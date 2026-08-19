@@ -1,0 +1,154 @@
+# Operating system files
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+Desktop.ini
+$RECYCLE.BIN/
+
+# Claude Code local session state
+.claude/scheduled_tasks.lock
+
+# Editor and IDE files
+*.iml
+*.ipr
+*.iws
+.idea/
+.vscode/
+
+# Logs and temporary files
+*.log
+*.tmp
+*.temp
+*.swp
+*.swo
+*.bak
+*.class
+*.pyc
+.history/
+.atom/
+.build/
+.buildlog/
+.svn/
+.swiftpm/
+migrate_working_dir/
+
+# Dart and Flutter
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+.pub-cache/
+.pub/
+**/doc/api/
+**/ios/Flutter/.last_build_id
+/build/
+/coverage/
+
+# Dart test and analysis output
+test/.test_coverage.dart
+coverage/
+
+# Flutter release artifacts
+app.*.symbols
+app.*.map.json
+
+# Android and Gradle
+/android/.gradle/
+/android/.cxx/
+/android/captures/
+/android/local.properties
+/android/**/build/
+/android/app/debug/
+/android/app/profile/
+/android/app/release/
+/android/app/.cxx/
+
+# Android signing keys and local secrets
+/android/key.properties
+/android/**/key.properties
+*.jks
+*.keystore
+*.p8
+*.p12
+*.pfx
+*.pem
+*.key
+*.crt
+*.cer
+*.mobileprovision
+*.provisionprofile
+
+# iOS and CocoaPods
+/ios/Flutter/App.framework
+/ios/Flutter/Flutter.framework
+/ios/Flutter/Flutter.podspec
+/ios/Flutter/Generated.xcconfig
+/ios/Flutter/flutter_export_environment.sh
+/ios/Flutter/ephemeral/
+/ios/Flutter/app.flx
+/ios/Flutter/app.zip
+/ios/Flutter/flutter_assets/
+/ios/Pods/
+/ios/.symlinks/
+/ios/DerivedData/
+/ios/**/xcuserdata/
+/ios/**/.generated/
+/ios/ServiceDefinitions.json
+/ios/Runner/GeneratedPluginRegistrant.*
+
+# Xcode user files
+*.mode1v3
+*.mode2v3
+*.moved-aside
+*.pbxuser
+*.perspectivev3
+!default.mode1v3
+!default.mode2v3
+!default.pbxuser
+!default.perspectivev3
+
+# macOS Flutter target, if added later
+/macos/Flutter/ephemeral/
+/macos/Pods/
+/macos/.symlinks/
+/macos/DerivedData/
+/macos/**/xcuserdata/
+
+# Windows, Linux, and generated desktop build output
+/windows/flutter/ephemeral/
+/linux/flutter/ephemeral/
+
+# Web build output
+/web/build/
+
+# Cloud Functions (Node.js/TypeScript) — ver functions/README.md
+/functions/node_modules/
+/functions/lib/
+/functions/coverage/
+/functions/.secret.local
+
+# Firebase generated caches and local app config
+/.firebase/
+firebase-debug.log
+firestore-debug.log
+ui-debug.log
+/lib/firebase_options*.dart
+/android/app/google-services*.json
+/ios/Runner/GoogleService-Info*.plist
+/macos/Runner/GoogleService-Info*.plist
+
+# Local environment files
+.env
+.env.*
+*.env
+*.env.*
+!.env.example
+!.env.sample
+
+# Keep pubspec.lock committed for Flutter apps.
+# For published Dart/Flutter packages, ignore it only if that is the package policy.
