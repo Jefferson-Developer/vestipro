@@ -33,6 +33,56 @@ Para Web:
 flutter run -d chrome
 ```
 
+## Ambientes
+
+O VestiPro possui três ambientes isolados, com nomes visuais e identifiers distintos:
+
+- `development` / `dev`: VestiPro Dev
+- `staging`: VestiPro Staging
+- `production` / `prod`: VestiPro
+
+`flutter run` sem flags usa o ambiente `development`.
+
+### Android
+
+```bash
+flutter run --flavor dev -t lib/main_dev.dart
+flutter run --flavor staging -t lib/main_staging.dart
+flutter run --flavor prod -t lib/main_prod.dart
+
+flutter build apk --debug --flavor dev -t lib/main_dev.dart
+flutter build apk --debug --flavor staging -t lib/main_staging.dart
+flutter build apk --release --flavor prod -t lib/main_prod.dart
+```
+
+### iOS
+
+Os schemes compartilhados são `dev`, `staging` e `prod`, com `.xcconfig` próprios em `ios/Flutter/`.
+
+```bash
+flutter run --flavor dev -t lib/main_dev.dart
+flutter run --flavor staging -t lib/main_staging.dart
+flutter run --flavor prod -t lib/main_prod.dart
+
+flutter build ipa --flavor staging -t lib/main_staging.dart
+flutter build ipa --flavor prod -t lib/main_prod.dart
+```
+
+Builds iOS exigem macOS com Xcode.
+
+### Web
+
+Flutter Web não usa flavors nativos; o ambiente é escolhido por `--dart-define`.
+
+```bash
+flutter run -d chrome -t lib/main_web.dart --dart-define=ENVIRONMENT=development
+flutter run -d chrome -t lib/main_web.dart --dart-define=ENVIRONMENT=staging
+flutter run -d chrome -t lib/main_web.dart --dart-define=ENVIRONMENT=production
+
+flutter build web -t lib/main_web.dart --dart-define=ENVIRONMENT=staging
+flutter build web -t lib/main_web.dart --dart-define=ENVIRONMENT=production
+```
+
 ## Como continuar o backlog
 
 ```
@@ -69,11 +119,10 @@ lib/
 └── main.dart
 ```
 
-`core/`, `design_system/` e `features/` ainda não têm conteúdo além do template padrão do Flutter —
-nenhuma feature real foi implementada ainda. A arquitetura completa (Clean Architecture por feature,
-BLoC, injeção de dependência, navegação com `go_router`, offline-first com Drift) está descrita em
-`.claude/agents/flutter-senior-architect.md` e será adicionada progressivamente pelas tasks do
-backlog, começando por `docs/tasks/TASK-001-inicializar-projeto-flutter-multiplataforma.md`.
+`core/` possui apenas a configuração mínima de ambiente criada na TASK-002; `features/` ainda não
+possui feature real. A arquitetura completa (Clean Architecture por feature, BLoC, injeção de
+dependência, navegação com `go_router`, offline-first com Drift) está descrita em
+`.claude/agents/flutter-senior-architect.md` e será adicionada progressivamente pelas próximas tasks.
 
 ## Backend
 

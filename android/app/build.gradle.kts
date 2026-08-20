@@ -22,6 +22,27 @@ android {
         versionName = flutter.versionName
     }
 
+    flavorDimensions += "environment"
+
+    productFlavors {
+        create("dev") {
+            dimension = "environment"
+            applicationIdSuffix = ".dev"
+            versionNameSuffix = "-dev"
+            manifestPlaceholders["appName"] = "VestiPro Dev"
+        }
+        create("staging") {
+            dimension = "environment"
+            applicationIdSuffix = ".staging"
+            versionNameSuffix = "-staging"
+            manifestPlaceholders["appName"] = "VestiPro Staging"
+        }
+        create("prod") {
+            dimension = "environment"
+            manifestPlaceholders["appName"] = "VestiPro"
+        }
+    }
+
     buildTypes {
         release {
             // Release signing will be configured in the release pipeline task.

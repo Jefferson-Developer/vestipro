@@ -1,0 +1,5 @@
+APP_ENVIRONMENT=production
+APP_DISPLAY_NAME=VestiPro
+APP_BUNDLE_IDENTIFIER=br.com.dinosoft.vestipro
+FLUTTER_TARGET=lib/main_prod.dart
+DART_DEFINES=RU5WSVJPTk1FTlQ9cHJvZHVjdGlvbg==

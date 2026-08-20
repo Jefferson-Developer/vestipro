@@ -1,0 +1,5 @@
+APP_ENVIRONMENT=staging
+APP_DISPLAY_NAME=VestiPro Staging
+APP_BUNDLE_IDENTIFIER=br.com.dinosoft.vestipro.staging
+FLUTTER_TARGET=lib/main_staging.dart
+DART_DEFINES=RU5WSVJPTk1FTlQ9c3RhZ2luZw==
