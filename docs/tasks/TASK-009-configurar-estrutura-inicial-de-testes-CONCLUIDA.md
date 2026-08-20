@@ -136,7 +136,7 @@ Não realizado nesta conversa (sem autorização explícita para push).
 
 ## Hash do commit
 
-A preencher após o commit.
+`f3ce084d6252cd88ad8d28460bc9ef6f01f9f795`
 
 ## Branch
 
