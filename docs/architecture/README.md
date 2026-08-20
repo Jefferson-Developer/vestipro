@@ -30,6 +30,8 @@ The `settings` feature is the reference implementation for this pattern.
 State management conventions are documented in [`state-management.md`](state-management.md).
 Dependency injection conventions are documented in
 [`dependency-injection.md`](dependency-injection.md).
+Navigation conventions (routing, guards, deep links) are documented in
+[`navigation.md`](navigation.md).
 
 ## Data Flow
 

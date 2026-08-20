@@ -24,6 +24,17 @@
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
+            <!-- TASK-007 (docs/architecture/navigation.md): universal deep links are not
+                 activated yet because VestiPro has no production domain configured. Once one
+                 exists, uncomment and replace vestipro.example.com with the real host so
+                 links like https://vestipro.example.com/org/<orgId>/... open this activity.
+            <intent-filter android:autoVerify="true">
+                <action android:name="android.intent.action.VIEW"/>
+                <category android:name="android.intent.category.DEFAULT"/>
+                <category android:name="android.intent.category.BROWSABLE"/>
+                <data android:scheme="https" android:host="vestipro.example.com"/>
+            </intent-filter>
+            -->
         </activity>
         <!-- Don't delete the meta-data below.
              This is used by the Flutter tool to generate GeneratedPluginRegistrant.java -->

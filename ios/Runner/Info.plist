@@ -49,6 +49,11 @@
 	</dict>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<!-- TASK-007 (docs/architecture/navigation.md): associated domains for universal deep
+	     links are not activated yet because VestiPro has no production domain configured.
+	     Once one exists, add an "com.apple.developer.associated-domains" entitlement with
+	     "applinks:vestipro.example.com" (replacing the placeholder host) to Runner.entitlements
+	     so links like https://vestipro.example.com/org/<orgId>/... open this app. -->
 	<key>UILaunchStoryboardName</key>
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>

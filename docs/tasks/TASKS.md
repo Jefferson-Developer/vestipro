@@ -73,7 +73,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-004 — Definir arquitetura feature-first + Clean Architecture](TASK-004-definir-arquitetura-feature-first.md) — Flutter Senior
 - [x] [TASK-005 — Configurar gerenciamento de estado (BLoC/Cubit)](TASK-005-configurar-gerenciamento-de-estado-bloc.md) — Flutter Senior
 - [x] [TASK-006 — Configurar injeção de dependência](TASK-006-configurar-injecao-de-dependencia.md) — Flutter Senior
-- [ ] [TASK-007 — Configurar navegação principal](TASK-007-configurar-navegacao-principal.md) — Flutter Senior
+- [x] [TASK-007 — Configurar navegação principal](TASK-007-configurar-navegacao-principal.md) — Flutter Senior
 - [ ] [TASK-008 — Configurar qualidade estática](TASK-008-configurar-qualidade-estatica.md) — Flutter Senior
 - [ ] [TASK-009 — Configurar estrutura inicial de testes](TASK-009-configurar-estrutura-inicial-de-testes.md) — Flutter Senior
 
@@ -354,4 +354,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 6 / 220 tasks concluídas.
+**Progresso:** 7 / 220 tasks concluídas.
