@@ -156,7 +156,7 @@ Não realizado — sem autorização explícita nesta conversa.
 
 ## Hash do commit
 
-Ver saída de `git log -1` após o commit.
+`429b319387d78be205cad12dd5d167bba18eb52e`
 
 ## Branch
 
