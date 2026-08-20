@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../core/environment/app_environment.dart';
+import '../features/settings/settings.dart';
 
 void bootstrap(AppEnvironment environment) {
   AppEnvironment.configure(environment);
@@ -20,21 +21,7 @@ class VestiProApp extends StatelessWidget {
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF245C73)),
         useMaterial3: true,
       ),
-      home: VestiProHomePage(environment: environment),
-    );
-  }
-}
-
-class VestiProHomePage extends StatelessWidget {
-  const VestiProHomePage({required this.environment, super.key});
-
-  final AppEnvironment environment;
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: Text(environment.appName)),
-      body: Center(child: Text(environment.value)),
+      home: AboutAppPage(getAboutApp: createAboutAppUseCase(environment)),
     );
   }
 }

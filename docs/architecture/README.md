@@ -1,0 +1,61 @@
+# VestiPro Architecture
+
+This document defines the baseline pattern for feature-first Clean Architecture in the VestiPro app.
+
+## Folder Pattern
+
+Each feature must keep code grouped by business capability:
+
+```text
+lib/features/<feature>/
+  presentation/
+    bloc/
+    pages/
+    widgets/
+  domain/
+    entities/
+    repositories/
+    usecases/
+    value_objects/
+  data/
+    datasources/
+    dtos/
+    mappers/
+    models/
+    repositories/
+```
+
+The `settings` feature is the reference implementation for this pattern.
+
+## Data Flow
+
+The required request flow is:
+
+```text
+Page -> Event/Cubit command -> BLoC/Cubit -> Use case -> Repository contract -> Repository implementation -> Datasource
+```
+
+The required response flow is:
+
+```text
+Datasource -> DTO -> Mapper -> Entity -> AppResult -> BLoC/Cubit state -> Interface
+```
+
+## Layer Rules
+
+- `presentation/` depends on BLoC/Cubit, use cases, states, and widgets. It never calls a datasource or repository implementation directly.
+- `domain/` owns entities, value objects, use cases, and repository contracts. It must not import Flutter, Firebase, Drift, widgets, or infrastructure packages.
+- `data/` owns DTOs, mappers, datasource contracts/implementations, models, and repository implementations.
+- DTOs are not entities. DTOs stay in `data/dtos/`; entities stay in `domain/entities/`.
+- External errors are converted to `AppException` in infrastructure and returned to domain/presentation as `Failure` through `AppResult`.
+- Dependency wiring lives at the composition boundary until the dependency injection task formalizes registration.
+
+## Current Reference
+
+`lib/features/settings/` implements an in-memory "About app" module:
+
+- Page renders loading, success, and error states.
+- Cubit calls `GetAboutAppUseCase`.
+- Use case depends only on `AboutAppRepository`.
+- Repository implementation calls `AboutAppDataSource`, maps `AboutAppDto` to `AboutApp`, and converts exceptions to failures.
+- Domain imports are covered by a boundary test.
