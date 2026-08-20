@@ -10,6 +10,29 @@ O backlog técnico e o status de progresso ficam em [`docs/tasks/TASKS.md`](docs
 cada task individual está documentada em `docs/tasks/TASK-XXX-*.md`. A especificação funcional
 completa do produto está em [`tasks.md`](tasks.md).
 
+## Versão do Flutter
+
+Este projeto foi inicializado e validado com:
+
+- Flutter 3.44.7 stable
+- Dart 3.12.2
+
+A versão recomendada também está registrada em [`.fvmrc`](.fvmrc), para reprodutibilidade entre
+máquinas de desenvolvimento e CI.
+
+## Como rodar
+
+```bash
+flutter pub get
+flutter run
+```
+
+Para Web:
+
+```bash
+flutter run -d chrome
+```
+
 ## Como continuar o backlog
 
 ```

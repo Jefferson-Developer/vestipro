@@ -58,7 +58,6 @@ app.*.symbols
 app.*.map.json
 
 # Android and Gradle
-/android/
 /android/.gradle/
 /android/.cxx/
 /android/captures/
