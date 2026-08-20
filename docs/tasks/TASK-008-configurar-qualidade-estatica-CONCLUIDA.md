@@ -126,15 +126,19 @@ A prova negativa com `print` temporário falhou como esperado:
 
 ## Commit
 
-A criar após revisão do diff, adicionando apenas arquivos da task.
+Criado com arquivos da task adicionados explicitamente, sem `git add -A`.
+
+Mensagem: `chore(quality): configure static quality gates`
 
 ## Push
 
-A realizar após commit, conforme autorização da skill `proxima-task`.
+Realizado para `origin/main`.
+
+Resultado: `a37a585..2042ea5  main -> main`
 
 ## Hash do commit
 
-A registrar na resposta final após criação do commit.
+`2042ea53987ee5b634a9e9087993dd6e317c55c1`
 
 ## Branch
 
