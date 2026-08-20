@@ -2,10 +2,11 @@
 
 > **Nota de operação:** este documento é a especificação funcional e arquitetural completa do
 > produto. Para executar o backlog no dia a dia, use a versão granular e sequenciável em
-> [`docs/tasks/TASKS.md`](docs/tasks/TASKS.md) (206 tasks em 32 EPICs, cada uma com arquivo próprio
+> [`docs/tasks/TASKS.md`](docs/tasks/TASKS.md) (220 tasks em 33 EPICs, cada uma com arquivo próprio
 > em `docs/tasks/TASK-XXX-*.md`), seguindo o protocolo descrito em [`AGENTS.md`](AGENTS.md). A seção
 > 18 abaixo ("Backlog Mestre") permanece como registro histórico do escopo original do MVP; a seção
-> 19 ("Tasks adicionais recomendadas") foi incorporada ao backlog granular como EPICs 22–31.
+> 19 ("Tasks adicionais recomendadas") foi incorporada ao backlog granular como EPICs 22–31, e o
+> EPIC-32 adiciona a revisão final de lacunas para operações comerciais avançadas de moda B2B.
 
 ## 1. Visão do Produto
 
@@ -69,7 +70,15 @@ Criar uma plataforma que permita que representantes, vendedores, gestores comerc
 17. gerar relatórios;
 18. organizar equipe;
 19. acompanhar funil de vendas;
-20. administrar empresas e usuários.
+20. administrar empresas e usuários;
+21. vender por kits, pacotes e sortimentos;
+22. trabalhar pré-venda/pre-book por coleção;
+23. colaborar com compradores em seleções, orçamentos e pedidos;
+24. controlar crédito, inadimplência, faturas e cobrança;
+25. acompanhar expedição, tracking e ocorrências de entrega;
+26. registrar backorders e solicitações de estoque futuro;
+27. analisar sell-out/POS do varejo quando disponível;
+28. governar qualidade cadastral e dados mestre.
 
 ---
 
@@ -351,6 +360,7 @@ Um produto deve suportar:
 - fotos;
 - vídeos;
 - atributos personalizados.
+- vínculos com kits, pacotes e sortimentos comerciais.
 
 ## 7.1 Cores
 
@@ -439,8 +449,10 @@ O pedido deve suportar:
 - transportadora;
 - coleção;
 - tipo de pedido;
+- modalidade comercial (pronta entrega, pré-venda/pre-book, backorder, pacote/sortimento);
 - itens;
 - quantidade por grade;
+- kits, pacotes e sortimentos;
 - descontos;
 - acréscimos;
 - frete;
@@ -450,6 +462,8 @@ O pedido deve suportar:
 - status;
 - aprovação;
 - histórico.
+- status financeiro;
+- status logístico/rastreamento quando aplicável.
 
 ## 9.1 Status sugeridos
 
@@ -477,8 +491,11 @@ Modos de visualização:
 - grid;
 - lista;
 - lookbook;
+- line sheet atacadista;
+- order form por coleção;
 - catálogo por coleção;
 - catálogo por campanha;
+- pré-venda/pre-book;
 - favoritos;
 - novidades;
 - mais vendidos;
@@ -524,6 +541,10 @@ Insights possíveis:
 - carrinhos salvos;
 - produtos com estoque alto e giro baixo;
 - produtos mais vendidos por região;
+- sell-through e sell-out/POS por cliente, loja, coleção e região;
+- demanda não atendida via backorder;
+- potencial e cobertura de carteira por território;
+- qualidade cadastral afetando confiança do insight;
 - sugestão de reposição;
 - sugestão de próxima visita;
 - risco de churn;
@@ -577,6 +598,13 @@ Inspirar-se conceitualmente em ferramentas como Salesforce, HubSpot, Power BI, T
 - produtos por pedido;
 - desconto médio;
 - margem;
+- sell-through;
+- fill rate;
+- backorders;
+- pedidos bloqueados por crédito;
+- aging de contas a receber;
+- OTIF/entrega no prazo;
+- score de qualidade cadastral;
 - crescimento YoY;
 - crescimento MoM;
 - atingimento de meta;
@@ -1334,7 +1362,21 @@ Após VESTI-120, considerar:
 - portal administrativo avançado;
 - logs de auditoria exportáveis;
 - Data Warehouse/BigQuery;
-- camada semântica de BI.
+- camada semântica de BI;
+- kits, pacotes e sortimentos;
+- venda por kit/pacote/sortimento no pedido;
+- line sheet atacadista e order form por coleção;
+- pré-venda/pre-book por coleção;
+- colaboração com comprador em seleções e pedidos;
+- crédito, inadimplência e bloqueios financeiros;
+- contas a receber, faturas e lembretes de cobrança;
+- expedição, romaneio, tracking e ocorrências;
+- backorder e solicitação de estoque futuro;
+- leitura de código de barras/QR para venda rápida;
+- gestão de mostruário, amostras e consignação;
+- territórios, cobertura e potencial de carteira;
+- ingestão de sell-out/POS do varejo;
+- governança de dados mestre e qualidade cadastral.
 
 ---
 
@@ -1361,7 +1403,19 @@ organizations/{organizationId}/collections/{collectionId}
 organizations/{organizationId}/priceLists/{priceListId}
 organizations/{organizationId}/warehouses/{warehouseId}
 organizations/{organizationId}/inventory/{inventoryId}
+organizations/{organizationId}/commercialPacks/{packId}
+organizations/{organizationId}/lineSheets/{lineSheetId}
+organizations/{organizationId}/preBookPrograms/{programId}
 organizations/{organizationId}/orders/{orderId}
+organizations/{organizationId}/backorders/{backorderId}
+organizations/{organizationId}/buyerCollaborations/{sessionId}
+organizations/{organizationId}/creditProfiles/{customerId}
+organizations/{organizationId}/receivables/{receivableId}
+organizations/{organizationId}/shipments/{shipmentId}
+organizations/{organizationId}/sampleKits/{sampleKitId}
+organizations/{organizationId}/territories/{territoryId}
+organizations/{organizationId}/sellOutEvents/{eventId}
+organizations/{organizationId}/dataQualityIssues/{issueId}
 organizations/{organizationId}/targets/{targetId}
 organizations/{organizationId}/insights/{insightId}
 organizations/{organizationId}/savedReports/{reportId}
@@ -1565,6 +1619,9 @@ VESTI-097 a VESTI-114
 
 ## Fase 5 — Hardening e Release
 VESTI-115 a VESTI-120
+
+## Fase 6 — Operações comerciais avançadas
+TASK-207 a TASK-220
 
 ---
 

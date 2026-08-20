@@ -5,10 +5,12 @@ Este é o índice mestre do backlog. Ele reflete e expande a especificação com
 [`AGENTS.md`](../../AGENTS.md).
 
 O backlog original (seção 18 de `tasks.md`) tinha 120 tasks amplas em 20 EPICs. Este índice expande
-para **206 tasks em 32 EPICs**: cada task original foi quebrada em passos menores e mais executáveis,
+para **220 tasks em 33 EPICs**: cada task original foi quebrada em passos menores e mais executáveis,
 foi adicionado um EPIC de Design System (que faltava, apesar de exigido na seção 6 da especificação),
 e toda a lista de "evolução pós-MVP" (seção 19 de `tasks.md`) foi transformada em tasks reais e
-sequenciáveis (EPICs 22–31), para que o VestiPro possa de fato se tornar o sistema de força de vendas
+sequenciáveis (EPICs 22–31). Depois de uma revisão final de lacunas para venda B2B de moda, também
+foi adicionado o EPIC-32, cobrindo packs/sortimentos, pré-venda, crédito, cobrança, expedição,
+sell-out e qualidade de dados, para que o VestiPro possa de fato se tornar o sistema de força de vendas
 mobile mais completo do mercado de moda — não apenas no MVP, mas na visão completa de produto.
 
 ## Como retomar o trabalho
@@ -36,8 +38,10 @@ mobile mais completo do mercado de moda — não apenas no MVP, mas na visão co
 
 ## Regras que nunca mudam (resumo — detalhe completo em `AGENTS.md`)
 
-- Toda task usa obrigatoriamente os agentes indicados na coluna "Agentes" (`flutter-senior-architect`
-  e/ou `flutter-ui-design-specialist`).
+- Toda task usa obrigatoriamente os agentes técnicos indicados na coluna "Agentes"
+  (`flutter-senior-architect` e/ou `flutter-ui-design-specialist`) e, quando o escopo for
+  comercial/gerencial, também os agentes de negócio definidos em `AGENTS.md`
+  (`vestipro-sales-representative-specialist` e/ou `vestipro-commercial-ops-strategist`).
 - Toda task termina com `dart format`, `flutter analyze`, `flutter test` (e o que mais for aplicável).
 - Toda task gera `docs/tasks/TASK-XXX-nome-da-task.md` (já existente) e, ao concluir,
   `docs/tasks/TASK-XXX-nome-da-task-CONCLUIDA.md` (evidência de conclusão).
@@ -55,7 +59,7 @@ Fase 1 — Fundação      : EPIC-00 a EPIC-05 (arquitetura, Firebase, Design Sy
 Fase 2 — Core Comercial: EPIC-06 a EPIC-13 (clientes, CRM, produtos, grades, catálogo, preço, estoque, pedidos)
 Fase 3 — Offline & BI  : EPIC-14 a EPIC-18 (sincronização, metas, insights, dashboards, relatórios)
 Fase 4 — Engajamento   : EPIC-19 a EPIC-21 (notificações, LGPD, qualidade/release) — fim do MVP
-Fase 5 — Evolução      : EPIC-22 a EPIC-31 (integrações, IA, portal B2B, pós-venda, data platform)
+Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, pós-venda, data platform, operações avançadas)
 ```
 
 ---
@@ -332,6 +336,22 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-31 (integrações, IA, portal B2B, p
 - [ ] [TASK-205 — Criar pipeline de Data Warehouse / BigQuery](TASK-205-criar-pipeline-data-warehouse.md) — Flutter Senior
 - [ ] [TASK-206 — Criar camada semântica de BI](TASK-206-criar-camada-semantica-de-bi.md) — Flutter Senior
 
+### EPIC-32 — Operações Comerciais Avançadas de Moda B2B
+- [ ] [TASK-207 — Modelar kits, pacotes e sortimentos](TASK-207-modelar-kits-pacotes-e-sortimentos.md) — Flutter Senior
+- [ ] [TASK-208 — Implementar venda por kit, pacote e sortimento no pedido](TASK-208-implementar-venda-por-kit-pacote-e-sortimento.md) — Flutter Senior + Front-end
+- [ ] [TASK-209 — Implementar line sheet atacadista e order form por coleção](TASK-209-implementar-line-sheet-atacadista-e-order-form.md) — Flutter Senior + Front-end
+- [ ] [TASK-210 — Implementar pré-venda e pre-book por coleção](TASK-210-implementar-pre-venda-e-pre-book-por-colecao.md) — Flutter Senior + Front-end
+- [ ] [TASK-211 — Implementar colaboração com comprador em seleções e pedidos](TASK-211-implementar-colaboracao-com-comprador.md) — Flutter Senior + Front-end
+- [ ] [TASK-212 — Implementar crédito, inadimplência e bloqueios financeiros](TASK-212-implementar-credito-inadimplencia-e-bloqueios.md) — Flutter Senior + Front-end
+- [ ] [TASK-213 — Implementar contas a receber, faturas e lembretes de cobrança](TASK-213-implementar-contas-a-receber-faturas-e-cobranca.md) — Flutter Senior + Front-end
+- [ ] [TASK-214 — Implementar expedição, romaneio, tracking e ocorrências](TASK-214-implementar-expedicao-romaneio-tracking-e-ocorrencias.md) — Flutter Senior + Front-end
+- [ ] [TASK-215 — Implementar backorder e solicitação de estoque futuro](TASK-215-implementar-backorder-e-solicitacao-de-estoque-futuro.md) — Flutter Senior + Front-end
+- [ ] [TASK-216 — Implementar leitura de código de barras e QR para venda rápida](TASK-216-implementar-leitura-de-codigo-de-barras-e-qr.md) — Flutter Senior + Front-end
+- [ ] [TASK-217 — Implementar gestão de mostruário, amostras e consignação](TASK-217-implementar-gestao-de-mostruario-amostras-e-consignacao.md) — Flutter Senior + Front-end
+- [ ] [TASK-218 — Implementar territórios, cobertura e potencial de carteira](TASK-218-implementar-territorios-cobertura-e-potencial-de-carteira.md) — Flutter Senior + Front-end
+- [ ] [TASK-219 — Implementar ingestão de sell-out/POS do varejo](TASK-219-implementar-ingestao-de-sell-out-pos.md) — Flutter Senior
+- [ ] [TASK-220 — Implementar governança de dados mestre e qualidade cadastral](TASK-220-implementar-governanca-de-dados-mestre-e-qualidade-cadastral.md) — Flutter Senior + Front-end
+
 ---
 
-**Progresso:** 0 / 206 tasks concluídas.
+**Progresso:** 0 / 220 tasks concluídas.
