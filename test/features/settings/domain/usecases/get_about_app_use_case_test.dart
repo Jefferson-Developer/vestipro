@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/settings/domain/entities/about_app.dart';
+import 'package:vestipro/features/settings/domain/entities/about_app_notes_page.dart';
 import 'package:vestipro/features/settings/domain/repositories/about_app_repository.dart';
 import 'package:vestipro/features/settings/domain/usecases/get_about_app_use_case.dart';
 import 'package:vestipro/features/settings/domain/value_objects/app_version.dart';
@@ -47,5 +48,19 @@ final class _AboutAppRepositoryStub implements AboutAppRepository {
   @override
   Future<AppResult<AboutApp>> getAboutApp() async {
     return _result;
+  }
+
+  @override
+  Future<AppResult<AboutAppNotesPage>> searchArchitectureNotes({
+    required String query,
+    required int page,
+    required int pageSize,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<void>> submitDiagnostics() async {
+    return AppSuccess<void>(null);
   }
 }

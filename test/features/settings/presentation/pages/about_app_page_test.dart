@@ -7,10 +7,14 @@ import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/features/settings/data/datasources/about_app_data_source.dart';
 import 'package:vestipro/features/settings/data/datasources/in_memory_about_app_datasource.dart';
 import 'package:vestipro/features/settings/data/dtos/about_app_dto.dart';
+import 'package:vestipro/features/settings/data/dtos/about_app_notes_page_dto.dart';
 import 'package:vestipro/features/settings/data/mappers/about_app_mapper.dart';
+import 'package:vestipro/features/settings/data/mappers/about_app_notes_mapper.dart';
 import 'package:vestipro/features/settings/data/models/about_app_seed_model.dart';
 import 'package:vestipro/features/settings/data/repositories/about_app_repository_impl.dart';
 import 'package:vestipro/features/settings/domain/usecases/get_about_app_use_case.dart';
+import 'package:vestipro/features/settings/domain/usecases/search_about_app_notes_use_case.dart';
+import 'package:vestipro/features/settings/domain/usecases/submit_about_app_diagnostics_use_case.dart';
 import 'package:vestipro/features/settings/presentation/pages/about_app_page.dart';
 
 void main() {
@@ -37,6 +41,9 @@ void main() {
       expect(find.text('1.0.0+1'), findsOneWidget);
       expect(find.text('Ambiente'), findsOneWidget);
       expect(find.text('development'), findsOneWidget);
+      expect(find.text('Origem'), findsOneWidget);
+      expect(find.text('Cache local'), findsOneWidget);
+      expect(find.text('Estados completos'), findsOneWidget);
     });
 
     testWidgets('renders error state', (tester) async {
@@ -61,16 +68,29 @@ void main() {
 final _seed = AboutAppSeedModel.fromEnvironment(AppEnvironment.development);
 
 Widget _buildPage(GetAboutAppUseCase useCase) {
-  return MaterialApp(home: AboutAppPage(getAboutApp: useCase));
+  final repository = _buildRepository(InMemoryAboutAppDataSource(seed: _seed));
+
+  return MaterialApp(
+    home: AboutAppPage(
+      getAboutApp: useCase,
+      searchNotes: SearchAboutAppNotesUseCase(repository),
+      submitDiagnostics: SubmitAboutAppDiagnosticsUseCase(repository),
+    ),
+  );
 }
 
 GetAboutAppUseCase _buildUseCase(AboutAppDataSource dataSource) {
+  return GetAboutAppUseCase(_buildRepository(dataSource));
+}
+
+AboutAppRepositoryImpl _buildRepository(AboutAppDataSource dataSource) {
   final repository = AboutAppRepositoryImpl(
     dataSource: dataSource,
     mapper: const AboutAppMapper(),
+    notesMapper: const AboutAppNotesMapper(),
   );
 
-  return GetAboutAppUseCase(repository);
+  return repository;
 }
 
 final class _PendingAboutAppDataSource implements AboutAppDataSource {
@@ -84,4 +104,18 @@ final class _PendingAboutAppDataSource implements AboutAppDataSource {
   void complete(AboutAppDto dto) {
     _completer.complete(dto);
   }
+
+  @override
+  Future<AboutAppNotesPageDto> searchArchitectureNotes({
+    required String query,
+    required int page,
+    required int pageSize,
+  }) {
+    return InMemoryAboutAppDataSource(
+      seed: _seed,
+    ).searchArchitectureNotes(query: query, page: page, pageSize: pageSize);
+  }
+
+  @override
+  Future<void> submitDiagnostics() async {}
 }

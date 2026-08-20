@@ -1,0 +1,1 @@
+enum AboutAppDataOrigin { localCache, remoteSynced }

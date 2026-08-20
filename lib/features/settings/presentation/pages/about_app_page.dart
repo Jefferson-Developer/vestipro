@@ -2,20 +2,34 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../domain/usecases/get_about_app_use_case.dart';
-import '../bloc/about_app_cubit.dart';
+import '../../domain/usecases/search_about_app_notes_use_case.dart';
+import '../../domain/usecases/submit_about_app_diagnostics_use_case.dart';
+import '../bloc/about_app_bloc.dart';
+import '../bloc/about_app_event.dart';
 import '../bloc/about_app_state.dart';
 import '../widgets/about_app_content.dart';
 import '../widgets/about_app_error_view.dart';
 
 class AboutAppPage extends StatelessWidget {
-  const AboutAppPage({required this.getAboutApp, super.key});
+  const AboutAppPage({
+    required this.getAboutApp,
+    required this.searchNotes,
+    required this.submitDiagnostics,
+    super.key,
+  });
 
   final GetAboutAppUseCase getAboutApp;
+  final SearchAboutAppNotesUseCase searchNotes;
+  final SubmitAboutAppDiagnosticsUseCase submitDiagnostics;
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<AboutAppCubit>(
-      create: (_) => AboutAppCubit(getAboutApp)..load(),
+    return BlocProvider<AboutAppBloc>(
+      create: (_) => AboutAppBloc(
+        getAboutApp: getAboutApp,
+        searchNotes: searchNotes,
+        submitDiagnostics: submitDiagnostics,
+      )..add(const AboutAppEvent.started()),
       child: const AboutAppView(),
     );
   }
@@ -26,22 +40,52 @@ class AboutAppView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<AboutAppCubit, AboutAppState>(
+    return BlocBuilder<AboutAppBloc, AboutAppState>(
       builder: (context, state) {
         return switch (state) {
           AboutAppInitial() || AboutAppLoading() => const Scaffold(
             appBar: _AboutAppBar(title: 'Sobre o app'),
             body: Center(child: CircularProgressIndicator()),
           ),
-          AboutAppLoaded(aboutApp: final aboutApp) => Scaffold(
-            appBar: _AboutAppBar(title: aboutApp.name),
-            body: AboutAppContent(aboutApp: aboutApp),
-          ),
-          AboutAppError(failure: final failure) => Scaffold(
+          AboutAppReady(
+            aboutApp: final aboutApp,
+            notes: final notes,
+            query: final query,
+            hasMore: final hasMore,
+            dataOrigin: final dataOrigin,
+            isLoadingNextPage: final isLoadingNextPage,
+            submissionStatus: final submissionStatus,
+            submissionFailure: final submissionFailure,
+          ) =>
+            Scaffold(
+              appBar: _AboutAppBar(title: aboutApp.name),
+              body: AboutAppContent(
+                aboutApp: aboutApp,
+                notes: notes,
+                query: query,
+                hasMore: hasMore,
+                dataOrigin: dataOrigin,
+                isLoadingNextPage: isLoadingNextPage,
+                submissionStatus: submissionStatus,
+                submissionFailure: submissionFailure,
+                onSearchChanged: (query) => context.read<AboutAppBloc>().add(
+                  AboutAppEvent.searchQueryChanged(query),
+                ),
+                onLoadMore: () => context.read<AboutAppBloc>().add(
+                  const AboutAppEvent.nextPageRequested(),
+                ),
+                onSubmitDiagnostics: () => context.read<AboutAppBloc>().add(
+                  const AboutAppEvent.diagnosticsSubmitted(),
+                ),
+              ),
+            ),
+          AboutAppFailure(failure: final failure) => Scaffold(
             appBar: const _AboutAppBar(title: 'Sobre o app'),
             body: AboutAppErrorView(
               message: failure.message,
-              onRetry: context.read<AboutAppCubit>().load,
+              onRetry: () => context.read<AboutAppBloc>().add(
+                const AboutAppEvent.started(),
+              ),
             ),
           ),
         };

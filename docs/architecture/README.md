@@ -27,6 +27,8 @@ lib/features/<feature>/
 
 The `settings` feature is the reference implementation for this pattern.
 
+State management conventions are documented in [`state-management.md`](state-management.md).
+
 ## Data Flow
 
 The required request flow is:
@@ -55,7 +57,9 @@ Datasource -> DTO -> Mapper -> Entity -> AppResult -> BLoC/Cubit state -> Interf
 `lib/features/settings/` implements an in-memory "About app" module:
 
 - Page renders loading, success, and error states.
-- Cubit calls `GetAboutAppUseCase`.
+- BLoC calls use cases injected through its constructor.
+- BLoC events use explicit concurrency transformers for loading, search, pagination, and submission.
 - Use case depends only on `AboutAppRepository`.
 - Repository implementation calls `AboutAppDataSource`, maps `AboutAppDto` to `AboutApp`, and converts exceptions to failures.
+- Paginated architecture notes preserve loaded items and expose data origin in state.
 - Domain imports are covered by a boundary test.
