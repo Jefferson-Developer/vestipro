@@ -15,6 +15,7 @@ import 'package:vestipro/features/settings/data/repositories/about_app_repositor
 import 'package:vestipro/features/settings/domain/usecases/get_about_app_use_case.dart';
 import 'package:vestipro/features/settings/domain/usecases/search_about_app_notes_use_case.dart';
 import 'package:vestipro/features/settings/domain/usecases/submit_about_app_diagnostics_use_case.dart';
+import 'package:vestipro/features/settings/presentation/bloc/about_app_bloc.dart';
 import 'package:vestipro/features/settings/presentation/pages/about_app_page.dart';
 
 void main() {
@@ -72,9 +73,11 @@ Widget _buildPage(GetAboutAppUseCase useCase) {
 
   return MaterialApp(
     home: AboutAppPage(
-      getAboutApp: useCase,
-      searchNotes: SearchAboutAppNotesUseCase(repository),
-      submitDiagnostics: SubmitAboutAppDiagnosticsUseCase(repository),
+      createBloc: () => AboutAppBloc(
+        getAboutApp: useCase,
+        searchNotes: SearchAboutAppNotesUseCase(repository),
+        submitDiagnostics: SubmitAboutAppDiagnosticsUseCase(repository),
+      ),
     ),
   );
 }

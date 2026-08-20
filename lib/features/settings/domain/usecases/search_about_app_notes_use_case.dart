@@ -1,7 +1,10 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/utils/utils.dart';
 import '../entities/about_app_notes_page.dart';
 import '../repositories/about_app_repository.dart';
 
+@injectable
 final class SearchAboutAppNotesUseCase {
   const SearchAboutAppNotesUseCase(this._repository);
 

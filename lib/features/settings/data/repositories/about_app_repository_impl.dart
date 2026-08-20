@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/about_app.dart';
@@ -7,6 +9,7 @@ import '../datasources/about_app_data_source.dart';
 import '../mappers/about_app_mapper.dart';
 import '../mappers/about_app_notes_mapper.dart';
 
+@LazySingleton(as: AboutAppRepository)
 final class AboutAppRepositoryImpl implements AboutAppRepository {
   const AboutAppRepositoryImpl({
     required this.dataSource,

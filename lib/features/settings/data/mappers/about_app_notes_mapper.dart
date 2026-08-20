@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/errors.dart';
 import '../../domain/entities/about_app_data_origin.dart';
 import '../../domain/entities/about_app_note.dart';
@@ -5,6 +7,7 @@ import '../../domain/entities/about_app_notes_page.dart';
 import '../dtos/about_app_note_dto.dart';
 import '../dtos/about_app_notes_page_dto.dart';
 
+@lazySingleton
 final class AboutAppNotesMapper {
   const AboutAppNotesMapper();
 

@@ -1,5 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/about_app.dart';
@@ -12,12 +13,13 @@ import '../../domain/usecases/submit_about_app_diagnostics_use_case.dart';
 import 'about_app_event.dart';
 import 'about_app_state.dart';
 
+@injectable
 final class AboutAppBloc extends Bloc<AboutAppEvent, AboutAppState> {
   AboutAppBloc({
     required this.getAboutApp,
     required this.searchNotes,
     required this.submitDiagnostics,
-    this.pageSize = 2,
+    @ignoreParam this.pageSize = 2,
   }) : super(const AboutAppState.initial()) {
     on<AboutAppStarted>(_onStarted, transformer: droppable());
     on<AboutAppSearchQueryChanged>(

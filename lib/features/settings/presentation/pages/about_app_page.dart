@@ -1,9 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import '../../domain/usecases/get_about_app_use_case.dart';
-import '../../domain/usecases/search_about_app_notes_use_case.dart';
-import '../../domain/usecases/submit_about_app_diagnostics_use_case.dart';
 import '../bloc/about_app_bloc.dart';
 import '../bloc/about_app_event.dart';
 import '../bloc/about_app_state.dart';
@@ -11,25 +8,14 @@ import '../widgets/about_app_content.dart';
 import '../widgets/about_app_error_view.dart';
 
 class AboutAppPage extends StatelessWidget {
-  const AboutAppPage({
-    required this.getAboutApp,
-    required this.searchNotes,
-    required this.submitDiagnostics,
-    super.key,
-  });
+  const AboutAppPage({required this.createBloc, super.key});
 
-  final GetAboutAppUseCase getAboutApp;
-  final SearchAboutAppNotesUseCase searchNotes;
-  final SubmitAboutAppDiagnosticsUseCase submitDiagnostics;
+  final AboutAppBloc Function() createBloc;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AboutAppBloc>(
-      create: (_) => AboutAppBloc(
-        getAboutApp: getAboutApp,
-        searchNotes: searchNotes,
-        submitDiagnostics: submitDiagnostics,
-      )..add(const AboutAppEvent.started()),
+      create: (_) => createBloc()..add(const AboutAppEvent.started()),
       child: const AboutAppView(),
     );
   }

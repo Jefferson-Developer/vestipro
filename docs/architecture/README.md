@@ -28,6 +28,8 @@ lib/features/<feature>/
 The `settings` feature is the reference implementation for this pattern.
 
 State management conventions are documented in [`state-management.md`](state-management.md).
+Dependency injection conventions are documented in
+[`dependency-injection.md`](dependency-injection.md).
 
 ## Data Flow
 
@@ -50,7 +52,8 @@ Datasource -> DTO -> Mapper -> Entity -> AppResult -> BLoC/Cubit state -> Interf
 - `data/` owns DTOs, mappers, datasource contracts/implementations, models, and repository implementations.
 - DTOs are not entities. DTOs stay in `data/dtos/`; entities stay in `domain/entities/`.
 - External errors are converted to `AppException` in infrastructure and returned to domain/presentation as `Failure` through `AppResult`.
-- Dependency wiring lives at the composition boundary until the dependency injection task formalizes registration.
+- Dependency wiring lives in `lib/app/injection.dart` and is resolved from the app composition
+  boundary.
 
 ## Current Reference
 

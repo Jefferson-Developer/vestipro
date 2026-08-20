@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/errors.dart';
 import '../dtos/about_app_dto.dart';
 import '../dtos/about_app_note_dto.dart';
@@ -5,12 +7,20 @@ import '../dtos/about_app_notes_page_dto.dart';
 import '../models/about_app_seed_model.dart';
 import 'about_app_data_source.dart';
 
+@LazySingleton(
+  as: AboutAppDataSource,
+  env: <String>[Environment.dev, 'staging', Environment.prod],
+)
 final class InMemoryAboutAppDataSource implements AboutAppDataSource {
   const InMemoryAboutAppDataSource({
     required this.seed,
     this.exception,
     this.delay = Duration.zero,
   });
+
+  @factoryMethod
+  const InMemoryAboutAppDataSource.injectable({required AboutAppSeedModel seed})
+    : this(seed: seed);
 
   final AboutAppSeedModel seed;
   final AppException? exception;

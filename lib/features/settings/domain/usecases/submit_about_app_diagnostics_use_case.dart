@@ -1,6 +1,9 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/utils/utils.dart';
 import '../repositories/about_app_repository.dart';
 
+@injectable
 final class SubmitAboutAppDiagnosticsUseCase {
   const SubmitAboutAppDiagnosticsUseCase(this._repository);
 
