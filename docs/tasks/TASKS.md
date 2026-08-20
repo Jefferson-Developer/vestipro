@@ -69,7 +69,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 ### EPIC-00 — Fundação e Arquitetura
 - [x] [TASK-001 — Inicializar projeto Flutter multiplataforma](TASK-001-inicializar-projeto-flutter-multiplataforma.md) — Flutter Senior
 - [x] [TASK-002 — Configurar ambientes dev/staging/prod](TASK-002-configurar-ambientes-dev-staging-prod.md) — Flutter Senior
-- [ ] [TASK-003 — Configurar dependências base do pubspec](TASK-003-configurar-dependencias-base.md) — Flutter Senior
+- [x] [TASK-003 — Configurar dependências base do pubspec](TASK-003-configurar-dependencias-base.md) — Flutter Senior
 - [ ] [TASK-004 — Definir arquitetura feature-first + Clean Architecture](TASK-004-definir-arquitetura-feature-first.md) — Flutter Senior
 - [ ] [TASK-005 — Configurar gerenciamento de estado (BLoC/Cubit)](TASK-005-configurar-gerenciamento-de-estado-bloc.md) — Flutter Senior
 - [ ] [TASK-006 — Configurar injeção de dependência](TASK-006-configurar-injecao-de-dependencia.md) — Flutter Senior
@@ -354,4 +354,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 2 / 220 tasks concluídas.
+**Progresso:** 3 / 220 tasks concluídas.
