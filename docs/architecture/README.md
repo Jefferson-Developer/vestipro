@@ -32,6 +32,7 @@ Dependency injection conventions are documented in
 [`dependency-injection.md`](dependency-injection.md).
 Navigation conventions (routing, guards, deep links) are documented in
 [`navigation.md`](navigation.md).
+Static quality conventions are documented in [`static-quality.md`](static-quality.md).
 
 ## Data Flow
 

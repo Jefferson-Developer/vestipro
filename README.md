@@ -33,6 +33,18 @@ Para Web:
 flutter run -d chrome
 ```
 
+## Qualidade estática
+
+Antes de concluir uma task com código Dart/Flutter, execute:
+
+```powershell
+.\scripts\check.ps1
+```
+
+O script valida `dart format --set-exit-if-changed .`, `flutter analyze` e comentários `TODO`/`FIXME`
+sem referência de task, issue ou URL. As regras e limites de revisão ficam em
+[`docs/architecture/static-quality.md`](docs/architecture/static-quality.md).
+
 ## Ambientes
 
 O VestiPro possui três ambientes isolados, com nomes visuais e identifiers distintos:
