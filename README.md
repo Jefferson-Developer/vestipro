@@ -167,7 +167,19 @@ está conectado (TASK-014): o provider `FirebaseStorage` de `lib/app/injection_m
 `StorageUploadCancelToken`), download e exclusão; `StoragePaths` centraliza a convenção de path por
 organização (`organizations/{organizationId}/products|orders|users/...`); `ImageUploadCompressor`
 comprime fotos de produto antes do upload usando `flutter_image_compress`. Nenhuma feature usa o
-Storage ainda (só entra a partir do EPIC-08/TASK-068).
+Storage ainda (só entra a partir do EPIC-08/TASK-068). O Functions também já está conectado
+(TASK-015): o codebase TypeScript em [`functions/`](functions/README.md) hospeda toda regra crítica
+que não pode depender só do cliente (autorização fina, preço, número de pedido, aprovações, regras
+financeiras — ver `AGENTS.md`), estruturado por domínio (`src/health`, e os reservados `src/auth`,
+`src/pricing`, `src/orders`, `src/insights`, `src/admin`, populados pelas tasks correspondentes) e
+com uma função de exemplo (`healthCheck`, callable) validando o pipeline de ponta a ponta. O provider
+`FirebaseFunctions` de `lib/app/injection_module.dart` chama `configureFunctions`
+(`lib/core/functions/`), que conecta ao emulador fora do `prod` da mesma forma que Firestore/Storage.
+`CloudFunctionsService` (`lib/core/functions/cloud_functions_service.dart`) é o único ponto do app
+autorizado a chamar `cloud_functions`: adiciona correlation id, versão do app/plataforma (sob a
+chave `_meta`, para nunca colidir com o payload de cada função), retry com backoff só para códigos de
+erro transitórios, medição de tempo de resposta (seam para a TASK-019/Performance Monitoring) e
+converte toda `FirebaseFunctionsException` para a hierarquia `AppException`/`Failure` existente.
 
 ### Configuração local
 
@@ -201,7 +213,9 @@ firebase emulators:start --only auth,firestore,storage,functions
 Os emuladores de **Firestore e Storage exigem um JRE (Java) instalado e no `PATH`** — Auth e
 Functions não. `firestore.rules` e `storage.rules` ficam com acesso negado por padrão
 (`allow read, write: if false;`) até as regras reais de RBAC/multi-tenant chegarem nas
-TASK-030/TASK-031. `functions/` está vazio de propósito (nenhuma função real) até a TASK-015.
+TASK-030/TASK-031. `functions/` já tem a função de exemplo `healthCheck` (TASK-015); as pastas de
+domínio (`pricing`, `orders`, `insights`, `auth`, `admin`) continuam vazias de propósito até as
+tasks correspondentes.
 
 ## Documentação
 

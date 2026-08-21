@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:injectable/injectable.dart';
 
 import '../core/database/configure_firestore.dart';
 import '../core/environment/app_environment.dart';
+import '../core/functions/configure_functions.dart';
 import '../core/storage/configure_storage.dart';
 import '../features/settings/data/models/about_app_seed_model.dart';
 
@@ -36,6 +38,16 @@ abstract class AppInjectionModule {
     final storage = FirebaseStorage.instance;
     configureStorage(storage, environment: environment);
     return storage;
+  }
+
+  /// Connects to the Functions Emulator (TASK-015) the first time something
+  /// resolves [FirebaseFunctions] — same lazy-DI-triggered wiring rationale
+  /// as [firebaseFirestore]/[firebaseStorage] above.
+  @lazySingleton
+  FirebaseFunctions firebaseFunctions(AppEnvironment environment) {
+    final functions = FirebaseFunctions.instance;
+    configureFunctions(functions, environment: environment);
+    return functions;
   }
 
   @lazySingleton
