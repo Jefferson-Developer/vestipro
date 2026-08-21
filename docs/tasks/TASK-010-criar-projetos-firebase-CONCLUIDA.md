@@ -183,7 +183,7 @@ Não executado, pois não houve autorização explícita para push nesta convers
 
 ## Hash do commit
 
-Informado na resposta final após o commit.
+`f288ee1`
 
 ## Branch
 
