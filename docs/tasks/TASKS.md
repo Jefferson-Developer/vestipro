@@ -79,7 +79,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ### EPIC-01 — Firebase e Observabilidade
 - [x] [TASK-010 — Criar e configurar projetos Firebase](TASK-010-criar-projetos-firebase.md) — Flutter Senior
-- [ ] [TASK-011 — Integrar Firebase Core](TASK-011-integrar-firebase-core.md) — Flutter Senior
+- [x] [TASK-011 — Integrar Firebase Core](TASK-011-integrar-firebase-core.md) — Flutter Senior
 - [ ] [TASK-012 — Configurar Firebase Authentication (base)](TASK-012-configurar-firebase-authentication-base.md) — Flutter Senior
 - [ ] [TASK-013 — Configurar Cloud Firestore](TASK-013-configurar-cloud-firestore.md) — Flutter Senior
 - [ ] [TASK-014 — Configurar Firebase Storage](TASK-014-configurar-firebase-storage.md) — Flutter Senior
@@ -354,4 +354,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 10 / 220 tasks concluídas.
+**Progresso:** 11 / 220 tasks concluídas.

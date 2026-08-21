@@ -147,8 +147,10 @@ Existe **um único projeto Firebase real: `vestipro`**, tratado como ambiente de
 há projetos `vestipro-dev`/`vestipro-staging`. Os flavors `dev` e `staging` do app usam
 exclusivamente o Firebase Emulator Suite local; apenas o flavor `prod` conecta no projeto real.
 Decisão completa e motivos em [`docs/adr/0002-topologia-firebase.md`](docs/adr/0002-topologia-firebase.md).
-A inicialização condicional do SDK (emulador para dev/staging, projeto real para prod) é feita na
-TASK-011.
+`Firebase.initializeApp` roda uma única vez, em `lib/app/bootstrap.dart`, chamado por todos os
+entrypoints (TASK-011); falhas de inicialização exibem uma tela de erro amigável em vez de crash ou
+tela branca. A conexão condicional a cada emulador (Auth, Firestore, Storage, Functions) é
+responsabilidade de cada task que configura o respectivo SDK (TASK-012 a TASK-015).
 
 ### Configuração local
 

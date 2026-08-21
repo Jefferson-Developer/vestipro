@@ -92,6 +92,7 @@ dev_dependencies:
   bloc_test: ^10.0.0
   mocktail: ^1.0.5
   network_image_mock: ^2.1.1
+  firebase_core_platform_interface: ^8.1.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

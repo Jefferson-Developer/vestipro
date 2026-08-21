@@ -41,7 +41,8 @@ Failure mapAppExceptionToFailure(AppException exception) {
     ),
     CacheException() ||
     SyncException() ||
-    UnknownException() => UnexpectedFailure(
+    UnknownException() ||
+    FirebaseInitializationException() => UnexpectedFailure(
       exception.message,
       code: exception.code,
       cause: exception,

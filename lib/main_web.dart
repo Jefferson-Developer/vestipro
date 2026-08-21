@@ -1,6 +1,6 @@
 import 'app/bootstrap.dart';
 import 'core/environment/app_environment.dart';
 
-void main() {
-  bootstrap(AppEnvironment.fromDartDefine());
+Future<void> main() async {
+  await bootstrap(AppEnvironment.fromDartDefine());
 }

@@ -128,3 +128,12 @@ final class UnknownException extends AppException {
     super.stackTrace,
   });
 }
+
+final class FirebaseInitializationException extends AppException {
+  const FirebaseInitializationException(
+    super.message, {
+    super.code,
+    super.cause,
+    super.stackTrace,
+  });
+}

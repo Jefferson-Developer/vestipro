@@ -16,9 +16,10 @@ void main() {
         const errors.CacheException('cache'),
         const errors.SyncException('sync'),
         const errors.UnknownException('unknown'),
+        const errors.FirebaseInitializationException('firebase init'),
       ];
 
-      expect(exceptions, hasLength(11));
+      expect(exceptions, hasLength(12));
       expect(
         exceptions.every((exception) => exception.message.isNotEmpty),
         true,
@@ -82,6 +83,12 @@ void main() {
       );
       expect(
         errors.mapAppExceptionToFailure(const errors.SyncException('sync')),
+        isA<errors.UnexpectedFailure>(),
+      );
+      expect(
+        errors.mapAppExceptionToFailure(
+          const errors.FirebaseInitializationException('firebase init'),
+        ),
         isA<errors.UnexpectedFailure>(),
       );
     });
