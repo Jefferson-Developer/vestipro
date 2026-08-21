@@ -155,7 +155,12 @@ conectado (TASK-012): `FirebaseAuthDataSource` (`lib/core/auth/data/datasources/
 `useAuthEmulator` para todo flavor que não seja `prod` assim que é resolvido pelo container de DI —
 não em `bootstrap.dart`, para não travar testes de widget que nunca tocam `firebase_auth` (ver
 `resolveFirebaseEmulatorHost`/`FirebaseEmulatorPorts` em `lib/core/environment/`, reutilizáveis pelas
-TASK-013/014/015).
+TASK-013/014/015). O Firestore também já está conectado (TASK-013): o provider `FirebaseFirestore`
+de `lib/app/injection_module.dart` chama `configureFirestore` (`lib/core/database/`), que habilita
+persistência nativa e conecta ao emulador fora do `prod`, só quando algo resolve essa dependência via
+DI. Acesso genérico ao Firestore (datasource base tipado, paginação por cursor, mapeamento de erros,
+modelo inicial de collections) está documentado em
+[`docs/architecture/firestore-schema.md`](docs/architecture/firestore-schema.md).
 
 ### Configuração local
 

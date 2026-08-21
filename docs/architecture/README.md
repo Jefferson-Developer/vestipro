@@ -34,6 +34,8 @@ Navigation conventions (routing, guards, deep links) are documented in
 [`navigation.md`](navigation.md).
 Static quality conventions are documented in [`static-quality.md`](static-quality.md).
 Testing conventions are documented in [`testing.md`](testing.md).
+Cloud Firestore access, the initial collection model, and exception mapping are documented in
+[`firestore-schema.md`](firestore-schema.md).
 
 ## Data Flow
 
