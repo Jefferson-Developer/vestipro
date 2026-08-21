@@ -219,7 +219,7 @@ return failure(_that.failure,_that.aboutApp,_that.notes,_that.query,_that.page,_
 
 class AboutAppInitial implements AboutAppState {
   const AboutAppInitial({this.dataOrigin = AboutAppDataOrigin.localCache});
-
+  
 
 @override@JsonKey() final  AboutAppDataOrigin dataOrigin;
 
@@ -285,7 +285,7 @@ as AboutAppDataOrigin,
 
 class AboutAppLoading implements AboutAppState {
   const AboutAppLoading({this.aboutApp, final  List<AboutAppNote> notes = const <AboutAppNote>[], this.query = '', this.page = 0, this.hasMore = true, this.dataOrigin = AboutAppDataOrigin.localCache}): _notes = notes;
-
+  
 
  final  AboutApp? aboutApp;
  final  List<AboutAppNote> _notes;
@@ -379,7 +379,7 @@ $AboutAppCopyWith<$Res>? get aboutApp {
 
 class AboutAppReady implements AboutAppState {
   const AboutAppReady({required this.aboutApp, required final  List<AboutAppNote> notes, required this.page, required this.hasMore, required this.query, required this.dataOrigin, this.isLoadingNextPage = false, this.submissionStatus = AboutAppSubmissionStatus.idle, this.submissionFailure}): _notes = notes;
-
+  
 
  final  AboutApp aboutApp;
  final  List<AboutAppNote> _notes;
@@ -464,7 +464,7 @@ as Failure?,
 @override
 @pragma('vm:prefer-inline')
 $AboutAppCopyWith<$Res> get aboutApp {
-
+  
   return $AboutAppCopyWith<$Res>(_self.aboutApp, (value) {
     return _then(_self.copyWith(aboutApp: value));
   });
@@ -476,7 +476,7 @@ $AboutAppCopyWith<$Res> get aboutApp {
 
 class AboutAppFailure implements AboutAppState {
   const AboutAppFailure({required this.failure, this.aboutApp, final  List<AboutAppNote> notes = const <AboutAppNote>[], this.query = '', this.page = 0, this.hasMore = false, this.dataOrigin = AboutAppDataOrigin.localCache}): _notes = notes;
-
+  
 
  final  Failure failure;
  final  AboutApp? aboutApp;

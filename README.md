@@ -150,7 +150,12 @@ Decisão completa e motivos em [`docs/adr/0002-topologia-firebase.md`](docs/adr/
 `Firebase.initializeApp` roda uma única vez, em `lib/app/bootstrap.dart`, chamado por todos os
 entrypoints (TASK-011); falhas de inicialização exibem uma tela de erro amigável em vez de crash ou
 tela branca. A conexão condicional a cada emulador (Auth, Firestore, Storage, Functions) é
-responsabilidade de cada task que configura o respectivo SDK (TASK-012 a TASK-015).
+responsabilidade de cada task que configura o respectivo SDK (TASK-012 a TASK-015). O Auth já está
+conectado (TASK-012): `FirebaseAuthDataSource` (`lib/core/auth/data/datasources/`) chama
+`useAuthEmulator` para todo flavor que não seja `prod` assim que é resolvido pelo container de DI —
+não em `bootstrap.dart`, para não travar testes de widget que nunca tocam `firebase_auth` (ver
+`resolveFirebaseEmulatorHost`/`FirebaseEmulatorPorts` em `lib/core/environment/`, reutilizáveis pelas
+TASK-013/014/015).
 
 ### Configuração local
 

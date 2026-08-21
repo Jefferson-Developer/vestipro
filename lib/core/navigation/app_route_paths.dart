@@ -32,6 +32,22 @@ final class AboutAppRoute extends AppRoute {
   String get location => '/org/$orgId/settings/about';
 }
 
+/// Route shown to sign a user in.
+///
+/// Not registered as a [GoRoute] yet: the login screen itself belongs to
+/// TASK-034. [SessionAuthGuard] (TASK-012) already redirects here for any
+/// unauthenticated request to a protected route, so wiring the real page
+/// later does not require touching the guard.
+final class LoginRoute extends AppRoute {
+  const LoginRoute();
+
+  static const name = 'login';
+  static const pathPattern = '/login';
+
+  @override
+  String get location => pathPattern;
+}
+
 /// Route shown when a guard denies access to the requested location.
 final class ForbiddenRoute extends AppRoute {
   const ForbiddenRoute();
