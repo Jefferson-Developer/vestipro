@@ -1,0 +1,15 @@
+{
+  "name": "functions",
+  "private": true,
+  "description": "Codebase de Cloud Functions do VestiPro. Vazio de propósito nesta task; funções reais entram na TASK-015 (Configurar Cloud Functions for Firebase).",
+  "main": "index.js",
+  "engines": {
+    "node": "20"
+  },
+  "scripts": {
+    "serve": "firebase emulators:start --only functions"
+  },
+  "dependencies": {
+    "firebase-functions": "^6.3.1"
+  }
+}

@@ -136,12 +136,53 @@ possui feature real. A arquitetura completa (Clean Architecture por feature, BLo
 dependência, navegação com `go_router`, offline-first com Drift) está descrita em
 `.claude/agents/flutter-senior-architect.md` e será adicionada progressivamente pelas próximas tasks.
 
-## Backend
+## Backend e Firebase
 
 Firebase: Authentication, Cloud Firestore, Storage, Cloud Functions, Analytics, Crashlytics,
-Performance Monitoring, Cloud Messaging, Remote Config, App Check. Nenhum SDK Firebase está
-integrado ainda — a configuração começa em `docs/tasks/TASK-010-criar-projetos-firebase.md`
-(EPIC-01).
+Performance Monitoring, Cloud Messaging, Remote Config, App Check.
+
+### Topologia
+
+Existe **um único projeto Firebase real: `vestipro`**, tratado como ambiente de **produção**. Não
+há projetos `vestipro-dev`/`vestipro-staging`. Os flavors `dev` e `staging` do app usam
+exclusivamente o Firebase Emulator Suite local; apenas o flavor `prod` conecta no projeto real.
+Decisão completa e motivos em [`docs/adr/0002-topologia-firebase.md`](docs/adr/0002-topologia-firebase.md).
+A inicialização condicional do SDK (emulador para dev/staging, projeto real para prod) é feita na
+TASK-011.
+
+### Configuração local
+
+Os arquivos gerados pelo FlutterFire CLI contêm chaves de API e nunca são commitados
+(`.gitignore`): `lib/firebase_options.dart`, `android/app/google-services.json` e
+`ios/Runner/GoogleService-Info.plist`. Para gerá-los localmente:
+
+```bash
+dart pub global activate flutterfire_cli
+flutterfire configure -p vestipro --platforms=android,ios,web
+```
+
+O app iOS (`GoogleService-Info.plist`) só é escrito/injetado no projeto Xcode quando o comando
+roda em **host macOS** (o FlutterFire CLI usa a gem Ruby `xcodeproj`); em outros sistemas apenas
+`lib/firebase_options.dart` é gerado com as opções do iOS (sem o arquivo `.plist` físico).
+
+### Firebase Emulator Suite
+
+```bash
+firebase emulators:start --only auth,firestore,storage,functions
+```
+
+| Emulador   | Porta |
+|------------|-------|
+| Auth       | 9099  |
+| Firestore  | 8080  |
+| Storage    | 9199  |
+| Functions  | 5001  |
+| UI         | 4000  |
+
+Os emuladores de **Firestore e Storage exigem um JRE (Java) instalado e no `PATH`** — Auth e
+Functions não. `firestore.rules` e `storage.rules` ficam com acesso negado por padrão
+(`allow read, write: if false;`) até as regras reais de RBAC/multi-tenant chegarem nas
+TASK-030/TASK-031. `functions/` está vazio de propósito (nenhuma função real) até a TASK-015.
 
 ## Documentação
 

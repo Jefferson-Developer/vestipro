@@ -1,0 +1,14 @@
+rules_version = '2';
+
+// Placeholder de segurança: nega todo acesso por padrão.
+// RBAC e regras reais de multi-tenant entram na TASK-030 (Criar Firestore Security Rules).
+// Este arquivo existe apenas para o Firebase Emulator Suite (TASK-010) ter uma configuração
+// de Firestore válida para subir localmente; nunca deve ficar mais permissivo que "deny all"
+// antes da TASK-030 implementar as regras reais.
+service cloud.firestore {
+  match /databases/{database}/documents {
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}

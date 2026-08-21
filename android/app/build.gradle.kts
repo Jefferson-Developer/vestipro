@@ -1,5 +1,10 @@
 plugins {
     id("com.android.application")
+    // START: FlutterFire Configuration
+    id("com.google.gms.google-services")
+    id("com.google.firebase.firebase-perf")
+    id("com.google.firebase.crashlytics")
+    // END: FlutterFire Configuration
     // The Flutter Gradle Plugin must be applied after the Android and Kotlin Gradle plugins.
     id("dev.flutter.flutter-gradle-plugin")
 }
@@ -59,4 +64,13 @@ kotlin {
 
 flutter {
     source = "../.."
+}
+
+// ADR-0002: só existe projeto Firebase real para "prod"; dev/staging usam o Emulator Suite e não
+// têm client correspondente em google-services.json. Sem este filtro, o Gradle plugin do Google
+// Services falha o build de dev/staging por não achar `br.com.dinosoft.vestipro.dev`/`.staging`.
+tasks.whenTaskAdded {
+    if (name.startsWith("process") && name.endsWith("GoogleServices") && !name.contains("Prod")) {
+        enabled = false
+    }
 }

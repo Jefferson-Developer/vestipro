@@ -1,1 +1,68 @@
-{"flutter":{"platforms":{"android":{"default":{"projectId":"vestipro","appId":"1:184451052714:android:db447cc0d912f83e5a4cd3","fileOutput":"android/app/google-services.json"}},"dart":{"lib/firebase_options.dart":{"projectId":"vestipro","configurations":{"android":"1:184451052714:android:db447cc0d912f83e5a4cd3","ios":"1:184451052714:ios:fcbf7552d8d61bc75a4cd3","web":"1:184451052714:web:79e186deec496ef95a4cd3"}}}}}}
+{
+  "flutter": {
+    "platforms": {
+      "android": {
+        "default": {
+          "projectId": "vestipro",
+          "appId": "1:184451052714:android:db447cc0d912f83e5a4cd3",
+          "fileOutput": "android/app/google-services.json"
+        },
+        "buildConfigurations": {
+          ".": {
+            "projectId": "vestipro",
+            "appId": "1:184451052714:android:db447cc0d912f83e5a4cd3",
+            "fileOutput": "android/app/google-services.json"
+          }
+        }
+      },
+      "dart": {
+        "lib/firebase_options.dart": {
+          "projectId": "vestipro",
+          "configurations": {
+            "android": "1:184451052714:android:db447cc0d912f83e5a4cd3",
+            "ios": "1:184451052714:ios:fcbf7552d8d61bc75a4cd3",
+            "web": "1:184451052714:web:79e186deec496ef95a4cd3"
+          }
+        }
+      }
+    }
+  },
+  "firestore": {
+    "rules": "firestore.rules",
+    "indexes": "firestore.indexes.json"
+  },
+  "storage": {
+    "rules": "storage.rules"
+  },
+  "functions": [
+    {
+      "source": "functions",
+      "codebase": "default",
+      "ignore": [
+        "node_modules",
+        ".git",
+        "firebase-debug.log",
+        "firebase-debug.*.log"
+      ]
+    }
+  ],
+  "emulators": {
+    "auth": {
+      "port": 9099
+    },
+    "firestore": {
+      "port": 8080
+    },
+    "storage": {
+      "port": 9199
+    },
+    "functions": {
+      "port": 5001
+    },
+    "ui": {
+      "enabled": true,
+      "port": 4000
+    },
+    "singleProjectMode": true
+  }
+}

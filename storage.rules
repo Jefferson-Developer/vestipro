@@ -1,0 +1,14 @@
+rules_version = '2';
+
+// Placeholder de segurança: nega todo acesso por padrão.
+// RBAC e regras reais de multi-tenant entram na TASK-031 (Criar Storage Security Rules).
+// Este arquivo existe apenas para o Firebase Emulator Suite (TASK-010) ter uma configuração
+// de Storage válida para subir localmente; nunca deve ficar mais permissivo que "deny all"
+// antes da TASK-031 implementar as regras reais.
+service firebase.storage {
+  match /b/{bucket}/o {
+    match /{allPaths=**} {
+      allow read, write: if false;
+    }
+  }
+}
