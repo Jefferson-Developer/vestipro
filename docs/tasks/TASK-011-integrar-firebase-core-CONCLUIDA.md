@@ -182,7 +182,7 @@ Não executado nesta task; depende de autorização explícita do usuário.
 
 ## Hash do commit
 
-A preencher após o commit.
+`ddb9f6c`
 
 ## Branch
 
