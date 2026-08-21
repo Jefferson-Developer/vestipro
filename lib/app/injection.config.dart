@@ -11,6 +11,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
+import 'package:firebase_storage/firebase_storage.dart' as _i457;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
@@ -20,6 +21,8 @@ import '../core/auth/data/mappers/auth_user_mapper.dart' as _i26;
 import '../core/auth/data/repositories/auth_repository_impl.dart' as _i961;
 import '../core/auth/domain/repositories/auth_repository.dart' as _i217;
 import '../core/environment/app_environment.dart' as _i461;
+import '../core/storage/firebase_storage_data_source.dart' as _i833;
+import '../core/storage/storage_data_source.dart' as _i904;
 import '../features/settings/data/datasources/about_app_data_source.dart'
     as _i364;
 import '../features/settings/data/datasources/in_memory_about_app_datasource.dart'
@@ -64,6 +67,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i974.FirebaseFirestore>(
       () => appInjectionModule.firebaseFirestore(gh<_i461.AppEnvironment>()),
     );
+    gh.lazySingleton<_i457.FirebaseStorage>(
+      () => appInjectionModule.firebaseStorage(gh<_i461.AppEnvironment>()),
+    );
     gh.lazySingleton<_i477.AboutAppSeedModel>(
       () => appInjectionModule.aboutAppSeedModel(gh<_i461.AppEnvironment>()),
     );
@@ -81,6 +87,9 @@ extension GetItInjectableX on _i174.GetIt {
         seed: gh<_i477.AboutAppSeedModel>(),
       ),
       registerFor: {_dev, _staging, _prod},
+    );
+    gh.lazySingleton<_i904.StorageDataSource>(
+      () => _i833.FirebaseStorageDataSource(gh<_i457.FirebaseStorage>()),
     );
     gh.lazySingleton<_i794.AboutAppRepository>(
       () => _i1060.AboutAppRepositoryImpl(

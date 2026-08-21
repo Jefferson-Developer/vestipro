@@ -160,7 +160,14 @@ de `lib/app/injection_module.dart` chama `configureFirestore` (`lib/core/databas
 persistência nativa e conecta ao emulador fora do `prod`, só quando algo resolve essa dependência via
 DI. Acesso genérico ao Firestore (datasource base tipado, paginação por cursor, mapeamento de erros,
 modelo inicial de collections) está documentado em
-[`docs/architecture/firestore-schema.md`](docs/architecture/firestore-schema.md).
+[`docs/architecture/firestore-schema.md`](docs/architecture/firestore-schema.md). O Storage também já
+está conectado (TASK-014): o provider `FirebaseStorage` de `lib/app/injection_module.dart` chama
+`configureStorage` (`lib/core/storage/`), que conecta ao emulador fora do `prod` da mesma forma.
+`FirebaseStorageDataSource` centraliza upload (com progresso e cancelamento via
+`StorageUploadCancelToken`), download e exclusão; `StoragePaths` centraliza a convenção de path por
+organização (`organizations/{organizationId}/products|orders|users/...`); `ImageUploadCompressor`
+comprime fotos de produto antes do upload usando `flutter_image_compress`. Nenhuma feature usa o
+Storage ainda (só entra a partir do EPIC-08/TASK-068).
 
 ### Configuração local
 

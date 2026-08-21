@@ -82,7 +82,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-011 — Integrar Firebase Core](TASK-011-integrar-firebase-core.md) — Flutter Senior
 - [x] [TASK-012 — Configurar Firebase Authentication (base)](TASK-012-configurar-firebase-authentication-base.md) — Flutter Senior
 - [x] [TASK-013 — Configurar Cloud Firestore](TASK-013-configurar-cloud-firestore.md) — Flutter Senior
-- [ ] [TASK-014 — Configurar Firebase Storage](TASK-014-configurar-firebase-storage.md) — Flutter Senior
+- [x] [TASK-014 — Configurar Firebase Storage](TASK-014-configurar-firebase-storage.md) — Flutter Senior
 - [ ] [TASK-015 — Configurar Cloud Functions for Firebase](TASK-015-configurar-cloud-functions.md) — Flutter Senior
 - [ ] [TASK-016 — Configurar Firebase Crashlytics](TASK-016-configurar-firebase-crashlytics.md) — Flutter Senior
 - [ ] [TASK-017 — Configurar Firebase Analytics](TASK-017-configurar-firebase-analytics.md) — Flutter Senior
@@ -354,4 +354,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 13 / 220 tasks concluídas.
+**Progresso:** 14 / 220 tasks concluídas.
