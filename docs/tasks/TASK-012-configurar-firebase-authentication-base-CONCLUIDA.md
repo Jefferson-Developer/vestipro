@@ -246,7 +246,7 @@ Não executado nesta task; depende de autorização explícita do usuário.
 
 ## Hash do commit
 
-Preenchido após o commit real (ver mensagem final desta conversa).
+`6de567c`
 
 ## Branch
 
