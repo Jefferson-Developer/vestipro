@@ -47,6 +47,20 @@ void main() {
       expect(find.text('Estados completos'), findsOneWidget);
     });
 
+    testWidgets('shows a debug-only crash test action that reports through '
+        'FlutterError.onError (TASK-016)', (tester) async {
+      final dataSource = InMemoryAboutAppDataSource(seed: _seed);
+
+      await tester.pumpWidget(_buildPage(_buildUseCase(dataSource)));
+      await tester.pumpAndSettle();
+
+      final crashButton = find.byTooltip('Forcar crash de teste (Crashlytics)');
+      expect(crashButton, findsOneWidget);
+
+      await tester.tap(crashButton);
+      expect(tester.takeException(), isA<StateError>());
+    });
+
     testWidgets('renders error state', (tester) async {
       final dataSource = InMemoryAboutAppDataSource(
         seed: _seed,

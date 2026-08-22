@@ -1,10 +1,23 @@
+import 'dart:async' show unawaited;
 import 'dart:developer' as developer;
 
 import 'package:flutter/foundation.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../core/errors/errors.dart';
+import '../core/services/services.dart';
+import 'injection.dart';
+
 final class VestiProBlocObserver extends BlocObserver {
-  const VestiProBlocObserver();
+  /// [crashReporter] defaults to `null`, resolved from [getIt] lazily inside
+  /// [onError] itself — only when a Bloc actually reports an unexpected
+  /// error — so a plain `const VestiProBlocObserver()` (as used by
+  /// `bootstrap.dart` and most tests) never has to eagerly touch the
+  /// Crashlytics DI graph. Tests that exercise [onError] can pass a fake
+  /// directly instead.
+  const VestiProBlocObserver({this.crashReporter});
+
+  final CrashReporter? crashReporter;
 
   @override
   void onTransition(
@@ -44,6 +57,16 @@ final class VestiProBlocObserver extends BlocObserver {
       action: 'error',
       fields: <String, Object?>{'errorType': error.runtimeType},
     );
+
+    if (isUnexpectedError(error)) {
+      unawaited(
+        (crashReporter ?? getIt<CrashReporter>()).recordError(
+          error,
+          stackTrace,
+          reason: 'Bloc: ${bloc.runtimeType}',
+        ),
+      );
+    }
   }
 
   void _debugLog({

@@ -12,6 +12,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
 import 'package:cloud_functions/cloud_functions.dart' as _i809;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
+import 'package:firebase_crashlytics/firebase_crashlytics.dart' as _i141;
 import 'package:firebase_storage/firebase_storage.dart' as _i457;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
@@ -24,6 +25,8 @@ import '../core/auth/domain/repositories/auth_repository.dart' as _i217;
 import '../core/environment/app_environment.dart' as _i461;
 import '../core/functions/app_client_metadata.dart' as _i465;
 import '../core/functions/cloud_functions_service.dart' as _i147;
+import '../core/services/crash_reporter.dart' as _i349;
+import '../core/services/firebase_crash_reporter.dart' as _i559;
 import '../core/storage/firebase_storage_data_source.dart' as _i833;
 import '../core/storage/storage_data_source.dart' as _i904;
 import '../features/settings/data/datasources/about_app_data_source.dart'
@@ -79,6 +82,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i809.FirebaseFunctions>(
       () => appInjectionModule.firebaseFunctions(gh<_i461.AppEnvironment>()),
     );
+    gh.lazySingleton<_i141.FirebaseCrashlytics>(
+      () => appInjectionModule.firebaseCrashlytics(gh<_i461.AppEnvironment>()),
+    );
     gh.lazySingleton<_i477.AboutAppSeedModel>(
       () => appInjectionModule.aboutAppSeedModel(gh<_i461.AppEnvironment>()),
     );
@@ -89,6 +95,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i961.AuthRepositoryImpl(
         dataSource: gh<_i845.AuthDataSource>(),
         mapper: gh<_i26.AuthUserMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i349.CrashReporter>(
+      () => _i559.FirebaseCrashReporter(
+        gh<_i141.FirebaseCrashlytics>(),
+        gh<_i461.AppEnvironment>(),
+        gh<_i465.AppClientMetadataProvider>(),
       ),
     );
     gh.lazySingleton<_i364.AboutAppDataSource>(

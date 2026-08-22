@@ -180,6 +180,20 @@ autorizado a chamar `cloud_functions`: adiciona correlation id, versão do app/p
 chave `_meta`, para nunca colidir com o payload de cada função), retry com backoff só para códigos de
 erro transitórios, medição de tempo de resposta (seam para a TASK-019/Performance Monitoring) e
 converte toda `FirebaseFunctionsException` para a hierarquia `AppException`/`Failure` existente.
+O Crashlytics também já está conectado (TASK-016): o provider `FirebaseCrashlytics` de
+`lib/app/injection_module.dart` chama `configureCrashlytics` (`lib/core/services/`), que desabilita
+a coleta em `development` (crashes locais não poluem o console de produção) e mantém habilitada em
+`staging`/`production`. `CrashReporter` (`lib/core/services/crash_reporter.dart`) é a abstração
+central — nenhuma feature chama `FirebaseCrashlytics.instance` diretamente; `FirebaseCrashReporter`
+é a implementação real, `@LazySingleton` como `CrashReporter`, defensiva (nunca lança, mesmo se o SDK
+falhar) e anexa contexto seguro (`environment`, `appVersion`, `platform`, via o mesmo
+`AppClientMetadataProvider` da TASK-015) na primeira vez que algo é de fato reportado.
+`FlutterError.onError` e `PlatformDispatcher.instance.onError` (`configureGlobalErrorHandlers` em
+`lib/app/bootstrap.dart`) e `VestiProBlocObserver.onError` reportam automaticamente qualquer erro
+classificado como inesperado (`isUnexpectedError`, `lib/core/errors/`); exceções de negócio
+esperadas (validação, permissão, não encontrado, conflito, rede, servidor) nunca geram ruído no
+Crashlytics. Em modo debug, a tela "Sobre o app" expõe um botão de crash de teste para validar o
+pipeline ponta a ponta no console do Firebase.
 
 ### Configuração local
 

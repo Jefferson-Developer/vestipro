@@ -1,6 +1,8 @@
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/services/services.dart';
 import '../bloc/about_app_bloc.dart';
 import '../bloc/about_app_event.dart';
 import '../bloc/about_app_state.dart';
@@ -90,6 +92,25 @@ class _AboutAppBar extends StatelessWidget implements PreferredSizeWidget {
 
   @override
   Widget build(BuildContext context) {
-    return AppBar(title: Text(title));
+    return AppBar(
+      title: Text(title),
+      actions: [if (kDebugMode) const _CrashlyticsTestCrashButton()],
+    );
+  }
+}
+
+/// Debug/dev-only affordance (TASK-016) to confirm that an uncaught error
+/// really reaches the Firebase Crashlytics console: never shown outside
+/// [kDebugMode].
+class _CrashlyticsTestCrashButton extends StatelessWidget {
+  const _CrashlyticsTestCrashButton();
+
+  @override
+  Widget build(BuildContext context) {
+    return IconButton(
+      icon: const Icon(Icons.bug_report_outlined),
+      tooltip: 'Forcar crash de teste (Crashlytics)',
+      onPressed: triggerCrashlyticsTestCrash,
+    );
   }
 }
