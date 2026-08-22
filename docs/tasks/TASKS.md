@@ -90,7 +90,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-019 — Configurar Firebase Performance Monitoring](TASK-019-configurar-firebase-performance-monitoring.md) — Flutter Senior
 
 ### EPIC-02 — Design System
-- [ ] [TASK-020 — Criar foundations do Design System](TASK-020-criar-design-system-foundations.md) — Front-end
+- [x] [TASK-020 — Criar foundations do Design System](TASK-020-criar-design-system-foundations.md) — Front-end
 - [ ] [TASK-021 — Criar componentes base](TASK-021-criar-componentes-base.md) — Front-end
 - [ ] [TASK-022 — Criar componentes de formulário e feedback](TASK-022-criar-componentes-de-formulario-e-feedback.md) — Front-end
 - [ ] [TASK-023 — Criar componentes de dados (tabelas, listas, KPI, gráficos)](TASK-023-criar-componentes-de-dados.md) — Front-end
@@ -354,4 +354,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 19 / 220 tasks concluídas.
+**Progresso:** 20 / 220 tasks concluídas.
