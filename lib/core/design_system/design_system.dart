@@ -1,13 +1,15 @@
 /// The VestiPro Design System: single import for every color, spacing,
 /// radius, shadow, typography, breakpoint, duration and icon-size token,
-/// plus the assembled light/dark [ThemeData] (`AppTheme`) and the
+/// the assembled light/dark [ThemeData] (`AppTheme`), the
 /// `context.colors`/`context.shadows`/`context.breakpoint` convenience
-/// getters.
+/// getters, and every reusable component (buttons, inputs, selection,
+/// chips, badges, feedback states).
 ///
 /// This is the only supported entry point: features must import
 /// `package:vestipro/core/design_system/design_system.dart`, never a file
-/// inside `foundations/`/`theme/` directly.
+/// inside `foundations/`/`theme/`/`components/` directly.
 library;
 
+export 'components/components.dart';
 export 'foundations/foundations.dart';
 export 'theme/theme.dart';
