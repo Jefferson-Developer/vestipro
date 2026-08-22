@@ -220,7 +220,7 @@ Sim (autorizado nesta rodada).
 
 ## Hash do commit
 
-Ver saída de `git log -1` após o commit nesta mesma execução.
+`41809ca`
 
 ## Branch
 
