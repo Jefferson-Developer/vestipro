@@ -132,6 +132,9 @@ app.*.map.json
 /functions/coverage/
 /functions/.secret.local
 
+# Firestore Security Rules tests (TASK-030) — ver firestore-tests/package.json
+/firestore-tests/node_modules/
+
 # Firebase generated caches and local app config
 /.firebase/
 firebase-debug.log

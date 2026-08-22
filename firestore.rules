@@ -1,14 +1,269 @@
 rules_version = '2';
 
-// Placeholder de segurança: nega todo acesso por padrão.
-// RBAC e regras reais de multi-tenant entram na TASK-030 (Criar Firestore Security Rules).
-// Este arquivo existe apenas para o Firebase Emulator Suite (TASK-010) ter uma configuração
-// de Firestore válida para subir localmente; nunca deve ficar mais permissivo que "deny all"
-// antes da TASK-030 implementar as regras reais.
+// Firestore Security Rules — VestiPro (TASK-030).
+//
+// Escopo: `organizations/{organizationId}` e as subcoleções já modeladas até
+// aqui (`companies`, `branches`, `roles`, `teams`, `members`), conforme
+// TASK-026 a TASK-029 e `tasks.md` seção 13 ("Nunca permitir que
+// `organizationId` enviado pelo cliente seja a única fonte de autorização").
+//
+// Princípio central: toda leitura/escrita dentro de uma Organization exige
+// um Membership REAL e ativo do usuário autenticado em
+// `organizations/{organizationId}/members/{request.auth.uid}` — nunca um
+// campo `organizationId` presente no próprio payload/documento sendo lido
+// ou escrito. `isActiveMember` é a única função que decide "pertence a esta
+// organização" e sempre relê esse documento a partir do banco.
+//
+// RBAC: `roleHasCapability` espelha, em Rules, exatamente a mesma tabela de
+// `lib/core/permissions/role_permission_matrix.dart` (TASK-029) — os dois
+// precisam ser mantidos em sincronia manualmente (ver
+// TASK-030-criar-firestore-security-rules-CONCLUIDA.md, seção "Riscos
+// conhecidos"). Os códigos de capability usados aqui são exatamente os de
+// `lib/core/permissions/capability.dart` (`CapabilityCode.code`).
+//
+// Bootstrap de tenant: `CreateOrganizationUseCase` -> `EnsureSystemRolesUseCase`
+// -> `AssignRoleToUserUseCase` (papel OWNER) rodam hoje diretamente do
+// cliente, em sequência, sem Cloud Function dedicada (isso é TASK-037,
+// "onboarding", fora do escopo desta task). Nesse instante o usuário criador
+// ainda não tem Membership — por isso existem 3 janelas de bootstrap
+// deliberadas e estreitas abaixo (criação da própria Organization, dos 7
+// system roles fixos, e da própria Membership OWNER), todas amarradas ao
+// campo imutável `Organization.createdBy`, nunca a um `organizationId` cru
+// vindo do payload.
 service cloud.firestore {
   match /databases/{database}/documents {
-    match /{document=**} {
-      allow read, write: if false;
+
+    // ---------------------------------------------------------------------
+    // Helpers
+    // ---------------------------------------------------------------------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function membershipPath(organizationId) {
+      return /databases/$(database)/documents/organizations/$(organizationId)/members/$(request.auth.uid);
+    }
+
+    // Único ponto que decide "este usuário autenticado pertence a esta
+    // Organization agora" — sempre relendo o Membership real, nunca
+    // confiando em nenhum campo do documento sendo lido/escrito.
+    function isActiveMember(organizationId) {
+      return isSignedIn()
+        && exists(membershipPath(organizationId))
+        && get(membershipPath(organizationId)).data.status == 'active';
+    }
+
+    function currentRoleName(organizationId) {
+      return get(membershipPath(organizationId)).data.roleName;
+    }
+
+    // Espelha lib/core/permissions/role_permission_matrix.dart (TASK-029).
+    // READ_ONLY e qualquer nome de role desconhecido/custom caem no `else`
+    // implícito (nenhuma cláusula bate) => default-deny, igual ao Dart.
+    function roleHasCapability(roleName, capabilityCode) {
+      return roleName == 'OWNER'
+        || (roleName == 'ADMIN' && capabilityCode != 'organization.transferOwnership')
+        || (roleName == 'SALES_MANAGER' && capabilityCode in [
+              'customer.create', 'customer.update', 'customer.delete',
+              'order.create', 'order.approve', 'discount.approveAboveLimit',
+              'team.manage', 'report.export', 'report.viewSensitive'
+            ])
+        || (roleName == 'SALES_REP' && capabilityCode in [
+              'customer.create', 'customer.update', 'order.create'
+            ])
+        || (roleName == 'SALES_ASSISTANT' && capabilityCode in [
+              'customer.create', 'customer.update'
+            ])
+        || (roleName == 'FINANCE' && capabilityCode in [
+              'finance.view', 'finance.manage', 'discount.approveAboveLimit',
+              'report.export', 'report.viewSensitive'
+            ]);
+    }
+
+    // Re-verifica sempre a Membership real (nunca confia em capability
+    // resolvida no cliente) antes de checar a matriz de roles.
+    function hasCapability(organizationId, capabilityCode) {
+      return isActiveMember(organizationId)
+        && roleHasCapability(currentRoleName(organizationId), capabilityCode);
+    }
+
+    // Usado só nas 3 janelas de bootstrap: confirma que quem está
+    // escrevendo é literalmente quem criou aquela Organization
+    // (`Organization.createdBy`, imutável após a criação — ver regra de
+    // `update` abaixo), nunca um `organizationId` alegado no payload.
+    function isOrganizationCreator(organizationId) {
+      return isSignedIn()
+        && exists(/databases/$(database)/documents/organizations/$(organizationId))
+        && get(/databases/$(database)/documents/organizations/$(organizationId)).data.createdBy == request.auth.uid;
+    }
+
+    function unchanged(field) {
+      return request.resource.data[field] == resource.data[field];
+    }
+
+    // ---------------------------------------------------------------------
+    // organizations/{organizationId}
+    // ---------------------------------------------------------------------
+
+    match /organizations/{organizationId} {
+      // `resource == null` cobre o `get()` de idempotência feito dentro da
+      // transaction de `CreateOrganizationUseCase.create` antes do
+      // documento existir — inofensivo (não expõe nenhum dado real).
+      allow get: if isSignedIn()
+        && (resource == null
+            || resource.data.createdBy == request.auth.uid
+            || isActiveMember(organizationId));
+
+      // Nunca listar tenants por uma query aberta: todo acesso deve
+      // conhecer o organizationId de antemão (via path).
+      allow list: if false;
+
+      allow create: if isSignedIn()
+        && request.resource.data.createdBy == request.auth.uid
+        && request.resource.data.updatedBy == request.auth.uid
+        && request.resource.data.status == 'active'
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.slug is string
+        && request.resource.data.slug.size() > 0;
+
+      allow update: if hasCapability(organizationId, 'organization.settingsManage')
+        && unchanged('name')
+        && unchanged('slug')
+        && unchanged('status')
+        && unchanged('createdAt')
+        && unchanged('createdBy');
+
+      allow delete: if false;
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/companies/{companyId}
+      // -------------------------------------------------------------------
+
+      match /companies/{companyId} {
+        allow read: if isActiveMember(organizationId);
+
+        allow create: if hasCapability(organizationId, 'company.manage')
+          && request.resource.data.organizationId == organizationId;
+
+        allow update: if hasCapability(organizationId, 'company.manage')
+          && unchanged('organizationId');
+
+        allow delete: if hasCapability(organizationId, 'company.manage');
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/branches/{branchId}
+      // -------------------------------------------------------------------
+
+      match /branches/{branchId} {
+        allow read: if isActiveMember(organizationId);
+
+        allow create: if hasCapability(organizationId, 'branch.manage')
+          && request.resource.data.organizationId == organizationId;
+
+        allow update: if hasCapability(organizationId, 'branch.manage')
+          && unchanged('organizationId')
+          && unchanged('companyId');
+
+        allow delete: if hasCapability(organizationId, 'branch.manage');
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/roles/{roleId}
+      // -------------------------------------------------------------------
+
+      match /roles/{roleId} {
+        allow read: if isActiveMember(organizationId);
+
+        allow create: if request.resource.data.organizationId == organizationId
+          && (
+            // Bootstrap: EnsureSystemRolesUseCase semeia os 7 system roles
+            // fixos, chamado antes de existir qualquer Membership.
+            (
+              !isActiveMember(organizationId)
+              && request.resource.data.isSystemRole == true
+              && roleId == request.resource.data.name
+              && request.resource.data.name in [
+                   'OWNER', 'ADMIN', 'SALES_MANAGER', 'SALES_REP',
+                   'SALES_ASSISTANT', 'FINANCE', 'READ_ONLY'
+                 ]
+              && isOrganizationCreator(organizationId)
+            )
+            // Caminho normal: role custom criado por quem já tem a
+            // capability (roles de sistema nunca nascem por este caminho).
+            || (
+              hasCapability(organizationId, 'role.manage')
+              && request.resource.data.isSystemRole == false
+            )
+          );
+
+        // Roles de sistema (isSystemRole == true) nunca podem ser
+        // renomeados/alterados nem excluídos por regra — espelha
+        // `assertRoleIsMutable` (TASK-028).
+        allow update: if resource.data.isSystemRole == false
+          && hasCapability(organizationId, 'role.manage')
+          && unchanged('organizationId')
+          && unchanged('isSystemRole');
+
+        allow delete: if resource.data.isSystemRole == false
+          && hasCapability(organizationId, 'role.manage');
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/teams/{teamId}
+      // -------------------------------------------------------------------
+
+      match /teams/{teamId} {
+        allow read: if isActiveMember(organizationId);
+
+        allow create: if hasCapability(organizationId, 'team.manage')
+          && request.resource.data.organizationId == organizationId;
+
+        allow update: if hasCapability(organizationId, 'team.manage')
+          && unchanged('organizationId');
+
+        allow delete: if hasCapability(organizationId, 'team.manage');
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/members/{userId}  (Membership)
+      // -------------------------------------------------------------------
+
+      match /members/{userId} {
+        allow read: if isActiveMember(organizationId);
+
+        allow create: if request.resource.data.organizationId == organizationId
+          && request.resource.data.userId == userId
+          && (
+            // Bootstrap: o criador da Organization concede a si mesmo o
+            // Membership OWNER, depois dos system roles já existirem.
+            (
+              !isActiveMember(organizationId)
+              && userId == request.auth.uid
+              && request.resource.data.roleId == 'OWNER'
+              && request.resource.data.roleName == 'OWNER'
+              && request.resource.data.status == 'active'
+              && isOrganizationCreator(organizationId)
+            )
+            // Caminho normal: convite feito por quem já tem a capability.
+            || hasCapability(organizationId, 'user.invite')
+          );
+
+        allow update: if request.resource.data.organizationId == organizationId
+          && request.resource.data.userId == userId
+          && unchanged('organizationId')
+          && unchanged('userId')
+          && (
+            hasCapability(organizationId, 'user.changeRole')
+            || hasCapability(organizationId, 'user.deactivate')
+          );
+
+        // Nenhum caso de uso exclui Membership hoje (desativar = status
+        // 'inactive' via update) — nega por padrão.
+        allow delete: if false;
+      }
     }
   }
 }
