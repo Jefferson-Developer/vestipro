@@ -253,8 +253,7 @@ Não executado nesta task; depende de autorização explícita do usuário.
 
 ## Hash do commit
 
-Registrado em um commit de documentação subsequente (`docs(tasks): record TASK-016 commit hash`),
-mesmo padrão das tasks anteriores (TASK-013/014/015).
+`3543955c279f78218533f483f2de9204b99dfd27`
 
 ## Branch
 
