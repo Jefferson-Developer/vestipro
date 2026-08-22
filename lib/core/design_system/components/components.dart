@@ -1,6 +1,8 @@
 /// Reusable Design System components: the widgets every feature composes
-/// screens from (buttons, inputs, selection, chips, badges and feedback
-/// states). Every component here consumes tokens from
+/// screens from (buttons, inputs, selection, chips, badges, feedback states
+/// and overlays — modals, bottom sheets, snackbars, tooltips and the
+/// destructive confirmation dialog). Every component here consumes tokens
+/// from
 /// `design_system/foundations/` exclusively — none defines its own color,
 /// spacing, radius, shadow or typography value.
 ///
@@ -15,7 +17,12 @@ export 'chips/app_filter_chip.dart';
 export 'feedback/app_empty_state.dart';
 export 'feedback/app_error_state.dart';
 export 'feedback/app_skeleton.dart';
+export 'feedback/app_snackbar.dart';
 export 'inputs/app_number_field.dart';
 export 'inputs/app_search_field.dart';
 export 'inputs/app_text_field.dart';
+export 'overlays/app_bottom_sheet.dart';
+export 'overlays/app_confirmation_dialog.dart';
+export 'overlays/app_modal.dart';
+export 'overlays/app_tooltip.dart';
 export 'selection/app_dropdown.dart';
