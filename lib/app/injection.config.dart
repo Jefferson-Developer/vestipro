@@ -38,6 +38,22 @@ import '../core/services/crash_reporter.dart' as _i349;
 import '../core/services/firebase_crash_reporter.dart' as _i559;
 import '../core/storage/firebase_storage_data_source.dart' as _i833;
 import '../core/storage/storage_data_source.dart' as _i904;
+import '../features/organizations/data/datasources/firestore_organization_data_source.dart'
+    as _i455;
+import '../features/organizations/data/datasources/organization_data_source.dart'
+    as _i268;
+import '../features/organizations/data/mappers/organization_mapper.dart'
+    as _i719;
+import '../features/organizations/data/repositories/organization_repository_impl.dart'
+    as _i522;
+import '../features/organizations/domain/repositories/organization_repository.dart'
+    as _i756;
+import '../features/organizations/domain/usecases/create_organization_use_case.dart'
+    as _i55;
+import '../features/organizations/domain/usecases/get_organization_use_case.dart'
+    as _i966;
+import '../features/organizations/domain/usecases/update_organization_settings_use_case.dart'
+    as _i270;
 import '../features/settings/data/datasources/about_app_data_source.dart'
     as _i364;
 import '../features/settings/data/datasources/in_memory_about_app_datasource.dart'
@@ -75,6 +91,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i59.FirebaseAuth>(() => appInjectionModule.firebaseAuth);
     gh.lazySingleton<_i26.AuthUserMapper>(() => const _i26.AuthUserMapper());
+    gh.lazySingleton<_i719.OrganizationMapper>(
+      () => const _i719.OrganizationMapper(),
+    );
     gh.lazySingleton<_i847.AboutAppMapper>(() => const _i847.AboutAppMapper());
     gh.lazySingleton<_i370.AboutAppNotesMapper>(
       () => const _i370.AboutAppNotesMapper(),
@@ -105,6 +124,10 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i477.AboutAppSeedModel>(
       () => appInjectionModule.aboutAppSeedModel(gh<_i461.AppEnvironment>()),
+    );
+    gh.lazySingleton<_i268.OrganizationDataSource>(
+      () =>
+          _i455.FirestoreOrganizationDataSource(gh<_i974.FirebaseFirestore>()),
     );
     gh.lazySingleton<_i932.AnalyticsService>(
       () => _i569.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
@@ -144,6 +167,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i465.AppClientMetadataProvider>(),
       ),
     );
+    gh.lazySingleton<_i756.OrganizationRepository>(
+      () => _i522.OrganizationRepositoryImpl(
+        dataSource: gh<_i268.OrganizationDataSource>(),
+        mapper: gh<_i719.OrganizationMapper>(),
+      ),
+    );
     gh.lazySingleton<_i904.StorageDataSource>(
       () => _i833.FirebaseStorageDataSource(gh<_i457.FirebaseStorage>()),
     );
@@ -152,6 +181,17 @@ extension GetItInjectableX on _i174.GetIt {
         dataSource: gh<_i364.AboutAppDataSource>(),
         mapper: gh<_i847.AboutAppMapper>(),
         notesMapper: gh<_i370.AboutAppNotesMapper>(),
+      ),
+    );
+    gh.factory<_i55.CreateOrganizationUseCase>(
+      () => _i55.CreateOrganizationUseCase(gh<_i756.OrganizationRepository>()),
+    );
+    gh.factory<_i966.GetOrganizationUseCase>(
+      () => _i966.GetOrganizationUseCase(gh<_i756.OrganizationRepository>()),
+    );
+    gh.factory<_i270.UpdateOrganizationSettingsUseCase>(
+      () => _i270.UpdateOrganizationSettingsUseCase(
+        gh<_i756.OrganizationRepository>(),
       ),
     );
     gh.factory<_i713.GetAboutAppUseCase>(

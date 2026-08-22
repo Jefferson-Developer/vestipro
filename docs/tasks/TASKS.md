@@ -114,7 +114,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-025 — Criar layouts responsivos](TASK-025-criar-layouts-responsivos.md) — Front-end
 
 ### EPIC-03 — Segurança e Multi-Tenancy
-- [ ] [TASK-026 — Modelar Organization](TASK-026-modelar-organization.md) — Flutter Senior
+- [x] [TASK-026 — Modelar Organization](TASK-026-modelar-organization.md) — Flutter Senior
 - [ ] [TASK-027 — Modelar Company e Branch](TASK-027-modelar-company-e-branch.md) — Flutter Senior
 - [ ] [TASK-028 — Modelar Team, Role e vínculos de usuário](TASK-028-modelar-team-role-e-vinculos.md) — Flutter Senior
 - [ ] [TASK-029 — Implementar RBAC](TASK-029-implementar-rbac.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 25 / 220 tasks concluídas.
+**Progresso:** 26 / 220 tasks concluídas.
