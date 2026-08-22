@@ -46,34 +46,71 @@ import '../features/organizations/data/datasources/firestore_branch_data_source.
     as _i878;
 import '../features/organizations/data/datasources/firestore_company_data_source.dart'
     as _i512;
+import '../features/organizations/data/datasources/firestore_membership_data_source.dart'
+    as _i201;
 import '../features/organizations/data/datasources/firestore_organization_data_source.dart'
     as _i455;
+import '../features/organizations/data/datasources/firestore_role_data_source.dart'
+    as _i892;
+import '../features/organizations/data/datasources/firestore_team_data_source.dart'
+    as _i23;
+import '../features/organizations/data/datasources/membership_data_source.dart'
+    as _i361;
 import '../features/organizations/data/datasources/organization_data_source.dart'
     as _i268;
+import '../features/organizations/data/datasources/role_data_source.dart'
+    as _i923;
+import '../features/organizations/data/datasources/team_data_source.dart'
+    as _i228;
 import '../features/organizations/data/mappers/branch_mapper.dart' as _i964;
 import '../features/organizations/data/mappers/company_mapper.dart' as _i642;
+import '../features/organizations/data/mappers/membership_mapper.dart' as _i714;
 import '../features/organizations/data/mappers/organization_mapper.dart'
     as _i719;
+import '../features/organizations/data/mappers/role_mapper.dart' as _i1043;
+import '../features/organizations/data/mappers/team_mapper.dart' as _i802;
 import '../features/organizations/data/repositories/branch_repository_impl.dart'
     as _i375;
 import '../features/organizations/data/repositories/company_repository_impl.dart'
     as _i960;
+import '../features/organizations/data/repositories/membership_repository_impl.dart'
+    as _i537;
 import '../features/organizations/data/repositories/organization_repository_impl.dart'
     as _i522;
+import '../features/organizations/data/repositories/role_repository_impl.dart'
+    as _i69;
+import '../features/organizations/data/repositories/team_repository_impl.dart'
+    as _i485;
 import '../features/organizations/domain/repositories/branch_repository.dart'
     as _i160;
 import '../features/organizations/domain/repositories/company_repository.dart'
     as _i799;
+import '../features/organizations/domain/repositories/membership_repository.dart'
+    as _i957;
 import '../features/organizations/domain/repositories/organization_repository.dart'
     as _i756;
+import '../features/organizations/domain/repositories/role_repository.dart'
+    as _i440;
+import '../features/organizations/domain/repositories/team_repository.dart'
+    as _i320;
+import '../features/organizations/domain/usecases/add_user_to_team_use_case.dart'
+    as _i835;
+import '../features/organizations/domain/usecases/assign_role_to_user_use_case.dart'
+    as _i1030;
 import '../features/organizations/domain/usecases/create_branch_use_case.dart'
     as _i906;
 import '../features/organizations/domain/usecases/create_company_use_case.dart'
     as _i330;
 import '../features/organizations/domain/usecases/create_organization_use_case.dart'
     as _i55;
+import '../features/organizations/domain/usecases/create_team_use_case.dart'
+    as _i766;
+import '../features/organizations/domain/usecases/ensure_system_roles_use_case.dart'
+    as _i68;
 import '../features/organizations/domain/usecases/get_organization_use_case.dart'
     as _i966;
+import '../features/organizations/domain/usecases/get_user_membership_use_case.dart'
+    as _i70;
 import '../features/organizations/domain/usecases/list_branches_by_company_use_case.dart'
     as _i500;
 import '../features/organizations/domain/usecases/list_companies_use_case.dart'
@@ -123,9 +160,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i26.AuthUserMapper>(() => const _i26.AuthUserMapper());
     gh.lazySingleton<_i964.BranchMapper>(() => const _i964.BranchMapper());
     gh.lazySingleton<_i642.CompanyMapper>(() => const _i642.CompanyMapper());
+    gh.lazySingleton<_i714.MembershipMapper>(
+      () => const _i714.MembershipMapper(),
+    );
     gh.lazySingleton<_i719.OrganizationMapper>(
       () => const _i719.OrganizationMapper(),
     );
+    gh.lazySingleton<_i1043.RoleMapper>(() => const _i1043.RoleMapper());
+    gh.lazySingleton<_i802.TeamMapper>(() => const _i802.TeamMapper());
     gh.lazySingleton<_i847.AboutAppMapper>(() => const _i847.AboutAppMapper());
     gh.lazySingleton<_i370.AboutAppNotesMapper>(
       () => const _i370.AboutAppNotesMapper(),
@@ -160,6 +202,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i268.OrganizationDataSource>(
       () =>
           _i455.FirestoreOrganizationDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.lazySingleton<_i228.TeamDataSource>(
+      () => _i23.FirestoreTeamDataSource(gh<_i974.FirebaseFirestore>()),
     );
     gh.lazySingleton<_i932.AnalyticsService>(
       () => _i569.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
@@ -199,6 +244,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i465.AppClientMetadataProvider>(),
       ),
     );
+    gh.lazySingleton<_i320.TeamRepository>(
+      () => _i485.TeamRepositoryImpl(
+        dataSource: gh<_i228.TeamDataSource>(),
+        mapper: gh<_i802.TeamMapper>(),
+      ),
+    );
     gh.lazySingleton<_i526.BranchDataSource>(
       () => _i878.FirestoreBranchDataSource(gh<_i974.FirebaseFirestore>()),
     );
@@ -211,6 +262,15 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i642.CompanyMapper>(),
       ),
     );
+    gh.lazySingleton<_i361.MembershipDataSource>(
+      () => _i201.FirestoreMembershipDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.lazySingleton<_i957.MembershipRepository>(
+      () => _i537.MembershipRepositoryImpl(
+        dataSource: gh<_i361.MembershipDataSource>(),
+        mapper: gh<_i714.MembershipMapper>(),
+      ),
+    );
     gh.lazySingleton<_i756.OrganizationRepository>(
       () => _i522.OrganizationRepositoryImpl(
         dataSource: gh<_i268.OrganizationDataSource>(),
@@ -220,6 +280,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i904.StorageDataSource>(
       () => _i833.FirebaseStorageDataSource(gh<_i457.FirebaseStorage>()),
     );
+    gh.lazySingleton<_i923.RoleDataSource>(
+      () => _i892.FirestoreRoleDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.factory<_i330.CreateCompanyUseCase>(
       () => _i330.CreateCompanyUseCase(gh<_i799.CompanyRepository>()),
     );
@@ -228,6 +291,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i571.UpdateCompanyUseCase>(
       () => _i571.UpdateCompanyUseCase(gh<_i799.CompanyRepository>()),
+    );
+    gh.factory<_i1030.AssignRoleToUserUseCase>(
+      () => _i1030.AssignRoleToUserUseCase(gh<_i957.MembershipRepository>()),
+    );
+    gh.factory<_i70.GetUserMembershipUseCase>(
+      () => _i70.GetUserMembershipUseCase(gh<_i957.MembershipRepository>()),
     );
     gh.lazySingleton<_i160.BranchRepository>(
       () => _i375.BranchRepositoryImpl(
@@ -242,6 +311,12 @@ extension GetItInjectableX on _i174.GetIt {
         notesMapper: gh<_i370.AboutAppNotesMapper>(),
       ),
     );
+    gh.factory<_i835.AddUserToTeamUseCase>(
+      () => _i835.AddUserToTeamUseCase(gh<_i320.TeamRepository>()),
+    );
+    gh.factory<_i766.CreateTeamUseCase>(
+      () => _i766.CreateTeamUseCase(gh<_i320.TeamRepository>()),
+    );
     gh.factory<_i55.CreateOrganizationUseCase>(
       () => _i55.CreateOrganizationUseCase(gh<_i756.OrganizationRepository>()),
     );
@@ -251,6 +326,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i270.UpdateOrganizationSettingsUseCase>(
       () => _i270.UpdateOrganizationSettingsUseCase(
         gh<_i756.OrganizationRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i440.RoleRepository>(
+      () => _i69.RoleRepositoryImpl(
+        dataSource: gh<_i923.RoleDataSource>(),
+        mapper: gh<_i1043.RoleMapper>(),
       ),
     );
     gh.factory<_i713.GetAboutAppUseCase>(
@@ -279,6 +360,9 @@ extension GetItInjectableX on _i174.GetIt {
         searchNotes: gh<_i916.SearchAboutAppNotesUseCase>(),
         submitDiagnostics: gh<_i226.SubmitAboutAppDiagnosticsUseCase>(),
       ),
+    );
+    gh.factory<_i68.EnsureSystemRolesUseCase>(
+      () => _i68.EnsureSystemRolesUseCase(gh<_i440.RoleRepository>()),
     );
     return this;
   }
