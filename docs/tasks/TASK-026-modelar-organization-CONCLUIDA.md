@@ -248,12 +248,11 @@ Criado com sucesso.
 
 ## Push
 
-Autorizado nesta sessão.
+Autorizado nesta sessão e executado com sucesso.
 
 ## Hash do commit
 
-Ver seção "Commit" após a execução do `git commit` (preenchido no fechamento desta task, nunca
-inventado antes do commit real).
+`1eda08b`
 
 ## Branch
 
