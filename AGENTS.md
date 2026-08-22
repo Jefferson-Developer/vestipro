@@ -27,6 +27,28 @@ Quando o usuário disser `/proxima-task`, "próxima task", "roda a próxima task
 
 Se não houver checkbox pendente, informe que o backlog atual está 100% concluído.
 
+## Comando De Retomada Em Lote
+
+Quando o usuário disser `/proximas-tasks`, "roda as próximas N tasks", "executa as próximas 3
+tasks" ou equivalente:
+
+1. Descubra N: se a quantidade não vier explícita no pedido, pergunte antes de começar.
+2. Descubra se o push deve ser feito ao final de cada task ou só o commit local; se não houver
+   autorização explícita nesta conversa, pergunte antes de começar.
+3. Repita o fluxo de `/proxima-task` uma task por vez, em sequência (nunca em paralelo, pois uma
+   task depende do estado que a anterior deixa em `docs/tasks/TASKS.md`), até completar N tasks, o
+   backlog esgotar ou uma task travar.
+4. Sempre que a ferramenta permitir (ex.: Agent/Task tool do Claude Code), execute cada task em um
+   subagente novo, sem reaproveitar o subagente de uma task anterior — isso mantém o contexto
+   principal limpo entre uma task e outra. Se a ferramenta não suportar subagentes, ao menos evite
+   recarregar no contexto os arquivos já lidos nas tasks anteriores: leia de cada task só o
+   necessário, como no modo econômico.
+5. Documente, commite e (se autorizado) faça push ao final de **cada** task, exatamente como em
+   `/proxima-task` — nunca só ao final do lote inteiro.
+6. Se uma task travar (bloqueio, teste falhando, dependência faltando), pare o lote nela, não marque
+   como concluída, não invente hash e informe o motivo real antes de seguir adiante.
+7. Ao final, resuma as tasks concluídas na rodada (número, título, hash do commit, push sim/não).
+
 ## Agentes
 
 Agentes técnicos listados nas tasks:
@@ -195,4 +217,5 @@ Use o template abaixo:
 - Tasks: `docs/tasks/TASK-XXX-nome-da-task.md`
 - Conclusões: `docs/tasks/TASK-XXX-nome-da-task-CONCLUIDA.md`
 - Agentes: `.claude/agents/`
-- Comando: `.claude/commands/proxima-task.md`
+- Comando (uma task): `.claude/commands/proxima-task.md`
+- Comando (N tasks em lote): `.claude/commands/proximas-tasks.md`
