@@ -111,7 +111,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-022 — Criar componentes de formulário e feedback](TASK-022-criar-componentes-de-formulario-e-feedback.md) — Front-end
 - [x] [TASK-023 — Criar componentes de dados (tabelas, listas, KPI, gráficos)](TASK-023-criar-componentes-de-dados.md) — Front-end
 - [x] [TASK-024 — Criar componentes de catálogo (grid, grade, cor, stepper)](TASK-024-criar-componentes-de-catalogo.md) — Front-end
-- [ ] [TASK-025 — Criar layouts responsivos](TASK-025-criar-layouts-responsivos.md) — Front-end
+- [x] [TASK-025 — Criar layouts responsivos](TASK-025-criar-layouts-responsivos.md) — Front-end
 
 ### EPIC-03 — Segurança e Multi-Tenancy
 - [ ] [TASK-026 — Modelar Organization](TASK-026-modelar-organization.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 24 / 220 tasks concluídas.
+**Progresso:** 25 / 220 tasks concluídas.
