@@ -260,8 +260,7 @@ Sim, `git push origin main` executado após o commit.
 
 ## Hash do commit
 
-Preenchido após a criação real do commit (ver saída do comando `git commit`, sem hash
-inventado).
+`e56a349`
 
 ## Branch
 
