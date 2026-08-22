@@ -5,6 +5,7 @@ import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_performance/firebase_performance.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:injectable/injectable.dart';
@@ -14,6 +15,7 @@ import '../core/database/configure_firestore.dart';
 import '../core/environment/app_environment.dart';
 import '../core/feature_flags/configure_remote_config.dart';
 import '../core/functions/configure_functions.dart';
+import '../core/performance/configure_performance.dart';
 import '../core/services/configure_crashlytics.dart';
 import '../core/storage/configure_storage.dart';
 import '../features/settings/data/models/about_app_seed_model.dart';
@@ -78,6 +80,19 @@ abstract class AppInjectionModule {
     final analytics = FirebaseAnalytics.instance;
     configureAnalytics(analytics, environment: environment);
     return analytics;
+  }
+
+  /// Toggles Performance Monitoring collection (TASK-019) the first time
+  /// something resolves [FirebasePerformance] — same lazy-DI-triggered
+  /// wiring rationale as [firebaseCrashlytics]/[firebaseAnalytics] above.
+  /// `unawaited` here is safe for the same reason it is for
+  /// [firebaseRemoteConfig]: [configurePerformance] never completes with an
+  /// error.
+  @lazySingleton
+  FirebasePerformance firebasePerformance(AppEnvironment environment) {
+    final performance = FirebasePerformance.instance;
+    unawaited(configurePerformance(performance, environment: environment));
+    return performance;
   }
 
   /// Applies the per-environment fetch policy and safe local defaults

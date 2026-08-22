@@ -14,6 +14,7 @@ import 'package:cloud_functions/cloud_functions.dart' as _i809;
 import 'package:firebase_analytics/firebase_analytics.dart' as _i398;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart' as _i141;
+import 'package:firebase_performance/firebase_performance.dart' as _i346;
 import 'package:firebase_remote_config/firebase_remote_config.dart' as _i627;
 import 'package:firebase_storage/firebase_storage.dart' as _i457;
 import 'package:get_it/get_it.dart' as _i174;
@@ -31,6 +32,8 @@ import '../core/feature_flags/feature_flag_service.dart' as _i972;
 import '../core/feature_flags/firebase_feature_flag_service.dart' as _i845;
 import '../core/functions/app_client_metadata.dart' as _i465;
 import '../core/functions/cloud_functions_service.dart' as _i147;
+import '../core/performance/firebase_performance_monitor.dart' as _i387;
+import '../core/performance/performance_monitor.dart' as _i1008;
 import '../core/services/crash_reporter.dart' as _i349;
 import '../core/services/firebase_crash_reporter.dart' as _i559;
 import '../core/storage/firebase_storage_data_source.dart' as _i833;
@@ -94,6 +97,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i398.FirebaseAnalytics>(
       () => appInjectionModule.firebaseAnalytics(gh<_i461.AppEnvironment>()),
     );
+    gh.lazySingleton<_i346.FirebasePerformance>(
+      () => appInjectionModule.firebasePerformance(gh<_i461.AppEnvironment>()),
+    );
     gh.lazySingleton<_i627.FirebaseRemoteConfig>(
       () => appInjectionModule.firebaseRemoteConfig(gh<_i461.AppEnvironment>()),
     );
@@ -127,6 +133,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i972.FeatureFlagService>(
       () => _i845.FirebaseFeatureFlagService(gh<_i627.FirebaseRemoteConfig>()),
+    );
+    gh.lazySingleton<_i1008.PerformanceMonitor>(
+      () => _i387.FirebasePerformanceMonitor(gh<_i346.FirebasePerformance>()),
     );
     gh.lazySingleton<_i147.CloudFunctionsService>(
       () => _i147.CloudFunctionsService(

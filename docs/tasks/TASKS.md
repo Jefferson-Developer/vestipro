@@ -87,7 +87,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-016 — Configurar Firebase Crashlytics](TASK-016-configurar-firebase-crashlytics.md) — Flutter Senior
 - [x] [TASK-017 — Configurar Firebase Analytics](TASK-017-configurar-firebase-analytics.md) — Flutter Senior
 - [x] [TASK-018 — Configurar Firebase Remote Config](TASK-018-configurar-firebase-remote-config.md) — Flutter Senior
-- [ ] [TASK-019 — Configurar Firebase Performance Monitoring](TASK-019-configurar-firebase-performance-monitoring.md) — Flutter Senior
+- [x] [TASK-019 — Configurar Firebase Performance Monitoring](TASK-019-configurar-firebase-performance-monitoring.md) — Flutter Senior
 
 ### EPIC-02 — Design System
 - [ ] [TASK-020 — Criar foundations do Design System](TASK-020-criar-design-system-foundations.md) — Front-end
@@ -354,4 +354,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 18 / 220 tasks concluídas.
+**Progresso:** 19 / 220 tasks concluídas.
