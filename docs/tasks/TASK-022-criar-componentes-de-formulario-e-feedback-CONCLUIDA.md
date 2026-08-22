@@ -183,7 +183,7 @@ Sim — autorizado nesta rodada.
 
 ## Hash do commit
 
-Preenchido após o commit real (ver resposta final).
+`1fb574c`
 
 ## Branch
 
