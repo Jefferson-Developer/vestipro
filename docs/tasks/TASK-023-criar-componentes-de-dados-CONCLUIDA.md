@@ -229,7 +229,7 @@ Sim — autorizado nesta rodada.
 
 ## Hash do commit
 
-Preenchido após o commit real (ver resposta final da task).
+`f5bb069`
 
 ## Branch
 
