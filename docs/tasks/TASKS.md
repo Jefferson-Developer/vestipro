@@ -117,7 +117,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-026 — Modelar Organization](TASK-026-modelar-organization.md) — Flutter Senior
 - [x] [TASK-027 — Modelar Company e Branch](TASK-027-modelar-company-e-branch.md) — Flutter Senior
 - [x] [TASK-028 — Modelar Team, Role e vínculos de usuário](TASK-028-modelar-team-role-e-vinculos.md) — Flutter Senior
-- [ ] [TASK-029 — Implementar RBAC](TASK-029-implementar-rbac.md) — Flutter Senior
+- [x] [TASK-029 — Implementar RBAC](TASK-029-implementar-rbac.md) — Flutter Senior
 - [ ] [TASK-030 — Criar Firestore Security Rules](TASK-030-criar-firestore-security-rules.md) — Flutter Senior
 - [ ] [TASK-031 — Criar Storage Security Rules](TASK-031-criar-storage-security-rules.md) — Flutter Senior
 - [ ] [TASK-032 — Configurar Firebase App Check](TASK-032-configurar-firebase-app-check.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 28 / 220 tasks concluídas.
+**Progresso:** 29 / 220 tasks concluídas.

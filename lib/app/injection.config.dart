@@ -34,6 +34,7 @@ import '../core/functions/app_client_metadata.dart' as _i465;
 import '../core/functions/cloud_functions_service.dart' as _i147;
 import '../core/performance/firebase_performance_monitor.dart' as _i387;
 import '../core/performance/performance_monitor.dart' as _i1008;
+import '../core/permissions/permission_service.dart' as _i315;
 import '../core/services/crash_reporter.dart' as _i349;
 import '../core/services/firebase_crash_reporter.dart' as _i559;
 import '../core/storage/firebase_storage_data_source.dart' as _i833;
@@ -291,6 +292,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i571.UpdateCompanyUseCase>(
       () => _i571.UpdateCompanyUseCase(gh<_i799.CompanyRepository>()),
+    );
+    gh.lazySingleton<_i315.PermissionService>(
+      () => _i315.PermissionService(gh<_i957.MembershipRepository>()),
     );
     gh.factory<_i1030.AssignRoleToUserUseCase>(
       () => _i1030.AssignRoleToUserUseCase(gh<_i957.MembershipRepository>()),
