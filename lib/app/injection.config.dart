@@ -38,20 +38,50 @@ import '../core/services/crash_reporter.dart' as _i349;
 import '../core/services/firebase_crash_reporter.dart' as _i559;
 import '../core/storage/firebase_storage_data_source.dart' as _i833;
 import '../core/storage/storage_data_source.dart' as _i904;
+import '../features/organizations/data/datasources/branch_data_source.dart'
+    as _i526;
+import '../features/organizations/data/datasources/company_data_source.dart'
+    as _i384;
+import '../features/organizations/data/datasources/firestore_branch_data_source.dart'
+    as _i878;
+import '../features/organizations/data/datasources/firestore_company_data_source.dart'
+    as _i512;
 import '../features/organizations/data/datasources/firestore_organization_data_source.dart'
     as _i455;
 import '../features/organizations/data/datasources/organization_data_source.dart'
     as _i268;
+import '../features/organizations/data/mappers/branch_mapper.dart' as _i964;
+import '../features/organizations/data/mappers/company_mapper.dart' as _i642;
 import '../features/organizations/data/mappers/organization_mapper.dart'
     as _i719;
+import '../features/organizations/data/repositories/branch_repository_impl.dart'
+    as _i375;
+import '../features/organizations/data/repositories/company_repository_impl.dart'
+    as _i960;
 import '../features/organizations/data/repositories/organization_repository_impl.dart'
     as _i522;
+import '../features/organizations/domain/repositories/branch_repository.dart'
+    as _i160;
+import '../features/organizations/domain/repositories/company_repository.dart'
+    as _i799;
 import '../features/organizations/domain/repositories/organization_repository.dart'
     as _i756;
+import '../features/organizations/domain/usecases/create_branch_use_case.dart'
+    as _i906;
+import '../features/organizations/domain/usecases/create_company_use_case.dart'
+    as _i330;
 import '../features/organizations/domain/usecases/create_organization_use_case.dart'
     as _i55;
 import '../features/organizations/domain/usecases/get_organization_use_case.dart'
     as _i966;
+import '../features/organizations/domain/usecases/list_branches_by_company_use_case.dart'
+    as _i500;
+import '../features/organizations/domain/usecases/list_companies_use_case.dart'
+    as _i628;
+import '../features/organizations/domain/usecases/update_branch_use_case.dart'
+    as _i820;
+import '../features/organizations/domain/usecases/update_company_use_case.dart'
+    as _i571;
 import '../features/organizations/domain/usecases/update_organization_settings_use_case.dart'
     as _i270;
 import '../features/settings/data/datasources/about_app_data_source.dart'
@@ -91,6 +121,8 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i59.FirebaseAuth>(() => appInjectionModule.firebaseAuth);
     gh.lazySingleton<_i26.AuthUserMapper>(() => const _i26.AuthUserMapper());
+    gh.lazySingleton<_i964.BranchMapper>(() => const _i964.BranchMapper());
+    gh.lazySingleton<_i642.CompanyMapper>(() => const _i642.CompanyMapper());
     gh.lazySingleton<_i719.OrganizationMapper>(
       () => const _i719.OrganizationMapper(),
     );
@@ -167,6 +199,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i465.AppClientMetadataProvider>(),
       ),
     );
+    gh.lazySingleton<_i526.BranchDataSource>(
+      () => _i878.FirestoreBranchDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.lazySingleton<_i384.CompanyDataSource>(
+      () => _i512.FirestoreCompanyDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.lazySingleton<_i799.CompanyRepository>(
+      () => _i960.CompanyRepositoryImpl(
+        dataSource: gh<_i384.CompanyDataSource>(),
+        mapper: gh<_i642.CompanyMapper>(),
+      ),
+    );
     gh.lazySingleton<_i756.OrganizationRepository>(
       () => _i522.OrganizationRepositoryImpl(
         dataSource: gh<_i268.OrganizationDataSource>(),
@@ -175,6 +219,21 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i904.StorageDataSource>(
       () => _i833.FirebaseStorageDataSource(gh<_i457.FirebaseStorage>()),
+    );
+    gh.factory<_i330.CreateCompanyUseCase>(
+      () => _i330.CreateCompanyUseCase(gh<_i799.CompanyRepository>()),
+    );
+    gh.factory<_i628.ListCompaniesUseCase>(
+      () => _i628.ListCompaniesUseCase(gh<_i799.CompanyRepository>()),
+    );
+    gh.factory<_i571.UpdateCompanyUseCase>(
+      () => _i571.UpdateCompanyUseCase(gh<_i799.CompanyRepository>()),
+    );
+    gh.lazySingleton<_i160.BranchRepository>(
+      () => _i375.BranchRepositoryImpl(
+        dataSource: gh<_i526.BranchDataSource>(),
+        mapper: gh<_i964.BranchMapper>(),
+      ),
     );
     gh.lazySingleton<_i794.AboutAppRepository>(
       () => _i1060.AboutAppRepositoryImpl(
@@ -204,6 +263,15 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i226.SubmitAboutAppDiagnosticsUseCase(
         gh<_i794.AboutAppRepository>(),
       ),
+    );
+    gh.factory<_i906.CreateBranchUseCase>(
+      () => _i906.CreateBranchUseCase(gh<_i160.BranchRepository>()),
+    );
+    gh.factory<_i500.ListBranchesByCompanyUseCase>(
+      () => _i500.ListBranchesByCompanyUseCase(gh<_i160.BranchRepository>()),
+    );
+    gh.factory<_i820.UpdateBranchUseCase>(
+      () => _i820.UpdateBranchUseCase(gh<_i160.BranchRepository>()),
     );
     gh.factory<_i398.AboutAppBloc>(
       () => _i398.AboutAppBloc(

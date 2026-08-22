@@ -5,10 +5,24 @@
 /// outside this package and its tests.
 library;
 
+export 'domain/entities/branch.dart';
+export 'domain/entities/company.dart';
 export 'domain/entities/organization.dart';
+export 'domain/repositories/branch_repository.dart';
+export 'domain/repositories/company_repository.dart';
 export 'domain/repositories/organization_repository.dart';
+export 'domain/usecases/create_branch_use_case.dart';
+export 'domain/usecases/create_company_use_case.dart';
 export 'domain/usecases/create_organization_use_case.dart';
 export 'domain/usecases/get_organization_use_case.dart';
+export 'domain/usecases/list_branches_by_company_use_case.dart';
+export 'domain/usecases/list_companies_use_case.dart';
+export 'domain/usecases/update_branch_use_case.dart';
+export 'domain/usecases/update_company_use_case.dart';
 export 'domain/usecases/update_organization_settings_use_case.dart';
+export 'domain/value_objects/branch_address.dart';
+export 'domain/value_objects/branch_status.dart';
+export 'domain/value_objects/branch_type.dart';
+export 'domain/value_objects/company_status.dart';
 export 'domain/value_objects/organization_settings.dart';
 export 'domain/value_objects/organization_status.dart';
