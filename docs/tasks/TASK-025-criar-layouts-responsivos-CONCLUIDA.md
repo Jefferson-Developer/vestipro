@@ -165,15 +165,15 @@ widgets.
 
 ## Commit
 
-Ver hash abaixo.
+Criado com sucesso.
 
 ## Push
 
-Autorizado e executado nesta sessão.
+Autorizado nesta sessão e executado com sucesso (`751246f..a27c14d main -> main`).
 
 ## Hash do commit
 
-Preenchido após o commit (ver resposta final da sessão que executou esta task).
+`a27c14d`
 
 ## Branch
 
