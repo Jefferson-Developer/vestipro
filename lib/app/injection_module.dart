@@ -1,14 +1,18 @@
+import 'dart:async' show unawaited;
+
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:injectable/injectable.dart';
 
 import '../core/analytics/configure_analytics.dart';
 import '../core/database/configure_firestore.dart';
 import '../core/environment/app_environment.dart';
+import '../core/feature_flags/configure_remote_config.dart';
 import '../core/functions/configure_functions.dart';
 import '../core/services/configure_crashlytics.dart';
 import '../core/storage/configure_storage.dart';
@@ -74,6 +78,21 @@ abstract class AppInjectionModule {
     final analytics = FirebaseAnalytics.instance;
     configureAnalytics(analytics, environment: environment);
     return analytics;
+  }
+
+  /// Applies the per-environment fetch policy and safe local defaults
+  /// (TASK-018) the first time something resolves [FirebaseRemoteConfig] —
+  /// same lazy-DI-triggered wiring rationale as [firebaseFirestore]/
+  /// [firebaseStorage]/[firebaseFunctions]/[firebaseCrashlytics]/
+  /// [firebaseAnalytics] above. `unawaited` here is safe:
+  /// [configureRemoteConfig] never completes with an error (see its own
+  /// docs), so this never blocks app bootstrap nor leaks an unhandled
+  /// Future rejection.
+  @lazySingleton
+  FirebaseRemoteConfig firebaseRemoteConfig(AppEnvironment environment) {
+    final remoteConfig = FirebaseRemoteConfig.instance;
+    unawaited(configureRemoteConfig(remoteConfig, environment: environment));
+    return remoteConfig;
   }
 
   @lazySingleton

@@ -9,6 +9,7 @@ import 'package:flutter_web_plugins/url_strategy.dart';
 
 import '../core/environment/app_environment.dart';
 import '../core/errors/errors.dart';
+import '../core/feature_flags/feature_flags.dart';
 import '../core/navigation/navigation.dart';
 import '../core/services/services.dart';
 import '../features/settings/presentation/bloc/about_app_bloc.dart';
@@ -122,8 +123,10 @@ class VestiProApp extends StatelessWidget {
     final appRouter =
         router ??
         AppRouter(
-          aboutAppPageBuilder: (context, orgId) =>
-              AboutAppPage(createBloc: () => getIt<AboutAppBloc>()),
+          aboutAppPageBuilder: (context, orgId) => AboutAppPage(
+            createBloc: () => getIt<AboutAppBloc>(),
+            showInsightsShortcut: _resolveShowInsightsShortcut(),
+          ),
         );
 
     return MaterialApp.router(
@@ -134,5 +137,31 @@ class VestiProApp extends StatelessWidget {
       ),
       routerConfig: appRouter.router,
     );
+  }
+}
+
+/// Resolves whether the `feature_insights_enabled` shortcut (TASK-018)
+/// should be shown in the reference module, defaulting to `false` (its own
+/// code-defined default in `FeatureFlagRegistry`) whenever
+/// [FeatureFlagService] itself cannot be resolved — e.g. a widget test that
+/// renders [VestiProApp] without going through the real [bootstrap] (and
+/// therefore without `Firebase.initializeApp`, which [FeatureFlagService]
+/// transitively depends on). A feature flag must never keep the rest of
+/// the app from rendering; worst case, the flagged shortcut simply stays
+/// hidden, exactly like it would if Remote Config itself were unreachable.
+bool _resolveShowInsightsShortcut() {
+  try {
+    return getIt<FeatureFlagService>().isEnabled(
+      FeatureFlagRegistry.featureInsightsEnabled,
+    );
+  } catch (error, stackTrace) {
+    developer.log(
+      'Failed to resolve FeatureFlagService; hiding the flagged shortcut.',
+      name: 'vestipro.bootstrap',
+      level: 900,
+      error: error,
+      stackTrace: stackTrace,
+    );
+    return false;
   }
 }

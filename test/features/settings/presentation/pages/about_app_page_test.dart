@@ -61,6 +61,40 @@ void main() {
       expect(tester.takeException(), isA<StateError>());
     });
 
+    testWidgets(
+      'hides the Insights shortcut when showInsightsShortcut is false '
+      '(TASK-018, feature_insights_enabled default)',
+      (tester) async {
+        final dataSource = InMemoryAboutAppDataSource(seed: _seed);
+
+        await tester.pumpWidget(_buildPage(_buildUseCase(dataSource)));
+        await tester.pumpAndSettle();
+
+        expect(find.byTooltip('Insights (feature flag)'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'shows the Insights shortcut end to end when showInsightsShortcut is '
+      'true (TASK-018, feature_insights_enabled)',
+      (tester) async {
+        final dataSource = InMemoryAboutAppDataSource(seed: _seed);
+
+        await tester.pumpWidget(
+          _buildPage(_buildUseCase(dataSource), showInsightsShortcut: true),
+        );
+        await tester.pumpAndSettle();
+
+        final insightsButton = find.byTooltip('Insights (feature flag)');
+        expect(insightsButton, findsOneWidget);
+
+        await tester.tap(insightsButton);
+        await tester.pump();
+
+        expect(find.textContaining('feature_insights_enabled'), findsOneWidget);
+      },
+    );
+
     testWidgets('renders error state', (tester) async {
       final dataSource = InMemoryAboutAppDataSource(
         seed: _seed,
@@ -82,7 +116,10 @@ void main() {
 
 final _seed = AboutAppSeedModel.fromEnvironment(AppEnvironment.development);
 
-Widget _buildPage(GetAboutAppUseCase useCase) {
+Widget _buildPage(
+  GetAboutAppUseCase useCase, {
+  bool showInsightsShortcut = false,
+}) {
   final repository = _buildRepository(InMemoryAboutAppDataSource(seed: _seed));
 
   return MaterialApp(
@@ -92,6 +129,7 @@ Widget _buildPage(GetAboutAppUseCase useCase) {
         searchNotes: SearchAboutAppNotesUseCase(repository),
         submitDiagnostics: SubmitAboutAppDiagnosticsUseCase(repository),
       ),
+      showInsightsShortcut: showInsightsShortcut,
     ),
   );
 }

@@ -38,6 +38,8 @@ Cloud Firestore access, the initial collection model, and exception mapping are 
 [`firestore-schema.md`](firestore-schema.md).
 Analytics event/user-property taxonomy and test-traffic filtering are documented in
 [`analytics.md`](analytics.md).
+Feature flag/Remote Config conventions, the flag registry table and the retirement process are
+documented in [`feature-flags.md`](feature-flags.md).
 
 ## Data Flow
 
