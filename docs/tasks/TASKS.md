@@ -93,7 +93,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-020 — Criar foundations do Design System](TASK-020-criar-design-system-foundations.md) — Front-end
 - [x] [TASK-021 — Criar componentes base](TASK-021-criar-componentes-base.md) — Front-end
 - [x] [TASK-022 — Criar componentes de formulário e feedback](TASK-022-criar-componentes-de-formulario-e-feedback.md) — Front-end
-- [ ] [TASK-023 — Criar componentes de dados (tabelas, listas, KPI, gráficos)](TASK-023-criar-componentes-de-dados.md) — Front-end
+- [x] [TASK-023 — Criar componentes de dados (tabelas, listas, KPI, gráficos)](TASK-023-criar-componentes-de-dados.md) — Front-end
 - [ ] [TASK-024 — Criar componentes de catálogo (grid, grade, cor, stepper)](TASK-024-criar-componentes-de-catalogo.md) — Front-end
 - [ ] [TASK-025 — Criar layouts responsivos](TASK-025-criar-layouts-responsivos.md) — Front-end
 
@@ -354,4 +354,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 22 / 220 tasks concluídas.
+**Progresso:** 23 / 220 tasks concluídas.
