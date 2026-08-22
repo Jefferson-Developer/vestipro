@@ -1,0 +1,53 @@
+/// Centralized catalog of Firebase Analytics event names for VestiPro
+/// (TASK-017). No feature is allowed to pass a raw string literal to
+/// [AnalyticsService.logEvent] — every event name must be referenced through
+/// a constant defined here, so the taxonomy stays consistent and grep-able
+/// across the whole app (same reasoning as `AppRoutePaths` for navigation).
+///
+/// Naming convention (documented in `docs/architecture/analytics.md`):
+/// `snake_case`, verb in the past participle, e.g. `_created`, `_completed`,
+/// `_viewed`, `_submitted`, `_clicked`, `_downloaded`.
+///
+/// This is the minimum taxonomy required by section 14 of `tasks.md`. New
+/// events must be added here — never inlined at the call site — and, when
+/// they belong to a different domain than commercial/product analytics
+/// (e.g. RBAC/audit metrics), kept in a separate catalog instead of mixed
+/// into this one (see "Regras de negócio e restrições" in TASK-017).
+final class AnalyticsEvents {
+  const AnalyticsEvents._();
+
+  static const String loginCompleted = 'login_completed';
+  static const String organizationCreated = 'organization_created';
+  static const String customerCreated = 'customer_created';
+  static const String productViewed = 'product_viewed';
+  static const String catalogFiltered = 'catalog_filtered';
+  static const String orderCreated = 'order_created';
+  static const String orderSubmitted = 'order_submitted';
+  static const String orderSyncFailed = 'order_sync_failed';
+  static const String crmActivityCreated = 'crm_activity_created';
+  static const String insightOpened = 'insight_opened';
+  static const String insightActionClicked = 'insight_action_clicked';
+  static const String reportExported = 'report_exported';
+  static const String offlinePackDownloaded = 'offline_pack_downloaded';
+  static const String productAddedToOrder = 'product_added_to_order';
+
+  /// Every event name currently defined in the taxonomy. Used by tests to
+  /// assert there are no duplicates and by tooling that needs to enumerate
+  /// the full catalog (e.g. a future QA/analytics debug screen).
+  static const List<String> values = [
+    loginCompleted,
+    organizationCreated,
+    customerCreated,
+    productViewed,
+    catalogFiltered,
+    orderCreated,
+    orderSubmitted,
+    orderSyncFailed,
+    crmActivityCreated,
+    insightOpened,
+    insightActionClicked,
+    reportExported,
+    offlinePackDownloaded,
+    productAddedToOrder,
+  ];
+}

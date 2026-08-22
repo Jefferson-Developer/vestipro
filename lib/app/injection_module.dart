@@ -1,10 +1,12 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_storage/firebase_storage.dart';
 import 'package:injectable/injectable.dart';
 
+import '../core/analytics/configure_analytics.dart';
 import '../core/database/configure_firestore.dart';
 import '../core/environment/app_environment.dart';
 import '../core/functions/configure_functions.dart';
@@ -62,6 +64,16 @@ abstract class AppInjectionModule {
     final crashlytics = FirebaseCrashlytics.instance;
     configureCrashlytics(crashlytics, environment: environment);
     return crashlytics;
+  }
+
+  /// Toggles Analytics collection and tags test/QA traffic (TASK-017) the
+  /// first time something resolves [FirebaseAnalytics] — same lazy-DI-
+  /// triggered wiring rationale as [firebaseCrashlytics] above.
+  @lazySingleton
+  FirebaseAnalytics firebaseAnalytics(AppEnvironment environment) {
+    final analytics = FirebaseAnalytics.instance;
+    configureAnalytics(analytics, environment: environment);
+    return analytics;
   }
 
   @lazySingleton

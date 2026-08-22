@@ -36,6 +36,8 @@ Static quality conventions are documented in [`static-quality.md`](static-qualit
 Testing conventions are documented in [`testing.md`](testing.md).
 Cloud Firestore access, the initial collection model, and exception mapping are documented in
 [`firestore-schema.md`](firestore-schema.md).
+Analytics event/user-property taxonomy and test-traffic filtering are documented in
+[`analytics.md`](analytics.md).
 
 ## Data Flow
 

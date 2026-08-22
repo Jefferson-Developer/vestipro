@@ -11,12 +11,15 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
 import 'package:cloud_functions/cloud_functions.dart' as _i809;
+import 'package:firebase_analytics/firebase_analytics.dart' as _i398;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart' as _i141;
 import 'package:firebase_storage/firebase_storage.dart' as _i457;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
+import '../core/analytics/analytics_service.dart' as _i932;
+import '../core/analytics/firebase_analytics_service.dart' as _i569;
 import '../core/auth/data/datasources/auth_data_source.dart' as _i845;
 import '../core/auth/data/datasources/firebase_auth_data_source.dart' as _i814;
 import '../core/auth/data/mappers/auth_user_mapper.dart' as _i26;
@@ -85,8 +88,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i141.FirebaseCrashlytics>(
       () => appInjectionModule.firebaseCrashlytics(gh<_i461.AppEnvironment>()),
     );
+    gh.lazySingleton<_i398.FirebaseAnalytics>(
+      () => appInjectionModule.firebaseAnalytics(gh<_i461.AppEnvironment>()),
+    );
     gh.lazySingleton<_i477.AboutAppSeedModel>(
       () => appInjectionModule.aboutAppSeedModel(gh<_i461.AppEnvironment>()),
+    );
+    gh.lazySingleton<_i932.AnalyticsService>(
+      () => _i569.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
     );
     gh.lazySingleton<_i845.AuthDataSource>(
       () => _i814.FirebaseAuthDataSource(gh<_i59.FirebaseAuth>()),
