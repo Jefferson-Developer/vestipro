@@ -32,6 +32,22 @@ mobile mais completo do mercado de moda — não apenas no MVP, mas na visão co
 
   Ambas instruem o agente a: abrir este arquivo, achar o primeiro checkbox `[ ]`, abrir o arquivo
   `docs/tasks/TASK-XXX-*.md` correspondente e seguir o fluxo obrigatório descrito em `AGENTS.md`.
+- Para rodar **várias** tasks pendentes em sequência, escolhendo a quantidade, use (no Claude Code):
+
+  ```
+  /proximas-tasks
+  ```
+
+  ou a frase equivalente em qualquer ferramenta (Claude Code ou Codex CLI):
+
+  ```
+  Roda as próximas 3 tasks pendentes do backlog em docs/tasks/TASKS.md
+  ```
+
+  Isso repete o fluxo de `/proxima-task` uma task por vez, documentando e commitando ao final de
+  cada uma (nunca só ao final do lote), e — sempre que a ferramenta suportar subagentes — isola cada
+  task em um subagente novo para manter o contexto principal limpo entre uma task e outra. Detalhe
+  completo em `AGENTS.md`.
 - Ao concluir uma task, o agente deve marcar o checkbox correspondente aqui **no mesmo commit** que
   documenta e finaliza a task (quando houver Git configurado). Nunca marque uma task como concluída
   sem a implementação e os testes correspondentes.
@@ -94,7 +110,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-021 — Criar componentes base](TASK-021-criar-componentes-base.md) — Front-end
 - [x] [TASK-022 — Criar componentes de formulário e feedback](TASK-022-criar-componentes-de-formulario-e-feedback.md) — Front-end
 - [x] [TASK-023 — Criar componentes de dados (tabelas, listas, KPI, gráficos)](TASK-023-criar-componentes-de-dados.md) — Front-end
-- [ ] [TASK-024 — Criar componentes de catálogo (grid, grade, cor, stepper)](TASK-024-criar-componentes-de-catalogo.md) — Front-end
+- [x] [TASK-024 — Criar componentes de catálogo (grid, grade, cor, stepper)](TASK-024-criar-componentes-de-catalogo.md) — Front-end
 - [ ] [TASK-025 — Criar layouts responsivos](TASK-025-criar-layouts-responsivos.md) — Front-end
 
 ### EPIC-03 — Segurança e Multi-Tenancy
@@ -354,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 23 / 220 tasks concluídas.
+**Progresso:** 24 / 220 tasks concluídas.
