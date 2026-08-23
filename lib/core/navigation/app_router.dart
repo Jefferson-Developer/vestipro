@@ -21,6 +21,7 @@ class AppRouter {
     required this.signUpPageBuilder,
     required this.forgotPasswordPageBuilder,
     required this.onboardingWizardPageBuilder,
+    required this.acceptInvitePageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
   }) : authGuard = authGuard ?? const AlwaysAllowAuthGuard(),
@@ -48,6 +49,12 @@ class AppRouter {
   /// Builds the real onboarding wizard screen (TASK-038). Same composition
   /// rationale as [loginPageBuilder].
   final WidgetBuilder onboardingWizardPageBuilder;
+
+  /// Builds the real invite-acceptance screen (TASK-040), given the `token`
+  /// path parameter extracted from [InviteAcceptanceRoute]. Same
+  /// composition rationale as [loginPageBuilder].
+  final Widget Function(BuildContext context, String token)
+  acceptInvitePageBuilder;
 
   late final GoRouter router = GoRouter(
     initialLocation: const AboutAppRoute(
@@ -80,6 +87,12 @@ class AppRouter {
         path: OnboardingWizardRoute.pathPattern,
         name: OnboardingWizardRoute.name,
         builder: (context, state) => onboardingWizardPageBuilder(context),
+      ),
+      GoRoute(
+        path: InviteAcceptanceRoute.pathPattern,
+        name: InviteAcceptanceRoute.name,
+        builder: (context, state) =>
+            acceptInvitePageBuilder(context, state.pathParameters['token']!),
       ),
       GoRoute(
         path: ForbiddenRoute.pathPattern,

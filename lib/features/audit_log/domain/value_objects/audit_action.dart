@@ -30,6 +30,11 @@ enum AuditAction {
   /// `functions/src/invites/revoke-invite.ts`) — same situation as
   /// [userInviteResent].
   userInviteRevoked,
+
+  /// Recorded server-side by the `acceptInvite` Cloud Function (TASK-040,
+  /// `functions/src/invites/accept-invite.ts`) — same "never written by
+  /// Dart code, only parsed back" situation as [userInviteResent].
+  userInviteAccepted,
   userDeactivated,
   userDeleted,
   companyDeleted,
@@ -52,6 +57,7 @@ extension AuditActionCode on AuditAction {
       AuditAction.userInvited => 'user.invited',
       AuditAction.userInviteResent => 'user.inviteResent',
       AuditAction.userInviteRevoked => 'user.inviteRevoked',
+      AuditAction.userInviteAccepted => 'user.inviteAccepted',
       AuditAction.userDeactivated => 'user.deactivated',
       AuditAction.userDeleted => 'user.deleted',
       AuditAction.companyDeleted => 'company.deleted',

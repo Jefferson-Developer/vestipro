@@ -80,6 +80,28 @@ void main() {
 
       expect(find.text('login-page'), findsOneWidget);
     });
+
+    testWidgets('extracts the token path parameter for InviteAcceptanceRoute '
+        '(TASK-040)', (tester) async {
+      String? capturedToken;
+      final appRouter = _buildRouter(
+        acceptInvitePageBuilder: (context, token) {
+          capturedToken = token;
+          return Scaffold(body: Text('accept-invite:$token'));
+        },
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(
+        const InviteAcceptanceRoute(token: 'abc-123').location,
+      );
+      await tester.pumpAndSettle();
+
+      expect(capturedToken, 'abc-123');
+      expect(find.text('accept-invite:abc-123'), findsOneWidget);
+    });
   });
 }
 
@@ -88,6 +110,7 @@ AppRouter _buildRouter({
   ActiveOrganizationGuard? organizationGuard,
   Widget Function(BuildContext context, String orgId)? aboutAppPageBuilder,
   WidgetBuilder? loginPageBuilder,
+  Widget Function(BuildContext context, String token)? acceptInvitePageBuilder,
 }) {
   return AppRouter(
     authGuard: authGuard,
@@ -102,6 +125,9 @@ AppRouter _buildRouter({
         const Scaffold(body: Text('forgot-password')),
     onboardingWizardPageBuilder: (context) =>
         const Scaffold(body: Text('onboarding-wizard')),
+    acceptInvitePageBuilder:
+        acceptInvitePageBuilder ??
+        (context, token) => Scaffold(body: Text('accept-invite:$token')),
   );
 }
 

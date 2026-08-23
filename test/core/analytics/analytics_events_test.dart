@@ -24,6 +24,7 @@ void main() {
           'product_added_to_order',
           'password_reset_requested',
           'invite_sent',
+          'invite_accepted',
         ]),
       );
 

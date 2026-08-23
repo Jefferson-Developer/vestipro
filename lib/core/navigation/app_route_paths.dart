@@ -113,6 +113,28 @@ final class TermsOfServiceRoute extends AppRoute {
   String get location => pathPattern;
 }
 
+/// Route reached via the deep link/token sent by e-mail when someone is
+/// invited to join an Organization (TASK-040, consuming the `Invite`
+/// created by TASK-039's `createInvite`).
+///
+/// Deliberately outside the `/org/:orgId/...` convention every other
+/// authenticated route follows: the organization is not known yet when
+/// this route is opened — it is resolved from [token] itself, by
+/// `validateInvite`, once `AcceptInvitePage` loads. Must never require
+/// [AuthGuard]/[ActiveOrganizationGuard] the way protected routes do: an
+/// invite link has to work for a visitor who is not signed in at all yet.
+final class InviteAcceptanceRoute extends AppRoute {
+  const InviteAcceptanceRoute({required this.token});
+
+  final String token;
+
+  static const name = 'inviteAcceptance';
+  static const pathPattern = '/invite/:token';
+
+  @override
+  String get location => '/invite/$token';
+}
+
 /// Route shown when a guard denies access to the requested location.
 final class ForbiddenRoute extends AppRoute {
   const ForbiddenRoute();

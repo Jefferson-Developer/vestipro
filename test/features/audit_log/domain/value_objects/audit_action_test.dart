@@ -13,6 +13,7 @@ void main() {
       expect(AuditAction.roleChanged.code, 'role.changed');
       expect(AuditAction.userInviteResent.code, 'user.inviteResent');
       expect(AuditAction.userInviteRevoked.code, 'user.inviteRevoked');
+      expect(AuditAction.userInviteAccepted.code, 'user.inviteAccepted');
       expect(AuditAction.userDeactivated.code, 'user.deactivated');
       expect(AuditAction.companyDeleted.code, 'company.deleted');
       expect(

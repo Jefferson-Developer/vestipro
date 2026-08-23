@@ -17,6 +17,7 @@ import '../features/authentication/authentication.dart';
 import '../features/authentication/presentation/bloc/forgot_password_bloc.dart';
 import '../features/authentication/presentation/bloc/login_bloc.dart';
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart';
+import '../features/invites/invites.dart';
 import '../features/onboarding/onboarding.dart';
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import '../features/settings/presentation/bloc/about_app_bloc.dart';
@@ -142,6 +143,11 @@ class VestiProApp extends StatelessWidget {
               ForgotPasswordPage(createBloc: () => getIt<ForgotPasswordBloc>()),
           onboardingWizardPageBuilder: (context) =>
               OnboardingWizardPage(createBloc: () => getIt<OnboardingBloc>()),
+          acceptInvitePageBuilder: (context, token) => AcceptInvitePage(
+            token: token,
+            createBloc: () => getIt<AcceptInviteBloc>(),
+            createSignUpBloc: () => getIt<SignUpBloc>(),
+          ),
         );
 
     return MaterialApp.router(

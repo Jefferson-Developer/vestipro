@@ -5,21 +5,31 @@
 /// this package and its tests.
 library;
 
+export 'domain/entities/accepted_invite.dart';
 export 'domain/entities/invite.dart';
+export 'domain/entities/invite_preview.dart';
 export 'domain/entities/issued_invite.dart';
+export 'domain/repositories/invite_acceptance_repository.dart';
 export 'domain/repositories/invite_repository.dart';
 export 'domain/role_hierarchy.dart';
+export 'domain/usecases/accept_invite_use_case.dart';
 export 'domain/usecases/create_invite_use_case.dart';
 export 'domain/usecases/list_pending_invites_use_case.dart';
 export 'domain/usecases/resend_invite_use_case.dart';
 export 'domain/usecases/revoke_invite_use_case.dart';
+export 'domain/usecases/validate_invite_use_case.dart';
 export 'domain/validators/invite_form_validators.dart';
+export 'domain/value_objects/invite_acceptance_outcome.dart';
 export 'domain/value_objects/invite_status.dart';
+export 'presentation/bloc/accept_invite_bloc.dart';
+export 'presentation/bloc/accept_invite_event.dart';
+export 'presentation/bloc/accept_invite_state.dart';
 export 'presentation/bloc/invite_form_bloc.dart';
 export 'presentation/bloc/invite_form_event.dart';
 export 'presentation/bloc/invite_form_state.dart';
 export 'presentation/bloc/invite_list_bloc.dart';
 export 'presentation/bloc/invite_list_event.dart';
 export 'presentation/bloc/invite_list_state.dart';
+export 'presentation/pages/accept_invite_page.dart';
 export 'presentation/pages/invite_list_page.dart';
 export 'presentation/pages/invite_user_page.dart';

@@ -17,7 +17,31 @@ import '../bloc/sign_up_state.dart';
 /// *because* the user typed here, so an error/failure state never has a
 /// reason to touch (let alone clear) what the user typed.
 class SignUpForm extends StatefulWidget {
-  const SignUpForm({super.key});
+  const SignUpForm({
+    this.initialEmail,
+    this.lockEmail = false,
+    this.showAlternateAuthLink = true,
+    super.key,
+  });
+
+  /// Pre-fills the e-mail field once, right when the form mounts — used by
+  /// `AcceptInvitePage` (TASK-040) to start the field already carrying the
+  /// invite's own e-mail. Ignored (the field starts blank, same as before
+  /// this parameter existed) when `null`/blank.
+  final String? initialEmail;
+
+  /// When `true`, the e-mail field is rendered read-only: the invite
+  /// acceptance flow only ever creates an account for exactly the invited
+  /// e-mail (TASK-040's documented e-mail-divergence rule), so nothing here
+  /// lets the user type a different one. Defaults to `false`, preserving
+  /// the original editable field for the regular sign-up flow.
+  final bool lockEmail;
+
+  /// Whether to show the bottom "Já tem conta? Entrar" link. `AcceptInvitePage`
+  /// hides it (`false`) — navigating away from `/invite/:token` to
+  /// `/login` would lose the invite context; that flow has its own,
+  /// separate way back instead.
+  final bool showAlternateAuthLink;
 
   @override
   State<SignUpForm> createState() => _SignUpFormState();
@@ -32,6 +56,20 @@ class _SignUpFormState extends State<SignUpForm> {
   final FocusNode _emailFocusNode = FocusNode();
   final FocusNode _passwordFocusNode = FocusNode();
   final FocusNode _passwordConfirmationFocusNode = FocusNode();
+
+  @override
+  void initState() {
+    super.initState();
+    final initialEmail = widget.initialEmail?.trim();
+    if (initialEmail != null && initialEmail.isNotEmpty) {
+      _emailController.text = initialEmail;
+      // The field's `onChanged` never fires for a value set this way, so
+      // `SignUpBloc`'s own state (what validation/submit actually reads)
+      // is synced explicitly here — same requirement whether the field
+      // ends up locked or not.
+      context.read<SignUpBloc>().add(SignUpEvent.emailChanged(initialEmail));
+    }
+  }
 
   @override
   void dispose() {
@@ -80,15 +118,20 @@ class _SignUpFormState extends State<SignUpForm> {
               focusNode: _emailFocusNode,
               label: 'E-mail',
               isRequired: true,
-              isDisabled: isSubmitting,
+              isDisabled: isSubmitting || widget.lockEmail,
               errorText: state.emailError,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               semanticLabel: 'Campo de e-mail',
+              helperText: widget.lockEmail
+                  ? 'Este convite é exclusivo para este e-mail.'
+                  : null,
               prefixIcon: const Icon(Icons.mail_outline),
-              onChanged: (value) => context.read<SignUpBloc>().add(
-                SignUpEvent.emailChanged(value),
-              ),
+              onChanged: widget.lockEmail
+                  ? null
+                  : (value) => context.read<SignUpBloc>().add(
+                      SignUpEvent.emailChanged(value),
+                    ),
               onSubmitted: (_) => _passwordFocusNode.requestFocus(),
             ),
             const SizedBox(height: AppSpacing.spacing16),
@@ -179,17 +222,19 @@ class _SignUpFormState extends State<SignUpForm> {
               isLoading: isSubmitting,
               onPressed: canSubmit ? () => _submit(context) : null,
             ),
-            const SizedBox(height: AppSpacing.spacing8),
-            Align(
-              alignment: Alignment.center,
-              child: AppButton(
-                label: 'Já tem conta? Entrar',
-                variant: AppButtonVariant.text,
-                onPressed: isSubmitting
-                    ? null
-                    : () => context.go(const LoginRoute().location),
+            if (widget.showAlternateAuthLink) ...<Widget>[
+              const SizedBox(height: AppSpacing.spacing8),
+              Align(
+                alignment: Alignment.center,
+                child: AppButton(
+                  label: 'Já tem conta? Entrar',
+                  variant: AppButtonVariant.text,
+                  onPressed: isSubmitting
+                      ? null
+                      : () => context.go(const LoginRoute().location),
+                ),
               ),
-            ),
+            ],
           ],
         );
       },

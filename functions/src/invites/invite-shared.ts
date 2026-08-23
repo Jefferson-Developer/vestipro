@@ -3,7 +3,9 @@ import { HttpsError } from 'firebase-functions/v2/https';
 import {
   Timestamp,
   type DocumentData,
+  type DocumentReference,
   type Firestore,
+  type Transaction,
 } from 'firebase-admin/firestore';
 
 /**
@@ -134,6 +136,18 @@ export interface GeneratedInviteToken {
 }
 
 /**
+ * SHA-256 hex digest of a plaintext invite token — the one and only form of
+ * a token ever persisted to Firestore (`Invite.tokenHash`). Shared by
+ * {@link generateInviteToken} (creating one) and TASK-040's
+ * `validateInvite`/`acceptInvite` (looking one up by the hash of whatever
+ * the caller presents), so the two ends of the token's lifecycle can never
+ * drift into hashing it differently.
+ */
+export function hashInviteToken(token: string): string {
+  return createHash('sha256').update(token).digest('hex');
+}
+
+/**
  * Generates a cryptographically secure, non-guessable invite token (256
  * bits of entropy from `crypto.randomBytes`, never `Math.random`/a
  * sequential id) and its SHA-256 hash.
@@ -147,8 +161,107 @@ export interface GeneratedInviteToken {
  */
 export function generateInviteToken(): GeneratedInviteToken {
   const token = randomBytes(32).toString('base64url');
-  const tokenHash = createHash('sha256').update(token).digest('hex');
+  const tokenHash = hashInviteToken(token);
   return { token, tokenHash };
+}
+
+/** One matched `Invite` document, together with a ready-to-use reference to
+ * it — returned by {@link findInviteByTokenHash} so callers never have to
+ * re-derive `organizationRef`/`inviteRef` from the matched document's own
+ * path. */
+export interface InviteLookup {
+  ref: DocumentReference;
+  organizationRef: DocumentReference;
+  data: DocumentData;
+}
+
+/**
+ * Finds the (at most one) `Invite` document anywhere in Firestore whose
+ * `tokenHash` equals [tokenHash], via a `collectionGroup('invites')` query —
+ * the caller only ever has the plaintext token, not the `organizationId` a
+ * direct `organizations/{id}/invites/{id}` lookup would need.
+ *
+ * `tokenHash` is a SHA-256 digest (`hashInviteToken`), so a match is
+ * effectively unique by construction; `limit(1)` is still applied
+ * defensively. Returns `null` when nothing matches (unknown/mistyped/
+ * tampered token) — the caller decides how to surface that (never treated
+ * as an unexpected/internal error, since a stale or garbage token is an
+ * entirely ordinary thing for a caller to present).
+ */
+export async function findInviteByTokenHash(
+  db: Firestore,
+  tokenHash: string,
+  /**
+   * When provided, the lookup runs as `transaction.get(query)` instead of a
+   * plain `query.get()` — required by `acceptInvite`, which must read the
+   * matched `Invite` inside the very same transaction that later updates
+   * it, so no concurrent accept of the same token can race past this read
+   * (same "read everything inside the transaction" rationale as
+   * `createOrganization`).
+   */
+  transaction?: Transaction,
+): Promise<InviteLookup | null> {
+  const query = db
+    .collectionGroup('invites')
+    .where('tokenHash', '==', tokenHash)
+    .limit(1);
+  const snapshot = transaction ? await transaction.get(query) : await query.get();
+
+  if (snapshot.empty) {
+    return null;
+  }
+
+  const document = snapshot.docs[0];
+  const organizationRef = document.ref.parent.parent;
+  if (!organizationRef) {
+    // Structurally impossible for a real `organizations/{id}/invites/{id}`
+    // document — failing loudly is safer than silently treating a
+    // corrupted path as "not found".
+    throw new HttpsError(
+      'internal',
+      'Invite document has no parent organization.',
+    );
+  }
+
+  return { ref: document.ref, organizationRef, data: document.data() };
+}
+
+/**
+ * The 4 outcomes {@link resolveInviteOutcome} can settle an already-found
+ * `Invite` into. `'notFound'` is deliberately not one of them — that is
+ * `findInviteByTokenHash` returning `null`, one level up, before there is
+ * any `Invite` document to resolve an outcome from.
+ */
+export type InviteOutcome = 'valid' | 'expired' | 'accepted' | 'revoked';
+
+/**
+ * Resolves what an already-found `Invite` document effectively is *right
+ * now*, independently of a stale `status` field: nothing in this codebase
+ * ever flips `status` from `'pending'` to `'expired'` on a schedule (no
+ * cron/trigger exists for it — see `resend-invite.ts`'s own
+ * `RESENDABLE_STATUSES` comment) — expiry is always a lazy, computed
+ * property of `expiresAt` vs. [now], never a value trusted verbatim from
+ * Firestore. `'accepted'`/`'revoked'` are terminal and always trusted as
+ * recorded (nothing un-accepts/un-revokes an invite).
+ */
+export function resolveInviteOutcome(
+  data: DocumentData,
+  now: Timestamp,
+): InviteOutcome {
+  const status = data.status as string;
+  if (status === 'accepted') return 'accepted';
+  if (status === 'revoked') return 'revoked';
+  // A literal `'expired'` is also honored as-is (no code path writes it
+  // today, but `resend-invite.ts`'s `RESENDABLE_STATUSES` already models it
+  // as a legitimate stored value a future scheduled job could set) — falls
+  // through to the lazy `expiresAt` check below only for anything else
+  // (`'pending'`).
+  if (status === 'expired') return 'expired';
+
+  const expiresAt = data.expiresAt as Timestamp;
+  if (expiresAt.toMillis() <= now.toMillis()) return 'expired';
+
+  return 'valid';
 }
 
 /**

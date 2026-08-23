@@ -82,5 +82,7 @@ AppRouter _buildRouter(SessionAuthGuard guard) {
         const Scaffold(body: Text('forgot-password-page')),
     onboardingWizardPageBuilder: (context) =>
         const Scaffold(body: Text('onboarding-wizard-page')),
+    acceptInvitePageBuilder: (context, token) =>
+        Scaffold(body: Text('accept-invite-page:$token')),
   );
 }

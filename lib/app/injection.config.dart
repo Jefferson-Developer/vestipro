@@ -79,13 +79,24 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart'
 import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
+import '../features/invites/data/datasources/cloud_functions_invite_acceptance_data_source.dart'
+    as _i674;
 import '../features/invites/data/datasources/firestore_invite_data_source.dart'
     as _i3;
+import '../features/invites/data/datasources/invite_acceptance_data_source.dart'
+    as _i336;
 import '../features/invites/data/datasources/invite_data_source.dart' as _i814;
+import '../features/invites/data/mappers/invite_acceptance_mapper.dart' as _i87;
 import '../features/invites/data/mappers/invite_mapper.dart' as _i649;
+import '../features/invites/data/repositories/invite_acceptance_repository_impl.dart'
+    as _i371;
 import '../features/invites/data/repositories/invite_repository_impl.dart'
     as _i90;
+import '../features/invites/domain/repositories/invite_acceptance_repository.dart'
+    as _i999;
 import '../features/invites/domain/repositories/invite_repository.dart' as _i75;
+import '../features/invites/domain/usecases/accept_invite_use_case.dart'
+    as _i559;
 import '../features/invites/domain/usecases/create_invite_use_case.dart'
     as _i461;
 import '../features/invites/domain/usecases/list_pending_invites_use_case.dart'
@@ -94,6 +105,9 @@ import '../features/invites/domain/usecases/resend_invite_use_case.dart'
     as _i502;
 import '../features/invites/domain/usecases/revoke_invite_use_case.dart'
     as _i334;
+import '../features/invites/domain/usecases/validate_invite_use_case.dart'
+    as _i409;
+import '../features/invites/presentation/bloc/accept_invite_bloc.dart' as _i628;
 import '../features/invites/presentation/bloc/invite_form_bloc.dart' as _i193;
 import '../features/invites/presentation/bloc/invite_list_bloc.dart' as _i0;
 import '../features/onboarding/data/datasources/onboarding_progress_data_source.dart'
@@ -262,6 +276,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i465.AppClientMetadataProvider>(
       () => _i465.PackageInfoClientMetadataProvider(),
     );
+    gh.lazySingleton<_i87.InviteAcceptanceMapper>(
+      () => _i87.InviteAcceptanceMapper(gh<_i649.InviteMapper>()),
+    );
     gh.lazySingleton<_i924.OnboardingProgressDataSource>(
       () => const _i1035.SharedPreferencesOnboardingProgressDataSource(),
     );
@@ -394,6 +411,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
+    gh.lazySingleton<_i336.InviteAcceptanceDataSource>(
+      () => _i674.CloudFunctionsInviteAcceptanceDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i957.MembershipRepository>(
       () => _i537.MembershipRepositoryImpl(
         dataSource: gh<_i361.MembershipDataSource>(),
@@ -413,6 +435,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i455.FirestoreOrganizationDataSource(
         gh<_i974.FirebaseFirestore>(),
         gh<_i340.CloudFunctionsService>(),
+      ),
+    );
+    gh.lazySingleton<_i999.InviteAcceptanceRepository>(
+      () => _i371.InviteAcceptanceRepositoryImpl(
+        dataSource: gh<_i336.InviteAcceptanceDataSource>(),
+        mapper: gh<_i87.InviteAcceptanceMapper>(),
       ),
     );
     gh.lazySingleton<_i923.RoleDataSource>(
@@ -468,6 +496,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i753.AuditLogRepository>(),
       ),
     );
+    gh.factory<_i559.AcceptInviteUseCase>(
+      () => _i559.AcceptInviteUseCase(gh<_i999.InviteAcceptanceRepository>()),
+    );
+    gh.factory<_i409.ValidateInviteUseCase>(
+      () => _i409.ValidateInviteUseCase(gh<_i999.InviteAcceptanceRepository>()),
+    );
     gh.lazySingleton<_i75.InviteRepository>(
       () => _i90.InviteRepositoryImpl(
         dataSource: gh<_i814.InviteDataSource>(),
@@ -522,6 +556,14 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i201.ListAuditLogEntriesUseCase(
         gh<_i753.AuditLogRepository>(),
         gh<_i47.PermissionService>(),
+      ),
+    );
+    gh.factory<_i628.AcceptInviteBloc>(
+      () => _i628.AcceptInviteBloc(
+        validateInvite: gh<_i409.ValidateInviteUseCase>(),
+        acceptInvite: gh<_i559.AcceptInviteUseCase>(),
+        authRepository: gh<_i472.AuthRepository>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i906.CreateBranchUseCase>(
