@@ -3,9 +3,10 @@ rules_version = '2';
 // Firestore Security Rules — VestiPro (TASK-030).
 //
 // Escopo: `organizations/{organizationId}` e as subcoleções já modeladas até
-// aqui (`companies`, `branches`, `roles`, `teams`, `members`), conforme
-// TASK-026 a TASK-029 e `tasks.md` seção 13 ("Nunca permitir que
-// `organizationId` enviado pelo cliente seja a única fonte de autorização").
+// aqui (`companies`, `branches`, `roles`, `teams`, `members`, `auditLogs`),
+// conforme TASK-026 a TASK-029, TASK-033 e `tasks.md` seção 13 ("Nunca
+// permitir que `organizationId` enviado pelo cliente seja a única fonte de
+// autorização").
 //
 // Princípio central: toda leitura/escrita dentro de uma Organization exige
 // um Membership REAL e ativo do usuário autenticado em
@@ -262,6 +263,31 @@ service cloud.firestore {
 
         // Nenhum caso de uso exclui Membership hoje (desativar = status
         // 'inactive' via update) — nega por padrão.
+        allow delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/auditLogs/{logId}  (TASK-033)
+      // -------------------------------------------------------------------
+
+      match /auditLogs/{logId} {
+        // Leitura restrita à capability audit.log.view (hoje, apenas
+        // OWNER/ADMIN — ver Capability.auditLogView/RolePermissionMatrix).
+        allow read: if hasCapability(organizationId, 'audit.log.view');
+
+        // Append-only: qualquer membro ativo pode registrar uma entrada
+        // sobre uma ação que ele mesmo executou (actorUserId ==
+        // request.auth.uid) — hoje isso é feito client-side, logo depois
+        // da ação sensível em si (ex.: AssignRoleToUserUseCase), enquanto
+        // não existe uma Cloud Function/trigger dedicada (ver
+        // RecordAuditLogUseCase/AuditLogEntryFactory docs para o plano de
+        // migração). Ninguém, nem OWNER, pode alterar ou excluir uma
+        // entrada já criada.
+        allow create: if isActiveMember(organizationId)
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.actorUserId == request.auth.uid;
+
+        allow update: if false;
         allow delete: if false;
       }
     }

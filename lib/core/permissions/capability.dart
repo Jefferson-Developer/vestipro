@@ -35,6 +35,7 @@ enum Capability {
   organizationTransferOwnership,
   reportExport,
   reportViewSensitive,
+  auditLogView,
 }
 
 extension CapabilityCode on Capability {
@@ -67,6 +68,7 @@ extension CapabilityCode on Capability {
         'organization.transferOwnership',
       Capability.reportExport => 'report.export',
       Capability.reportViewSensitive => 'report.viewSensitive',
+      Capability.auditLogView => 'audit.log.view',
     };
   }
 }

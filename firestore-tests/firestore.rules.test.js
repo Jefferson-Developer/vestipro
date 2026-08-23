@@ -82,6 +82,20 @@ function companyDoc({ organizationId }) {
   };
 }
 
+function auditLogDoc({ organizationId, actorUserId, action = 'role.changed' }) {
+  return {
+    organizationId,
+    actorUserId,
+    actorName: 'Ator de Teste',
+    action,
+    entityType: 'membership',
+    entityId: 'rep-a',
+    previousValue: { roleId: 'SALES_REP', roleName: 'SALES_REP' },
+    newValue: { roleId: 'SALES_MANAGER', roleName: 'SALES_MANAGER' },
+    timestamp: now(),
+  };
+}
+
 let testEnv;
 
 beforeAll(async () => {
@@ -408,5 +422,118 @@ describe('organizations/{organizationId}/members/{userId}  (Membership)', () => 
 
     const db = testEnv.authenticatedContext('rep-a').firestore();
     await assertFails(db.doc(`organizations/${ORG_A}/companies/company-a`).get());
+  });
+});
+
+describe('organizations/{organizationId}/auditLogs/{logId}  (TASK-033)', () => {
+  test('qualquer membro ativo pode registrar uma entrada de auditoria sobre '
+    + 'uma ação que ele mesmo executou', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/auditLogs/log-1`).set(
+        auditLogDoc({ organizationId: ORG_A, actorUserId: 'rep-a' }),
+      ),
+    );
+  });
+
+  test('não é possível registrar uma entrada de auditoria em nome de outro '
+    + 'usuário (actorUserId forjado)', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/auditLogs/log-1`).set(
+        auditLogDoc({ organizationId: ORG_A, actorUserId: 'owner-a' }),
+      ),
+    );
+  });
+
+  test('usuário sem Membership na Org A não registra uma entrada de '
+    + 'auditoria lá', async () => {
+    const db = testEnv.authenticatedContext('stranger').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/auditLogs/log-1`).set(
+        auditLogDoc({ organizationId: ORG_A, actorUserId: 'stranger' }),
+      ),
+    );
+  });
+
+  test('usuário não autenticado não registra nenhuma entrada de auditoria', async () => {
+    const db = testEnv.unauthenticatedContext().firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/auditLogs/log-1`).set(
+        auditLogDoc({ organizationId: ORG_A, actorUserId: 'rep-a' }),
+      ),
+    );
+  });
+
+  test('membro da Org A não registra uma entrada de auditoria forjando o '
+    + 'organizationId da Org B', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_B}/auditLogs/log-1`).set(
+        auditLogDoc({ organizationId: ORG_B, actorUserId: 'owner-a' }),
+      ),
+    );
+  });
+
+  test('OWNER (audit.log.view) consegue ler o audit log da própria organization', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/auditLogs/log-1`)
+        .set(auditLogDoc({ organizationId: ORG_A, actorUserId: 'owner-a' }));
+    });
+
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/auditLogs/log-1`).get());
+  });
+
+  test('SALES_REP (sem audit.log.view) não consegue ler o audit log', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/auditLogs/log-1`)
+        .set(auditLogDoc({ organizationId: ORG_A, actorUserId: 'rep-a' }));
+    });
+
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/auditLogs/log-1`).get());
+  });
+
+  test('OWNER da Org A não consegue ler o audit log da Org B (cross-tenant)', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_B}/auditLogs/log-1`)
+        .set(auditLogDoc({ organizationId: ORG_B, actorUserId: 'owner-b' }));
+    });
+
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/auditLogs/log-1`).get());
+  });
+
+  test('nenhum papel, nem OWNER, consegue atualizar uma entrada de auditoria já criada', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/auditLogs/log-1`)
+        .set(auditLogDoc({ organizationId: ORG_A, actorUserId: 'owner-a' }));
+    });
+
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/auditLogs/log-1`).update({ actorName: 'Nome Alterado' }),
+    );
+  });
+
+  test('nenhum papel, nem OWNER, consegue excluir uma entrada de auditoria já criada', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/auditLogs/log-1`)
+        .set(auditLogDoc({ organizationId: ORG_A, actorUserId: 'owner-a' }));
+    });
+
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/auditLogs/log-1`).delete());
   });
 });

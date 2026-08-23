@@ -36,10 +36,25 @@ import '../core/functions/cloud_functions_service.dart' as _i147;
 import '../core/performance/firebase_performance_monitor.dart' as _i387;
 import '../core/performance/performance_monitor.dart' as _i1008;
 import '../core/permissions/permission_service.dart' as _i315;
+import '../core/permissions/permissions.dart' as _i47;
 import '../core/services/crash_reporter.dart' as _i349;
 import '../core/services/firebase_crash_reporter.dart' as _i559;
 import '../core/storage/firebase_storage_data_source.dart' as _i833;
 import '../core/storage/storage_data_source.dart' as _i904;
+import '../features/audit_log/data/datasources/audit_log_data_source.dart'
+    as _i432;
+import '../features/audit_log/data/datasources/firestore_audit_log_data_source.dart'
+    as _i709;
+import '../features/audit_log/data/mappers/audit_log_entry_mapper.dart'
+    as _i246;
+import '../features/audit_log/data/repositories/audit_log_repository_impl.dart'
+    as _i303;
+import '../features/audit_log/domain/repositories/audit_log_repository.dart'
+    as _i753;
+import '../features/audit_log/domain/usecases/list_audit_log_entries_use_case.dart'
+    as _i201;
+import '../features/audit_log/domain/usecases/record_audit_log_use_case.dart'
+    as _i421;
 import '../features/organizations/data/datasources/branch_data_source.dart'
     as _i526;
 import '../features/organizations/data/datasources/company_data_source.dart'
@@ -160,6 +175,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i59.FirebaseAuth>(() => appInjectionModule.firebaseAuth);
     gh.lazySingleton<_i26.AuthUserMapper>(() => const _i26.AuthUserMapper());
+    gh.lazySingleton<_i246.AuditLogEntryMapper>(
+      () => const _i246.AuditLogEntryMapper(),
+    );
     gh.lazySingleton<_i964.BranchMapper>(() => const _i964.BranchMapper());
     gh.lazySingleton<_i642.CompanyMapper>(() => const _i642.CompanyMapper());
     gh.lazySingleton<_i714.MembershipMapper>(
@@ -294,11 +312,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i571.UpdateCompanyUseCase>(
       () => _i571.UpdateCompanyUseCase(gh<_i799.CompanyRepository>()),
     );
+    gh.lazySingleton<_i432.AuditLogDataSource>(
+      () => _i709.FirestoreAuditLogDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i315.PermissionService>(
       () => _i315.PermissionService(gh<_i957.MembershipRepository>()),
-    );
-    gh.factory<_i1030.AssignRoleToUserUseCase>(
-      () => _i1030.AssignRoleToUserUseCase(gh<_i957.MembershipRepository>()),
     );
     gh.factory<_i70.GetUserMembershipUseCase>(
       () => _i70.GetUserMembershipUseCase(gh<_i957.MembershipRepository>()),
@@ -314,6 +332,18 @@ extension GetItInjectableX on _i174.GetIt {
         dataSource: gh<_i364.AboutAppDataSource>(),
         mapper: gh<_i847.AboutAppMapper>(),
         notesMapper: gh<_i370.AboutAppNotesMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i753.AuditLogRepository>(
+      () => _i303.AuditLogRepositoryImpl(
+        dataSource: gh<_i432.AuditLogDataSource>(),
+        mapper: gh<_i246.AuditLogEntryMapper>(),
+      ),
+    );
+    gh.factory<_i1030.AssignRoleToUserUseCase>(
+      () => _i1030.AssignRoleToUserUseCase(
+        gh<_i957.MembershipRepository>(),
+        gh<_i753.AuditLogRepository>(),
       ),
     );
     gh.lazySingleton<_i440.RoleRepository>(
@@ -334,6 +364,9 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i719.OrganizationMapper>(),
       ),
     );
+    gh.factory<_i421.RecordAuditLogUseCase>(
+      () => _i421.RecordAuditLogUseCase(gh<_i753.AuditLogRepository>()),
+    );
     gh.factory<_i713.GetAboutAppUseCase>(
       () => _i713.GetAboutAppUseCase(gh<_i794.AboutAppRepository>()),
     );
@@ -343,6 +376,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i226.SubmitAboutAppDiagnosticsUseCase>(
       () => _i226.SubmitAboutAppDiagnosticsUseCase(
         gh<_i794.AboutAppRepository>(),
+      ),
+    );
+    gh.factory<_i201.ListAuditLogEntriesUseCase>(
+      () => _i201.ListAuditLogEntriesUseCase(
+        gh<_i753.AuditLogRepository>(),
+        gh<_i47.PermissionService>(),
       ),
     );
     gh.factory<_i906.CreateBranchUseCase>(

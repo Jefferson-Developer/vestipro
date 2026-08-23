@@ -121,7 +121,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-030 — Criar Firestore Security Rules](TASK-030-criar-firestore-security-rules.md) — Flutter Senior
 - [x] [TASK-031 — Criar Storage Security Rules](TASK-031-criar-storage-security-rules.md) — Flutter Senior
 - [x] [TASK-032 — Configurar Firebase App Check](TASK-032-configurar-firebase-app-check.md) — Flutter Senior
-- [ ] [TASK-033 — Implementar auditoria administrativa (audit log central)](TASK-033-implementar-auditoria-administrativa.md) — Flutter Senior
+- [x] [TASK-033 — Implementar auditoria administrativa (audit log central)](TASK-033-implementar-auditoria-administrativa.md) — Flutter Senior
 
 ### EPIC-04 — Autenticação e Onboarding
 - [ ] [TASK-034 — Implementar tela de login](TASK-034-implementar-tela-de-login.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 32 / 220 tasks concluídas.
+**Progresso:** 33 / 220 tasks concluídas.
