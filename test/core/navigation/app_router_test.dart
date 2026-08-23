@@ -98,6 +98,8 @@ AppRouter _buildRouter({
     loginPageBuilder:
         loginPageBuilder ?? (context) => const Scaffold(body: Text('login')),
     signUpPageBuilder: (context) => const Scaffold(body: Text('sign-up')),
+    forgotPasswordPageBuilder: (context) =>
+        const Scaffold(body: Text('forgot-password')),
   );
 }
 

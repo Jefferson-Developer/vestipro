@@ -63,14 +63,10 @@ final class SignUpRoute extends AppRoute {
   String get location => pathPattern;
 }
 
-/// Route shown for the "forgot password" flow.
+/// Route shown for the "forgot password" flow (TASK-036).
 ///
-/// Declared ahead of its own implementation, same precedent as [LoginRoute]
-/// before TASK-034: not registered as a [GoRoute] yet, so navigating here
-/// today falls back to [NotFoundRoute]'s `errorBuilder`. The login screen
-/// (TASK-034) already links to [PasswordResetRoute.location] through
-/// `go_router` so that TASK-036 only has to register the real `GoRoute` and
-/// page builder, without touching the login screen again.
+/// Linked from [LoginRoute] ("Esqueci minha senha") and links back to it
+/// ("Voltar para o login"), same reciprocal-link precedent as [SignUpRoute].
 final class PasswordResetRoute extends AppRoute {
   const PasswordResetRoute();
 
@@ -84,10 +80,10 @@ final class PasswordResetRoute extends AppRoute {
 /// Route shown for the initial onboarding wizard, right after a successful
 /// sign-up (TASK-038).
 ///
-/// Declared ahead of its own implementation, same precedent as
-/// [PasswordResetRoute] before TASK-034/TASK-036: not registered as a
-/// [GoRoute] yet, so navigating here today falls back to [NotFoundRoute]'s
-/// `errorBuilder`. `SignUpPage` (TASK-035) already navigates to
+/// Declared ahead of its own implementation, same precedent [PasswordResetRoute]
+/// followed before TASK-036: not registered as a [GoRoute] yet, so
+/// navigating here today falls back to [NotFoundRoute]'s `errorBuilder`.
+/// `SignUpPage` (TASK-035) already navigates to
 /// [OnboardingWizardRoute.location] through `go_router` so that TASK-037
 /// (which actually creates the first Organization before the wizard can run)
 /// only has to register the real `GoRoute`/page builder, without touching

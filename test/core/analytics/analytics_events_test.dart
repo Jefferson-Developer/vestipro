@@ -22,6 +22,7 @@ void main() {
           'report_exported',
           'offline_pack_downloaded',
           'product_added_to_order',
+          'password_reset_requested',
         ]),
       );
 

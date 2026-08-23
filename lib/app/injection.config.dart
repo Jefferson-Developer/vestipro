@@ -69,8 +69,12 @@ import '../features/authentication/domain/repositories/user_profile_repository.d
     as _i488;
 import '../features/authentication/domain/usecases/create_account_with_email_and_password_use_case.dart'
     as _i90;
+import '../features/authentication/domain/usecases/send_password_reset_email_use_case.dart'
+    as _i820;
 import '../features/authentication/domain/usecases/sign_in_with_email_and_password_use_case.dart'
     as _i185;
+import '../features/authentication/presentation/bloc/forgot_password_bloc.dart'
+    as _i1015;
 import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
@@ -247,6 +251,9 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i26.AuthUserMapper>(),
       ),
     );
+    gh.factory<_i820.SendPasswordResetEmailUseCase>(
+      () => _i820.SendPasswordResetEmailUseCase(gh<_i472.AuthRepository>()),
+    );
     gh.factory<_i185.SignInWithEmailAndPasswordUseCase>(
       () => _i185.SignInWithEmailAndPasswordUseCase(gh<_i472.AuthRepository>()),
     );
@@ -320,6 +327,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i537.MembershipRepositoryImpl(
         dataSource: gh<_i361.MembershipDataSource>(),
         mapper: gh<_i714.MembershipMapper>(),
+      ),
+    );
+    gh.factory<_i1015.ForgotPasswordBloc>(
+      () => _i1015.ForgotPasswordBloc(
+        sendPasswordResetEmail: gh<_i820.SendPasswordResetEmailUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.lazySingleton<_i904.StorageDataSource>(

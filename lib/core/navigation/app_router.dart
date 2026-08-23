@@ -19,6 +19,7 @@ class AppRouter {
     required this.aboutAppPageBuilder,
     required this.loginPageBuilder,
     required this.signUpPageBuilder,
+    required this.forgotPasswordPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
   }) : authGuard = authGuard ?? const AlwaysAllowAuthGuard(),
@@ -38,6 +39,10 @@ class AppRouter {
   /// Builds the real sign-up screen (TASK-035). Same composition rationale
   /// as [loginPageBuilder].
   final WidgetBuilder signUpPageBuilder;
+
+  /// Builds the real "forgot password" screen (TASK-036). Same composition
+  /// rationale as [loginPageBuilder].
+  final WidgetBuilder forgotPasswordPageBuilder;
 
   late final GoRouter router = GoRouter(
     initialLocation: const AboutAppRoute(
@@ -60,6 +65,11 @@ class AppRouter {
         path: SignUpRoute.pathPattern,
         name: SignUpRoute.name,
         builder: (context, state) => signUpPageBuilder(context),
+      ),
+      GoRoute(
+        path: PasswordResetRoute.pathPattern,
+        name: PasswordResetRoute.name,
+        builder: (context, state) => forgotPasswordPageBuilder(context),
       ),
       GoRoute(
         path: ForbiddenRoute.pathPattern,

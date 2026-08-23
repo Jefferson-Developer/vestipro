@@ -78,5 +78,7 @@ AppRouter _buildRouter(SessionAuthGuard guard) {
         Scaffold(body: Text('about-app:$orgId')),
     loginPageBuilder: (context) => const Scaffold(body: Text('login-page')),
     signUpPageBuilder: (context) => const Scaffold(body: Text('sign-up-page')),
+    forgotPasswordPageBuilder: (context) =>
+        const Scaffold(body: Text('forgot-password-page')),
   );
 }
