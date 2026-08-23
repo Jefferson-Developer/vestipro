@@ -29,6 +29,7 @@ void main() {
           'team_created',
           'team_updated',
           'team_deleted',
+          'portfolio_assignment_saved',
         ]),
       );
 

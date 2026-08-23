@@ -93,6 +93,123 @@ service cloud.firestore {
         && roleHasCapability(currentRoleName(organizationId), capabilityCode);
     }
 
+    function isOwnerOrAdmin(organizationId) {
+      return isActiveMember(organizationId)
+        && currentRoleName(organizationId) in ['OWNER', 'ADMIN'];
+    }
+
+    function isSalesManager(organizationId) {
+      return isActiveMember(organizationId)
+        && currentRoleName(organizationId) == 'SALES_MANAGER';
+    }
+
+    function isSalesRep(organizationId) {
+      return isActiveMember(organizationId)
+        && currentRoleName(organizationId) == 'SALES_REP';
+    }
+
+    function requesterTeamIds(organizationId) {
+      return get(membershipPath(organizationId)).data.teamIds;
+    }
+
+    function teamPath(organizationId, teamId) {
+      return /databases/$(database)/documents/organizations/$(organizationId)/teams/$(teamId);
+    }
+
+    // TASK-045 contract consumed by TASK-051:
+    // Customer docs must denormalize `primarySalesRepId` and primary `teamId`
+    // so queries and Rules can enforce portfolio visibility without reading
+    // a Customer model on the client in this task.
+    function validCustomerVisibilityPayload(organizationId) {
+      return resource.data.keys().hasAll([
+          'organizationId',
+          'companyId',
+          'primarySalesRepId',
+          'teamId',
+          'deletedAt'
+        ])
+        && resource.data.organizationId == organizationId
+        && resource.data.companyId is string
+        && resource.data.companyId.size() > 0
+        && resource.data.primarySalesRepId is string
+        && resource.data.primarySalesRepId.size() > 0
+        && resource.data.teamId is string
+        && resource.data.teamId.size() > 0
+        && resource.data.deletedAt == null;
+    }
+
+    function customerIsActive() {
+      return resource.data.deletedAt == null;
+    }
+
+    function managerCanReadCustomer(organizationId) {
+      return isSalesManager(organizationId)
+        && (
+          requesterTeamIds(organizationId).hasAny([resource.data.teamId])
+          || (
+            exists(teamPath(organizationId, resource.data.teamId))
+            && get(teamPath(organizationId, resource.data.teamId)).data.managerUserId == request.auth.uid
+          )
+        );
+    }
+
+    function canReadCustomer(organizationId) {
+      return validCustomerVisibilityPayload(organizationId)
+        && (
+          isOwnerOrAdmin(organizationId)
+          || managerCanReadCustomer(organizationId)
+          || (
+            isSalesRep(organizationId)
+            && resource.data.primarySalesRepId == request.auth.uid
+          )
+        );
+    }
+
+    function canListCustomers(organizationId) {
+      return isOwnerOrAdmin(organizationId)
+        || (
+          customerIsActive()
+          && (
+            managerCanReadCustomer(organizationId)
+            || (
+              isSalesRep(organizationId)
+              && resource.data.primarySalesRepId == request.auth.uid
+            )
+          )
+        );
+    }
+
+    function portfolioAssignmentPayloadValid(organizationId, data) {
+      return data.organizationId == organizationId
+        && data.companyId is string
+        && data.companyId.size() > 0
+        && data.userId is string
+        && data.userId.size() > 0
+        && data.teamId is string
+        && data.teamId.size() > 0
+        && data.scopeType in ['customer', 'criteria']
+        && data.status in ['active', 'reassigned', 'archived']
+        && data.version is int
+        && data.createdBy is string
+        && data.createdBy.size() > 0
+        && data.updatedBy is string
+        && data.updatedBy.size() > 0
+        && (
+          (
+            data.scopeType == 'customer'
+            && data.customerId is string
+            && data.customerId.size() > 0
+          )
+          || (
+            data.scopeType == 'criteria'
+            && (
+              (data.region is string && data.region.size() > 0)
+              || (data.segment is string && data.segment.size() > 0)
+            )
+          )
+        );
+    }
+
     function unchanged(field) {
       return request.resource.data[field] == resource.data[field];
     }
@@ -246,6 +363,55 @@ service cloud.firestore {
           && unchanged('organizationId');
 
         allow delete: if hasCapability(organizationId, 'team.manage');
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/portfolioAssignments/{assignmentId}
+      // (TASK-045)
+      // -------------------------------------------------------------------
+
+      match /portfolioAssignments/{assignmentId} {
+        allow read: if hasCapability(organizationId, 'team.manage')
+          || (
+            isSalesRep(organizationId)
+            && resource.data.userId == request.auth.uid
+          );
+
+        allow create: if hasCapability(organizationId, 'team.manage')
+          && portfolioAssignmentPayloadValid(organizationId, request.resource.data)
+          && request.resource.data.status == 'active'
+          && request.resource.data.deletedAt == null;
+
+        // Reassignment preserves history: clients may close an active
+        // assignment, never rewrite its tenant/seller/team/scope identity.
+        allow update: if hasCapability(organizationId, 'team.manage')
+          && portfolioAssignmentPayloadValid(organizationId, request.resource.data)
+          && unchanged('organizationId')
+          && unchanged('companyId')
+          && unchanged('userId')
+          && unchanged('teamId')
+          && unchanged('scopeType')
+          && unchanged('customerId')
+          && unchanged('region')
+          && unchanged('segment')
+          && unchanged('createdAt')
+          && unchanged('createdBy')
+          && request.resource.data.status in ['reassigned', 'archived'];
+
+        allow delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/customers/{customerId}
+      // (TASK-045 visibility contract for TASK-048/TASK-051)
+      // -------------------------------------------------------------------
+
+      match /customers/{customerId} {
+        allow get: if canReadCustomer(organizationId);
+        allow list: if canListCustomers(organizationId);
+
+        // Customer creation/editing belongs to TASK-048/TASK-049/TASK-051.
+        allow create, update, delete: if false;
       }
 
       // -------------------------------------------------------------------

@@ -40,19 +40,36 @@ function organizationDoc(overrides = {}) {
   };
 }
 
-function membershipDoc({ organizationId, userId, roleId, roleName, status = 'active' }) {
+function membershipDoc({ organizationId, userId, roleId, roleName, teamIds = [], status = 'active' }) {
   return {
     organizationId,
     userId,
     roleId,
     roleName,
-    teamIds: [],
+    teamIds,
     status,
     version: 1,
     createdAt: now(),
     createdBy: userId,
     updatedAt: now(),
     updatedBy: userId,
+  };
+}
+
+function teamDoc({ organizationId, name = 'Equipe Sul', managerUserId = 'manager-a', memberIds = ['rep-a'] }) {
+  return {
+    organizationId,
+    name,
+    companyId: 'company-a',
+    branchId: null,
+    managerUserId,
+    memberIds,
+    version: 1,
+    createdAt: now(),
+    createdBy: 'owner-a',
+    updatedAt: now(),
+    updatedBy: 'owner-a',
+    deletedAt: null,
   };
 }
 
@@ -79,6 +96,54 @@ function companyDoc({ organizationId }) {
     createdBy: 'owner-a',
     updatedAt: now(),
     updatedBy: 'owner-a',
+  };
+}
+
+function customerDoc({ organizationId, companyId = 'company-a', primarySalesRepId, teamId, deletedAt = null }) {
+  return {
+    organizationId,
+    companyId,
+    name: 'Cliente Teste',
+    primarySalesRepId,
+    teamId,
+    deletedAt,
+    version: 1,
+    createdAt: now(),
+    createdBy: 'owner-a',
+    updatedAt: now(),
+    updatedBy: 'owner-a',
+  };
+}
+
+function portfolioAssignmentDoc({
+  organizationId,
+  companyId = 'company-a',
+  userId = 'rep-a',
+  teamId = 'team-a',
+  scopeType = 'customer',
+  customerId = 'customer-a',
+  region = null,
+  segment = null,
+  status = 'active',
+}) {
+  return {
+    organizationId,
+    companyId,
+    userId,
+    teamId,
+    scopeType,
+    customerId,
+    region,
+    segment,
+    status,
+    version: 1,
+    createdAt: now(),
+    createdBy: 'manager-a',
+    updatedAt: now(),
+    updatedBy: 'manager-a',
+    endedAt: null,
+    endedBy: null,
+    deletedAt: null,
   };
 }
 
@@ -151,14 +216,49 @@ beforeEach(async () => {
 
     await db.doc(`organizations/${ORG_A}`).set(organizationDoc({ createdBy: 'owner-a', updatedBy: 'owner-a' }));
     await db.doc(`organizations/${ORG_A}/roles/OWNER`).set(roleDoc({ organizationId: ORG_A, name: 'OWNER', isSystemRole: true }));
+    await db.doc(`organizations/${ORG_A}/roles/ADMIN`).set(roleDoc({ organizationId: ORG_A, name: 'ADMIN', isSystemRole: true }));
+    await db.doc(`organizations/${ORG_A}/roles/SALES_MANAGER`).set(roleDoc({ organizationId: ORG_A, name: 'SALES_MANAGER', isSystemRole: true }));
     await db.doc(`organizations/${ORG_A}/roles/SALES_REP`).set(roleDoc({ organizationId: ORG_A, name: 'SALES_REP', isSystemRole: true }));
     await db.doc(`organizations/${ORG_A}/members/owner-a`).set(
       membershipDoc({ organizationId: ORG_A, userId: 'owner-a', roleId: 'OWNER', roleName: 'OWNER' }),
     );
+    await db.doc(`organizations/${ORG_A}/members/admin-a`).set(
+      membershipDoc({ organizationId: ORG_A, userId: 'admin-a', roleId: 'ADMIN', roleName: 'ADMIN' }),
+    );
+    await db.doc(`organizations/${ORG_A}/members/manager-a`).set(
+      membershipDoc({
+        organizationId: ORG_A,
+        userId: 'manager-a',
+        roleId: 'SALES_MANAGER',
+        roleName: 'SALES_MANAGER',
+        teamIds: ['team-a'],
+      }),
+    );
     await db.doc(`organizations/${ORG_A}/members/rep-a`).set(
-      membershipDoc({ organizationId: ORG_A, userId: 'rep-a', roleId: 'SALES_REP', roleName: 'SALES_REP' }),
+      membershipDoc({
+        organizationId: ORG_A,
+        userId: 'rep-a',
+        roleId: 'SALES_REP',
+        roleName: 'SALES_REP',
+        teamIds: ['team-a'],
+      }),
+    );
+    await db.doc(`organizations/${ORG_A}/members/rep-b`).set(
+      membershipDoc({
+        organizationId: ORG_A,
+        userId: 'rep-b',
+        roleId: 'SALES_REP',
+        roleName: 'SALES_REP',
+        teamIds: ['team-b'],
+      }),
     );
     await db.doc(`organizations/${ORG_A}/companies/company-a`).set(companyDoc({ organizationId: ORG_A }));
+    await db.doc(`organizations/${ORG_A}/teams/team-a`).set(
+      teamDoc({ organizationId: ORG_A, managerUserId: 'manager-a', memberIds: ['rep-a'] }),
+    );
+    await db.doc(`organizations/${ORG_A}/teams/team-b`).set(
+      teamDoc({ organizationId: ORG_A, name: 'Equipe Norte', managerUserId: 'other-manager', memberIds: ['rep-b'] }),
+    );
 
     await db.doc(`organizations/${ORG_B}`).set(organizationDoc({ createdBy: 'owner-b', updatedBy: 'owner-b' }));
     await db.doc(`organizations/${ORG_B}/roles/OWNER`).set(roleDoc({ organizationId: ORG_B, name: 'OWNER', isSystemRole: true }));
@@ -443,6 +543,150 @@ describe('organizations/{organizationId}/roles/{roleId}', () => {
       );
     },
   );
+});
+
+describe('organizations/{organizationId}/portfolioAssignments/{assignmentId}  (TASK-045)', () => {
+  test('SALES_MANAGER consegue criar vínculo de carteira na própria organization', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/portfolioAssignments/assignment-1`).set(
+        portfolioAssignmentDoc({ organizationId: ORG_A }),
+      ),
+    );
+  });
+
+  test('SALES_REP não consegue criar vínculo de carteira', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/portfolioAssignments/assignment-1`).set(
+        portfolioAssignmentDoc({ organizationId: ORG_A }),
+      ),
+    );
+  });
+
+  test('reatribuição fecha vínculo sem permitir troca de tenant ou escopo', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/portfolioAssignments/assignment-1`)
+        .set(portfolioAssignmentDoc({ organizationId: ORG_A }));
+    });
+
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/portfolioAssignments/assignment-1`).update({
+        status: 'reassigned',
+        endedAt: now(),
+        endedBy: 'manager-a',
+        updatedAt: now(),
+        updatedBy: 'manager-a',
+      }),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/portfolioAssignments/assignment-1`).update({
+        customerId: 'customer-b',
+        updatedAt: now(),
+        updatedBy: 'manager-a',
+      }),
+    );
+  });
+
+  test('SALES_REP lista apenas os próprios vínculos quando a query filtra userId', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/portfolioAssignments/assignment-rep-a`)
+        .set(portfolioAssignmentDoc({ organizationId: ORG_A, userId: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/portfolioAssignments/assignment-rep-b`)
+        .set(portfolioAssignmentDoc({ organizationId: ORG_A, userId: 'rep-b', customerId: 'customer-b', teamId: 'team-b' }));
+    });
+
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      db
+        .collection(`organizations/${ORG_A}/portfolioAssignments`)
+        .where('userId', '==', 'rep-a')
+        .get(),
+    );
+    await assertFails(
+      db
+        .collection(`organizations/${ORG_A}/portfolioAssignments`)
+        .where('userId', '==', 'rep-b')
+        .get(),
+    );
+  });
+});
+
+describe('organizations/{organizationId}/customers/{customerId}  (TASK-045 visibility contract)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/customers/customer-a`)
+        .set(customerDoc({ organizationId: ORG_A, primarySalesRepId: 'rep-a', teamId: 'team-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/customers/customer-b`)
+        .set(customerDoc({ organizationId: ORG_A, primarySalesRepId: 'rep-b', teamId: 'team-b' }));
+      await db
+        .doc(`organizations/${ORG_B}/customers/customer-other-tenant`)
+        .set(customerDoc({ organizationId: ORG_B, companyId: 'company-b', primarySalesRepId: 'owner-b', teamId: 'team-x' }));
+    });
+  });
+
+  test('SALES_REP lê cliente da própria carteira', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/customers/customer-a`).get());
+  });
+
+  test('SALES_REP não lê cliente fora da carteira mesmo manipulando query', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/customers/customer-b`).get());
+    await assertFails(
+      db
+        .collection(`organizations/${ORG_A}/customers`)
+        .where('primarySalesRepId', '==', 'rep-b')
+        .where('deletedAt', '==', null)
+        .get(),
+    );
+  });
+
+  test('SALES_REP consegue executar a query contratada por primarySalesRepId', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      db
+        .collection(`organizations/${ORG_A}/customers`)
+        .where('primarySalesRepId', '==', 'rep-a')
+        .where('deletedAt', '==', null)
+        .get(),
+    );
+  });
+
+  test('SALES_MANAGER lê clientes das suas equipes por teamId', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/customers/customer-a`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/customers/customer-b`).get());
+    await assertSucceeds(
+      db
+        .collection(`organizations/${ORG_A}/customers`)
+        .where('teamId', '==', 'team-a')
+        .where('deletedAt', '==', null)
+        .get(),
+    );
+  });
+
+  test('ADMIN e OWNER leem toda a carteira da própria organization', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+
+    await assertSucceeds(ownerDb.collection(`organizations/${ORG_A}/customers`).get());
+    await assertSucceeds(adminDb.collection(`organizations/${ORG_A}/customers`).get());
+  });
+
+  test('membro da Org A não lê clientes da Org B', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/customers/customer-other-tenant`).get());
+  });
 });
 
 describe('organizations/{organizationId}/members/{userId}  (Membership)', () => {

@@ -247,19 +247,37 @@ import '../features/settings/domain/usecases/submit_about_app_diagnostics_use_ca
 import '../features/settings/presentation/bloc/about_app_bloc.dart' as _i398;
 import '../features/users/data/datasources/cloud_functions_user_role_data_source.dart'
     as _i789;
+import '../features/users/data/datasources/firestore_portfolio_assignment_data_source.dart'
+    as _i954;
+import '../features/users/data/datasources/portfolio_assignment_data_source.dart'
+    as _i847;
 import '../features/users/data/datasources/user_role_data_source.dart' as _i176;
+import '../features/users/data/mappers/portfolio_assignment_mapper.dart'
+    as _i708;
 import '../features/users/data/mappers/user_role_update_result_mapper.dart'
     as _i958;
+import '../features/users/data/repositories/portfolio_assignment_repository_impl.dart'
+    as _i667;
 import '../features/users/data/repositories/user_role_repository_impl.dart'
     as _i53;
+import '../features/users/domain/repositories/portfolio_assignment_repository.dart'
+    as _i295;
 import '../features/users/domain/repositories/user_role_repository.dart'
     as _i262;
+import '../features/users/domain/services/portfolio_visibility_service.dart'
+    as _i302;
+import '../features/users/domain/usecases/assign_portfolio_use_case.dart'
+    as _i636;
 import '../features/users/domain/usecases/list_commercial_teams_use_case.dart'
     as _i986;
 import '../features/users/domain/usecases/list_organization_users_use_case.dart'
     as _i93;
+import '../features/users/domain/usecases/list_portfolio_assignments_use_case.dart'
+    as _i321;
 import '../features/users/domain/usecases/update_user_role_use_case.dart'
     as _i428;
+import '../features/users/presentation/bloc/assign_portfolio_bloc.dart'
+    as _i433;
 import '../features/users/presentation/bloc/team_form_bloc.dart' as _i516;
 import '../features/users/presentation/bloc/team_list_bloc.dart' as _i831;
 import '../features/users/presentation/bloc/user_list_bloc.dart' as _i244;
@@ -309,6 +327,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i847.AboutAppMapper>(() => const _i847.AboutAppMapper());
     gh.lazySingleton<_i370.AboutAppNotesMapper>(
       () => const _i370.AboutAppNotesMapper(),
+    );
+    gh.lazySingleton<_i708.PortfolioAssignmentMapper>(
+      () => const _i708.PortfolioAssignmentMapper(),
     );
     gh.lazySingleton<_i958.UserRoleUpdateResultMapper>(
       () => const _i958.UserRoleUpdateResultMapper(),
@@ -485,6 +506,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i904.StorageDataSource>(
       () => _i833.FirebaseStorageDataSource(gh<_i457.FirebaseStorage>()),
     );
+    gh.lazySingleton<_i847.PortfolioAssignmentDataSource>(
+      () => _i954.FirestorePortfolioAssignmentDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.lazySingleton<_i268.OrganizationDataSource>(
       () => _i455.FirestoreOrganizationDataSource(
         gh<_i974.FirebaseFirestore>(),
@@ -538,6 +564,12 @@ extension GetItInjectableX on _i174.GetIt {
         notesMapper: gh<_i370.AboutAppNotesMapper>(),
       ),
     );
+    gh.lazySingleton<_i295.PortfolioAssignmentRepository>(
+      () => _i667.PortfolioAssignmentRepositoryImpl(
+        dataSource: gh<_i847.PortfolioAssignmentDataSource>(),
+        mapper: gh<_i708.PortfolioAssignmentMapper>(),
+      ),
+    );
     gh.lazySingleton<_i753.AuditLogRepository>(
       () => _i303.AuditLogRepositoryImpl(
         dataSource: gh<_i432.AuditLogDataSource>(),
@@ -548,6 +580,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i53.UserRoleRepositoryImpl(
         dataSource: gh<_i176.UserRoleDataSource>(),
         mapper: gh<_i958.UserRoleUpdateResultMapper>(),
+      ),
+    );
+    gh.factory<_i321.ListPortfolioAssignmentsUseCase>(
+      () => _i321.ListPortfolioAssignmentsUseCase(
+        gh<_i295.PortfolioAssignmentRepository>(),
       ),
     );
     gh.factory<_i1030.AssignRoleToUserUseCase>(
@@ -711,10 +748,23 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i334.RevokeInviteUseCase>(
       () => _i334.RevokeInviteUseCase(gh<_i75.InviteRepository>()),
     );
+    gh.factory<_i302.PortfolioVisibilityService>(
+      () => _i302.PortfolioVisibilityService(
+        gh<_i265.MembershipRepository>(),
+        gh<_i265.TeamRepository>(),
+      ),
+    );
     gh.factory<_i93.ListOrganizationUsersUseCase>(
       () => _i93.ListOrganizationUsersUseCase(
         gh<_i957.MembershipRepository>(),
         gh<_i320.TeamRepository>(),
+      ),
+    );
+    gh.factory<_i636.AssignPortfolioUseCase>(
+      () => _i636.AssignPortfolioUseCase(
+        gh<_i295.PortfolioAssignmentRepository>(),
+        gh<_i265.MembershipRepository>(),
+        gh<_i265.TeamRepository>(),
       ),
     );
     gh.factory<_i516.TeamFormBloc>(
@@ -763,6 +813,15 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i831.TeamListBloc(
         listCommercialTeams: gh<_i986.ListCommercialTeamsUseCase>(),
         deleteTeam: gh<_i265.DeleteTeamUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i433.AssignPortfolioBloc>(
+      () => _i433.AssignPortfolioBloc(
+        listOrganizationUsers: gh<_i93.ListOrganizationUsersUseCase>(),
+        listCommercialTeams: gh<_i986.ListCommercialTeamsUseCase>(),
+        listPortfolioAssignments: gh<_i321.ListPortfolioAssignmentsUseCase>(),
+        assignPortfolio: gh<_i636.AssignPortfolioUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
