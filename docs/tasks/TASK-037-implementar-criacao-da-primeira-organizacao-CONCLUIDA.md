@@ -317,15 +317,16 @@ arquivo alterado nesta passada foi o teste do datasource, recém-reescrito).
 
 ## Commit
 
-Ver resposta final da task (preenchido após `git commit` real).
+Criado com sucesso (`lib/main.dart`, alteração pré-existente não relacionada a esta task, foi
+deliberadamente deixado de fora do commit).
 
 ## Push
 
-Autorizado nesta rodada; executado após o commit.
+Autorizado nesta rodada; executado com sucesso após o commit.
 
 ## Hash do commit
 
-Ver resposta final da task (preenchido após `git commit` real).
+`59b04b2`
 
 ## Branch
 
