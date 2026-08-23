@@ -2,26 +2,29 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vestipro/core/auth/auth.dart';
+import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/navigation/navigation.dart';
+import 'package:vestipro/core/utils/utils.dart';
 
-class _MockAuthRepository extends Mock implements AuthRepository {}
+class _MockSessionService extends Mock implements SessionService {}
 
 void main() {
   group('SessionAuthGuard', () {
-    late _MockAuthRepository authRepository;
+    late _MockSessionService sessionService;
     late SessionAuthGuard guard;
 
     const signedInUser = SessionUser(uid: 'user-1', emailVerified: true);
 
     setUp(() {
-      authRepository = _MockAuthRepository();
-      guard = SessionAuthGuard(authRepository);
+      sessionService = _MockSessionService();
+      guard = SessionAuthGuard(sessionService);
     });
 
-    testWidgets('allows navigation when a session is signed in', (
-      tester,
-    ) async {
-      when(() => authRepository.currentUser).thenReturn(signedInUser);
+    testWidgets('allows navigation when the session is active', (tester) async {
+      when(() => sessionService.currentUser).thenReturn(signedInUser);
+      when(
+        () => sessionService.ensureSessionIsActive(),
+      ).thenAnswer((_) async => const AppSuccess<void>(null));
       final appRouter = _buildRouter(guard);
 
       await tester.pumpWidget(
@@ -36,7 +39,7 @@ void main() {
     testWidgets('redirects to LoginRoute when no session is signed in', (
       tester,
     ) async {
-      when(() => authRepository.currentUser).thenReturn(null);
+      when(() => sessionService.currentUser).thenReturn(null);
       final appRouter = _buildRouter(guard);
 
       await tester.pumpWidget(
@@ -49,12 +52,35 @@ void main() {
       // LoginRoute has a real GoRoute since TASK-034: the guard redirects
       // to the actual login page instead of falling back to not-found.
       expect(find.text('login-page'), findsOneWidget);
+      verifyNever(() => sessionService.ensureSessionIsActive());
     });
+
+    testWidgets(
+      'redirects to LoginRoute when the session was revoked remotely',
+      (tester) async {
+        when(() => sessionService.currentUser).thenReturn(signedInUser);
+        when(() => sessionService.ensureSessionIsActive()).thenAnswer(
+          (_) async => const AppFailure<void>(
+            AuthenticationFailure('Sua sessão foi encerrada.'),
+          ),
+        );
+        final appRouter = _buildRouter(guard);
+
+        await tester.pumpWidget(
+          MaterialApp.router(routerConfig: appRouter.router),
+        );
+        appRouter.router.go(const AboutAppRoute(orgId: 'acme').location);
+        await tester.pumpAndSettle();
+
+        expect(find.text('about-app:acme'), findsNothing);
+        expect(find.text('login-page'), findsOneWidget);
+      },
+    );
 
     testWidgets(
       'does not redirect a request that is already headed to LoginRoute',
       (tester) async {
-        when(() => authRepository.currentUser).thenReturn(null);
+        when(() => sessionService.currentUser).thenReturn(null);
         final appRouter = _buildRouter(guard);
 
         await tester.pumpWidget(

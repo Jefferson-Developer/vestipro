@@ -125,4 +125,22 @@ final class AuthRepositoryImpl implements AuthRepository {
       );
     }
   }
+
+  @override
+  Future<AppResult<void>> refreshSession() async {
+    try {
+      await dataSource.refreshIdToken();
+      return const AppSuccess<void>(null);
+    } on AppException catch (exception) {
+      return AppFailure<void>(mapAppExceptionToFailure(exception));
+    } catch (exception) {
+      return AppFailure<void>(
+        UnexpectedFailure(
+          'Unexpected error refreshing the session.',
+          code: 'auth_refresh_session_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
 }

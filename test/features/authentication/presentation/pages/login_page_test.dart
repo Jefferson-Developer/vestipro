@@ -307,4 +307,9 @@ final class _AuthRepositoryStub implements AuthRepository {
   Future<AppResult<void>> sendPasswordResetEmail({required String email}) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<AppResult<void>> refreshSession() {
+    throw UnimplementedError();
+  }
 }

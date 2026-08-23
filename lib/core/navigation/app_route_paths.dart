@@ -5,6 +5,8 @@
 /// helpers exposed by `AppRouter`.
 library;
 
+import '../auth/domain/value_objects/session_ended_reason.dart';
+
 /// Base type for every route VestiPro can navigate to.
 sealed class AppRoute {
   const AppRoute();
@@ -34,19 +36,37 @@ final class AboutAppRoute extends AppRoute {
 
 /// Route shown to sign a user in (TASK-034).
 ///
-/// [SessionAuthGuard] (TASK-012) already redirects here for any
-/// unauthenticated request to a protected route; [AppRouter] is not wired
-/// to use [SessionAuthGuard] by default yet (that guard swap is TASK-041's
-/// persistent-session responsibility), so this route only becomes the
-/// actual entry point of the app once that task lands.
+/// [SessionAuthGuard] (TASK-041) redirects here for any unauthenticated
+/// request to a protected route, and for one whose session was detected as
+/// revoked while navigating. Both cases may carry:
+///
+/// - [returnTo]: the location that was originally requested, so a future
+///   post-login navigation can send the user back there instead of always
+///   landing on the same placeholder destination `LoginPage` uses today.
+/// - [endedSessionReason]: set only when an already-signed-in session just
+///   ended (never for a plain "not signed in yet" redirect), so a future
+///   UI can show *why* — e.g. "Sua sessão foi encerrada." Reading this
+///   query parameter and rendering that message is not part of TASK-041's
+///   scope (no front-end agent is assigned to it): this route only carries
+///   the information forward.
 final class LoginRoute extends AppRoute {
-  const LoginRoute();
+  const LoginRoute({this.returnTo, this.endedSessionReason});
+
+  final String? returnTo;
+  final SessionEndedReason? endedSessionReason;
 
   static const name = 'login';
   static const pathPattern = '/login';
 
   @override
-  String get location => pathPattern;
+  String get location {
+    final queryParameters = <String, String>{
+      if (returnTo != null && returnTo!.isNotEmpty) 'returnTo': returnTo!,
+      if (endedSessionReason != null) 'reason': endedSessionReason!.name,
+    };
+    if (queryParameters.isEmpty) return pathPattern;
+    return Uri(path: pathPattern, queryParameters: queryParameters).toString();
+  }
 }
 
 /// Route shown to create a brand-new account (TASK-035).

@@ -218,4 +218,9 @@ final class _AuthRepositoryStub implements AuthRepository {
     }
     return result!;
   }
+
+  @override
+  Future<AppResult<void>> refreshSession() {
+    throw UnimplementedError();
+  }
 }

@@ -183,4 +183,9 @@ final class _AuthRepositoryStub implements AuthRepository {
     onCall?.call(email);
     return result;
   }
+
+  @override
+  Future<AppResult<void>> refreshSession() {
+    throw UnimplementedError();
+  }
 }

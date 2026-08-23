@@ -9,6 +9,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 
 import '../core/analytics/configure_analytics.dart';
@@ -29,6 +30,13 @@ abstract class AppInjectionModule {
 
   @lazySingleton
   FirebaseAuth get firebaseAuth => FirebaseAuth.instance;
+
+  /// Backs `SecureFlutterSessionStore` (TASK-041). Default options already
+  /// map to Keychain (iOS/macOS), Keystore-backed EncryptedSharedPreferences
+  /// (Android) and DPAPI (Windows) — no extra per-platform configuration
+  /// needed for the minimal, non-token session metadata it persists.
+  @lazySingleton
+  FlutterSecureStorage get secureStorage => const FlutterSecureStorage();
 
   /// Activates App Check (TASK-032) the first time something resolves
   /// [FirebaseAppCheck] — same lazy-DI-triggered wiring rationale as every

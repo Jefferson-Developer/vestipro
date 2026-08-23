@@ -41,4 +41,13 @@ abstract interface class AuthRepository {
   Future<AppResult<void>> signOut();
 
   Future<AppResult<void>> sendPasswordResetEmail({required String email});
+
+  /// Forces a refresh of the signed-in user's ID token (TASK-041). Returns
+  /// an [AuthenticationFailure] carrying the original Firebase code
+  /// (`user-disabled`, `user-token-expired`, `invalid-user-token`,
+  /// `user-not-found`) when the session is no longer valid — used by
+  /// [SessionService.ensureSessionIsActive] to tell a real revocation apart
+  /// from a transient connectivity failure. Succeeds as a no-op when there
+  /// is no signed-in user.
+  Future<AppResult<void>> refreshSession();
 }

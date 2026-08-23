@@ -103,9 +103,10 @@ class AppRouter {
     errorBuilder: (context, state) => const NotFoundPage(),
   );
 
-  String? _redirect(BuildContext context, GoRouterState state) {
-    final authRedirect = authGuard.redirect(context, state);
+  Future<String?> _redirect(BuildContext context, GoRouterState state) async {
+    final authRedirect = await authGuard.redirect(context, state);
     if (authRedirect != null) return authRedirect;
+    if (!context.mounted) return null;
 
     return organizationGuard.redirect(context, state);
   }

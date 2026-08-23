@@ -18,6 +18,7 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart' as _i141;
 import 'package:firebase_performance/firebase_performance.dart' as _i346;
 import 'package:firebase_remote_config/firebase_remote_config.dart' as _i627;
 import 'package:firebase_storage/firebase_storage.dart' as _i457;
+import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
@@ -27,9 +28,14 @@ import '../core/analytics/firebase_analytics_service.dart' as _i569;
 import '../core/auth/auth.dart' as _i472;
 import '../core/auth/data/datasources/auth_data_source.dart' as _i845;
 import '../core/auth/data/datasources/firebase_auth_data_source.dart' as _i814;
+import '../core/auth/data/datasources/secure_flutter_session_store.dart'
+    as _i772;
+import '../core/auth/data/datasources/secure_session_store.dart' as _i99;
 import '../core/auth/data/mappers/auth_user_mapper.dart' as _i26;
 import '../core/auth/data/repositories/auth_repository_impl.dart' as _i961;
+import '../core/auth/data/services/session_service_impl.dart' as _i520;
 import '../core/auth/domain/repositories/auth_repository.dart' as _i217;
+import '../core/auth/domain/services/session_service.dart' as _i885;
 import '../core/environment/app_environment.dart' as _i461;
 import '../core/feature_flags/feature_flag_service.dart' as _i972;
 import '../core/feature_flags/firebase_feature_flag_service.dart' as _i845;
@@ -248,6 +254,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => appInjectionModule.appEnvironment,
     );
     gh.lazySingleton<_i59.FirebaseAuth>(() => appInjectionModule.firebaseAuth);
+    gh.lazySingleton<_i558.FlutterSecureStorage>(
+      () => appInjectionModule.secureStorage,
+    );
     gh.lazySingleton<_i26.AuthUserMapper>(() => const _i26.AuthUserMapper());
     gh.lazySingleton<_i246.AuditLogEntryMapper>(
       () => const _i246.AuditLogEntryMapper(),
@@ -275,6 +284,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i465.AppClientMetadataProvider>(
       () => _i465.PackageInfoClientMetadataProvider(),
+    );
+    gh.lazySingleton<_i99.SecureSessionStore>(
+      () => _i772.SecureFlutterSessionStore(gh<_i558.FlutterSecureStorage>()),
     );
     gh.lazySingleton<_i87.InviteAcceptanceMapper>(
       () => _i87.InviteAcceptanceMapper(gh<_i649.InviteMapper>()),
@@ -388,6 +400,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i809.FirebaseFunctions>(),
         gh<_i59.FirebaseAuth>(),
         gh<_i465.AppClientMetadataProvider>(),
+      ),
+    );
+    gh.lazySingleton<_i885.SessionService>(
+      () => _i520.SessionServiceImpl(
+        authRepository: gh<_i217.AuthRepository>(),
+        secureSessionStore: gh<_i99.SecureSessionStore>(),
       ),
     );
     gh.lazySingleton<_i526.BranchDataSource>(

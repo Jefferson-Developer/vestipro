@@ -57,6 +57,20 @@ AppException mapFirebaseAuthExceptionToAppException(
         cause: exception,
         stackTrace: stackTrace,
       );
+    // Raised by `User.getIdToken(true)` (TASK-041's session-refresh check)
+    // when the account was disabled/deleted or its refresh token was
+    // revoked remotely after the app already had a locally cached session.
+    // `SessionService.ensureSessionIsActive` reads `code` back off the
+    // mapped `AuthenticationFailure` to tell this apart from a transient
+    // connectivity failure.
+    case 'user-token-expired':
+    case 'invalid-user-token':
+      return UnauthorizedException(
+        'Sua sessão foi encerrada.',
+        code: exception.code,
+        cause: exception,
+        stackTrace: stackTrace,
+      );
     default:
       return UnknownException(
         exception.message ?? 'Falha de autenticação desconhecida.',

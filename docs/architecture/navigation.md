@@ -44,8 +44,19 @@ resolved.
 `AppRouter` composes two guard extension points, both evaluated in its `redirect` callback:
 
 - `AuthGuard` (`lib/core/navigation/auth_guard.dart`) — decides whether the signed-in user may
-  reach the requested location. `AlwaysAllowAuthGuard` is the stub used today; TASK-041
-  (persistent session, logout and revocation) supplies the real implementation.
+  reach the requested location. `AlwaysAllowAuthGuard` is `AppRouter`'s own default (kept so a
+  test/example route is never forced through a real session check); `SessionAuthGuard`
+  (TASK-041), backed by `SessionService`, is the real implementation, wired explicitly at the
+  composition root (`VestiProApp`, `lib/app/bootstrap.dart`) the same way `PermissionAuthorizationGuard`
+  is wired per-route instead of changing `AppRouter`'s own default. `AuthGuard.redirect` returns
+  `FutureOr<String?>` because deciding a session is still valid may require an actual token
+  refresh round-trip (`SessionService.ensureSessionIsActive`) — same asynchronous shape
+  `AuthorizationGuard` already used. `SessionAuthGuard`'s redirect to `LoginRoute` carries
+  `returnTo` (the location that was originally requested) and, when an already-signed-in session
+  just ended, `reason` (`SessionEndedReason.name`) — both are carried as query parameters only;
+  reading them and rendering a "session ended" message is not wired into `LoginPage` yet (no
+  front-end agent was in TASK-041's scope), so this is a pending integration point for whichever
+  task builds real post-login navigation.
 - `ActiveOrganizationGuard` (`lib/core/navigation/active_organization_guard.dart`) — decides
   whether the requested `:orgId` resolves to a valid active organization for the signed-in user.
   `AlwaysAllowActiveOrganizationGuard` is the stub used today; TASK-026/TASK-037 supply the real

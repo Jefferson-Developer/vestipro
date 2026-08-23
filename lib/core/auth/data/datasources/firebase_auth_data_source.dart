@@ -118,6 +118,17 @@ final class FirebaseAuthDataSource implements AuthDataSource {
     }
   }
 
+  @override
+  Future<void> refreshIdToken() async {
+    final user = _firebaseAuth.currentUser;
+    if (user == null) return;
+    try {
+      await user.getIdToken(true);
+    } on FirebaseAuthException catch (exception, stackTrace) {
+      throw mapFirebaseAuthExceptionToAppException(exception, stackTrace);
+    }
+  }
+
   AuthUserDto? _toDto(User? user) {
     if (user == null) return null;
     return AuthUserDto(

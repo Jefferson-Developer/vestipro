@@ -7,4 +7,6 @@ library;
 
 export 'domain/entities/session_user.dart';
 export 'domain/repositories/auth_repository.dart';
+export 'domain/services/session_service.dart';
 export 'domain/value_objects/auth_provider_type.dart';
+export 'domain/value_objects/session_ended_reason.dart';

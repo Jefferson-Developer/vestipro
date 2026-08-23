@@ -95,6 +95,7 @@ dev_dependencies:
   mocktail: ^1.0.5
   network_image_mock: ^2.1.1
   firebase_core_platform_interface: ^8.1.0
+  flutter_secure_storage_platform_interface: ^2.0.1
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec

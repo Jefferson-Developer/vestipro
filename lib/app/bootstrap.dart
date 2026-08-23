@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 
+import '../core/auth/auth.dart';
 import '../core/design_system/design_system.dart';
 import '../core/environment/app_environment.dart';
 import '../core/errors/errors.dart';
@@ -131,6 +132,11 @@ class VestiProApp extends StatelessWidget {
     final appRouter =
         router ??
         AppRouter(
+          // TASK-041: the only place a session-aware [AuthGuard] gets wired
+          // for real — [AppRouter] itself keeps [AlwaysAllowAuthGuard] as
+          // its own default so tests/examples that build their own
+          // [AppRouter] are unaffected unless they opt in.
+          authGuard: SessionAuthGuard(getIt<SessionService>()),
           aboutAppPageBuilder: (context, orgId) => AboutAppPage(
             createBloc: () => getIt<AboutAppBloc>(),
             showInsightsShortcut: _resolveShowInsightsShortcut(),
