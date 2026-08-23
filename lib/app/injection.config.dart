@@ -12,6 +12,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
 import 'package:cloud_functions/cloud_functions.dart' as _i809;
 import 'package:firebase_analytics/firebase_analytics.dart' as _i398;
+import 'package:firebase_app_check/firebase_app_check.dart' as _i56;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart' as _i141;
 import 'package:firebase_performance/firebase_performance.dart' as _i346;
@@ -176,14 +177,8 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i465.AppClientMetadataProvider>(
       () => _i465.PackageInfoClientMetadataProvider(),
     );
-    gh.lazySingleton<_i974.FirebaseFirestore>(
-      () => appInjectionModule.firebaseFirestore(gh<_i461.AppEnvironment>()),
-    );
-    gh.lazySingleton<_i457.FirebaseStorage>(
-      () => appInjectionModule.firebaseStorage(gh<_i461.AppEnvironment>()),
-    );
-    gh.lazySingleton<_i809.FirebaseFunctions>(
-      () => appInjectionModule.firebaseFunctions(gh<_i461.AppEnvironment>()),
+    gh.lazySingleton<_i56.FirebaseAppCheck>(
+      () => appInjectionModule.firebaseAppCheck(gh<_i461.AppEnvironment>()),
     );
     gh.lazySingleton<_i141.FirebaseCrashlytics>(
       () => appInjectionModule.firebaseCrashlytics(gh<_i461.AppEnvironment>()),
@@ -200,13 +195,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i477.AboutAppSeedModel>(
       () => appInjectionModule.aboutAppSeedModel(gh<_i461.AppEnvironment>()),
     );
-    gh.lazySingleton<_i268.OrganizationDataSource>(
-      () =>
-          _i455.FirestoreOrganizationDataSource(gh<_i974.FirebaseFirestore>()),
-    );
-    gh.lazySingleton<_i228.TeamDataSource>(
-      () => _i23.FirestoreTeamDataSource(gh<_i974.FirebaseFirestore>()),
-    );
     gh.lazySingleton<_i932.AnalyticsService>(
       () => _i569.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
     );
@@ -217,6 +205,24 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i961.AuthRepositoryImpl(
         dataSource: gh<_i845.AuthDataSource>(),
         mapper: gh<_i26.AuthUserMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i974.FirebaseFirestore>(
+      () => appInjectionModule.firebaseFirestore(
+        gh<_i461.AppEnvironment>(),
+        gh<_i56.FirebaseAppCheck>(),
+      ),
+    );
+    gh.lazySingleton<_i457.FirebaseStorage>(
+      () => appInjectionModule.firebaseStorage(
+        gh<_i461.AppEnvironment>(),
+        gh<_i56.FirebaseAppCheck>(),
+      ),
+    );
+    gh.lazySingleton<_i809.FirebaseFunctions>(
+      () => appInjectionModule.firebaseFunctions(
+        gh<_i461.AppEnvironment>(),
+        gh<_i56.FirebaseAppCheck>(),
       ),
     );
     gh.lazySingleton<_i349.CrashReporter>(
@@ -245,12 +251,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i465.AppClientMetadataProvider>(),
       ),
     );
-    gh.lazySingleton<_i320.TeamRepository>(
-      () => _i485.TeamRepositoryImpl(
-        dataSource: gh<_i228.TeamDataSource>(),
-        mapper: gh<_i802.TeamMapper>(),
-      ),
-    );
     gh.lazySingleton<_i526.BranchDataSource>(
       () => _i878.FirestoreBranchDataSource(gh<_i974.FirebaseFirestore>()),
     );
@@ -272,17 +272,18 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i714.MembershipMapper>(),
       ),
     );
-    gh.lazySingleton<_i756.OrganizationRepository>(
-      () => _i522.OrganizationRepositoryImpl(
-        dataSource: gh<_i268.OrganizationDataSource>(),
-        mapper: gh<_i719.OrganizationMapper>(),
-      ),
-    );
     gh.lazySingleton<_i904.StorageDataSource>(
       () => _i833.FirebaseStorageDataSource(gh<_i457.FirebaseStorage>()),
     );
     gh.lazySingleton<_i923.RoleDataSource>(
       () => _i892.FirestoreRoleDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.lazySingleton<_i268.OrganizationDataSource>(
+      () =>
+          _i455.FirestoreOrganizationDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.lazySingleton<_i228.TeamDataSource>(
+      () => _i23.FirestoreTeamDataSource(gh<_i974.FirebaseFirestore>()),
     );
     gh.factory<_i330.CreateCompanyUseCase>(
       () => _i330.CreateCompanyUseCase(gh<_i799.CompanyRepository>()),
@@ -315,27 +316,22 @@ extension GetItInjectableX on _i174.GetIt {
         notesMapper: gh<_i370.AboutAppNotesMapper>(),
       ),
     );
-    gh.factory<_i835.AddUserToTeamUseCase>(
-      () => _i835.AddUserToTeamUseCase(gh<_i320.TeamRepository>()),
-    );
-    gh.factory<_i766.CreateTeamUseCase>(
-      () => _i766.CreateTeamUseCase(gh<_i320.TeamRepository>()),
-    );
-    gh.factory<_i55.CreateOrganizationUseCase>(
-      () => _i55.CreateOrganizationUseCase(gh<_i756.OrganizationRepository>()),
-    );
-    gh.factory<_i966.GetOrganizationUseCase>(
-      () => _i966.GetOrganizationUseCase(gh<_i756.OrganizationRepository>()),
-    );
-    gh.factory<_i270.UpdateOrganizationSettingsUseCase>(
-      () => _i270.UpdateOrganizationSettingsUseCase(
-        gh<_i756.OrganizationRepository>(),
-      ),
-    );
     gh.lazySingleton<_i440.RoleRepository>(
       () => _i69.RoleRepositoryImpl(
         dataSource: gh<_i923.RoleDataSource>(),
         mapper: gh<_i1043.RoleMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i320.TeamRepository>(
+      () => _i485.TeamRepositoryImpl(
+        dataSource: gh<_i228.TeamDataSource>(),
+        mapper: gh<_i802.TeamMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i756.OrganizationRepository>(
+      () => _i522.OrganizationRepositoryImpl(
+        dataSource: gh<_i268.OrganizationDataSource>(),
+        mapper: gh<_i719.OrganizationMapper>(),
       ),
     );
     gh.factory<_i713.GetAboutAppUseCase>(
@@ -357,6 +353,23 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i820.UpdateBranchUseCase>(
       () => _i820.UpdateBranchUseCase(gh<_i160.BranchRepository>()),
+    );
+    gh.factory<_i835.AddUserToTeamUseCase>(
+      () => _i835.AddUserToTeamUseCase(gh<_i320.TeamRepository>()),
+    );
+    gh.factory<_i766.CreateTeamUseCase>(
+      () => _i766.CreateTeamUseCase(gh<_i320.TeamRepository>()),
+    );
+    gh.factory<_i55.CreateOrganizationUseCase>(
+      () => _i55.CreateOrganizationUseCase(gh<_i756.OrganizationRepository>()),
+    );
+    gh.factory<_i966.GetOrganizationUseCase>(
+      () => _i966.GetOrganizationUseCase(gh<_i756.OrganizationRepository>()),
+    );
+    gh.factory<_i270.UpdateOrganizationSettingsUseCase>(
+      () => _i270.UpdateOrganizationSettingsUseCase(
+        gh<_i756.OrganizationRepository>(),
+      ),
     );
     gh.factory<_i398.AboutAppBloc>(
       () => _i398.AboutAppBloc(

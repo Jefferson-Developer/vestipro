@@ -232,6 +232,18 @@ função de exemplo `healthCheck` (TASK-015); as pastas de
 domínio (`pricing`, `orders`, `insights`, `auth`, `admin`) continuam vazias de propósito até as
 tasks correspondentes.
 
+O App Check também já está conectado (TASK-032): o provider `FirebaseAppCheck` de
+`lib/app/injection_module.dart` chama `configureAppCheck` (`lib/core/security/`) antes de qualquer
+`FirebaseFirestore`/`FirebaseStorage`/`FirebaseFunctions` ser entregue pelo container de DI (os três
+providers passaram a declarar `FirebaseAppCheck` como parâmetro só para forçar essa ordem no
+`injectable`). Como só o flavor `prod` toca o projeto real `vestipro` (ADR-0002), `development` e
+`staging` sempre ativam o Debug provider (Android/iOS/Web); `production` ativa Play Integrity
+(Android) e App Attest com fallback DeviceCheck (iOS/macOS), e só ativa reCAPTCHA v3 na Web quando um
+site key real for configurado via `--dart-define=APP_CHECK_WEB_RECAPTCHA_SITE_KEY` (App Check ainda
+não foi registrado no Firebase Console para o projeto `vestipro` — enquanto isso não acontecer, a
+Web roda sem token de App Check, com Security Rules/RBAC continuando a autorizar normalmente). App
+Check é uma camada adicional, nunca um substituto do RBAC/Security Rules já existentes.
+
 ## Documentação
 
 - Protocolo de execução do backlog: [`AGENTS.md`](AGENTS.md)

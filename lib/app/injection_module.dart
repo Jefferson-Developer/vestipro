@@ -3,6 +3,7 @@ import 'dart:async' show unawaited;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
+import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_performance/firebase_performance.dart';
@@ -16,6 +17,7 @@ import '../core/environment/app_environment.dart';
 import '../core/feature_flags/configure_remote_config.dart';
 import '../core/functions/configure_functions.dart';
 import '../core/performance/configure_performance.dart';
+import '../core/security/configure_app_check.dart';
 import '../core/services/configure_crashlytics.dart';
 import '../core/storage/configure_storage.dart';
 import '../features/settings/data/models/about_app_seed_model.dart';
@@ -28,13 +30,38 @@ abstract class AppInjectionModule {
   @lazySingleton
   FirebaseAuth get firebaseAuth => FirebaseAuth.instance;
 
+  /// Activates App Check (TASK-032) the first time something resolves
+  /// [FirebaseAppCheck] — same lazy-DI-triggered wiring rationale as every
+  /// other Firebase product provider in this module. Unlike those, this one
+  /// is also declared as an (unused) parameter of [firebaseFirestore],
+  /// [firebaseStorage] and [firebaseFunctions] below on purpose: `injectable`
+  /// resolves constructor/function parameters before the function body that
+  /// depends on them runs, so this guarantees App Check activation is always
+  /// *requested* before any of those three SDKs is handed to a caller — and
+  /// therefore before the app's first real Firestore/Storage/Functions call
+  /// — without making app boot itself wait for activation to finish
+  /// (`configureAppCheck` is fire-and-forget, same as
+  /// [firebaseRemoteConfig]/[firebasePerformance] below).
+  @lazySingleton
+  FirebaseAppCheck firebaseAppCheck(AppEnvironment environment) {
+    final appCheck = FirebaseAppCheck.instance;
+    unawaited(configureAppCheck(appCheck, environment: environment));
+    return appCheck;
+  }
+
   /// Configures native persistence and the Firestore Emulator connection
   /// (TASK-013) the first time something resolves [FirebaseFirestore] — not
   /// in `bootstrap.dart`, for the same reason `FirebaseAuthDataSource` does
   /// its own emulator wiring instead of bootstrap (TASK-012): no widget test
-  /// that never touches Firestore should pay for it.
+  /// that never touches Firestore should pay for it. [FirebaseAppCheck] is
+  /// requested (not otherwise used) so App Check activation is always
+  /// triggered first — see [firebaseAppCheck] above.
   @lazySingleton
-  FirebaseFirestore firebaseFirestore(AppEnvironment environment) {
+  FirebaseFirestore firebaseFirestore(
+    AppEnvironment environment,
+    // ignore: avoid_unused_constructor_parameters
+    FirebaseAppCheck appCheck,
+  ) {
     final firestore = FirebaseFirestore.instance;
     configureFirestore(firestore, environment: environment);
     return firestore;
@@ -42,9 +69,14 @@ abstract class AppInjectionModule {
 
   /// Connects to the Storage Emulator (TASK-014) the first time something
   /// resolves [FirebaseStorage] — same lazy-DI-triggered wiring rationale as
-  /// [firebaseFirestore] above.
+  /// [firebaseFirestore] above, including the [FirebaseAppCheck] ordering
+  /// dependency.
   @lazySingleton
-  FirebaseStorage firebaseStorage(AppEnvironment environment) {
+  FirebaseStorage firebaseStorage(
+    AppEnvironment environment,
+    // ignore: avoid_unused_constructor_parameters
+    FirebaseAppCheck appCheck,
+  ) {
     final storage = FirebaseStorage.instance;
     configureStorage(storage, environment: environment);
     return storage;
@@ -52,9 +84,14 @@ abstract class AppInjectionModule {
 
   /// Connects to the Functions Emulator (TASK-015) the first time something
   /// resolves [FirebaseFunctions] — same lazy-DI-triggered wiring rationale
-  /// as [firebaseFirestore]/[firebaseStorage] above.
+  /// as [firebaseFirestore]/[firebaseStorage] above, including the
+  /// [FirebaseAppCheck] ordering dependency.
   @lazySingleton
-  FirebaseFunctions firebaseFunctions(AppEnvironment environment) {
+  FirebaseFunctions firebaseFunctions(
+    AppEnvironment environment,
+    // ignore: avoid_unused_constructor_parameters
+    FirebaseAppCheck appCheck,
+  ) {
     final functions = FirebaseFunctions.instance;
     configureFunctions(functions, environment: environment);
     return functions;
