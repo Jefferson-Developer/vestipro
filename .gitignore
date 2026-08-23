@@ -135,6 +135,9 @@ app.*.map.json
 # Firestore Security Rules tests (TASK-030) — ver firestore-tests/package.json
 /firestore-tests/node_modules/
 
+# Storage Security Rules tests (TASK-031) — ver storage-tests/package.json
+/storage-tests/node_modules/
+
 # Firebase generated caches and local app config
 /.firebase/
 firebase-debug.log

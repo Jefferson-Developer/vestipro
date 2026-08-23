@@ -225,9 +225,10 @@ firebase emulators:start --only auth,firestore,storage,functions
 | UI         | 4000  |
 
 Os emuladores de **Firestore e Storage exigem um JRE (Java) instalado e no `PATH`** — Auth e
-Functions não. `firestore.rules` e `storage.rules` ficam com acesso negado por padrão
-(`allow read, write: if false;`) até as regras reais de RBAC/multi-tenant chegarem nas
-TASK-030/TASK-031. `functions/` já tem a função de exemplo `healthCheck` (TASK-015); as pastas de
+Functions não. `firestore.rules` (TASK-030) e `storage.rules` (TASK-031) já implementam RBAC/
+isolamento multi-tenant real (Membership ativo + capability), com testes automatizados em
+`firestore-tests/` e `storage-tests/` (rodam via `firebase emulators:exec`). `functions/` já tem a
+função de exemplo `healthCheck` (TASK-015); as pastas de
 domínio (`pricing`, `orders`, `insights`, `auth`, `admin`) continuam vazias de propósito até as
 tasks correspondentes.
 

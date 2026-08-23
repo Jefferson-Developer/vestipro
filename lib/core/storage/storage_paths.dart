@@ -5,8 +5,11 @@
 /// (ADR-0002/tenant isolation convention, mirrored from
 /// `FirestoreCollectionDataSource` in `lib/core/database/`): a client-side
 /// convention only, never the real authorization boundary — the real boundary
-/// is `storage.rules` (deny-all today, real RBAC lands in TASK-031). A
-/// correctly-shaped path is not itself permission to read/write it.
+/// is `storage.rules` (real RBAC/multi-tenant isolation since TASK-031). A
+/// correctly-shaped path is not itself permission to read/write it: every
+/// read/write is re-validated server-side against the caller's real
+/// Membership/capability, exactly as `firestore.rules` (TASK-030) already
+/// does.
 ///
 /// Path conventions (see `tasks.md`, seção 20):
 /// - Product media: `organizations/{organizationId}/products/{productId}/{fileName}`

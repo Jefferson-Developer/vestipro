@@ -13,16 +13,22 @@ import 'package:vestipro/firebase_options.dart';
 /// exercising [FirebaseStorageDataSource] exactly like a future feature
 /// service built on top of it would.
 ///
-/// `storage.rules` is intentionally `allow read, write: if false` (deny all)
-/// until TASK-031 implements real Storage Security Rules — this task must
-/// not loosen it ahead of time (same rule already applied to
-/// `firestore.rules` by TASK-013). So instead of a full upload/download
-/// round trip, this suite validates what is actually true today: the
-/// datasource reaches the real Storage Emulator through a real
+/// `storage.rules` now implements real RBAC/multi-tenant isolation
+/// (TASK-031): every read/write requires an authenticated user with an
+/// active Membership (and, for writes, the right capability) in
+/// `organizationId`. This suite never signs in through Firebase Auth, so
+/// every call below is still expected to be denied — just for a different,
+/// still-true reason (`request.auth == null` fails `isActiveMember`
+/// unconditionally, not the old deny-all placeholder). So instead of a full
+/// upload/download round trip, this suite validates what is actually true
+/// today: the datasource reaches the real Storage Emulator through a real
 /// tenant-scoped path (built via [StoragePaths]), and a real
 /// `unauthorized`/`permission-denied` response from the SDK is mapped to
 /// [ForbiddenException] end-to-end (not just for a hand-constructed
 /// [FirebaseException], like `storage_exception_mapper_test.dart` covers).
+/// A real end-to-end success round trip (signed-in user with a seeded
+/// Membership) is exercised by `storage-tests/storage.rules.test.js`
+/// (TASK-031), not by this Flutter integration test.
 ///
 /// Requires the emulator to already be running before this suite starts:
 ///

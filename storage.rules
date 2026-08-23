@@ -1,12 +1,177 @@
 rules_version = '2';
 
-// Placeholder de segurança: nega todo acesso por padrão.
-// RBAC e regras reais de multi-tenant entram na TASK-031 (Criar Storage Security Rules).
-// Este arquivo existe apenas para o Firebase Emulator Suite (TASK-010) ter uma configuração
-// de Storage válida para subir localmente; nunca deve ficar mais permissivo que "deny all"
-// antes da TASK-031 implementar as regras reais.
+// Firebase Storage Security Rules — VestiPro (TASK-031).
+//
+// Substitui o placeholder "deny all" introduzido na TASK-010 (ver histórico
+// git) pelas regras reais de isolamento multi-tenant + RBAC para os 3 tipos
+// de mídia hoje modelados em `lib/core/storage/storage_paths.dart`
+// (TASK-014): fotos de produto, anexos de pedido e avatar de usuário. Todos
+// os paths seguem a convenção `organizations/{organizationId}/...` — mas,
+// exatamente como em `firestore.rules` (TASK-030), o path em si NUNCA é
+// tratado como prova de autorização: um path "adivinhável" com um
+// `organizationId` de outra organização continua sendo negado, porque toda
+// decisão relê o Membership real no Firestore.
+//
+// Cross-service: Firebase Storage Rules podem consultar o Firestore através
+// de `firestore.get`/`firestore.exists` (Cross-Service Security Rules),
+// sempre contra o banco `(default)` — não existe aqui a variável
+// `{database}` que `firestore.rules` tem, por isso o path usa `(default)`
+// literal. Isso permite reaproveitar o mesmo Membership
+// (`organizations/{organizationId}/members/{userId}`) já usado pelo
+// Firestore como única fonte de verdade de "este usuário pertence a esta
+// organização agora", sem duplicar o dado em nenhum metadado de Storage.
+//
+// RBAC: `roleHasCapability` é uma cópia funcional do que já existe em
+// `firestore.rules` (TASK-030) e, na origem, em
+// `lib/core/permissions/role_permission_matrix.dart` (TASK-029). As 3 cópias
+// precisam ser mantidas manualmente em sincronia — mesmo risco já registrado
+// em `docs/tasks/TASK-030-criar-firestore-security-rules-CONCLUIDA.md`,
+// agora com mais um lugar para divergir (ver
+// `docs/tasks/TASK-031-criar-storage-security-rules-CONCLUIDA.md`, seção
+// "Riscos conhecidos").
+//
+// Deny by default: qualquer path fora dos 3 matches explícitos abaixo cai no
+// catch-all final (`allow read, write: if false`) — nenhum novo tipo de
+// mídia fica acessível "de graça" só por respeitar o prefixo
+// `organizations/{organizationId}/`.
 service firebase.storage {
   match /b/{bucket}/o {
+
+    // -------------------------------------------------------------------
+    // Helpers
+    // -------------------------------------------------------------------
+
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // Cross-service: sempre relê o Membership real no Firestore
+    // `(default)`, nunca confia em nenhum metadado do próprio arquivo de
+    // Storage sendo lido/escrito.
+    function membershipPath(organizationId) {
+      return /databases/(default)/documents/organizations/$(organizationId)/members/$(request.auth.uid);
+    }
+
+    function isActiveMember(organizationId) {
+      return isSignedIn()
+        && firestore.exists(membershipPath(organizationId))
+        && firestore.get(membershipPath(organizationId)).data.status == 'active';
+    }
+
+    function currentRoleName(organizationId) {
+      return firestore.get(membershipPath(organizationId)).data.roleName;
+    }
+
+    // Espelha `roleHasCapability` de `firestore.rules` (TASK-030), que por
+    // sua vez espelha `RolePermissionMatrix` (TASK-029/Dart). Os códigos de
+    // capability usados aqui são exatamente os de
+    // `lib/core/permissions/capability.dart` (`CapabilityCode.code`).
+    function roleHasCapability(roleName, capabilityCode) {
+      return roleName == 'OWNER'
+        || (roleName == 'ADMIN' && capabilityCode != 'organization.transferOwnership')
+        || (roleName == 'SALES_MANAGER' && capabilityCode in [
+              'customer.create', 'customer.update', 'customer.delete',
+              'order.create', 'order.approve', 'discount.approveAboveLimit',
+              'team.manage', 'report.export', 'report.viewSensitive'
+            ])
+        || (roleName == 'SALES_REP' && capabilityCode in [
+              'customer.create', 'customer.update', 'order.create'
+            ])
+        || (roleName == 'SALES_ASSISTANT' && capabilityCode in [
+              'customer.create', 'customer.update'
+            ])
+        || (roleName == 'FINANCE' && capabilityCode in [
+              'finance.view', 'finance.manage', 'discount.approveAboveLimit',
+              'report.export', 'report.viewSensitive'
+            ]);
+    }
+
+    function hasCapability(organizationId, capabilityCode) {
+      return isActiveMember(organizationId)
+        && roleHasCapability(currentRoleName(organizationId), capabilityCode);
+    }
+
+    // Validação de tipo/tamanho no upload — nunca só na UI/client. Só se
+    // aplica a `create`/`update` (em `delete` não existe `request.resource`).
+
+    function isValidProductImage() {
+      return request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    function isValidOrderAttachment() {
+      return request.resource.size <= 20 * 1024 * 1024
+        && request.resource.contentType in [
+             'application/pdf',
+             'image/jpeg',
+             'image/png',
+             'image/webp',
+             'application/msword',
+             'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+             'application/vnd.ms-excel',
+             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+           ];
+    }
+
+    function isValidAvatarImage() {
+      return request.resource.size <= 5 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
+    // -------------------------------------------------------------------
+    // organizations/{organizationId}/products/{productId}/{fileName}
+    // (`StoragePaths.productFile`)
+    // -------------------------------------------------------------------
+
+    match /organizations/{organizationId}/products/{productId}/{fileName} {
+      allow read: if isActiveMember(organizationId);
+
+      allow create, update: if hasCapability(organizationId, 'catalog.manage')
+        && isValidProductImage();
+
+      // Exclusão é sempre administrativa (ex.: remover imagem de produto
+      // enviada por outro usuário) — mesma capability de escrita, nunca
+      // liberada a qualquer membro ativo.
+      allow delete: if hasCapability(organizationId, 'catalog.manage');
+    }
+
+    // -------------------------------------------------------------------
+    // organizations/{organizationId}/orders/{orderId}/attachments/{fileName}
+    // (`StoragePaths.orderAttachment`)
+    // -------------------------------------------------------------------
+
+    match /organizations/{organizationId}/orders/{orderId}/attachments/{fileName} {
+      allow read: if isActiveMember(organizationId);
+
+      allow create, update: if hasCapability(organizationId, 'order.create')
+        && isValidOrderAttachment();
+
+      allow delete: if hasCapability(organizationId, 'order.create');
+    }
+
+    // -------------------------------------------------------------------
+    // organizations/{organizationId}/users/{userId}/avatar
+    // (`StoragePaths.userAvatar`)
+    // -------------------------------------------------------------------
+
+    match /organizations/{organizationId}/users/{userId}/avatar {
+      allow read: if isActiveMember(organizationId);
+
+      // Cada usuário só gerencia o próprio avatar — não há capability de
+      // RBAC para isso, é sempre uma ação sobre o próprio perfil.
+      allow create, update: if isActiveMember(organizationId)
+        && userId == request.auth.uid
+        && isValidAvatarImage();
+
+      allow delete: if isActiveMember(organizationId)
+        && userId == request.auth.uid;
+    }
+
+    // -------------------------------------------------------------------
+    // Deny by default: qualquer outro path (produto/pedido/avatar de outra
+    // organização, ou qualquer path futuro ainda não modelado aqui).
+    // -------------------------------------------------------------------
+
     match /{allPaths=**} {
       allow read, write: if false;
     }
