@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Team {
 
- String get id; String get organizationId; String get name; List<String> get memberIds; int get version; DateTime get createdAt; String get createdBy; DateTime get updatedAt; String get updatedBy; DateTime? get deletedAt;
+ String get id; String get organizationId; String get name; String? get companyId; String? get branchId; String get managerUserId; List<String> get memberIds; int get version; DateTime get createdAt; String get createdBy; DateTime get updatedAt; String get updatedBy; DateTime? get deletedAt;
 /// Create a copy of Team
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $TeamCopyWith<Team> get copyWith => _$TeamCopyWithImpl<Team>(this as Team, _$ide
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Team&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other.memberIds, memberIds)&&(identical(other.version, version) || other.version == version)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Team&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.name, name) || other.name == name)&&(identical(other.companyId, companyId) || other.companyId == companyId)&&(identical(other.branchId, branchId) || other.branchId == branchId)&&(identical(other.managerUserId, managerUserId) || other.managerUserId == managerUserId)&&const DeepCollectionEquality().equals(other.memberIds, memberIds)&&(identical(other.version, version) || other.version == version)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,organizationId,name,const DeepCollectionEquality().hash(memberIds),version,createdAt,createdBy,updatedAt,updatedBy,deletedAt);
+int get hashCode => Object.hash(runtimeType,id,organizationId,name,companyId,branchId,managerUserId,const DeepCollectionEquality().hash(memberIds),version,createdAt,createdBy,updatedAt,updatedBy,deletedAt);
 
 @override
 String toString() {
-  return 'Team(id: $id, organizationId: $organizationId, name: $name, memberIds: $memberIds, version: $version, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, deletedAt: $deletedAt)';
+  return 'Team(id: $id, organizationId: $organizationId, name: $name, companyId: $companyId, branchId: $branchId, managerUserId: $managerUserId, memberIds: $memberIds, version: $version, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, deletedAt: $deletedAt)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $TeamCopyWith<$Res>  {
   factory $TeamCopyWith(Team value, $Res Function(Team) _then) = _$TeamCopyWithImpl;
 @useResult
 $Res call({
- String id, String organizationId, String name, List<String> memberIds, int version, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, DateTime? deletedAt
+ String id, String organizationId, String name, String? companyId, String? branchId, String managerUserId, List<String> memberIds, int version, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, DateTime? deletedAt
 });
 
 
@@ -62,11 +62,14 @@ class _$TeamCopyWithImpl<$Res>
 
 /// Create a copy of Team
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? organizationId = null,Object? name = null,Object? memberIds = null,Object? version = null,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? deletedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? organizationId = null,Object? name = null,Object? companyId = freezed,Object? branchId = freezed,Object? managerUserId = null,Object? memberIds = null,Object? version = null,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? deletedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,companyId: freezed == companyId ? _self.companyId : companyId // ignore: cast_nullable_to_non_nullable
+as String?,branchId: freezed == branchId ? _self.branchId : branchId // ignore: cast_nullable_to_non_nullable
+as String?,managerUserId: null == managerUserId ? _self.managerUserId : managerUserId // ignore: cast_nullable_to_non_nullable
 as String,memberIds: null == memberIds ? _self.memberIds : memberIds // ignore: cast_nullable_to_non_nullable
 as List<String>,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
@@ -159,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String organizationId,  String name,  List<String> memberIds,  int version,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String organizationId,  String name,  String? companyId,  String? branchId,  String managerUserId,  List<String> memberIds,  int version,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Team() when $default != null:
-return $default(_that.id,_that.organizationId,_that.name,_that.memberIds,_that.version,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
+return $default(_that.id,_that.organizationId,_that.name,_that.companyId,_that.branchId,_that.managerUserId,_that.memberIds,_that.version,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
   return orElse();
 
 }
@@ -180,10 +183,10 @@ return $default(_that.id,_that.organizationId,_that.name,_that.memberIds,_that.v
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String organizationId,  String name,  List<String> memberIds,  int version,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String organizationId,  String name,  String? companyId,  String? branchId,  String managerUserId,  List<String> memberIds,  int version,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)  $default,) {final _that = this;
 switch (_that) {
 case _Team():
-return $default(_that.id,_that.organizationId,_that.name,_that.memberIds,_that.version,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
+return $default(_that.id,_that.organizationId,_that.name,_that.companyId,_that.branchId,_that.managerUserId,_that.memberIds,_that.version,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -200,10 +203,10 @@ return $default(_that.id,_that.organizationId,_that.name,_that.memberIds,_that.v
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String organizationId,  String name,  List<String> memberIds,  int version,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String organizationId,  String name,  String? companyId,  String? branchId,  String managerUserId,  List<String> memberIds,  int version,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _Team() when $default != null:
-return $default(_that.id,_that.organizationId,_that.name,_that.memberIds,_that.version,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
+return $default(_that.id,_that.organizationId,_that.name,_that.companyId,_that.branchId,_that.managerUserId,_that.memberIds,_that.version,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
   return null;
 
 }
@@ -215,12 +218,15 @@ return $default(_that.id,_that.organizationId,_that.name,_that.memberIds,_that.v
 
 
 class _Team implements Team {
-  const _Team({required this.id, required this.organizationId, required this.name, final  List<String> memberIds = const <String>[], required this.version, required this.createdAt, required this.createdBy, required this.updatedAt, required this.updatedBy, this.deletedAt}): _memberIds = memberIds;
+  const _Team({required this.id, required this.organizationId, required this.name, this.companyId, this.branchId, this.managerUserId = '', final  List<String> memberIds = const <String>[], required this.version, required this.createdAt, required this.createdBy, required this.updatedAt, required this.updatedBy, this.deletedAt}): _memberIds = memberIds;
   
 
 @override final  String id;
 @override final  String organizationId;
 @override final  String name;
+@override final  String? companyId;
+@override final  String? branchId;
+@override@JsonKey() final  String managerUserId;
  final  List<String> _memberIds;
 @override@JsonKey() List<String> get memberIds {
   if (_memberIds is EqualUnmodifiableListView) return _memberIds;
@@ -245,16 +251,16 @@ _$TeamCopyWith<_Team> get copyWith => __$TeamCopyWithImpl<_Team>(this, _$identit
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Team&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other._memberIds, _memberIds)&&(identical(other.version, version) || other.version == version)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Team&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.name, name) || other.name == name)&&(identical(other.companyId, companyId) || other.companyId == companyId)&&(identical(other.branchId, branchId) || other.branchId == branchId)&&(identical(other.managerUserId, managerUserId) || other.managerUserId == managerUserId)&&const DeepCollectionEquality().equals(other._memberIds, _memberIds)&&(identical(other.version, version) || other.version == version)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,organizationId,name,const DeepCollectionEquality().hash(_memberIds),version,createdAt,createdBy,updatedAt,updatedBy,deletedAt);
+int get hashCode => Object.hash(runtimeType,id,organizationId,name,companyId,branchId,managerUserId,const DeepCollectionEquality().hash(_memberIds),version,createdAt,createdBy,updatedAt,updatedBy,deletedAt);
 
 @override
 String toString() {
-  return 'Team(id: $id, organizationId: $organizationId, name: $name, memberIds: $memberIds, version: $version, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, deletedAt: $deletedAt)';
+  return 'Team(id: $id, organizationId: $organizationId, name: $name, companyId: $companyId, branchId: $branchId, managerUserId: $managerUserId, memberIds: $memberIds, version: $version, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, deletedAt: $deletedAt)';
 }
 
 
@@ -265,7 +271,7 @@ abstract mixin class _$TeamCopyWith<$Res> implements $TeamCopyWith<$Res> {
   factory _$TeamCopyWith(_Team value, $Res Function(_Team) _then) = __$TeamCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String organizationId, String name, List<String> memberIds, int version, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, DateTime? deletedAt
+ String id, String organizationId, String name, String? companyId, String? branchId, String managerUserId, List<String> memberIds, int version, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, DateTime? deletedAt
 });
 
 
@@ -282,11 +288,14 @@ class __$TeamCopyWithImpl<$Res>
 
 /// Create a copy of Team
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? organizationId = null,Object? name = null,Object? memberIds = null,Object? version = null,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? deletedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? organizationId = null,Object? name = null,Object? companyId = freezed,Object? branchId = freezed,Object? managerUserId = null,Object? memberIds = null,Object? version = null,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? deletedAt = freezed,}) {
   return _then(_Team(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,companyId: freezed == companyId ? _self.companyId : companyId // ignore: cast_nullable_to_non_nullable
+as String?,branchId: freezed == branchId ? _self.branchId : branchId // ignore: cast_nullable_to_non_nullable
+as String?,managerUserId: null == managerUserId ? _self.managerUserId : managerUserId // ignore: cast_nullable_to_non_nullable
 as String,memberIds: null == memberIds ? _self._memberIds : memberIds // ignore: cast_nullable_to_non_nullable
 as List<String>,version: null == version ? _self.version : version // ignore: cast_nullable_to_non_nullable
 as int,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable

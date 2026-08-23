@@ -19,6 +19,10 @@ final class TeamRepositoryImpl implements TeamRepository {
     required String id,
     required String organizationId,
     required String name,
+    required String managerUserId,
+    List<String> memberIds = const <String>[],
+    String? companyId,
+    String? branchId,
     required String createdBy,
   }) async {
     try {
@@ -28,6 +32,10 @@ final class TeamRepositoryImpl implements TeamRepository {
           id: id,
           organizationId: organizationId,
           name: name,
+          companyId: companyId,
+          branchId: branchId,
+          managerUserId: managerUserId,
+          memberIds: memberIds,
           version: 1,
           createdAt: now,
           createdBy: createdBy,
@@ -45,6 +53,43 @@ final class TeamRepositoryImpl implements TeamRepository {
         UnexpectedFailure(
           'Unexpected error creating team.',
           code: 'team_create_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<AppResult<Team>> update({
+    required String organizationId,
+    required String id,
+    required String name,
+    required String managerUserId,
+    required List<String> memberIds,
+    String? companyId,
+    String? branchId,
+    required String updatedBy,
+  }) async {
+    try {
+      final updatedDto = await dataSource.update(
+        organizationId: organizationId,
+        id: id,
+        name: name,
+        managerUserId: managerUserId,
+        memberIds: memberIds,
+        companyId: companyId,
+        branchId: branchId,
+        updatedAt: DateTime.now().toUtc(),
+        updatedBy: updatedBy,
+      );
+      return AppSuccess<Team>(mapper.toEntity(updatedDto));
+    } on AppException catch (exception) {
+      return AppFailure<Team>(mapAppExceptionToFailure(exception));
+    } catch (exception) {
+      return AppFailure<Team>(
+        UnexpectedFailure(
+          'Unexpected error updating team.',
+          code: 'team_update_unexpected',
           cause: exception,
         ),
       );
@@ -125,6 +170,87 @@ final class TeamRepositoryImpl implements TeamRepository {
         UnexpectedFailure(
           'Unexpected error adding member to team.',
           code: 'team_add_member_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<AppResult<Team>> removeMember({
+    required String organizationId,
+    required String id,
+    required String userId,
+    required String updatedBy,
+  }) async {
+    try {
+      final updatedDto = await dataSource.removeMember(
+        organizationId: organizationId,
+        id: id,
+        userId: userId,
+        updatedAt: DateTime.now().toUtc(),
+        updatedBy: updatedBy,
+      );
+      return AppSuccess<Team>(mapper.toEntity(updatedDto));
+    } on AppException catch (exception) {
+      return AppFailure<Team>(mapAppExceptionToFailure(exception));
+    } catch (exception) {
+      return AppFailure<Team>(
+        UnexpectedFailure(
+          'Unexpected error removing member from team.',
+          code: 'team_remove_member_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<AppResult<bool>> hasCommercialLinks({
+    required String organizationId,
+    required String id,
+  }) async {
+    try {
+      return AppSuccess<bool>(
+        await dataSource.hasCommercialLinks(
+          organizationId: organizationId,
+          id: id,
+        ),
+      );
+    } on AppException catch (exception) {
+      return AppFailure<bool>(mapAppExceptionToFailure(exception));
+    } catch (exception) {
+      return AppFailure<bool>(
+        UnexpectedFailure(
+          'Unexpected error checking team commercial links.',
+          code: 'team_links_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<AppResult<Team>> delete({
+    required String organizationId,
+    required String id,
+    required String deletedBy,
+  }) async {
+    try {
+      final deletedDto = await dataSource.softDelete(
+        organizationId: organizationId,
+        id: id,
+        deletedAt: DateTime.now().toUtc(),
+        deletedBy: deletedBy,
+      );
+      return AppSuccess<Team>(mapper.toEntity(deletedDto));
+    } on AppException catch (exception) {
+      return AppFailure<Team>(mapAppExceptionToFailure(exception));
+    } catch (exception) {
+      return AppFailure<Team>(
+        UnexpectedFailure(
+          'Unexpected error deleting team.',
+          code: 'team_delete_unexpected',
           cause: exception,
         ),
       );

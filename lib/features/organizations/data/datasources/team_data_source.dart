@@ -16,6 +16,18 @@ abstract interface class TeamDataSource {
     required String id,
   });
 
+  Future<TeamDto> update({
+    required String organizationId,
+    required String id,
+    required String name,
+    required String managerUserId,
+    required List<String> memberIds,
+    String? companyId,
+    String? branchId,
+    required DateTime updatedAt,
+    required String updatedBy,
+  });
+
   /// Adds [userId] to the document's `memberIds` array (Firestore
   /// `FieldValue.arrayUnion`, so adding it twice keeps a single entry) and
   /// bumps `updatedAt`/`updatedBy`/`version`.
@@ -25,5 +37,25 @@ abstract interface class TeamDataSource {
     required String userId,
     required DateTime updatedAt,
     required String updatedBy,
+  });
+
+  Future<TeamDto> removeMember({
+    required String organizationId,
+    required String id,
+    required String userId,
+    required DateTime updatedAt,
+    required String updatedBy,
+  });
+
+  Future<bool> hasCommercialLinks({
+    required String organizationId,
+    required String id,
+  });
+
+  Future<TeamDto> softDelete({
+    required String organizationId,
+    required String id,
+    required DateTime deletedAt,
+    required String deletedBy,
   });
 }

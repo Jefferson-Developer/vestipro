@@ -18,12 +18,14 @@ void main() {
     TeamDto buildDto({
       String id = 'team-1',
       String organizationId = 'org-1',
+      String managerUserId = 'manager-1',
       List<String> memberIds = const <String>[],
     }) {
       return TeamDto(
         id: id,
         organizationId: organizationId,
         name: 'Equipe Blumenau',
+        managerUserId: managerUserId,
         memberIds: memberIds,
         version: 1,
         createdAt: DateTime.utc(2026, 1, 1),
@@ -57,6 +59,7 @@ void main() {
             id: 'team-1',
             organizationId: 'org-1',
             name: 'Equipe Blumenau',
+            managerUserId: 'manager-1',
             createdBy: 'user-1',
           );
 

@@ -12,6 +12,10 @@ abstract interface class TeamRepository {
     required String id,
     required String organizationId,
     required String name,
+    required String managerUserId,
+    List<String> memberIds = const <String>[],
+    String? companyId,
+    String? branchId,
     required String createdBy,
   });
 
@@ -24,6 +28,17 @@ abstract interface class TeamRepository {
     required String id,
   });
 
+  Future<AppResult<Team>> update({
+    required String organizationId,
+    required String id,
+    required String name,
+    required String managerUserId,
+    required List<String> memberIds,
+    String? companyId,
+    String? branchId,
+    required String updatedBy,
+  });
+
   /// Adds [userId] to [Team.memberIds] (idempotent: adding the same
   /// [userId] twice keeps a single entry) and bumps audit metadata. Never
   /// accepts nor changes [Team.organizationId].
@@ -32,5 +47,23 @@ abstract interface class TeamRepository {
     required String id,
     required String userId,
     required String updatedBy,
+  });
+
+  Future<AppResult<Team>> removeMember({
+    required String organizationId,
+    required String id,
+    required String userId,
+    required String updatedBy,
+  });
+
+  Future<AppResult<bool>> hasCommercialLinks({
+    required String organizationId,
+    required String id,
+  });
+
+  Future<AppResult<Team>> delete({
+    required String organizationId,
+    required String id,
+    required String deletedBy,
   });
 }

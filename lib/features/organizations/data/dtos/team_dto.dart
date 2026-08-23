@@ -14,6 +14,9 @@ final class TeamDto {
     required this.id,
     required this.organizationId,
     required this.name,
+    this.companyId,
+    this.branchId,
+    this.managerUserId = '',
     this.memberIds = const <String>[],
     required this.version,
     required this.createdAt,
@@ -26,6 +29,9 @@ final class TeamDto {
   factory TeamDto.fromJson(Map<String, dynamic> json, {required String id}) {
     final organizationId = json['organizationId'];
     final name = json['name'];
+    final companyId = json['companyId'];
+    final branchId = json['branchId'];
+    final managerUserId = json['managerUserId'];
     final memberIds = json['memberIds'];
     final version = json['version'];
     final createdAt = json['createdAt'];
@@ -36,6 +42,9 @@ final class TeamDto {
 
     if (organizationId is! String ||
         name is! String ||
+        (companyId != null && companyId is! String) ||
+        (branchId != null && branchId is! String) ||
+        (managerUserId != null && managerUserId is! String) ||
         (memberIds != null && memberIds is! List) ||
         version is! int ||
         createdAt is! Timestamp ||
@@ -53,6 +62,9 @@ final class TeamDto {
       id: id,
       organizationId: organizationId,
       name: name,
+      companyId: companyId as String?,
+      branchId: branchId as String?,
+      managerUserId: managerUserId == null ? '' : managerUserId as String,
       memberIds: memberIds == null
           ? const <String>[]
           : List<String>.from(memberIds as List),
@@ -68,6 +80,9 @@ final class TeamDto {
   final String id;
   final String organizationId;
   final String name;
+  final String? companyId;
+  final String? branchId;
+  final String managerUserId;
   final List<String> memberIds;
   final int version;
   final DateTime createdAt;
@@ -80,6 +95,9 @@ final class TeamDto {
     return <String, dynamic>{
       'organizationId': organizationId,
       'name': name,
+      'companyId': companyId,
+      'branchId': branchId,
+      'managerUserId': managerUserId,
       'memberIds': memberIds,
       'version': version,
       'createdAt': Timestamp.fromDate(createdAt),

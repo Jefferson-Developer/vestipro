@@ -26,6 +26,11 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     /// own "segment is required to finish onboarding" rule independently
     /// (`CompleteOnboardingUseCase`).
     String? segment,
+
+    /// Optional commercial governance limit: when set, one active member
+    /// cannot be assigned to more than this many Teams in the Organization.
+    /// `null` means unlimited.
+    int? maxTeamsPerUser,
   }) = _OrganizationSettings;
 
   /// Builds validated [OrganizationSettings], trimming each value and
@@ -41,6 +46,7 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     required String country,
     required String defaultLanguage,
     String? segment,
+    int? maxTeamsPerUser,
   }) {
     final fieldErrors = <String, String>{};
     final trimmedCurrency = currency.trim();
@@ -56,6 +62,10 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     }
     if (trimmedDefaultLanguage.isEmpty) {
       fieldErrors['defaultLanguage'] = 'Default language is required.';
+    }
+    if (maxTeamsPerUser != null && maxTeamsPerUser < 1) {
+      fieldErrors['maxTeamsPerUser'] =
+          'Max teams per user must be greater than zero.';
     }
 
     if (fieldErrors.isNotEmpty) {
@@ -73,6 +83,7 @@ abstract class OrganizationSettings with _$OrganizationSettings {
       segment: (trimmedSegment == null || trimmedSegment.isEmpty)
           ? null
           : trimmedSegment,
+      maxTeamsPerUser: maxTeamsPerUser,
     );
   }
 }

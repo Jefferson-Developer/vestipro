@@ -6,6 +6,7 @@ final class OrganizationSettingsDto {
     required this.country,
     required this.defaultLanguage,
     this.segment,
+    this.maxTeamsPerUser,
   });
 
   factory OrganizationSettingsDto.fromJson(Map<String, dynamic> json) {
@@ -13,11 +14,13 @@ final class OrganizationSettingsDto {
     final country = json['country'];
     final defaultLanguage = json['defaultLanguage'];
     final segment = json['segment'];
+    final maxTeamsPerUser = json['maxTeamsPerUser'];
 
     if (currency is! String ||
         country is! String ||
         defaultLanguage is! String ||
-        (segment != null && segment is! String)) {
+        (segment != null && segment is! String) ||
+        (maxTeamsPerUser != null && maxTeamsPerUser is! int)) {
       throw const ValidationException(
         'Invalid organization settings payload.',
         code: 'invalid_organization_settings_payload',
@@ -29,6 +32,7 @@ final class OrganizationSettingsDto {
       country: country,
       defaultLanguage: defaultLanguage,
       segment: segment as String?,
+      maxTeamsPerUser: maxTeamsPerUser as int?,
     );
   }
 
@@ -47,6 +51,7 @@ final class OrganizationSettingsDto {
   /// [OrganizationSettings] — a caller updating settings must always
   /// resend every value it wants to keep.
   final String? segment;
+  final int? maxTeamsPerUser;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -54,6 +59,7 @@ final class OrganizationSettingsDto {
       'country': country,
       'defaultLanguage': defaultLanguage,
       if (segment != null) 'segment': segment,
+      if (maxTeamsPerUser != null) 'maxTeamsPerUser': maxTeamsPerUser,
     };
   }
 }

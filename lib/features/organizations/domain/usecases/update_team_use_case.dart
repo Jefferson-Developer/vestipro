@@ -9,64 +9,67 @@ import '../repositories/organization_repository.dart';
 import '../repositories/team_repository.dart';
 import 'team_membership_policy.dart';
 
-/// Creates a Team under an Organization (`tasks.md`, seção 3.3).
-///
-/// [id] must be generated once by the caller and kept stable across retries
-/// — mirrors `CreateCompanyUseCase` so a retried create after a network
-/// failure does not depend on this use case to stay idempotent.
 @injectable
-final class CreateTeamUseCase {
-  const CreateTeamUseCase(
-    this._repository,
+final class UpdateTeamUseCase {
+  const UpdateTeamUseCase(
+    this._teamRepository,
     this._membershipRepository,
     this._organizationRepository,
   );
 
-  final TeamRepository _repository;
+  final TeamRepository _teamRepository;
   final MembershipRepository _membershipRepository;
   final OrganizationRepository _organizationRepository;
 
   Future<AppResult<Team>> call({
-    required String id,
     required String organizationId,
+    required String id,
     required String name,
     required String managerUserId,
-    List<String> memberIds = const <String>[],
+    required List<String> memberIds,
     String? companyId,
     String? branchId,
-    required String createdBy,
+    required String updatedBy,
   }) async {
-    final trimmedId = id.trim();
     final trimmedOrganizationId = organizationId.trim();
+    final trimmedId = id.trim();
     final trimmedName = name.trim();
     final trimmedManagerUserId = managerUserId.trim();
     final normalizedMemberIds = normalizeTeamMemberIds(memberIds);
     final trimmedCompanyId = companyId?.trim();
     final trimmedBranchId = branchId?.trim();
-    final trimmedCreatedBy = createdBy.trim();
+    final trimmedUpdatedBy = updatedBy.trim();
 
     final fieldErrors = <String, String>{};
-    if (trimmedId.isEmpty) fieldErrors['id'] = 'Id is required.';
     if (trimmedOrganizationId.isEmpty) {
       fieldErrors['organizationId'] = 'OrganizationId is required.';
     }
+    if (trimmedId.isEmpty) fieldErrors['id'] = 'Id is required.';
     if (trimmedName.isEmpty) fieldErrors['name'] = 'Name is required.';
     if (trimmedManagerUserId.isEmpty) {
       fieldErrors['managerUserId'] = 'Manager user id is required.';
     }
-    if (trimmedCreatedBy.isEmpty) {
-      fieldErrors['createdBy'] = 'CreatedBy is required.';
+    if (trimmedUpdatedBy.isEmpty) {
+      fieldErrors['updatedBy'] = 'UpdatedBy is required.';
     }
-
     if (fieldErrors.isNotEmpty) {
       return AppFailure<Team>(
         ValidationFailure(
-          'Invalid team creation payload.',
+          'Invalid team update payload.',
           fieldErrors: fieldErrors,
-          code: 'invalid_team_create_payload',
+          code: 'invalid_team_update_payload',
         ),
       );
     }
+
+    final currentResult = await _teamRepository.getById(
+      organizationId: trimmedOrganizationId,
+      id: trimmedId,
+    );
+    if (currentResult case AppFailure<Team>(failure: final failure)) {
+      return AppFailure<Team>(failure);
+    }
+    final current = (currentResult as AppSuccess<Team>).value;
 
     final managerResult = await _membershipRepository.getByUser(
       organizationId: trimmedOrganizationId,
@@ -86,22 +89,23 @@ final class CreateTeamUseCase {
     }
     final maxTeamsPerUser = (maxTeamsResult as AppSuccess<int?>).value;
 
-    final memberResults = await _validatedMemberUpdates(
+    final membersResult = await _validatedMembers(
       organizationId: trimmedOrganizationId,
       teamId: trimmedId,
       memberIds: normalizedMemberIds,
       maxTeamsPerUser: maxTeamsPerUser,
     );
-    if (memberResults case AppFailure<List<Membership>>(
+    if (membersResult case AppFailure<Map<String, Membership>>(
       failure: final failure,
     )) {
       return AppFailure<Team>(failure);
     }
-    final members = (memberResults as AppSuccess<List<Membership>>).value;
+    final memberById =
+        (membersResult as AppSuccess<Map<String, Membership>>).value;
 
-    final createResult = await _repository.create(
-      id: trimmedId,
+    final updatedTeamResult = await _teamRepository.update(
       organizationId: trimmedOrganizationId,
+      id: trimmedId,
       name: trimmedName,
       managerUserId: trimmedManagerUserId,
       memberIds: normalizedMemberIds,
@@ -111,31 +115,54 @@ final class CreateTeamUseCase {
       branchId: (trimmedBranchId == null || trimmedBranchId.isEmpty)
           ? null
           : trimmedBranchId,
-      createdBy: trimmedCreatedBy,
+      updatedBy: trimmedUpdatedBy,
     );
-    if (createResult case AppFailure<Team>()) {
-      return createResult;
+    if (updatedTeamResult case AppFailure<Team>()) {
+      return updatedTeamResult;
     }
 
-    for (final member in members) {
-      final nextTeamIds = normalizeTeamMemberIds(<String>[
-        ...member.teamIds,
-        trimmedId,
-      ]);
-      final updateResult = await _membershipRepository.update(
+    final currentMemberIds = current.memberIds.toSet();
+    final nextMemberIds = normalizedMemberIds.toSet();
+    final affectedIds = <String>{
+      ...currentMemberIds.difference(nextMemberIds),
+      ...nextMemberIds.difference(currentMemberIds),
+    };
+    for (final memberId in affectedIds) {
+      var membership = memberById[memberId];
+      if (membership == null) {
+        final membershipResult = await _membershipRepository.getByUser(
+          organizationId: trimmedOrganizationId,
+          userId: memberId,
+        );
+        if (membershipResult case AppFailure<Membership>(
+          failure: final failure,
+        )) {
+          return AppFailure<Team>(failure);
+        }
+        membership = (membershipResult as AppSuccess<Membership>).value;
+      }
+      final nextTeamIds = nextMemberIds.contains(memberId)
+          ? normalizeTeamMemberIds(<String>[...membership.teamIds, trimmedId])
+          : normalizeTeamMemberIds(
+              membership.teamIds.where((teamId) => teamId != trimmedId),
+            );
+      final updateMembershipResult = await _membershipRepository.update(
         organizationId: trimmedOrganizationId,
-        userId: member.userId,
-        roleId: member.roleId,
-        roleName: member.roleName,
+        userId: memberId,
+        roleId: membership.roleId,
+        roleName: membership.roleName,
         teamIds: nextTeamIds,
-        status: member.status,
-        updatedBy: trimmedCreatedBy,
+        status: membership.status,
+        updatedBy: trimmedUpdatedBy,
       );
-      if (updateResult case AppFailure<Membership>(failure: final failure)) {
+      if (updateMembershipResult case AppFailure<Membership>(
+        failure: final failure,
+      )) {
         return AppFailure<Team>(failure);
       }
     }
-    return createResult;
+
+    return updatedTeamResult;
   }
 
   Future<AppResult<int?>> _maxTeamsPerUser(String organizationId) async {
@@ -149,37 +176,39 @@ final class CreateTeamUseCase {
     );
   }
 
-  Future<AppResult<List<Membership>>> _validatedMemberUpdates({
+  Future<AppResult<Map<String, Membership>>> _validatedMembers({
     required String organizationId,
     required String teamId,
     required List<String> memberIds,
     required int? maxTeamsPerUser,
   }) async {
-    final members = <Membership>[];
+    final memberById = <String, Membership>{};
     for (final memberId in memberIds) {
       final memberResult = await _membershipRepository.getByUser(
         organizationId: organizationId,
         userId: memberId,
       );
       if (memberResult case AppFailure<Membership>(failure: final failure)) {
-        return AppFailure<List<Membership>>(failure);
+        return AppFailure<Map<String, Membership>>(failure);
       }
       final member = (memberResult as AppSuccess<Membership>).value;
       if (!isTeamMember(member)) {
-        return AppFailure<List<Membership>>(invalidTeamMemberFailure(memberId));
+        return AppFailure<Map<String, Membership>>(
+          invalidTeamMemberFailure(memberId),
+        );
       }
       if (maxTeamsPerUser != null &&
           !member.teamIds.contains(teamId) &&
           member.teamIds.length >= maxTeamsPerUser) {
-        return AppFailure<List<Membership>>(
+        return AppFailure<Map<String, Membership>>(
           teamLimitReachedFailure(
             userId: memberId,
             maxTeamsPerUser: maxTeamsPerUser,
           ),
         );
       }
-      members.add(member);
+      memberById[memberId] = member;
     }
-    return AppSuccess<List<Membership>>(members);
+    return AppSuccess<Map<String, Membership>>(memberById);
   }
 }

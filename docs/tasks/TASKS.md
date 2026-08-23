@@ -136,7 +136,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 ### EPIC-05 — Usuários e Equipes
 - [x] [TASK-042 — Implementar lista de usuários da organização](TASK-042-implementar-lista-de-usuarios.md) — Flutter Senior + Front-end
 - [x] [TASK-043 — Implementar gestão de perfis e permissões](TASK-043-implementar-gestao-de-perfis-e-permissoes.md) — Flutter Senior + Front-end
-- [ ] [TASK-044 — Implementar equipes comerciais](TASK-044-implementar-equipes-comerciais.md) — Flutter Senior + Front-end
+- [x] [TASK-044 — Implementar equipes comerciais](TASK-044-implementar-equipes-comerciais.md) — Flutter Senior + Front-end
 - [ ] [TASK-045 — Implementar vínculo de vendedores a carteiras](TASK-045-implementar-vinculo-de-carteiras.md) — Flutter Senior + Front-end
 - [ ] [TASK-046 — Implementar desativação de usuário](TASK-046-implementar-desativacao-de-usuario.md) — Flutter Senior + Front-end
 - [ ] [TASK-047 — Implementar tela de auditoria de acessos](TASK-047-implementar-tela-de-auditoria-de-acessos.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 43 / 220 tasks concluídas.
+**Progresso:** 44 / 220 tasks concluídas.

@@ -190,6 +190,8 @@ import '../features/organizations/domain/repositories/role_repository.dart'
     as _i440;
 import '../features/organizations/domain/repositories/team_repository.dart'
     as _i320;
+import '../features/organizations/domain/usecases/add_member_to_team_use_case.dart'
+    as _i658;
 import '../features/organizations/domain/usecases/add_user_to_team_use_case.dart'
     as _i835;
 import '../features/organizations/domain/usecases/assign_role_to_user_use_case.dart'
@@ -202,6 +204,8 @@ import '../features/organizations/domain/usecases/create_organization_use_case.d
     as _i55;
 import '../features/organizations/domain/usecases/create_team_use_case.dart'
     as _i766;
+import '../features/organizations/domain/usecases/delete_team_use_case.dart'
+    as _i817;
 import '../features/organizations/domain/usecases/ensure_system_roles_use_case.dart'
     as _i68;
 import '../features/organizations/domain/usecases/get_organization_use_case.dart'
@@ -212,12 +216,17 @@ import '../features/organizations/domain/usecases/list_branches_by_company_use_c
     as _i500;
 import '../features/organizations/domain/usecases/list_companies_use_case.dart'
     as _i628;
+import '../features/organizations/domain/usecases/remove_member_from_team_use_case.dart'
+    as _i335;
 import '../features/organizations/domain/usecases/update_branch_use_case.dart'
     as _i820;
 import '../features/organizations/domain/usecases/update_company_use_case.dart'
     as _i571;
 import '../features/organizations/domain/usecases/update_organization_settings_use_case.dart'
     as _i270;
+import '../features/organizations/domain/usecases/update_team_use_case.dart'
+    as _i207;
+import '../features/organizations/organizations.dart' as _i265;
 import '../features/settings/data/datasources/about_app_data_source.dart'
     as _i364;
 import '../features/settings/data/datasources/in_memory_about_app_datasource.dart'
@@ -245,10 +254,14 @@ import '../features/users/data/repositories/user_role_repository_impl.dart'
     as _i53;
 import '../features/users/domain/repositories/user_role_repository.dart'
     as _i262;
+import '../features/users/domain/usecases/list_commercial_teams_use_case.dart'
+    as _i986;
 import '../features/users/domain/usecases/list_organization_users_use_case.dart'
     as _i93;
 import '../features/users/domain/usecases/update_user_role_use_case.dart'
     as _i428;
+import '../features/users/presentation/bloc/team_form_bloc.dart' as _i516;
+import '../features/users/presentation/bloc/team_list_bloc.dart' as _i831;
 import '../features/users/presentation/bloc/user_list_bloc.dart' as _i244;
 import '../features/users/presentation/bloc/user_role_edit_bloc.dart' as _i698;
 import 'injection_module.dart' as _i212;
@@ -567,6 +580,12 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i802.TeamMapper>(),
       ),
     );
+    gh.factory<_i335.RemoveMemberFromTeamUseCase>(
+      () => _i335.RemoveMemberFromTeamUseCase(
+        gh<_i320.TeamRepository>(),
+        gh<_i957.MembershipRepository>(),
+      ),
+    );
     gh.lazySingleton<_i756.OrganizationRepository>(
       () => _i522.OrganizationRepositoryImpl(
         dataSource: gh<_i268.OrganizationDataSource>(),
@@ -581,6 +600,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i421.RecordAuditLogUseCase>(
       () => _i421.RecordAuditLogUseCase(gh<_i753.AuditLogRepository>()),
+    );
+    gh.factory<_i766.CreateTeamUseCase>(
+      () => _i766.CreateTeamUseCase(
+        gh<_i320.TeamRepository>(),
+        gh<_i957.MembershipRepository>(),
+        gh<_i756.OrganizationRepository>(),
+      ),
     );
     gh.factory<_i428.UpdateUserRoleUseCase>(
       () => _i428.UpdateUserRoleUseCase(gh<_i262.UserRoleRepository>()),
@@ -628,8 +654,22 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i835.AddUserToTeamUseCase>(
       () => _i835.AddUserToTeamUseCase(gh<_i320.TeamRepository>()),
     );
-    gh.factory<_i766.CreateTeamUseCase>(
-      () => _i766.CreateTeamUseCase(gh<_i320.TeamRepository>()),
+    gh.factory<_i817.DeleteTeamUseCase>(
+      () => _i817.DeleteTeamUseCase(gh<_i320.TeamRepository>()),
+    );
+    gh.factory<_i658.AddMemberToTeamUseCase>(
+      () => _i658.AddMemberToTeamUseCase(
+        gh<_i320.TeamRepository>(),
+        gh<_i957.MembershipRepository>(),
+        gh<_i756.OrganizationRepository>(),
+      ),
+    );
+    gh.factory<_i207.UpdateTeamUseCase>(
+      () => _i207.UpdateTeamUseCase(
+        gh<_i320.TeamRepository>(),
+        gh<_i957.MembershipRepository>(),
+        gh<_i756.OrganizationRepository>(),
+      ),
     );
     gh.factory<_i481.SignUpBloc>(
       () => _i481.SignUpBloc(
@@ -677,6 +717,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i320.TeamRepository>(),
       ),
     );
+    gh.factory<_i516.TeamFormBloc>(
+      () => _i516.TeamFormBloc(
+        listOrganizationUsers: gh<_i93.ListOrganizationUsersUseCase>(),
+        createTeam: gh<_i265.CreateTeamUseCase>(),
+        updateTeam: gh<_i265.UpdateTeamUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i193.InviteFormBloc>(
       () => _i193.InviteFormBloc(
         createInvite: gh<_i461.CreateInviteUseCase>(),
@@ -698,11 +746,24 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i986.ListCommercialTeamsUseCase>(
+      () => _i986.ListCommercialTeamsUseCase(
+        gh<_i265.TeamRepository>(),
+        gh<_i93.ListOrganizationUsersUseCase>(),
+      ),
+    );
     gh.factory<_i0.InviteListBloc>(
       () => _i0.InviteListBloc(
         listPendingInvites: gh<_i509.ListPendingInvitesUseCase>(),
         resendInvite: gh<_i502.ResendInviteUseCase>(),
         revokeInvite: gh<_i334.RevokeInviteUseCase>(),
+      ),
+    );
+    gh.factory<_i831.TeamListBloc>(
+      () => _i831.TeamListBloc(
+        listCommercialTeams: gh<_i986.ListCommercialTeamsUseCase>(),
+        deleteTeam: gh<_i265.DeleteTeamUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i675.CompleteOnboardingUseCase>(

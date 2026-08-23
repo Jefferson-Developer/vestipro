@@ -47,6 +47,7 @@ final class OrganizationMapper {
       country: dto.country,
       defaultLanguage: dto.defaultLanguage,
       segment: dto.segment,
+      maxTeamsPerUser: dto.maxTeamsPerUser,
     );
   }
 
@@ -56,6 +57,7 @@ final class OrganizationMapper {
       country: settings.country,
       defaultLanguage: settings.defaultLanguage,
       segment: settings.segment,
+      maxTeamsPerUser: settings.maxTeamsPerUser,
     );
   }
 

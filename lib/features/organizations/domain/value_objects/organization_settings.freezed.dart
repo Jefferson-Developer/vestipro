@@ -23,7 +23,10 @@ mixin _$OrganizationSettings {
 /// [currency] has no reason to also resend it); the wizard enforces its
 /// own "segment is required to finish onboarding" rule independently
 /// (`CompleteOnboardingUseCase`).
- String? get segment;
+ String? get segment;/// Optional commercial governance limit: when set, one active member
+/// cannot be assigned to more than this many Teams in the Organization.
+/// `null` means unlimited.
+ int? get maxTeamsPerUser;
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -34,16 +37,16 @@ $OrganizationSettingsCopyWith<OrganizationSettings> get copyWith => _$Organizati
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment)&&(identical(other.maxTeamsPerUser, maxTeamsPerUser) || other.maxTeamsPerUser == maxTeamsPerUser));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment);
+int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment,maxTeamsPerUser);
 
 @override
 String toString() {
-  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment)';
+  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment, maxTeamsPerUser: $maxTeamsPerUser)';
 }
 
 
@@ -54,7 +57,7 @@ abstract mixin class $OrganizationSettingsCopyWith<$Res>  {
   factory $OrganizationSettingsCopyWith(OrganizationSettings value, $Res Function(OrganizationSettings) _then) = _$OrganizationSettingsCopyWithImpl;
 @useResult
 $Res call({
- String currency, String country, String defaultLanguage, String? segment
+ String currency, String country, String defaultLanguage, String? segment, int? maxTeamsPerUser
 });
 
 
@@ -71,13 +74,14 @@ class _$OrganizationSettingsCopyWithImpl<$Res>
 
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,Object? maxTeamsPerUser = freezed,}) {
   return _then(_self.copyWith(
 currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
 as String,defaultLanguage: null == defaultLanguage ? _self.defaultLanguage : defaultLanguage // ignore: cast_nullable_to_non_nullable
 as String,segment: freezed == segment ? _self.segment : segment // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,maxTeamsPerUser: freezed == maxTeamsPerUser ? _self.maxTeamsPerUser : maxTeamsPerUser // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -162,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OrganizationSettings() when $default != null:
-return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment);case _:
+return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser);case _:
   return orElse();
 
 }
@@ -183,10 +187,10 @@ return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser)  $default,) {final _that = this;
 switch (_that) {
 case _OrganizationSettings():
-return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment);case _:
+return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +207,10 @@ return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String currency,  String country,  String defaultLanguage,  String? segment)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser)?  $default,) {final _that = this;
 switch (_that) {
 case _OrganizationSettings() when $default != null:
-return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment);case _:
+return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser);case _:
   return null;
 
 }
@@ -218,7 +222,7 @@ return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment
 
 
 class _OrganizationSettings extends OrganizationSettings {
-  const _OrganizationSettings({required this.currency, required this.country, required this.defaultLanguage, this.segment}): super._();
+  const _OrganizationSettings({required this.currency, required this.country, required this.defaultLanguage, this.segment, this.maxTeamsPerUser}): super._();
   
 
 @override final  String currency;
@@ -234,6 +238,10 @@ class _OrganizationSettings extends OrganizationSettings {
 /// own "segment is required to finish onboarding" rule independently
 /// (`CompleteOnboardingUseCase`).
 @override final  String? segment;
+/// Optional commercial governance limit: when set, one active member
+/// cannot be assigned to more than this many Teams in the Organization.
+/// `null` means unlimited.
+@override final  int? maxTeamsPerUser;
 
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -245,16 +253,16 @@ _$OrganizationSettingsCopyWith<_OrganizationSettings> get copyWith => __$Organiz
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment)&&(identical(other.maxTeamsPerUser, maxTeamsPerUser) || other.maxTeamsPerUser == maxTeamsPerUser));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment);
+int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment,maxTeamsPerUser);
 
 @override
 String toString() {
-  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment)';
+  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment, maxTeamsPerUser: $maxTeamsPerUser)';
 }
 
 
@@ -265,7 +273,7 @@ abstract mixin class _$OrganizationSettingsCopyWith<$Res> implements $Organizati
   factory _$OrganizationSettingsCopyWith(_OrganizationSettings value, $Res Function(_OrganizationSettings) _then) = __$OrganizationSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- String currency, String country, String defaultLanguage, String? segment
+ String currency, String country, String defaultLanguage, String? segment, int? maxTeamsPerUser
 });
 
 
@@ -282,13 +290,14 @@ class __$OrganizationSettingsCopyWithImpl<$Res>
 
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,Object? maxTeamsPerUser = freezed,}) {
   return _then(_OrganizationSettings(
 currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
 as String,defaultLanguage: null == defaultLanguage ? _self.defaultLanguage : defaultLanguage // ignore: cast_nullable_to_non_nullable
 as String,segment: freezed == segment ? _self.segment : segment // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,maxTeamsPerUser: freezed == maxTeamsPerUser ? _self.maxTeamsPerUser : maxTeamsPerUser // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

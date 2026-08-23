@@ -35,6 +35,9 @@ final class AnalyticsEvents {
   static const String inviteSent = 'invite_sent';
   static const String inviteAccepted = 'invite_accepted';
   static const String userRoleUpdated = 'user_role_updated';
+  static const String teamCreated = 'team_created';
+  static const String teamUpdated = 'team_updated';
+  static const String teamDeleted = 'team_deleted';
 
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
@@ -59,5 +62,8 @@ final class AnalyticsEvents {
     inviteSent,
     inviteAccepted,
     userRoleUpdated,
+    teamCreated,
+    teamUpdated,
+    teamDeleted,
   ];
 }
