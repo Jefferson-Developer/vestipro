@@ -331,16 +331,17 @@ passada, após todos os ajustes).
 
 ## Commit
 
-Criado com sucesso (`lib/main.dart`, alteração pré-existente não relacionada a esta task, foi
-deliberadamente deixado de fora do commit).
+`3586cd2` — `feat(onboarding): implement initial organization setup wizard` (`lib/main.dart`,
+alteração pré-existente não relacionada a esta task, foi deliberadamente deixado de fora do
+commit).
 
 ## Push
 
-Autorizado nesta rodada; executado após o commit.
+Sim — `git push origin main` concluído com sucesso (`b731e7f..3586cd2 main -> main`).
 
 ## Hash do commit
 
-Ver seção "Commit" da resposta final.
+`3586cd2`
 
 ## Branch
 
