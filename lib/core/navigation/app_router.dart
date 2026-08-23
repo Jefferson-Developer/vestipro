@@ -18,6 +18,7 @@ class AppRouter {
   AppRouter({
     required this.aboutAppPageBuilder,
     required this.loginPageBuilder,
+    required this.signUpPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
   }) : authGuard = authGuard ?? const AlwaysAllowAuthGuard(),
@@ -33,6 +34,10 @@ class AppRouter {
   /// concrete `lib/features/authentication/` widget — same composition
   /// rationale as [aboutAppPageBuilder].
   final WidgetBuilder loginPageBuilder;
+
+  /// Builds the real sign-up screen (TASK-035). Same composition rationale
+  /// as [loginPageBuilder].
+  final WidgetBuilder signUpPageBuilder;
 
   late final GoRouter router = GoRouter(
     initialLocation: const AboutAppRoute(
@@ -50,6 +55,11 @@ class AppRouter {
         path: LoginRoute.pathPattern,
         name: LoginRoute.name,
         builder: (context, state) => loginPageBuilder(context),
+      ),
+      GoRoute(
+        path: SignUpRoute.pathPattern,
+        name: SignUpRoute.name,
+        builder: (context, state) => signUpPageBuilder(context),
       ),
       GoRoute(
         path: ForbiddenRoute.pathPattern,

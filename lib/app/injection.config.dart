@@ -57,9 +57,23 @@ import '../features/audit_log/domain/usecases/list_audit_log_entries_use_case.da
     as _i201;
 import '../features/audit_log/domain/usecases/record_audit_log_use_case.dart'
     as _i421;
+import '../features/authentication/data/datasources/firestore_user_profile_data_source.dart'
+    as _i1043;
+import '../features/authentication/data/datasources/user_profile_data_source.dart'
+    as _i668;
+import '../features/authentication/data/mappers/user_profile_mapper.dart'
+    as _i756;
+import '../features/authentication/data/repositories/user_profile_repository_impl.dart'
+    as _i801;
+import '../features/authentication/domain/repositories/user_profile_repository.dart'
+    as _i488;
+import '../features/authentication/domain/usecases/create_account_with_email_and_password_use_case.dart'
+    as _i90;
 import '../features/authentication/domain/usecases/sign_in_with_email_and_password_use_case.dart'
     as _i185;
 import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
+import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
+    as _i481;
 import '../features/organizations/data/datasources/branch_data_source.dart'
     as _i526;
 import '../features/organizations/data/datasources/company_data_source.dart'
@@ -182,6 +196,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i26.AuthUserMapper>(() => const _i26.AuthUserMapper());
     gh.lazySingleton<_i246.AuditLogEntryMapper>(
       () => const _i246.AuditLogEntryMapper(),
+    );
+    gh.lazySingleton<_i756.UserProfileMapper>(
+      () => const _i756.UserProfileMapper(),
     );
     gh.lazySingleton<_i964.BranchMapper>(() => const _i964.BranchMapper());
     gh.lazySingleton<_i642.CompanyMapper>(() => const _i642.CompanyMapper());
@@ -336,6 +353,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i70.GetUserMembershipUseCase>(
       () => _i70.GetUserMembershipUseCase(gh<_i957.MembershipRepository>()),
     );
+    gh.lazySingleton<_i668.UserProfileDataSource>(
+      () =>
+          _i1043.FirestoreUserProfileDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i160.BranchRepository>(
       () => _i375.BranchRepositoryImpl(
         dataSource: gh<_i526.BranchDataSource>(),
@@ -379,6 +400,12 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i719.OrganizationMapper>(),
       ),
     );
+    gh.lazySingleton<_i488.UserProfileRepository>(
+      () => _i801.UserProfileRepositoryImpl(
+        dataSource: gh<_i668.UserProfileDataSource>(),
+        mapper: gh<_i756.UserProfileMapper>(),
+      ),
+    );
     gh.factory<_i421.RecordAuditLogUseCase>(
       () => _i421.RecordAuditLogUseCase(gh<_i753.AuditLogRepository>()),
     );
@@ -391,6 +418,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i226.SubmitAboutAppDiagnosticsUseCase>(
       () => _i226.SubmitAboutAppDiagnosticsUseCase(
         gh<_i794.AboutAppRepository>(),
+      ),
+    );
+    gh.factory<_i90.CreateAccountWithEmailAndPasswordUseCase>(
+      () => _i90.CreateAccountWithEmailAndPasswordUseCase(
+        gh<_i472.AuthRepository>(),
+        gh<_i488.UserProfileRepository>(),
       ),
     );
     gh.factory<_i201.ListAuditLogEntriesUseCase>(
@@ -413,6 +446,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i766.CreateTeamUseCase>(
       () => _i766.CreateTeamUseCase(gh<_i320.TeamRepository>()),
+    );
+    gh.factory<_i481.SignUpBloc>(
+      () => _i481.SignUpBloc(
+        createAccountWithEmailAndPassword:
+            gh<_i90.CreateAccountWithEmailAndPasswordUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
     );
     gh.factory<_i55.CreateOrganizationUseCase>(
       () => _i55.CreateOrganizationUseCase(gh<_i756.OrganizationRepository>()),

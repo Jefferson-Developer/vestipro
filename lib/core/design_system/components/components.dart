@@ -26,6 +26,7 @@ export 'feedback/app_empty_state.dart';
 export 'feedback/app_error_state.dart';
 export 'feedback/app_skeleton.dart';
 export 'feedback/app_snackbar.dart';
+export 'inputs/app_checkbox.dart';
 export 'inputs/app_number_field.dart';
 export 'inputs/app_search_field.dart';
 export 'inputs/app_text_field.dart';

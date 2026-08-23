@@ -82,6 +82,18 @@ function companyDoc({ organizationId }) {
   };
 }
 
+function userProfileDoc({ uid, overrides = {} }) {
+  return {
+    uid,
+    name: 'Usuário de Teste',
+    email: 'usuario@vestipro.com.br',
+    createdAt: now(),
+    termsVersion: '2026-08-23',
+    termsAcceptedAt: now(),
+    ...overrides,
+  };
+}
+
 function auditLogDoc({ organizationId, actorUserId, action = 'role.changed' }) {
   return {
     organizationId,
@@ -136,6 +148,70 @@ beforeEach(async () => {
       membershipDoc({ organizationId: ORG_B, userId: 'owner-b', roleId: 'OWNER', roleName: 'OWNER' }),
     );
     await db.doc(`organizations/${ORG_B}/companies/company-b`).set(companyDoc({ organizationId: ORG_B }));
+  });
+});
+
+describe('users/{userId}  (basic profile — TASK-035)', () => {
+  test('um usuário autenticado consegue criar o próprio perfil', async () => {
+    const db = testEnv.authenticatedContext('new-user').firestore();
+    await assertSucceeds(
+      db.doc('users/new-user').set(userProfileDoc({ uid: 'new-user' })),
+    );
+  });
+
+  test('não é possível criar o perfil de outro usuário (uid forjado)', async () => {
+    const db = testEnv.authenticatedContext('attacker').firestore();
+    await assertFails(
+      db.doc('users/victim').set(userProfileDoc({ uid: 'victim' })),
+    );
+  });
+
+  test('não é possível criar o próprio perfil com o campo uid forjado', async () => {
+    const db = testEnv.authenticatedContext('new-user').firestore();
+    await assertFails(
+      db.doc('users/new-user').set(userProfileDoc({ uid: 'someone-else' })),
+    );
+  });
+
+  test('usuário não autenticado não consegue criar nenhum perfil', async () => {
+    const db = testEnv.unauthenticatedContext().firestore();
+    await assertFails(
+      db.doc('users/new-user').set(userProfileDoc({ uid: 'new-user' })),
+    );
+  });
+
+  test('não é possível criar um perfil sem termsVersion (consentimento ausente)', async () => {
+    const db = testEnv.authenticatedContext('new-user').firestore();
+    const payload = userProfileDoc({ uid: 'new-user' });
+    delete payload.termsVersion;
+    await assertFails(db.doc('users/new-user').set(payload));
+  });
+
+  test('o próprio usuário consegue ler o próprio perfil', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().doc('users/owner-a').set(userProfileDoc({ uid: 'owner-a' }));
+    });
+
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertSucceeds(db.doc('users/owner-a').get());
+  });
+
+  test('um usuário não consegue ler o perfil de outro usuário', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().doc('users/owner-b').set(userProfileDoc({ uid: 'owner-b' }));
+    });
+
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc('users/owner-b').get());
+  });
+
+  test('nem o próprio usuário consegue atualizar o perfil por este caminho', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().doc('users/owner-a').set(userProfileDoc({ uid: 'owner-a' }));
+    });
+
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc('users/owner-a').update({ name: 'Novo Nome' }));
   });
 });
 

@@ -51,6 +51,32 @@ final class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<AppResult<SessionUser>> createUserWithEmailAndPassword({
+    required String email,
+    required String password,
+    required String displayName,
+  }) async {
+    try {
+      final dto = await dataSource.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+        displayName: displayName,
+      );
+      return AppSuccess<SessionUser>(mapper.toEntity(dto));
+    } on AppException catch (exception) {
+      return AppFailure<SessionUser>(mapAppExceptionToFailure(exception));
+    } catch (exception) {
+      return AppFailure<SessionUser>(
+        UnexpectedFailure(
+          'Unexpected error creating account.',
+          code: 'auth_create_account_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
+  @override
   Future<AppResult<SessionUser>> signInWithProvider(
     AuthProviderType provider,
   ) async {

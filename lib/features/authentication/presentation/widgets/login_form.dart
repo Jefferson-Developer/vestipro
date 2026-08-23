@@ -113,6 +113,18 @@ class _LoginFormState extends State<LoginForm> {
               isLoading: isSubmitting,
               onPressed: isSubmitting ? null : () => _submit(context),
             ),
+            const SizedBox(height: AppSpacing.spacing8),
+            Align(
+              alignment: Alignment.center,
+              child: AppButton(
+                label: 'Criar conta',
+                semanticLabel: 'Ainda não tem conta? Criar conta',
+                variant: AppButtonVariant.text,
+                onPressed: isSubmitting
+                    ? null
+                    : () => context.go(const SignUpRoute().location),
+              ),
+            ),
           ],
         );
       },

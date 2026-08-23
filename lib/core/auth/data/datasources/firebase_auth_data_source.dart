@@ -65,6 +65,42 @@ final class FirebaseAuthDataSource implements AuthDataSource {
   }
 
   @override
+  Future<AuthUserDto> createUserWithEmailAndPassword({
+    required String email,
+    required String password,
+    required String displayName,
+  }) async {
+    try {
+      final credential = await _firebaseAuth.createUserWithEmailAndPassword(
+        email: email,
+        password: password,
+      );
+      final user = credential.user;
+      if (user == null) {
+        throw const UnknownException(
+          'Firebase returned an empty user after account creation.',
+          code: 'auth_empty_user',
+        );
+      }
+      // `updateDisplayName` mutates the SDK's cached `User` in place, but
+      // does not return the updated snapshot — `_toDto` is built manually
+      // below (instead of re-reading `_firebaseAuth.currentUser`) so the
+      // returned DTO always carries [displayName], even if the SDK's cache
+      // update is not yet observable through `currentUser` at this exact
+      // point.
+      await user.updateDisplayName(displayName);
+      return AuthUserDto(
+        uid: user.uid,
+        email: user.email,
+        displayName: displayName,
+        emailVerified: user.emailVerified,
+      );
+    } on FirebaseAuthException catch (exception, stackTrace) {
+      throw mapFirebaseAuthExceptionToAppException(exception, stackTrace);
+    }
+  }
+
+  @override
   Future<void> signOut() async {
     try {
       await _firebaseAuth.signOut();

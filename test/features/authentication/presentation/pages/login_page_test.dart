@@ -285,6 +285,15 @@ final class _AuthRepositoryStub implements AuthRepository {
   }
 
   @override
+  Future<AppResult<SessionUser>> createUserWithEmailAndPassword({
+    required String email,
+    required String password,
+    required String displayName,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<AppResult<SessionUser>> signInWithProvider(AuthProviderType provider) {
     throw UnimplementedError();
   }

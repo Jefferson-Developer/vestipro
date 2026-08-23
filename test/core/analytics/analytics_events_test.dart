@@ -8,6 +8,7 @@ void main() {
         AnalyticsEvents.values,
         unorderedEquals(<String>[
           'login_completed',
+          'sign_up_completed',
           'organization_created',
           'customer_created',
           'product_viewed',

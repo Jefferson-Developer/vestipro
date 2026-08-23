@@ -49,6 +49,20 @@ final class LoginRoute extends AppRoute {
   String get location => pathPattern;
 }
 
+/// Route shown to create a brand-new account (TASK-035).
+///
+/// Linked from [LoginRoute] ("Criar conta") and links back to it ("Já tem
+/// conta? Entrar"), same reciprocal-link precedent as [PasswordResetRoute].
+final class SignUpRoute extends AppRoute {
+  const SignUpRoute();
+
+  static const name = 'signUp';
+  static const pathPattern = '/sign-up';
+
+  @override
+  String get location => pathPattern;
+}
+
 /// Route shown for the "forgot password" flow.
 ///
 /// Declared ahead of its own implementation, same precedent as [LoginRoute]
@@ -62,6 +76,45 @@ final class PasswordResetRoute extends AppRoute {
 
   static const name = 'passwordReset';
   static const pathPattern = '/password-reset';
+
+  @override
+  String get location => pathPattern;
+}
+
+/// Route shown for the initial onboarding wizard, right after a successful
+/// sign-up (TASK-038).
+///
+/// Declared ahead of its own implementation, same precedent as
+/// [PasswordResetRoute] before TASK-034/TASK-036: not registered as a
+/// [GoRoute] yet, so navigating here today falls back to [NotFoundRoute]'s
+/// `errorBuilder`. `SignUpPage` (TASK-035) already navigates to
+/// [OnboardingWizardRoute.location] through `go_router` so that TASK-037
+/// (which actually creates the first Organization before the wizard can run)
+/// only has to register the real `GoRoute`/page builder, without touching
+/// the sign-up screen again.
+final class OnboardingWizardRoute extends AppRoute {
+  const OnboardingWizardRoute();
+
+  static const name = 'onboardingWizard';
+  static const pathPattern = '/onboarding';
+
+  @override
+  String get location => pathPattern;
+}
+
+/// Route shown for the Terms of Service/Privacy Policy content linked from
+/// the sign-up form's acceptance checkbox (TASK-035/EPIC-20).
+///
+/// Declared ahead of its own implementation — the actual terms content is
+/// TASK-156's responsibility (EPIC-20) — same precedent as
+/// [OnboardingWizardRoute]: not registered as a [GoRoute] yet, so tapping
+/// the link today falls back to [NotFoundRoute]'s `errorBuilder` instead of
+/// crashing or silently doing nothing.
+final class TermsOfServiceRoute extends AppRoute {
+  const TermsOfServiceRoute();
+
+  static const name = 'termsOfService';
+  static const pathPattern = '/terms-of-service';
 
   @override
   String get location => pathPattern;

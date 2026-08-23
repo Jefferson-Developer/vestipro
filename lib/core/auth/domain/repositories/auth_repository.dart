@@ -18,6 +18,20 @@ abstract interface class AuthRepository {
     required String password,
   });
 
+  /// Creates a brand-new Firebase Auth account and signs it in (TASK-035).
+  ///
+  /// [displayName] is stored on the Firebase Auth user itself (available on
+  /// every subsequent [SessionUser] without a round-trip to Firestore); the
+  /// richer profile document (`createdAt`, terms consent) is a separate
+  /// concern owned by `UserProfileRepository`, never this repository — this
+  /// method only ever talks to Firebase Auth, mirroring the existing
+  /// boundary between authentication and the rest of the domain.
+  Future<AppResult<SessionUser>> createUserWithEmailAndPassword({
+    required String email,
+    required String password,
+    required String displayName,
+  });
+
   /// Extension point for providers that do not need e-mail/password inputs
   /// (Google, Apple, corporate SSO — TASK-173). Returns a [Failure] for any
   /// provider not implemented yet, including [AuthProviderType.emailAndPassword]

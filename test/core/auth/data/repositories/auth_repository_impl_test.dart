@@ -134,6 +134,81 @@ void main() {
       );
     });
 
+    group('createUserWithEmailAndPassword', () {
+      test('returns a success mapping the DTO to a SessionUser', () async {
+        when(
+          () => dataSource.createUserWithEmailAndPassword(
+            email: 'rep@vestipro.com.br',
+            password: 'super-secret-1',
+            displayName: 'Vendedor VestiPro',
+          ),
+        ).thenAnswer((_) async => dto);
+
+        final result = await repository.createUserWithEmailAndPassword(
+          email: 'rep@vestipro.com.br',
+          password: 'super-secret-1',
+          displayName: 'Vendedor VestiPro',
+        );
+
+        expect(result, isA<AppSuccess<SessionUser>>());
+        expect((result as AppSuccess<SessionUser>).value.uid, 'user-1');
+      });
+
+      test(
+        'maps an AppException thrown by the datasource to a Failure',
+        () async {
+          when(
+            () => dataSource.createUserWithEmailAndPassword(
+              email: 'rep@vestipro.com.br',
+              password: 'super-secret-1',
+              displayName: 'Vendedor VestiPro',
+            ),
+          ).thenThrow(
+            const ConflictException(
+              'Este e-mail já está em uso.',
+              code: 'email-already-in-use',
+            ),
+          );
+
+          final result = await repository.createUserWithEmailAndPassword(
+            email: 'rep@vestipro.com.br',
+            password: 'super-secret-1',
+            displayName: 'Vendedor VestiPro',
+          );
+
+          expect(result, isA<AppFailure<SessionUser>>());
+          expect(
+            (result as AppFailure<SessionUser>).failure,
+            isA<ConflictFailure>(),
+          );
+        },
+      );
+
+      test(
+        'maps a generic exception thrown by the datasource to an UnexpectedFailure',
+        () async {
+          when(
+            () => dataSource.createUserWithEmailAndPassword(
+              email: 'rep@vestipro.com.br',
+              password: 'super-secret-1',
+              displayName: 'Vendedor VestiPro',
+            ),
+          ).thenThrow(StateError('boom'));
+
+          final result = await repository.createUserWithEmailAndPassword(
+            email: 'rep@vestipro.com.br',
+            password: 'super-secret-1',
+            displayName: 'Vendedor VestiPro',
+          );
+
+          expect(result, isA<AppFailure<SessionUser>>());
+          final failure = (result as AppFailure<SessionUser>).failure;
+          expect(failure, isA<UnexpectedFailure>());
+          expect(failure.code, 'auth_create_account_unexpected');
+        },
+      );
+    });
+
     group('signInWithProvider', () {
       test(
         'returns a Failure for every provider, including emailAndPassword',

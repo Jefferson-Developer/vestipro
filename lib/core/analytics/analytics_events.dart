@@ -17,6 +17,7 @@ final class AnalyticsEvents {
   const AnalyticsEvents._();
 
   static const String loginCompleted = 'login_completed';
+  static const String signUpCompleted = 'sign_up_completed';
   static const String organizationCreated = 'organization_created';
   static const String customerCreated = 'customer_created';
   static const String productViewed = 'product_viewed';
@@ -36,6 +37,7 @@ final class AnalyticsEvents {
   /// the full catalog (e.g. a future QA/analytics debug screen).
   static const List<String> values = [
     loginCompleted,
+    signUpCompleted,
     organizationCreated,
     customerCreated,
     productViewed,

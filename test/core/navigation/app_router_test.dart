@@ -97,6 +97,7 @@ AppRouter _buildRouter({
         (context, orgId) => Scaffold(body: Text('about-app:$orgId')),
     loginPageBuilder:
         loginPageBuilder ?? (context) => const Scaffold(body: Text('login')),
+    signUpPageBuilder: (context) => const Scaffold(body: Text('sign-up')),
   );
 }
 

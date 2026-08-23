@@ -13,6 +13,12 @@ abstract interface class AuthDataSource {
     required String password,
   });
 
+  Future<AuthUserDto> createUserWithEmailAndPassword({
+    required String email,
+    required String password,
+    required String displayName,
+  });
+
   Future<void> signOut();
 
   Future<void> sendPasswordResetEmail({required String email});

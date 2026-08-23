@@ -104,6 +104,39 @@ service cloud.firestore {
     }
 
     // ---------------------------------------------------------------------
+    // users/{userId}  (basic profile — TASK-035)
+    // ---------------------------------------------------------------------
+    //
+    // Created during sign-up, before any Organization/Membership exists for
+    // that user (`CreateAccountWithEmailAndPasswordUseCase`) — so, unlike
+    // every collection below, access here is scoped to "is this literally
+    // my own uid", never to a Membership. Holds only the LGPD-relevant
+    // basics (name, e-mail, terms consent + version/timestamp); there is no
+    // `update`/`delete` path yet — profile editing is a future task's
+    // responsibility, not this one's.
+
+    match /users/{userId} {
+      allow get: if isSignedIn() && request.auth.uid == userId;
+
+      // Never list every user by an open query — same rationale as
+      // `organizations`'s own `allow list: if false`.
+      allow list: if false;
+
+      allow create: if isSignedIn()
+        && request.auth.uid == userId
+        && request.resource.data.uid == userId
+        && request.resource.data.name is string
+        && request.resource.data.name.size() > 0
+        && request.resource.data.email is string
+        && request.resource.data.email.size() > 0
+        && request.resource.data.termsVersion is string
+        && request.resource.data.termsVersion.size() > 0;
+
+      allow update: if false;
+      allow delete: if false;
+    }
+
+    // ---------------------------------------------------------------------
     // organizations/{organizationId}
     // ---------------------------------------------------------------------
 
