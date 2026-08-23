@@ -1,6 +1,7 @@
 import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
@@ -10,9 +11,13 @@ class _MockMembershipRepository extends Mock implements MembershipRepository {}
 
 class _MockTeamRepository extends Mock implements TeamRepository {}
 
+class _MockUserAccessRepository extends Mock implements UserAccessRepository {}
+
 void main() {
   late _MockMembershipRepository membershipRepository;
   late _MockTeamRepository teamRepository;
+  late _MockUserAccessRepository userAccessRepository;
+  late FakeAnalyticsService analyticsService;
 
   final owner = OrganizationUser(
     userId: 'owner-1',
@@ -35,6 +40,9 @@ void main() {
         membershipRepository,
         teamRepository,
       ),
+      deactivateUser: DeactivateUserUseCase(userAccessRepository),
+      reactivateUser: ReactivateUserUseCase(userAccessRepository),
+      analyticsService: analyticsService,
     );
   }
 
@@ -59,12 +67,14 @@ void main() {
   setUp(() {
     membershipRepository = _MockMembershipRepository();
     teamRepository = _MockTeamRepository();
+    userAccessRepository = _MockUserAccessRepository();
+    analyticsService = FakeAnalyticsService();
     when(
       () => teamRepository.listByOrganization('org-1'),
     ).thenAnswer((_) async => const AppSuccess<List<Team>>([]));
   });
 
-  group('UserListBloc — started', () {
+  group('UserListBloc - started', () {
     blocTest<UserListBloc, UserListState>(
       'loads and exposes every user of the organization',
       build: buildBloc,
@@ -118,10 +128,9 @@ void main() {
     );
   });
 
-  group('UserListBloc — searchChanged', () {
+  group('UserListBloc - searchChanged', () {
     blocTest<UserListBloc, UserListState>(
-      'narrows the roster by name/e-mail, case-insensitively, and resets '
-      'pagination',
+      'narrows the roster by name/e-mail, case-insensitively, and resets pagination',
       build: buildBloc,
       seed: () => UserListState(
         loadStatus: UserListLoadStatus.ready,
@@ -159,7 +168,7 @@ void main() {
     );
   });
 
-  group('UserListBloc — filters', () {
+  group('UserListBloc - filters', () {
     blocTest<UserListBloc, UserListState>(
       'combines role and status filters',
       build: buildBloc,
@@ -179,8 +188,7 @@ void main() {
     );
 
     blocTest<UserListBloc, UserListState>(
-      'a role filter combined with a status nobody matches yields an '
-      'empty result, not a crash',
+      'a role filter combined with a status nobody matches yields an empty result',
       build: buildBloc,
       seed: () => UserListState(
         loadStatus: UserListLoadStatus.ready,
@@ -196,7 +204,7 @@ void main() {
     );
 
     blocTest<UserListBloc, UserListState>(
-      'clearing a filter (null) restores the previously narrowed users',
+      'clearing a filter restores the previously narrowed users',
       build: buildBloc,
       seed: () => UserListState(
         loadStatus: UserListLoadStatus.ready,
@@ -211,7 +219,7 @@ void main() {
     );
   });
 
-  group('UserListBloc — loadMoreRequested', () {
+  group('UserListBloc - loadMoreRequested', () {
     blocTest<UserListBloc, UserListState>(
       'reveals one more page without re-fetching from the repository',
       build: buildBloc,
@@ -239,6 +247,156 @@ void main() {
       ),
       act: (bloc) => bloc.add(const UserListEvent.loadMoreRequested()),
       expect: () => <UserListState>[],
+    );
+  });
+
+  group('UserListBloc - accessStatusChangeRequested', () {
+    blocTest<UserListBloc, UserListState>(
+      'deactivates an active user, updates the visible status and logs analytics',
+      build: buildBloc,
+      seed: () => UserListState(
+        loadStatus: UserListLoadStatus.ready,
+        organizationId: 'org-1',
+        allUsers: [owner],
+      ),
+      setUp: () {
+        when(
+          () => userAccessRepository.deactivateUser(
+            organizationId: any(named: 'organizationId'),
+            targetUserId: any(named: 'targetUserId'),
+          ),
+        ).thenAnswer(
+          (_) async => AppSuccess<UserAccessUpdateResult>(
+            UserAccessUpdateResult(
+              organizationId: 'org-1',
+              targetUserId: 'owner-1',
+              previousStatus: MembershipStatus.active,
+              status: MembershipStatus.inactive,
+              updatedAt: DateTime.utc(2026, 1, 1),
+            ),
+          ),
+        );
+      },
+      act: (bloc) => bloc.add(UserListEvent.accessStatusChangeRequested(owner)),
+      expect: () => <UserListState>[
+        UserListState(
+          loadStatus: UserListLoadStatus.ready,
+          organizationId: 'org-1',
+          allUsers: [owner],
+          accessMutationStatus: UserListAccessMutationStatus.submitting,
+          accessMutationUser: owner,
+        ),
+        UserListState(
+          loadStatus: UserListLoadStatus.ready,
+          organizationId: 'org-1',
+          allUsers: [owner.copyWith(status: MembershipStatus.inactive)],
+          accessMutationStatus: UserListAccessMutationStatus.success,
+          accessMutationUser: owner.copyWith(status: MembershipStatus.inactive),
+          accessMutationResult: UserAccessUpdateResult(
+            organizationId: 'org-1',
+            targetUserId: 'owner-1',
+            previousStatus: MembershipStatus.active,
+            status: MembershipStatus.inactive,
+            updatedAt: DateTime.utc(2026, 1, 1),
+          ),
+        ),
+      ],
+      verify: (_) {
+        verify(
+          () => userAccessRepository.deactivateUser(
+            organizationId: 'org-1',
+            targetUserId: 'owner-1',
+          ),
+        ).called(1);
+        expect(analyticsService.loggedEvents.single.name, 'user_deactivated');
+        expect(
+          analyticsService.loggedEvents.single.parameters,
+          <String, Object?>{
+            'previous_status': 'active',
+            'new_status': 'inactive',
+          },
+        );
+      },
+    );
+
+    blocTest<UserListBloc, UserListState>(
+      'reactivates an inactive user',
+      build: buildBloc,
+      seed: () => UserListState(
+        loadStatus: UserListLoadStatus.ready,
+        organizationId: 'org-1',
+        allUsers: [rep],
+      ),
+      setUp: () {
+        when(
+          () => userAccessRepository.reactivateUser(
+            organizationId: any(named: 'organizationId'),
+            targetUserId: any(named: 'targetUserId'),
+          ),
+        ).thenAnswer(
+          (_) async => AppSuccess<UserAccessUpdateResult>(
+            UserAccessUpdateResult(
+              organizationId: 'org-1',
+              targetUserId: 'rep-1',
+              previousStatus: MembershipStatus.inactive,
+              status: MembershipStatus.active,
+              updatedAt: DateTime.utc(2026, 1, 1),
+            ),
+          ),
+        );
+      },
+      act: (bloc) => bloc.add(UserListEvent.accessStatusChangeRequested(rep)),
+      verify: (bloc) {
+        expect(bloc.state.allUsers.single.status, MembershipStatus.active);
+        expect(analyticsService.loggedEvents.single.name, 'user_reactivated');
+      },
+    );
+
+    blocTest<UserListBloc, UserListState>(
+      'surfaces the last active OWNER failure without logging analytics',
+      build: buildBloc,
+      seed: () => UserListState(
+        loadStatus: UserListLoadStatus.ready,
+        organizationId: 'org-1',
+        allUsers: [owner],
+      ),
+      setUp: () {
+        when(
+          () => userAccessRepository.deactivateUser(
+            organizationId: any(named: 'organizationId'),
+            targetUserId: any(named: 'targetUserId'),
+          ),
+        ).thenAnswer(
+          (_) async => AppFailure<UserAccessUpdateResult>(
+            const ConflictFailure(
+              'Não é possível desativar este usuário porque ele é o último OWNER ativo da organização.',
+            ),
+          ),
+        );
+      },
+      act: (bloc) => bloc.add(UserListEvent.accessStatusChangeRequested(owner)),
+      expect: () => <UserListState>[
+        UserListState(
+          loadStatus: UserListLoadStatus.ready,
+          organizationId: 'org-1',
+          allUsers: [owner],
+          accessMutationStatus: UserListAccessMutationStatus.submitting,
+          accessMutationUser: owner,
+        ),
+        UserListState(
+          loadStatus: UserListLoadStatus.ready,
+          organizationId: 'org-1',
+          allUsers: [owner],
+          accessMutationStatus: UserListAccessMutationStatus.failure,
+          accessMutationUser: owner,
+          accessMutationFailure: const ConflictFailure(
+            'Não é possível desativar este usuário porque ele é o último OWNER ativo da organização.',
+          ),
+        ),
+      ],
+      verify: (_) {
+        expect(analyticsService.loggedEvents, isEmpty);
+      },
     );
   });
 }

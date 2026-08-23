@@ -16,20 +16,9 @@ import '../bloc/user_list_state.dart';
 import '../bloc/user_role_edit_bloc.dart';
 import 'user_role_edit_page.dart';
 
-/// Lists every user of one Organization — search, role/status filters and
-/// "carregar mais" pagination — with quick access to per-user administrative
-/// actions (TASK-042).
-///
-/// Restricted to administrative profiles both here (via [PermissionBuilder],
-/// gating the whole screen on [Capability.userChangeRole] — the capability
-/// only OWNER/ADMIN ever hold) and, more importantly, on the backend: a bulk
-/// `members` `list` query is denied by `firestore.rules` to anyone without
-/// that same capability (TASK-042/TASK-030), so this UI-side check is
-/// defense-in-depth/UX only, never the real authorization.
-///
-/// Never talks to `ListOrganizationUsersUseCase`/`MembershipRepository`
-/// directly — every state transition goes through [UserListBloc], same
-/// precedent as `InviteListPage`.
+/// Lists every user of one Organization with administrative actions
+/// (TASK-042/TASK-046). The UI never writes Firestore directly: role edits
+/// and access changes go through BLoCs/use cases backed by Cloud Functions.
 class UserListPage extends StatelessWidget {
   const UserListPage({
     required this.organizationId,
@@ -43,22 +32,18 @@ class UserListPage extends StatelessWidget {
   });
 
   final String organizationId;
-
-  /// The signed-in user whose permission is being checked — never taken
-  /// from anywhere else in the widget tree, same explicitness as
-  /// `PermissionBuilder` itself requires.
   final String userId;
   final PermissionService permissionService;
   final UserListBloc Function() createBloc;
   final UserRoleEditBloc Function()? createRoleEditBloc;
 
-  /// Quick access to "gerenciar perfil/permissão" (TASK-043). `null` (the
-  /// default) falls back to [createRoleEditBloc] when available, opening
-  /// `UserRoleEditPage` as the official TASK-043 bottom sheet.
+  /// Optional override for tests/shells embedding this page. The default
+  /// opens the official TASK-043 bottom sheet when [createRoleEditBloc] is
+  /// provided.
   final void Function(OrganizationUser user)? onManageUser;
 
-  /// Quick access to "desativar usuário" (TASK-046). Same `null`-hides-the-
-  /// action rationale as [onManageUser].
+  /// Optional override for the TASK-046 status action. The default shows the
+  /// confirmation dialog and dispatches [UserListEvent.accessStatusChangeRequested].
   final void Function(OrganizationUser user)? onDeactivateUser;
 
   @override
@@ -103,7 +88,10 @@ class _UserListView extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      body: BlocBuilder<UserListBloc, UserListState>(
+      body: BlocConsumer<UserListBloc, UserListState>(
+        listenWhen: (previous, current) =>
+            previous.accessMutationStatus != current.accessMutationStatus,
+        listener: _listenToAccessMutation,
         builder: (context, state) {
           final bloc = context.read<UserListBloc>();
           final manageUser =
@@ -115,6 +103,13 @@ class _UserListView extends StatelessWidget {
                       bloc: bloc,
                       user: user,
                     ));
+          final changeAccess =
+              onDeactivateUser ??
+              (OrganizationUser user) => _confirmAndChangeAccess(
+                context: context,
+                bloc: bloc,
+                user: user,
+              );
 
           return AppAdminPageLayout(
             title: 'Usuários',
@@ -157,7 +152,7 @@ class _UserListView extends StatelessWidget {
                             AppDataColumn(
                               label: 'E-mail',
                               cellBuilder: (context, user) =>
-                                  Text(user.email.isEmpty ? '—' : user.email),
+                                  Text(user.email.isEmpty ? '-' : user.email),
                             ),
                             AppDataColumn(
                               label: 'Role',
@@ -166,20 +161,25 @@ class _UserListView extends StatelessWidget {
                             ),
                             AppDataColumn(
                               label: 'Status',
-                              cellBuilder: (context, user) => AppStatusBadge(
-                                label: user.status == MembershipStatus.active
-                                    ? 'Ativo'
-                                    : 'Desativado',
-                                variant: user.status == MembershipStatus.active
-                                    ? AppStatusBadgeVariant.success
-                                    : AppStatusBadgeVariant.neutral,
+                              cellBuilder: (context, user) => FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: AppStatusBadge(
+                                  label: user.status == MembershipStatus.active
+                                      ? 'Ativo'
+                                      : 'Desativado',
+                                  variant:
+                                      user.status == MembershipStatus.active
+                                      ? AppStatusBadgeVariant.success
+                                      : AppStatusBadgeVariant.neutral,
+                                ),
                               ),
                             ),
                             AppDataColumn(
                               label: 'Equipe',
                               cellBuilder: (context, user) => Text(
                                 user.teamNames.isEmpty
-                                    ? '—'
+                                    ? '-'
                                     : user.teamNames.join(', '),
                               ),
                             ),
@@ -191,12 +191,19 @@ class _UserListView extends StatelessWidget {
                                 semanticLabel: 'Gerenciar perfil/permissão',
                                 onPressed: manageUser,
                               ),
-                            if (onDeactivateUser != null)
-                              AppDataTableAction<OrganizationUser>(
-                                icon: Icons.block_outlined,
-                                semanticLabel: 'Desativar usuário',
-                                onPressed: onDeactivateUser!,
-                              ),
+                            AppDataTableAction<OrganizationUser>(
+                              icon: Icons.block_outlined,
+                              semanticLabel: 'Desativar usuário',
+                              iconBuilder: (user) =>
+                                  user.status == MembershipStatus.active
+                                  ? Icons.block_outlined
+                                  : Icons.restore_outlined,
+                              semanticLabelBuilder: (user) =>
+                                  user.status == MembershipStatus.active
+                                  ? 'Desativar usuário'
+                                  : 'Reativar usuário',
+                              onPressed: changeAccess,
+                            ),
                           ],
                         ),
                         if (_tableStatus(state) ==
@@ -219,6 +226,52 @@ class _UserListView extends StatelessWidget {
         },
       ),
     );
+  }
+
+  void _listenToAccessMutation(BuildContext context, UserListState state) {
+    switch (state.accessMutationStatus) {
+      case UserListAccessMutationStatus.success:
+        final result = state.accessMutationResult;
+        if (result == null) return;
+        final deactivated = result.status == MembershipStatus.inactive;
+        AppSnackbar.show(
+          context,
+          message: deactivated
+              ? 'Usuário desativado. O histórico foi preservado.'
+              : 'Usuário reativado.',
+          variant: AppSnackbarVariant.success,
+        );
+      case UserListAccessMutationStatus.failure:
+        AppSnackbar.show(
+          context,
+          message:
+              state.accessMutationFailure?.message ??
+              'Não foi possível alterar o acesso do usuário.',
+          variant: AppSnackbarVariant.error,
+        );
+      case UserListAccessMutationStatus.idle:
+      case UserListAccessMutationStatus.submitting:
+        break;
+    }
+  }
+
+  Future<void> _confirmAndChangeAccess({
+    required BuildContext context,
+    required UserListBloc bloc,
+    required OrganizationUser user,
+  }) async {
+    final isDeactivation = user.status == MembershipStatus.active;
+    final confirmed = await AppConfirmationDialog.show(
+      context: context,
+      title: isDeactivation ? 'Desativar usuário?' : 'Reativar usuário?',
+      message: isDeactivation
+          ? 'O acesso deste usuário à organização será bloqueado, mas pedidos, atividades CRM, vínculos de carteira e auditoria permanecerão preservados no histórico.'
+          : 'O acesso deste usuário à organização será restaurado e a reativação ficará registrada na auditoria.',
+      confirmLabel: isDeactivation ? 'Desativar' : 'Reativar',
+    );
+    if (confirmed && context.mounted) {
+      bloc.add(UserListEvent.accessStatusChangeRequested(user));
+    }
   }
 
   Future<void> _openRoleEditor({
@@ -255,10 +308,6 @@ String _roleLabel(String roleName) {
   return systemRole == null ? roleName : systemRoleNameLabel(systemRole);
 }
 
-/// Shorter than [systemRoleNameLabel] (drops the parenthetical `(OWNER)`/
-/// `(ADMIN)` suffix): the role filter chips live in the narrow
-/// `AppAdminPageLayout` side panel, where the full descriptive label used
-/// by `InviteUserPage`'s role picker would overflow.
 String _roleFilterLabel(SystemRoleName role) {
   return switch (role) {
     SystemRoleName.owner => 'Proprietário',

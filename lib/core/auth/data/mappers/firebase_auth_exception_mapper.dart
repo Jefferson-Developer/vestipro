@@ -14,9 +14,15 @@ AppException mapFirebaseAuthExceptionToAppException(
     case 'wrong-password':
     case 'invalid-credential':
     case 'invalid-email':
-    case 'user-disabled':
       return UnauthorizedException(
         'E-mail ou senha inválidos.',
+        code: exception.code,
+        cause: exception,
+        stackTrace: stackTrace,
+      );
+    case 'user-disabled':
+      return UnauthorizedException(
+        'Seu acesso foi desativado. Entre em contato com o administrador da sua organização.',
         code: exception.code,
         cause: exception,
         stackTrace: stackTrace,

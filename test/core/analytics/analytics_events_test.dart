@@ -26,6 +26,8 @@ void main() {
           'invite_sent',
           'invite_accepted',
           'user_role_updated',
+          'user_deactivated',
+          'user_reactivated',
           'team_created',
           'team_updated',
           'team_deleted',

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/permissions/permissions.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
@@ -12,9 +13,13 @@ class _MockMembershipRepository extends Mock implements MembershipRepository {}
 
 class _MockTeamRepository extends Mock implements TeamRepository {}
 
+class _MockUserAccessRepository extends Mock implements UserAccessRepository {}
+
 void main() {
   late _MockMembershipRepository membershipRepository;
   late _MockTeamRepository teamRepository;
+  late _MockUserAccessRepository userAccessRepository;
+  late FakeAnalyticsService analyticsService;
   late PermissionService permissionService;
 
   Membership buildMembership({
@@ -44,6 +49,8 @@ void main() {
   setUp(() {
     membershipRepository = _MockMembershipRepository();
     teamRepository = _MockTeamRepository();
+    userAccessRepository = _MockUserAccessRepository();
+    analyticsService = FakeAnalyticsService();
     permissionService = PermissionService(membershipRepository);
     when(
       () => teamRepository.listByOrganization('org-1'),
@@ -76,6 +83,9 @@ void main() {
           membershipRepository,
           teamRepository,
         ),
+        deactivateUser: DeactivateUserUseCase(userAccessRepository),
+        reactivateUser: ReactivateUserUseCase(userAccessRepository),
+        analyticsService: analyticsService,
       ),
     );
   }
@@ -88,10 +98,9 @@ void main() {
     addTearDown(view.resetDevicePixelRatio);
   }
 
-  group('UserListPage — RBAC', () {
+  group('UserListPage - RBAC', () {
     testWidgets(
-      'hides the roster and shows the "sem permissão" fallback for a role '
-      'without user.changeRole (e.g. SALES_REP)',
+      'hides the roster and shows the forbidden fallback for SALES_REP',
       (tester) async {
         setWidth(tester, 1200);
         when(
@@ -117,9 +126,7 @@ void main() {
       },
     );
 
-    testWidgets('renders the roster for an OWNER (has user.changeRole)', (
-      tester,
-    ) async {
+    testWidgets('renders the roster for an OWNER', (tester) async {
       setWidth(tester, 1200);
       when(
         () => membershipRepository.getByUser(
@@ -141,7 +148,7 @@ void main() {
     });
   });
 
-  group('UserListPage — responsive layout', () {
+  group('UserListPage - responsive layout', () {
     testWidgets('renders as an administrative table on desktop', (
       tester,
     ) async {
@@ -160,8 +167,6 @@ void main() {
       await pumpApp(tester, buildPage());
       await tester.pumpAndSettle();
 
-      // The table layout renders plain column headers ("E-mail", no
-      // trailing colon) — only the card layout renders "E-mail: valor".
       expect(find.text('E-mail'), findsOneWidget);
       expect(find.textContaining('E-mail: '), findsNothing);
     });
@@ -182,14 +187,11 @@ void main() {
       await pumpApp(tester, buildPage());
       await tester.pumpAndSettle();
 
-      // The card layout renders remaining columns as "Label: valor" — the
-      // table layout never renders that colon-prefixed shape (same
-      // convention exercised by AppDataTable's own tests).
       expect(find.textContaining('E-mail: '), findsNWidgets(2));
     });
   });
 
-  group('UserListPage — empty/error states', () {
+  group('UserListPage - empty/error states', () {
     testWidgets('shows an empty state when the organization has no users', (
       tester,
     ) async {
@@ -213,5 +215,75 @@ void main() {
 
       expect(find.text('Nenhum usuário encontrado'), findsOneWidget);
     });
+  });
+
+  group('UserListPage - access status actions', () {
+    testWidgets(
+      'confirms deactivation, explains history preservation and updates status',
+      (tester) async {
+        setWidth(tester, 1200);
+        when(
+          () => membershipRepository.getByUser(
+            organizationId: 'org-1',
+            userId: 'current-user',
+          ),
+        ).thenAnswer(
+          (_) async => AppSuccess<Membership>(
+            buildMembership(userId: 'current-user', roleName: 'OWNER'),
+          ),
+        );
+        when(() => membershipRepository.listByOrganization('org-1')).thenAnswer(
+          (_) async => AppSuccess<List<Membership>>([
+            buildMembership(
+              userId: 'user-1',
+              roleName: 'SALES_REP',
+              name: 'Ana Souza',
+              email: 'ana@vestipro.com.br',
+            ),
+          ]),
+        );
+        when(
+          () => userAccessRepository.deactivateUser(
+            organizationId: any(named: 'organizationId'),
+            targetUserId: any(named: 'targetUserId'),
+          ),
+        ).thenAnswer(
+          (_) async => AppSuccess<UserAccessUpdateResult>(
+            UserAccessUpdateResult(
+              organizationId: 'org-1',
+              targetUserId: 'user-1',
+              previousStatus: MembershipStatus.active,
+              status: MembershipStatus.inactive,
+              updatedAt: DateTime.utc(2026, 1, 1),
+            ),
+          ),
+        );
+
+        await pumpApp(tester, buildPage());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.bySemanticsLabel('Desativar usuário'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Desativar usuário?'), findsOneWidget);
+        expect(find.textContaining('histórico'), findsOneWidget);
+        expect(find.textContaining('vínculos de carteira'), findsOneWidget);
+
+        await tester.tap(find.text('Desativar'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('Desativado'), findsWidgets);
+        expect(
+          find.text('Usuário desativado. O histórico foi preservado.'),
+          findsOneWidget,
+        );
+        verify(
+          () => userAccessRepository.deactivateUser(
+            organizationId: 'org-1',
+            targetUserId: 'user-1',
+          ),
+        ).called(1);
+      },
+    );
   });
 }

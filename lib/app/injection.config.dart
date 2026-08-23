@@ -245,35 +245,49 @@ import '../features/settings/domain/usecases/search_about_app_notes_use_case.dar
 import '../features/settings/domain/usecases/submit_about_app_diagnostics_use_case.dart'
     as _i226;
 import '../features/settings/presentation/bloc/about_app_bloc.dart' as _i398;
+import '../features/users/data/datasources/cloud_functions_user_access_data_source.dart'
+    as _i605;
 import '../features/users/data/datasources/cloud_functions_user_role_data_source.dart'
     as _i789;
 import '../features/users/data/datasources/firestore_portfolio_assignment_data_source.dart'
     as _i954;
 import '../features/users/data/datasources/portfolio_assignment_data_source.dart'
     as _i847;
+import '../features/users/data/datasources/user_access_data_source.dart'
+    as _i681;
 import '../features/users/data/datasources/user_role_data_source.dart' as _i176;
 import '../features/users/data/mappers/portfolio_assignment_mapper.dart'
     as _i708;
+import '../features/users/data/mappers/user_access_update_result_mapper.dart'
+    as _i566;
 import '../features/users/data/mappers/user_role_update_result_mapper.dart'
     as _i958;
 import '../features/users/data/repositories/portfolio_assignment_repository_impl.dart'
     as _i667;
+import '../features/users/data/repositories/user_access_repository_impl.dart'
+    as _i591;
 import '../features/users/data/repositories/user_role_repository_impl.dart'
     as _i53;
 import '../features/users/domain/repositories/portfolio_assignment_repository.dart'
     as _i295;
+import '../features/users/domain/repositories/user_access_repository.dart'
+    as _i33;
 import '../features/users/domain/repositories/user_role_repository.dart'
     as _i262;
 import '../features/users/domain/services/portfolio_visibility_service.dart'
     as _i302;
 import '../features/users/domain/usecases/assign_portfolio_use_case.dart'
     as _i636;
+import '../features/users/domain/usecases/deactivate_user_use_case.dart'
+    as _i126;
 import '../features/users/domain/usecases/list_commercial_teams_use_case.dart'
     as _i986;
 import '../features/users/domain/usecases/list_organization_users_use_case.dart'
     as _i93;
 import '../features/users/domain/usecases/list_portfolio_assignments_use_case.dart'
     as _i321;
+import '../features/users/domain/usecases/reactivate_user_use_case.dart'
+    as _i603;
 import '../features/users/domain/usecases/update_user_role_use_case.dart'
     as _i428;
 import '../features/users/presentation/bloc/assign_portfolio_bloc.dart'
@@ -330,6 +344,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i708.PortfolioAssignmentMapper>(
       () => const _i708.PortfolioAssignmentMapper(),
+    );
+    gh.lazySingleton<_i566.UserAccessUpdateResultMapper>(
+      () => const _i566.UserAccessUpdateResultMapper(),
     );
     gh.lazySingleton<_i958.UserRoleUpdateResultMapper>(
       () => const _i958.UserRoleUpdateResultMapper(),
@@ -529,6 +546,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i228.TeamDataSource>(
       () => _i23.FirestoreTeamDataSource(gh<_i974.FirebaseFirestore>()),
     );
+    gh.lazySingleton<_i681.UserAccessDataSource>(
+      () => _i605.CloudFunctionsUserAccessDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.factory<_i330.CreateCompanyUseCase>(
       () => _i330.CreateCompanyUseCase(gh<_i799.CompanyRepository>()),
     );
@@ -547,6 +569,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i70.GetUserMembershipUseCase>(
       () => _i70.GetUserMembershipUseCase(gh<_i957.MembershipRepository>()),
     );
+    gh.lazySingleton<_i33.UserAccessRepository>(
+      () => _i591.UserAccessRepositoryImpl(
+        dataSource: gh<_i681.UserAccessDataSource>(),
+        mapper: gh<_i566.UserAccessUpdateResultMapper>(),
+      ),
+    );
     gh.lazySingleton<_i668.UserProfileDataSource>(
       () =>
           _i1043.FirestoreUserProfileDataSource(gh<_i974.FirebaseFirestore>()),
@@ -556,6 +584,12 @@ extension GetItInjectableX on _i174.GetIt {
         dataSource: gh<_i526.BranchDataSource>(),
         mapper: gh<_i964.BranchMapper>(),
       ),
+    );
+    gh.factory<_i126.DeactivateUserUseCase>(
+      () => _i126.DeactivateUserUseCase(gh<_i33.UserAccessRepository>()),
+    );
+    gh.factory<_i603.ReactivateUserUseCase>(
+      () => _i603.ReactivateUserUseCase(gh<_i33.UserAccessRepository>()),
     );
     gh.lazySingleton<_i794.AboutAppRepository>(
       () => _i1060.AboutAppRepositoryImpl(
@@ -783,11 +817,6 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
-    gh.factory<_i244.UserListBloc>(
-      () => _i244.UserListBloc(
-        listOrganizationUsers: gh<_i93.ListOrganizationUsersUseCase>(),
-      ),
-    );
     gh.factory<_i698.UserRoleEditBloc>(
       () => _i698.UserRoleEditBloc(
         updateUserRole: gh<_i428.UpdateUserRoleUseCase>(),
@@ -828,6 +857,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i675.CompleteOnboardingUseCase>(
       () =>
           _i675.CompleteOnboardingUseCase(gh<_i55.CreateOrganizationUseCase>()),
+    );
+    gh.factory<_i244.UserListBloc>(
+      () => _i244.UserListBloc(
+        listOrganizationUsers: gh<_i93.ListOrganizationUsersUseCase>(),
+        deactivateUser: gh<_i126.DeactivateUserUseCase>(),
+        reactivateUser: gh<_i603.ReactivateUserUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
     );
     gh.factory<_i593.OnboardingBloc>(
       () => _i593.OnboardingBloc(

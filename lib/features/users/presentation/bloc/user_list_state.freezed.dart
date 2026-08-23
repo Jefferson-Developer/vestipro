@@ -14,18 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$UserListState {
 
- UserListLoadStatus get loadStatus; String get organizationId;/// Every user of the organization, unfiltered and unpaginated — the
-/// single result of [ListOrganizationUsersUseCase]. `UserListBloc`
-/// applies [searchQuery]/[roleFilter]/[statusFilter] and pagination
-/// entirely in memory on top of this list: an internal (not a raw
-/// Firestore) roster is the only way to search by name/e-mail at all,
-/// since `Membership`/`users/{uid}` cannot be joined by a Firestore
-/// query — see `ListOrganizationUsersUseCase`'s own docs.
- List<OrganizationUser> get allUsers;/// Only meaningful when [loadStatus] is [UserListLoadStatus.failure].
- Failure? get loadFailure; String get searchQuery; String? get roleFilter; MembershipStatus? get statusFilter;/// How many of [filteredUsers] are currently revealed
-/// (`AppPagination`'s "carregar mais"). Reset to [kUserListPageSize]
-/// whenever [searchQuery]/[roleFilter]/[statusFilter] changes.
- int get visibleCount;
+ UserListLoadStatus get loadStatus; String get organizationId; List<OrganizationUser> get allUsers; Failure? get loadFailure; String get searchQuery; String? get roleFilter; MembershipStatus? get statusFilter; int get visibleCount; UserListAccessMutationStatus get accessMutationStatus; OrganizationUser? get accessMutationUser; Failure? get accessMutationFailure; UserAccessUpdateResult? get accessMutationResult;
 /// Create a copy of UserListState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -36,16 +25,16 @@ $UserListStateCopyWith<UserListState> get copyWith => _$UserListStateCopyWithImp
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserListState&&(identical(other.loadStatus, loadStatus) || other.loadStatus == loadStatus)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&const DeepCollectionEquality().equals(other.allUsers, allUsers)&&(identical(other.loadFailure, loadFailure) || other.loadFailure == loadFailure)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.roleFilter, roleFilter) || other.roleFilter == roleFilter)&&(identical(other.statusFilter, statusFilter) || other.statusFilter == statusFilter)&&(identical(other.visibleCount, visibleCount) || other.visibleCount == visibleCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserListState&&(identical(other.loadStatus, loadStatus) || other.loadStatus == loadStatus)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&const DeepCollectionEquality().equals(other.allUsers, allUsers)&&(identical(other.loadFailure, loadFailure) || other.loadFailure == loadFailure)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.roleFilter, roleFilter) || other.roleFilter == roleFilter)&&(identical(other.statusFilter, statusFilter) || other.statusFilter == statusFilter)&&(identical(other.visibleCount, visibleCount) || other.visibleCount == visibleCount)&&(identical(other.accessMutationStatus, accessMutationStatus) || other.accessMutationStatus == accessMutationStatus)&&(identical(other.accessMutationUser, accessMutationUser) || other.accessMutationUser == accessMutationUser)&&(identical(other.accessMutationFailure, accessMutationFailure) || other.accessMutationFailure == accessMutationFailure)&&(identical(other.accessMutationResult, accessMutationResult) || other.accessMutationResult == accessMutationResult));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,loadStatus,organizationId,const DeepCollectionEquality().hash(allUsers),loadFailure,searchQuery,roleFilter,statusFilter,visibleCount);
+int get hashCode => Object.hash(runtimeType,loadStatus,organizationId,const DeepCollectionEquality().hash(allUsers),loadFailure,searchQuery,roleFilter,statusFilter,visibleCount,accessMutationStatus,accessMutationUser,accessMutationFailure,accessMutationResult);
 
 @override
 String toString() {
-  return 'UserListState(loadStatus: $loadStatus, organizationId: $organizationId, allUsers: $allUsers, loadFailure: $loadFailure, searchQuery: $searchQuery, roleFilter: $roleFilter, statusFilter: $statusFilter, visibleCount: $visibleCount)';
+  return 'UserListState(loadStatus: $loadStatus, organizationId: $organizationId, allUsers: $allUsers, loadFailure: $loadFailure, searchQuery: $searchQuery, roleFilter: $roleFilter, statusFilter: $statusFilter, visibleCount: $visibleCount, accessMutationStatus: $accessMutationStatus, accessMutationUser: $accessMutationUser, accessMutationFailure: $accessMutationFailure, accessMutationResult: $accessMutationResult)';
 }
 
 
@@ -56,11 +45,11 @@ abstract mixin class $UserListStateCopyWith<$Res>  {
   factory $UserListStateCopyWith(UserListState value, $Res Function(UserListState) _then) = _$UserListStateCopyWithImpl;
 @useResult
 $Res call({
- UserListLoadStatus loadStatus, String organizationId, List<OrganizationUser> allUsers, Failure? loadFailure, String searchQuery, String? roleFilter, MembershipStatus? statusFilter, int visibleCount
+ UserListLoadStatus loadStatus, String organizationId, List<OrganizationUser> allUsers, Failure? loadFailure, String searchQuery, String? roleFilter, MembershipStatus? statusFilter, int visibleCount, UserListAccessMutationStatus accessMutationStatus, OrganizationUser? accessMutationUser, Failure? accessMutationFailure, UserAccessUpdateResult? accessMutationResult
 });
 
 
-
+$OrganizationUserCopyWith<$Res>? get accessMutationUser;
 
 }
 /// @nodoc
@@ -73,7 +62,7 @@ class _$UserListStateCopyWithImpl<$Res>
 
 /// Create a copy of UserListState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? loadStatus = null,Object? organizationId = null,Object? allUsers = null,Object? loadFailure = freezed,Object? searchQuery = null,Object? roleFilter = freezed,Object? statusFilter = freezed,Object? visibleCount = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? loadStatus = null,Object? organizationId = null,Object? allUsers = null,Object? loadFailure = freezed,Object? searchQuery = null,Object? roleFilter = freezed,Object? statusFilter = freezed,Object? visibleCount = null,Object? accessMutationStatus = null,Object? accessMutationUser = freezed,Object? accessMutationFailure = freezed,Object? accessMutationResult = freezed,}) {
   return _then(_self.copyWith(
 loadStatus: null == loadStatus ? _self.loadStatus : loadStatus // ignore: cast_nullable_to_non_nullable
 as UserListLoadStatus,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
@@ -83,10 +72,26 @@ as Failure?,searchQuery: null == searchQuery ? _self.searchQuery : searchQuery /
 as String,roleFilter: freezed == roleFilter ? _self.roleFilter : roleFilter // ignore: cast_nullable_to_non_nullable
 as String?,statusFilter: freezed == statusFilter ? _self.statusFilter : statusFilter // ignore: cast_nullable_to_non_nullable
 as MembershipStatus?,visibleCount: null == visibleCount ? _self.visibleCount : visibleCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,accessMutationStatus: null == accessMutationStatus ? _self.accessMutationStatus : accessMutationStatus // ignore: cast_nullable_to_non_nullable
+as UserListAccessMutationStatus,accessMutationUser: freezed == accessMutationUser ? _self.accessMutationUser : accessMutationUser // ignore: cast_nullable_to_non_nullable
+as OrganizationUser?,accessMutationFailure: freezed == accessMutationFailure ? _self.accessMutationFailure : accessMutationFailure // ignore: cast_nullable_to_non_nullable
+as Failure?,accessMutationResult: freezed == accessMutationResult ? _self.accessMutationResult : accessMutationResult // ignore: cast_nullable_to_non_nullable
+as UserAccessUpdateResult?,
   ));
 }
+/// Create a copy of UserListState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$OrganizationUserCopyWith<$Res>? get accessMutationUser {
+    if (_self.accessMutationUser == null) {
+    return null;
+  }
 
+  return $OrganizationUserCopyWith<$Res>(_self.accessMutationUser!, (value) {
+    return _then(_self.copyWith(accessMutationUser: value));
+  });
+}
 }
 
 
@@ -168,10 +173,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( UserListLoadStatus loadStatus,  String organizationId,  List<OrganizationUser> allUsers,  Failure? loadFailure,  String searchQuery,  String? roleFilter,  MembershipStatus? statusFilter,  int visibleCount)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( UserListLoadStatus loadStatus,  String organizationId,  List<OrganizationUser> allUsers,  Failure? loadFailure,  String searchQuery,  String? roleFilter,  MembershipStatus? statusFilter,  int visibleCount,  UserListAccessMutationStatus accessMutationStatus,  OrganizationUser? accessMutationUser,  Failure? accessMutationFailure,  UserAccessUpdateResult? accessMutationResult)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _UserListState() when $default != null:
-return $default(_that.loadStatus,_that.organizationId,_that.allUsers,_that.loadFailure,_that.searchQuery,_that.roleFilter,_that.statusFilter,_that.visibleCount);case _:
+return $default(_that.loadStatus,_that.organizationId,_that.allUsers,_that.loadFailure,_that.searchQuery,_that.roleFilter,_that.statusFilter,_that.visibleCount,_that.accessMutationStatus,_that.accessMutationUser,_that.accessMutationFailure,_that.accessMutationResult);case _:
   return orElse();
 
 }
@@ -189,10 +194,10 @@ return $default(_that.loadStatus,_that.organizationId,_that.allUsers,_that.loadF
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( UserListLoadStatus loadStatus,  String organizationId,  List<OrganizationUser> allUsers,  Failure? loadFailure,  String searchQuery,  String? roleFilter,  MembershipStatus? statusFilter,  int visibleCount)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( UserListLoadStatus loadStatus,  String organizationId,  List<OrganizationUser> allUsers,  Failure? loadFailure,  String searchQuery,  String? roleFilter,  MembershipStatus? statusFilter,  int visibleCount,  UserListAccessMutationStatus accessMutationStatus,  OrganizationUser? accessMutationUser,  Failure? accessMutationFailure,  UserAccessUpdateResult? accessMutationResult)  $default,) {final _that = this;
 switch (_that) {
 case _UserListState():
-return $default(_that.loadStatus,_that.organizationId,_that.allUsers,_that.loadFailure,_that.searchQuery,_that.roleFilter,_that.statusFilter,_that.visibleCount);case _:
+return $default(_that.loadStatus,_that.organizationId,_that.allUsers,_that.loadFailure,_that.searchQuery,_that.roleFilter,_that.statusFilter,_that.visibleCount,_that.accessMutationStatus,_that.accessMutationUser,_that.accessMutationFailure,_that.accessMutationResult);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -209,10 +214,10 @@ return $default(_that.loadStatus,_that.organizationId,_that.allUsers,_that.loadF
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( UserListLoadStatus loadStatus,  String organizationId,  List<OrganizationUser> allUsers,  Failure? loadFailure,  String searchQuery,  String? roleFilter,  MembershipStatus? statusFilter,  int visibleCount)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( UserListLoadStatus loadStatus,  String organizationId,  List<OrganizationUser> allUsers,  Failure? loadFailure,  String searchQuery,  String? roleFilter,  MembershipStatus? statusFilter,  int visibleCount,  UserListAccessMutationStatus accessMutationStatus,  OrganizationUser? accessMutationUser,  Failure? accessMutationFailure,  UserAccessUpdateResult? accessMutationResult)?  $default,) {final _that = this;
 switch (_that) {
 case _UserListState() when $default != null:
-return $default(_that.loadStatus,_that.organizationId,_that.allUsers,_that.loadFailure,_that.searchQuery,_that.roleFilter,_that.statusFilter,_that.visibleCount);case _:
+return $default(_that.loadStatus,_that.organizationId,_that.allUsers,_that.loadFailure,_that.searchQuery,_that.roleFilter,_that.statusFilter,_that.visibleCount,_that.accessMutationStatus,_that.accessMutationUser,_that.accessMutationFailure,_that.accessMutationResult);case _:
   return null;
 
 }
@@ -224,41 +229,27 @@ return $default(_that.loadStatus,_that.organizationId,_that.allUsers,_that.loadF
 
 
 class _UserListState extends UserListState {
-  const _UserListState({this.loadStatus = UserListLoadStatus.loading, this.organizationId = '', final  List<OrganizationUser> allUsers = const <OrganizationUser>[], this.loadFailure, this.searchQuery = '', this.roleFilter, this.statusFilter, this.visibleCount = kUserListPageSize}): _allUsers = allUsers,super._();
+  const _UserListState({this.loadStatus = UserListLoadStatus.loading, this.organizationId = '', final  List<OrganizationUser> allUsers = const <OrganizationUser>[], this.loadFailure, this.searchQuery = '', this.roleFilter, this.statusFilter, this.visibleCount = kUserListPageSize, this.accessMutationStatus = UserListAccessMutationStatus.idle, this.accessMutationUser, this.accessMutationFailure, this.accessMutationResult}): _allUsers = allUsers,super._();
   
 
 @override@JsonKey() final  UserListLoadStatus loadStatus;
 @override@JsonKey() final  String organizationId;
-/// Every user of the organization, unfiltered and unpaginated — the
-/// single result of [ListOrganizationUsersUseCase]. `UserListBloc`
-/// applies [searchQuery]/[roleFilter]/[statusFilter] and pagination
-/// entirely in memory on top of this list: an internal (not a raw
-/// Firestore) roster is the only way to search by name/e-mail at all,
-/// since `Membership`/`users/{uid}` cannot be joined by a Firestore
-/// query — see `ListOrganizationUsersUseCase`'s own docs.
  final  List<OrganizationUser> _allUsers;
-/// Every user of the organization, unfiltered and unpaginated — the
-/// single result of [ListOrganizationUsersUseCase]. `UserListBloc`
-/// applies [searchQuery]/[roleFilter]/[statusFilter] and pagination
-/// entirely in memory on top of this list: an internal (not a raw
-/// Firestore) roster is the only way to search by name/e-mail at all,
-/// since `Membership`/`users/{uid}` cannot be joined by a Firestore
-/// query — see `ListOrganizationUsersUseCase`'s own docs.
 @override@JsonKey() List<OrganizationUser> get allUsers {
   if (_allUsers is EqualUnmodifiableListView) return _allUsers;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_allUsers);
 }
 
-/// Only meaningful when [loadStatus] is [UserListLoadStatus.failure].
 @override final  Failure? loadFailure;
 @override@JsonKey() final  String searchQuery;
 @override final  String? roleFilter;
 @override final  MembershipStatus? statusFilter;
-/// How many of [filteredUsers] are currently revealed
-/// (`AppPagination`'s "carregar mais"). Reset to [kUserListPageSize]
-/// whenever [searchQuery]/[roleFilter]/[statusFilter] changes.
 @override@JsonKey() final  int visibleCount;
+@override@JsonKey() final  UserListAccessMutationStatus accessMutationStatus;
+@override final  OrganizationUser? accessMutationUser;
+@override final  Failure? accessMutationFailure;
+@override final  UserAccessUpdateResult? accessMutationResult;
 
 /// Create a copy of UserListState
 /// with the given fields replaced by the non-null parameter values.
@@ -270,16 +261,16 @@ _$UserListStateCopyWith<_UserListState> get copyWith => __$UserListStateCopyWith
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserListState&&(identical(other.loadStatus, loadStatus) || other.loadStatus == loadStatus)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&const DeepCollectionEquality().equals(other._allUsers, _allUsers)&&(identical(other.loadFailure, loadFailure) || other.loadFailure == loadFailure)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.roleFilter, roleFilter) || other.roleFilter == roleFilter)&&(identical(other.statusFilter, statusFilter) || other.statusFilter == statusFilter)&&(identical(other.visibleCount, visibleCount) || other.visibleCount == visibleCount));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _UserListState&&(identical(other.loadStatus, loadStatus) || other.loadStatus == loadStatus)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&const DeepCollectionEquality().equals(other._allUsers, _allUsers)&&(identical(other.loadFailure, loadFailure) || other.loadFailure == loadFailure)&&(identical(other.searchQuery, searchQuery) || other.searchQuery == searchQuery)&&(identical(other.roleFilter, roleFilter) || other.roleFilter == roleFilter)&&(identical(other.statusFilter, statusFilter) || other.statusFilter == statusFilter)&&(identical(other.visibleCount, visibleCount) || other.visibleCount == visibleCount)&&(identical(other.accessMutationStatus, accessMutationStatus) || other.accessMutationStatus == accessMutationStatus)&&(identical(other.accessMutationUser, accessMutationUser) || other.accessMutationUser == accessMutationUser)&&(identical(other.accessMutationFailure, accessMutationFailure) || other.accessMutationFailure == accessMutationFailure)&&(identical(other.accessMutationResult, accessMutationResult) || other.accessMutationResult == accessMutationResult));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,loadStatus,organizationId,const DeepCollectionEquality().hash(_allUsers),loadFailure,searchQuery,roleFilter,statusFilter,visibleCount);
+int get hashCode => Object.hash(runtimeType,loadStatus,organizationId,const DeepCollectionEquality().hash(_allUsers),loadFailure,searchQuery,roleFilter,statusFilter,visibleCount,accessMutationStatus,accessMutationUser,accessMutationFailure,accessMutationResult);
 
 @override
 String toString() {
-  return 'UserListState(loadStatus: $loadStatus, organizationId: $organizationId, allUsers: $allUsers, loadFailure: $loadFailure, searchQuery: $searchQuery, roleFilter: $roleFilter, statusFilter: $statusFilter, visibleCount: $visibleCount)';
+  return 'UserListState(loadStatus: $loadStatus, organizationId: $organizationId, allUsers: $allUsers, loadFailure: $loadFailure, searchQuery: $searchQuery, roleFilter: $roleFilter, statusFilter: $statusFilter, visibleCount: $visibleCount, accessMutationStatus: $accessMutationStatus, accessMutationUser: $accessMutationUser, accessMutationFailure: $accessMutationFailure, accessMutationResult: $accessMutationResult)';
 }
 
 
@@ -290,11 +281,11 @@ abstract mixin class _$UserListStateCopyWith<$Res> implements $UserListStateCopy
   factory _$UserListStateCopyWith(_UserListState value, $Res Function(_UserListState) _then) = __$UserListStateCopyWithImpl;
 @override @useResult
 $Res call({
- UserListLoadStatus loadStatus, String organizationId, List<OrganizationUser> allUsers, Failure? loadFailure, String searchQuery, String? roleFilter, MembershipStatus? statusFilter, int visibleCount
+ UserListLoadStatus loadStatus, String organizationId, List<OrganizationUser> allUsers, Failure? loadFailure, String searchQuery, String? roleFilter, MembershipStatus? statusFilter, int visibleCount, UserListAccessMutationStatus accessMutationStatus, OrganizationUser? accessMutationUser, Failure? accessMutationFailure, UserAccessUpdateResult? accessMutationResult
 });
 
 
-
+@override $OrganizationUserCopyWith<$Res>? get accessMutationUser;
 
 }
 /// @nodoc
@@ -307,7 +298,7 @@ class __$UserListStateCopyWithImpl<$Res>
 
 /// Create a copy of UserListState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? loadStatus = null,Object? organizationId = null,Object? allUsers = null,Object? loadFailure = freezed,Object? searchQuery = null,Object? roleFilter = freezed,Object? statusFilter = freezed,Object? visibleCount = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? loadStatus = null,Object? organizationId = null,Object? allUsers = null,Object? loadFailure = freezed,Object? searchQuery = null,Object? roleFilter = freezed,Object? statusFilter = freezed,Object? visibleCount = null,Object? accessMutationStatus = null,Object? accessMutationUser = freezed,Object? accessMutationFailure = freezed,Object? accessMutationResult = freezed,}) {
   return _then(_UserListState(
 loadStatus: null == loadStatus ? _self.loadStatus : loadStatus // ignore: cast_nullable_to_non_nullable
 as UserListLoadStatus,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
@@ -317,11 +308,27 @@ as Failure?,searchQuery: null == searchQuery ? _self.searchQuery : searchQuery /
 as String,roleFilter: freezed == roleFilter ? _self.roleFilter : roleFilter // ignore: cast_nullable_to_non_nullable
 as String?,statusFilter: freezed == statusFilter ? _self.statusFilter : statusFilter // ignore: cast_nullable_to_non_nullable
 as MembershipStatus?,visibleCount: null == visibleCount ? _self.visibleCount : visibleCount // ignore: cast_nullable_to_non_nullable
-as int,
+as int,accessMutationStatus: null == accessMutationStatus ? _self.accessMutationStatus : accessMutationStatus // ignore: cast_nullable_to_non_nullable
+as UserListAccessMutationStatus,accessMutationUser: freezed == accessMutationUser ? _self.accessMutationUser : accessMutationUser // ignore: cast_nullable_to_non_nullable
+as OrganizationUser?,accessMutationFailure: freezed == accessMutationFailure ? _self.accessMutationFailure : accessMutationFailure // ignore: cast_nullable_to_non_nullable
+as Failure?,accessMutationResult: freezed == accessMutationResult ? _self.accessMutationResult : accessMutationResult // ignore: cast_nullable_to_non_nullable
+as UserAccessUpdateResult?,
   ));
 }
 
+/// Create a copy of UserListState
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$OrganizationUserCopyWith<$Res>? get accessMutationUser {
+    if (_self.accessMutationUser == null) {
+    return null;
+  }
 
+  return $OrganizationUserCopyWith<$Res>(_self.accessMutationUser!, (value) {
+    return _then(_self.copyWith(accessMutationUser: value));
+  });
+}
 }
 
 // dart format on

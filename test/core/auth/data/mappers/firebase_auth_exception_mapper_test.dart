@@ -25,6 +25,19 @@ void main() {
       expect(result.code, 'wrong-password');
     });
 
+    test('maps user-disabled to the deactivated access message', () {
+      final result = mapFirebaseAuthExceptionToAppException(
+        FirebaseAuthException(code: 'user-disabled'),
+        StackTrace.empty,
+      );
+
+      expect(result, isA<UnauthorizedException>());
+      expect(
+        result.message,
+        'Seu acesso foi desativado. Entre em contato com o administrador da sua organização.',
+      );
+    });
+
     test('maps network-request-failed to NetworkException', () {
       final result = mapFirebaseAuthExceptionToAppException(
         FirebaseAuthException(code: 'network-request-failed'),

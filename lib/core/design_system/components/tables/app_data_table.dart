@@ -62,11 +62,20 @@ class AppDataTableAction<T> {
     required this.icon,
     required this.semanticLabel,
     required this.onPressed,
+    this.iconBuilder,
+    this.semanticLabelBuilder,
   });
 
   final IconData icon;
   final String semanticLabel;
   final void Function(T item) onPressed;
+  final IconData Function(T item)? iconBuilder;
+  final String Function(T item)? semanticLabelBuilder;
+
+  IconData resolvedIcon(T item) => iconBuilder?.call(item) ?? icon;
+
+  String resolvedSemanticLabel(T item) =>
+      semanticLabelBuilder?.call(item) ?? semanticLabel;
 }
 
 /// A bulk action available once at least one row is selected.
@@ -523,8 +532,8 @@ class AppDataTable<T> extends StatelessWidget {
                 children: rowActions
                     .map(
                       (action) => AppIconButton(
-                        icon: action.icon,
-                        semanticLabel: action.semanticLabel,
+                        icon: action.resolvedIcon(item),
+                        semanticLabel: action.resolvedSemanticLabel(item),
                         variant: AppButtonVariant.text,
                         onPressed: () => action.onPressed(item),
                       ),
@@ -626,8 +635,8 @@ class AppDataTable<T> extends StatelessWidget {
               ),
               for (final action in rowActions)
                 AppIconButton(
-                  icon: action.icon,
-                  semanticLabel: action.semanticLabel,
+                  icon: action.resolvedIcon(item),
+                  semanticLabel: action.resolvedSemanticLabel(item),
                   variant: AppButtonVariant.text,
                   onPressed: () => action.onPressed(item),
                 ),

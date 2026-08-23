@@ -42,6 +42,9 @@ const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
 const EMAIL_PATTERN = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
 
+export const ACCESS_DISABLED_MESSAGE =
+  'Seu acesso foi desativado. Entre em contato com o administrador da sua organização.';
+
 export function requireNonEmptyString(value: unknown, field: string): string {
   if (typeof value !== 'string' || value.trim().length === 0) {
     throw new HttpsError('invalid-argument', `${field} is required.`);
@@ -88,10 +91,19 @@ export async function loadActiveMembership(
     .get();
 
   const data = snapshot.data();
-  if (!snapshot.exists || !data || data.status !== 'active') {
+  if (!snapshot.exists || !data) {
     throw new HttpsError(
       'permission-denied',
       'É necessário ser um membro ativo desta organização.',
+    );
+  }
+
+  if (data.status !== 'active') {
+    throw new HttpsError(
+      'permission-denied',
+      data.status === 'inactive'
+        ? ACCESS_DISABLED_MESSAGE
+        : 'É necessário ser um membro ativo desta organização.',
     );
   }
 

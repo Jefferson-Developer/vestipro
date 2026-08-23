@@ -35,6 +35,8 @@ final class AnalyticsEvents {
   static const String inviteSent = 'invite_sent';
   static const String inviteAccepted = 'invite_accepted';
   static const String userRoleUpdated = 'user_role_updated';
+  static const String userDeactivated = 'user_deactivated';
+  static const String userReactivated = 'user_reactivated';
   static const String teamCreated = 'team_created';
   static const String teamUpdated = 'team_updated';
   static const String teamDeleted = 'team_deleted';
@@ -63,6 +65,8 @@ final class AnalyticsEvents {
     inviteSent,
     inviteAccepted,
     userRoleUpdated,
+    userDeactivated,
+    userReactivated,
     teamCreated,
     teamUpdated,
     teamDeleted,

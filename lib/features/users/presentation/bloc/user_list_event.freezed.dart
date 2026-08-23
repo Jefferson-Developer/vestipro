@@ -55,7 +55,7 @@ extension UserListEventPatterns on UserListEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( UserListStarted value)?  started,TResult Function( UserListRefreshRequested value)?  refreshRequested,TResult Function( UserListSearchChanged value)?  searchChanged,TResult Function( UserListRoleFilterChanged value)?  roleFilterChanged,TResult Function( UserListStatusFilterChanged value)?  statusFilterChanged,TResult Function( UserListLoadMoreRequested value)?  loadMoreRequested,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( UserListStarted value)?  started,TResult Function( UserListRefreshRequested value)?  refreshRequested,TResult Function( UserListSearchChanged value)?  searchChanged,TResult Function( UserListRoleFilterChanged value)?  roleFilterChanged,TResult Function( UserListStatusFilterChanged value)?  statusFilterChanged,TResult Function( UserListLoadMoreRequested value)?  loadMoreRequested,TResult Function( UserListAccessStatusChangeRequested value)?  accessStatusChangeRequested,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case UserListStarted() when started != null:
@@ -64,7 +64,8 @@ return refreshRequested(_that);case UserListSearchChanged() when searchChanged !
 return searchChanged(_that);case UserListRoleFilterChanged() when roleFilterChanged != null:
 return roleFilterChanged(_that);case UserListStatusFilterChanged() when statusFilterChanged != null:
 return statusFilterChanged(_that);case UserListLoadMoreRequested() when loadMoreRequested != null:
-return loadMoreRequested(_that);case _:
+return loadMoreRequested(_that);case UserListAccessStatusChangeRequested() when accessStatusChangeRequested != null:
+return accessStatusChangeRequested(_that);case _:
   return orElse();
 
 }
@@ -82,7 +83,7 @@ return loadMoreRequested(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( UserListStarted value)  started,required TResult Function( UserListRefreshRequested value)  refreshRequested,required TResult Function( UserListSearchChanged value)  searchChanged,required TResult Function( UserListRoleFilterChanged value)  roleFilterChanged,required TResult Function( UserListStatusFilterChanged value)  statusFilterChanged,required TResult Function( UserListLoadMoreRequested value)  loadMoreRequested,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( UserListStarted value)  started,required TResult Function( UserListRefreshRequested value)  refreshRequested,required TResult Function( UserListSearchChanged value)  searchChanged,required TResult Function( UserListRoleFilterChanged value)  roleFilterChanged,required TResult Function( UserListStatusFilterChanged value)  statusFilterChanged,required TResult Function( UserListLoadMoreRequested value)  loadMoreRequested,required TResult Function( UserListAccessStatusChangeRequested value)  accessStatusChangeRequested,}){
 final _that = this;
 switch (_that) {
 case UserListStarted():
@@ -91,7 +92,8 @@ return refreshRequested(_that);case UserListSearchChanged():
 return searchChanged(_that);case UserListRoleFilterChanged():
 return roleFilterChanged(_that);case UserListStatusFilterChanged():
 return statusFilterChanged(_that);case UserListLoadMoreRequested():
-return loadMoreRequested(_that);}
+return loadMoreRequested(_that);case UserListAccessStatusChangeRequested():
+return accessStatusChangeRequested(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -105,7 +107,7 @@ return loadMoreRequested(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( UserListStarted value)?  started,TResult? Function( UserListRefreshRequested value)?  refreshRequested,TResult? Function( UserListSearchChanged value)?  searchChanged,TResult? Function( UserListRoleFilterChanged value)?  roleFilterChanged,TResult? Function( UserListStatusFilterChanged value)?  statusFilterChanged,TResult? Function( UserListLoadMoreRequested value)?  loadMoreRequested,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( UserListStarted value)?  started,TResult? Function( UserListRefreshRequested value)?  refreshRequested,TResult? Function( UserListSearchChanged value)?  searchChanged,TResult? Function( UserListRoleFilterChanged value)?  roleFilterChanged,TResult? Function( UserListStatusFilterChanged value)?  statusFilterChanged,TResult? Function( UserListLoadMoreRequested value)?  loadMoreRequested,TResult? Function( UserListAccessStatusChangeRequested value)?  accessStatusChangeRequested,}){
 final _that = this;
 switch (_that) {
 case UserListStarted() when started != null:
@@ -114,7 +116,8 @@ return refreshRequested(_that);case UserListSearchChanged() when searchChanged !
 return searchChanged(_that);case UserListRoleFilterChanged() when roleFilterChanged != null:
 return roleFilterChanged(_that);case UserListStatusFilterChanged() when statusFilterChanged != null:
 return statusFilterChanged(_that);case UserListLoadMoreRequested() when loadMoreRequested != null:
-return loadMoreRequested(_that);case _:
+return loadMoreRequested(_that);case UserListAccessStatusChangeRequested() when accessStatusChangeRequested != null:
+return accessStatusChangeRequested(_that);case _:
   return null;
 
 }
@@ -131,7 +134,7 @@ return loadMoreRequested(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String organizationId)?  started,TResult Function()?  refreshRequested,TResult Function( String query)?  searchChanged,TResult Function( String? roleName)?  roleFilterChanged,TResult Function( MembershipStatus? status)?  statusFilterChanged,TResult Function()?  loadMoreRequested,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String organizationId)?  started,TResult Function()?  refreshRequested,TResult Function( String query)?  searchChanged,TResult Function( String? roleName)?  roleFilterChanged,TResult Function( MembershipStatus? status)?  statusFilterChanged,TResult Function()?  loadMoreRequested,TResult Function( OrganizationUser user)?  accessStatusChangeRequested,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case UserListStarted() when started != null:
 return started(_that.organizationId);case UserListRefreshRequested() when refreshRequested != null:
@@ -139,7 +142,8 @@ return refreshRequested();case UserListSearchChanged() when searchChanged != nul
 return searchChanged(_that.query);case UserListRoleFilterChanged() when roleFilterChanged != null:
 return roleFilterChanged(_that.roleName);case UserListStatusFilterChanged() when statusFilterChanged != null:
 return statusFilterChanged(_that.status);case UserListLoadMoreRequested() when loadMoreRequested != null:
-return loadMoreRequested();case _:
+return loadMoreRequested();case UserListAccessStatusChangeRequested() when accessStatusChangeRequested != null:
+return accessStatusChangeRequested(_that.user);case _:
   return orElse();
 
 }
@@ -157,7 +161,7 @@ return loadMoreRequested();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String organizationId)  started,required TResult Function()  refreshRequested,required TResult Function( String query)  searchChanged,required TResult Function( String? roleName)  roleFilterChanged,required TResult Function( MembershipStatus? status)  statusFilterChanged,required TResult Function()  loadMoreRequested,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String organizationId)  started,required TResult Function()  refreshRequested,required TResult Function( String query)  searchChanged,required TResult Function( String? roleName)  roleFilterChanged,required TResult Function( MembershipStatus? status)  statusFilterChanged,required TResult Function()  loadMoreRequested,required TResult Function( OrganizationUser user)  accessStatusChangeRequested,}) {final _that = this;
 switch (_that) {
 case UserListStarted():
 return started(_that.organizationId);case UserListRefreshRequested():
@@ -165,7 +169,8 @@ return refreshRequested();case UserListSearchChanged():
 return searchChanged(_that.query);case UserListRoleFilterChanged():
 return roleFilterChanged(_that.roleName);case UserListStatusFilterChanged():
 return statusFilterChanged(_that.status);case UserListLoadMoreRequested():
-return loadMoreRequested();}
+return loadMoreRequested();case UserListAccessStatusChangeRequested():
+return accessStatusChangeRequested(_that.user);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -179,7 +184,7 @@ return loadMoreRequested();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String organizationId)?  started,TResult? Function()?  refreshRequested,TResult? Function( String query)?  searchChanged,TResult? Function( String? roleName)?  roleFilterChanged,TResult? Function( MembershipStatus? status)?  statusFilterChanged,TResult? Function()?  loadMoreRequested,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String organizationId)?  started,TResult? Function()?  refreshRequested,TResult? Function( String query)?  searchChanged,TResult? Function( String? roleName)?  roleFilterChanged,TResult? Function( MembershipStatus? status)?  statusFilterChanged,TResult? Function()?  loadMoreRequested,TResult? Function( OrganizationUser user)?  accessStatusChangeRequested,}) {final _that = this;
 switch (_that) {
 case UserListStarted() when started != null:
 return started(_that.organizationId);case UserListRefreshRequested() when refreshRequested != null:
@@ -187,7 +192,8 @@ return refreshRequested();case UserListSearchChanged() when searchChanged != nul
 return searchChanged(_that.query);case UserListRoleFilterChanged() when roleFilterChanged != null:
 return roleFilterChanged(_that.roleName);case UserListStatusFilterChanged() when statusFilterChanged != null:
 return statusFilterChanged(_that.status);case UserListLoadMoreRequested() when loadMoreRequested != null:
-return loadMoreRequested();case _:
+return loadMoreRequested();case UserListAccessStatusChangeRequested() when accessStatusChangeRequested != null:
+return accessStatusChangeRequested(_that.user);case _:
   return null;
 
 }
@@ -200,7 +206,7 @@ return loadMoreRequested();case _:
 
 class UserListStarted implements UserListEvent {
   const UserListStarted(this.organizationId);
-  
+
 
  final  String organizationId;
 
@@ -266,7 +272,7 @@ as String,
 
 class UserListRefreshRequested implements UserListEvent {
   const UserListRefreshRequested();
-  
+
 
 
 
@@ -522,5 +528,80 @@ String toString() {
 
 
 
+
+/// @nodoc
+
+
+class UserListAccessStatusChangeRequested implements UserListEvent {
+  const UserListAccessStatusChangeRequested(this.user);
+
+
+ final  OrganizationUser user;
+
+/// Create a copy of UserListEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$UserListAccessStatusChangeRequestedCopyWith<UserListAccessStatusChangeRequested> get copyWith => _$UserListAccessStatusChangeRequestedCopyWithImpl<UserListAccessStatusChangeRequested>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is UserListAccessStatusChangeRequested&&(identical(other.user, user) || other.user == user));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,user);
+
+@override
+String toString() {
+  return 'UserListEvent.accessStatusChangeRequested(user: $user)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $UserListAccessStatusChangeRequestedCopyWith<$Res> implements $UserListEventCopyWith<$Res> {
+  factory $UserListAccessStatusChangeRequestedCopyWith(UserListAccessStatusChangeRequested value, $Res Function(UserListAccessStatusChangeRequested) _then) = _$UserListAccessStatusChangeRequestedCopyWithImpl;
+@useResult
+$Res call({
+ OrganizationUser user
+});
+
+
+$OrganizationUserCopyWith<$Res> get user;
+
+}
+/// @nodoc
+class _$UserListAccessStatusChangeRequestedCopyWithImpl<$Res>
+    implements $UserListAccessStatusChangeRequestedCopyWith<$Res> {
+  _$UserListAccessStatusChangeRequestedCopyWithImpl(this._self, this._then);
+
+  final UserListAccessStatusChangeRequested _self;
+  final $Res Function(UserListAccessStatusChangeRequested) _then;
+
+/// Create a copy of UserListEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? user = null,}) {
+  return _then(UserListAccessStatusChangeRequested(
+null == user ? _self.user : user // ignore: cast_nullable_to_non_nullable
+as OrganizationUser,
+  ));
+}
+
+/// Create a copy of UserListEvent
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$OrganizationUserCopyWith<$Res> get user {
+
+  return $OrganizationUserCopyWith<$Res>(_self.user, (value) {
+    return _then(_self.copyWith(user: value));
+  });
+}
+}
 
 // dart format on
