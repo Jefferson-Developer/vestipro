@@ -79,6 +79,23 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart'
 import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
+import '../features/invites/data/datasources/firestore_invite_data_source.dart'
+    as _i3;
+import '../features/invites/data/datasources/invite_data_source.dart' as _i814;
+import '../features/invites/data/mappers/invite_mapper.dart' as _i649;
+import '../features/invites/data/repositories/invite_repository_impl.dart'
+    as _i90;
+import '../features/invites/domain/repositories/invite_repository.dart' as _i75;
+import '../features/invites/domain/usecases/create_invite_use_case.dart'
+    as _i461;
+import '../features/invites/domain/usecases/list_pending_invites_use_case.dart'
+    as _i509;
+import '../features/invites/domain/usecases/resend_invite_use_case.dart'
+    as _i502;
+import '../features/invites/domain/usecases/revoke_invite_use_case.dart'
+    as _i334;
+import '../features/invites/presentation/bloc/invite_form_bloc.dart' as _i193;
+import '../features/invites/presentation/bloc/invite_list_bloc.dart' as _i0;
 import '../features/onboarding/data/datasources/onboarding_progress_data_source.dart'
     as _i924;
 import '../features/onboarding/data/datasources/shared_preferences_onboarding_progress_data_source.dart'
@@ -224,6 +241,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i756.UserProfileMapper>(
       () => const _i756.UserProfileMapper(),
     );
+    gh.lazySingleton<_i649.InviteMapper>(() => const _i649.InviteMapper());
     gh.lazySingleton<_i477.OnboardingProgressMapper>(
       () => const _i477.OnboardingProgressMapper(),
     );
@@ -370,6 +388,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i361.MembershipDataSource>(
       () => _i201.FirestoreMembershipDataSource(gh<_i974.FirebaseFirestore>()),
     );
+    gh.lazySingleton<_i814.InviteDataSource>(
+      () => _i3.FirestoreInviteDataSource(
+        gh<_i340.CloudFunctionsService>(),
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.lazySingleton<_i957.MembershipRepository>(
       () => _i537.MembershipRepositoryImpl(
         dataSource: gh<_i361.MembershipDataSource>(),
@@ -442,6 +466,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1030.AssignRoleToUserUseCase(
         gh<_i957.MembershipRepository>(),
         gh<_i753.AuditLogRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i75.InviteRepository>(
+      () => _i90.InviteRepositoryImpl(
+        dataSource: gh<_i814.InviteDataSource>(),
+        mapper: gh<_i649.InviteMapper>(),
       ),
     );
     gh.lazySingleton<_i440.RoleRepository>(
@@ -536,6 +566,33 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i68.EnsureSystemRolesUseCase>(
       () => _i68.EnsureSystemRolesUseCase(gh<_i440.RoleRepository>()),
+    );
+    gh.factory<_i461.CreateInviteUseCase>(
+      () => _i461.CreateInviteUseCase(gh<_i75.InviteRepository>()),
+    );
+    gh.factory<_i509.ListPendingInvitesUseCase>(
+      () => _i509.ListPendingInvitesUseCase(gh<_i75.InviteRepository>()),
+    );
+    gh.factory<_i502.ResendInviteUseCase>(
+      () => _i502.ResendInviteUseCase(gh<_i75.InviteRepository>()),
+    );
+    gh.factory<_i334.RevokeInviteUseCase>(
+      () => _i334.RevokeInviteUseCase(gh<_i75.InviteRepository>()),
+    );
+    gh.factory<_i193.InviteFormBloc>(
+      () => _i193.InviteFormBloc(
+        createInvite: gh<_i461.CreateInviteUseCase>(),
+        membershipRepository: gh<_i957.MembershipRepository>(),
+        authRepository: gh<_i472.AuthRepository>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i0.InviteListBloc>(
+      () => _i0.InviteListBloc(
+        listPendingInvites: gh<_i509.ListPendingInvitesUseCase>(),
+        resendInvite: gh<_i502.ResendInviteUseCase>(),
+        revokeInvite: gh<_i334.RevokeInviteUseCase>(),
+      ),
     );
     gh.factory<_i675.CompleteOnboardingUseCase>(
       () =>

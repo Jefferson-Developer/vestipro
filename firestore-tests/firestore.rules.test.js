@@ -94,6 +94,24 @@ function userProfileDoc({ uid, overrides = {} }) {
   };
 }
 
+function inviteDoc({ organizationId, email = 'novo@vestipro.com.br', roleName = 'SALES_REP', status = 'pending' }) {
+  return {
+    organizationId,
+    email,
+    roleName,
+    status,
+    tokenHash: 'fake-hash-for-tests',
+    invitedByUserId: 'owner-a',
+    invitedByName: 'Owner A',
+    message: null,
+    expiresAt: now(),
+    createdAt: now(),
+    createdBy: 'owner-a',
+    updatedAt: now(),
+    updatedBy: 'owner-a',
+  };
+}
+
 function auditLogDoc({ organizationId, actorUserId, action = 'role.changed' }) {
   return {
     organizationId,
@@ -510,6 +528,77 @@ describe('organizations/{organizationId}/members/{userId}  (Membership)', () => 
 
     const db = testEnv.authenticatedContext('rep-a').firestore();
     await assertFails(db.doc(`organizations/${ORG_A}/companies/company-a`).get());
+  });
+});
+
+describe('organizations/{organizationId}/invites/{inviteId}  (TASK-039)', () => {
+  test('OWNER (user.invite) consegue ler um convite pendente da própria organization', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/invites/invite-1`)
+        .set(inviteDoc({ organizationId: ORG_A }));
+    });
+
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/invites/invite-1`).get());
+  });
+
+  test('SALES_REP (sem user.invite) não consegue ler os convites', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/invites/invite-1`)
+        .set(inviteDoc({ organizationId: ORG_A }));
+    });
+
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/invites/invite-1`).get());
+  });
+
+  test('OWNER da Org A não consegue ler um convite da Org B (cross-tenant)', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_B}/invites/invite-1`)
+        .set(inviteDoc({ organizationId: ORG_B }));
+    });
+
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/invites/invite-1`).get());
+  });
+
+  test('nem mesmo OWNER consegue criar um convite diretamente pelo cliente — exclusivo da Cloud Function createInvite', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/invites/invite-new`).set(inviteDoc({ organizationId: ORG_A })),
+    );
+  });
+
+  test('nem mesmo OWNER consegue atualizar (ex.: reenviar) um convite diretamente pelo cliente', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/invites/invite-1`)
+        .set(inviteDoc({ organizationId: ORG_A }));
+    });
+
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/invites/invite-1`).update({ status: 'revoked' }),
+    );
+  });
+
+  test('nem mesmo OWNER consegue excluir um convite diretamente pelo cliente', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/invites/invite-1`)
+        .set(inviteDoc({ organizationId: ORG_A }));
+    });
+
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/invites/invite-1`).delete());
   });
 });
 

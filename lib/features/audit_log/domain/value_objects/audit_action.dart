@@ -20,6 +20,16 @@ enum AuditAction {
   organizationCreated,
   roleChanged,
   userInvited,
+
+  /// Recorded server-side by the `resendInvite` Cloud Function (TASK-039,
+  /// `functions/src/invites/resend-invite.ts`) — same "never written by
+  /// Dart code, only parsed back" situation as [organizationCreated].
+  userInviteResent,
+
+  /// Recorded server-side by the `revokeInvite` Cloud Function (TASK-039,
+  /// `functions/src/invites/revoke-invite.ts`) — same situation as
+  /// [userInviteResent].
+  userInviteRevoked,
   userDeactivated,
   userDeleted,
   companyDeleted,
@@ -40,6 +50,8 @@ extension AuditActionCode on AuditAction {
       AuditAction.organizationCreated => 'organization.created',
       AuditAction.roleChanged => 'role.changed',
       AuditAction.userInvited => 'user.invited',
+      AuditAction.userInviteResent => 'user.inviteResent',
+      AuditAction.userInviteRevoked => 'user.inviteRevoked',
       AuditAction.userDeactivated => 'user.deactivated',
       AuditAction.userDeleted => 'user.deleted',
       AuditAction.companyDeleted => 'company.deleted',

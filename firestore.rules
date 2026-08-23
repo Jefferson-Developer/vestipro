@@ -3,8 +3,9 @@ rules_version = '2';
 // Firestore Security Rules — VestiPro (TASK-030).
 //
 // Escopo: `organizations/{organizationId}` e as subcoleções já modeladas até
-// aqui (`companies`, `branches`, `roles`, `teams`, `members`, `auditLogs`),
-// conforme TASK-026 a TASK-029, TASK-033 e `tasks.md` seção 13 ("Nunca
+// aqui (`companies`, `branches`, `roles`, `teams`, `members`, `invites`,
+// `auditLogs`), conforme TASK-026 a TASK-029, TASK-033, TASK-039 e
+// `tasks.md` seção 13 ("Nunca
 // permitir que `organizationId` enviado pelo cliente seja a única fonte de
 // autorização").
 //
@@ -275,6 +276,29 @@ service cloud.firestore {
         // Nenhum caso de uso exclui Membership hoje (desativar = status
         // 'inactive' via update) — nega por padrão.
         allow delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/invites/{inviteId}  (TASK-039)
+      // -------------------------------------------------------------------
+      //
+      // Exclusively written by the `createInvite`/`resendInvite`/
+      // `revokeInvite` Cloud Functions (Admin SDK, which ignores these
+      // Rules) — same rationale as `organizationOwners`/`organizations`
+      // after TASK-037: a token needs to be generated server-side (never
+      // guessable/reproducible from the client) and only its SHA-256 hash
+      // (`tokenHash`) is ever persisted here, so `create`/`update`/`delete`
+      // are all `if false` unconditionally. Reading the pending-invite list
+      // (`InviteListPage`) is the one client operation allowed, gated by the
+      // same `user.invite` capability required to create one in the first
+      // place — exposing `tokenHash` to an OWNER/ADMIN who already has that
+      // capability is not a secrecy concern (it is a one-way hash, not the
+      // token itself).
+
+      match /invites/{inviteId} {
+        allow read: if hasCapability(organizationId, 'user.invite');
+
+        allow create, update, delete: if false;
       }
 
       // -------------------------------------------------------------------

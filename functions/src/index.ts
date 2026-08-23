@@ -6,6 +6,9 @@ initializeApp();
 
 export { healthCheck } from './health/health-check';
 export { createOrganization } from './organizations/create-organization';
+export { createInvite } from './invites/create-invite';
+export { resendInvite } from './invites/resend-invite';
+export { revokeInvite } from './invites/revoke-invite';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

@@ -32,6 +32,7 @@ final class AnalyticsEvents {
   static const String offlinePackDownloaded = 'offline_pack_downloaded';
   static const String productAddedToOrder = 'product_added_to_order';
   static const String passwordResetRequested = 'password_reset_requested';
+  static const String inviteSent = 'invite_sent';
 
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
@@ -53,5 +54,6 @@ final class AnalyticsEvents {
     offlinePackDownloaded,
     productAddedToOrder,
     passwordResetRequested,
+    inviteSent,
   ];
 }
