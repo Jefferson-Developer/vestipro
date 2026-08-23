@@ -64,6 +64,22 @@ void main() {
       expect(find.text('about-app:acme'), findsOneWidget);
       expect(find.text('Sem permissão'), findsNothing);
     });
+
+    testWidgets('renders the injected login page at LoginRoute (TASK-034)', (
+      tester,
+    ) async {
+      final appRouter = _buildRouter(
+        loginPageBuilder: (context) => const Scaffold(body: Text('login-page')),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(const LoginRoute().location);
+      await tester.pumpAndSettle();
+
+      expect(find.text('login-page'), findsOneWidget);
+    });
   });
 }
 
@@ -71,6 +87,7 @@ AppRouter _buildRouter({
   AuthGuard? authGuard,
   ActiveOrganizationGuard? organizationGuard,
   Widget Function(BuildContext context, String orgId)? aboutAppPageBuilder,
+  WidgetBuilder? loginPageBuilder,
 }) {
   return AppRouter(
     authGuard: authGuard,
@@ -78,6 +95,8 @@ AppRouter _buildRouter({
     aboutAppPageBuilder:
         aboutAppPageBuilder ??
         (context, orgId) => Scaffold(body: Text('about-app:$orgId')),
+    loginPageBuilder:
+        loginPageBuilder ?? (context) => const Scaffold(body: Text('login')),
   );
 }
 

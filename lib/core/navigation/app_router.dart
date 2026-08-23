@@ -17,6 +17,7 @@ import 'widgets/not_found_page.dart';
 class AppRouter {
   AppRouter({
     required this.aboutAppPageBuilder,
+    required this.loginPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
   }) : authGuard = authGuard ?? const AlwaysAllowAuthGuard(),
@@ -26,6 +27,12 @@ class AppRouter {
   final AuthGuard authGuard;
   final ActiveOrganizationGuard organizationGuard;
   final Widget Function(BuildContext context, String orgId) aboutAppPageBuilder;
+
+  /// Builds the real login screen (TASK-034). Injected from `VestiProApp`
+  /// instead of imported here so `lib/core/navigation/` never depends on a
+  /// concrete `lib/features/authentication/` widget — same composition
+  /// rationale as [aboutAppPageBuilder].
+  final WidgetBuilder loginPageBuilder;
 
   late final GoRouter router = GoRouter(
     initialLocation: const AboutAppRoute(
@@ -38,6 +45,11 @@ class AppRouter {
         name: AboutAppRoute.name,
         builder: (context, state) =>
             aboutAppPageBuilder(context, state.pathParameters['orgId']!),
+      ),
+      GoRoute(
+        path: LoginRoute.pathPattern,
+        name: LoginRoute.name,
+        builder: (context, state) => loginPageBuilder(context),
       ),
       GoRoute(
         path: ForbiddenRoute.pathPattern,

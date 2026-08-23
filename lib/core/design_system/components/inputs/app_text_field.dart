@@ -28,6 +28,7 @@ class AppTextField extends StatelessWidget {
     this.suffixIcon,
     this.keyboardType,
     this.textInputAction,
+    this.obscureText = false,
     this.onChanged,
     this.onSubmitted,
     this.validator,
@@ -56,6 +57,12 @@ class AppTextField extends StatelessWidget {
   final Widget? suffixIcon;
   final TextInputType? keyboardType;
   final TextInputAction? textInputAction;
+
+  /// Masks the entered text (dots) instead of showing it in the clear —
+  /// e.g. password fields. Callers that need a visibility toggle own the
+  /// state and flip this + [suffixIcon] together (see
+  /// `features/authentication/presentation/widgets/login_form.dart`).
+  final bool obscureText;
   final ValueChanged<String>? onChanged;
   final ValueChanged<String>? onSubmitted;
   final FormFieldValidator<String>? validator;
@@ -78,6 +85,7 @@ class AppTextField extends StatelessWidget {
         maxLength: maxLength,
         keyboardType: keyboardType,
         textInputAction: textInputAction,
+        obscureText: obscureText,
         onChanged: onChanged,
         onFieldSubmitted: onSubmitted,
         validator: validator,

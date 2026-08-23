@@ -32,17 +32,36 @@ final class AboutAppRoute extends AppRoute {
   String get location => '/org/$orgId/settings/about';
 }
 
-/// Route shown to sign a user in.
+/// Route shown to sign a user in (TASK-034).
 ///
-/// Not registered as a [GoRoute] yet: the login screen itself belongs to
-/// TASK-034. [SessionAuthGuard] (TASK-012) already redirects here for any
-/// unauthenticated request to a protected route, so wiring the real page
-/// later does not require touching the guard.
+/// [SessionAuthGuard] (TASK-012) already redirects here for any
+/// unauthenticated request to a protected route; [AppRouter] is not wired
+/// to use [SessionAuthGuard] by default yet (that guard swap is TASK-041's
+/// persistent-session responsibility), so this route only becomes the
+/// actual entry point of the app once that task lands.
 final class LoginRoute extends AppRoute {
   const LoginRoute();
 
   static const name = 'login';
   static const pathPattern = '/login';
+
+  @override
+  String get location => pathPattern;
+}
+
+/// Route shown for the "forgot password" flow.
+///
+/// Declared ahead of its own implementation, same precedent as [LoginRoute]
+/// before TASK-034: not registered as a [GoRoute] yet, so navigating here
+/// today falls back to [NotFoundRoute]'s `errorBuilder`. The login screen
+/// (TASK-034) already links to [PasswordResetRoute.location] through
+/// `go_router` so that TASK-036 only has to register the real `GoRoute` and
+/// page builder, without touching the login screen again.
+final class PasswordResetRoute extends AppRoute {
+  const PasswordResetRoute();
+
+  static const name = 'passwordReset';
+  static const pathPattern = '/password-reset';
 
   @override
   String get location => pathPattern;

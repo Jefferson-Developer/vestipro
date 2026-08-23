@@ -61,5 +61,22 @@ void main() {
       final field = tester.widget<TextField>(find.byType(TextField));
       expect(field.enabled, isFalse);
     });
+
+    testWidgets('masks the text when obscureText is true', (tester) async {
+      await pumpApp(
+        tester,
+        const AppTextField(label: 'Senha', obscureText: true),
+      );
+
+      final field = tester.widget<TextField>(find.byType(TextField));
+      expect(field.obscureText, isTrue);
+    });
+
+    testWidgets('shows the text in the clear by default', (tester) async {
+      await pumpApp(tester, const AppTextField(label: 'Senha'));
+
+      final field = tester.widget<TextField>(find.byType(TextField));
+      expect(field.obscureText, isFalse);
+    });
   });
 }

@@ -13,6 +13,8 @@ import '../core/errors/errors.dart';
 import '../core/feature_flags/feature_flags.dart';
 import '../core/navigation/navigation.dart';
 import '../core/services/services.dart';
+import '../features/authentication/authentication.dart';
+import '../features/authentication/presentation/bloc/login_bloc.dart';
 import '../features/settings/presentation/bloc/about_app_bloc.dart';
 import '../features/settings/settings.dart';
 import '../firebase_options.dart';
@@ -128,6 +130,8 @@ class VestiProApp extends StatelessWidget {
             createBloc: () => getIt<AboutAppBloc>(),
             showInsightsShortcut: _resolveShowInsightsShortcut(),
           ),
+          loginPageBuilder: (context) =>
+              LoginPage(createBloc: () => getIt<LoginBloc>()),
         );
 
     return MaterialApp.router(

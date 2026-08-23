@@ -46,9 +46,9 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('about-app:acme'), findsNothing);
-      // LoginRoute has no GoRoute yet (TASK-034); the app falls back to the
-      // generic not-found page instead of a real login screen.
-      expect(find.text('Página não encontrada'), findsOneWidget);
+      // LoginRoute has a real GoRoute since TASK-034: the guard redirects
+      // to the actual login page instead of falling back to not-found.
+      expect(find.text('login-page'), findsOneWidget);
     });
 
     testWidgets(
@@ -64,9 +64,8 @@ void main() {
         await tester.pumpAndSettle();
 
         // No redirect loop: the guard lets the already-login-bound request
-        // fall straight through to the not-found page (no /login GoRoute
-        // yet), instead of looping back to itself.
-        expect(find.text('Página não encontrada'), findsOneWidget);
+        // fall straight through to the login page itself.
+        expect(find.text('login-page'), findsOneWidget);
       },
     );
   });
@@ -77,5 +76,6 @@ AppRouter _buildRouter(SessionAuthGuard guard) {
     authGuard: guard,
     aboutAppPageBuilder: (context, orgId) =>
         Scaffold(body: Text('about-app:$orgId')),
+    loginPageBuilder: (context) => const Scaffold(body: Text('login-page')),
   );
 }

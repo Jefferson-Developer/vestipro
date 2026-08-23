@@ -21,8 +21,10 @@ import 'package:firebase_storage/firebase_storage.dart' as _i457;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
 
+import '../core/analytics/analytics.dart' as _i202;
 import '../core/analytics/analytics_service.dart' as _i932;
 import '../core/analytics/firebase_analytics_service.dart' as _i569;
+import '../core/auth/auth.dart' as _i472;
 import '../core/auth/data/datasources/auth_data_source.dart' as _i845;
 import '../core/auth/data/datasources/firebase_auth_data_source.dart' as _i814;
 import '../core/auth/data/mappers/auth_user_mapper.dart' as _i26;
@@ -55,6 +57,9 @@ import '../features/audit_log/domain/usecases/list_audit_log_entries_use_case.da
     as _i201;
 import '../features/audit_log/domain/usecases/record_audit_log_use_case.dart'
     as _i421;
+import '../features/authentication/domain/usecases/sign_in_with_email_and_password_use_case.dart'
+    as _i185;
+import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
 import '../features/organizations/data/datasources/branch_data_source.dart'
     as _i526;
 import '../features/organizations/data/datasources/company_data_source.dart'
@@ -223,6 +228,16 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i961.AuthRepositoryImpl(
         dataSource: gh<_i845.AuthDataSource>(),
         mapper: gh<_i26.AuthUserMapper>(),
+      ),
+    );
+    gh.factory<_i185.SignInWithEmailAndPasswordUseCase>(
+      () => _i185.SignInWithEmailAndPasswordUseCase(gh<_i472.AuthRepository>()),
+    );
+    gh.factory<_i776.LoginBloc>(
+      () => _i776.LoginBloc(
+        signInWithEmailAndPassword:
+            gh<_i185.SignInWithEmailAndPasswordUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.lazySingleton<_i974.FirebaseFirestore>(
