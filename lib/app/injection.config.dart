@@ -79,6 +79,25 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart'
 import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
+import '../features/onboarding/data/datasources/onboarding_progress_data_source.dart'
+    as _i924;
+import '../features/onboarding/data/datasources/shared_preferences_onboarding_progress_data_source.dart'
+    as _i1035;
+import '../features/onboarding/data/mappers/onboarding_progress_mapper.dart'
+    as _i477;
+import '../features/onboarding/data/repositories/onboarding_progress_repository_impl.dart'
+    as _i803;
+import '../features/onboarding/domain/repositories/onboarding_progress_repository.dart'
+    as _i886;
+import '../features/onboarding/domain/usecases/clear_onboarding_progress_use_case.dart'
+    as _i214;
+import '../features/onboarding/domain/usecases/complete_onboarding_use_case.dart'
+    as _i675;
+import '../features/onboarding/domain/usecases/get_onboarding_progress_use_case.dart'
+    as _i206;
+import '../features/onboarding/domain/usecases/save_onboarding_progress_use_case.dart'
+    as _i81;
+import '../features/onboarding/presentation/bloc/onboarding_bloc.dart' as _i593;
 import '../features/organizations/data/datasources/branch_data_source.dart'
     as _i526;
 import '../features/organizations/data/datasources/company_data_source.dart'
@@ -205,6 +224,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i756.UserProfileMapper>(
       () => const _i756.UserProfileMapper(),
     );
+    gh.lazySingleton<_i477.OnboardingProgressMapper>(
+      () => const _i477.OnboardingProgressMapper(),
+    );
     gh.lazySingleton<_i964.BranchMapper>(() => const _i964.BranchMapper());
     gh.lazySingleton<_i642.CompanyMapper>(() => const _i642.CompanyMapper());
     gh.lazySingleton<_i714.MembershipMapper>(
@@ -221,6 +243,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i465.AppClientMetadataProvider>(
       () => _i465.PackageInfoClientMetadataProvider(),
+    );
+    gh.lazySingleton<_i924.OnboardingProgressDataSource>(
+      () => const _i1035.SharedPreferencesOnboardingProgressDataSource(),
+    );
+    gh.lazySingleton<_i886.OnboardingProgressRepository>(
+      () => _i803.OnboardingProgressRepositoryImpl(
+        dataSource: gh<_i924.OnboardingProgressDataSource>(),
+        mapper: gh<_i477.OnboardingProgressMapper>(),
+      ),
     );
     gh.lazySingleton<_i56.FirebaseAppCheck>(
       () => appInjectionModule.firebaseAppCheck(gh<_i461.AppEnvironment>()),
@@ -281,6 +312,21 @@ extension GetItInjectableX on _i174.GetIt {
       () => appInjectionModule.firebaseFunctions(
         gh<_i461.AppEnvironment>(),
         gh<_i56.FirebaseAppCheck>(),
+      ),
+    );
+    gh.factory<_i214.ClearOnboardingProgressUseCase>(
+      () => _i214.ClearOnboardingProgressUseCase(
+        gh<_i886.OnboardingProgressRepository>(),
+      ),
+    );
+    gh.factory<_i206.GetOnboardingProgressUseCase>(
+      () => _i206.GetOnboardingProgressUseCase(
+        gh<_i886.OnboardingProgressRepository>(),
+      ),
+    );
+    gh.factory<_i81.SaveOnboardingProgressUseCase>(
+      () => _i81.SaveOnboardingProgressUseCase(
+        gh<_i886.OnboardingProgressRepository>(),
       ),
     );
     gh.lazySingleton<_i349.CrashReporter>(
@@ -490,6 +536,20 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i68.EnsureSystemRolesUseCase>(
       () => _i68.EnsureSystemRolesUseCase(gh<_i440.RoleRepository>()),
+    );
+    gh.factory<_i675.CompleteOnboardingUseCase>(
+      () =>
+          _i675.CompleteOnboardingUseCase(gh<_i55.CreateOrganizationUseCase>()),
+    );
+    gh.factory<_i593.OnboardingBloc>(
+      () => _i593.OnboardingBloc(
+        getProgress: gh<_i206.GetOnboardingProgressUseCase>(),
+        saveProgress: gh<_i81.SaveOnboardingProgressUseCase>(),
+        clearProgress: gh<_i214.ClearOnboardingProgressUseCase>(),
+        completeOnboarding: gh<_i675.CompleteOnboardingUseCase>(),
+        authRepository: gh<_i472.AuthRepository>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
     );
     return this;
   }

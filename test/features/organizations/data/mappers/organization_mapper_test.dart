@@ -81,6 +81,21 @@ void main() {
       );
     });
 
+    test('settingsToEntity/settingsToDto round-trip the segment', () {
+      const dtoWithSegment = OrganizationSettingsDto(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+        segment: 'apparel',
+      );
+
+      final entity = mapper.settingsToEntity(dtoWithSegment);
+      expect(entity.segment, 'apparel');
+
+      final roundTrippedDto = mapper.settingsToDto(entity);
+      expect(roundTrippedDto.segment, 'apparel');
+    });
+
     test('toDto is the exact inverse of toEntity', () {
       final entity = mapper.toEntity(dto);
       final roundTrippedDto = mapper.toDto(entity);

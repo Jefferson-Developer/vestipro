@@ -2,8 +2,9 @@
 /// screens from (buttons, inputs, selection, chips, badges, feedback states,
 /// overlays — modals, bottom sheets, snackbars, tooltips and the
 /// destructive confirmation dialog — data presentation — administrative
-/// tables, KPI cards, management charts and pagination — and catalog/grade
-/// components — product grid, color × size grade and quantity stepper).
+/// tables, KPI cards, management charts and pagination — catalog/grade
+/// components — product grid, color × size grade and quantity stepper — and
+/// navigation — the multi-step wizard progress indicator).
 /// Every component here consumes tokens from
 /// `design_system/foundations/` exclusively — none defines its own color,
 /// spacing, radius, shadow or typography value.
@@ -30,6 +31,7 @@ export 'inputs/app_checkbox.dart';
 export 'inputs/app_number_field.dart';
 export 'inputs/app_search_field.dart';
 export 'inputs/app_text_field.dart';
+export 'navigation/app_wizard_stepper.dart';
 export 'overlays/app_bottom_sheet.dart';
 export 'overlays/app_confirmation_dialog.dart';
 export 'overlays/app_modal.dart';

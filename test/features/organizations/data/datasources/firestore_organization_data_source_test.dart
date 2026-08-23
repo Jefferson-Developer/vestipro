@@ -186,6 +186,76 @@ void main() {
         expect(captured['defaultLanguage'], 'pt-BR');
       });
 
+      test('includes the segment in the callable payload when the DTO has '
+          'one, and parses it back from the response', () async {
+        final dtoWithSegment = OrganizationDto(
+          id: newDto.id,
+          name: newDto.name,
+          slug: newDto.slug,
+          settings: const OrganizationSettingsDto(
+            currency: 'BRL',
+            country: 'BR',
+            defaultLanguage: 'pt-BR',
+            segment: 'apparel',
+          ),
+          status: newDto.status,
+          createdAt: newDto.createdAt,
+          createdBy: newDto.createdBy,
+          updatedAt: newDto.updatedAt,
+          updatedBy: newDto.updatedBy,
+        );
+
+        final responseWithSegment = callableResponse();
+        (responseWithSegment['organization']
+            as Map<String, dynamic>)['settings'] = <String, dynamic>{
+          'currency': 'BRL',
+          'country': 'BR',
+          'defaultLanguage': 'pt-BR',
+          'segment': 'apparel',
+        };
+
+        final result = _MockHttpsCallableResult<Map<String, dynamic>>();
+        when(() => result.data).thenReturn(responseWithSegment);
+        when(
+          () => callable.call<Map<String, dynamic>>(any<dynamic>()),
+        ).thenAnswer((_) async => result);
+
+        final createdDto = await dataSource.create(dtoWithSegment);
+
+        expect(createdDto.settings.segment, 'apparel');
+
+        final captured =
+            verify(
+                  () => callable.call<Map<String, dynamic>>(
+                    captureAny<dynamic>(),
+                  ),
+                ).captured.single
+                as Map<String, dynamic>;
+        expect(captured['segment'], 'apparel');
+      });
+
+      test(
+        'omits segment from the callable payload when the DTO has none',
+        () async {
+          final result = _MockHttpsCallableResult<Map<String, dynamic>>();
+          when(() => result.data).thenReturn(callableResponse());
+          when(
+            () => callable.call<Map<String, dynamic>>(any<dynamic>()),
+          ).thenAnswer((_) async => result);
+
+          await dataSource.create(newDto);
+
+          final captured =
+              verify(
+                    () => callable.call<Map<String, dynamic>>(
+                      captureAny<dynamic>(),
+                    ),
+                  ).captured.single
+                  as Map<String, dynamic>;
+          expect(captured.containsKey('segment'), isFalse);
+        },
+      );
+
       test('is idempotent: returns whatever createOrganization reports even '
           'when alreadyExisted is true', () async {
         final result = _MockHttpsCallableResult<Map<String, dynamic>>();

@@ -131,6 +131,53 @@ describe('createOrganization', () => {
     },
   );
 
+  it('persists and returns the optional segment when provided, and omits it ' +
+    'entirely from settings when not provided', async () => {
+    const wrapped = testEnv.wrap(createOrganization);
+
+    const withSegment = (await wrapped(
+      buildRequest(
+        {
+          organizationId: 'org-1',
+          name: 'Grupo Fashion XPTO',
+          slug: 'grupo-fashion-xpto',
+          currency: 'BRL',
+          country: 'BR',
+          defaultLanguage: 'pt-BR',
+          segment: 'apparel',
+        },
+        authFor('user-1'),
+      ),
+    )) as CreateOrganizationResponse;
+
+    expect(withSegment.organization.settings).toEqual({
+      currency: 'BRL',
+      country: 'BR',
+      defaultLanguage: 'pt-BR',
+      segment: 'apparel',
+    });
+
+    const withoutSegment = (await wrapped(
+      buildRequest(
+        {
+          organizationId: 'org-2',
+          name: 'Outra Organização',
+          slug: 'outra-organizacao',
+          currency: 'BRL',
+          country: 'BR',
+          defaultLanguage: 'pt-BR',
+        },
+        authFor('user-2'),
+      ),
+    )) as CreateOrganizationResponse;
+
+    expect(withoutSegment.organization.settings).toEqual({
+      currency: 'BRL',
+      country: 'BR',
+      defaultLanguage: 'pt-BR',
+    });
+  });
+
   it(
     'is idempotent: a retry from the same uid returns the already-created ' +
       'organization instead of creating a duplicate, even when the retry ' +

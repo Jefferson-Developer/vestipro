@@ -14,7 +14,16 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$OrganizationSettings {
 
- String get currency; String get country; String get defaultLanguage;
+ String get currency; String get country; String get defaultLanguage;/// The fashion segment the Organization operates in (`apparel`,
+/// `footwear`, `accessories`, `multi_brand` — see
+/// `OrganizationSegment.code`), collected by the onboarding wizard
+/// (TASK-038). Nullable — and never validated here — because, unlike
+/// [currency]/[country]/[defaultLanguage], not every caller of this
+/// type sets it (e.g. a future settings update that only changes
+/// [currency] has no reason to also resend it); the wizard enforces its
+/// own "segment is required to finish onboarding" rule independently
+/// (`CompleteOnboardingUseCase`).
+ String? get segment;
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +34,16 @@ $OrganizationSettingsCopyWith<OrganizationSettings> get copyWith => _$Organizati
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage);
+int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment);
 
 @override
 String toString() {
-  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage)';
+  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment)';
 }
 
 
@@ -45,7 +54,7 @@ abstract mixin class $OrganizationSettingsCopyWith<$Res>  {
   factory $OrganizationSettingsCopyWith(OrganizationSettings value, $Res Function(OrganizationSettings) _then) = _$OrganizationSettingsCopyWithImpl;
 @useResult
 $Res call({
- String currency, String country, String defaultLanguage
+ String currency, String country, String defaultLanguage, String? segment
 });
 
 
@@ -62,12 +71,13 @@ class _$OrganizationSettingsCopyWithImpl<$Res>
 
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,}) {
   return _then(_self.copyWith(
 currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
 as String,defaultLanguage: null == defaultLanguage ? _self.defaultLanguage : defaultLanguage // ignore: cast_nullable_to_non_nullable
-as String,
+as String,segment: freezed == segment ? _self.segment : segment // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -152,10 +162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OrganizationSettings() when $default != null:
-return $default(_that.currency,_that.country,_that.defaultLanguage);case _:
+return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment);case _:
   return orElse();
 
 }
@@ -173,10 +183,10 @@ return $default(_that.currency,_that.country,_that.defaultLanguage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment)  $default,) {final _that = this;
 switch (_that) {
 case _OrganizationSettings():
-return $default(_that.currency,_that.country,_that.defaultLanguage);case _:
+return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -193,10 +203,10 @@ return $default(_that.currency,_that.country,_that.defaultLanguage);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String currency,  String country,  String defaultLanguage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String currency,  String country,  String defaultLanguage,  String? segment)?  $default,) {final _that = this;
 switch (_that) {
 case _OrganizationSettings() when $default != null:
-return $default(_that.currency,_that.country,_that.defaultLanguage);case _:
+return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment);case _:
   return null;
 
 }
@@ -208,12 +218,22 @@ return $default(_that.currency,_that.country,_that.defaultLanguage);case _:
 
 
 class _OrganizationSettings extends OrganizationSettings {
-  const _OrganizationSettings({required this.currency, required this.country, required this.defaultLanguage}): super._();
+  const _OrganizationSettings({required this.currency, required this.country, required this.defaultLanguage, this.segment}): super._();
   
 
 @override final  String currency;
 @override final  String country;
 @override final  String defaultLanguage;
+/// The fashion segment the Organization operates in (`apparel`,
+/// `footwear`, `accessories`, `multi_brand` — see
+/// `OrganizationSegment.code`), collected by the onboarding wizard
+/// (TASK-038). Nullable — and never validated here — because, unlike
+/// [currency]/[country]/[defaultLanguage], not every caller of this
+/// type sets it (e.g. a future settings update that only changes
+/// [currency] has no reason to also resend it); the wizard enforces its
+/// own "segment is required to finish onboarding" rule independently
+/// (`CompleteOnboardingUseCase`).
+@override final  String? segment;
 
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -225,16 +245,16 @@ _$OrganizationSettingsCopyWith<_OrganizationSettings> get copyWith => __$Organiz
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage);
+int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment);
 
 @override
 String toString() {
-  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage)';
+  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment)';
 }
 
 
@@ -245,7 +265,7 @@ abstract mixin class _$OrganizationSettingsCopyWith<$Res> implements $Organizati
   factory _$OrganizationSettingsCopyWith(_OrganizationSettings value, $Res Function(_OrganizationSettings) _then) = __$OrganizationSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- String currency, String country, String defaultLanguage
+ String currency, String country, String defaultLanguage, String? segment
 });
 
 
@@ -262,12 +282,13 @@ class __$OrganizationSettingsCopyWithImpl<$Res>
 
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,}) {
   return _then(_OrganizationSettings(
 currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
 as String,defaultLanguage: null == defaultLanguage ? _self.defaultLanguage : defaultLanguage // ignore: cast_nullable_to_non_nullable
-as String,
+as String,segment: freezed == segment ? _self.segment : segment // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

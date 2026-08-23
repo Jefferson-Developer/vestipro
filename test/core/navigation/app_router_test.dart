@@ -100,6 +100,8 @@ AppRouter _buildRouter({
     signUpPageBuilder: (context) => const Scaffold(body: Text('sign-up')),
     forgotPasswordPageBuilder: (context) =>
         const Scaffold(body: Text('forgot-password')),
+    onboardingWizardPageBuilder: (context) =>
+        const Scaffold(body: Text('onboarding-wizard')),
   );
 }
 

@@ -49,5 +49,37 @@ void main() {
         expect(exception.code, 'invalid_organization_settings');
       }
     });
+
+    test('trims a non-blank segment', () {
+      final settings = OrganizationSettings.validated(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+        segment: ' apparel ',
+      );
+
+      expect(settings.segment, 'apparel');
+    });
+
+    test('normalizes a blank segment to null instead of rejecting it', () {
+      final settings = OrganizationSettings.validated(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+        segment: '   ',
+      );
+
+      expect(settings.segment, isNull);
+    });
+
+    test('defaults segment to null when not provided', () {
+      final settings = OrganizationSettings.validated(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+      );
+
+      expect(settings.segment, isNull);
+    });
   });
 }

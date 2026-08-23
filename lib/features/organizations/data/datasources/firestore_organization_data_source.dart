@@ -52,6 +52,7 @@ final class FirestoreOrganizationDataSource implements OrganizationDataSource {
         'currency': dto.settings.currency,
         'country': dto.settings.country,
         'defaultLanguage': dto.settings.defaultLanguage,
+        if (dto.settings.segment != null) 'segment': dto.settings.segment,
       },
       requireAuth: true,
     );
@@ -108,9 +109,11 @@ final class FirestoreOrganizationDataSource implements OrganizationDataSource {
     final currency = settings['currency'];
     final country = settings['country'];
     final defaultLanguage = settings['defaultLanguage'];
+    final segment = settings['segment'];
     if (currency is! String ||
         country is! String ||
-        defaultLanguage is! String) {
+        defaultLanguage is! String ||
+        (segment != null && segment is! String)) {
       throw const ServerException(
         'Unexpected createOrganization response shape.',
         code: 'invalid_create_organization_response',
@@ -125,6 +128,7 @@ final class FirestoreOrganizationDataSource implements OrganizationDataSource {
         currency: currency,
         country: country,
         defaultLanguage: defaultLanguage,
+        segment: segment as String?,
       ),
       status: status,
       createdAt: DateTime.parse(createdAt),

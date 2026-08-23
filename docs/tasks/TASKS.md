@@ -128,7 +128,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-035 — Implementar cadastro inicial de usuário](TASK-035-implementar-cadastro-inicial-de-usuario.md) — Flutter Senior + Front-end
 - [x] [TASK-036 — Implementar recuperação de senha](TASK-036-implementar-recuperacao-de-senha.md) — Flutter Senior + Front-end
 - [x] [TASK-037 — Implementar criação da primeira Organization](TASK-037-implementar-criacao-da-primeira-organizacao.md) — Flutter Senior
-- [ ] [TASK-038 — Implementar wizard de configuração inicial](TASK-038-implementar-wizard-de-configuracao-inicial.md) — Flutter Senior + Front-end
+- [x] [TASK-038 — Implementar wizard de configuração inicial](TASK-038-implementar-wizard-de-configuracao-inicial.md) — Flutter Senior + Front-end
 - [ ] [TASK-039 — Implementar convite de usuários](TASK-039-implementar-convite-de-usuarios.md) — Flutter Senior + Front-end
 - [ ] [TASK-040 — Implementar aceite de convite e vínculo de conta](TASK-040-implementar-aceite-de-convite.md) — Flutter Senior + Front-end
 - [ ] [TASK-041 — Implementar sessão persistente, logout e revogação](TASK-041-implementar-sessao-persistente-e-logout.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 37 / 220 tasks concluídas.
+**Progresso:** 38 / 220 tasks concluídas.

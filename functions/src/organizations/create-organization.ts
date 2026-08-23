@@ -40,12 +40,22 @@ export interface CreateOrganizationRequest extends RequestWithMeta {
   currency?: string;
   country?: string;
   defaultLanguage?: string;
+  /**
+   * The Organization's fashion segment (`apparel`, `footwear`,
+   * `accessories`, `multi_brand` — mirrors
+   * `lib/features/onboarding/domain/value_objects/organization_segment.dart`),
+   * collected by the onboarding wizard (TASK-038). Optional: unlike `name`/
+   * `slug`/`currency`/`country`/`defaultLanguage`, a blank/missing value is
+   * not rejected here — it is simply omitted from `settings` below.
+   */
+  segment?: string;
 }
 
 interface OrganizationSettingsResponse {
   currency: string;
   country: string;
   defaultLanguage: string;
+  segment?: string;
 }
 
 interface OrganizationResponse {
@@ -71,6 +81,19 @@ function requireNonEmptyString(value: unknown, field: string): string {
     throw new HttpsError('invalid-argument', `${field} is required.`);
   }
   return value.trim();
+}
+
+/**
+ * Same trimming as {@link requireNonEmptyString}, but returns `undefined`
+ * instead of throwing when [value] is missing/blank — used for the one
+ * optional field of {@link CreateOrganizationRequest} (`segment`).
+ */
+function optionalTrimmedString(value: unknown): string | undefined {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  return trimmed.length === 0 ? undefined : trimmed;
 }
 
 function serializeOrganization(
@@ -154,6 +177,7 @@ export const createOrganization = onCall<
     request.data?.defaultLanguage,
     'defaultLanguage',
   );
+  const segment = optionalTrimmedString(request.data?.segment);
 
   const db = getFirestore();
   const ownerMarkerRef = db.collection('organizationOwners').doc(uid);
@@ -231,7 +255,9 @@ export const createOrganization = onCall<
     const organizationData: DocumentData = {
       name,
       slug,
-      settings: { currency, country, defaultLanguage },
+      settings: segment
+        ? { currency, country, defaultLanguage, segment }
+        : { currency, country, defaultLanguage },
       status: 'active',
       createdAt: now,
       createdBy: uid,

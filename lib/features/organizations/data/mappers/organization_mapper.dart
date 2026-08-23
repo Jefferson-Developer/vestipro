@@ -46,6 +46,7 @@ final class OrganizationMapper {
       currency: dto.currency,
       country: dto.country,
       defaultLanguage: dto.defaultLanguage,
+      segment: dto.segment,
     );
   }
 
@@ -54,6 +55,7 @@ final class OrganizationMapper {
       currency: settings.currency,
       country: settings.country,
       defaultLanguage: settings.defaultLanguage,
+      segment: settings.segment,
     );
   }
 

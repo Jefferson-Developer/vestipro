@@ -141,6 +141,43 @@ void main() {
       );
     });
 
+    test('forwards the optional segment into OrganizationSettings when '
+        'provided', () async {
+      when(
+        () => repository.create(
+          id: any(named: 'id'),
+          name: any(named: 'name'),
+          slug: any(named: 'slug'),
+          settings: any(named: 'settings'),
+          createdBy: any(named: 'createdBy'),
+        ),
+      ).thenAnswer((_) async => AppSuccess<Organization>(organization));
+
+      await useCase.call(
+        id: 'org-1',
+        name: 'Grupo Fashion XPTO',
+        slug: 'grupo-fashion-xpto',
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+        segment: 'apparel',
+        createdBy: 'user-1',
+      );
+
+      final captured =
+          verify(
+                () => repository.create(
+                  id: any(named: 'id'),
+                  name: any(named: 'name'),
+                  slug: any(named: 'slug'),
+                  settings: captureAny(named: 'settings'),
+                  createdBy: any(named: 'createdBy'),
+                ),
+              ).captured.single
+              as OrganizationSettings;
+      expect(captured.segment, 'apparel');
+    });
+
     test('propagates a network failure from the repository', () async {
       when(
         () => repository.create(

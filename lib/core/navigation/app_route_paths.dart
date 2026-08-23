@@ -80,14 +80,11 @@ final class PasswordResetRoute extends AppRoute {
 /// Route shown for the initial onboarding wizard, right after a successful
 /// sign-up (TASK-038).
 ///
-/// Declared ahead of its own implementation, same precedent [PasswordResetRoute]
-/// followed before TASK-036: not registered as a [GoRoute] yet, so
-/// navigating here today falls back to [NotFoundRoute]'s `errorBuilder`.
-/// `SignUpPage` (TASK-035) already navigates to
-/// [OnboardingWizardRoute.location] through `go_router` so that TASK-037
-/// (which actually creates the first Organization before the wizard can run)
-/// only has to register the real `GoRoute`/page builder, without touching
-/// the sign-up screen again.
+/// `SignUpPage` (TASK-035) navigates here on a successful account creation;
+/// `OnboardingWizardPage`, once its last step is submitted, navigates away
+/// to [AboutAppRoute] with the real Organization id it just created — there
+/// is no dedicated "post-onboarding home" route yet (that is a later task's
+/// scope), so [AboutAppRoute] is reused as the first real in-app screen.
 final class OnboardingWizardRoute extends AppRoute {
   const OnboardingWizardRoute();
 

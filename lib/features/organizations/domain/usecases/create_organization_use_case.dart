@@ -32,6 +32,12 @@ final class CreateOrganizationUseCase {
     required String country,
     required String defaultLanguage,
     required String createdBy,
+
+    /// The Organization's fashion segment (`OrganizationSegment.code`),
+    /// collected by the onboarding wizard (TASK-038). Optional — and never
+    /// validated here — for the same reason it is optional on
+    /// [OrganizationSettings] itself: see that type's own doc.
+    String? segment,
   }) async {
     final trimmedId = id.trim();
     final trimmedName = name.trim();
@@ -62,6 +68,7 @@ final class CreateOrganizationUseCase {
         currency: currency,
         country: country,
         defaultLanguage: defaultLanguage,
+        segment: segment,
       );
     } on ValidationException catch (exception) {
       return AppFailure<Organization>(mapAppExceptionToFailure(exception));
