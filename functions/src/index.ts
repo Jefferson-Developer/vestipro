@@ -11,6 +11,7 @@ export { resendInvite } from './invites/resend-invite';
 export { revokeInvite } from './invites/revoke-invite';
 export { validateInvite } from './invites/validate-invite';
 export { acceptInvite } from './invites/accept-invite';
+export { updateUserRole } from './admin/update-user-role';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

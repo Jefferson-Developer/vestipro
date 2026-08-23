@@ -13,6 +13,8 @@ import '../../domain/entities/organization_user.dart';
 import '../bloc/user_list_bloc.dart';
 import '../bloc/user_list_event.dart';
 import '../bloc/user_list_state.dart';
+import '../bloc/user_role_edit_bloc.dart';
+import 'user_role_edit_page.dart';
 
 /// Lists every user of one Organization — search, role/status filters and
 /// "carregar mais" pagination — with quick access to per-user administrative
@@ -34,6 +36,7 @@ class UserListPage extends StatelessWidget {
     required this.userId,
     required this.permissionService,
     required this.createBloc,
+    this.createRoleEditBloc,
     this.onManageUser,
     this.onDeactivateUser,
     super.key,
@@ -47,10 +50,11 @@ class UserListPage extends StatelessWidget {
   final String userId;
   final PermissionService permissionService;
   final UserListBloc Function() createBloc;
+  final UserRoleEditBloc Function()? createRoleEditBloc;
 
   /// Quick access to "gerenciar perfil/permissão" (TASK-043). `null` (the
-  /// default) hides the action entirely — TASK-043's page/route does not
-  /// exist yet, and a button that leads nowhere is worse than no button.
+  /// default) falls back to [createRoleEditBloc] when available, opening
+  /// `UserRoleEditPage` as the official TASK-043 bottom sheet.
   final void Function(OrganizationUser user)? onManageUser;
 
   /// Quick access to "desativar usuário" (TASK-046). Same `null`-hides-the-
@@ -72,6 +76,8 @@ class UserListPage extends StatelessWidget {
           create: (_) =>
               createBloc()..add(UserListEvent.started(organizationId)),
           child: _UserListView(
+            organizationId: organizationId,
+            createRoleEditBloc: createRoleEditBloc,
             onManageUser: onManageUser,
             onDeactivateUser: onDeactivateUser,
           ),
@@ -82,8 +88,15 @@ class UserListPage extends StatelessWidget {
 }
 
 class _UserListView extends StatelessWidget {
-  const _UserListView({this.onManageUser, this.onDeactivateUser});
+  const _UserListView({
+    required this.organizationId,
+    this.createRoleEditBloc,
+    this.onManageUser,
+    this.onDeactivateUser,
+  });
 
+  final String organizationId;
+  final UserRoleEditBloc Function()? createRoleEditBloc;
   final void Function(OrganizationUser user)? onManageUser;
   final void Function(OrganizationUser user)? onDeactivateUser;
 
@@ -93,6 +106,15 @@ class _UserListView extends StatelessWidget {
       body: BlocBuilder<UserListBloc, UserListState>(
         builder: (context, state) {
           final bloc = context.read<UserListBloc>();
+          final manageUser =
+              onManageUser ??
+              (createRoleEditBloc == null
+                  ? null
+                  : (OrganizationUser user) => _openRoleEditor(
+                      context: context,
+                      bloc: bloc,
+                      user: user,
+                    ));
 
           return AppAdminPageLayout(
             title: 'Usuários',
@@ -163,11 +185,11 @@ class _UserListView extends StatelessWidget {
                             ),
                           ],
                           rowActions: <AppDataTableAction<OrganizationUser>>[
-                            if (onManageUser != null)
+                            if (manageUser != null)
                               AppDataTableAction<OrganizationUser>(
                                 icon: Icons.manage_accounts_outlined,
                                 semanticLabel: 'Gerenciar perfil/permissão',
-                                onPressed: onManageUser!,
+                                onPressed: manageUser,
                               ),
                             if (onDeactivateUser != null)
                               AppDataTableAction<OrganizationUser>(
@@ -197,6 +219,23 @@ class _UserListView extends StatelessWidget {
         },
       ),
     );
+  }
+
+  Future<void> _openRoleEditor({
+    required BuildContext context,
+    required UserListBloc bloc,
+    required OrganizationUser user,
+  }) async {
+    final updated = await UserRoleEditPage.showBottomSheet(
+      context: context,
+      organizationId: organizationId,
+      user: user,
+      createBloc: createRoleEditBloc!,
+    );
+
+    if (updated == true && context.mounted) {
+      bloc.add(const UserListEvent.refreshRequested());
+    }
   }
 
   AppDataTableStatus _tableStatus(UserListState state) {

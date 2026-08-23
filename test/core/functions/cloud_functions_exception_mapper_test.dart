@@ -50,6 +50,20 @@ void main() {
       });
     }
 
+    test('preserves failed-precondition messages for clear UX blocks', () {
+      final result = mapCloudFunctionsExceptionToAppException(
+        FirebaseException(
+          plugin: 'firebase_functions',
+          code: 'failed-precondition',
+          message: 'Último OWNER ativo.',
+        ),
+        StackTrace.empty,
+      );
+
+      expect(result, isA<ConflictException>());
+      expect(result.message, 'Último OWNER ativo.');
+    });
+
     for (final code in ['unavailable', 'deadline-exceeded', 'cancelled']) {
       test('maps $code to NetworkException', () {
         final result = mapCloudFunctionsExceptionToAppException(

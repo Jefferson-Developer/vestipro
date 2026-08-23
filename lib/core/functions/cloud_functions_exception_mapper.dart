@@ -40,9 +40,16 @@ AppException mapCloudFunctionsExceptionToAppException(
       );
     case 'already-exists':
     case 'aborted':
-    case 'failed-precondition':
       return ConflictException(
         'Conflito ao processar a solicitação. Tente novamente.',
+        code: exception.code,
+        cause: exception,
+        stackTrace: stackTrace,
+      );
+    case 'failed-precondition':
+      return ConflictException(
+        exception.message ??
+            'Conflito ao processar a solicitação. Tente novamente.',
         code: exception.code,
         cause: exception,
         stackTrace: stackTrace,

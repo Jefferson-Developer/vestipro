@@ -25,6 +25,7 @@ void main() {
           'password_reset_requested',
           'invite_sent',
           'invite_accepted',
+          'user_role_updated',
         ]),
       );
 
