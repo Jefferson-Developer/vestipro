@@ -297,7 +297,7 @@ Realizado para `origin/main` (autorizado nesta conversa).
 
 ## Hash do commit
 
-<!-- preenchido após o commit -->
+`25e5881`
 
 ## Branch
 
