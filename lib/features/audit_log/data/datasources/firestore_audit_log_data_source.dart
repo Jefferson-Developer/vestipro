@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/database/database.dart';
 import '../dtos/audit_log_entry_dto.dart';
+import '../dtos/audit_log_entry_page_dto.dart';
 import 'audit_log_data_source.dart';
 
 /// Firestore-backed [AuditLogDataSource] for the
@@ -39,21 +40,28 @@ final class FirestoreAuditLogDataSource implements AuditLogDataSource {
   }
 
   @override
-  Future<List<AuditLogEntryDto>> listByOrganization({
+  Future<AuditLogEntryPageDto> listPageByOrganization({
     required String organizationId,
     int limit = 50,
     DateTime? before,
     DateTime? from,
     DateTime? to,
-    String? actionCode,
+    Set<String> actionCodes = const <String>{},
+    String? actorUserId,
   }) async {
+    final trimmedActorUserId = actorUserId?.trim();
     final page = await _collection.getPage(
       organizationId: organizationId,
       limit: limit,
       queryBuilder: (query) {
         var scoped = query.orderBy('timestamp', descending: true);
-        if (actionCode != null) {
-          scoped = scoped.where('action', isEqualTo: actionCode);
+        if (actionCodes.length == 1) {
+          scoped = scoped.where('action', isEqualTo: actionCodes.first);
+        } else if (actionCodes.length > 1) {
+          scoped = scoped.where('action', whereIn: actionCodes.toList());
+        }
+        if (trimmedActorUserId != null && trimmedActorUserId.isNotEmpty) {
+          scoped = scoped.where('actorUserId', isEqualTo: trimmedActorUserId);
         }
         if (before != null) {
           scoped = scoped.where(
@@ -76,6 +84,6 @@ final class FirestoreAuditLogDataSource implements AuditLogDataSource {
         return scoped;
       },
     );
-    return page.items;
+    return AuditLogEntryPageDto(items: page.items, hasMore: page.hasMore);
   }
 }

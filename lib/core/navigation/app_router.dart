@@ -1,9 +1,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:go_router/go_router.dart';
 
+import '../permissions/permissions.dart';
 import 'active_organization_guard.dart';
 import 'app_route_paths.dart';
 import 'auth_guard.dart';
+import 'authorization_guard.dart';
 import 'widgets/forbidden_page.dart';
 import 'widgets/not_found_page.dart';
 
@@ -17,6 +19,7 @@ import 'widgets/not_found_page.dart';
 class AppRouter {
   AppRouter({
     required this.aboutAppPageBuilder,
+    required this.auditLogPageBuilder,
     required this.loginPageBuilder,
     required this.signUpPageBuilder,
     required this.forgotPasswordPageBuilder,
@@ -24,13 +27,18 @@ class AppRouter {
     required this.acceptInvitePageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
+    AuthorizationGuard? authorizationGuard,
   }) : authGuard = authGuard ?? const AlwaysAllowAuthGuard(),
        organizationGuard =
-           organizationGuard ?? const AlwaysAllowActiveOrganizationGuard();
+           organizationGuard ?? const AlwaysAllowActiveOrganizationGuard(),
+       authorizationGuard =
+           authorizationGuard ?? const AlwaysAllowAuthorizationGuard();
 
   final AuthGuard authGuard;
   final ActiveOrganizationGuard organizationGuard;
+  final AuthorizationGuard authorizationGuard;
   final Widget Function(BuildContext context, String orgId) aboutAppPageBuilder;
+  final Widget Function(BuildContext context, String orgId) auditLogPageBuilder;
 
   /// Builds the real login screen (TASK-034). Injected from `VestiProApp`
   /// instead of imported here so `lib/core/navigation/` never depends on a
@@ -67,6 +75,17 @@ class AppRouter {
         name: AboutAppRoute.name,
         builder: (context, state) =>
             aboutAppPageBuilder(context, state.pathParameters['orgId']!),
+      ),
+      GoRoute(
+        path: AuditLogRoute.pathPattern,
+        name: AuditLogRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.auditLogView,
+        ),
+        builder: (context, state) =>
+            auditLogPageBuilder(context, state.pathParameters['orgId']!),
       ),
       GoRoute(
         path: LoginRoute.pathPattern,

@@ -3,7 +3,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/errors/errors.dart';
 import '../../../../core/permissions/permissions.dart';
 import '../../../../core/utils/utils.dart';
-import '../entities/audit_log_entry.dart';
+import '../entities/audit_log_entry_page.dart';
 import '../repositories/audit_log_repository.dart';
 import '../value_objects/audit_action.dart';
 
@@ -21,17 +21,19 @@ final class ListAuditLogEntriesUseCase {
   final AuditLogRepository _repository;
   final PermissionService _permissionService;
 
-  Future<AppResult<List<AuditLogEntry>>> call({
+  Future<AppResult<AuditLogEntryPage>> call({
     required String organizationId,
     required String requestedByUserId,
     int limit = 50,
     DateTime? before,
     DateTime? from,
     DateTime? to,
-    AuditAction? action,
+    Set<AuditAction> actions = const <AuditAction>{},
+    String? actorUserId,
   }) async {
     final trimmedOrganizationId = organizationId.trim();
     final trimmedRequestedByUserId = requestedByUserId.trim();
+    final trimmedActorUserId = actorUserId?.trim();
 
     final fieldErrors = <String, String>{};
     if (trimmedOrganizationId.isEmpty) {
@@ -40,9 +42,15 @@ final class ListAuditLogEntriesUseCase {
     if (trimmedRequestedByUserId.isEmpty) {
       fieldErrors['requestedByUserId'] = 'RequestedByUserId is required.';
     }
+    if (limit < 1 || limit > 100) {
+      fieldErrors['limit'] = 'Limit must be between 1 and 100.';
+    }
+    if (from != null && to != null && from.isAfter(to)) {
+      fieldErrors['period'] = 'From must be before to.';
+    }
 
     if (fieldErrors.isNotEmpty) {
-      return AppFailure<List<AuditLogEntry>>(
+      return AppFailure<AuditLogEntryPage>(
         ValidationFailure(
           'Invalid audit log listing request.',
           fieldErrors: fieldErrors,
@@ -58,12 +66,12 @@ final class ListAuditLogEntriesUseCase {
     );
 
     if (permissionResult is AppFailure<bool>) {
-      return AppFailure<List<AuditLogEntry>>(permissionResult.failure);
+      return AppFailure<AuditLogEntryPage>(permissionResult.failure);
     }
 
     final isAllowed = (permissionResult as AppSuccess<bool>).value;
     if (!isAllowed) {
-      return AppFailure<List<AuditLogEntry>>(
+      return AppFailure<AuditLogEntryPage>(
         const PermissionFailure(
           'User is not allowed to view the audit log.',
           code: 'audit_log_view_denied',
@@ -71,13 +79,16 @@ final class ListAuditLogEntriesUseCase {
       );
     }
 
-    return _repository.listByOrganization(
+    return _repository.listPageByOrganization(
       organizationId: trimmedOrganizationId,
       limit: limit,
       before: before,
       from: from,
       to: to,
-      action: action,
+      actions: actions,
+      actorUserId: trimmedActorUserId == null || trimmedActorUserId.isEmpty
+          ? null
+          : trimmedActorUserId,
     );
   }
 }

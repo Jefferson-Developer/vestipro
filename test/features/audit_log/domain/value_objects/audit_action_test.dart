@@ -10,11 +10,14 @@ void main() {
     });
 
     test('code matches the documented catalog examples from tasks.md', () {
+      expect(AuditAction.userLogin.code, 'auth.login');
       expect(AuditAction.roleChanged.code, 'role.changed');
+      expect(AuditAction.userRoleUpdated.code, 'user.roleUpdated');
       expect(AuditAction.userInviteResent.code, 'user.inviteResent');
       expect(AuditAction.userInviteRevoked.code, 'user.inviteRevoked');
       expect(AuditAction.userInviteAccepted.code, 'user.inviteAccepted');
       expect(AuditAction.userDeactivated.code, 'user.deactivated');
+      expect(AuditAction.userReactivated.code, 'user.reactivated');
       expect(AuditAction.companyDeleted.code, 'company.deleted');
       expect(
         AuditAction.organizationSettingsUpdated.code,

@@ -34,6 +34,22 @@ final class AboutAppRoute extends AppRoute {
   String get location => '/org/$orgId/settings/about';
 }
 
+/// Read-only administrative audit log route (TASK-047).
+///
+/// It lives under the active organization scope and is protected in
+/// [AppRouter] by `audit.log.view`, currently OWNER/ADMIN only.
+final class AuditLogRoute extends AppRoute {
+  const AuditLogRoute({required this.orgId});
+
+  final String orgId;
+
+  static const name = 'auditLog';
+  static const pathPattern = '/org/:orgId/settings/audit-log';
+
+  @override
+  String get location => '/org/$orgId/settings/audit-log';
+}
+
 /// Route shown to sign a user in (TASK-034).
 ///
 /// [SessionAuthGuard] (TASK-041) redirects here for any unauthenticated

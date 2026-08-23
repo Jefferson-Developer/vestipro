@@ -1,5 +1,6 @@
 import '../../../../core/utils/utils.dart';
 import '../entities/audit_log_entry.dart';
+import '../entities/audit_log_entry_page.dart';
 import '../value_objects/audit_action.dart';
 
 /// Contract for the central, append-only administrative audit log
@@ -33,5 +34,20 @@ abstract interface class AuditLogRepository {
     DateTime? from,
     DateTime? to,
     AuditAction? action,
+    String? actorUserId,
+  });
+
+  /// Cursor-paginated variant used by administrative UI: returns the current
+  /// page plus [AuditLogEntryPage.hasMore]/[AuditLogEntryPage.nextCursor],
+  /// supports a server-side actor filter and can group equivalent action
+  /// codes (e.g. legacy `role.changed` plus current `user.roleUpdated`).
+  Future<AppResult<AuditLogEntryPage>> listPageByOrganization({
+    required String organizationId,
+    int limit = 50,
+    DateTime? before,
+    DateTime? from,
+    DateTime? to,
+    Set<AuditAction> actions = const <AuditAction>{},
+    String? actorUserId,
   });
 }

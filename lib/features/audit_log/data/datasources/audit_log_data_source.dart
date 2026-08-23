@@ -1,4 +1,5 @@
 import '../dtos/audit_log_entry_dto.dart';
+import '../dtos/audit_log_entry_page_dto.dart';
 
 /// Data access contract for
 /// `organizations/{organizationId}/auditLogs/{id}` documents (TASK-033).
@@ -9,15 +10,17 @@ import '../dtos/audit_log_entry_dto.dart';
 abstract interface class AuditLogDataSource {
   Future<AuditLogEntryDto> record(AuditLogEntryDto dto);
 
-  /// Lists [organizationId]'s audit log, newest first. [before]/[from]/[to]
-  /// filter on `timestamp`; [actionCode] filters on `action`
-  /// ([AuditActionCode.code]). Never queries across organizations.
-  Future<List<AuditLogEntryDto>> listByOrganization({
+  /// Lists one cursor page of [organizationId]'s audit log, newest first.
+  /// [before]/[from]/[to] filter on `timestamp`; [actionCodes] filters on
+  /// `action` and [actorUserId] filters on the acting user. Never queries
+  /// across organizations.
+  Future<AuditLogEntryPageDto> listPageByOrganization({
     required String organizationId,
     int limit = 50,
     DateTime? before,
     DateTime? from,
     DateTime? to,
-    String? actionCode,
+    Set<String> actionCodes = const <String>{},
+    String? actorUserId,
   });
 }

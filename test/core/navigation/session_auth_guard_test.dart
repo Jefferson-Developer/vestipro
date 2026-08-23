@@ -102,6 +102,8 @@ AppRouter _buildRouter(SessionAuthGuard guard) {
     authGuard: guard,
     aboutAppPageBuilder: (context, orgId) =>
         Scaffold(body: Text('about-app:$orgId')),
+    auditLogPageBuilder: (context, orgId) =>
+        Scaffold(body: Text('audit-log:$orgId')),
     loginPageBuilder: (context) => const Scaffold(body: Text('login-page')),
     signUpPageBuilder: (context) => const Scaffold(body: Text('sign-up-page')),
     forgotPasswordPageBuilder: (context) =>

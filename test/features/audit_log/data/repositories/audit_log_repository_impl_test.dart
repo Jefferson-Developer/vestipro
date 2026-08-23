@@ -5,6 +5,7 @@ import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/audit_log/audit_log.dart';
 import 'package:vestipro/features/audit_log/data/datasources/audit_log_data_source.dart';
 import 'package:vestipro/features/audit_log/data/dtos/audit_log_entry_dto.dart';
+import 'package:vestipro/features/audit_log/data/dtos/audit_log_entry_page_dto.dart';
 import 'package:vestipro/features/audit_log/data/mappers/audit_log_entry_mapper.dart';
 import 'package:vestipro/features/audit_log/data/repositories/audit_log_repository_impl.dart';
 
@@ -115,28 +116,35 @@ void main() {
         ];
 
         when(
-          () => dataSource.listByOrganization(
+          () => dataSource.listPageByOrganization(
             organizationId: 'org-1',
             limit: 50,
             before: null,
             from: null,
             to: null,
-            actionCode: null,
+            actionCodes: const <String>{},
+            actorUserId: null,
           ),
-        ).thenAnswer((_) async => entriesOrg1);
+        ).thenAnswer(
+          (_) async => AuditLogEntryPageDto(items: entriesOrg1, hasMore: false),
+        );
         when(
-          () => dataSource.listByOrganization(
+          () => dataSource.listPageByOrganization(
             organizationId: 'org-2',
             limit: 50,
             before: null,
             from: null,
             to: null,
-            actionCode: null,
+            actionCodes: const <String>{},
+            actorUserId: null,
           ),
         ).thenAnswer(
-          (_) async => <AuditLogEntryDto>[
-            buildDto(id: 'log-3', organizationId: 'org-2'),
-          ],
+          (_) async => AuditLogEntryPageDto(
+            items: <AuditLogEntryDto>[
+              buildDto(id: 'log-3', organizationId: 'org-2'),
+            ],
+            hasMore: false,
+          ),
         );
 
         final result = await repository.listByOrganization(
@@ -151,28 +159,35 @@ void main() {
           isTrue,
         );
         verify(
-          () => dataSource.listByOrganization(
+          () => dataSource.listPageByOrganization(
             organizationId: 'org-1',
             limit: 50,
             before: null,
             from: null,
             to: null,
-            actionCode: null,
+            actionCodes: const <String>{},
+            actorUserId: null,
           ),
         ).called(1);
       });
 
       test('forwards the AuditAction filter as its raw code', () async {
         when(
-          () => dataSource.listByOrganization(
+          () => dataSource.listPageByOrganization(
             organizationId: 'org-1',
             limit: 50,
             before: null,
             from: null,
             to: null,
-            actionCode: 'user.deactivated',
+            actionCodes: const <String>{'user.deactivated'},
+            actorUserId: null,
           ),
-        ).thenAnswer((_) async => <AuditLogEntryDto>[]);
+        ).thenAnswer(
+          (_) async => const AuditLogEntryPageDto(
+            items: <AuditLogEntryDto>[],
+            hasMore: false,
+          ),
+        );
 
         await repository.listByOrganization(
           organizationId: 'org-1',
@@ -180,28 +195,73 @@ void main() {
         );
 
         verify(
-          () => dataSource.listByOrganization(
+          () => dataSource.listPageByOrganization(
             organizationId: 'org-1',
             limit: 50,
             before: null,
             from: null,
             to: null,
-            actionCode: 'user.deactivated',
+            actionCodes: const <String>{'user.deactivated'},
+            actorUserId: null,
           ),
         ).called(1);
       });
 
       test(
+        'returns page metadata and forwards grouped actions with actor',
+        () async {
+          when(
+            () => dataSource.listPageByOrganization(
+              organizationId: 'org-1',
+              limit: 25,
+              before: DateTime.utc(2026, 1, 2),
+              from: DateTime.utc(2026, 1, 1),
+              to: DateTime.utc(2026, 1, 31),
+              actionCodes: const <String>{'role.changed', 'user.roleUpdated'},
+              actorUserId: 'admin-a',
+            ),
+          ).thenAnswer(
+            (_) async => AuditLogEntryPageDto(
+              items: <AuditLogEntryDto>[
+                buildDto(id: 'log-2', action: 'user.roleUpdated'),
+              ],
+              hasMore: true,
+            ),
+          );
+
+          final result = await repository.listPageByOrganization(
+            organizationId: 'org-1',
+            limit: 25,
+            before: DateTime.utc(2026, 1, 2),
+            from: DateTime.utc(2026, 1, 1),
+            to: DateTime.utc(2026, 1, 31),
+            actions: const <AuditAction>{
+              AuditAction.roleChanged,
+              AuditAction.userRoleUpdated,
+            },
+            actorUserId: 'admin-a',
+          );
+
+          expect(result, isA<AppSuccess<AuditLogEntryPage>>());
+          final page = (result as AppSuccess<AuditLogEntryPage>).value;
+          expect(page.entries.single.action, AuditAction.userRoleUpdated);
+          expect(page.hasMore, isTrue);
+          expect(page.nextCursor, DateTime.utc(2026, 1, 1));
+        },
+      );
+
+      test(
         'maps an AppException thrown by the datasource to a Failure',
         () async {
           when(
-            () => dataSource.listByOrganization(
+            () => dataSource.listPageByOrganization(
               organizationId: 'org-1',
               limit: 50,
               before: null,
               from: null,
               to: null,
-              actionCode: null,
+              actionCodes: const <String>{},
+              actorUserId: null,
             ),
           ).thenThrow(const ForbiddenException('Not allowed.'));
 

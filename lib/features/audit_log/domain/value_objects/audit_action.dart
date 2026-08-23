@@ -17,8 +17,10 @@
 /// kept here so `AuditLogEntryMapper`/`ListAuditLogEntriesUseCase` can parse
 /// those entries back into an [AuditAction] like any other.
 enum AuditAction {
+  userLogin,
   organizationCreated,
   roleChanged,
+  userRoleUpdated,
   userInvited,
 
   /// Recorded server-side by the `resendInvite` Cloud Function (TASK-039,
@@ -36,6 +38,7 @@ enum AuditAction {
   /// Dart code, only parsed back" situation as [userInviteResent].
   userInviteAccepted,
   userDeactivated,
+  userReactivated,
   userDeleted,
   companyDeleted,
   branchDeleted,
@@ -53,12 +56,15 @@ extension AuditActionCode on AuditAction {
   String get code {
     return switch (this) {
       AuditAction.organizationCreated => 'organization.created',
+      AuditAction.userLogin => 'auth.login',
       AuditAction.roleChanged => 'role.changed',
+      AuditAction.userRoleUpdated => 'user.roleUpdated',
       AuditAction.userInvited => 'user.invited',
       AuditAction.userInviteResent => 'user.inviteResent',
       AuditAction.userInviteRevoked => 'user.inviteRevoked',
       AuditAction.userInviteAccepted => 'user.inviteAccepted',
       AuditAction.userDeactivated => 'user.deactivated',
+      AuditAction.userReactivated => 'user.reactivated',
       AuditAction.userDeleted => 'user.deleted',
       AuditAction.companyDeleted => 'company.deleted',
       AuditAction.branchDeleted => 'branch.deleted',

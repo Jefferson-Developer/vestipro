@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:go_router/go_router.dart';
 import 'package:vestipro/core/navigation/navigation.dart';
+import 'package:vestipro/core/permissions/permissions.dart';
 
 void main() {
   group('AppRouter', () {
@@ -102,22 +103,43 @@ void main() {
       expect(capturedToken, 'abc-123');
       expect(find.text('accept-invite:abc-123'), findsOneWidget);
     });
+
+    testWidgets('protects AuditLogRoute with audit.log.view', (tester) async {
+      final appRouter = _buildRouter(
+        authorizationGuard: const _DenyAuditLogGuard(),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(const AuditLogRoute(orgId: 'acme').location);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sem permissão'), findsOneWidget);
+      expect(find.text('audit-log:acme'), findsNothing);
+    });
   });
 }
 
 AppRouter _buildRouter({
   AuthGuard? authGuard,
   ActiveOrganizationGuard? organizationGuard,
+  AuthorizationGuard? authorizationGuard,
   Widget Function(BuildContext context, String orgId)? aboutAppPageBuilder,
+  Widget Function(BuildContext context, String orgId)? auditLogPageBuilder,
   WidgetBuilder? loginPageBuilder,
   Widget Function(BuildContext context, String token)? acceptInvitePageBuilder,
 }) {
   return AppRouter(
     authGuard: authGuard,
     organizationGuard: organizationGuard,
+    authorizationGuard: authorizationGuard,
     aboutAppPageBuilder:
         aboutAppPageBuilder ??
         (context, orgId) => Scaffold(body: Text('about-app:$orgId')),
+    auditLogPageBuilder:
+        auditLogPageBuilder ??
+        (context, orgId) => Scaffold(body: Text('audit-log:$orgId')),
     loginPageBuilder:
         loginPageBuilder ?? (context) => const Scaffold(body: Text('login')),
     signUpPageBuilder: (context) => const Scaffold(body: Text('sign-up')),
@@ -137,6 +159,22 @@ final class _DenyOrgRoutesGuard implements AuthGuard {
   @override
   String? redirect(BuildContext context, GoRouterState state) {
     if (state.uri.path.startsWith('/org/')) {
+      return const ForbiddenRoute().location;
+    }
+    return null;
+  }
+}
+
+final class _DenyAuditLogGuard implements AuthorizationGuard {
+  const _DenyAuditLogGuard();
+
+  @override
+  String? redirect(
+    BuildContext context,
+    GoRouterState state, {
+    required Capability requiredCapability,
+  }) {
+    if (requiredCapability == Capability.auditLogView) {
       return const ForbiddenRoute().location;
     }
     return null;

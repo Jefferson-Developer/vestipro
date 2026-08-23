@@ -56,6 +56,10 @@ void main() {
       );
     });
 
+    setUpAll(() {
+      registerFallbackValue(<AuditAction>{});
+    });
+
     test('OWNER (has audit.log.view) receives the entries from the '
         'repository', () async {
       when(
@@ -67,16 +71,22 @@ void main() {
         (_) async => AppSuccess<Membership>(buildMembership('OWNER')),
       );
       when(
-        () => auditLogRepository.listByOrganization(
+        () => auditLogRepository.listPageByOrganization(
           organizationId: 'org-1',
           limit: 50,
           before: null,
           from: null,
           to: null,
-          action: null,
+          actions: const <AuditAction>{},
+          actorUserId: null,
         ),
       ).thenAnswer(
-        (_) async => AppSuccess<List<AuditLogEntry>>([buildEntry()]),
+        (_) async => AppSuccess<AuditLogEntryPage>(
+          AuditLogEntryPage(
+            entries: <AuditLogEntry>[buildEntry()],
+            hasMore: false,
+          ),
+        ),
       );
 
       final result = await useCase.call(
@@ -84,8 +94,11 @@ void main() {
         requestedByUserId: 'user-1',
       );
 
-      expect(result, isA<AppSuccess<List<AuditLogEntry>>>());
-      expect((result as AppSuccess<List<AuditLogEntry>>).value, hasLength(1));
+      expect(result, isA<AppSuccess<AuditLogEntryPage>>());
+      expect(
+        (result as AppSuccess<AuditLogEntryPage>).value.entries,
+        hasLength(1),
+      );
     });
 
     test('SALES_REP (no audit.log.view) is denied without ever reaching the '
@@ -104,22 +117,84 @@ void main() {
         requestedByUserId: 'user-1',
       );
 
-      expect(result, isA<AppFailure<List<AuditLogEntry>>>());
+      expect(result, isA<AppFailure<AuditLogEntryPage>>());
       expect(
-        (result as AppFailure<List<AuditLogEntry>>).failure,
+        (result as AppFailure<AuditLogEntryPage>).failure,
         isA<PermissionFailure>(),
       );
       verifyNever(
-        () => auditLogRepository.listByOrganization(
+        () => auditLogRepository.listPageByOrganization(
           organizationId: any(named: 'organizationId'),
           limit: any(named: 'limit'),
           before: any(named: 'before'),
           from: any(named: 'from'),
           to: any(named: 'to'),
-          action: any(named: 'action'),
+          actions: any(named: 'actions'),
+          actorUserId: any(named: 'actorUserId'),
         ),
       );
     });
+
+    test(
+      'passes actor, action group and cursor filters to the repository',
+      () async {
+        when(
+          () => membershipRepository.getByUser(
+            organizationId: 'org-1',
+            userId: 'user-1',
+          ),
+        ).thenAnswer(
+          (_) async => AppSuccess<Membership>(buildMembership('ADMIN')),
+        );
+        when(
+          () => auditLogRepository.listPageByOrganization(
+            organizationId: 'org-1',
+            limit: 25,
+            before: DateTime.utc(2026, 1, 2),
+            from: DateTime.utc(2026, 1, 1),
+            to: DateTime.utc(2026, 1, 31),
+            actions: const <AuditAction>{
+              AuditAction.roleChanged,
+              AuditAction.userRoleUpdated,
+            },
+            actorUserId: 'admin-a',
+          ),
+        ).thenAnswer(
+          (_) async => const AppSuccess<AuditLogEntryPage>(
+            AuditLogEntryPage(entries: <AuditLogEntry>[], hasMore: false),
+          ),
+        );
+
+        await useCase.call(
+          organizationId: ' org-1 ',
+          requestedByUserId: ' user-1 ',
+          limit: 25,
+          before: DateTime.utc(2026, 1, 2),
+          from: DateTime.utc(2026, 1, 1),
+          to: DateTime.utc(2026, 1, 31),
+          actions: const <AuditAction>{
+            AuditAction.roleChanged,
+            AuditAction.userRoleUpdated,
+          },
+          actorUserId: ' admin-a ',
+        );
+
+        verify(
+          () => auditLogRepository.listPageByOrganization(
+            organizationId: 'org-1',
+            limit: 25,
+            before: DateTime.utc(2026, 1, 2),
+            from: DateTime.utc(2026, 1, 1),
+            to: DateTime.utc(2026, 1, 31),
+            actions: const <AuditAction>{
+              AuditAction.roleChanged,
+              AuditAction.userRoleUpdated,
+            },
+            actorUserId: 'admin-a',
+          ),
+        ).called(1);
+      },
+    );
 
     test('a user with no Membership at all is denied', () async {
       when(
@@ -138,9 +213,9 @@ void main() {
         requestedByUserId: 'stranger',
       );
 
-      expect(result, isA<AppFailure<List<AuditLogEntry>>>());
+      expect(result, isA<AppFailure<AuditLogEntryPage>>());
       expect(
-        (result as AppFailure<List<AuditLogEntry>>).failure,
+        (result as AppFailure<AuditLogEntryPage>).failure,
         isA<PermissionFailure>(),
       );
     });
@@ -152,9 +227,9 @@ void main() {
         requestedByUserId: '',
       );
 
-      expect(result, isA<AppFailure<List<AuditLogEntry>>>());
+      expect(result, isA<AppFailure<AuditLogEntryPage>>());
       expect(
-        (result as AppFailure<List<AuditLogEntry>>).failure,
+        (result as AppFailure<AuditLogEntryPage>).failure,
         isA<ValidationFailure>(),
       );
       verifyNever(

@@ -6,6 +6,7 @@ import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
+import 'package:go_router/go_router.dart';
 
 import '../core/auth/auth.dart';
 import '../core/design_system/design_system.dart';
@@ -13,11 +14,13 @@ import '../core/environment/app_environment.dart';
 import '../core/errors/errors.dart';
 import '../core/feature_flags/feature_flags.dart';
 import '../core/navigation/navigation.dart';
+import '../core/permissions/permissions.dart';
 import '../core/services/services.dart';
 import '../features/authentication/authentication.dart';
 import '../features/authentication/presentation/bloc/forgot_password_bloc.dart';
 import '../features/authentication/presentation/bloc/login_bloc.dart';
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart';
+import '../features/audit_log/audit_log.dart';
 import '../features/invites/invites.dart';
 import '../features/onboarding/onboarding.dart';
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
@@ -137,9 +140,18 @@ class VestiProApp extends StatelessWidget {
           // its own default so tests/examples that build their own
           // [AppRouter] are unaffected unless they opt in.
           authGuard: SessionAuthGuard(getIt<SessionService>()),
+          authorizationGuard: const _LazyPermissionAuthorizationGuard(),
           aboutAppPageBuilder: (context, orgId) => AboutAppPage(
             createBloc: () => getIt<AboutAppBloc>(),
             showInsightsShortcut: _resolveShowInsightsShortcut(),
+          ),
+          auditLogPageBuilder: (context, orgId) => AuditLogPage(
+            organizationId: orgId,
+            userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+            permissionService: getIt<PermissionService>(),
+            createBloc: () => AuditLogBloc(
+              listAuditLogEntries: getIt<ListAuditLogEntriesUseCase>(),
+            ),
           ),
           loginPageBuilder: (context) =>
               LoginPage(createBloc: () => getIt<LoginBloc>()),
@@ -189,5 +201,21 @@ bool _resolveShowInsightsShortcut() {
       stackTrace: stackTrace,
     );
     return false;
+  }
+}
+
+final class _LazyPermissionAuthorizationGuard implements AuthorizationGuard {
+  const _LazyPermissionAuthorizationGuard();
+
+  @override
+  Future<String?> redirect(
+    BuildContext context,
+    GoRouterState state, {
+    required Capability requiredCapability,
+  }) {
+    return PermissionAuthorizationGuard(
+      getIt<PermissionService>(),
+      getIt<AuthRepository>(),
+    ).redirect(context, state, requiredCapability: requiredCapability);
   }
 }

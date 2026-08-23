@@ -926,6 +926,38 @@ describe('organizations/{organizationId}/auditLogs/{logId}  (TASK-033)', () => {
     await assertSucceeds(db.doc(`organizations/${ORG_A}/auditLogs/log-1`).get());
   });
 
+  test('OWNER e ADMIN conseguem listar audit logs somente da própria organization (TASK-047)', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/auditLogs/log-owner`)
+        .set(auditLogDoc({ organizationId: ORG_A, actorUserId: 'owner-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/auditLogs/log-admin`)
+        .set(auditLogDoc({ organizationId: ORG_A, actorUserId: 'admin-a', action: 'user.roleUpdated' }));
+      await db
+        .doc(`organizations/${ORG_B}/auditLogs/log-other-tenant`)
+        .set(auditLogDoc({ organizationId: ORG_B, actorUserId: 'owner-b' }));
+    });
+
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+
+    await assertSucceeds(
+      ownerDb
+        .collection(`organizations/${ORG_A}/auditLogs`)
+        .where('action', '==', 'user.roleUpdated')
+        .get(),
+    );
+    await assertSucceeds(
+      adminDb
+        .collection(`organizations/${ORG_A}/auditLogs`)
+        .where('actorUserId', '==', 'admin-a')
+        .get(),
+    );
+    await assertFails(ownerDb.collection(`organizations/${ORG_B}/auditLogs`).get());
+  });
+
   test('SALES_REP (sem audit.log.view) não consegue ler o audit log', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {
       await context
@@ -936,6 +968,7 @@ describe('organizations/{organizationId}/auditLogs/{logId}  (TASK-033)', () => {
 
     const db = testEnv.authenticatedContext('rep-a').firestore();
     await assertFails(db.doc(`organizations/${ORG_A}/auditLogs/log-1`).get());
+    await assertFails(db.collection(`organizations/${ORG_A}/auditLogs`).get());
   });
 
   test('OWNER da Org A não consegue ler o audit log da Org B (cross-tenant)', async () => {
