@@ -14,6 +14,19 @@ part 'membership.freezed.dart';
 /// another Organization means creating a brand new [Membership], never
 /// editing this one. [MembershipRepository.update] only ever touches
 /// [roleId], [roleName], [teamIds], [status] and audit metadata.
+///
+/// [name]/[email] (TASK-042) are a denormalized snapshot of the user's
+/// `users/{uid}` profile, written once by the `createOrganization`/
+/// `acceptInvite` Cloud Functions at Membership-creation time — never by any
+/// client write, and never kept in sync with a later profile edit (there is
+/// no such edit flow yet either). They exist purely so `UserListPage` can
+/// render a name/e-mail per row without the client ever reading another
+/// user's `users/{uid}` profile directly, which `firestore.rules` denies
+/// (`allow get: if request.auth.uid == userId; allow list: if false;`).
+/// Nullable/optional so every Membership built before this field existed
+/// (or by a test fixture that does not care) keeps compiling and decoding
+/// unchanged — a `null` is rendered as a graceful fallback by
+/// `ListOrganizationUsersUseCase`, never as a crash.
 @freezed
 abstract class Membership with _$Membership {
   const factory Membership({
@@ -30,5 +43,7 @@ abstract class Membership with _$Membership {
     required DateTime updatedAt,
     required String updatedBy,
     DateTime? deletedAt,
+    String? name,
+    String? email,
   }) = _Membership;
 }

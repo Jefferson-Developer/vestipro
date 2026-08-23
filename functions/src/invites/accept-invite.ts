@@ -140,6 +140,13 @@ export const acceptInvite = onCall<
       userId: uid,
       roleId: roleName,
       roleName,
+      // Denormalized display fields (TASK-042: `UserListPage` needs a name/
+      // e-mail per row without the client ever reading another user's
+      // `users/{uid}` profile — `firestore.rules` denies that). A snapshot
+      // taken at Membership-creation/re-creation time, same trade-off
+      // documented in `create-organization.ts`'s own Membership write.
+      name: actorName,
+      email: callerEmail,
       teamIds: previousMembershipSnapshot.exists
         ? (previousMembershipSnapshot.data()?.teamIds ?? [])
         : [],

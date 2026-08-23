@@ -56,5 +56,36 @@ void main() {
         throwsA(isA<ValidationException>()),
       );
     });
+
+    test(
+      'fromJson parses the denormalized name/email (TASK-042) when present',
+      () {
+        final withDisplayFields = Map<String, dynamic>.of(json)
+          ..['name'] = 'Ana Souza'
+          ..['email'] = 'ana@vestipro.com.br';
+
+        final dto = MembershipDto.fromJson(withDisplayFields, id: 'user-1');
+
+        expect(dto.name, 'Ana Souza');
+        expect(dto.email, 'ana@vestipro.com.br');
+      },
+    );
+
+    test('fromJson defaults name/email to null when absent (TASK-042)', () {
+      final dto = MembershipDto.fromJson(json, id: 'user-1');
+
+      expect(dto.name, isNull);
+      expect(dto.email, isNull);
+    });
+
+    test('toJson round-trips the denormalized name/email (TASK-042)', () {
+      final withDisplayFields = Map<String, dynamic>.of(json)
+        ..['name'] = 'Ana Souza'
+        ..['email'] = 'ana@vestipro.com.br';
+      final dto = MembershipDto.fromJson(withDisplayFields, id: 'user-1');
+
+      expect(dto.toJson()['name'], 'Ana Souza');
+      expect(dto.toJson()['email'], 'ana@vestipro.com.br');
+    });
   });
 }

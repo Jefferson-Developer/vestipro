@@ -456,6 +456,24 @@ describe('organizations/{organizationId}/members/{userId}  (Membership)', () => 
     await assertFails(db.doc(`organizations/${ORG_B}/members/owner-b`).get());
   });
 
+  test('OWNER lista (query) os members da própria organization (UserListPage, TASK-042)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertSucceeds(db.collection(`organizations/${ORG_A}/members`).get());
+  });
+
+  test('SALES_REP não consegue listar (query) os members — sem user.changeRole', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.collection(`organizations/${ORG_A}/members`).get());
+  });
+
+  test(
+    'OWNER da Org A não consegue listar (query manipulada) os members da Org B (cross-tenant)',
+    async () => {
+      const db = testEnv.authenticatedContext('owner-a').firestore();
+      await assertFails(db.collection(`organizations/${ORG_B}/members`).get());
+    },
+  );
+
   test('OWNER consegue convidar (criar Membership) um novo usuário', async () => {
     const db = testEnv.authenticatedContext('owner-a').firestore();
     await assertSucceeds(

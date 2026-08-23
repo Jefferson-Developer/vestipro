@@ -253,7 +253,21 @@ service cloud.firestore {
       // -------------------------------------------------------------------
 
       match /members/{userId} {
-        allow read: if isActiveMember(organizationId);
+        // Leitura de um único Membership (self-check de permissão,
+        // resolução de role antes de uma troca de role/atribuição de
+        // convite, etc.) permanece aberta a qualquer membro ativo — nunca
+        // dependeu de capability alguma.
+        allow get: if isActiveMember(organizationId);
+
+        // `list` (a query administrativa por trás de `UserListPage`,
+        // TASK-042) é mais sensível que um `get` isolado: enumerar todo o
+        // roster da organização (nomes, e-mails, roles) só é permitido a
+        // quem já tem `user.changeRole` — hoje, apenas OWNER/ADMIN
+        // (RolePermissionMatrix). Nenhum caso de uso hoje chama
+        // `MembershipRepository.listByOrganization` fora desse fluxo
+        // administrativo, então esta restrição não quebra nenhum caminho
+        // existente (self-check usa sempre `get`, nunca `list`).
+        allow list: if hasCapability(organizationId, 'user.changeRole');
 
         // A primeira Membership (OWNER) só nasce dentro da transação
         // server-side de `createOrganization` (Admin SDK, TASK-037) — nunca

@@ -25,6 +25,8 @@ final class MembershipDto {
     required this.updatedAt,
     required this.updatedBy,
     this.deletedAt,
+    this.name,
+    this.email,
   });
 
   factory MembershipDto.fromJson(
@@ -43,6 +45,8 @@ final class MembershipDto {
     final updatedAt = json['updatedAt'];
     final updatedBy = json['updatedBy'];
     final deletedAt = json['deletedAt'];
+    final name = json['name'];
+    final email = json['email'];
 
     if (organizationId is! String ||
         userId is! String ||
@@ -55,7 +59,9 @@ final class MembershipDto {
         createdBy is! String ||
         updatedAt is! Timestamp ||
         updatedBy is! String ||
-        (deletedAt != null && deletedAt is! Timestamp)) {
+        (deletedAt != null && deletedAt is! Timestamp) ||
+        (name != null && name is! String) ||
+        (email != null && email is! String)) {
       throw const ValidationException(
         'Invalid membership payload.',
         code: 'invalid_membership_payload',
@@ -78,6 +84,8 @@ final class MembershipDto {
       updatedAt: updatedAt.toDate(),
       updatedBy: updatedBy,
       deletedAt: (deletedAt as Timestamp?)?.toDate(),
+      name: name as String?,
+      email: email as String?,
     );
   }
 
@@ -95,6 +103,12 @@ final class MembershipDto {
   final String updatedBy;
   final DateTime? deletedAt;
 
+  /// Denormalized display fields (TASK-042) — see [Membership.name]/
+  /// [Membership.email]'s own docs for why these are optional and never
+  /// written by any client-side update.
+  final String? name;
+  final String? email;
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'organizationId': organizationId,
@@ -109,6 +123,8 @@ final class MembershipDto {
       'updatedAt': Timestamp.fromDate(updatedAt),
       'updatedBy': updatedBy,
       'deletedAt': deletedAt == null ? null : Timestamp.fromDate(deletedAt!),
+      'name': name,
+      'email': email,
     };
   }
 }

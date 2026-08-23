@@ -281,12 +281,34 @@ export const createOrganization = onCall<
       });
     });
 
+    // Computed here (before the Membership write below) so both the
+    // Membership's own denormalized `name`/`email` (TASK-042: `UserListPage`
+    // needs a display name/e-mail per row without ever reading another
+    // user's `users/{uid}` profile from the client — `firestore.rules`
+    // denies that) and the audit log's `actorName` share the exact same
+    // resolution, instead of computing it twice.
+    const profileName = profileSnapshot.exists
+      ? (profileSnapshot.data()?.name as string | undefined)?.trim()
+      : undefined;
+    const callerEmail = (request.auth?.token?.email as string | undefined) ?? '';
+    const actorName =
+      profileName ||
+      (request.auth?.token?.name as string | undefined) ||
+      callerEmail ||
+      'unknown';
+
     const membershipRef = requestedOrganizationRef.collection('members').doc(uid);
     transaction.set(membershipRef, {
       organizationId,
       userId: uid,
       roleId: 'OWNER',
       roleName: 'OWNER',
+      // Denormalized display fields (TASK-042) — a snapshot taken at
+      // Membership-creation time, never kept in sync with a later
+      // `users/{uid}` profile edit (there is no such edit flow yet either;
+      // see this task's own "Riscos conhecidos").
+      name: actorName,
+      email: callerEmail,
       teamIds: [],
       status: 'active',
       version: 1,
@@ -301,15 +323,6 @@ export const createOrganization = onCall<
       organizationId,
       createdAt: now,
     });
-
-    const profileName = profileSnapshot.exists
-      ? (profileSnapshot.data()?.name as string | undefined)?.trim()
-      : undefined;
-    const actorName =
-      profileName ||
-      (request.auth?.token?.name as string | undefined) ||
-      (request.auth?.token?.email as string | undefined) ||
-      'unknown';
 
     const auditLogRef = requestedOrganizationRef.collection('auditLogs').doc();
     transaction.set(auditLogRef, {

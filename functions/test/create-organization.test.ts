@@ -77,7 +77,7 @@ describe('createOrganization', () => {
             country: 'BR',
             defaultLanguage: 'pt-BR',
           },
-          authFor('user-1'),
+          authFor('user-1', { email: 'owner@vestipro.com.br' }),
         ),
       )) as CreateOrganizationResponse;
 
@@ -118,6 +118,11 @@ describe('createOrganization', () => {
       expect(membershipSnapshot.data()?.roleId).toBe('OWNER');
       expect(membershipSnapshot.data()?.roleName).toBe('OWNER');
       expect(membershipSnapshot.data()?.status).toBe('active');
+      // Denormalized display fields (TASK-042: `UserListPage` needs a name/
+      // e-mail per row without the client ever reading another user's
+      // `users/{uid}` profile — `firestore.rules` denies that).
+      expect(membershipSnapshot.data()?.email).toBe('owner@vestipro.com.br');
+      expect(membershipSnapshot.data()?.name).toBe('owner@vestipro.com.br');
 
       const ownerMarkerSnapshot = await db.collection('organizationOwners').doc('user-1').get();
       expect(ownerMarkerSnapshot.exists).toBe(true);
@@ -341,6 +346,16 @@ describe('createOrganization', () => {
       .collection('auditLogs')
       .get();
     expect(auditSnapshot.docs[0].data().actorName).toBe('Ana Souza');
+
+    // The Membership's own denormalized `name` (TASK-042) shares the exact
+    // same resolution as the audit log's `actorName`.
+    const membershipSnapshot = await db
+      .collection('organizations')
+      .doc('org-1')
+      .collection('members')
+      .doc('user-1')
+      .get();
+    expect(membershipSnapshot.data()?.name).toBe('Ana Souza');
   });
 
   it("falls back to the auth token's name when there is no users/{uid} profile", async () => {

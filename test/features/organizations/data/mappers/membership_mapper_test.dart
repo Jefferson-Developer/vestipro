@@ -88,5 +88,41 @@ void main() {
       expect(roundTrippedDto.teamIds, dto.teamIds);
       expect(roundTrippedDto.status, dto.status);
     });
+
+    test('toEntity/toDto pass the denormalized name/email through unchanged '
+        '(TASK-042)', () {
+      final dtoWithDisplayFields = MembershipDto(
+        id: dto.id,
+        organizationId: dto.organizationId,
+        userId: dto.userId,
+        roleId: dto.roleId,
+        roleName: dto.roleName,
+        teamIds: dto.teamIds,
+        status: dto.status,
+        version: dto.version,
+        createdAt: dto.createdAt,
+        createdBy: dto.createdBy,
+        updatedAt: dto.updatedAt,
+        updatedBy: dto.updatedBy,
+        name: 'Ana Souza',
+        email: 'ana@vestipro.com.br',
+      );
+
+      final entity = mapper.toEntity(dtoWithDisplayFields);
+      expect(entity.name, 'Ana Souza');
+      expect(entity.email, 'ana@vestipro.com.br');
+
+      final roundTrippedDto = mapper.toDto(entity);
+      expect(roundTrippedDto.name, 'Ana Souza');
+      expect(roundTrippedDto.email, 'ana@vestipro.com.br');
+    });
+
+    test('toEntity defaults name/email to null when the DTO omits them '
+        '(TASK-042)', () {
+      final entity = mapper.toEntity(dto);
+
+      expect(entity.name, isNull);
+      expect(entity.email, isNull);
+    });
   });
 }

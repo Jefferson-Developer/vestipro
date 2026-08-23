@@ -126,6 +126,12 @@ describe('acceptInvite', () => {
     expect(membershipSnapshot.exists).toBe(true);
     expect(membershipSnapshot.data()?.roleName).toBe('SALES_REP');
     expect(membershipSnapshot.data()?.status).toBe('active');
+    // Denormalized display fields (TASK-042): `email` always matches the
+    // (lower-cased) invite/caller e-mail; `name` falls back through
+    // `resolveActorName` down to the auth token's own e-mail here, since no
+    // `users/{uid}` profile was seeded for this test.
+    expect(membershipSnapshot.data()?.email).toBe('convidado@vestipro.com.br');
+    expect(membershipSnapshot.data()?.name).toBe('Convidado@Vestipro.com.br');
 
     const inviteSnapshot = await db
       .collection('organizations')
@@ -303,5 +309,37 @@ describe('acceptInvite', () => {
     expect(membership.teamIds).toEqual(['team-a']);
     expect(membership.version).toBe(2);
     expect(membership.createdBy).toBe('someone-else');
+    // Unlike createdAt/createdBy/teamIds, the denormalized name/email
+    // (TASK-042) are always refreshed to this acceptance's own caller —
+    // never preserved from the pre-existing (inactive) document.
+    expect(membership.email).toBe('convidado@vestipro.com.br');
   });
+
+  it(
+    "denormalizes the caller's users/{uid} profile name and e-mail onto the " +
+      'Membership (TASK-042), so UserListPage never has to read another ' +
+      "user's profile directly",
+    async () => {
+      await seedOrganization('org-1', 'Grupo Fashion XPTO');
+      await seedInvite('org-1', 'invite-1', 'token-1');
+      await db.collection('users').doc('new-user-1').set({ name: 'Ana Souza' });
+      const wrapped = testEnv.wrap(acceptInvite);
+
+      await wrapped(
+        buildRequest(
+          { token: 'token-1' },
+          authFor('new-user-1', 'convidado@vestipro.com.br'),
+        ),
+      );
+
+      const membershipSnapshot = await db
+        .collection('organizations')
+        .doc('org-1')
+        .collection('members')
+        .doc('new-user-1')
+        .get();
+      expect(membershipSnapshot.data()?.name).toBe('Ana Souza');
+      expect(membershipSnapshot.data()?.email).toBe('convidado@vestipro.com.br');
+    },
+  );
 });

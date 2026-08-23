@@ -236,6 +236,9 @@ import '../features/settings/domain/usecases/search_about_app_notes_use_case.dar
 import '../features/settings/domain/usecases/submit_about_app_diagnostics_use_case.dart'
     as _i226;
 import '../features/settings/presentation/bloc/about_app_bloc.dart' as _i398;
+import '../features/users/domain/usecases/list_organization_users_use_case.dart'
+    as _i93;
+import '../features/users/presentation/bloc/user_list_bloc.dart' as _i244;
 import 'injection_module.dart' as _i212;
 
 const String _dev = 'dev';
@@ -639,12 +642,23 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i334.RevokeInviteUseCase>(
       () => _i334.RevokeInviteUseCase(gh<_i75.InviteRepository>()),
     );
+    gh.factory<_i93.ListOrganizationUsersUseCase>(
+      () => _i93.ListOrganizationUsersUseCase(
+        gh<_i957.MembershipRepository>(),
+        gh<_i320.TeamRepository>(),
+      ),
+    );
     gh.factory<_i193.InviteFormBloc>(
       () => _i193.InviteFormBloc(
         createInvite: gh<_i461.CreateInviteUseCase>(),
         membershipRepository: gh<_i957.MembershipRepository>(),
         authRepository: gh<_i472.AuthRepository>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i244.UserListBloc>(
+      () => _i244.UserListBloc(
+        listOrganizationUsers: gh<_i93.ListOrganizationUsersUseCase>(),
       ),
     );
     gh.factory<_i0.InviteListBloc>(

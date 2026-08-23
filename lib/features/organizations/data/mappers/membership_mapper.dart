@@ -24,6 +24,8 @@ final class MembershipMapper {
       updatedAt: dto.updatedAt,
       updatedBy: dto.updatedBy,
       deletedAt: dto.deletedAt,
+      name: dto.name,
+      email: dto.email,
     );
   }
 
@@ -42,6 +44,8 @@ final class MembershipMapper {
       updatedAt: entity.updatedAt,
       updatedBy: entity.updatedBy,
       deletedAt: entity.deletedAt,
+      name: entity.name,
+      email: entity.email,
     );
   }
 

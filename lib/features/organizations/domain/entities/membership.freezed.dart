@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Membership {
 
- String get id; String get organizationId; String get userId; String get roleId; String get roleName; List<String> get teamIds; MembershipStatus get status; int get version; DateTime get createdAt; String get createdBy; DateTime get updatedAt; String get updatedBy; DateTime? get deletedAt;
+ String get id; String get organizationId; String get userId; String get roleId; String get roleName; List<String> get teamIds; MembershipStatus get status; int get version; DateTime get createdAt; String get createdBy; DateTime get updatedAt; String get updatedBy; DateTime? get deletedAt; String? get name; String? get email;
 /// Create a copy of Membership
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $MembershipCopyWith<Membership> get copyWith => _$MembershipCopyWithImpl<Members
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Membership&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.roleId, roleId) || other.roleId == roleId)&&(identical(other.roleName, roleName) || other.roleName == roleName)&&const DeepCollectionEquality().equals(other.teamIds, teamIds)&&(identical(other.status, status) || other.status == status)&&(identical(other.version, version) || other.version == version)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Membership&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.roleId, roleId) || other.roleId == roleId)&&(identical(other.roleName, roleName) || other.roleName == roleName)&&const DeepCollectionEquality().equals(other.teamIds, teamIds)&&(identical(other.status, status) || other.status == status)&&(identical(other.version, version) || other.version == version)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,organizationId,userId,roleId,roleName,const DeepCollectionEquality().hash(teamIds),status,version,createdAt,createdBy,updatedAt,updatedBy,deletedAt);
+int get hashCode => Object.hash(runtimeType,id,organizationId,userId,roleId,roleName,const DeepCollectionEquality().hash(teamIds),status,version,createdAt,createdBy,updatedAt,updatedBy,deletedAt,name,email);
 
 @override
 String toString() {
-  return 'Membership(id: $id, organizationId: $organizationId, userId: $userId, roleId: $roleId, roleName: $roleName, teamIds: $teamIds, status: $status, version: $version, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, deletedAt: $deletedAt)';
+  return 'Membership(id: $id, organizationId: $organizationId, userId: $userId, roleId: $roleId, roleName: $roleName, teamIds: $teamIds, status: $status, version: $version, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, deletedAt: $deletedAt, name: $name, email: $email)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $MembershipCopyWith<$Res>  {
   factory $MembershipCopyWith(Membership value, $Res Function(Membership) _then) = _$MembershipCopyWithImpl;
 @useResult
 $Res call({
- String id, String organizationId, String userId, String roleId, String roleName, List<String> teamIds, MembershipStatus status, int version, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, DateTime? deletedAt
+ String id, String organizationId, String userId, String roleId, String roleName, List<String> teamIds, MembershipStatus status, int version, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, DateTime? deletedAt, String? name, String? email
 });
 
 
@@ -62,7 +62,7 @@ class _$MembershipCopyWithImpl<$Res>
 
 /// Create a copy of Membership
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? organizationId = null,Object? userId = null,Object? roleId = null,Object? roleName = null,Object? teamIds = null,Object? status = null,Object? version = null,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? deletedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? organizationId = null,Object? userId = null,Object? roleId = null,Object? roleName = null,Object? teamIds = null,Object? status = null,Object? version = null,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? deletedAt = freezed,Object? name = freezed,Object? email = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
@@ -77,7 +77,9 @@ as DateTime,createdBy: null == createdBy ? _self.createdBy : createdBy // ignore
 as String,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedBy: null == updatedBy ? _self.updatedBy : updatedBy // ignore: cast_nullable_to_non_nullable
 as String,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String?,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -162,10 +164,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String organizationId,  String userId,  String roleId,  String roleName,  List<String> teamIds,  MembershipStatus status,  int version,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String organizationId,  String userId,  String roleId,  String roleName,  List<String> teamIds,  MembershipStatus status,  int version,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt,  String? name,  String? email)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Membership() when $default != null:
-return $default(_that.id,_that.organizationId,_that.userId,_that.roleId,_that.roleName,_that.teamIds,_that.status,_that.version,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
+return $default(_that.id,_that.organizationId,_that.userId,_that.roleId,_that.roleName,_that.teamIds,_that.status,_that.version,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt,_that.name,_that.email);case _:
   return orElse();
 
 }
@@ -183,10 +185,10 @@ return $default(_that.id,_that.organizationId,_that.userId,_that.roleId,_that.ro
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String organizationId,  String userId,  String roleId,  String roleName,  List<String> teamIds,  MembershipStatus status,  int version,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String organizationId,  String userId,  String roleId,  String roleName,  List<String> teamIds,  MembershipStatus status,  int version,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt,  String? name,  String? email)  $default,) {final _that = this;
 switch (_that) {
 case _Membership():
-return $default(_that.id,_that.organizationId,_that.userId,_that.roleId,_that.roleName,_that.teamIds,_that.status,_that.version,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
+return $default(_that.id,_that.organizationId,_that.userId,_that.roleId,_that.roleName,_that.teamIds,_that.status,_that.version,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt,_that.name,_that.email);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +205,10 @@ return $default(_that.id,_that.organizationId,_that.userId,_that.roleId,_that.ro
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String organizationId,  String userId,  String roleId,  String roleName,  List<String> teamIds,  MembershipStatus status,  int version,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String organizationId,  String userId,  String roleId,  String roleName,  List<String> teamIds,  MembershipStatus status,  int version,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt,  String? name,  String? email)?  $default,) {final _that = this;
 switch (_that) {
 case _Membership() when $default != null:
-return $default(_that.id,_that.organizationId,_that.userId,_that.roleId,_that.roleName,_that.teamIds,_that.status,_that.version,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
+return $default(_that.id,_that.organizationId,_that.userId,_that.roleId,_that.roleName,_that.teamIds,_that.status,_that.version,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt,_that.name,_that.email);case _:
   return null;
 
 }
@@ -218,7 +220,7 @@ return $default(_that.id,_that.organizationId,_that.userId,_that.roleId,_that.ro
 
 
 class _Membership implements Membership {
-  const _Membership({required this.id, required this.organizationId, required this.userId, required this.roleId, required this.roleName, final  List<String> teamIds = const <String>[], required this.status, required this.version, required this.createdAt, required this.createdBy, required this.updatedAt, required this.updatedBy, this.deletedAt}): _teamIds = teamIds;
+  const _Membership({required this.id, required this.organizationId, required this.userId, required this.roleId, required this.roleName, final  List<String> teamIds = const <String>[], required this.status, required this.version, required this.createdAt, required this.createdBy, required this.updatedAt, required this.updatedBy, this.deletedAt, this.name, this.email}): _teamIds = teamIds;
   
 
 @override final  String id;
@@ -240,6 +242,8 @@ class _Membership implements Membership {
 @override final  DateTime updatedAt;
 @override final  String updatedBy;
 @override final  DateTime? deletedAt;
+@override final  String? name;
+@override final  String? email;
 
 /// Create a copy of Membership
 /// with the given fields replaced by the non-null parameter values.
@@ -251,16 +255,16 @@ _$MembershipCopyWith<_Membership> get copyWith => __$MembershipCopyWithImpl<_Mem
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Membership&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.roleId, roleId) || other.roleId == roleId)&&(identical(other.roleName, roleName) || other.roleName == roleName)&&const DeepCollectionEquality().equals(other._teamIds, _teamIds)&&(identical(other.status, status) || other.status == status)&&(identical(other.version, version) || other.version == version)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Membership&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.userId, userId) || other.userId == userId)&&(identical(other.roleId, roleId) || other.roleId == roleId)&&(identical(other.roleName, roleName) || other.roleName == roleName)&&const DeepCollectionEquality().equals(other._teamIds, _teamIds)&&(identical(other.status, status) || other.status == status)&&(identical(other.version, version) || other.version == version)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt)&&(identical(other.name, name) || other.name == name)&&(identical(other.email, email) || other.email == email));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,organizationId,userId,roleId,roleName,const DeepCollectionEquality().hash(_teamIds),status,version,createdAt,createdBy,updatedAt,updatedBy,deletedAt);
+int get hashCode => Object.hash(runtimeType,id,organizationId,userId,roleId,roleName,const DeepCollectionEquality().hash(_teamIds),status,version,createdAt,createdBy,updatedAt,updatedBy,deletedAt,name,email);
 
 @override
 String toString() {
-  return 'Membership(id: $id, organizationId: $organizationId, userId: $userId, roleId: $roleId, roleName: $roleName, teamIds: $teamIds, status: $status, version: $version, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, deletedAt: $deletedAt)';
+  return 'Membership(id: $id, organizationId: $organizationId, userId: $userId, roleId: $roleId, roleName: $roleName, teamIds: $teamIds, status: $status, version: $version, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, deletedAt: $deletedAt, name: $name, email: $email)';
 }
 
 
@@ -271,7 +275,7 @@ abstract mixin class _$MembershipCopyWith<$Res> implements $MembershipCopyWith<$
   factory _$MembershipCopyWith(_Membership value, $Res Function(_Membership) _then) = __$MembershipCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String organizationId, String userId, String roleId, String roleName, List<String> teamIds, MembershipStatus status, int version, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, DateTime? deletedAt
+ String id, String organizationId, String userId, String roleId, String roleName, List<String> teamIds, MembershipStatus status, int version, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, DateTime? deletedAt, String? name, String? email
 });
 
 
@@ -288,7 +292,7 @@ class __$MembershipCopyWithImpl<$Res>
 
 /// Create a copy of Membership
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? organizationId = null,Object? userId = null,Object? roleId = null,Object? roleName = null,Object? teamIds = null,Object? status = null,Object? version = null,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? deletedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? organizationId = null,Object? userId = null,Object? roleId = null,Object? roleName = null,Object? teamIds = null,Object? status = null,Object? version = null,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? deletedAt = freezed,Object? name = freezed,Object? email = freezed,}) {
   return _then(_Membership(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
@@ -303,7 +307,9 @@ as DateTime,createdBy: null == createdBy ? _self.createdBy : createdBy // ignore
 as String,updatedAt: null == updatedAt ? _self.updatedAt : updatedAt // ignore: cast_nullable_to_non_nullable
 as DateTime,updatedBy: null == updatedBy ? _self.updatedBy : updatedBy // ignore: cast_nullable_to_non_nullable
 as String,deletedAt: freezed == deletedAt ? _self.deletedAt : deletedAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,name: freezed == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String?,email: freezed == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
