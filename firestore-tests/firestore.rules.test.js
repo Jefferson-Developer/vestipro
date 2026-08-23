@@ -264,21 +264,43 @@ describe('organizations/{organizationId}', () => {
     );
   });
 
-  test('bootstrap: um novo usuário autenticado pode criar sua própria Organization', async () => {
-    const db = testEnv.authenticatedContext('new-founder').firestore();
-    await assertSucceeds(
-      db.doc('organizations/org-new').set(
-        organizationDoc({ createdBy: 'new-founder', updatedBy: 'new-founder' }),
-      ),
-    );
-  });
+  test(
+    'organizations não pode mais ser criada diretamente pelo cliente, nem pelo próprio usuário ' +
+      'autenticado como createdBy — a criação é exclusiva da Cloud Function createOrganization (TASK-037)',
+    async () => {
+      const db = testEnv.authenticatedContext('new-founder').firestore();
+      await assertFails(
+        db.doc('organizations/org-new').set(
+          organizationDoc({ createdBy: 'new-founder', updatedBy: 'new-founder' }),
+        ),
+      );
+    },
+  );
 
-  test('bootstrap: não é possível criar uma Organization em nome de outro usuário', async () => {
+  test('organizations continua negando criação em nome de outro usuário (createdBy forjado)', async () => {
     const db = testEnv.authenticatedContext('attacker').firestore();
     await assertFails(
       db.doc('organizations/org-new').set(
         organizationDoc({ createdBy: 'victim', updatedBy: 'attacker' }),
       ),
+    );
+  });
+});
+
+describe('organizationOwners/{userId}  (TASK-037)', () => {
+  test('cliente nunca lê o próprio marcador de idempotência', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().doc('organizationOwners/owner-a').set({ organizationId: ORG_A });
+    });
+
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc('organizationOwners/owner-a').get());
+  });
+
+  test('cliente nunca escreve o próprio marcador de idempotência', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc('organizationOwners/owner-a').set({ organizationId: ORG_A }),
     );
   });
 });
@@ -372,37 +394,37 @@ describe('organizations/{organizationId}/roles/{roleId}', () => {
     );
   });
 
-  test('bootstrap: criador da organization semeia os 7 system roles antes de ter Membership', async () => {
-    const db = testEnv.authenticatedContext('new-founder').firestore();
-    await testEnv.withSecurityRulesDisabled(async (context) => {
-      await context
-        .firestore()
-        .doc('organizations/org-new')
-        .set(organizationDoc({ createdBy: 'new-founder', updatedBy: 'new-founder' }));
-    });
+  test(
+    'system role (OWNER) não pode mais ser semeado diretamente pelo cliente, mesmo pelo criador ' +
+      'da organization ainda sem Membership — isso é exclusivo da Cloud Function createOrganization (TASK-037)',
+    async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await context
+          .firestore()
+          .doc('organizations/org-new')
+          .set(organizationDoc({ createdBy: 'new-founder', updatedBy: 'new-founder' }));
+      });
 
-    await assertSucceeds(
-      db.doc('organizations/org-new/roles/OWNER').set(
-        roleDoc({ organizationId: 'org-new', name: 'OWNER', isSystemRole: true }),
-      ),
-    );
-  });
+      const db = testEnv.authenticatedContext('new-founder').firestore();
+      await assertFails(
+        db.doc('organizations/org-new/roles/OWNER').set(
+          roleDoc({ organizationId: 'org-new', name: 'OWNER', isSystemRole: true }),
+        ),
+      );
+    },
+  );
 
-  test('bootstrap de system role é negado para quem não é o criador da organization', async () => {
-    await testEnv.withSecurityRulesDisabled(async (context) => {
-      await context
-        .firestore()
-        .doc('organizations/org-new')
-        .set(organizationDoc({ createdBy: 'new-founder', updatedBy: 'new-founder' }));
-    });
-
-    const db = testEnv.authenticatedContext('attacker').firestore();
-    await assertFails(
-      db.doc('organizations/org-new/roles/OWNER').set(
-        roleDoc({ organizationId: 'org-new', name: 'OWNER', isSystemRole: true }),
-      ),
-    );
-  });
+  test(
+    'mesmo OWNER com role.manage não consegue criar um role marcado isSystemRole: true pelo caminho normal',
+    async () => {
+      const db = testEnv.authenticatedContext('owner-a').firestore();
+      await assertFails(
+        db.doc(`organizations/${ORG_A}/roles/FAKE_SYSTEM`).set(
+          roleDoc({ organizationId: ORG_A, name: 'FAKE_SYSTEM', isSystemRole: true }),
+        ),
+      );
+    },
+  );
 });
 
 describe('organizations/{organizationId}/members/{userId}  (Membership)', () => {
@@ -458,35 +480,25 @@ describe('organizations/{organizationId}/members/{userId}  (Membership)', () => 
     );
   });
 
-  test('bootstrap: criador da organization concede a si mesmo o Membership OWNER', async () => {
-    await testEnv.withSecurityRulesDisabled(async (context) => {
-      const db = context.firestore();
-      await db.doc('organizations/org-new').set(organizationDoc({ createdBy: 'new-founder', updatedBy: 'new-founder' }));
-      await db.doc('organizations/org-new/roles/OWNER').set(roleDoc({ organizationId: 'org-new', name: 'OWNER', isSystemRole: true }));
-    });
+  test(
+    'Membership OWNER não pode mais ser autoconcedida diretamente pelo cliente, mesmo pelo ' +
+      'criador da organization ainda sem Membership — isso é exclusivo da Cloud Function ' +
+      'createOrganization (TASK-037)',
+    async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+        await db.doc('organizations/org-new').set(organizationDoc({ createdBy: 'new-founder', updatedBy: 'new-founder' }));
+        await db.doc('organizations/org-new/roles/OWNER').set(roleDoc({ organizationId: 'org-new', name: 'OWNER', isSystemRole: true }));
+      });
 
-    const db = testEnv.authenticatedContext('new-founder').firestore();
-    await assertSucceeds(
-      db.doc('organizations/org-new/members/new-founder').set(
-        membershipDoc({ organizationId: 'org-new', userId: 'new-founder', roleId: 'OWNER', roleName: 'OWNER' }),
-      ),
-    );
-  });
-
-  test('bootstrap de Membership OWNER é negado para quem não é o criador da organization', async () => {
-    await testEnv.withSecurityRulesDisabled(async (context) => {
-      const db = context.firestore();
-      await db.doc('organizations/org-new').set(organizationDoc({ createdBy: 'new-founder', updatedBy: 'new-founder' }));
-      await db.doc('organizations/org-new/roles/OWNER').set(roleDoc({ organizationId: 'org-new', name: 'OWNER', isSystemRole: true }));
-    });
-
-    const db = testEnv.authenticatedContext('attacker').firestore();
-    await assertFails(
-      db.doc('organizations/org-new/members/attacker').set(
-        membershipDoc({ organizationId: 'org-new', userId: 'attacker', roleId: 'OWNER', roleName: 'OWNER' }),
-      ),
-    );
-  });
+      const db = testEnv.authenticatedContext('new-founder').firestore();
+      await assertFails(
+        db.doc('organizations/org-new/members/new-founder').set(
+          membershipDoc({ organizationId: 'org-new', userId: 'new-founder', roleId: 'OWNER', roleName: 'OWNER' }),
+        ),
+      );
+    },
+  );
 
   test('Membership inativo perde acesso de leitura à organization', async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {

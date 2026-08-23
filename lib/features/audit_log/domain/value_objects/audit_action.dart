@@ -4,11 +4,20 @@
 /// (`role.changed`, `user.deactivated`, ...) of its own.
 ///
 /// Every value here maps 1:1 to one of the sensitive administrative
-/// operations already modeled by `lib/features/organizations/` (role
-/// change, user/company/branch/team removal, organization settings
-/// change). Adding a new auditable action means adding a case here first,
-/// never inlining a string at the call site.
+/// operations already modeled by `lib/features/organizations/` (Organization
+/// creation, role change, user/company/branch/team removal, organization
+/// settings change). Adding a new auditable action means adding a case here
+/// first, never inlining a string at the call site.
+///
+/// [organizationCreated] is the one value never written by any Dart code in
+/// this repository: it is recorded server-side by the `createOrganization`
+/// Cloud Function (TASK-037,
+/// `functions/src/organizations/create-organization.ts`), using the exact
+/// same `organization.created` string as [AuditActionCode.code] below —
+/// kept here so `AuditLogEntryMapper`/`ListAuditLogEntriesUseCase` can parse
+/// those entries back into an [AuditAction] like any other.
 enum AuditAction {
+  organizationCreated,
   roleChanged,
   userInvited,
   userDeactivated,
@@ -28,6 +37,7 @@ extension AuditActionCode on AuditAction {
   /// docs and the Firestore Security Rules comment that lists them.
   String get code {
     return switch (this) {
+      AuditAction.organizationCreated => 'organization.created',
       AuditAction.roleChanged => 'role.changed',
       AuditAction.userInvited => 'user.invited',
       AuditAction.userDeactivated => 'user.deactivated',

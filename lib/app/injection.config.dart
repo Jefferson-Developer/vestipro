@@ -35,6 +35,7 @@ import '../core/feature_flags/feature_flag_service.dart' as _i972;
 import '../core/feature_flags/firebase_feature_flag_service.dart' as _i845;
 import '../core/functions/app_client_metadata.dart' as _i465;
 import '../core/functions/cloud_functions_service.dart' as _i147;
+import '../core/functions/functions.dart' as _i340;
 import '../core/performance/firebase_performance_monitor.dart' as _i387;
 import '../core/performance/performance_monitor.dart' as _i1008;
 import '../core/permissions/permission_service.dart' as _i315;
@@ -338,12 +339,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i904.StorageDataSource>(
       () => _i833.FirebaseStorageDataSource(gh<_i457.FirebaseStorage>()),
     );
+    gh.lazySingleton<_i268.OrganizationDataSource>(
+      () => _i455.FirestoreOrganizationDataSource(
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i923.RoleDataSource>(
       () => _i892.FirestoreRoleDataSource(gh<_i974.FirebaseFirestore>()),
-    );
-    gh.lazySingleton<_i268.OrganizationDataSource>(
-      () =>
-          _i455.FirestoreOrganizationDataSource(gh<_i974.FirebaseFirestore>()),
     );
     gh.lazySingleton<_i228.TeamDataSource>(
       () => _i23.FirestoreTeamDataSource(gh<_i974.FirebaseFirestore>()),

@@ -22,15 +22,18 @@ rules_version = '2';
 // conhecidos"). Os códigos de capability usados aqui são exatamente os de
 // `lib/core/permissions/capability.dart` (`CapabilityCode.code`).
 //
-// Bootstrap de tenant: `CreateOrganizationUseCase` -> `EnsureSystemRolesUseCase`
-// -> `AssignRoleToUserUseCase` (papel OWNER) rodam hoje diretamente do
-// cliente, em sequência, sem Cloud Function dedicada (isso é TASK-037,
-// "onboarding", fora do escopo desta task). Nesse instante o usuário criador
-// ainda não tem Membership — por isso existem 3 janelas de bootstrap
-// deliberadas e estreitas abaixo (criação da própria Organization, dos 7
-// system roles fixos, e da própria Membership OWNER), todas amarradas ao
-// campo imutável `Organization.createdBy`, nunca a um `organizationId` cru
-// vindo do payload.
+// Bootstrap de tenant (histórico): até a TASK-037, `CreateOrganizationUseCase`
+// -> `EnsureSystemRolesUseCase` -> `AssignRoleToUserUseCase` (papel OWNER)
+// rodavam diretamente do cliente, em sequência, sem Cloud Function dedicada —
+// e existiam aqui 3 janelas de bootstrap deliberadas e estreitas para isso
+// (criação da própria Organization, dos 7 system roles fixos, e da própria
+// Membership OWNER). A TASK-037 substituiu esse fluxo pela Cloud Function
+// callable `createOrganization` (`functions/src/organizations/create-organization.ts`),
+// que cria a Organization, semeia os 7 system roles e concede a Membership
+// OWNER numa única transação server-side com o Admin SDK — que ignora estas
+// regras por definição. As 3 janelas de bootstrap foram removidas: nenhuma
+// dessas três escritas é mais permitida a partir do cliente, nem mesmo para
+// quem seria o criador legítimo.
 service cloud.firestore {
   match /databases/{database}/documents {
 
@@ -89,16 +92,6 @@ service cloud.firestore {
         && roleHasCapability(currentRoleName(organizationId), capabilityCode);
     }
 
-    // Usado só nas 3 janelas de bootstrap: confirma que quem está
-    // escrevendo é literalmente quem criou aquela Organization
-    // (`Organization.createdBy`, imutável após a criação — ver regra de
-    // `update` abaixo), nunca um `organizationId` alegado no payload.
-    function isOrganizationCreator(organizationId) {
-      return isSignedIn()
-        && exists(/databases/$(database)/documents/organizations/$(organizationId))
-        && get(/databases/$(database)/documents/organizations/$(organizationId)).data.createdBy == request.auth.uid;
-    }
-
     function unchanged(field) {
       return request.resource.data[field] == resource.data[field];
     }
@@ -137,30 +130,36 @@ service cloud.firestore {
     }
 
     // ---------------------------------------------------------------------
+    // organizationOwners/{userId}  (TASK-037)
+    // ---------------------------------------------------------------------
+    //
+    // Idempotency marker written exclusively by the `createOrganization`
+    // Cloud Function (Admin SDK) — tracks which Organization, if any, a
+    // given uid created through that flow, so a retried call never creates
+    // a second one for the same owner. No client operation ever needs to
+    // read or write this collection directly; explicit deny-all instead of
+    // relying on the implicit "no matching rule" default, so the intent is
+    // unambiguous to anyone reading this file.
+
+    match /organizationOwners/{userId} {
+      allow read, write: if false;
+    }
+
+    // ---------------------------------------------------------------------
     // organizations/{organizationId}
     // ---------------------------------------------------------------------
 
     match /organizations/{organizationId} {
-      // `resource == null` cobre o `get()` de idempotência feito dentro da
-      // transaction de `CreateOrganizationUseCase.create` antes do
-      // documento existir — inofensivo (não expõe nenhum dado real).
-      allow get: if isSignedIn()
-        && (resource == null
-            || resource.data.createdBy == request.auth.uid
-            || isActiveMember(organizationId));
+      allow get: if isActiveMember(organizationId);
 
       // Nunca listar tenants por uma query aberta: todo acesso deve
       // conhecer o organizationId de antemão (via path).
       allow list: if false;
 
-      allow create: if isSignedIn()
-        && request.resource.data.createdBy == request.auth.uid
-        && request.resource.data.updatedBy == request.auth.uid
-        && request.resource.data.status == 'active'
-        && request.resource.data.name is string
-        && request.resource.data.name.size() > 0
-        && request.resource.data.slug is string
-        && request.resource.data.slug.size() > 0;
+      // Nunca criada pelo cliente: exclusivamente pela Cloud Function
+      // `createOrganization` (Admin SDK, TASK-037), que também semeia os 7
+      // system roles e a Membership OWNER na mesma transação.
+      allow create: if false;
 
       allow update: if hasCapability(organizationId, 'organization.settingsManage')
         && unchanged('name')
@@ -211,27 +210,14 @@ service cloud.firestore {
       match /roles/{roleId} {
         allow read: if isActiveMember(organizationId);
 
+        // Os 7 system roles fixos só nascem dentro da transação server-side
+        // de `createOrganization` (Admin SDK, TASK-037) — nunca pelo
+        // cliente, nem mesmo pelo criador da Organization. O único `create`
+        // que o cliente pode fazer aqui é um role custom, por quem já tem a
+        // capability (roles de sistema nunca nascem por este caminho).
         allow create: if request.resource.data.organizationId == organizationId
-          && (
-            // Bootstrap: EnsureSystemRolesUseCase semeia os 7 system roles
-            // fixos, chamado antes de existir qualquer Membership.
-            (
-              !isActiveMember(organizationId)
-              && request.resource.data.isSystemRole == true
-              && roleId == request.resource.data.name
-              && request.resource.data.name in [
-                   'OWNER', 'ADMIN', 'SALES_MANAGER', 'SALES_REP',
-                   'SALES_ASSISTANT', 'FINANCE', 'READ_ONLY'
-                 ]
-              && isOrganizationCreator(organizationId)
-            )
-            // Caminho normal: role custom criado por quem já tem a
-            // capability (roles de sistema nunca nascem por este caminho).
-            || (
-              hasCapability(organizationId, 'role.manage')
-              && request.resource.data.isSystemRole == false
-            )
-          );
+          && hasCapability(organizationId, 'role.manage')
+          && request.resource.data.isSystemRole == false;
 
         // Roles de sistema (isSystemRole == true) nunca podem ser
         // renomeados/alterados nem excluídos por regra — espelha
@@ -268,22 +254,14 @@ service cloud.firestore {
       match /members/{userId} {
         allow read: if isActiveMember(organizationId);
 
+        // A primeira Membership (OWNER) só nasce dentro da transação
+        // server-side de `createOrganization` (Admin SDK, TASK-037) — nunca
+        // pelo cliente, nem mesmo pelo próprio criador da Organization. O
+        // único `create` que o cliente pode fazer aqui é um convite feito
+        // por quem já tem a capability.
         allow create: if request.resource.data.organizationId == organizationId
           && request.resource.data.userId == userId
-          && (
-            // Bootstrap: o criador da Organization concede a si mesmo o
-            // Membership OWNER, depois dos system roles já existirem.
-            (
-              !isActiveMember(organizationId)
-              && userId == request.auth.uid
-              && request.resource.data.roleId == 'OWNER'
-              && request.resource.data.roleName == 'OWNER'
-              && request.resource.data.status == 'active'
-              && isOrganizationCreator(organizationId)
-            )
-            // Caminho normal: convite feito por quem já tem a capability.
-            || hasCapability(organizationId, 'user.invite')
-          );
+          && hasCapability(organizationId, 'user.invite');
 
         allow update: if request.resource.data.organizationId == organizationId
           && request.resource.data.userId == userId

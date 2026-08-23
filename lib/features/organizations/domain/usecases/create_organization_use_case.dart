@@ -6,13 +6,18 @@ import '../entities/organization.dart';
 import '../repositories/organization_repository.dart';
 import '../value_objects/organization_settings.dart';
 
-/// Creates the Organization tenant root (`tasks.md`, section 3.1).
+/// Creates the Organization tenant root for the onboarding flow (`tasks.md`,
+/// section 3.1) — the first Organization of [createdBy], who becomes its
+/// `OWNER` (TASK-037).
 ///
-/// [id] must be generated once by the caller (e.g. the onboarding flow in
-/// TASK-037) and kept stable across retries: [OrganizationRepository.create]
-/// relies on that stability to stay idempotent instead of creating
-/// duplicate tenants when a create request is retried after a network
-/// failure.
+/// [id] should be generated once by the caller and kept stable across
+/// retries, the same way any other idempotency key is used in this
+/// codebase, but [OrganizationRepository.create] does not actually depend
+/// on that: it calls the `createOrganization` Cloud Function, whose own
+/// idempotency is tracked server-side per [createdBy] (one Organization per
+/// creator), not per [id] — so even a retry that generates a *different*
+/// [id] after losing local state still cannot create a second Organization
+/// for the same user.
 @injectable
 final class CreateOrganizationUseCase {
   const CreateOrganizationUseCase(this._repository);

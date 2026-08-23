@@ -12,9 +12,19 @@ import '../value_objects/system_role_name.dart';
 ///
 /// Idempotent: only creates the [SystemRoleName]s missing from
 /// [RoleRepository.listByOrganization] — calling it again for the same
-/// Organization never duplicates nor renames an existing role. Meant to be
-/// invoked once, right after `Organization.create` (TASK-037's onboarding
-/// flow), without duplicating this seeding logic there.
+/// Organization never duplicates nor renames an existing role.
+///
+/// Superseded for the onboarding flow by TASK-037: seeding the first
+/// Organization's system roles now happens server-side, inside the
+/// `createOrganization` Cloud Function's own transaction
+/// (`functions/src/organizations/create-organization.ts`), which the client
+/// cannot bypass — `firestore.rules` denies a system-role `create` from the
+/// client entirely (no more bootstrap window), so calling this use case
+/// from the client for that purpose would now simply be rejected. It
+/// remains a valid, tested building block for any future *non-onboarding*
+/// path that needs to (re)seed system roles for an Organization created by
+/// other means (e.g. an internal admin tool running with elevated
+/// privileges), but it has no live caller in the app today.
 @injectable
 final class EnsureSystemRolesUseCase {
   const EnsureSystemRolesUseCase(this._repository);

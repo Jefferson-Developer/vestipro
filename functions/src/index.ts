@@ -5,6 +5,7 @@ import { initializeApp } from 'firebase-admin/app';
 initializeApp();
 
 export { healthCheck } from './health/health-check';
+export { createOrganization } from './organizations/create-organization';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

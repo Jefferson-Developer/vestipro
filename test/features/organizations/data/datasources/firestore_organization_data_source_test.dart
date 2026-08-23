@@ -1,7 +1,10 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vestipro/core/errors/errors.dart';
+import 'package:vestipro/core/functions/functions.dart';
 import 'package:vestipro/features/organizations/data/datasources/firestore_organization_data_source.dart';
 import 'package:vestipro/features/organizations/data/dtos/organization_dto.dart';
 import 'package:vestipro/features/organizations/data/dtos/organization_settings_dto.dart';
@@ -20,22 +23,43 @@ class _MockDocumentReference extends Mock
 class _MockDocumentSnapshot extends Mock
     implements DocumentSnapshot<Map<String, dynamic>> {}
 
-class _MockTransaction extends Mock implements Transaction {}
+class _MockFirebaseFunctions extends Mock implements FirebaseFunctions {}
 
-Future<T> _runFakeTransaction<T>(
-  Transaction transaction,
-  Invocation invocation,
-) {
-  final handler =
-      invocation.positionalArguments.first as Future<T> Function(Transaction);
-  return handler(transaction);
+class _MockHttpsCallable extends Mock implements HttpsCallable {}
+
+class _MockHttpsCallableResult<T> extends Mock
+    implements HttpsCallableResult<T> {}
+
+class _MockFirebaseAuth extends Mock implements FirebaseAuth {}
+
+class _MockUser extends Mock implements User {}
+
+class _MockAppClientMetadataProvider extends Mock
+    implements AppClientMetadataProvider {}
+
+/// [FirebaseFunctionsException]'s constructor is `@protected` — only a
+/// subclass may call it, same trick already used by
+/// `test/core/functions/cloud_functions_service_test.dart`.
+class _FakeFirebaseFunctionsException extends FirebaseFunctionsException {
+  _FakeFirebaseFunctionsException(String code)
+    : super(message: 'Simulated "$code" for tests.', code: code);
 }
 
 void main() {
+  setUpAll(() {
+    registerFallbackValue(<String, dynamic>{});
+    registerFallbackValue(HttpsCallableOptions());
+  });
+
   group('FirestoreOrganizationDataSource', () {
     late _MockFirebaseFirestore firestore;
     late _MockCollectionReference collection;
     late _MockDocumentReference docRef;
+    late _MockFirebaseFunctions functions;
+    late _MockHttpsCallable callable;
+    late _MockFirebaseAuth auth;
+    late _MockAppClientMetadataProvider metadataProvider;
+    late CloudFunctionsService cloudFunctionsService;
     late FirestoreOrganizationDataSource dataSource;
 
     final settingsJson = const OrganizationSettingsDto(
@@ -59,11 +83,35 @@ void main() {
       firestore = _MockFirebaseFirestore();
       collection = _MockCollectionReference();
       docRef = _MockDocumentReference();
+      functions = _MockFirebaseFunctions();
+      callable = _MockHttpsCallable();
+      auth = _MockFirebaseAuth();
+      metadataProvider = _MockAppClientMetadataProvider();
 
       when(() => firestore.collection('organizations')).thenReturn(collection);
       when(() => collection.doc(any())).thenReturn(docRef);
+      when(
+        () => functions.httpsCallable(any(), options: any(named: 'options')),
+      ).thenReturn(callable);
+      when(() => auth.currentUser).thenReturn(_MockUser());
+      when(() => metadataProvider.resolve()).thenAnswer(
+        (_) async => const AppClientMetadata(
+          appVersion: '1.0.0',
+          buildNumber: '1',
+          platform: 'test',
+        ),
+      );
 
-      dataSource = FirestoreOrganizationDataSource(firestore);
+      cloudFunctionsService = CloudFunctionsService.withDependencies(
+        functions,
+        auth,
+        metadataProvider,
+      );
+
+      dataSource = FirestoreOrganizationDataSource(
+        firestore,
+        cloudFunctionsService,
+      );
     });
 
     group('create', () {
@@ -83,60 +131,136 @@ void main() {
         updatedBy: 'user-1',
       );
 
-      test('writes the document when none exists yet', () async {
-        final transaction = _MockTransaction();
-        final snapshot = _MockDocumentSnapshot();
+      Map<String, dynamic> callableResponse({bool alreadyExisted = false}) {
+        return <String, dynamic>{
+          'organization': <String, dynamic>{
+            'id': 'org-1',
+            'name': 'Grupo Fashion XPTO',
+            'slug': 'grupo-fashion-xpto',
+            'settings': <String, dynamic>{
+              'currency': 'BRL',
+              'country': 'BR',
+              'defaultLanguage': 'pt-BR',
+            },
+            'status': 'active',
+            'createdAt': '2026-01-01T00:00:00.000Z',
+            'createdBy': 'user-1',
+            'updatedAt': '2026-01-01T00:00:00.000Z',
+            'updatedBy': 'user-1',
+          },
+          'alreadyExisted': alreadyExisted,
+          'correlationId': 'correlation-1',
+        };
+      }
 
-        when(() => snapshot.exists).thenReturn(false);
-        when(() => snapshot.data()).thenReturn(null);
+      test('calls the createOrganization callable with the DTO fields and '
+          'parses its response into an OrganizationDto', () async {
+        final result = _MockHttpsCallableResult<Map<String, dynamic>>();
+        when(() => result.data).thenReturn(callableResponse());
         when(
-          () => transaction.get<Map<String, dynamic>>(docRef),
-        ).thenAnswer((_) async => snapshot);
-        when(
-          () => transaction.set<Map<String, dynamic>>(docRef, any()),
-        ).thenReturn(transaction);
-        when(() => firestore.runTransaction<OrganizationDto>(any())).thenAnswer(
-          (invocation) => _runFakeTransaction(transaction, invocation),
+          () => callable.call<Map<String, dynamic>>(any<dynamic>()),
+        ).thenAnswer((_) async => result);
+
+        final createdDto = await dataSource.create(newDto);
+
+        expect(createdDto.id, 'org-1');
+        expect(createdDto.name, 'Grupo Fashion XPTO');
+        expect(createdDto.settings.currency, 'BRL');
+        expect(
+          createdDto.createdAt,
+          DateTime.parse('2026-01-01T00:00:00.000Z'),
         );
 
-        final result = await dataSource.create(newDto);
-
-        expect(result.id, 'org-1');
-        verify(
-          () => transaction.set<Map<String, dynamic>>(docRef, newDto.toJson()),
-        ).called(1);
+        final captured =
+            verify(
+                  () => callable.call<Map<String, dynamic>>(
+                    captureAny<dynamic>(),
+                  ),
+                ).captured.single
+                as Map<String, dynamic>;
+        expect(captured['organizationId'], 'org-1');
+        expect(captured['name'], 'Grupo Fashion XPTO');
+        expect(captured['slug'], 'grupo-fashion-xpto');
+        expect(captured['currency'], 'BRL');
+        expect(captured['country'], 'BR');
+        expect(captured['defaultLanguage'], 'pt-BR');
       });
 
-      test('is idempotent: when a retry finds the document already created, '
-          'it returns what is there instead of overwriting it', () async {
-        final transaction = _MockTransaction();
-        final snapshot = _MockDocumentSnapshot();
-
-        when(() => snapshot.exists).thenReturn(true);
-        when(() => snapshot.data()).thenReturn(existingDocumentData);
-        when(() => snapshot.id).thenReturn('org-1');
+      test('is idempotent: returns whatever createOrganization reports even '
+          'when alreadyExisted is true', () async {
+        final result = _MockHttpsCallableResult<Map<String, dynamic>>();
         when(
-          () => transaction.get<Map<String, dynamic>>(docRef),
-        ).thenAnswer((_) async => snapshot);
-        when(() => firestore.runTransaction<OrganizationDto>(any())).thenAnswer(
-          (invocation) => _runFakeTransaction(transaction, invocation),
-        );
+          () => result.data,
+        ).thenReturn(callableResponse(alreadyExisted: true));
+        when(
+          () => callable.call<Map<String, dynamic>>(any<dynamic>()),
+        ).thenAnswer((_) async => result);
 
-        final result = await dataSource.create(newDto);
+        final createdDto = await dataSource.create(newDto);
 
-        expect(result.id, 'org-1');
-        expect(result.name, 'Grupo Fashion XPTO');
-        verifyNever(() => transaction.set<Map<String, dynamic>>(docRef, any()));
+        expect(createdDto.id, 'org-1');
       });
 
-      test('maps a FirebaseException to an AppException', () async {
-        when(() => firestore.runTransaction<OrganizationDto>(any())).thenThrow(
-          FirebaseException(plugin: 'cloud_firestore', code: 'unavailable'),
-        );
+      test('throws UnauthorizedException without calling the function when '
+          'there is no signed-in user', () async {
+        when(() => auth.currentUser).thenReturn(null);
 
         await expectLater(
           dataSource.create(newDto),
-          throwsA(isA<NetworkException>()),
+          throwsA(isA<UnauthorizedException>()),
+        );
+        verifyNever(
+          () => functions.httpsCallable(any(), options: any(named: 'options')),
+        );
+      });
+
+      test(
+        'propagates the AppException already mapped from a '
+        'FirebaseFunctionsException by the underlying CloudFunctionsService',
+        () async {
+          when(
+            () => callable.call<Map<String, dynamic>>(any<dynamic>()),
+          ).thenThrow(_FakeFirebaseFunctionsException('already-exists'));
+
+          await expectLater(
+            dataSource.create(newDto),
+            throwsA(isA<ConflictException>()),
+          );
+        },
+      );
+
+      test('throws ServerException when the callable response is missing the '
+          'organization field', () async {
+        final result = _MockHttpsCallableResult<Map<String, dynamic>>();
+        when(
+          () => result.data,
+        ).thenReturn(<String, dynamic>{'alreadyExisted': false});
+        when(
+          () => callable.call<Map<String, dynamic>>(any<dynamic>()),
+        ).thenAnswer((_) async => result);
+
+        await expectLater(
+          dataSource.create(newDto),
+          throwsA(isA<ServerException>()),
+        );
+      });
+
+      test('throws ServerException when a required organization field has an '
+          'unexpected type', () async {
+        final malformedResponse = callableResponse();
+        (malformedResponse['organization']
+                as Map<String, dynamic>)['createdAt'] =
+            1234;
+
+        final result = _MockHttpsCallableResult<Map<String, dynamic>>();
+        when(() => result.data).thenReturn(malformedResponse);
+        when(
+          () => callable.call<Map<String, dynamic>>(any<dynamic>()),
+        ).thenAnswer((_) async => result);
+
+        await expectLater(
+          dataSource.create(newDto),
+          throwsA(isA<ServerException>()),
         );
       });
     });
