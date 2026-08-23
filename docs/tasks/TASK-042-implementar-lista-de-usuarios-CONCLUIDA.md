@@ -243,15 +243,15 @@ Firestore Rules, todos passando).
 
 ## Commit
 
-Ver hash abaixo.
+`feat(users): implementar lista administrativa de usuarios da organizacao`
 
 ## Push
 
-Autorizado e executado nesta rodada.
+Autorizado e executado nesta rodada (`git push origin main`).
 
 ## Hash do commit
 
-Registrado após o `git commit` (ver resposta final da task).
+`1c5eabd`
 
 ## Branch
 
