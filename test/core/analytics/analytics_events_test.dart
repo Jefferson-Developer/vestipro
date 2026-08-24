@@ -20,6 +20,7 @@ void main() {
           'order_submitted',
           'order_sync_failed',
           'crm_activity_created',
+          'crm_followup_completed',
           'insight_opened',
           'insight_action_clicked',
           'report_exported',

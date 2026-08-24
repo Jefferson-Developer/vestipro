@@ -89,18 +89,33 @@ import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
 import '../features/crm/crm.dart' as _i205;
 import '../features/crm/data/mappers/crm_activity_mapper.dart' as _i203;
+import '../features/crm/data/mappers/crm_task_mapper.dart' as _i519;
 import '../features/crm/data/repositories/shared_preferences_crm_activity_repository.dart'
     as _i699;
+import '../features/crm/data/repositories/shared_preferences_crm_task_repository.dart'
+    as _i150;
 import '../features/crm/domain/repositories/crm_activity_repository.dart'
     as _i558;
+import '../features/crm/domain/repositories/crm_task_repository.dart' as _i588;
+import '../features/crm/domain/usecases/complete_crm_task_use_case.dart'
+    as _i96;
+import '../features/crm/domain/usecases/create_crm_task_use_case.dart'
+    as _i1039;
 import '../features/crm/domain/usecases/list_crm_activities_for_customer_use_case.dart'
     as _i489;
 import '../features/crm/domain/usecases/list_crm_activities_for_lead_use_case.dart'
     as _i554;
 import '../features/crm/domain/usecases/list_crm_activities_for_opportunity_use_case.dart'
     as _i286;
+import '../features/crm/domain/usecases/list_pending_tasks_for_today_use_case.dart'
+    as _i224;
+import '../features/crm/domain/usecases/list_pending_tasks_for_week_use_case.dart'
+    as _i874;
 import '../features/crm/domain/usecases/register_crm_activity_use_case.dart'
     as _i924;
+import '../features/crm/domain/usecases/reschedule_crm_task_use_case.dart'
+    as _i711;
+import '../features/crm/presentation/bloc/crm_task_list_bloc.dart' as _i634;
 import '../features/customers/data/datasources/customer_form_draft_data_source.dart'
     as _i1036;
 import '../features/customers/data/datasources/customer_segment_data_source.dart'
@@ -456,6 +471,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i203.CrmActivityMapper>(
       () => const _i203.CrmActivityMapper(),
     );
+    gh.lazySingleton<_i519.CrmTaskMapper>(() => const _i519.CrmTaskMapper());
     gh.lazySingleton<_i258.CustomerFormDraftMapper>(
       () => const _i258.CustomerFormDraftMapper(),
     );
@@ -568,6 +584,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i857.CustomerRepository>(
       () =>
           _i784.SharedPreferencesCustomerRepository(gh<_i457.CustomerMapper>()),
+    );
+    gh.lazySingleton<_i588.CrmTaskRepository>(
+      () => _i150.SharedPreferencesCrmTaskRepository(gh<_i519.CrmTaskMapper>()),
     );
     gh.lazySingleton<_i748.CustomerSegmentRepository>(
       () => _i1052.CustomerSegmentRepositoryImpl(
@@ -698,6 +717,22 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i461.AppEnvironment>(),
         gh<_i56.FirebaseAppCheck>(),
       ),
+    );
+    gh.factory<_i96.CompleteCrmTaskUseCase>(
+      () => _i96.CompleteCrmTaskUseCase(gh<_i588.CrmTaskRepository>()),
+    );
+    gh.factory<_i1039.CreateCrmTaskUseCase>(
+      () => _i1039.CreateCrmTaskUseCase(gh<_i588.CrmTaskRepository>()),
+    );
+    gh.factory<_i224.ListPendingTasksForTodayUseCase>(
+      () =>
+          _i224.ListPendingTasksForTodayUseCase(gh<_i588.CrmTaskRepository>()),
+    );
+    gh.factory<_i874.ListPendingTasksForWeekUseCase>(
+      () => _i874.ListPendingTasksForWeekUseCase(gh<_i588.CrmTaskRepository>()),
+    );
+    gh.factory<_i711.RescheduleCrmTaskUseCase>(
+      () => _i711.RescheduleCrmTaskUseCase(gh<_i588.CrmTaskRepository>()),
     );
     gh.factory<_i214.ClearOnboardingProgressUseCase>(
       () => _i214.ClearOnboardingProgressUseCase(
@@ -940,6 +975,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i603.ReactivateUserUseCase>(
       () => _i603.ReactivateUserUseCase(gh<_i33.UserAccessRepository>()),
+    );
+    gh.factory<_i634.CrmTaskListBloc>(
+      () => _i634.CrmTaskListBloc(
+        listPendingTasksForWeek: gh<_i874.ListPendingTasksForWeekUseCase>(),
+        completeTask: gh<_i96.CompleteCrmTaskUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
     );
     gh.lazySingleton<_i794.AboutAppRepository>(
       () => _i1060.AboutAppRepositoryImpl(

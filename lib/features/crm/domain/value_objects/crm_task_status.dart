@@ -1,0 +1,1 @@
+enum CrmTaskStatus { pending, completed }
