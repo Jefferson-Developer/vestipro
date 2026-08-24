@@ -19,6 +19,7 @@ void main() {
     late PermissionService permissionService;
     late _InMemoryCustomerRepository customerRepository;
     late _InMemoryCrmActivityRepository activityRepository;
+    late _InMemoryCrmTaskRepository taskRepository;
     late FakeAnalyticsService analyticsService;
 
     setUp(() {
@@ -26,6 +27,7 @@ void main() {
       permissionService = PermissionService(membershipRepository);
       customerRepository = _InMemoryCustomerRepository()..seed(_fullCustomer);
       activityRepository = _InMemoryCrmActivityRepository();
+      taskRepository = _InMemoryCrmTaskRepository();
       analyticsService = FakeAnalyticsService();
     });
 
@@ -39,6 +41,7 @@ void main() {
         permissionService,
         customerRepository,
         activityRepository,
+        taskRepository,
         analyticsService,
       );
       await tester.pumpAndSettle();
@@ -77,6 +80,7 @@ void main() {
         permissionService,
         customerRepository,
         activityRepository,
+        taskRepository,
         analyticsService,
       );
       await tester.pumpAndSettle();
@@ -106,6 +110,36 @@ void main() {
       );
     });
 
+    testWidgets('opens prefilled activity sheet from next best action CTA', (
+      tester,
+    ) async {
+      _grantRole(membershipRepository, 'SALES_MANAGER');
+
+      await _pumpPage(
+        tester,
+        permissionService,
+        customerRepository,
+        activityRepository,
+        taskRepository,
+        analyticsService,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.ensureVisible(find.text('Registrar ligacao'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Registrar ligacao'));
+      await tester.pumpAndSettle();
+
+      expect(
+        find.byKey(const Key('register-crm-activity-sheet')),
+        findsOneWidget,
+      );
+      expect(
+        find.textContaining('Acao sugerida: Registrar ligacao'),
+        findsOneWidget,
+      );
+    });
+
     testWidgets('renders partial data with explicit placeholders', (
       tester,
     ) async {
@@ -119,6 +153,7 @@ void main() {
         permissionService,
         customerRepository,
         activityRepository,
+        taskRepository,
         analyticsService,
         customerId: 'customer-partial',
       );
@@ -142,7 +177,10 @@ void main() {
       expect(find.text('Nenhuma atividade registrada ainda.'), findsOneWidget);
       expect(find.text('Oportunidades em breve'), findsOneWidget);
       expect(find.text('Pedidos em breve'), findsOneWidget);
-      expect(find.text('Recomendacao em breve'), findsOneWidget);
+      expect(
+        find.text('Nenhuma recomendacao prioritaria agora.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets('uses mobile, tablet and desktop responsive compositions', (
@@ -156,6 +194,7 @@ void main() {
         permissionService,
         customerRepository,
         activityRepository,
+        taskRepository,
         analyticsService,
       );
       await tester.pumpAndSettle();
@@ -168,6 +207,7 @@ void main() {
         permissionService,
         customerRepository,
         activityRepository,
+        taskRepository,
         analyticsService,
       );
       await tester.pumpAndSettle();
@@ -180,6 +220,7 @@ void main() {
         permissionService,
         customerRepository,
         activityRepository,
+        taskRepository,
         analyticsService,
       );
       await tester.pumpAndSettle();
@@ -197,6 +238,7 @@ void main() {
           permissionService,
           customerRepository,
           activityRepository,
+          taskRepository,
           analyticsService,
         );
         await tester.pumpAndSettle();
@@ -217,6 +259,7 @@ void main() {
           permissionService,
           customerRepository,
           activityRepository,
+          taskRepository,
           analyticsService,
         );
         await tester.pumpAndSettle();
@@ -238,6 +281,7 @@ Future<void> _pumpPage(
   PermissionService permissionService,
   _InMemoryCustomerRepository customerRepository,
   _InMemoryCrmActivityRepository activityRepository,
+  _InMemoryCrmTaskRepository taskRepository,
   FakeAnalyticsService analyticsService, {
   String customerId = 'customer-a',
 }) {
@@ -254,7 +298,12 @@ Future<void> _pumpPage(
           listActivitiesForCustomer: ListCrmActivitiesForCustomerUseCase(
             activityRepository,
           ),
+          listPendingTasksForCustomer: ListPendingTasksForCustomerUseCase(
+            taskRepository,
+          ),
+          nextBestActionService: const NextBestActionService(),
           registerActivity: RegisterCrmActivityUseCase(activityRepository),
+          permissionService: permissionService,
           analyticsService: analyticsService,
         ),
       ),
@@ -320,6 +369,57 @@ final class _InMemoryCrmActivityRepository implements CrmActivityRepository {
     bool ascending = false,
   }) {
     throw UnimplementedError();
+  }
+}
+
+final class _InMemoryCrmTaskRepository implements CrmTaskRepository {
+  final Map<String, CrmTask> tasks = <String, CrmTask>{};
+
+  @override
+  Future<AppResult<CrmTask>> create({required CrmTask task}) async {
+    tasks[task.id] = task;
+    return AppSuccess<CrmTask>(task);
+  }
+
+  @override
+  Future<AppResult<CrmTask>> update({required CrmTask task}) async {
+    tasks[task.id] = task;
+    return AppSuccess<CrmTask>(task);
+  }
+
+  @override
+  Future<AppResult<CrmTask>> getById({
+    required String organizationId,
+    required String id,
+  }) async {
+    final task = tasks[id];
+    if (task == null || task.organizationId != organizationId) {
+      return const AppFailure<CrmTask>(
+        NotFoundFailure('CRM task not found.', code: 'crm_task_not_found'),
+      );
+    }
+    return AppSuccess<CrmTask>(task);
+  }
+
+  @override
+  Future<AppResult<List<CrmTask>>> listPending({
+    required String organizationId,
+    Set<String> responsibleUserIds = const <String>{},
+    DateTime? dueBefore,
+  }) async {
+    final visible =
+        tasks.values
+            .where(
+              (task) =>
+                  task.organizationId == organizationId &&
+                  task.status == CrmTaskStatus.pending &&
+                  (responsibleUserIds.isEmpty ||
+                      responsibleUserIds.contains(task.responsibleUserId)) &&
+                  (dueBefore == null || task.dueAt.isBefore(dueBefore)),
+            )
+            .toList(growable: false)
+          ..sort((first, second) => first.dueAt.compareTo(second.dueAt));
+    return AppSuccess<List<CrmTask>>(visible);
   }
 }
 

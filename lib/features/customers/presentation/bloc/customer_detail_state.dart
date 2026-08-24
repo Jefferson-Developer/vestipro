@@ -29,6 +29,8 @@ final class CustomerDetailState {
     this.userId = '',
     this.customer,
     this.activities = const <CrmActivity>[],
+    this.pendingTasks = const <CrmTask>[],
+    this.nextBestAction,
     this.activitiesHasMore = false,
     this.activitiesNextCursor,
     this.failure,
@@ -44,6 +46,8 @@ final class CustomerDetailState {
   final String userId;
   final Customer? customer;
   final List<CrmActivity> activities;
+  final List<CrmTask> pendingTasks;
+  final NextBestAction? nextBestAction;
   final bool activitiesHasMore;
   final String? activitiesNextCursor;
   final Failure? failure;
@@ -75,6 +79,9 @@ final class CustomerDetailState {
     Customer? customer,
     bool clearCustomer = false,
     List<CrmActivity>? activities,
+    List<CrmTask>? pendingTasks,
+    NextBestAction? nextBestAction,
+    bool clearNextBestAction = false,
     bool? activitiesHasMore,
     String? activitiesNextCursor,
     bool clearActivitiesNextCursor = false,
@@ -95,6 +102,10 @@ final class CustomerDetailState {
       userId: userId ?? this.userId,
       customer: clearCustomer ? null : customer ?? this.customer,
       activities: activities ?? this.activities,
+      pendingTasks: pendingTasks ?? this.pendingTasks,
+      nextBestAction: clearNextBestAction
+          ? null
+          : nextBestAction ?? this.nextBestAction,
       activitiesHasMore: activitiesHasMore ?? this.activitiesHasMore,
       activitiesNextCursor: clearActivitiesNextCursor
           ? null

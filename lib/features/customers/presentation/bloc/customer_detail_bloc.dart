@@ -3,6 +3,7 @@ import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/analytics/analytics.dart';
+import '../../../../core/permissions/permissions.dart';
 import '../../../../core/utils/utils.dart';
 import '../../../crm/crm.dart';
 import '../../domain/entities/customer.dart';
@@ -16,7 +17,10 @@ final class CustomerDetailBloc
   CustomerDetailBloc({
     required this.getCustomerById,
     required this.listActivitiesForCustomer,
+    required this.listPendingTasksForCustomer,
+    required this.nextBestActionService,
     required this.registerActivity,
+    required this.permissionService,
     required this.analyticsService,
   }) : super(const CustomerDetailState()) {
     on<CustomerDetailStarted>(_onStarted);
@@ -31,7 +35,10 @@ final class CustomerDetailBloc
 
   final GetCustomerByIdUseCase getCustomerById;
   final ListCrmActivitiesForCustomerUseCase listActivitiesForCustomer;
+  final ListPendingTasksForCustomerUseCase listPendingTasksForCustomer;
+  final NextBestActionService nextBestActionService;
   final RegisterCrmActivityUseCase registerActivity;
+  final PermissionService permissionService;
   final AnalyticsService analyticsService;
   final Uuid _uuid = const Uuid();
 
@@ -48,6 +55,8 @@ final class CustomerDetailBloc
         userId: event.userId,
         clearCustomer: true,
         activities: const <CrmActivity>[],
+        pendingTasks: const <CrmTask>[],
+        clearNextBestAction: true,
         activitiesHasMore: false,
         clearActivitiesNextCursor: true,
         clearFailure: true,
@@ -68,6 +77,8 @@ final class CustomerDetailBloc
         timelineStatus: CustomerDetailTimelineStatus.loading,
         clearCustomer: true,
         activities: const <CrmActivity>[],
+        pendingTasks: const <CrmTask>[],
+        clearNextBestAction: true,
         activitiesHasMore: false,
         clearActivitiesNextCursor: true,
         clearFailure: true,
@@ -93,6 +104,8 @@ final class CustomerDetailBloc
           ),
         );
         await _loadActivities(emit);
+        if (emit.isDone) return;
+        await _loadPendingTasksAndRecommendation(emit);
       case AppFailure<Customer>(failure: final failure):
         emit(
           state.copyWith(
@@ -160,6 +173,7 @@ final class CustomerDetailBloc
             clearTimelineFailure: true,
           ),
         );
+        await _refreshNextBestAction(emit);
       case AppFailure<CrmActivityPageResult>(failure: final failure):
         emit(
           state.copyWith(
@@ -168,6 +182,114 @@ final class CustomerDetailBloc
           ),
         );
     }
+  }
+
+  Future<void> _loadPendingTasksAndRecommendation(
+    Emitter<CustomerDetailState> emit,
+  ) async {
+    final customer = state.customer;
+    if (customer == null) return;
+
+    final canManageOthers = await _actorCanManageCustomerPortfolio();
+    if (emit.isDone) return;
+    final now = DateTime.now().toUtc();
+    final result = await listPendingTasksForCustomer(
+      organizationId: state.organizationId,
+      customerId: state.customerId,
+      responsibleUserIds: canManageOthers
+          ? const <String>{}
+          : <String>{state.userId},
+      dueBefore: now,
+    );
+    if (emit.isDone) return;
+
+    switch (result) {
+      case AppSuccess<List<CrmTask>>(value: final tasks):
+        final nextBestAction = _buildNextBestAction(
+          customer: customer,
+          activities: state.activities,
+          pendingTasks: tasks,
+          actorCanManageOthers: canManageOthers,
+          now: now,
+        );
+        emit(
+          state.copyWith(
+            pendingTasks: tasks,
+            nextBestAction: nextBestAction,
+            clearNextBestAction: nextBestAction == null,
+          ),
+        );
+      case AppFailure<List<CrmTask>>():
+        final nextBestAction = _buildNextBestAction(
+          customer: customer,
+          activities: state.activities,
+          pendingTasks: const <CrmTask>[],
+          actorCanManageOthers: canManageOthers,
+          now: now,
+        );
+        emit(
+          state.copyWith(
+            pendingTasks: const <CrmTask>[],
+            nextBestAction: nextBestAction,
+            clearNextBestAction: nextBestAction == null,
+          ),
+        );
+    }
+  }
+
+  Future<void> _refreshNextBestAction(Emitter<CustomerDetailState> emit) async {
+    final customer = state.customer;
+    if (customer == null) return;
+    final canManageOthers = await _actorCanManageCustomerPortfolio();
+    if (emit.isDone) return;
+    final nextBestAction = _buildNextBestAction(
+      customer: customer,
+      activities: state.activities,
+      pendingTasks: state.pendingTasks,
+      actorCanManageOthers: canManageOthers,
+      now: DateTime.now().toUtc(),
+    );
+    emit(
+      state.copyWith(
+        nextBestAction: nextBestAction,
+        clearNextBestAction: nextBestAction == null,
+      ),
+    );
+  }
+
+  NextBestAction? _buildNextBestAction({
+    required Customer customer,
+    required List<CrmActivity> activities,
+    required List<CrmTask> pendingTasks,
+    required bool actorCanManageOthers,
+    required DateTime now,
+  }) {
+    return nextBestActionService.recommendForCustomer(
+      NextBestActionContext(
+        customer: customer,
+        actorUserId: state.userId,
+        actorCanManageOthers: actorCanManageOthers,
+        customerInPortfolio:
+            customer.responsibleSellerId?.trim() == state.userId.trim(),
+        now: now,
+        activities: activities,
+        pendingTasks: pendingTasks,
+        noContactThresholdDays:
+            NextBestActionService.defaultNoContactThresholdDays,
+      ),
+    );
+  }
+
+  Future<bool> _actorCanManageCustomerPortfolio() async {
+    final result = await permissionService.hasPermission(
+      organizationId: state.organizationId,
+      userId: state.userId,
+      capability: Capability.teamManage,
+    );
+    return result.fold(
+      onSuccess: (granted) => granted,
+      onFailure: (_) => false,
+    );
   }
 
   Future<void> _onActivitySubmitted(
@@ -216,6 +338,7 @@ final class CustomerDetailBloc
             timelineStatus: CustomerDetailTimelineStatus.ready,
           ),
         );
+        await _refreshNextBestAction(emit);
       case AppFailure<CrmActivity>(failure: final failure):
         emit(
           state.copyWith(

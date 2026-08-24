@@ -156,6 +156,7 @@ class _CustomerDetailBody extends StatelessWidget {
 
     return _CustomerDetailContent(
       customer: state.customer!,
+      nextBestAction: state.nextBestAction,
       organizationId: organizationId,
       userId: userId,
       permissionService: permissionService,
@@ -166,12 +167,14 @@ class _CustomerDetailBody extends StatelessWidget {
 class _CustomerDetailContent extends StatelessWidget {
   const _CustomerDetailContent({
     required this.customer,
+    required this.nextBestAction,
     required this.organizationId,
     required this.userId,
     required this.permissionService,
   });
 
   final Customer customer;
+  final NextBestAction? nextBestAction;
   final String organizationId;
   final String userId;
   final PermissionService permissionService;
@@ -191,12 +194,14 @@ class _CustomerDetailContent extends StatelessWidget {
                 breakpoint == AppBreakpoint.largeDesktop
             ? _DesktopCustomerDetail(
                 customer: customer,
+                nextBestAction: nextBestAction,
                 organizationId: organizationId,
                 userId: userId,
                 permissionService: permissionService,
               )
             : _StackedCustomerDetail(
                 customer: customer,
+                nextBestAction: nextBestAction,
                 organizationId: organizationId,
                 userId: userId,
                 permissionService: permissionService,
@@ -211,12 +216,14 @@ class _CustomerDetailContent extends StatelessWidget {
 class _StackedCustomerDetail extends StatelessWidget {
   const _StackedCustomerDetail({
     required this.customer,
+    required this.nextBestAction,
     required this.organizationId,
     required this.userId,
     required this.permissionService,
   });
 
   final Customer customer;
+  final NextBestAction? nextBestAction;
   final String organizationId;
   final String userId;
   final PermissionService permissionService;
@@ -247,7 +254,7 @@ class _StackedCustomerDetail extends StatelessWidget {
         const SizedBox(height: AppSpacing.spacing16),
         const _OrderHistorySection(),
         const SizedBox(height: AppSpacing.spacing16),
-        const _NextBestActionSection(),
+        _NextBestActionSection(action: nextBestAction),
       ],
     );
   }
@@ -256,12 +263,14 @@ class _StackedCustomerDetail extends StatelessWidget {
 class _DesktopCustomerDetail extends StatelessWidget {
   const _DesktopCustomerDetail({
     required this.customer,
+    required this.nextBestAction,
     required this.organizationId,
     required this.userId,
     required this.permissionService,
   });
 
   final Customer customer;
+  final NextBestAction? nextBestAction;
   final String organizationId;
   final String userId;
   final PermissionService permissionService;
@@ -306,7 +315,7 @@ class _DesktopCustomerDetail extends StatelessWidget {
                   const SizedBox(height: AppSpacing.spacing16),
                   const _OpportunitiesSection(),
                   const SizedBox(height: AppSpacing.spacing16),
-                  const _NextBestActionSection(),
+                  _NextBestActionSection(action: nextBestAction),
                 ],
               ),
             ),
@@ -432,7 +441,11 @@ class _QuickActions extends StatelessWidget {
   }
 }
 
-Future<void> _showRegisterActivitySheet(BuildContext context) {
+Future<void> _showRegisterActivitySheet(
+  BuildContext context, {
+  CrmActivityType initialType = CrmActivityType.phoneCall,
+  String? initialDescription,
+}) {
   final bloc = context.read<CustomerDetailBloc>();
   return AppBottomSheet.show<void>(
     context: context,
@@ -440,22 +453,40 @@ Future<void> _showRegisterActivitySheet(BuildContext context) {
     contentKey: const Key('register-crm-activity-sheet'),
     builder: (sheetContext) => BlocProvider<CustomerDetailBloc>.value(
       value: bloc,
-      child: const _RegisterActivitySheet(),
+      child: _RegisterActivitySheet(
+        initialType: initialType,
+        initialDescription: initialDescription,
+      ),
     ),
   );
 }
 
 class _RegisterActivitySheet extends StatefulWidget {
-  const _RegisterActivitySheet();
+  const _RegisterActivitySheet({
+    required this.initialType,
+    this.initialDescription,
+  });
+
+  final CrmActivityType initialType;
+  final String? initialDescription;
 
   @override
   State<_RegisterActivitySheet> createState() => _RegisterActivitySheetState();
 }
 
 class _RegisterActivitySheetState extends State<_RegisterActivitySheet> {
-  final _descriptionController = TextEditingController();
-  CrmActivityType _type = CrmActivityType.phoneCall;
+  late final TextEditingController _descriptionController;
+  late CrmActivityType _type;
   String? _descriptionError;
+
+  @override
+  void initState() {
+    super.initState();
+    _type = widget.initialType;
+    _descriptionController = TextEditingController(
+      text: widget.initialDescription,
+    );
+  }
 
   @override
   void dispose() {
@@ -845,23 +876,50 @@ class _OrderHistorySection extends StatelessWidget {
 }
 
 class _NextBestActionSection extends StatelessWidget {
-  const _NextBestActionSection();
+  const _NextBestActionSection({required this.action});
+
+  final NextBestAction? action;
 
   @override
   Widget build(BuildContext context) {
-    return const _SectionCard(
+    final recommendation = action;
+    return _SectionCard(
       title: 'Proxima melhor acao',
       icon: Icons.auto_awesome_outlined,
-      children: <Widget>[
-        _ComingSoonPanel(
-          title: 'Recomendacao em breve',
-          description:
-              'Nao disponivel ate a TASK-063 implementar recomendacoes rastreaveis.',
-          icon: Icons.lightbulb_outline,
-        ),
-      ],
+      children: recommendation == null
+          ? const <Widget>[
+              _InlineEmpty(text: 'Nenhuma recomendacao prioritaria agora.'),
+            ]
+          : <Widget>[
+              NextBestActionCard(
+                action: recommendation,
+                onPressed: () => _handleNextBestAction(context, recommendation),
+              ),
+            ],
     );
   }
+}
+
+Future<void> _handleNextBestAction(
+  BuildContext context,
+  NextBestAction action,
+) {
+  final suggestedActivityType = action.suggestedActivityType;
+  if (suggestedActivityType != null) {
+    return _showRegisterActivitySheet(
+      context,
+      initialType: suggestedActivityType,
+      initialDescription:
+          'Acao sugerida: ${action.suggestedAction}. Motivo: ${action.reason}',
+    );
+  }
+
+  AppSnackbar.show(
+    context,
+    message: 'Abra Tarefas e follow-ups para concluir ou reagendar.',
+    variant: AppSnackbarVariant.info,
+  );
+  return Future<void>.value();
 }
 
 class _InfoGrid extends StatelessWidget {

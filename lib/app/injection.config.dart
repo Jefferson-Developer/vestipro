@@ -97,6 +97,7 @@ import '../features/crm/data/repositories/shared_preferences_crm_task_repository
 import '../features/crm/domain/repositories/crm_activity_repository.dart'
     as _i558;
 import '../features/crm/domain/repositories/crm_task_repository.dart' as _i588;
+import '../features/crm/domain/services/next_best_action_service.dart' as _i905;
 import '../features/crm/domain/usecases/complete_crm_task_use_case.dart'
     as _i96;
 import '../features/crm/domain/usecases/create_crm_task_use_case.dart'
@@ -107,6 +108,8 @@ import '../features/crm/domain/usecases/list_crm_activities_for_lead_use_case.da
     as _i554;
 import '../features/crm/domain/usecases/list_crm_activities_for_opportunity_use_case.dart'
     as _i286;
+import '../features/crm/domain/usecases/list_pending_tasks_for_customer_use_case.dart'
+    as _i972;
 import '../features/crm/domain/usecases/list_pending_tasks_for_today_use_case.dart'
     as _i224;
 import '../features/crm/domain/usecases/list_pending_tasks_for_week_use_case.dart'
@@ -490,6 +493,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => const _i203.CrmActivityMapper(),
     );
     gh.lazySingleton<_i519.CrmTaskMapper>(() => const _i519.CrmTaskMapper());
+    gh.lazySingleton<_i905.NextBestActionService>(
+      () => const _i905.NextBestActionService(),
+    );
     gh.lazySingleton<_i258.CustomerFormDraftMapper>(
       () => const _i258.CustomerFormDraftMapper(),
     );
@@ -782,6 +788,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i1039.CreateCrmTaskUseCase>(
       () => _i1039.CreateCrmTaskUseCase(gh<_i588.CrmTaskRepository>()),
     );
+    gh.factory<_i972.ListPendingTasksForCustomerUseCase>(
+      () => _i972.ListPendingTasksForCustomerUseCase(
+        gh<_i588.CrmTaskRepository>(),
+      ),
+    );
     gh.factory<_i224.ListPendingTasksForTodayUseCase>(
       () =>
           _i224.ListPendingTasksForTodayUseCase(gh<_i588.CrmTaskRepository>()),
@@ -978,15 +989,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i923.RoleDataSource>(
       () => _i892.FirestoreRoleDataSource(gh<_i974.FirebaseFirestore>()),
     );
-    gh.factory<_i433.CustomerDetailBloc>(
-      () => _i433.CustomerDetailBloc(
-        getCustomerById: gh<_i356.GetCustomerByIdUseCase>(),
-        listActivitiesForCustomer:
-            gh<_i205.ListCrmActivitiesForCustomerUseCase>(),
-        registerActivity: gh<_i205.RegisterCrmActivityUseCase>(),
-        analyticsService: gh<_i202.AnalyticsService>(),
-      ),
-    );
     gh.lazySingleton<_i228.TeamDataSource>(
       () => _i23.FirestoreTeamDataSource(gh<_i974.FirebaseFirestore>()),
     );
@@ -1135,6 +1137,19 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i421.RecordAuditLogUseCase>(
       () => _i421.RecordAuditLogUseCase(gh<_i753.AuditLogRepository>()),
+    );
+    gh.factory<_i433.CustomerDetailBloc>(
+      () => _i433.CustomerDetailBloc(
+        getCustomerById: gh<_i356.GetCustomerByIdUseCase>(),
+        listActivitiesForCustomer:
+            gh<_i205.ListCrmActivitiesForCustomerUseCase>(),
+        listPendingTasksForCustomer:
+            gh<_i205.ListPendingTasksForCustomerUseCase>(),
+        nextBestActionService: gh<_i205.NextBestActionService>(),
+        registerActivity: gh<_i205.RegisterCrmActivityUseCase>(),
+        permissionService: gh<_i47.PermissionService>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
     );
     gh.factory<_i766.CreateTeamUseCase>(
       () => _i766.CreateTeamUseCase(
