@@ -218,6 +218,36 @@ import '../features/onboarding/domain/usecases/save_onboarding_progress_use_case
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart' as _i593;
 import '../features/opportunities/data/mappers/opportunity_mapper.dart'
     as _i449;
+import '../features/opportunities/data/mappers/pipeline_stage_mapper.dart'
+    as _i772;
+import '../features/opportunities/data/repositories/shared_preferences_opportunity_repository.dart'
+    as _i771;
+import '../features/opportunities/data/repositories/shared_preferences_pipeline_stage_repository.dart'
+    as _i319;
+import '../features/opportunities/domain/repositories/opportunity_repository.dart'
+    as _i43;
+import '../features/opportunities/domain/repositories/pipeline_stage_repository.dart'
+    as _i385;
+import '../features/opportunities/domain/usecases/create_pipeline_stage_use_case.dart'
+    as _i959;
+import '../features/opportunities/domain/usecases/list_pipeline_opportunities_use_case.dart'
+    as _i891;
+import '../features/opportunities/domain/usecases/list_pipeline_stages_use_case.dart'
+    as _i879;
+import '../features/opportunities/domain/usecases/mark_opportunity_lost_use_case.dart'
+    as _i416;
+import '../features/opportunities/domain/usecases/mark_opportunity_won_use_case.dart'
+    as _i657;
+import '../features/opportunities/domain/usecases/rename_pipeline_stage_use_case.dart'
+    as _i266;
+import '../features/opportunities/domain/usecases/reorder_pipeline_stages_use_case.dart'
+    as _i482;
+import '../features/opportunities/domain/usecases/update_opportunity_stage_use_case.dart'
+    as _i942;
+import '../features/opportunities/presentation/bloc/pipeline_stage_admin_bloc.dart'
+    as _i31;
+import '../features/opportunities/presentation/bloc/sales_pipeline_bloc.dart'
+    as _i339;
 import '../features/organizations/data/datasources/branch_data_source.dart'
     as _i526;
 import '../features/organizations/data/datasources/company_data_source.dart'
@@ -424,6 +454,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i449.OpportunityMapper>(
       () => const _i449.OpportunityMapper(),
     );
+    gh.lazySingleton<_i772.PipelineStageMapper>(
+      () => const _i772.PipelineStageMapper(),
+    );
     gh.lazySingleton<_i964.BranchMapper>(() => const _i964.BranchMapper());
     gh.lazySingleton<_i642.CompanyMapper>(() => const _i642.CompanyMapper());
     gh.lazySingleton<_i714.MembershipMapper>(
@@ -459,6 +492,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i99.SecureSessionStore>(
       () => _i772.SecureFlutterSessionStore(gh<_i558.FlutterSecureStorage>()),
     );
+    gh.lazySingleton<_i43.OpportunityRepository>(
+      () => _i771.SharedPreferencesOpportunityRepository(
+        gh<_i449.OpportunityMapper>(),
+      ),
+    );
     gh.lazySingleton<_i1036.CustomerFormDraftDataSource>(
       () => const _i292.SharedPreferencesCustomerFormDraftDataSource(),
     );
@@ -473,6 +511,21 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i924.OnboardingProgressDataSource>(
       () => const _i1035.SharedPreferencesOnboardingProgressDataSource(),
+    );
+    gh.factory<_i891.ListPipelineOpportunitiesUseCase>(
+      () => _i891.ListPipelineOpportunitiesUseCase(
+        gh<_i43.OpportunityRepository>(),
+      ),
+    );
+    gh.factory<_i416.MarkOpportunityLostUseCase>(
+      () => _i416.MarkOpportunityLostUseCase(gh<_i43.OpportunityRepository>()),
+    );
+    gh.factory<_i657.MarkOpportunityWonUseCase>(
+      () => _i657.MarkOpportunityWonUseCase(gh<_i43.OpportunityRepository>()),
+    );
+    gh.factory<_i942.UpdateOpportunityStageUseCase>(
+      () =>
+          _i942.UpdateOpportunityStageUseCase(gh<_i43.OpportunityRepository>()),
     );
     gh.lazySingleton<_i725.CustomerLocalMapper>(
       () => _i725.CustomerLocalMapper(gh<_i457.CustomerMapper>()),
@@ -541,6 +594,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i932.AnalyticsService>(
       () => _i569.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
     );
+    gh.lazySingleton<_i385.PipelineStageRepository>(
+      () => _i319.SharedPreferencesPipelineStageRepository(
+        gh<_i772.PipelineStageMapper>(),
+      ),
+    );
     gh.lazySingleton<_i845.AuthDataSource>(
       () => _i814.FirebaseAuthDataSource(gh<_i59.FirebaseAuth>()),
     );
@@ -575,6 +633,23 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i261.ListCustomerSegmentsUseCase>(
       () => _i261.ListCustomerSegmentsUseCase(
         gh<_i748.CustomerSegmentRepository>(),
+      ),
+    );
+    gh.factory<_i959.CreatePipelineStageUseCase>(
+      () =>
+          _i959.CreatePipelineStageUseCase(gh<_i385.PipelineStageRepository>()),
+    );
+    gh.factory<_i879.ListPipelineStagesUseCase>(
+      () =>
+          _i879.ListPipelineStagesUseCase(gh<_i385.PipelineStageRepository>()),
+    );
+    gh.factory<_i266.RenamePipelineStageUseCase>(
+      () =>
+          _i266.RenamePipelineStageUseCase(gh<_i385.PipelineStageRepository>()),
+    );
+    gh.factory<_i482.ReorderPipelineStagesUseCase>(
+      () => _i482.ReorderPipelineStagesUseCase(
+        gh<_i385.PipelineStageRepository>(),
       ),
     );
     gh.factory<_i776.LoginBloc>(
@@ -666,6 +741,15 @@ extension GetItInjectableX on _i174.GetIt {
         seed: gh<_i477.AboutAppSeedModel>(),
       ),
       registerFor: {_dev, _staging, _prod},
+    );
+    gh.factory<_i339.SalesPipelineBloc>(
+      () => _i339.SalesPipelineBloc(
+        listStages: gh<_i879.ListPipelineStagesUseCase>(),
+        listOpportunities: gh<_i891.ListPipelineOpportunitiesUseCase>(),
+        updateStage: gh<_i942.UpdateOpportunityStageUseCase>(),
+        markWon: gh<_i657.MarkOpportunityWonUseCase>(),
+        markLost: gh<_i416.MarkOpportunityLostUseCase>(),
+      ),
     );
     gh.lazySingleton<_i972.FeatureFlagService>(
       () => _i845.FirebaseFeatureFlagService(gh<_i627.FirebaseRemoteConfig>()),
@@ -763,6 +847,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i681.UserAccessDataSource>(
       () => _i605.CloudFunctionsUserAccessDataSource(
         gh<_i340.CloudFunctionsService>(),
+      ),
+    );
+    gh.factory<_i31.PipelineStageAdminBloc>(
+      () => _i31.PipelineStageAdminBloc(
+        listStages: gh<_i879.ListPipelineStagesUseCase>(),
+        createStage: gh<_i959.CreatePipelineStageUseCase>(),
+        renameStage: gh<_i266.RenamePipelineStageUseCase>(),
+        reorderStages: gh<_i482.ReorderPipelineStagesUseCase>(),
       ),
     );
     gh.factory<_i330.CreateCompanyUseCase>(

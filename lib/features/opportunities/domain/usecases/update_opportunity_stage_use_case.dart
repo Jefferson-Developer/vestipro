@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../entities/opportunity.dart';
@@ -12,6 +14,13 @@ import 'opportunity_use_case_helpers.dart';
 /// only allows this while it is still open, per the rule that a closed
 /// Opportunity must never change through a regular edit — only an explicit,
 /// audited reopen flow (out of this task's scope) could allow it again.
+///
+/// This use case never checks whether the target stage is terminal
+/// (won/lost) itself — `SalesPipelineBloc` is responsible for routing a
+/// move onto a terminal stage through `MarkOpportunityWonUseCase`/
+/// `MarkOpportunityLostUseCase` instead, since those alone can collect the
+/// mandatory reason and flip [Opportunity.status] atomically with the stage.
+@injectable
 final class UpdateOpportunityStageUseCase {
   UpdateOpportunityStageUseCase(this._repository);
 

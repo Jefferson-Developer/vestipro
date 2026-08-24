@@ -52,6 +52,37 @@ void main() {
       expect(updated.version, opportunity.version + 1);
     });
 
+    test(
+      'moves the opportunity onto the given stageId (TASK-058 board close)',
+      () async {
+        final opportunity = _buildOpportunity(status: OpportunityStatus.open);
+        when(
+          () => repository.getById(
+            organizationId: any(named: 'organizationId'),
+            id: any(named: 'id'),
+          ),
+        ).thenAnswer((_) async => AppSuccess<Opportunity>(opportunity));
+        when(
+          () => repository.update(opportunity: any(named: 'opportunity')),
+        ).thenAnswer((invocation) async {
+          return AppSuccess<Opportunity>(
+            invocation.namedArguments[#opportunity] as Opportunity,
+          );
+        });
+
+        final result = await useCase.call(
+          organizationId: 'org-1',
+          id: 'opportunity-1',
+          lostReason: 'Concorrente com preço menor',
+          updatedBy: 'user-2',
+          stageId: 'stage-lost',
+        );
+
+        final updated = (result as AppSuccess<Opportunity>).value;
+        expect(updated.stageId, 'stage-lost');
+      },
+    );
+
     test('rejects marking as lost without a reason', () async {
       final result = await useCase.call(
         organizationId: 'org-1',

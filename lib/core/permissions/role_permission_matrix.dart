@@ -39,6 +39,9 @@ abstract final class RolePermissionMatrix {
     Capability.leadView,
     Capability.leadCreate,
     Capability.leadQualify,
+    Capability.opportunityView,
+    Capability.opportunityManage,
+    Capability.pipelineStageManage,
     Capability.orderCreate,
     Capability.orderApprove,
     Capability.discountApproveAboveLimit,
@@ -54,6 +57,8 @@ abstract final class RolePermissionMatrix {
     Capability.leadView,
     Capability.leadCreate,
     Capability.leadQualify,
+    Capability.opportunityView,
+    Capability.opportunityManage,
     Capability.orderCreate,
   };
 

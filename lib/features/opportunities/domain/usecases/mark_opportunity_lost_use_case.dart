@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../entities/opportunity.dart';
@@ -10,8 +12,13 @@ import 'opportunity_use_case_helpers.dart';
 /// funnel keeps a traceable learning trail (a full configurable reason
 /// catalog is left for TASK-061; a free-text reason is accepted here).
 ///
+/// [stageId], when provided, also moves the Opportunity onto that pipeline
+/// stage in the same update — see `MarkOpportunityWonUseCase` docs for why
+/// (TASK-058).
+///
 /// Terminal: once lost, the Opportunity can never transition to any other
 /// status through this or `MarkOpportunityWonUseCase` again.
+@injectable
 final class MarkOpportunityLostUseCase {
   MarkOpportunityLostUseCase(this._repository);
 
@@ -22,11 +29,13 @@ final class MarkOpportunityLostUseCase {
     required String id,
     required String lostReason,
     required String updatedBy,
+    String? stageId,
   }) async {
     final trimmedOrganizationId = organizationId.trim();
     final trimmedId = id.trim();
     final trimmedLostReason = lostReason.trim();
     final trimmedUpdatedBy = updatedBy.trim();
+    final normalizedStageId = normalizeOpportunityOptional(stageId);
     final fieldErrors = <String, String>{};
 
     if (trimmedOrganizationId.isEmpty) {
@@ -68,6 +77,7 @@ final class MarkOpportunityLostUseCase {
 
     final now = DateTime.now().toUtc();
     final updated = opportunity.copyWith(
+      stageId: normalizedStageId ?? opportunity.stageId,
       status: OpportunityStatus.lost,
       lostReason: trimmedLostReason,
       closedAt: now,

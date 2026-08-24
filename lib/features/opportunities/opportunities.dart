@@ -1,13 +1,32 @@
 /// Public surface of `lib/features/opportunities/`.
 library;
 
+export 'data/mappers/pipeline_stage_mapper.dart';
 export 'domain/entities/opportunity.dart';
+export 'domain/entities/pipeline_column.dart';
+export 'domain/entities/pipeline_stage.dart';
 export 'domain/opportunity_status_transition_rules.dart';
+export 'domain/pipeline_board_builder.dart';
 export 'domain/repositories/opportunity_repository.dart';
+export 'domain/repositories/pipeline_stage_repository.dart';
 export 'domain/usecases/create_opportunity_use_case.dart';
+export 'domain/usecases/create_pipeline_stage_use_case.dart';
+export 'domain/usecases/list_pipeline_opportunities_use_case.dart';
+export 'domain/usecases/list_pipeline_stages_use_case.dart';
 export 'domain/usecases/mark_opportunity_lost_use_case.dart';
 export 'domain/usecases/mark_opportunity_won_use_case.dart';
 export 'domain/usecases/recalculate_revenue_forecast_use_case.dart';
+export 'domain/usecases/rename_pipeline_stage_use_case.dart';
+export 'domain/usecases/reorder_pipeline_stages_use_case.dart';
 export 'domain/usecases/update_opportunity_stage_use_case.dart';
 export 'domain/value_objects/opportunity_status.dart';
 export 'domain/value_objects/opportunity_sync_status.dart';
+export 'domain/value_objects/pipeline_stage_terminal_type.dart';
+export 'presentation/bloc/pipeline_stage_admin_bloc.dart';
+export 'presentation/bloc/pipeline_stage_admin_event.dart';
+export 'presentation/bloc/pipeline_stage_admin_state.dart';
+export 'presentation/bloc/sales_pipeline_bloc.dart';
+export 'presentation/bloc/sales_pipeline_event.dart';
+export 'presentation/bloc/sales_pipeline_state.dart';
+export 'presentation/pages/pipeline_stage_admin_page.dart';
+export 'presentation/pages/sales_pipeline_page.dart';

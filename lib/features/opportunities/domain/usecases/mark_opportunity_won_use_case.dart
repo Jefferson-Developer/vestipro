@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../entities/opportunity.dart';
@@ -10,8 +12,16 @@ import 'opportunity_use_case_helpers.dart';
 /// funnel keeps a traceable learning trail (a full configurable reason
 /// catalog is left for TASK-061; a free-text reason is accepted here).
 ///
+/// [stageId], when provided, also moves the Opportunity onto that pipeline
+/// stage in the same update (TASK-058: `SalesPipelineBloc` passes the
+/// terminal "won" stage's id here when the funnel closes an Opportunity by
+/// dropping it on that column, so the board and the status stay in sync in
+/// one write). Omitting it leaves `stageId` unchanged, e.g. for a future
+/// "mark won" action outside the pipeline board.
+///
 /// Terminal: once won, the Opportunity can never transition to any other
 /// status through this or `MarkOpportunityLostUseCase` again.
+@injectable
 final class MarkOpportunityWonUseCase {
   MarkOpportunityWonUseCase(this._repository);
 
@@ -22,11 +32,13 @@ final class MarkOpportunityWonUseCase {
     required String id,
     required String wonReason,
     required String updatedBy,
+    String? stageId,
   }) async {
     final trimmedOrganizationId = organizationId.trim();
     final trimmedId = id.trim();
     final trimmedWonReason = wonReason.trim();
     final trimmedUpdatedBy = updatedBy.trim();
+    final normalizedStageId = normalizeOpportunityOptional(stageId);
     final fieldErrors = <String, String>{};
 
     if (trimmedOrganizationId.isEmpty) {
@@ -68,6 +80,7 @@ final class MarkOpportunityWonUseCase {
 
     final now = DateTime.now().toUtc();
     final updated = opportunity.copyWith(
+      stageId: normalizedStageId ?? opportunity.stageId,
       status: OpportunityStatus.won,
       wonReason: trimmedWonReason,
       closedAt: now,
