@@ -30,4 +30,14 @@ abstract interface class ProductRepository {
     required String organizationId,
     required String id,
   });
+
+  /// Batch-loads every Product of [organizationId] whose id is in [ids]
+  /// (TASK-066, `ListProductsByCollectionUseCase`). Silently skips ids that
+  /// do not exist or belong to another organization instead of failing the
+  /// whole batch — a stale/removed Product reference in a join table should
+  /// not block the rest of the list from loading.
+  Future<AppResult<List<Product>>> getByIds({
+    required String organizationId,
+    required List<String> ids,
+  });
 }

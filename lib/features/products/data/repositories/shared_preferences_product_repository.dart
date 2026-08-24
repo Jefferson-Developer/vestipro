@@ -148,6 +148,30 @@ final class SharedPreferencesProductRepository implements ProductRepository {
     }
   }
 
+  @override
+  Future<AppResult<List<Product>>> getByIds({
+    required String organizationId,
+    required List<String> ids,
+  }) async {
+    try {
+      final wanted = ids.toSet();
+      final products = await _load(organizationId);
+      return AppSuccess<List<Product>>(
+        products
+            .where((product) => wanted.contains(product.id))
+            .toList(growable: false),
+      );
+    } catch (exception) {
+      return AppFailure<List<Product>>(
+        UnexpectedFailure(
+          'Unexpected error loading products locally.',
+          code: 'product_local_get_by_ids_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
   Future<List<Product>> _load(String organizationId) async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_keyFor(organizationId));

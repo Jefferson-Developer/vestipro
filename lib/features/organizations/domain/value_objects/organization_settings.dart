@@ -44,6 +44,13 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     /// Extra contact type codes/labels available in the Customer form, e.g.
     /// `logistics|Logistica`.
     @Default(<String>[]) List<String> customerContactTypes,
+
+    /// Whether a Product can be associated with more than one `Collection`
+    /// at once (TASK-066), e.g. a continuous product carried in both a core
+    /// collection and a seasonal drop. `false` (the default) means
+    /// `AssociateProductWithCollectionUseCase` replaces any previous
+    /// association instead of adding a second one.
+    @Default(false) bool allowMultipleCollectionsPerProduct,
   }) = _OrganizationSettings;
 
   /// Builds validated [OrganizationSettings], trimming each value and
@@ -63,6 +70,7 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     List<String> requiredCustomerFields = const <String>[],
     List<String> customerAddressTypes = const <String>[],
     List<String> customerContactTypes = const <String>[],
+    bool allowMultipleCollectionsPerProduct = false,
   }) {
     final fieldErrors = <String, String>{};
     final trimmedCurrency = currency.trim();
@@ -116,6 +124,7 @@ abstract class OrganizationSettings with _$OrganizationSettings {
       requiredCustomerFields: normalizedRequiredCustomerFields,
       customerAddressTypes: normalizedCustomerAddressTypes,
       customerContactTypes: normalizedCustomerContactTypes,
+      allowMultipleCollectionsPerProduct: allowMultipleCollectionsPerProduct,
     );
   }
 }

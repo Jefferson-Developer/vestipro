@@ -10,6 +10,7 @@ final class OrganizationSettingsDto {
     this.requiredCustomerFields = const <String>[],
     this.customerAddressTypes = const <String>[],
     this.customerContactTypes = const <String>[],
+    this.allowMultipleCollectionsPerProduct = false,
   });
 
   factory OrganizationSettingsDto.fromJson(Map<String, dynamic> json) {
@@ -21,12 +22,16 @@ final class OrganizationSettingsDto {
     final rawRequiredCustomerFields = json['requiredCustomerFields'];
     final rawCustomerAddressTypes = json['customerAddressTypes'];
     final rawCustomerContactTypes = json['customerContactTypes'];
+    final allowMultipleCollectionsPerProduct =
+        json['allowMultipleCollectionsPerProduct'];
 
     if (currency is! String ||
         country is! String ||
         defaultLanguage is! String ||
         (segment != null && segment is! String) ||
-        (maxTeamsPerUser != null && maxTeamsPerUser is! int)) {
+        (maxTeamsPerUser != null && maxTeamsPerUser is! int) ||
+        (allowMultipleCollectionsPerProduct != null &&
+            allowMultipleCollectionsPerProduct is! bool)) {
       throw const ValidationException(
         'Invalid organization settings payload.',
         code: 'invalid_organization_settings_payload',
@@ -42,6 +47,8 @@ final class OrganizationSettingsDto {
       requiredCustomerFields: _stringListFromJson(rawRequiredCustomerFields),
       customerAddressTypes: _stringListFromJson(rawCustomerAddressTypes),
       customerContactTypes: _stringListFromJson(rawCustomerContactTypes),
+      allowMultipleCollectionsPerProduct:
+          allowMultipleCollectionsPerProduct as bool? ?? false,
     );
   }
 
@@ -65,6 +72,12 @@ final class OrganizationSettingsDto {
   final List<String> customerAddressTypes;
   final List<String> customerContactTypes;
 
+  /// See `OrganizationSettings.allowMultipleCollectionsPerProduct`'s own
+  /// doc. Same whole-map-replace caveat as [segment]: a future
+  /// `updateSettings` call must resend `true` to keep it, or it resets to
+  /// the `false` default.
+  final bool allowMultipleCollectionsPerProduct;
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'currency': currency,
@@ -78,6 +91,8 @@ final class OrganizationSettingsDto {
         'customerAddressTypes': customerAddressTypes,
       if (customerContactTypes.isNotEmpty)
         'customerContactTypes': customerContactTypes,
+      if (allowMultipleCollectionsPerProduct)
+        'allowMultipleCollectionsPerProduct': true,
     };
   }
 }

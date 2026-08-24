@@ -62,6 +62,23 @@ class _FakeProductRepository implements ProductRepository {
     _productsByCompositeKey[key] = product;
     return AppSuccess<Product>(product);
   }
+
+  @override
+  Future<AppResult<List<Product>>> getByIds({
+    required String organizationId,
+    required List<String> ids,
+  }) async {
+    final wanted = ids.toSet();
+    return AppSuccess<List<Product>>(
+      _productsByCompositeKey.values
+          .where(
+            (product) =>
+                product.organizationId == organizationId &&
+                wanted.contains(product.id),
+          )
+          .toList(growable: false),
+    );
+  }
 }
 
 void main() {

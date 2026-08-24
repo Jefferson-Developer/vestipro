@@ -81,5 +81,26 @@ void main() {
 
       expect(settings.segment, isNull);
     });
+
+    test('defaults allowMultipleCollectionsPerProduct to false (TASK-066)', () {
+      final settings = OrganizationSettings.validated(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+      );
+
+      expect(settings.allowMultipleCollectionsPerProduct, isFalse);
+    });
+
+    test('accepts allowMultipleCollectionsPerProduct set to true', () {
+      final settings = OrganizationSettings.validated(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+        allowMultipleCollectionsPerProduct: true,
+      );
+
+      expect(settings.allowMultipleCollectionsPerProduct, isTrue);
+    });
   });
 }

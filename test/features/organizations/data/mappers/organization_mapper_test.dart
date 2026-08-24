@@ -81,6 +81,28 @@ void main() {
       );
     });
 
+    test('settingsToEntity/settingsToDto round-trip '
+        'allowMultipleCollectionsPerProduct', () {
+      const dtoAllowingMultiple = OrganizationSettingsDto(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+        allowMultipleCollectionsPerProduct: true,
+      );
+
+      final entity = mapper.settingsToEntity(dtoAllowingMultiple);
+      expect(entity.allowMultipleCollectionsPerProduct, isTrue);
+
+      final roundTrippedDto = mapper.settingsToDto(entity);
+      expect(roundTrippedDto.allowMultipleCollectionsPerProduct, isTrue);
+    });
+
+    test('settingsToEntity defaults allowMultipleCollectionsPerProduct to '
+        'false when absent from the DTO', () {
+      final entity = mapper.settingsToEntity(dto.settings);
+      expect(entity.allowMultipleCollectionsPerProduct, isFalse);
+    });
+
     test('settingsToEntity/settingsToDto round-trip the segment', () {
       const dtoWithSegment = OrganizationSettingsDto(
         currency: 'BRL',

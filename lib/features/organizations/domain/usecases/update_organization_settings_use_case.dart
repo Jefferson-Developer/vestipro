@@ -28,6 +28,7 @@ final class UpdateOrganizationSettingsUseCase {
     List<String> requiredCustomerFields = const <String>[],
     List<String> customerAddressTypes = const <String>[],
     List<String> customerContactTypes = const <String>[],
+    bool allowMultipleCollectionsPerProduct = false,
   }) async {
     final trimmedId = id.trim();
     final trimmedUpdatedBy = updatedBy.trim();
@@ -57,6 +58,7 @@ final class UpdateOrganizationSettingsUseCase {
         requiredCustomerFields: requiredCustomerFields,
         customerAddressTypes: customerAddressTypes,
         customerContactTypes: customerContactTypes,
+        allowMultipleCollectionsPerProduct: allowMultipleCollectionsPerProduct,
       );
     } on ValidationException catch (exception) {
       return AppFailure<Organization>(mapAppExceptionToFailure(exception));

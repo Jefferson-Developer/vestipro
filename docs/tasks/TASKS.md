@@ -164,7 +164,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 ### EPIC-08 — Produtos e Catálogo Base
 - [x] [TASK-064 — Modelar Product](TASK-064-modelar-product.md) — Flutter Senior
 - [x] [TASK-065 — Implementar cadastro/edição de produto](TASK-065-implementar-cadastro-de-produto.md) — Flutter Senior + Front-end
-- [ ] [TASK-066 — Implementar coleções e estações](TASK-066-implementar-colecoes-e-estacoes.md) — Flutter Senior + Front-end
+- [x] [TASK-066 — Implementar coleções e estações](TASK-066-implementar-colecoes-e-estacoes.md) — Flutter Senior + Front-end
 - [ ] [TASK-067 — Implementar categorias e subcategorias](TASK-067-implementar-categorias-e-subcategorias.md) — Flutter Senior + Front-end
 - [ ] [TASK-068 — Implementar fotos e vídeos de produto](TASK-068-implementar-fotos-e-videos-de-produto.md) — Flutter Senior + Front-end
 - [ ] [TASK-069 — Implementar busca global de produtos](TASK-069-implementar-busca-global-de-produtos.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 65 / 220 tasks concluídas.
+**Progresso:** 66 / 220 tasks concluídas.

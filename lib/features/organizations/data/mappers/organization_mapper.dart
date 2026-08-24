@@ -51,6 +51,8 @@ final class OrganizationMapper {
       requiredCustomerFields: dto.requiredCustomerFields,
       customerAddressTypes: dto.customerAddressTypes,
       customerContactTypes: dto.customerContactTypes,
+      allowMultipleCollectionsPerProduct:
+          dto.allowMultipleCollectionsPerProduct,
     );
   }
 
@@ -64,6 +66,8 @@ final class OrganizationMapper {
       requiredCustomerFields: settings.requiredCustomerFields,
       customerAddressTypes: settings.customerAddressTypes,
       customerContactTypes: settings.customerContactTypes,
+      allowMultipleCollectionsPerProduct:
+          settings.allowMultipleCollectionsPerProduct,
     );
   }
 

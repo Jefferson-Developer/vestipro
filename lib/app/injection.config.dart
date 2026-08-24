@@ -399,27 +399,67 @@ import '../features/products/data/mappers/product_form_draft_mapper.dart'
 import '../features/products/data/mappers/product_mapper.dart' as _i309;
 import '../features/products/data/repositories/product_form_draft_repository_impl.dart'
     as _i873;
+import '../features/products/data/repositories/shared_preferences_collection_repository.dart'
+    as _i717;
+import '../features/products/data/repositories/shared_preferences_product_collection_link_repository.dart'
+    as _i654;
 import '../features/products/data/repositories/shared_preferences_product_repository.dart'
     as _i323;
+import '../features/products/data/repositories/shared_preferences_season_repository.dart'
+    as _i860;
+import '../features/products/domain/repositories/collection_repository.dart'
+    as _i626;
+import '../features/products/domain/repositories/product_collection_link_repository.dart'
+    as _i1015;
 import '../features/products/domain/repositories/product_form_draft_repository.dart'
     as _i459;
 import '../features/products/domain/repositories/product_repository.dart'
     as _i321;
+import '../features/products/domain/repositories/season_repository.dart'
+    as _i260;
+import '../features/products/domain/usecases/associate_product_with_collection_use_case.dart'
+    as _i452;
 import '../features/products/domain/usecases/clear_product_form_draft_use_case.dart'
     as _i19;
+import '../features/products/domain/usecases/close_collection_use_case.dart'
+    as _i367;
+import '../features/products/domain/usecases/create_collection_use_case.dart'
+    as _i426;
 import '../features/products/domain/usecases/create_product_use_case.dart'
     as _i300;
+import '../features/products/domain/usecases/create_season_use_case.dart'
+    as _i176;
+import '../features/products/domain/usecases/delete_season_use_case.dart'
+    as _i389;
+import '../features/products/domain/usecases/disassociate_product_from_collection_use_case.dart'
+    as _i134;
 import '../features/products/domain/usecases/get_product_by_id_use_case.dart'
     as _i721;
 import '../features/products/domain/usecases/get_product_form_draft_use_case.dart'
     as _i1021;
+import '../features/products/domain/usecases/list_collections_use_case.dart'
+    as _i1023;
+import '../features/products/domain/usecases/list_products_by_collection_use_case.dart'
+    as _i815;
+import '../features/products/domain/usecases/list_seasons_use_case.dart'
+    as _i722;
 import '../features/products/domain/usecases/publish_product_use_case.dart'
     as _i647;
 import '../features/products/domain/usecases/save_product_form_draft_use_case.dart'
     as _i244;
+import '../features/products/domain/usecases/update_collection_use_case.dart'
+    as _i779;
 import '../features/products/domain/usecases/update_product_use_case.dart'
     as _i12;
+import '../features/products/domain/usecases/update_season_use_case.dart'
+    as _i814;
+import '../features/products/presentation/bloc/collection_form_bloc.dart'
+    as _i89;
+import '../features/products/presentation/bloc/collection_list_bloc.dart'
+    as _i41;
 import '../features/products/presentation/bloc/product_form_bloc.dart' as _i198;
+import '../features/products/presentation/bloc/season_form_bloc.dart' as _i98;
+import '../features/products/presentation/bloc/season_list_bloc.dart' as _i986;
 import '../features/settings/data/datasources/about_app_data_source.dart'
     as _i364;
 import '../features/settings/data/datasources/in_memory_about_app_datasource.dart'
@@ -597,6 +637,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i87.InviteAcceptanceMapper>(
       () => _i87.InviteAcceptanceMapper(gh<_i649.InviteMapper>()),
     );
+    gh.lazySingleton<_i1015.ProductCollectionLinkRepository>(
+      () => const _i654.SharedPreferencesProductCollectionLinkRepository(),
+    );
     gh.lazySingleton<_i999.CustomerFormDraftRepository>(
       () => _i920.CustomerFormDraftRepositoryImpl(
         dataSource: gh<_i1036.CustomerFormDraftDataSource>(),
@@ -626,6 +669,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i960.ProductFormDraftDataSource>(
       () => const _i1033.SharedPreferencesProductFormDraftDataSource(),
+    );
+    gh.lazySingleton<_i626.CollectionRepository>(
+      () => const _i717.SharedPreferencesCollectionRepository(),
+    );
+    gh.lazySingleton<_i260.SeasonRepository>(
+      () => const _i860.SharedPreferencesSeasonRepository(),
     );
     gh.lazySingleton<_i527.OpportunityOutcomeReasonRepository>(
       () => _i292.SharedPreferencesOpportunityOutcomeReasonRepository(
@@ -697,6 +746,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i546.ListTopOpportunityOutcomeReasonsUseCase(
         gh<_i527.OpportunityOutcomeReasonRepository>(),
         gh<_i43.OpportunityRepository>(),
+      ),
+    );
+    gh.factory<_i815.ListProductsByCollectionUseCase>(
+      () => _i815.ListProductsByCollectionUseCase(
+        gh<_i1015.ProductCollectionLinkRepository>(),
+        gh<_i321.ProductRepository>(),
       ),
     );
     gh.factory<_i551.ClearCustomerFormDraftUseCase>(
@@ -786,6 +841,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i185.SignInWithEmailAndPasswordUseCase>(
       () => _i185.SignInWithEmailAndPasswordUseCase(gh<_i472.AuthRepository>()),
     );
+    gh.factory<_i134.DisassociateProductFromCollectionUseCase>(
+      () => _i134.DisassociateProductFromCollectionUseCase(
+        gh<_i1015.ProductCollectionLinkRepository>(),
+      ),
+    );
     gh.factory<_i806.CreateCustomerSegmentUseCase>(
       () => _i806.CreateCustomerSegmentUseCase(
         gh<_i748.CustomerSegmentRepository>(),
@@ -816,6 +876,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i482.ReorderPipelineStagesUseCase>(
       () => _i482.ReorderPipelineStagesUseCase(
         gh<_i385.PipelineStageRepository>(),
+      ),
+    );
+    gh.factory<_i452.AssociateProductWithCollectionUseCase>(
+      () => _i452.AssociateProductWithCollectionUseCase(
+        gh<_i1015.ProductCollectionLinkRepository>(),
+        gh<_i626.CollectionRepository>(),
       ),
     );
     gh.factory<_i300.CreateProductUseCase>(
@@ -935,6 +1001,18 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       registerFor: {_dev, _staging, _prod},
     );
+    gh.factory<_i176.CreateSeasonUseCase>(
+      () => _i176.CreateSeasonUseCase(gh<_i260.SeasonRepository>()),
+    );
+    gh.factory<_i389.DeleteSeasonUseCase>(
+      () => _i389.DeleteSeasonUseCase(gh<_i260.SeasonRepository>()),
+    );
+    gh.factory<_i722.ListSeasonsUseCase>(
+      () => _i722.ListSeasonsUseCase(gh<_i260.SeasonRepository>()),
+    );
+    gh.factory<_i814.UpdateSeasonUseCase>(
+      () => _i814.UpdateSeasonUseCase(gh<_i260.SeasonRepository>()),
+    );
     gh.factory<_i683.OpportunityOutcomeReasonAdminBloc>(
       () => _i683.OpportunityOutcomeReasonAdminBloc(
         listReasons: gh<_i690.ListOpportunityOutcomeReasonsUseCase>(),
@@ -948,6 +1026,18 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i1008.PerformanceMonitor>(
       () => _i387.FirebasePerformanceMonitor(gh<_i346.FirebasePerformance>()),
+    );
+    gh.factory<_i367.CloseCollectionUseCase>(
+      () => _i367.CloseCollectionUseCase(gh<_i626.CollectionRepository>()),
+    );
+    gh.factory<_i426.CreateCollectionUseCase>(
+      () => _i426.CreateCollectionUseCase(gh<_i626.CollectionRepository>()),
+    );
+    gh.factory<_i1023.ListCollectionsUseCase>(
+      () => _i1023.ListCollectionsUseCase(gh<_i626.CollectionRepository>()),
+    );
+    gh.factory<_i779.UpdateCollectionUseCase>(
+      () => _i779.UpdateCollectionUseCase(gh<_i626.CollectionRepository>()),
     );
     gh.factory<_i489.ListCrmActivitiesForCustomerUseCase>(
       () => _i489.ListCrmActivitiesForCustomerUseCase(
@@ -1047,6 +1137,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i340.CloudFunctionsService>(),
       ),
     );
+    gh.factory<_i89.CollectionFormBloc>(
+      () => _i89.CollectionFormBloc(
+        listSeasons: gh<_i722.ListSeasonsUseCase>(),
+        createCollection: gh<_i426.CreateCollectionUseCase>(),
+        updateCollection: gh<_i779.UpdateCollectionUseCase>(),
+      ),
+    );
     gh.lazySingleton<_i999.InviteAcceptanceRepository>(
       () => _i371.InviteAcceptanceRepositoryImpl(
         dataSource: gh<_i336.InviteAcceptanceDataSource>(),
@@ -1081,6 +1178,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i571.UpdateCompanyUseCase>(
       () => _i571.UpdateCompanyUseCase(gh<_i799.CompanyRepository>()),
     );
+    gh.factory<_i98.SeasonFormBloc>(
+      () => _i98.SeasonFormBloc(
+        createSeason: gh<_i176.CreateSeasonUseCase>(),
+        updateSeason: gh<_i814.UpdateSeasonUseCase>(),
+      ),
+    );
     gh.lazySingleton<_i432.AuditLogDataSource>(
       () => _i709.FirestoreAuditLogDataSource(gh<_i974.FirebaseFirestore>()),
     );
@@ -1094,6 +1197,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i591.UserAccessRepositoryImpl(
         dataSource: gh<_i681.UserAccessDataSource>(),
         mapper: gh<_i566.UserAccessUpdateResultMapper>(),
+      ),
+    );
+    gh.factory<_i41.CollectionListBloc>(
+      () => _i41.CollectionListBloc(
+        listCollections: gh<_i1023.ListCollectionsUseCase>(),
+        closeCollection: gh<_i367.CloseCollectionUseCase>(),
       ),
     );
     gh.lazySingleton<_i668.UserProfileDataSource>(
@@ -1130,6 +1239,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i667.PortfolioAssignmentRepositoryImpl(
         dataSource: gh<_i847.PortfolioAssignmentDataSource>(),
         mapper: gh<_i708.PortfolioAssignmentMapper>(),
+      ),
+    );
+    gh.factory<_i986.SeasonListBloc>(
+      () => _i986.SeasonListBloc(
+        listSeasons: gh<_i722.ListSeasonsUseCase>(),
+        deleteSeason: gh<_i389.DeleteSeasonUseCase>(),
       ),
     );
     gh.lazySingleton<_i753.AuditLogRepository>(

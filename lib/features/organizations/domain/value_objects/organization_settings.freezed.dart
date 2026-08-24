@@ -33,7 +33,12 @@ mixin _$OrganizationSettings {
 /// `showroom|Showroom` or `warehouse|Deposito`.
  List<String> get customerAddressTypes;/// Extra contact type codes/labels available in the Customer form, e.g.
 /// `logistics|Logistica`.
- List<String> get customerContactTypes;
+ List<String> get customerContactTypes;/// Whether a Product can be associated with more than one `Collection`
+/// at once (TASK-066), e.g. a continuous product carried in both a core
+/// collection and a seasonal drop. `false` (the default) means
+/// `AssociateProductWithCollectionUseCase` replaces any previous
+/// association instead of adding a second one.
+ bool get allowMultipleCollectionsPerProduct;
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -44,16 +49,16 @@ $OrganizationSettingsCopyWith<OrganizationSettings> get copyWith => _$Organizati
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment)&&(identical(other.maxTeamsPerUser, maxTeamsPerUser) || other.maxTeamsPerUser == maxTeamsPerUser)&&const DeepCollectionEquality().equals(other.requiredCustomerFields, requiredCustomerFields)&&const DeepCollectionEquality().equals(other.customerAddressTypes, customerAddressTypes)&&const DeepCollectionEquality().equals(other.customerContactTypes, customerContactTypes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment)&&(identical(other.maxTeamsPerUser, maxTeamsPerUser) || other.maxTeamsPerUser == maxTeamsPerUser)&&const DeepCollectionEquality().equals(other.requiredCustomerFields, requiredCustomerFields)&&const DeepCollectionEquality().equals(other.customerAddressTypes, customerAddressTypes)&&const DeepCollectionEquality().equals(other.customerContactTypes, customerContactTypes)&&(identical(other.allowMultipleCollectionsPerProduct, allowMultipleCollectionsPerProduct) || other.allowMultipleCollectionsPerProduct == allowMultipleCollectionsPerProduct));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment,maxTeamsPerUser,const DeepCollectionEquality().hash(requiredCustomerFields),const DeepCollectionEquality().hash(customerAddressTypes),const DeepCollectionEquality().hash(customerContactTypes));
+int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment,maxTeamsPerUser,const DeepCollectionEquality().hash(requiredCustomerFields),const DeepCollectionEquality().hash(customerAddressTypes),const DeepCollectionEquality().hash(customerContactTypes),allowMultipleCollectionsPerProduct);
 
 @override
 String toString() {
-  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment, maxTeamsPerUser: $maxTeamsPerUser, requiredCustomerFields: $requiredCustomerFields, customerAddressTypes: $customerAddressTypes, customerContactTypes: $customerContactTypes)';
+  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment, maxTeamsPerUser: $maxTeamsPerUser, requiredCustomerFields: $requiredCustomerFields, customerAddressTypes: $customerAddressTypes, customerContactTypes: $customerContactTypes, allowMultipleCollectionsPerProduct: $allowMultipleCollectionsPerProduct)';
 }
 
 
@@ -64,7 +69,7 @@ abstract mixin class $OrganizationSettingsCopyWith<$Res>  {
   factory $OrganizationSettingsCopyWith(OrganizationSettings value, $Res Function(OrganizationSettings) _then) = _$OrganizationSettingsCopyWithImpl;
 @useResult
 $Res call({
- String currency, String country, String defaultLanguage, String? segment, int? maxTeamsPerUser, List<String> requiredCustomerFields, List<String> customerAddressTypes, List<String> customerContactTypes
+ String currency, String country, String defaultLanguage, String? segment, int? maxTeamsPerUser, List<String> requiredCustomerFields, List<String> customerAddressTypes, List<String> customerContactTypes, bool allowMultipleCollectionsPerProduct
 });
 
 
@@ -81,7 +86,7 @@ class _$OrganizationSettingsCopyWithImpl<$Res>
 
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,Object? maxTeamsPerUser = freezed,Object? requiredCustomerFields = null,Object? customerAddressTypes = null,Object? customerContactTypes = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,Object? maxTeamsPerUser = freezed,Object? requiredCustomerFields = null,Object? customerAddressTypes = null,Object? customerContactTypes = null,Object? allowMultipleCollectionsPerProduct = null,}) {
   return _then(_self.copyWith(
 currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
@@ -91,7 +96,8 @@ as String?,maxTeamsPerUser: freezed == maxTeamsPerUser ? _self.maxTeamsPerUser :
 as int?,requiredCustomerFields: null == requiredCustomerFields ? _self.requiredCustomerFields : requiredCustomerFields // ignore: cast_nullable_to_non_nullable
 as List<String>,customerAddressTypes: null == customerAddressTypes ? _self.customerAddressTypes : customerAddressTypes // ignore: cast_nullable_to_non_nullable
 as List<String>,customerContactTypes: null == customerContactTypes ? _self.customerContactTypes : customerContactTypes // ignore: cast_nullable_to_non_nullable
-as List<String>,
+as List<String>,allowMultipleCollectionsPerProduct: null == allowMultipleCollectionsPerProduct ? _self.allowMultipleCollectionsPerProduct : allowMultipleCollectionsPerProduct // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -176,10 +182,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser,  List<String> requiredCustomerFields,  List<String> customerAddressTypes,  List<String> customerContactTypes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser,  List<String> requiredCustomerFields,  List<String> customerAddressTypes,  List<String> customerContactTypes,  bool allowMultipleCollectionsPerProduct)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OrganizationSettings() when $default != null:
-return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser,_that.requiredCustomerFields,_that.customerAddressTypes,_that.customerContactTypes);case _:
+return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser,_that.requiredCustomerFields,_that.customerAddressTypes,_that.customerContactTypes,_that.allowMultipleCollectionsPerProduct);case _:
   return orElse();
 
 }
@@ -197,10 +203,10 @@ return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser,  List<String> requiredCustomerFields,  List<String> customerAddressTypes,  List<String> customerContactTypes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser,  List<String> requiredCustomerFields,  List<String> customerAddressTypes,  List<String> customerContactTypes,  bool allowMultipleCollectionsPerProduct)  $default,) {final _that = this;
 switch (_that) {
 case _OrganizationSettings():
-return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser,_that.requiredCustomerFields,_that.customerAddressTypes,_that.customerContactTypes);case _:
+return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser,_that.requiredCustomerFields,_that.customerAddressTypes,_that.customerContactTypes,_that.allowMultipleCollectionsPerProduct);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -217,10 +223,10 @@ return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser,  List<String> requiredCustomerFields,  List<String> customerAddressTypes,  List<String> customerContactTypes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser,  List<String> requiredCustomerFields,  List<String> customerAddressTypes,  List<String> customerContactTypes,  bool allowMultipleCollectionsPerProduct)?  $default,) {final _that = this;
 switch (_that) {
 case _OrganizationSettings() when $default != null:
-return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser,_that.requiredCustomerFields,_that.customerAddressTypes,_that.customerContactTypes);case _:
+return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser,_that.requiredCustomerFields,_that.customerAddressTypes,_that.customerContactTypes,_that.allowMultipleCollectionsPerProduct);case _:
   return null;
 
 }
@@ -232,7 +238,7 @@ return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment
 
 
 class _OrganizationSettings extends OrganizationSettings {
-  const _OrganizationSettings({required this.currency, required this.country, required this.defaultLanguage, this.segment, this.maxTeamsPerUser, final  List<String> requiredCustomerFields = const <String>[], final  List<String> customerAddressTypes = const <String>[], final  List<String> customerContactTypes = const <String>[]}): _requiredCustomerFields = requiredCustomerFields,_customerAddressTypes = customerAddressTypes,_customerContactTypes = customerContactTypes,super._();
+  const _OrganizationSettings({required this.currency, required this.country, required this.defaultLanguage, this.segment, this.maxTeamsPerUser, final  List<String> requiredCustomerFields = const <String>[], final  List<String> customerAddressTypes = const <String>[], final  List<String> customerContactTypes = const <String>[], this.allowMultipleCollectionsPerProduct = false}): _requiredCustomerFields = requiredCustomerFields,_customerAddressTypes = customerAddressTypes,_customerContactTypes = customerContactTypes,super._();
   
 
 @override final  String currency;
@@ -287,6 +293,12 @@ class _OrganizationSettings extends OrganizationSettings {
   return EqualUnmodifiableListView(_customerContactTypes);
 }
 
+/// Whether a Product can be associated with more than one `Collection`
+/// at once (TASK-066), e.g. a continuous product carried in both a core
+/// collection and a seasonal drop. `false` (the default) means
+/// `AssociateProductWithCollectionUseCase` replaces any previous
+/// association instead of adding a second one.
+@override@JsonKey() final  bool allowMultipleCollectionsPerProduct;
 
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -298,16 +310,16 @@ _$OrganizationSettingsCopyWith<_OrganizationSettings> get copyWith => __$Organiz
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment)&&(identical(other.maxTeamsPerUser, maxTeamsPerUser) || other.maxTeamsPerUser == maxTeamsPerUser)&&const DeepCollectionEquality().equals(other._requiredCustomerFields, _requiredCustomerFields)&&const DeepCollectionEquality().equals(other._customerAddressTypes, _customerAddressTypes)&&const DeepCollectionEquality().equals(other._customerContactTypes, _customerContactTypes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment)&&(identical(other.maxTeamsPerUser, maxTeamsPerUser) || other.maxTeamsPerUser == maxTeamsPerUser)&&const DeepCollectionEquality().equals(other._requiredCustomerFields, _requiredCustomerFields)&&const DeepCollectionEquality().equals(other._customerAddressTypes, _customerAddressTypes)&&const DeepCollectionEquality().equals(other._customerContactTypes, _customerContactTypes)&&(identical(other.allowMultipleCollectionsPerProduct, allowMultipleCollectionsPerProduct) || other.allowMultipleCollectionsPerProduct == allowMultipleCollectionsPerProduct));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment,maxTeamsPerUser,const DeepCollectionEquality().hash(_requiredCustomerFields),const DeepCollectionEquality().hash(_customerAddressTypes),const DeepCollectionEquality().hash(_customerContactTypes));
+int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment,maxTeamsPerUser,const DeepCollectionEquality().hash(_requiredCustomerFields),const DeepCollectionEquality().hash(_customerAddressTypes),const DeepCollectionEquality().hash(_customerContactTypes),allowMultipleCollectionsPerProduct);
 
 @override
 String toString() {
-  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment, maxTeamsPerUser: $maxTeamsPerUser, requiredCustomerFields: $requiredCustomerFields, customerAddressTypes: $customerAddressTypes, customerContactTypes: $customerContactTypes)';
+  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment, maxTeamsPerUser: $maxTeamsPerUser, requiredCustomerFields: $requiredCustomerFields, customerAddressTypes: $customerAddressTypes, customerContactTypes: $customerContactTypes, allowMultipleCollectionsPerProduct: $allowMultipleCollectionsPerProduct)';
 }
 
 
@@ -318,7 +330,7 @@ abstract mixin class _$OrganizationSettingsCopyWith<$Res> implements $Organizati
   factory _$OrganizationSettingsCopyWith(_OrganizationSettings value, $Res Function(_OrganizationSettings) _then) = __$OrganizationSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- String currency, String country, String defaultLanguage, String? segment, int? maxTeamsPerUser, List<String> requiredCustomerFields, List<String> customerAddressTypes, List<String> customerContactTypes
+ String currency, String country, String defaultLanguage, String? segment, int? maxTeamsPerUser, List<String> requiredCustomerFields, List<String> customerAddressTypes, List<String> customerContactTypes, bool allowMultipleCollectionsPerProduct
 });
 
 
@@ -335,7 +347,7 @@ class __$OrganizationSettingsCopyWithImpl<$Res>
 
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,Object? maxTeamsPerUser = freezed,Object? requiredCustomerFields = null,Object? customerAddressTypes = null,Object? customerContactTypes = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,Object? maxTeamsPerUser = freezed,Object? requiredCustomerFields = null,Object? customerAddressTypes = null,Object? customerContactTypes = null,Object? allowMultipleCollectionsPerProduct = null,}) {
   return _then(_OrganizationSettings(
 currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
@@ -345,7 +357,8 @@ as String?,maxTeamsPerUser: freezed == maxTeamsPerUser ? _self.maxTeamsPerUser :
 as int?,requiredCustomerFields: null == requiredCustomerFields ? _self._requiredCustomerFields : requiredCustomerFields // ignore: cast_nullable_to_non_nullable
 as List<String>,customerAddressTypes: null == customerAddressTypes ? _self._customerAddressTypes : customerAddressTypes // ignore: cast_nullable_to_non_nullable
 as List<String>,customerContactTypes: null == customerContactTypes ? _self._customerContactTypes : customerContactTypes // ignore: cast_nullable_to_non_nullable
-as List<String>,
+as List<String>,allowMultipleCollectionsPerProduct: null == allowMultipleCollectionsPerProduct ? _self.allowMultipleCollectionsPerProduct : allowMultipleCollectionsPerProduct // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

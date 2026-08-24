@@ -205,6 +205,23 @@ final class _InMemoryProductRepository implements ProductRepository {
       NotFoundFailure('Product not found.', code: 'product_not_found'),
     );
   }
+
+  @override
+  Future<AppResult<List<Product>>> getByIds({
+    required String organizationId,
+    required List<String> ids,
+  }) async {
+    final wanted = ids.toSet();
+    return AppSuccess<List<Product>>(
+      products
+          .where(
+            (product) =>
+                product.organizationId == organizationId &&
+                wanted.contains(product.id),
+          )
+          .toList(growable: false),
+    );
+  }
 }
 
 final class _InMemoryAuditLogRepository implements AuditLogRepository {
