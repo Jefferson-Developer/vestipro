@@ -216,6 +216,8 @@ import '../features/onboarding/domain/usecases/get_onboarding_progress_use_case.
 import '../features/onboarding/domain/usecases/save_onboarding_progress_use_case.dart'
     as _i81;
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart' as _i593;
+import '../features/opportunities/data/mappers/opportunity_mapper.dart'
+    as _i449;
 import '../features/organizations/data/datasources/branch_data_source.dart'
     as _i526;
 import '../features/organizations/data/datasources/company_data_source.dart'
@@ -418,6 +420,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i265.LeadMapper>(() => const _i265.LeadMapper());
     gh.lazySingleton<_i477.OnboardingProgressMapper>(
       () => const _i477.OnboardingProgressMapper(),
+    );
+    gh.lazySingleton<_i449.OpportunityMapper>(
+      () => const _i449.OpportunityMapper(),
     );
     gh.lazySingleton<_i964.BranchMapper>(() => const _i964.BranchMapper());
     gh.lazySingleton<_i642.CompanyMapper>(() => const _i642.CompanyMapper());

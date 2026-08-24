@@ -9,13 +9,17 @@ import 'lead_use_case_helpers.dart';
 /// Converts a qualified Lead into an Opportunity, preserving traceability
 /// through [Lead.convertedOpportunityId].
 ///
-/// `Opportunity` itself is modeled in TASK-057 (still pending as of
-/// TASK-055). Until that task lands, this use case accepts an
+/// `Opportunity` itself is modeled in TASK-057 (`Opportunity.leadId`
+/// mirrors `Customer.sourceLeadId`). This use case still accepts an
 /// already-generated [opportunityId] from the caller instead of creating the
-/// Opportunity aggregate directly, so it does not duplicate/anticipate
-/// TASK-057's modeling. Once `Opportunity` exists, the caller creates it
-/// first (setting `sourceLeadId`, mirroring `Customer.sourceLeadId`) and then
-/// calls this use case to record the Lead-side link and status transition.
+/// Opportunity aggregate directly, mirroring the split between
+/// `CreateOpportunityUseCase` (creates the Opportunity, setting `leadId`)
+/// and this use case (records the Lead-side link and status transition) —
+/// the same two-step shape `ConvertLeadToCustomerUseCase` collapses into one
+/// call because `Customer` creation doesn't depend on Lead-only inputs the
+/// way `Opportunity.stageId`/`estimatedValue`/`probability` do. A future
+/// orchestration use case may wrap both calls if the funnel UI (TASK-058)
+/// needs a single entry point.
 final class ConvertLeadToOpportunityUseCase {
   ConvertLeadToOpportunityUseCase(this._repository);
 
