@@ -21,6 +21,7 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart';
 import '../features/authentication/presentation/bloc/login_bloc.dart';
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart';
 import '../features/audit_log/audit_log.dart';
+import '../features/customers/customers.dart';
 import '../features/invites/invites.dart';
 import '../features/onboarding/onboarding.dart';
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
@@ -153,6 +154,14 @@ class VestiProApp extends StatelessWidget {
               listAuditLogEntries: getIt<ListAuditLogEntriesUseCase>(),
             ),
           ),
+          customerFormPageBuilder: (context, orgId, companyId) =>
+              CustomerFormPage(
+                organizationId: orgId,
+                companyId: companyId,
+                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                permissionService: getIt<PermissionService>(),
+                createBloc: () => getIt<CustomerFormBloc>(),
+              ),
           loginPageBuilder: (context) =>
               LoginPage(createBloc: () => getIt<LoginBloc>()),
           signUpPageBuilder: (context) =>

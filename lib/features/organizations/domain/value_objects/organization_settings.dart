@@ -31,6 +31,11 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     /// cannot be assigned to more than this many Teams in the Organization.
     /// `null` means unlimited.
     int? maxTeamsPerUser,
+
+    /// Extra customer form fields that this Organization requires beyond the
+    /// hard minimum (document + legal/full name). Stored as stable field codes
+    /// so the Organization model stays decoupled from the customers feature.
+    @Default(<String>[]) List<String> requiredCustomerFields,
   }) = _OrganizationSettings;
 
   /// Builds validated [OrganizationSettings], trimming each value and
@@ -47,12 +52,20 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     required String defaultLanguage,
     String? segment,
     int? maxTeamsPerUser,
+    List<String> requiredCustomerFields = const <String>[],
   }) {
     final fieldErrors = <String, String>{};
     final trimmedCurrency = currency.trim();
     final trimmedCountry = country.trim();
     final trimmedDefaultLanguage = defaultLanguage.trim();
     final trimmedSegment = segment?.trim();
+    final normalizedRequiredCustomerFields =
+        requiredCustomerFields
+            .map((field) => field.trim())
+            .where((field) => field.isNotEmpty)
+            .toSet()
+            .toList(growable: false)
+          ..sort();
 
     if (trimmedCurrency.isEmpty) {
       fieldErrors['currency'] = 'Currency is required.';
@@ -84,6 +97,7 @@ abstract class OrganizationSettings with _$OrganizationSettings {
           ? null
           : trimmedSegment,
       maxTeamsPerUser: maxTeamsPerUser,
+      requiredCustomerFields: normalizedRequiredCustomerFields,
     );
   }
 }

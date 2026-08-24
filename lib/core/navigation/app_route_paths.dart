@@ -50,6 +50,21 @@ final class AuditLogRoute extends AppRoute {
   String get location => '/org/$orgId/settings/audit-log';
 }
 
+/// Customer creation form route (TASK-049), scoped by Organization and
+/// Company. Protected in [AppRouter] by `customer.create`.
+final class CustomerFormRoute extends AppRoute {
+  const CustomerFormRoute({required this.orgId, required this.companyId});
+
+  final String orgId;
+  final String companyId;
+
+  static const name = 'customerForm';
+  static const pathPattern = '/org/:orgId/companies/:companyId/customers/new';
+
+  @override
+  String get location => '/org/$orgId/companies/$companyId/customers/new';
+}
+
 /// Route shown to sign a user in (TASK-034).
 ///
 /// [SessionAuthGuard] (TASK-041) redirects here for any unauthenticated

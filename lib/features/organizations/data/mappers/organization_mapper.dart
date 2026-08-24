@@ -48,6 +48,7 @@ final class OrganizationMapper {
       defaultLanguage: dto.defaultLanguage,
       segment: dto.segment,
       maxTeamsPerUser: dto.maxTeamsPerUser,
+      requiredCustomerFields: dto.requiredCustomerFields,
     );
   }
 
@@ -58,6 +59,7 @@ final class OrganizationMapper {
       defaultLanguage: settings.defaultLanguage,
       segment: settings.segment,
       maxTeamsPerUser: settings.maxTeamsPerUser,
+      requiredCustomerFields: settings.requiredCustomerFields,
     );
   }
 

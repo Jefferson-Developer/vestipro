@@ -118,6 +118,27 @@ void main() {
       expect(find.text('Sem permissão'), findsOneWidget);
       expect(find.text('audit-log:acme'), findsNothing);
     });
+
+    testWidgets('protects CustomerFormRoute with customer.create', (
+      tester,
+    ) async {
+      final appRouter = _buildRouter(
+        authorizationGuard: const _DenyCustomerCreateGuard(),
+        customerFormPageBuilder: (context, orgId, companyId) =>
+            Scaffold(body: Text('customer-form:$orgId:$companyId')),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(
+        const CustomerFormRoute(orgId: 'acme', companyId: 'company-1').location,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.text('Sem permissão'), findsOneWidget);
+      expect(find.text('customer-form:acme:company-1'), findsNothing);
+    });
   });
 }
 
@@ -127,6 +148,8 @@ AppRouter _buildRouter({
   AuthorizationGuard? authorizationGuard,
   Widget Function(BuildContext context, String orgId)? aboutAppPageBuilder,
   Widget Function(BuildContext context, String orgId)? auditLogPageBuilder,
+  Widget Function(BuildContext context, String orgId, String companyId)?
+  customerFormPageBuilder,
   WidgetBuilder? loginPageBuilder,
   Widget Function(BuildContext context, String token)? acceptInvitePageBuilder,
 }) {
@@ -140,6 +163,7 @@ AppRouter _buildRouter({
     auditLogPageBuilder:
         auditLogPageBuilder ??
         (context, orgId) => Scaffold(body: Text('audit-log:$orgId')),
+    customerFormPageBuilder: customerFormPageBuilder,
     loginPageBuilder:
         loginPageBuilder ?? (context) => const Scaffold(body: Text('login')),
     signUpPageBuilder: (context) => const Scaffold(body: Text('sign-up')),
@@ -175,6 +199,22 @@ final class _DenyAuditLogGuard implements AuthorizationGuard {
     required Capability requiredCapability,
   }) {
     if (requiredCapability == Capability.auditLogView) {
+      return const ForbiddenRoute().location;
+    }
+    return null;
+  }
+}
+
+final class _DenyCustomerCreateGuard implements AuthorizationGuard {
+  const _DenyCustomerCreateGuard();
+
+  @override
+  String? redirect(
+    BuildContext context,
+    GoRouterState state, {
+    required Capability requiredCapability,
+  }) {
+    if (requiredCapability == Capability.customerCreate) {
       return const ForbiddenRoute().location;
     }
     return null;

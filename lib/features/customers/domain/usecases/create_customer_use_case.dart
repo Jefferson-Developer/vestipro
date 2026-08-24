@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../customer_identity_validator.dart';
@@ -8,6 +10,7 @@ import '../value_objects/customer_sync_status.dart';
 import '../value_objects/customer_type.dart';
 import 'customer_use_case_helpers.dart';
 
+@injectable
 final class CreateCustomerUseCase {
   CreateCustomerUseCase(this._repository);
 

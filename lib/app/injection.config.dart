@@ -85,7 +85,35 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart'
 import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
+import '../features/customers/data/datasources/customer_form_draft_data_source.dart'
+    as _i1036;
+import '../features/customers/data/datasources/shared_preferences_customer_form_draft_data_source.dart'
+    as _i292;
+import '../features/customers/data/mappers/customer_form_draft_mapper.dart'
+    as _i258;
 import '../features/customers/data/mappers/customer_mapper.dart' as _i457;
+import '../features/customers/data/repositories/customer_form_draft_repository_impl.dart'
+    as _i920;
+import '../features/customers/data/repositories/shared_preferences_customer_repository.dart'
+    as _i784;
+import '../features/customers/domain/repositories/customer_form_draft_repository.dart'
+    as _i999;
+import '../features/customers/domain/repositories/customer_repository.dart'
+    as _i857;
+import '../features/customers/domain/usecases/clear_customer_form_draft_use_case.dart'
+    as _i551;
+import '../features/customers/domain/usecases/create_customer_use_case.dart'
+    as _i427;
+import '../features/customers/domain/usecases/get_customer_form_config_use_case.dart'
+    as _i825;
+import '../features/customers/domain/usecases/get_customer_form_draft_use_case.dart'
+    as _i504;
+import '../features/customers/domain/usecases/save_customer_form_draft_use_case.dart'
+    as _i780;
+import '../features/customers/domain/usecases/update_customer_use_case.dart'
+    as _i172;
+import '../features/customers/presentation/bloc/customer_form_bloc.dart'
+    as _i478;
 import '../features/invites/data/datasources/cloud_functions_invite_acceptance_data_source.dart'
     as _i674;
 import '../features/invites/data/datasources/firestore_invite_data_source.dart'
@@ -297,6 +325,7 @@ import '../features/users/presentation/bloc/team_form_bloc.dart' as _i516;
 import '../features/users/presentation/bloc/team_list_bloc.dart' as _i831;
 import '../features/users/presentation/bloc/user_list_bloc.dart' as _i244;
 import '../features/users/presentation/bloc/user_role_edit_bloc.dart' as _i698;
+import '../features/users/users.dart' as _i220;
 import 'injection_module.dart' as _i212;
 
 const String _dev = 'dev';
@@ -324,6 +353,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i756.UserProfileMapper>(
       () => const _i756.UserProfileMapper(),
+    );
+    gh.lazySingleton<_i258.CustomerFormDraftMapper>(
+      () => const _i258.CustomerFormDraftMapper(),
     );
     gh.lazySingleton<_i457.CustomerMapper>(() => const _i457.CustomerMapper());
     gh.lazySingleton<_i649.InviteMapper>(() => const _i649.InviteMapper());
@@ -359,8 +391,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i99.SecureSessionStore>(
       () => _i772.SecureFlutterSessionStore(gh<_i558.FlutterSecureStorage>()),
     );
+    gh.lazySingleton<_i1036.CustomerFormDraftDataSource>(
+      () => const _i292.SharedPreferencesCustomerFormDraftDataSource(),
+    );
     gh.lazySingleton<_i87.InviteAcceptanceMapper>(
       () => _i87.InviteAcceptanceMapper(gh<_i649.InviteMapper>()),
+    );
+    gh.lazySingleton<_i999.CustomerFormDraftRepository>(
+      () => _i920.CustomerFormDraftRepositoryImpl(
+        dataSource: gh<_i1036.CustomerFormDraftDataSource>(),
+        mapper: gh<_i258.CustomerFormDraftMapper>(),
+      ),
     );
     gh.lazySingleton<_i924.OnboardingProgressDataSource>(
       () => const _i1035.SharedPreferencesOnboardingProgressDataSource(),
@@ -369,6 +410,25 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i803.OnboardingProgressRepositoryImpl(
         dataSource: gh<_i924.OnboardingProgressDataSource>(),
         mapper: gh<_i477.OnboardingProgressMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i857.CustomerRepository>(
+      () =>
+          _i784.SharedPreferencesCustomerRepository(gh<_i457.CustomerMapper>()),
+    );
+    gh.factory<_i551.ClearCustomerFormDraftUseCase>(
+      () => _i551.ClearCustomerFormDraftUseCase(
+        gh<_i999.CustomerFormDraftRepository>(),
+      ),
+    );
+    gh.factory<_i504.GetCustomerFormDraftUseCase>(
+      () => _i504.GetCustomerFormDraftUseCase(
+        gh<_i999.CustomerFormDraftRepository>(),
+      ),
+    );
+    gh.factory<_i780.SaveCustomerFormDraftUseCase>(
+      () => _i780.SaveCustomerFormDraftUseCase(
+        gh<_i999.CustomerFormDraftRepository>(),
       ),
     );
     gh.lazySingleton<_i56.FirebaseAppCheck>(
@@ -453,6 +513,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i461.AppEnvironment>(),
         gh<_i465.AppClientMetadataProvider>(),
       ),
+    );
+    gh.factory<_i427.CreateCustomerUseCase>(
+      () => _i427.CreateCustomerUseCase(gh<_i857.CustomerRepository>()),
+    );
+    gh.factory<_i172.UpdateCustomerUseCase>(
+      () => _i172.UpdateCustomerUseCase(gh<_i857.CustomerRepository>()),
     );
     gh.lazySingleton<_i364.AboutAppDataSource>(
       () => _i639.InMemoryAboutAppDataSource.injectable(
@@ -671,6 +737,11 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i756.UserProfileMapper>(),
       ),
     );
+    gh.factory<_i825.GetCustomerFormConfigUseCase>(
+      () => _i825.GetCustomerFormConfigUseCase(
+        gh<_i756.OrganizationRepository>(),
+      ),
+    );
     gh.factory<_i421.RecordAuditLogUseCase>(
       () => _i421.RecordAuditLogUseCase(gh<_i753.AuditLogRepository>()),
     );
@@ -816,6 +887,18 @@ extension GetItInjectableX on _i174.GetIt {
         createInvite: gh<_i461.CreateInviteUseCase>(),
         membershipRepository: gh<_i957.MembershipRepository>(),
         authRepository: gh<_i472.AuthRepository>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i478.CustomerFormBloc>(
+      () => _i478.CustomerFormBloc(
+        getConfig: gh<_i825.GetCustomerFormConfigUseCase>(),
+        getDraft: gh<_i504.GetCustomerFormDraftUseCase>(),
+        saveDraft: gh<_i780.SaveCustomerFormDraftUseCase>(),
+        clearDraft: gh<_i551.ClearCustomerFormDraftUseCase>(),
+        createCustomer: gh<_i427.CreateCustomerUseCase>(),
+        updateCustomer: gh<_i172.UpdateCustomerUseCase>(),
+        listOrganizationUsers: gh<_i220.ListOrganizationUsersUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );

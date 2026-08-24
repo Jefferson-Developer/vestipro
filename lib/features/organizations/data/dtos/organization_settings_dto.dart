@@ -7,6 +7,7 @@ final class OrganizationSettingsDto {
     required this.defaultLanguage,
     this.segment,
     this.maxTeamsPerUser,
+    this.requiredCustomerFields = const <String>[],
   });
 
   factory OrganizationSettingsDto.fromJson(Map<String, dynamic> json) {
@@ -15,6 +16,7 @@ final class OrganizationSettingsDto {
     final defaultLanguage = json['defaultLanguage'];
     final segment = json['segment'];
     final maxTeamsPerUser = json['maxTeamsPerUser'];
+    final rawRequiredCustomerFields = json['requiredCustomerFields'];
 
     if (currency is! String ||
         country is! String ||
@@ -33,6 +35,7 @@ final class OrganizationSettingsDto {
       defaultLanguage: defaultLanguage,
       segment: segment as String?,
       maxTeamsPerUser: maxTeamsPerUser as int?,
+      requiredCustomerFields: _stringListFromJson(rawRequiredCustomerFields),
     );
   }
 
@@ -52,6 +55,7 @@ final class OrganizationSettingsDto {
   /// resend every value it wants to keep.
   final String? segment;
   final int? maxTeamsPerUser;
+  final List<String> requiredCustomerFields;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -60,6 +64,19 @@ final class OrganizationSettingsDto {
       'defaultLanguage': defaultLanguage,
       if (segment != null) 'segment': segment,
       if (maxTeamsPerUser != null) 'maxTeamsPerUser': maxTeamsPerUser,
+      if (requiredCustomerFields.isNotEmpty)
+        'requiredCustomerFields': requiredCustomerFields,
     };
   }
+}
+
+List<String> _stringListFromJson(Object? value) {
+  if (value == null) return const <String>[];
+  if (value is! List<dynamic> || value.any((item) => item is! String)) {
+    throw const ValidationException(
+      'Invalid organization settings payload.',
+      code: 'invalid_organization_settings_payload',
+    );
+  }
+  return List<String>.unmodifiable(value.cast<String>());
 }
