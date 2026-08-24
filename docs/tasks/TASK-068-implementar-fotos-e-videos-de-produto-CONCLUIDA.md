@@ -227,7 +227,7 @@ flutter test
 
 ## Commit
 
-Ver hash abaixo.
+`feat(products): implement product photo and video gallery`
 
 ## Push
 
@@ -235,7 +235,7 @@ Não realizado nesta rodada (autorização apenas para commit local).
 
 ## Hash do commit
 
-Ver mensagem final da task.
+`ce5e67ebe4bb1639f39b43d8ee6257d871ff79d7`
 
 ## Branch
 
