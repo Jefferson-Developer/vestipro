@@ -9,10 +9,12 @@ import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_storage/firebase_storage.dart';
+import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
 
 import '../core/analytics/configure_analytics.dart';
+import '../core/database/app_database.dart';
 import '../core/database/configure_firestore.dart';
 import '../core/environment/app_environment.dart';
 import '../core/feature_flags/configure_remote_config.dart';
@@ -158,5 +160,23 @@ abstract class AppInjectionModule {
   @lazySingleton
   AboutAppSeedModel aboutAppSeedModel(AppEnvironment environment) {
     return AboutAppSeedModel.fromEnvironment(environment);
+  }
+
+  /// Opens the local offline database (TASK-054) the first time something
+  /// resolves [AppDatabase] — same lazy-DI-triggered wiring rationale as the
+  /// Firebase product providers above, so the widget-test-heavy app never
+  /// pays for it unless a feature actually reads/writes offline data.
+  ///
+  /// Native platforms (Android/iOS/Windows/macOS/Linux) work out of the box
+  /// through `drift_flutter`. Web is not wired yet: `driftDatabase` requires
+  /// bundled `sqlite3.wasm`/`drift_worker.js` assets that do not exist in
+  /// this repository yet, so resolving [AppDatabase] on Web throws a clear
+  /// `ArgumentError` until a later task (EPIC-14) adds those assets. Nothing
+  /// resolves [AppDatabase] yet outside tests that provide their own
+  /// in-memory instance, so this is a documented, currently-unreachable gap
+  /// rather than a regression.
+  @lazySingleton
+  AppDatabase appDatabase() {
+    return AppDatabase(driftDatabase(name: 'vestipro_offline'));
   }
 }

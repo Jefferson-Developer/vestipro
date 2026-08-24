@@ -36,6 +36,8 @@ import '../core/auth/data/repositories/auth_repository_impl.dart' as _i961;
 import '../core/auth/data/services/session_service_impl.dart' as _i520;
 import '../core/auth/domain/repositories/auth_repository.dart' as _i217;
 import '../core/auth/domain/services/session_service.dart' as _i885;
+import '../core/database/app_database.dart' as _i935;
+import '../core/database/database.dart' as _i658;
 import '../core/environment/app_environment.dart' as _i461;
 import '../core/feature_flags/feature_flag_service.dart' as _i972;
 import '../core/feature_flags/firebase_feature_flag_service.dart' as _i845;
@@ -95,6 +97,7 @@ import '../features/customers/data/datasources/shared_preferences_customer_segme
     as _i15;
 import '../features/customers/data/mappers/customer_form_draft_mapper.dart'
     as _i258;
+import '../features/customers/data/mappers/customer_local_mapper.dart' as _i725;
 import '../features/customers/data/mappers/customer_mapper.dart' as _i457;
 import '../features/customers/data/mappers/customer_segment_mapper.dart'
     as _i712;
@@ -102,10 +105,14 @@ import '../features/customers/data/repositories/customer_form_draft_repository_i
     as _i920;
 import '../features/customers/data/repositories/customer_segment_repository_impl.dart'
     as _i1052;
+import '../features/customers/data/repositories/drift_customer_local_store_repository.dart'
+    as _i674;
 import '../features/customers/data/repositories/shared_preferences_customer_repository.dart'
     as _i784;
 import '../features/customers/domain/repositories/customer_form_draft_repository.dart'
     as _i999;
+import '../features/customers/domain/repositories/customer_local_store_repository.dart'
+    as _i361;
 import '../features/customers/domain/repositories/customer_repository.dart'
     as _i857;
 import '../features/customers/domain/repositories/customer_segment_repository.dart'
@@ -132,6 +139,8 @@ import '../features/customers/domain/usecases/list_customer_portfolio_use_case.d
     as _i576;
 import '../features/customers/domain/usecases/list_customer_segments_use_case.dart'
     as _i261;
+import '../features/customers/domain/usecases/load_initial_customer_offline_data_use_case.dart'
+    as _i977;
 import '../features/customers/domain/usecases/preview_customer_segment_count_use_case.dart'
     as _i438;
 import '../features/customers/domain/usecases/save_customer_form_draft_use_case.dart'
@@ -379,6 +388,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => appInjectionModule.secureStorage,
     );
+    gh.lazySingleton<_i935.AppDatabase>(() => appInjectionModule.appDatabase());
     gh.lazySingleton<_i26.AuthUserMapper>(() => const _i26.AuthUserMapper());
     gh.lazySingleton<_i246.AuditLogEntryMapper>(
       () => const _i246.AuditLogEntryMapper(),
@@ -444,6 +454,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i924.OnboardingProgressDataSource>(
       () => const _i1035.SharedPreferencesOnboardingProgressDataSource(),
     );
+    gh.lazySingleton<_i725.CustomerLocalMapper>(
+      () => _i725.CustomerLocalMapper(gh<_i457.CustomerMapper>()),
+    );
     gh.lazySingleton<_i886.OnboardingProgressRepository>(
       () => _i803.OnboardingProgressRepositoryImpl(
         dataSource: gh<_i924.OnboardingProgressDataSource>(),
@@ -503,6 +516,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i961.AuthRepositoryImpl(
         dataSource: gh<_i845.AuthDataSource>(),
         mapper: gh<_i26.AuthUserMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i361.CustomerLocalStoreRepository>(
+      () => _i674.DriftCustomerLocalStoreRepository(
+        gh<_i658.AppDatabase>(),
+        gh<_i725.CustomerLocalMapper>(),
       ),
     );
     gh.factory<_i820.SendPasswordResetEmailUseCase>(
@@ -954,6 +973,14 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i302.PortfolioVisibilityService(
         gh<_i265.MembershipRepository>(),
         gh<_i265.TeamRepository>(),
+      ),
+    );
+    gh.factory<_i977.LoadInitialCustomerOfflineDataUseCase>(
+      () => _i977.LoadInitialCustomerOfflineDataUseCase(
+        gh<_i857.CustomerRepository>(),
+        gh<_i220.PortfolioVisibilityService>(),
+        gh<_i220.PortfolioAssignmentRepository>(),
+        gh<_i361.CustomerLocalStoreRepository>(),
       ),
     );
     gh.factory<_i93.ListOrganizationUsersUseCase>(

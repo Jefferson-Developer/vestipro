@@ -148,7 +148,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-051 — Implementar carteira de clientes](TASK-051-implementar-carteira-de-clientes.md) — Flutter Senior + Front-end
 - [x] [TASK-052 — Implementar detalhe do cliente 360º](TASK-052-implementar-detalhe-do-cliente-360.md) — Flutter Senior + Front-end
 - [x] [TASK-053 — Implementar segmentação dinâmica de clientes](TASK-053-implementar-segmentacao-de-clientes.md) — Flutter Senior + Front-end
-- [ ] [TASK-054 — Implementar carga offline inicial de clientes](TASK-054-implementar-carga-offline-de-clientes.md) — Flutter Senior
+- [x] [TASK-054 — Implementar carga offline inicial de clientes](TASK-054-implementar-carga-offline-de-clientes.md) — Flutter Senior
 
 ### EPIC-07 — CRM
 - [ ] [TASK-055 — Modelar Lead](TASK-055-modelar-lead.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 53 / 220 tasks concluídas.
+**Progresso:** 54 / 220 tasks concluídas.
