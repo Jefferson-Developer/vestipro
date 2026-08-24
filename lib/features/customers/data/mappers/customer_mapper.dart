@@ -55,6 +55,7 @@ final class CustomerMapper {
       segment: dto.segment,
       originChannel: dto.originChannel,
       responsibleSellerId: dto.responsibleSellerId,
+      sourceLeadId: dto.sourceLeadId,
       registeredAt: dto.registeredAt,
       lastPurchaseAt: dto.lastPurchaseAt,
       addresses: normalizeCustomerAddresses(
@@ -92,6 +93,7 @@ final class CustomerMapper {
       segment: entity.segment,
       originChannel: entity.originChannel,
       responsibleSellerId: entity.responsibleSellerId,
+      sourceLeadId: entity.sourceLeadId,
       registeredAt: entity.registeredAt,
       lastPurchaseAt: entity.lastPurchaseAt,
       addresses: entity.addresses.map(_addressToDto).toList(growable: false),

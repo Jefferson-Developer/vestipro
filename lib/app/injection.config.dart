@@ -186,6 +186,7 @@ import '../features/invites/domain/usecases/validate_invite_use_case.dart'
 import '../features/invites/presentation/bloc/accept_invite_bloc.dart' as _i628;
 import '../features/invites/presentation/bloc/invite_form_bloc.dart' as _i193;
 import '../features/invites/presentation/bloc/invite_list_bloc.dart' as _i0;
+import '../features/leads/data/mappers/lead_mapper.dart' as _i265;
 import '../features/onboarding/data/datasources/onboarding_progress_data_source.dart'
     as _i924;
 import '../features/onboarding/data/datasources/shared_preferences_onboarding_progress_data_source.dart'
@@ -404,6 +405,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => const _i712.CustomerSegmentMapper(),
     );
     gh.lazySingleton<_i649.InviteMapper>(() => const _i649.InviteMapper());
+    gh.lazySingleton<_i265.LeadMapper>(() => const _i265.LeadMapper());
     gh.lazySingleton<_i477.OnboardingProgressMapper>(
       () => const _i477.OnboardingProgressMapper(),
     );

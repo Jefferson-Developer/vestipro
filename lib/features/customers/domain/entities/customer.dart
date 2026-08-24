@@ -37,6 +37,9 @@ abstract class Customer with _$Customer {
     String? segment,
     String? originChannel,
     String? responsibleSellerId,
+    // Traceability back to the originating Lead (TASK-055), when the
+    // Customer was created through `ConvertLeadToCustomerUseCase`.
+    String? sourceLeadId,
     required DateTime registeredAt,
     DateTime? lastPurchaseAt,
     @Default(<CustomerAddress>[]) List<CustomerAddress> addresses,

@@ -27,6 +27,7 @@ final class CustomerDto {
     this.segment,
     this.originChannel,
     this.responsibleSellerId,
+    this.sourceLeadId,
     required this.registeredAt,
     this.lastPurchaseAt,
     this.addresses = const <CustomerAddressDto>[],
@@ -62,6 +63,7 @@ final class CustomerDto {
     final segment = json['segment'];
     final originChannel = json['originChannel'];
     final responsibleSellerId = json['responsibleSellerId'];
+    final sourceLeadId = json['sourceLeadId'];
     final registeredAt = json['registeredAt'];
     final lastPurchaseAt = json['lastPurchaseAt'];
     final rawAddresses = json['addresses'];
@@ -90,6 +92,7 @@ final class CustomerDto {
         (segment != null && segment is! String) ||
         (originChannel != null && originChannel is! String) ||
         (responsibleSellerId != null && responsibleSellerId is! String) ||
+        (sourceLeadId != null && sourceLeadId is! String) ||
         registeredAt is! Timestamp ||
         (lastPurchaseAt != null && lastPurchaseAt is! Timestamp) ||
         createdAt is! Timestamp ||
@@ -123,6 +126,7 @@ final class CustomerDto {
       segment: segment as String?,
       originChannel: originChannel as String?,
       responsibleSellerId: responsibleSellerId as String?,
+      sourceLeadId: sourceLeadId as String?,
       registeredAt: registeredAt.toDate(),
       lastPurchaseAt: (lastPurchaseAt as Timestamp?)?.toDate(),
       addresses: _addressDtosFromJson(rawAddresses),
@@ -156,6 +160,7 @@ final class CustomerDto {
   final String? segment;
   final String? originChannel;
   final String? responsibleSellerId;
+  final String? sourceLeadId;
   final DateTime registeredAt;
   final DateTime? lastPurchaseAt;
   final List<CustomerAddressDto> addresses;
@@ -188,6 +193,7 @@ final class CustomerDto {
       'segment': segment,
       'originChannel': originChannel,
       'responsibleSellerId': responsibleSellerId,
+      'sourceLeadId': sourceLeadId,
       'registeredAt': Timestamp.fromDate(registeredAt),
       'lastPurchaseAt': lastPurchaseAt == null
           ? null

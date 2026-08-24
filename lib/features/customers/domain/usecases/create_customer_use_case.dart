@@ -37,6 +37,9 @@ final class CreateCustomerUseCase {
     String? segment,
     String? originChannel,
     String? responsibleSellerId,
+    // Set by `ConvertLeadToCustomerUseCase` (TASK-055) to preserve
+    // traceability back to the originating Lead.
+    String? sourceLeadId,
     DateTime? registeredAt,
     DateTime? lastPurchaseAt,
     List<CustomerAddress> addresses = const <CustomerAddress>[],
@@ -135,6 +138,7 @@ final class CreateCustomerUseCase {
       segment: normalizeCustomerOptional(segment),
       originChannel: normalizeCustomerOptional(originChannel),
       responsibleSellerId: normalizeCustomerOptional(responsibleSellerId),
+      sourceLeadId: normalizeCustomerOptional(sourceLeadId),
       registeredAt: registeredAt?.toUtc() ?? now,
       lastPurchaseAt: lastPurchaseAt?.toUtc(),
       addresses: normalizedAddresses,
