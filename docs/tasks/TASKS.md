@@ -152,7 +152,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ### EPIC-07 — CRM
 - [x] [TASK-055 — Modelar Lead](TASK-055-modelar-lead.md) — Flutter Senior
-- [ ] [TASK-056 — Implementar cadastro e listagem de leads](TASK-056-implementar-cadastro-e-listagem-de-leads.md) — Flutter Senior + Front-end
+- [x] [TASK-056 — Implementar cadastro e listagem de leads](TASK-056-implementar-cadastro-e-listagem-de-leads.md) — Flutter Senior + Front-end
 - [ ] [TASK-057 — Modelar Opportunity](TASK-057-modelar-opportunity.md) — Flutter Senior
 - [ ] [TASK-058 — Implementar funil de vendas configurável](TASK-058-implementar-funil-de-vendas.md) — Flutter Senior + Front-end
 - [ ] [TASK-059 — Implementar atividades CRM (timeline)](TASK-059-implementar-atividades-crm.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 55 / 220 tasks concluídas.
+**Progresso:** 56 / 220 tasks concluídas.

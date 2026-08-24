@@ -20,6 +20,9 @@ final class AnalyticsEvents {
   static const String signUpCompleted = 'sign_up_completed';
   static const String organizationCreated = 'organization_created';
   static const String customerCreated = 'customer_created';
+  static const String leadCreated = 'lead_created';
+  static const String leadQualified = 'lead_qualified';
+  static const String leadDisqualified = 'lead_disqualified';
   static const String productViewed = 'product_viewed';
   static const String catalogFiltered = 'catalog_filtered';
   static const String orderCreated = 'order_created';
@@ -50,6 +53,9 @@ final class AnalyticsEvents {
     signUpCompleted,
     organizationCreated,
     customerCreated,
+    leadCreated,
+    leadQualified,
+    leadDisqualified,
     productViewed,
     catalogFiltered,
     orderCreated,

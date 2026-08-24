@@ -79,19 +79,63 @@ void main() {
       );
     });
 
-    test('SALES_ASSISTANT can only create/update customers', () {
-      final capabilities = RolePermissionMatrix.capabilitiesFor(
-        SystemRoleName.salesAssistant,
-      );
+    test(
+      'SALES_ASSISTANT can only create/update customers and create leads',
+      () {
+        final capabilities = RolePermissionMatrix.capabilitiesFor(
+          SystemRoleName.salesAssistant,
+        );
 
-      expect(capabilities, <Capability>{
-        Capability.customerCreate,
-        Capability.customerUpdate,
-      });
+        expect(capabilities, <Capability>{
+          Capability.customerCreate,
+          Capability.customerUpdate,
+          Capability.leadCreate,
+        });
+      },
+    );
+
+    test('SALES_REP and SALES_MANAGER can view/create/qualify leads, but '
+        'SALES_ASSISTANT/FINANCE/READ_ONLY cannot qualify them (TASK-056)', () {
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesRep,
+        SystemRoleName.salesManager,
+      ]) {
+        final capabilities = RolePermissionMatrix.capabilitiesFor(role);
+        expect(
+          capabilities.contains(Capability.leadView),
+          isTrue,
+          reason: '$role must see the lead list.',
+        );
+        expect(
+          capabilities.contains(Capability.leadCreate),
+          isTrue,
+          reason: '$role must be able to register a lead.',
+        );
+        expect(
+          capabilities.contains(Capability.leadQualify),
+          isTrue,
+          reason: '$role must be able to qualify/disqualify a lead.',
+        );
+      }
+
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesAssistant,
+        SystemRoleName.finance,
+        SystemRoleName.readOnly,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.leadQualify),
+          isFalse,
+          reason: '$role must never qualify/disqualify a lead.',
+        );
+      }
     });
 
-    test('FINANCE can view/manage finance and approve discounts above '
-        'limit, but cannot manage customers/orders', () {
+    test('FINANCE can view/manage finance, approve discounts above limit and '
+        'see the lead pipeline for forecasting, but cannot manage customers/'
+        'orders nor qualify a lead', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.finance,
       );
@@ -102,6 +146,8 @@ void main() {
         capabilities.contains(Capability.discountApproveAboveLimit),
         isTrue,
       );
+      expect(capabilities.contains(Capability.leadView), isTrue);
+      expect(capabilities.contains(Capability.leadQualify), isFalse);
       expect(capabilities.contains(Capability.customerCreate), isFalse);
       expect(capabilities.contains(Capability.orderApprove), isFalse);
     });

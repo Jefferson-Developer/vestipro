@@ -187,6 +187,16 @@ import '../features/invites/presentation/bloc/accept_invite_bloc.dart' as _i628;
 import '../features/invites/presentation/bloc/invite_form_bloc.dart' as _i193;
 import '../features/invites/presentation/bloc/invite_list_bloc.dart' as _i0;
 import '../features/leads/data/mappers/lead_mapper.dart' as _i265;
+import '../features/leads/data/repositories/shared_preferences_lead_repository.dart'
+    as _i185;
+import '../features/leads/domain/repositories/lead_repository.dart' as _i472;
+import '../features/leads/domain/usecases/create_lead_use_case.dart' as _i770;
+import '../features/leads/domain/usecases/disqualify_lead_use_case.dart'
+    as _i904;
+import '../features/leads/domain/usecases/list_leads_use_case.dart' as _i778;
+import '../features/leads/domain/usecases/qualify_lead_use_case.dart' as _i924;
+import '../features/leads/presentation/bloc/lead_form_bloc.dart' as _i480;
+import '../features/leads/presentation/bloc/lead_list_bloc.dart' as _i581;
 import '../features/onboarding/data/datasources/onboarding_progress_data_source.dart'
     as _i924;
 import '../features/onboarding/data/datasources/shared_preferences_onboarding_progress_data_source.dart'
@@ -438,6 +448,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i659.CustomerSegmentDataSource>(
       () => const _i15.SharedPreferencesCustomerSegmentDataSource(),
     );
+    gh.lazySingleton<_i472.LeadRepository>(
+      () => _i185.SharedPreferencesLeadRepository(gh<_i265.LeadMapper>()),
+    );
     gh.lazySingleton<_i99.SecureSessionStore>(
       () => _i772.SecureFlutterSessionStore(gh<_i558.FlutterSecureStorage>()),
     );
@@ -464,6 +477,18 @@ extension GetItInjectableX on _i174.GetIt {
         dataSource: gh<_i924.OnboardingProgressDataSource>(),
         mapper: gh<_i477.OnboardingProgressMapper>(),
       ),
+    );
+    gh.factory<_i770.CreateLeadUseCase>(
+      () => _i770.CreateLeadUseCase(gh<_i472.LeadRepository>()),
+    );
+    gh.factory<_i904.DisqualifyLeadUseCase>(
+      () => _i904.DisqualifyLeadUseCase(gh<_i472.LeadRepository>()),
+    );
+    gh.factory<_i778.ListLeadsUseCase>(
+      () => _i778.ListLeadsUseCase(gh<_i472.LeadRepository>()),
+    );
+    gh.factory<_i924.QualifyLeadUseCase>(
+      () => _i924.QualifyLeadUseCase(gh<_i472.LeadRepository>()),
     );
     gh.lazySingleton<_i857.CustomerRepository>(
       () =>
@@ -1026,6 +1051,13 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i480.LeadFormBloc>(
+      () => _i480.LeadFormBloc(
+        createLead: gh<_i770.CreateLeadUseCase>(),
+        listOrganizationUsers: gh<_i220.ListOrganizationUsersUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i576.ListCustomerPortfolioUseCase>(
       () => _i576.ListCustomerPortfolioUseCase(
         gh<_i857.CustomerRepository>(),
@@ -1039,6 +1071,14 @@ extension GetItInjectableX on _i174.GetIt {
         membershipRepository: gh<_i957.MembershipRepository>(),
         authRepository: gh<_i472.AuthRepository>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i581.LeadListBloc>(
+      () => _i581.LeadListBloc(
+        listLeads: gh<_i778.ListLeadsUseCase>(),
+        qualifyLead: gh<_i924.QualifyLeadUseCase>(),
+        disqualifyLead: gh<_i904.DisqualifyLeadUseCase>(),
+        listOrganizationUsers: gh<_i220.ListOrganizationUsersUseCase>(),
       ),
     );
     gh.factory<_i438.PreviewCustomerSegmentCountUseCase>(

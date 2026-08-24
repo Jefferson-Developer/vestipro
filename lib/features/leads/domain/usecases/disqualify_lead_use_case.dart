@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../entities/lead.dart';
@@ -9,6 +11,7 @@ import 'lead_use_case_helpers.dart';
 /// Disqualifies a Lead, always requiring a reason so the funnel keeps a
 /// traceable learning trail (a full configurable reason catalog is left for
 /// TASK-061; a free-text reason is accepted here).
+@injectable
 final class DisqualifyLeadUseCase {
   DisqualifyLeadUseCase(this._repository);
 

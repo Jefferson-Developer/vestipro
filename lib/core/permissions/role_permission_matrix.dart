@@ -36,6 +36,9 @@ abstract final class RolePermissionMatrix {
     Capability.customerCreate,
     Capability.customerUpdate,
     Capability.customerDelete,
+    Capability.leadView,
+    Capability.leadCreate,
+    Capability.leadQualify,
     Capability.orderCreate,
     Capability.orderApprove,
     Capability.discountApproveAboveLimit,
@@ -48,12 +51,16 @@ abstract final class RolePermissionMatrix {
     Capability.customerView,
     Capability.customerCreate,
     Capability.customerUpdate,
+    Capability.leadView,
+    Capability.leadCreate,
+    Capability.leadQualify,
     Capability.orderCreate,
   };
 
   static const Set<Capability> _salesAssistantCapabilities = <Capability>{
     Capability.customerCreate,
     Capability.customerUpdate,
+    Capability.leadCreate,
   };
 
   static const Set<Capability> _financeCapabilities = <Capability>{
@@ -62,6 +69,7 @@ abstract final class RolePermissionMatrix {
     Capability.discountApproveAboveLimit,
     Capability.reportExport,
     Capability.reportViewSensitive,
+    Capability.leadView,
   };
 
   static const Set<Capability> _readOnlyCapabilities = <Capability>{};

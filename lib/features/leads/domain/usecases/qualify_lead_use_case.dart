@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../entities/lead.dart';
@@ -8,6 +10,7 @@ import 'lead_use_case_helpers.dart';
 
 /// Qualifies a Lead that has already been contacted, opening the door to
 /// `ConvertLeadToCustomerUseCase`/`ConvertLeadToOpportunityUseCase`.
+@injectable
 final class QualifyLeadUseCase {
   QualifyLeadUseCase(this._repository);
 

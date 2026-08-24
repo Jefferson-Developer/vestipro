@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../entities/lead.dart';
@@ -12,6 +14,7 @@ import 'lead_use_case_helpers.dart';
 /// A newly created Lead always starts as [LeadStatus.newLead]; moving it
 /// forward is the job of `MarkLeadContactedUseCase`, `QualifyLeadUseCase`,
 /// `DisqualifyLeadUseCase` and the conversion use cases.
+@injectable
 final class CreateLeadUseCase {
   CreateLeadUseCase(this._repository);
 
