@@ -1,4 +1,4 @@
-import 'main_dev.dart' as dev;
+import 'main_prod.dart' as dev;
 
 Future<void> main() async {
   await dev.main();
