@@ -40,6 +40,9 @@ void main() {
         tags: const <String>['lancamento', 'basico'],
         status: status,
         launchDate: DateTime.utc(2026, 2, 1),
+        seoTitle: 'Camisa Essential | Malwee',
+        seoDescription: 'Camisa basica de algodao pima para o verao.',
+        seoSlug: 'camisa-essential',
         photoUrls: const <String>['https://cdn.example.com/foto1.jpg'],
         videoUrls: const <String>['https://cdn.example.com/video1.mp4'],
         customFieldValues: const <ProductCustomFieldValueDto>[
@@ -90,6 +93,12 @@ void main() {
       expect(entity.tags, <String>['lancamento', 'basico']);
       expect(entity.status, ProductStatus.active);
       expect(entity.launchDate, DateTime.utc(2026, 2, 1));
+      expect(entity.seoTitle, 'Camisa Essential | Malwee');
+      expect(
+        entity.seoDescription,
+        'Camisa basica de algodao pima para o verao.',
+      );
+      expect(entity.seoSlug, 'camisa-essential');
       expect(entity.photoUrls, <String>['https://cdn.example.com/foto1.jpg']);
       expect(entity.videoUrls, <String>['https://cdn.example.com/video1.mp4']);
       expect(entity.customFieldValues.single.fieldDefinitionId, 'field-1');
@@ -111,6 +120,9 @@ void main() {
         expect(entity.targetAudience, isNull);
         expect(entity.ean, isNull);
         expect(entity.launchDate, isNull);
+        expect(entity.seoTitle, isNull);
+        expect(entity.seoDescription, isNull);
+        expect(entity.seoSlug, isNull);
         expect(entity.tags, isEmpty);
         expect(entity.photoUrls, isEmpty);
         expect(entity.videoUrls, isEmpty);
@@ -136,6 +148,9 @@ void main() {
       expect(roundTripped.tags, dto.tags);
       expect(roundTripped.status, dto.status);
       expect(roundTripped.launchDate, dto.launchDate);
+      expect(roundTripped.seoTitle, dto.seoTitle);
+      expect(roundTripped.seoDescription, dto.seoDescription);
+      expect(roundTripped.seoSlug, dto.seoSlug);
       expect(roundTripped.photoUrls, dto.photoUrls);
       expect(roundTripped.videoUrls, dto.videoUrls);
       expect(
@@ -152,6 +167,9 @@ void main() {
 
       expect(roundTripped.companyId, isNull);
       expect(roundTripped.ean, isNull);
+      expect(roundTripped.seoTitle, isNull);
+      expect(roundTripped.seoDescription, isNull);
+      expect(roundTripped.seoSlug, isNull);
       expect(roundTripped.tags, isEmpty);
       expect(roundTripped.customFieldValues, isEmpty);
       expect(roundTripped.status, 'draft');

@@ -18,6 +18,8 @@ String auditActionLabel(AuditAction action) {
     AuditAction.teamDeleted => 'Equipe excluída',
     AuditAction.roleDeleted => 'Role excluída',
     AuditAction.organizationSettingsUpdated => 'Configuração alterada',
+    AuditAction.productPublished => 'Produto publicado',
+    AuditAction.productUpdated => 'Produto alterado',
   };
 }
 
@@ -31,6 +33,7 @@ String auditEntityLabel(AuditLogEntry entry) {
     'team' => 'Equipe',
     'role' => 'Role',
     'settings' => 'Configuração',
+    'product' => 'Produto',
     _ => entry.entityType,
   };
   return '$type ${entry.entityId}';

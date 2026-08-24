@@ -33,6 +33,9 @@ final class ProductDto {
     this.tags = const <String>[],
     required this.status,
     this.launchDate,
+    this.seoTitle,
+    this.seoDescription,
+    this.seoSlug,
     this.photoUrls = const <String>[],
     this.videoUrls = const <String>[],
     this.customFieldValues = const <ProductCustomFieldValueDto>[],
@@ -68,6 +71,9 @@ final class ProductDto {
     final ean = json['ean'];
     final status = json['status'];
     final launchDate = json['launchDate'];
+    final seoTitle = json['seoTitle'];
+    final seoDescription = json['seoDescription'];
+    final seoSlug = json['seoSlug'];
     final createdAt = json['createdAt'];
     final createdBy = json['createdBy'];
     final updatedAt = json['updatedAt'];
@@ -98,6 +104,9 @@ final class ProductDto {
         (ean != null && ean is! String) ||
         status is! String ||
         (launchDate != null && launchDate is! Timestamp) ||
+        (seoTitle != null && seoTitle is! String) ||
+        (seoDescription != null && seoDescription is! String) ||
+        (seoSlug != null && seoSlug is! String) ||
         createdAt is! Timestamp ||
         createdBy is! String ||
         updatedAt is! Timestamp ||
@@ -136,6 +145,9 @@ final class ProductDto {
       tags: _stringListFromJson(json['tags'], field: 'tags'),
       status: status,
       launchDate: (launchDate as Timestamp?)?.toDate(),
+      seoTitle: seoTitle as String?,
+      seoDescription: seoDescription as String?,
+      seoSlug: seoSlug as String?,
       photoUrls: _stringListFromJson(json['photoUrls'], field: 'photoUrls'),
       videoUrls: _stringListFromJson(json['videoUrls'], field: 'videoUrls'),
       customFieldValues: _customFieldValueDtosFromJson(
@@ -175,6 +187,9 @@ final class ProductDto {
   final List<String> tags;
   final String status;
   final DateTime? launchDate;
+  final String? seoTitle;
+  final String? seoDescription;
+  final String? seoSlug;
   final List<String> photoUrls;
   final List<String> videoUrls;
   final List<ProductCustomFieldValueDto> customFieldValues;
@@ -211,6 +226,9 @@ final class ProductDto {
       'tags': tags,
       'status': status,
       'launchDate': launchDate == null ? null : Timestamp.fromDate(launchDate!),
+      'seoTitle': seoTitle,
+      'seoDescription': seoDescription,
+      'seoSlug': seoSlug,
       'photoUrls': photoUrls,
       'videoUrls': videoUrls,
       'customFieldValues': customFieldValues

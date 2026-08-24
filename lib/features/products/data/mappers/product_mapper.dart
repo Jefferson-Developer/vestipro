@@ -46,6 +46,9 @@ final class ProductMapper {
       tags: dto.tags,
       status: statusToEntity(dto.status),
       launchDate: dto.launchDate,
+      seoTitle: dto.seoTitle,
+      seoDescription: dto.seoDescription,
+      seoSlug: dto.seoSlug,
       photoUrls: dto.photoUrls,
       videoUrls: dto.videoUrls,
       customFieldValues: dto.customFieldValues
@@ -89,6 +92,9 @@ final class ProductMapper {
       tags: entity.tags,
       status: statusToDto(entity.status),
       launchDate: entity.launchDate,
+      seoTitle: entity.seoTitle,
+      seoDescription: entity.seoDescription,
+      seoSlug: entity.seoSlug,
       photoUrls: entity.photoUrls,
       videoUrls: entity.videoUrls,
       customFieldValues: entity.customFieldValues

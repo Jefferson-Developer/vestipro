@@ -390,7 +390,36 @@ import '../features/organizations/domain/usecases/update_organization_settings_u
 import '../features/organizations/domain/usecases/update_team_use_case.dart'
     as _i207;
 import '../features/organizations/organizations.dart' as _i265;
+import '../features/products/data/datasources/product_form_draft_data_source.dart'
+    as _i960;
+import '../features/products/data/datasources/shared_preferences_product_form_draft_data_source.dart'
+    as _i1033;
+import '../features/products/data/mappers/product_form_draft_mapper.dart'
+    as _i325;
 import '../features/products/data/mappers/product_mapper.dart' as _i309;
+import '../features/products/data/repositories/product_form_draft_repository_impl.dart'
+    as _i873;
+import '../features/products/data/repositories/shared_preferences_product_repository.dart'
+    as _i323;
+import '../features/products/domain/repositories/product_form_draft_repository.dart'
+    as _i459;
+import '../features/products/domain/repositories/product_repository.dart'
+    as _i321;
+import '../features/products/domain/usecases/clear_product_form_draft_use_case.dart'
+    as _i19;
+import '../features/products/domain/usecases/create_product_use_case.dart'
+    as _i300;
+import '../features/products/domain/usecases/get_product_by_id_use_case.dart'
+    as _i721;
+import '../features/products/domain/usecases/get_product_form_draft_use_case.dart'
+    as _i1021;
+import '../features/products/domain/usecases/publish_product_use_case.dart'
+    as _i647;
+import '../features/products/domain/usecases/save_product_form_draft_use_case.dart'
+    as _i244;
+import '../features/products/domain/usecases/update_product_use_case.dart'
+    as _i12;
+import '../features/products/presentation/bloc/product_form_bloc.dart' as _i198;
 import '../features/settings/data/datasources/about_app_data_source.dart'
     as _i364;
 import '../features/settings/data/datasources/in_memory_about_app_datasource.dart'
@@ -528,6 +557,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i1043.RoleMapper>(() => const _i1043.RoleMapper());
     gh.lazySingleton<_i802.TeamMapper>(() => const _i802.TeamMapper());
+    gh.lazySingleton<_i325.ProductFormDraftMapper>(
+      () => const _i325.ProductFormDraftMapper(),
+    );
     gh.lazySingleton<_i309.ProductMapper>(() => const _i309.ProductMapper());
     gh.lazySingleton<_i847.AboutAppMapper>(() => const _i847.AboutAppMapper());
     gh.lazySingleton<_i370.AboutAppNotesMapper>(
@@ -592,6 +624,9 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i477.OnboardingProgressMapper>(),
       ),
     );
+    gh.lazySingleton<_i960.ProductFormDraftDataSource>(
+      () => const _i1033.SharedPreferencesProductFormDraftDataSource(),
+    );
     gh.lazySingleton<_i527.OpportunityOutcomeReasonRepository>(
       () => _i292.SharedPreferencesOpportunityOutcomeReasonRepository(
         gh<_i210.OpportunityOutcomeReasonMapper>(),
@@ -621,12 +656,36 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i527.OpportunityOutcomeReasonRepository>(),
       ),
     );
+    gh.lazySingleton<_i321.ProductRepository>(
+      () => _i323.SharedPreferencesProductRepository(gh<_i309.ProductMapper>()),
+    );
+    gh.lazySingleton<_i459.ProductFormDraftRepository>(
+      () => _i873.ProductFormDraftRepositoryImpl(
+        dataSource: gh<_i960.ProductFormDraftDataSource>(),
+        mapper: gh<_i325.ProductFormDraftMapper>(),
+      ),
+    );
     gh.lazySingleton<_i857.CustomerRepository>(
       () =>
           _i784.SharedPreferencesCustomerRepository(gh<_i457.CustomerMapper>()),
     );
     gh.lazySingleton<_i588.CrmTaskRepository>(
       () => _i150.SharedPreferencesCrmTaskRepository(gh<_i519.CrmTaskMapper>()),
+    );
+    gh.factory<_i19.ClearProductFormDraftUseCase>(
+      () => _i19.ClearProductFormDraftUseCase(
+        gh<_i459.ProductFormDraftRepository>(),
+      ),
+    );
+    gh.factory<_i1021.GetProductFormDraftUseCase>(
+      () => _i1021.GetProductFormDraftUseCase(
+        gh<_i459.ProductFormDraftRepository>(),
+      ),
+    );
+    gh.factory<_i244.SaveProductFormDraftUseCase>(
+      () => _i244.SaveProductFormDraftUseCase(
+        gh<_i459.ProductFormDraftRepository>(),
+      ),
     );
     gh.lazySingleton<_i748.CustomerSegmentRepository>(
       () => _i1052.CustomerSegmentRepositoryImpl(
@@ -758,6 +817,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i482.ReorderPipelineStagesUseCase(
         gh<_i385.PipelineStageRepository>(),
       ),
+    );
+    gh.factory<_i300.CreateProductUseCase>(
+      () => _i300.CreateProductUseCase(gh<_i321.ProductRepository>()),
+    );
+    gh.factory<_i721.GetProductByIdUseCase>(
+      () => _i721.GetProductByIdUseCase(gh<_i321.ProductRepository>()),
     );
     gh.factory<_i776.LoginBloc>(
       () => _i776.LoginBloc(
@@ -1126,6 +1191,18 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i719.OrganizationMapper>(),
       ),
     );
+    gh.factory<_i647.PublishProductUseCase>(
+      () => _i647.PublishProductUseCase(
+        gh<_i321.ProductRepository>(),
+        gh<_i753.AuditLogRepository>(),
+      ),
+    );
+    gh.factory<_i12.UpdateProductUseCase>(
+      () => _i12.UpdateProductUseCase(
+        gh<_i321.ProductRepository>(),
+        gh<_i753.AuditLogRepository>(),
+      ),
+    );
     gh.lazySingleton<_i488.UserProfileRepository>(
       () => _i801.UserProfileRepositoryImpl(
         dataSource: gh<_i668.UserProfileDataSource>(),
@@ -1330,6 +1407,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i857.CustomerRepository>(),
         gh<_i220.PortfolioVisibilityService>(),
         gh<_i220.PortfolioAssignmentRepository>(),
+      ),
+    );
+    gh.factory<_i198.ProductFormBloc>(
+      () => _i198.ProductFormBloc(
+        getDraft: gh<_i1021.GetProductFormDraftUseCase>(),
+        saveDraft: gh<_i244.SaveProductFormDraftUseCase>(),
+        clearDraft: gh<_i19.ClearProductFormDraftUseCase>(),
+        createProduct: gh<_i300.CreateProductUseCase>(),
+        updateProduct: gh<_i12.UpdateProductUseCase>(),
+        publishProduct: gh<_i647.PublishProductUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i698.UserRoleEditBloc>(

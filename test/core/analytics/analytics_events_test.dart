@@ -36,6 +36,9 @@ void main() {
           'team_updated',
           'team_deleted',
           'portfolio_assignment_saved',
+          'product_created',
+          'product_updated',
+          'product_published',
         ]),
       );
 

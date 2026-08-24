@@ -27,6 +27,41 @@ class _FakeProductRepository implements ProductRepository {
     }
     return AppSuccess<Product>(product);
   }
+
+  @override
+  Future<AppResult<bool>> existsBySku({
+    required String organizationId,
+    required Sku sku,
+    String? excludingProductId,
+  }) async {
+    return AppSuccess<bool>(
+      _productsByCompositeKey.values.any(
+        (product) =>
+            product.organizationId == organizationId &&
+            product.sku == sku &&
+            product.id != excludingProductId,
+      ),
+    );
+  }
+
+  @override
+  Future<AppResult<Product>> create({required Product product}) async {
+    _productsByCompositeKey['${product.organizationId}:${product.id}'] =
+        product;
+    return AppSuccess<Product>(product);
+  }
+
+  @override
+  Future<AppResult<Product>> update({required Product product}) async {
+    final key = '${product.organizationId}:${product.id}';
+    if (!_productsByCompositeKey.containsKey(key)) {
+      return const AppFailure<Product>(
+        NotFoundFailure('Product not found.', code: 'product_not_found'),
+      );
+    }
+    _productsByCompositeKey[key] = product;
+    return AppSuccess<Product>(product);
+  }
 }
 
 void main() {

@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../entities/product.dart';
@@ -5,10 +7,11 @@ import '../repositories/product_repository.dart';
 
 /// Looks up a single Product by id, scoped to [organizationId].
 ///
-/// Not annotated with `@injectable`: [ProductRepository] has no concrete
-/// implementation registered yet (TASK-064 models domain/data only), so this
-/// use case is wired manually once TASK-065 registers a repository, the same
-/// precedent set by Lead's TASK-055 use cases.
+/// TASK-065 registered `SharedPreferencesProductRepository` as the first
+/// concrete [ProductRepository] implementation, so this use case is now
+/// `@injectable` (it was wired manually in TASK-064, when no implementation
+/// existed yet).
+@injectable
 final class GetProductByIdUseCase {
   const GetProductByIdUseCase(this._repository);
 

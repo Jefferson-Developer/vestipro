@@ -6,8 +6,10 @@
 /// Every value here maps 1:1 to one of the sensitive administrative
 /// operations already modeled by `lib/features/organizations/` (Organization
 /// creation, role change, user/company/branch/team removal, organization
-/// settings change). Adding a new auditable action means adding a case here
-/// first, never inlining a string at the call site.
+/// settings change) or, since TASK-065, by `lib/features/products/`
+/// (publishing/editing a catalog Product). Adding a new auditable action
+/// means adding a case here first, never inlining a string at the call
+/// site.
 ///
 /// [organizationCreated] is the one value never written by any Dart code in
 /// this repository: it is recorded server-side by the `createOrganization`
@@ -45,6 +47,16 @@ enum AuditAction {
   teamDeleted,
   roleDeleted,
   organizationSettingsUpdated,
+
+  /// A draft Product (TASK-064/065) transitioned to
+  /// `ProductStatus.active` via `PublishProductUseCase`, after its
+  /// completeness (name/SKU/reference/category) was validated.
+  productPublished,
+
+  /// A field of a Product that was already published (any status other
+  /// than `ProductStatus.draft`) changed via `UpdateProductUseCase` — never
+  /// recorded for an edit to a still-unpublished draft.
+  productUpdated,
 }
 
 extension AuditActionCode on AuditAction {
@@ -71,6 +83,8 @@ extension AuditActionCode on AuditAction {
       AuditAction.teamDeleted => 'team.deleted',
       AuditAction.roleDeleted => 'role.deleted',
       AuditAction.organizationSettingsUpdated => 'organization.settingsUpdated',
+      AuditAction.productPublished => 'product.published',
+      AuditAction.productUpdated => 'product.updated',
     };
   }
 }

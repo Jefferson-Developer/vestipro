@@ -20,8 +20,12 @@ part 'product.freezed.dart';
 /// [ean] may be absent: a product can carry its barcode on the color/size
 /// variant instead of at the product level (see TASK-064 business rules).
 /// The completeness rule for [ProductStatus.active] (name, SKU and category
-/// minimally filled) is enforced by create/update use cases, never by this
-/// entity or by UI widgets.
+/// minimally filled) is enforced by `PublishProductUseCase` (TASK-065), never
+/// by this entity or by UI widgets.
+///
+/// [seoTitle]/[seoDescription]/[seoSlug] (TASK-065) are optional and only
+/// meaningful once a shareable/white-label catalog (EPIC-25) reads them —
+/// they carry no completeness requirement of their own.
 @freezed
 abstract class Product with _$Product {
   const Product._();
@@ -51,6 +55,9 @@ abstract class Product with _$Product {
     @Default(<String>[]) List<String> tags,
     required ProductStatus status,
     DateTime? launchDate,
+    String? seoTitle,
+    String? seoDescription,
+    String? seoSlug,
     @Default(<String>[]) List<String> photoUrls,
     @Default(<String>[]) List<String> videoUrls,
     @Default(<ProductCustomFieldValue>[])
