@@ -10,6 +10,9 @@ import '../../domain/value_objects/customer_status.dart';
 import '../bloc/customer_portfolio_bloc.dart';
 import '../bloc/customer_portfolio_event.dart';
 import '../bloc/customer_portfolio_state.dart';
+import '../bloc/customer_segment_bloc.dart';
+import '../bloc/customer_segment_event.dart';
+import '../widgets/customer_segment_quick_filters.dart';
 
 class CustomerPortfolioPage extends StatelessWidget {
   const CustomerPortfolioPage({
@@ -22,6 +25,7 @@ class CustomerPortfolioPage extends StatelessWidget {
     this.initialFilters = CustomerPortfolioFilters.empty,
     this.onCustomerSelected,
     this.onUrlStateChanged,
+    this.createSegmentBloc,
     super.key,
   });
 
@@ -36,6 +40,11 @@ class CustomerPortfolioPage extends StatelessWidget {
   final void Function(String searchQuery, CustomerPortfolioFilters filters)?
   onUrlStateChanged;
 
+  /// Optional (TASK-053): when provided, mounts the saved-segment quick
+  /// filters above the carteira filters. Kept optional so existing call
+  /// sites that do not wire a [CustomerSegmentBloc] keep working unchanged.
+  final CustomerSegmentBloc Function()? createSegmentBloc;
+
   @override
   Widget build(BuildContext context) {
     return PermissionBuilder(
@@ -45,7 +54,7 @@ class CustomerPortfolioPage extends StatelessWidget {
       capability: Capability.customerView,
       builder: (context, granted) {
         if (!granted) return const ForbiddenPage();
-        return BlocProvider<CustomerPortfolioBloc>(
+        final scaffold = BlocProvider<CustomerPortfolioBloc>(
           create: (_) => createBloc()
             ..add(
               CustomerPortfolioStarted(
@@ -59,7 +68,23 @@ class CustomerPortfolioPage extends StatelessWidget {
           child: _CustomerPortfolioScaffold(
             onCustomerSelected: onCustomerSelected,
             onUrlStateChanged: onUrlStateChanged,
+            userId: userId,
+            hasSegments: createSegmentBloc != null,
           ),
+        );
+
+        final buildSegmentBloc = createSegmentBloc;
+        if (buildSegmentBloc == null) return scaffold;
+        return BlocProvider<CustomerSegmentBloc>(
+          create: (_) => buildSegmentBloc()
+            ..add(
+              CustomerSegmentsStarted(
+                organizationId: organizationId,
+                companyId: companyId,
+                userId: userId,
+              ),
+            ),
+          child: scaffold,
         );
       },
     );
@@ -68,10 +93,14 @@ class CustomerPortfolioPage extends StatelessWidget {
 
 class _CustomerPortfolioScaffold extends StatelessWidget {
   const _CustomerPortfolioScaffold({
+    required this.userId,
+    required this.hasSegments,
     this.onCustomerSelected,
     this.onUrlStateChanged,
   });
 
+  final String userId;
+  final bool hasSegments;
   final ValueChanged<Customer>? onCustomerSelected;
   final void Function(String searchQuery, CustomerPortfolioFilters filters)?
   onUrlStateChanged;
@@ -90,7 +119,11 @@ class _CustomerPortfolioScaffold extends StatelessWidget {
             body: AppAdminPageLayout(
               title: 'Carteira de clientes',
               filtersTitle: 'Filtros da carteira',
-              filtersBuilder: (_) => _PortfolioFilters(state: state),
+              filtersBuilder: (_) => _PortfolioFilters(
+                state: state,
+                userId: userId,
+                hasSegments: hasSegments,
+              ),
               content: _PortfolioContent(
                 state: state,
                 onCustomerSelected: onCustomerSelected,
@@ -194,9 +227,15 @@ class _PortfolioContentState extends State<_PortfolioContent> {
 }
 
 class _PortfolioFilters extends StatefulWidget {
-  const _PortfolioFilters({required this.state});
+  const _PortfolioFilters({
+    required this.state,
+    required this.userId,
+    required this.hasSegments,
+  });
 
   final CustomerPortfolioState state;
+  final String userId;
+  final bool hasSegments;
 
   @override
   State<_PortfolioFilters> createState() => _PortfolioFiltersState();
@@ -254,6 +293,11 @@ class _PortfolioFiltersState extends State<_PortfolioFilters> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          if (widget.hasSegments) ...<Widget>[
+            CustomerSegmentQuickFilters(userId: widget.userId),
+            const Divider(),
+            const SizedBox(height: AppSpacing.spacing16),
+          ],
           AppTextField(
             controller: _searchController,
             label: 'Busca',

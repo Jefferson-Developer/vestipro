@@ -87,27 +87,41 @@ import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
 import '../features/customers/data/datasources/customer_form_draft_data_source.dart'
     as _i1036;
+import '../features/customers/data/datasources/customer_segment_data_source.dart'
+    as _i659;
 import '../features/customers/data/datasources/shared_preferences_customer_form_draft_data_source.dart'
     as _i292;
+import '../features/customers/data/datasources/shared_preferences_customer_segment_data_source.dart'
+    as _i15;
 import '../features/customers/data/mappers/customer_form_draft_mapper.dart'
     as _i258;
 import '../features/customers/data/mappers/customer_mapper.dart' as _i457;
+import '../features/customers/data/mappers/customer_segment_mapper.dart'
+    as _i712;
 import '../features/customers/data/repositories/customer_form_draft_repository_impl.dart'
     as _i920;
+import '../features/customers/data/repositories/customer_segment_repository_impl.dart'
+    as _i1052;
 import '../features/customers/data/repositories/shared_preferences_customer_repository.dart'
     as _i784;
 import '../features/customers/domain/repositories/customer_form_draft_repository.dart'
     as _i999;
 import '../features/customers/domain/repositories/customer_repository.dart'
     as _i857;
+import '../features/customers/domain/repositories/customer_segment_repository.dart'
+    as _i748;
 import '../features/customers/domain/usecases/clear_customer_form_draft_use_case.dart'
     as _i551;
+import '../features/customers/domain/usecases/create_customer_segment_use_case.dart'
+    as _i806;
 import '../features/customers/domain/usecases/create_customer_use_case.dart'
     as _i427;
 import '../features/customers/domain/usecases/customer_address_use_cases.dart'
     as _i860;
 import '../features/customers/domain/usecases/customer_contact_use_cases.dart'
     as _i442;
+import '../features/customers/domain/usecases/delete_customer_segment_use_case.dart'
+    as _i869;
 import '../features/customers/domain/usecases/get_customer_by_id_use_case.dart'
     as _i356;
 import '../features/customers/domain/usecases/get_customer_form_config_use_case.dart'
@@ -116,6 +130,10 @@ import '../features/customers/domain/usecases/get_customer_form_draft_use_case.d
     as _i504;
 import '../features/customers/domain/usecases/list_customer_portfolio_use_case.dart'
     as _i576;
+import '../features/customers/domain/usecases/list_customer_segments_use_case.dart'
+    as _i261;
+import '../features/customers/domain/usecases/preview_customer_segment_count_use_case.dart'
+    as _i438;
 import '../features/customers/domain/usecases/save_customer_form_draft_use_case.dart'
     as _i780;
 import '../features/customers/domain/usecases/update_customer_use_case.dart'
@@ -126,6 +144,8 @@ import '../features/customers/presentation/bloc/customer_form_bloc.dart'
     as _i478;
 import '../features/customers/presentation/bloc/customer_portfolio_bloc.dart'
     as _i522;
+import '../features/customers/presentation/bloc/customer_segment_bloc.dart'
+    as _i901;
 import '../features/invites/data/datasources/cloud_functions_invite_acceptance_data_source.dart'
     as _i674;
 import '../features/invites/data/datasources/firestore_invite_data_source.dart'
@@ -370,6 +390,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => const _i258.CustomerFormDraftMapper(),
     );
     gh.lazySingleton<_i457.CustomerMapper>(() => const _i457.CustomerMapper());
+    gh.lazySingleton<_i712.CustomerSegmentMapper>(
+      () => const _i712.CustomerSegmentMapper(),
+    );
     gh.lazySingleton<_i649.InviteMapper>(() => const _i649.InviteMapper());
     gh.lazySingleton<_i477.OnboardingProgressMapper>(
       () => const _i477.OnboardingProgressMapper(),
@@ -400,6 +423,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i465.AppClientMetadataProvider>(
       () => _i465.PackageInfoClientMetadataProvider(),
     );
+    gh.lazySingleton<_i659.CustomerSegmentDataSource>(
+      () => const _i15.SharedPreferencesCustomerSegmentDataSource(),
+    );
     gh.lazySingleton<_i99.SecureSessionStore>(
       () => _i772.SecureFlutterSessionStore(gh<_i558.FlutterSecureStorage>()),
     );
@@ -427,6 +453,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i857.CustomerRepository>(
       () =>
           _i784.SharedPreferencesCustomerRepository(gh<_i457.CustomerMapper>()),
+    );
+    gh.lazySingleton<_i748.CustomerSegmentRepository>(
+      () => _i1052.CustomerSegmentRepositoryImpl(
+        dataSource: gh<_i659.CustomerSegmentDataSource>(),
+        mapper: gh<_i712.CustomerSegmentMapper>(),
+      ),
     );
     gh.factory<_i551.ClearCustomerFormDraftUseCase>(
       () => _i551.ClearCustomerFormDraftUseCase(
@@ -478,6 +510,21 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i185.SignInWithEmailAndPasswordUseCase>(
       () => _i185.SignInWithEmailAndPasswordUseCase(gh<_i472.AuthRepository>()),
+    );
+    gh.factory<_i806.CreateCustomerSegmentUseCase>(
+      () => _i806.CreateCustomerSegmentUseCase(
+        gh<_i748.CustomerSegmentRepository>(),
+      ),
+    );
+    gh.factory<_i869.DeleteCustomerSegmentUseCase>(
+      () => _i869.DeleteCustomerSegmentUseCase(
+        gh<_i748.CustomerSegmentRepository>(),
+      ),
+    );
+    gh.factory<_i261.ListCustomerSegmentsUseCase>(
+      () => _i261.ListCustomerSegmentsUseCase(
+        gh<_i748.CustomerSegmentRepository>(),
+      ),
     );
     gh.factory<_i776.LoginBloc>(
       () => _i776.LoginBloc(
@@ -965,9 +1012,23 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i438.PreviewCustomerSegmentCountUseCase>(
+      () => _i438.PreviewCustomerSegmentCountUseCase(
+        gh<_i576.ListCustomerPortfolioUseCase>(),
+      ),
+    );
     gh.factory<_i522.CustomerPortfolioBloc>(
       () => _i522.CustomerPortfolioBloc(
         listCustomerPortfolio: gh<_i576.ListCustomerPortfolioUseCase>(),
+      ),
+    );
+    gh.factory<_i901.CustomerSegmentBloc>(
+      () => _i901.CustomerSegmentBloc(
+        listCustomerSegments: gh<_i261.ListCustomerSegmentsUseCase>(),
+        createCustomerSegment: gh<_i806.CreateCustomerSegmentUseCase>(),
+        deleteCustomerSegment: gh<_i869.DeleteCustomerSegmentUseCase>(),
+        previewCustomerSegmentCount:
+            gh<_i438.PreviewCustomerSegmentCountUseCase>(),
       ),
     );
     gh.factory<_i986.ListCommercialTeamsUseCase>(

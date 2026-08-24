@@ -170,6 +170,7 @@ class VestiProApp extends StatelessWidget {
                     userId: getIt<AuthRepository>().currentUser?.uid ?? '',
                     permissionService: getIt<PermissionService>(),
                     createBloc: () => getIt<CustomerPortfolioBloc>(),
+                    createSegmentBloc: () => getIt<CustomerSegmentBloc>(),
                     onCustomerSelected: (customer) => context.go(
                       CustomerDetailRoute(
                         orgId: orgId,
