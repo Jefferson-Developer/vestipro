@@ -30,6 +30,12 @@ final class CustomerDto {
     this.sourceLeadId,
     required this.registeredAt,
     this.lastPurchaseAt,
+    this.commercialScore,
+    this.healthScore,
+    this.healthScoreBand,
+    this.scoreUpdatedAt,
+    this.scoreFormulaVersion,
+    this.scoreDataCoverage,
     this.addresses = const <CustomerAddressDto>[],
     this.contacts = const <CustomerContactDto>[],
     this.tags = const <String>[],
@@ -66,6 +72,12 @@ final class CustomerDto {
     final sourceLeadId = json['sourceLeadId'];
     final registeredAt = json['registeredAt'];
     final lastPurchaseAt = json['lastPurchaseAt'];
+    final commercialScore = json['commercialScore'];
+    final healthScore = json['healthScore'];
+    final healthScoreBand = json['healthScoreBand'];
+    final scoreUpdatedAt = json['scoreUpdatedAt'];
+    final scoreFormulaVersion = json['scoreFormulaVersion'];
+    final scoreDataCoverage = json['scoreDataCoverage'];
     final rawAddresses = json['addresses'];
     final rawContacts = json['contacts'];
     final createdAt = json['createdAt'];
@@ -95,6 +107,12 @@ final class CustomerDto {
         (sourceLeadId != null && sourceLeadId is! String) ||
         registeredAt is! Timestamp ||
         (lastPurchaseAt != null && lastPurchaseAt is! Timestamp) ||
+        (commercialScore != null && commercialScore is! int) ||
+        (healthScore != null && healthScore is! int) ||
+        (healthScoreBand != null && healthScoreBand is! String) ||
+        (scoreUpdatedAt != null && scoreUpdatedAt is! Timestamp) ||
+        (scoreFormulaVersion != null && scoreFormulaVersion is! String) ||
+        (scoreDataCoverage != null && scoreDataCoverage is! String) ||
         createdAt is! Timestamp ||
         createdBy is! String ||
         updatedAt is! Timestamp ||
@@ -129,6 +147,12 @@ final class CustomerDto {
       sourceLeadId: sourceLeadId as String?,
       registeredAt: registeredAt.toDate(),
       lastPurchaseAt: (lastPurchaseAt as Timestamp?)?.toDate(),
+      commercialScore: commercialScore as int?,
+      healthScore: healthScore as int?,
+      healthScoreBand: healthScoreBand as String?,
+      scoreUpdatedAt: (scoreUpdatedAt as Timestamp?)?.toDate(),
+      scoreFormulaVersion: scoreFormulaVersion as String?,
+      scoreDataCoverage: scoreDataCoverage as String?,
       addresses: _addressDtosFromJson(rawAddresses),
       contacts: _contactDtosFromJson(rawContacts),
       tags: _tagsFromJson(json['tags']),
@@ -163,6 +187,12 @@ final class CustomerDto {
   final String? sourceLeadId;
   final DateTime registeredAt;
   final DateTime? lastPurchaseAt;
+  final int? commercialScore;
+  final int? healthScore;
+  final String? healthScoreBand;
+  final DateTime? scoreUpdatedAt;
+  final String? scoreFormulaVersion;
+  final String? scoreDataCoverage;
   final List<CustomerAddressDto> addresses;
   final List<CustomerContactDto> contacts;
   final List<String> tags;
@@ -198,6 +228,14 @@ final class CustomerDto {
       'lastPurchaseAt': lastPurchaseAt == null
           ? null
           : Timestamp.fromDate(lastPurchaseAt!),
+      'commercialScore': commercialScore,
+      'healthScore': healthScore,
+      'healthScoreBand': healthScoreBand,
+      'scoreUpdatedAt': scoreUpdatedAt == null
+          ? null
+          : Timestamp.fromDate(scoreUpdatedAt!),
+      'scoreFormulaVersion': scoreFormulaVersion,
+      'scoreDataCoverage': scoreDataCoverage,
       'addresses': addresses
           .map((address) => address.toJson())
           .toList(growable: false),

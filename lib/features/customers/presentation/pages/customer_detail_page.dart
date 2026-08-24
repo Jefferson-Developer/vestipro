@@ -8,6 +8,7 @@ import '../../../crm/crm.dart';
 import '../../domain/entities/customer.dart';
 import '../../domain/entities/customer_address.dart';
 import '../../domain/entities/customer_contact.dart';
+import '../../domain/value_objects/customer_health_score_band.dart';
 import '../../domain/value_objects/customer_status.dart';
 import '../../domain/value_objects/customer_sync_status.dart';
 import '../../domain/value_objects/customer_type.dart';
@@ -629,6 +630,9 @@ class _IndicatorSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final hasScores = customer.hasCalculatedScores;
+    final healthScore = customer.healthScore;
+    final healthScoreBand = customer.healthScoreBand;
     return _SectionCard(
       title: 'Indicadores e health score',
       icon: Icons.monitor_heart_outlined,
@@ -649,14 +653,51 @@ class _IndicatorSection extends StatelessWidget {
               variant: AppStatusBadgeVariant.info,
               icon: Icons.trending_up,
             ),
+            if (customer.commercialScore != null)
+              AppStatusBadge(
+                label: 'Score comercial ${customer.commercialScore}',
+                variant: AppStatusBadgeVariant.info,
+                icon: Icons.speed_outlined,
+              ),
+            if (healthScore != null && healthScoreBand != null)
+              AppStatusBadge(
+                label: 'Health $healthScore - ${healthScoreBand.label}',
+                variant: _healthBandVariant(healthScoreBand),
+                icon: Icons.favorite_border,
+              ),
           ],
         ),
         const SizedBox(height: AppSpacing.spacing12),
-        const _ComingSoonPanel(
-          title: 'Score do cliente em breve',
-          description:
-              'Nao disponivel ate a TASK-062 implementar score e health score.',
-          icon: Icons.speed_outlined,
+        if (hasScores)
+          _ScoreSnapshot(customer: customer)
+        else
+          const _InlineEmpty(
+            text: 'Score ainda nao calculado para este cliente.',
+          ),
+      ],
+    );
+  }
+}
+
+class _ScoreSnapshot extends StatelessWidget {
+  const _ScoreSnapshot({required this.customer});
+
+  final Customer customer;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          'Formula ${customer.scoreFormulaVersion}',
+          style: AppTypography.bodyMedium.copyWith(color: colors.onSurface),
+        ),
+        const SizedBox(height: AppSpacing.spacing4),
+        Text(
+          '${customer.scoreDataCoverage!.label} - atualizado ${_dateLabel(customer.scoreUpdatedAt!)}',
+          style: AppTypography.bodySmall.copyWith(color: colors.outline),
         ),
       ],
     );
@@ -1219,6 +1260,14 @@ AppStatusBadgeVariant _statusVariant(CustomerStatus status) {
     CustomerStatus.inactive => AppStatusBadgeVariant.neutral,
     CustomerStatus.prospect => AppStatusBadgeVariant.info,
     CustomerStatus.blocked => AppStatusBadgeVariant.error,
+  };
+}
+
+AppStatusBadgeVariant _healthBandVariant(CustomerHealthScoreBand band) {
+  return switch (band) {
+    CustomerHealthScoreBand.healthy => AppStatusBadgeVariant.success,
+    CustomerHealthScoreBand.attention => AppStatusBadgeVariant.warning,
+    CustomerHealthScoreBand.risk => AppStatusBadgeVariant.error,
   };
 }
 

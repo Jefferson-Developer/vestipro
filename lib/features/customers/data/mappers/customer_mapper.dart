@@ -10,6 +10,8 @@ import '../../domain/value_objects/cep.dart';
 import '../../domain/value_objects/cnpj_cpf.dart';
 import '../../domain/value_objects/customer_address_type.dart';
 import '../../domain/value_objects/customer_contact_type.dart';
+import '../../domain/value_objects/customer_health_score_band.dart';
+import '../../domain/value_objects/customer_score_data_coverage.dart';
 import '../../domain/value_objects/customer_status.dart';
 import '../../domain/value_objects/customer_sync_status.dart';
 import '../../domain/value_objects/customer_type.dart';
@@ -58,6 +60,16 @@ final class CustomerMapper {
       sourceLeadId: dto.sourceLeadId,
       registeredAt: dto.registeredAt,
       lastPurchaseAt: dto.lastPurchaseAt,
+      commercialScore: dto.commercialScore,
+      healthScore: dto.healthScore,
+      healthScoreBand: dto.healthScoreBand == null
+          ? null
+          : healthScoreBandToEntity(dto.healthScoreBand!),
+      scoreUpdatedAt: dto.scoreUpdatedAt,
+      scoreFormulaVersion: dto.scoreFormulaVersion,
+      scoreDataCoverage: dto.scoreDataCoverage == null
+          ? null
+          : scoreDataCoverageToEntity(dto.scoreDataCoverage!),
       addresses: normalizeCustomerAddresses(
         dto.addresses.map(_addressToEntity),
       ),
@@ -96,6 +108,16 @@ final class CustomerMapper {
       sourceLeadId: entity.sourceLeadId,
       registeredAt: entity.registeredAt,
       lastPurchaseAt: entity.lastPurchaseAt,
+      commercialScore: entity.commercialScore,
+      healthScore: entity.healthScore,
+      healthScoreBand: entity.healthScoreBand == null
+          ? null
+          : healthScoreBandToDto(entity.healthScoreBand!),
+      scoreUpdatedAt: entity.scoreUpdatedAt,
+      scoreFormulaVersion: entity.scoreFormulaVersion,
+      scoreDataCoverage: entity.scoreDataCoverage == null
+          ? null
+          : scoreDataCoverageToDto(entity.scoreDataCoverage!),
       addresses: entity.addresses.map(_addressToDto).toList(growable: false),
       contacts: entity.contacts.map(_contactToDto).toList(growable: false),
       tags: entity.tags,
@@ -175,6 +197,38 @@ final class CustomerMapper {
       CustomerSyncStatus.failed => 'failed',
       CustomerSyncStatus.conflict => 'conflict',
     };
+  }
+
+  CustomerHealthScoreBand healthScoreBandToEntity(String value) {
+    return switch (value) {
+      'healthy' => CustomerHealthScoreBand.healthy,
+      'attention' => CustomerHealthScoreBand.attention,
+      'risk' => CustomerHealthScoreBand.risk,
+      _ => throw ValidationException(
+        'Invalid customer health score band.',
+        code: 'invalid_customer_health_score_band',
+        cause: value,
+      ),
+    };
+  }
+
+  String healthScoreBandToDto(CustomerHealthScoreBand band) => band.code;
+
+  CustomerScoreDataCoverage scoreDataCoverageToEntity(String value) {
+    return switch (value) {
+      'ordersAndCrm' => CustomerScoreDataCoverage.ordersAndCrm,
+      'crmOnly' => CustomerScoreDataCoverage.crmOnly,
+      'registrationOnly' => CustomerScoreDataCoverage.registrationOnly,
+      _ => throw ValidationException(
+        'Invalid customer score data coverage.',
+        code: 'invalid_customer_score_data_coverage',
+        cause: value,
+      ),
+    };
+  }
+
+  String scoreDataCoverageToDto(CustomerScoreDataCoverage coverage) {
+    return coverage.code;
   }
 
   CustomerAddress _addressToEntity(CustomerAddressDto dto) {

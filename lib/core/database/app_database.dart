@@ -37,13 +37,38 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 1;
+  int get schemaVersion => 2;
 
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(
       onCreate: (migrator) async {
         await migrator.createAll();
+      },
+      onUpgrade: (migrator, from, to) async {
+        if (from < 2) {
+          await migrator.addColumn(
+            customersTable,
+            customersTable.commercialScore,
+          );
+          await migrator.addColumn(customersTable, customersTable.healthScore);
+          await migrator.addColumn(
+            customersTable,
+            customersTable.healthScoreBand,
+          );
+          await migrator.addColumn(
+            customersTable,
+            customersTable.scoreUpdatedAt,
+          );
+          await migrator.addColumn(
+            customersTable,
+            customersTable.scoreFormulaVersion,
+          );
+          await migrator.addColumn(
+            customersTable,
+            customersTable.scoreDataCoverage,
+          );
+        }
       },
       beforeOpen: (details) async {
         // Required for `ON DELETE CASCADE` on the address/contact foreign

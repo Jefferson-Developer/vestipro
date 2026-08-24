@@ -42,6 +42,12 @@ class CustomersTable extends Table {
   TextColumn get responsibleSellerId => text().nullable()();
   DateTimeColumn get registeredAt => dateTime()();
   DateTimeColumn get lastPurchaseAt => dateTime().nullable()();
+  IntColumn get commercialScore => integer().nullable()();
+  IntColumn get healthScore => integer().nullable()();
+  TextColumn get healthScoreBand => text().nullable()();
+  DateTimeColumn get scoreUpdatedAt => dateTime().nullable()();
+  TextColumn get scoreFormulaVersion => text().nullable()();
+  TextColumn get scoreDataCoverage => text().nullable()();
   TextColumn get tagsJson => text().nullable()();
   TextColumn get customFieldsJson => text().nullable()();
   DateTimeColumn get createdAt => dateTime()();

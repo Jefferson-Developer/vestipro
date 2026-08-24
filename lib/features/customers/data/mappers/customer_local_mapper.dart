@@ -48,6 +48,22 @@ final class CustomerLocalMapper {
       responsibleSellerId: Value(customer.responsibleSellerId),
       registeredAt: customer.registeredAt.toUtc(),
       lastPurchaseAt: Value(customer.lastPurchaseAt?.toUtc()),
+      commercialScore: Value(customer.commercialScore),
+      healthScore: Value(customer.healthScore),
+      healthScoreBand: Value(
+        customer.healthScoreBand == null
+            ? null
+            : _customerMapper.healthScoreBandToDto(customer.healthScoreBand!),
+      ),
+      scoreUpdatedAt: Value(customer.scoreUpdatedAt?.toUtc()),
+      scoreFormulaVersion: Value(customer.scoreFormulaVersion),
+      scoreDataCoverage: Value(
+        customer.scoreDataCoverage == null
+            ? null
+            : _customerMapper.scoreDataCoverageToDto(
+                customer.scoreDataCoverage!,
+              ),
+      ),
       tagsJson: Value(customer.tags.isEmpty ? null : jsonEncode(customer.tags)),
       customFieldsJson: Value(
         customer.customFields.isEmpty
@@ -148,6 +164,20 @@ final class CustomerLocalMapper {
       responsibleSellerId: customerRow.responsibleSellerId,
       registeredAt: customerRow.registeredAt.toUtc(),
       lastPurchaseAt: customerRow.lastPurchaseAt?.toUtc(),
+      commercialScore: customerRow.commercialScore,
+      healthScore: customerRow.healthScore,
+      healthScoreBand: customerRow.healthScoreBand == null
+          ? null
+          : _customerMapper.healthScoreBandToEntity(
+              customerRow.healthScoreBand!,
+            ),
+      scoreUpdatedAt: customerRow.scoreUpdatedAt?.toUtc(),
+      scoreFormulaVersion: customerRow.scoreFormulaVersion,
+      scoreDataCoverage: customerRow.scoreDataCoverage == null
+          ? null
+          : _customerMapper.scoreDataCoverageToEntity(
+              customerRow.scoreDataCoverage!,
+            ),
       addresses: normalizeCustomerAddresses(row.addresses.map(_addressFromRow)),
       contacts: normalizeCustomerContacts(row.contacts.map(_contactFromRow)),
       tags: _stringListFromJson(customerRow.tagsJson),

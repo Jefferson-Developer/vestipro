@@ -53,6 +53,16 @@ void main() {
       expect(find.text('Ligar'), findsOneWidget);
       expect(find.text('Mensagem'), findsOneWidget);
       expect(find.bySemanticsLabel('Registrar atividade'), findsOneWidget);
+      expect(find.text('Score comercial 88'), findsOneWidget);
+      expect(find.text('Health 77 - Saudavel'), findsOneWidget);
+      expect(
+        find.text('Formula $customerScoringFormulaVersion'),
+        findsOneWidget,
+      );
+      expect(
+        find.text('Pedidos e CRM - atualizado 24/08/2026'),
+        findsOneWidget,
+      );
       expect(find.text('Nenhuma atividade registrada ainda.'), findsOneWidget);
       expect(customerRepository.calls.single, ('org-1', 'customer-a'));
     });
@@ -125,7 +135,10 @@ void main() {
         find.text('Nenhum contato cadastrado para este cliente.'),
         findsOneWidget,
       );
-      expect(find.text('Score do cliente em breve'), findsOneWidget);
+      expect(
+        find.text('Score ainda nao calculado para este cliente.'),
+        findsOneWidget,
+      );
       expect(find.text('Nenhuma atividade registrada ainda.'), findsOneWidget);
       expect(find.text('Oportunidades em breve'), findsOneWidget);
       expect(find.text('Pedidos em breve'), findsOneWidget);
@@ -351,6 +364,12 @@ final _fullCustomer = Customer(
   responsibleSellerId: 'rep-1',
   registeredAt: DateTime.utc(2026, 1, 1),
   lastPurchaseAt: DateTime.utc(2026, 8, 10),
+  commercialScore: 88,
+  healthScore: 77,
+  healthScoreBand: CustomerHealthScoreBand.healthy,
+  scoreUpdatedAt: DateTime.utc(2026, 8, 24, 12),
+  scoreFormulaVersion: customerScoringFormulaVersion,
+  scoreDataCoverage: CustomerScoreDataCoverage.ordersAndCrm,
   addresses: <CustomerAddress>[
     CustomerAddress(
       id: 'address-1',

@@ -120,6 +120,12 @@ Customer _fullCustomer() {
     responsibleSellerId: 'rep-1',
     registeredAt: now,
     lastPurchaseAt: now.subtract(const Duration(days: 10)),
+    commercialScore: 91,
+    healthScore: 78,
+    healthScoreBand: CustomerHealthScoreBand.healthy,
+    scoreUpdatedAt: now.add(const Duration(hours: 3)),
+    scoreFormulaVersion: customerScoringFormulaVersion,
+    scoreDataCoverage: CustomerScoreDataCoverage.ordersAndCrm,
     addresses: <CustomerAddress>[
       CustomerAddress(
         id: 'address-1',

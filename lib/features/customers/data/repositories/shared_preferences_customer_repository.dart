@@ -490,8 +490,23 @@ final class SharedPreferencesCustomerRepository implements CustomerRepository {
       segment: _optionalString(json, 'segment'),
       originChannel: _optionalString(json, 'originChannel'),
       responsibleSellerId: _optionalString(json, 'responsibleSellerId'),
+      sourceLeadId: _optionalString(json, 'sourceLeadId'),
       registeredAt: _requiredDate(json, 'registeredAt'),
       lastPurchaseAt: _optionalDate(json, 'lastPurchaseAt'),
+      commercialScore: _optionalInt(json, 'commercialScore'),
+      healthScore: _optionalInt(json, 'healthScore'),
+      healthScoreBand: _optionalString(json, 'healthScoreBand') == null
+          ? null
+          : _mapper.healthScoreBandToEntity(
+              _requiredString(json, 'healthScoreBand'),
+            ),
+      scoreUpdatedAt: _optionalDate(json, 'scoreUpdatedAt'),
+      scoreFormulaVersion: _optionalString(json, 'scoreFormulaVersion'),
+      scoreDataCoverage: _optionalString(json, 'scoreDataCoverage') == null
+          ? null
+          : _mapper.scoreDataCoverageToEntity(
+              _requiredString(json, 'scoreDataCoverage'),
+            ),
       addresses: _addressesFromJson(json['addresses']),
       contacts: _contactsFromJson(json['contacts']),
       tags: _stringList(json['tags']),
@@ -531,9 +546,25 @@ final class SharedPreferencesCustomerRepository implements CustomerRepository {
         'originChannel': customer.originChannel,
       if (customer.responsibleSellerId != null)
         'responsibleSellerId': customer.responsibleSellerId,
+      if (customer.sourceLeadId != null) 'sourceLeadId': customer.sourceLeadId,
       'registeredAt': customer.registeredAt.toUtc().toIso8601String(),
       if (customer.lastPurchaseAt != null)
         'lastPurchaseAt': customer.lastPurchaseAt!.toUtc().toIso8601String(),
+      if (customer.commercialScore != null)
+        'commercialScore': customer.commercialScore,
+      if (customer.healthScore != null) 'healthScore': customer.healthScore,
+      if (customer.healthScoreBand != null)
+        'healthScoreBand': _mapper.healthScoreBandToDto(
+          customer.healthScoreBand!,
+        ),
+      if (customer.scoreUpdatedAt != null)
+        'scoreUpdatedAt': customer.scoreUpdatedAt!.toUtc().toIso8601String(),
+      if (customer.scoreFormulaVersion != null)
+        'scoreFormulaVersion': customer.scoreFormulaVersion,
+      if (customer.scoreDataCoverage != null)
+        'scoreDataCoverage': _mapper.scoreDataCoverageToDto(
+          customer.scoreDataCoverage!,
+        ),
       if (customer.addresses.isNotEmpty)
         'addresses': customer.addresses
             .map(_addressToJson)
@@ -588,6 +619,16 @@ final class SharedPreferencesCustomerRepository implements CustomerRepository {
   int _requiredInt(Map<String, dynamic> json, String field) {
     final value = json[field];
     if (value is int) return value;
+    throw ValidationException(
+      'Invalid local customer integer field.',
+      code: 'invalid_customer_local_payload',
+      cause: field,
+    );
+  }
+
+  int? _optionalInt(Map<String, dynamic> json, String field) {
+    final value = json[field];
+    if (value == null || value is int) return value as int?;
     throw ValidationException(
       'Invalid local customer integer field.',
       code: 'invalid_customer_local_payload',

@@ -214,6 +214,74 @@ class $CustomersTableTable extends CustomersTable
         type: DriftSqlType.dateTime,
         requiredDuringInsert: false,
       );
+  static const VerificationMeta _commercialScoreMeta = const VerificationMeta(
+    'commercialScore',
+  );
+  @override
+  late final GeneratedColumn<int> commercialScore = GeneratedColumn<int>(
+    'commercial_score',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _healthScoreMeta = const VerificationMeta(
+    'healthScore',
+  );
+  @override
+  late final GeneratedColumn<int> healthScore = GeneratedColumn<int>(
+    'health_score',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _healthScoreBandMeta = const VerificationMeta(
+    'healthScoreBand',
+  );
+  @override
+  late final GeneratedColumn<String> healthScoreBand = GeneratedColumn<String>(
+    'health_score_band',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _scoreUpdatedAtMeta = const VerificationMeta(
+    'scoreUpdatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> scoreUpdatedAt =
+      GeneratedColumn<DateTime>(
+        'score_updated_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _scoreFormulaVersionMeta =
+      const VerificationMeta('scoreFormulaVersion');
+  @override
+  late final GeneratedColumn<String> scoreFormulaVersion =
+      GeneratedColumn<String>(
+        'score_formula_version',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _scoreDataCoverageMeta = const VerificationMeta(
+    'scoreDataCoverage',
+  );
+  @override
+  late final GeneratedColumn<String> scoreDataCoverage =
+      GeneratedColumn<String>(
+        'score_data_coverage',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _tagsJsonMeta = const VerificationMeta(
     'tagsJson',
   );
@@ -334,6 +402,12 @@ class $CustomersTableTable extends CustomersTable
     responsibleSellerId,
     registeredAt,
     lastPurchaseAt,
+    commercialScore,
+    healthScore,
+    healthScoreBand,
+    scoreUpdatedAt,
+    scoreFormulaVersion,
+    scoreDataCoverage,
     tagsJson,
     customFieldsJson,
     createdAt,
@@ -508,6 +582,60 @@ class $CustomersTableTable extends CustomersTable
         ),
       );
     }
+    if (data.containsKey('commercial_score')) {
+      context.handle(
+        _commercialScoreMeta,
+        commercialScore.isAcceptableOrUnknown(
+          data['commercial_score']!,
+          _commercialScoreMeta,
+        ),
+      );
+    }
+    if (data.containsKey('health_score')) {
+      context.handle(
+        _healthScoreMeta,
+        healthScore.isAcceptableOrUnknown(
+          data['health_score']!,
+          _healthScoreMeta,
+        ),
+      );
+    }
+    if (data.containsKey('health_score_band')) {
+      context.handle(
+        _healthScoreBandMeta,
+        healthScoreBand.isAcceptableOrUnknown(
+          data['health_score_band']!,
+          _healthScoreBandMeta,
+        ),
+      );
+    }
+    if (data.containsKey('score_updated_at')) {
+      context.handle(
+        _scoreUpdatedAtMeta,
+        scoreUpdatedAt.isAcceptableOrUnknown(
+          data['score_updated_at']!,
+          _scoreUpdatedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('score_formula_version')) {
+      context.handle(
+        _scoreFormulaVersionMeta,
+        scoreFormulaVersion.isAcceptableOrUnknown(
+          data['score_formula_version']!,
+          _scoreFormulaVersionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('score_data_coverage')) {
+      context.handle(
+        _scoreDataCoverageMeta,
+        scoreDataCoverage.isAcceptableOrUnknown(
+          data['score_data_coverage']!,
+          _scoreDataCoverageMeta,
+        ),
+      );
+    }
     if (data.containsKey('tags_json')) {
       context.handle(
         _tagsJsonMeta,
@@ -662,6 +790,30 @@ class $CustomersTableTable extends CustomersTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}last_purchase_at'],
       ),
+      commercialScore: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}commercial_score'],
+      ),
+      healthScore: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}health_score'],
+      ),
+      healthScoreBand: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}health_score_band'],
+      ),
+      scoreUpdatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}score_updated_at'],
+      ),
+      scoreFormulaVersion: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}score_formula_version'],
+      ),
+      scoreDataCoverage: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}score_data_coverage'],
+      ),
       tagsJson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}tags_json'],
@@ -728,6 +880,12 @@ class CustomersTableData extends DataClass
   final String? responsibleSellerId;
   final DateTime registeredAt;
   final DateTime? lastPurchaseAt;
+  final int? commercialScore;
+  final int? healthScore;
+  final String? healthScoreBand;
+  final DateTime? scoreUpdatedAt;
+  final String? scoreFormulaVersion;
+  final String? scoreDataCoverage;
   final String? tagsJson;
   final String? customFieldsJson;
   final DateTime createdAt;
@@ -757,6 +915,12 @@ class CustomersTableData extends DataClass
     this.responsibleSellerId,
     required this.registeredAt,
     this.lastPurchaseAt,
+    this.commercialScore,
+    this.healthScore,
+    this.healthScoreBand,
+    this.scoreUpdatedAt,
+    this.scoreFormulaVersion,
+    this.scoreDataCoverage,
     this.tagsJson,
     this.customFieldsJson,
     required this.createdAt,
@@ -812,6 +976,24 @@ class CustomersTableData extends DataClass
     map['registered_at'] = Variable<DateTime>(registeredAt);
     if (!nullToAbsent || lastPurchaseAt != null) {
       map['last_purchase_at'] = Variable<DateTime>(lastPurchaseAt);
+    }
+    if (!nullToAbsent || commercialScore != null) {
+      map['commercial_score'] = Variable<int>(commercialScore);
+    }
+    if (!nullToAbsent || healthScore != null) {
+      map['health_score'] = Variable<int>(healthScore);
+    }
+    if (!nullToAbsent || healthScoreBand != null) {
+      map['health_score_band'] = Variable<String>(healthScoreBand);
+    }
+    if (!nullToAbsent || scoreUpdatedAt != null) {
+      map['score_updated_at'] = Variable<DateTime>(scoreUpdatedAt);
+    }
+    if (!nullToAbsent || scoreFormulaVersion != null) {
+      map['score_formula_version'] = Variable<String>(scoreFormulaVersion);
+    }
+    if (!nullToAbsent || scoreDataCoverage != null) {
+      map['score_data_coverage'] = Variable<String>(scoreDataCoverage);
     }
     if (!nullToAbsent || tagsJson != null) {
       map['tags_json'] = Variable<String>(tagsJson);
@@ -876,6 +1058,24 @@ class CustomersTableData extends DataClass
       lastPurchaseAt: lastPurchaseAt == null && nullToAbsent
           ? const Value.absent()
           : Value(lastPurchaseAt),
+      commercialScore: commercialScore == null && nullToAbsent
+          ? const Value.absent()
+          : Value(commercialScore),
+      healthScore: healthScore == null && nullToAbsent
+          ? const Value.absent()
+          : Value(healthScore),
+      healthScoreBand: healthScoreBand == null && nullToAbsent
+          ? const Value.absent()
+          : Value(healthScoreBand),
+      scoreUpdatedAt: scoreUpdatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(scoreUpdatedAt),
+      scoreFormulaVersion: scoreFormulaVersion == null && nullToAbsent
+          ? const Value.absent()
+          : Value(scoreFormulaVersion),
+      scoreDataCoverage: scoreDataCoverage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(scoreDataCoverage),
       tagsJson: tagsJson == null && nullToAbsent
           ? const Value.absent()
           : Value(tagsJson),
@@ -923,6 +1123,16 @@ class CustomersTableData extends DataClass
       ),
       registeredAt: serializer.fromJson<DateTime>(json['registeredAt']),
       lastPurchaseAt: serializer.fromJson<DateTime?>(json['lastPurchaseAt']),
+      commercialScore: serializer.fromJson<int?>(json['commercialScore']),
+      healthScore: serializer.fromJson<int?>(json['healthScore']),
+      healthScoreBand: serializer.fromJson<String?>(json['healthScoreBand']),
+      scoreUpdatedAt: serializer.fromJson<DateTime?>(json['scoreUpdatedAt']),
+      scoreFormulaVersion: serializer.fromJson<String?>(
+        json['scoreFormulaVersion'],
+      ),
+      scoreDataCoverage: serializer.fromJson<String?>(
+        json['scoreDataCoverage'],
+      ),
       tagsJson: serializer.fromJson<String?>(json['tagsJson']),
       customFieldsJson: serializer.fromJson<String?>(json['customFieldsJson']),
       createdAt: serializer.fromJson<DateTime>(json['createdAt']),
@@ -957,6 +1167,12 @@ class CustomersTableData extends DataClass
       'responsibleSellerId': serializer.toJson<String?>(responsibleSellerId),
       'registeredAt': serializer.toJson<DateTime>(registeredAt),
       'lastPurchaseAt': serializer.toJson<DateTime?>(lastPurchaseAt),
+      'commercialScore': serializer.toJson<int?>(commercialScore),
+      'healthScore': serializer.toJson<int?>(healthScore),
+      'healthScoreBand': serializer.toJson<String?>(healthScoreBand),
+      'scoreUpdatedAt': serializer.toJson<DateTime?>(scoreUpdatedAt),
+      'scoreFormulaVersion': serializer.toJson<String?>(scoreFormulaVersion),
+      'scoreDataCoverage': serializer.toJson<String?>(scoreDataCoverage),
       'tagsJson': serializer.toJson<String?>(tagsJson),
       'customFieldsJson': serializer.toJson<String?>(customFieldsJson),
       'createdAt': serializer.toJson<DateTime>(createdAt),
@@ -989,6 +1205,12 @@ class CustomersTableData extends DataClass
     Value<String?> responsibleSellerId = const Value.absent(),
     DateTime? registeredAt,
     Value<DateTime?> lastPurchaseAt = const Value.absent(),
+    Value<int?> commercialScore = const Value.absent(),
+    Value<int?> healthScore = const Value.absent(),
+    Value<String?> healthScoreBand = const Value.absent(),
+    Value<DateTime?> scoreUpdatedAt = const Value.absent(),
+    Value<String?> scoreFormulaVersion = const Value.absent(),
+    Value<String?> scoreDataCoverage = const Value.absent(),
     Value<String?> tagsJson = const Value.absent(),
     Value<String?> customFieldsJson = const Value.absent(),
     DateTime? createdAt,
@@ -1028,6 +1250,22 @@ class CustomersTableData extends DataClass
     lastPurchaseAt: lastPurchaseAt.present
         ? lastPurchaseAt.value
         : this.lastPurchaseAt,
+    commercialScore: commercialScore.present
+        ? commercialScore.value
+        : this.commercialScore,
+    healthScore: healthScore.present ? healthScore.value : this.healthScore,
+    healthScoreBand: healthScoreBand.present
+        ? healthScoreBand.value
+        : this.healthScoreBand,
+    scoreUpdatedAt: scoreUpdatedAt.present
+        ? scoreUpdatedAt.value
+        : this.scoreUpdatedAt,
+    scoreFormulaVersion: scoreFormulaVersion.present
+        ? scoreFormulaVersion.value
+        : this.scoreFormulaVersion,
+    scoreDataCoverage: scoreDataCoverage.present
+        ? scoreDataCoverage.value
+        : this.scoreDataCoverage,
     tagsJson: tagsJson.present ? tagsJson.value : this.tagsJson,
     customFieldsJson: customFieldsJson.present
         ? customFieldsJson.value
@@ -1079,6 +1317,24 @@ class CustomersTableData extends DataClass
       lastPurchaseAt: data.lastPurchaseAt.present
           ? data.lastPurchaseAt.value
           : this.lastPurchaseAt,
+      commercialScore: data.commercialScore.present
+          ? data.commercialScore.value
+          : this.commercialScore,
+      healthScore: data.healthScore.present
+          ? data.healthScore.value
+          : this.healthScore,
+      healthScoreBand: data.healthScoreBand.present
+          ? data.healthScoreBand.value
+          : this.healthScoreBand,
+      scoreUpdatedAt: data.scoreUpdatedAt.present
+          ? data.scoreUpdatedAt.value
+          : this.scoreUpdatedAt,
+      scoreFormulaVersion: data.scoreFormulaVersion.present
+          ? data.scoreFormulaVersion.value
+          : this.scoreFormulaVersion,
+      scoreDataCoverage: data.scoreDataCoverage.present
+          ? data.scoreDataCoverage.value
+          : this.scoreDataCoverage,
       tagsJson: data.tagsJson.present ? data.tagsJson.value : this.tagsJson,
       customFieldsJson: data.customFieldsJson.present
           ? data.customFieldsJson.value
@@ -1117,6 +1373,12 @@ class CustomersTableData extends DataClass
           ..write('responsibleSellerId: $responsibleSellerId, ')
           ..write('registeredAt: $registeredAt, ')
           ..write('lastPurchaseAt: $lastPurchaseAt, ')
+          ..write('commercialScore: $commercialScore, ')
+          ..write('healthScore: $healthScore, ')
+          ..write('healthScoreBand: $healthScoreBand, ')
+          ..write('scoreUpdatedAt: $scoreUpdatedAt, ')
+          ..write('scoreFormulaVersion: $scoreFormulaVersion, ')
+          ..write('scoreDataCoverage: $scoreDataCoverage, ')
           ..write('tagsJson: $tagsJson, ')
           ..write('customFieldsJson: $customFieldsJson, ')
           ..write('createdAt: $createdAt, ')
@@ -1151,6 +1413,12 @@ class CustomersTableData extends DataClass
     responsibleSellerId,
     registeredAt,
     lastPurchaseAt,
+    commercialScore,
+    healthScore,
+    healthScoreBand,
+    scoreUpdatedAt,
+    scoreFormulaVersion,
+    scoreDataCoverage,
     tagsJson,
     customFieldsJson,
     createdAt,
@@ -1184,6 +1452,12 @@ class CustomersTableData extends DataClass
           other.responsibleSellerId == this.responsibleSellerId &&
           other.registeredAt == this.registeredAt &&
           other.lastPurchaseAt == this.lastPurchaseAt &&
+          other.commercialScore == this.commercialScore &&
+          other.healthScore == this.healthScore &&
+          other.healthScoreBand == this.healthScoreBand &&
+          other.scoreUpdatedAt == this.scoreUpdatedAt &&
+          other.scoreFormulaVersion == this.scoreFormulaVersion &&
+          other.scoreDataCoverage == this.scoreDataCoverage &&
           other.tagsJson == this.tagsJson &&
           other.customFieldsJson == this.customFieldsJson &&
           other.createdAt == this.createdAt &&
@@ -1215,6 +1489,12 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
   final Value<String?> responsibleSellerId;
   final Value<DateTime> registeredAt;
   final Value<DateTime?> lastPurchaseAt;
+  final Value<int?> commercialScore;
+  final Value<int?> healthScore;
+  final Value<String?> healthScoreBand;
+  final Value<DateTime?> scoreUpdatedAt;
+  final Value<String?> scoreFormulaVersion;
+  final Value<String?> scoreDataCoverage;
   final Value<String?> tagsJson;
   final Value<String?> customFieldsJson;
   final Value<DateTime> createdAt;
@@ -1245,6 +1525,12 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     this.responsibleSellerId = const Value.absent(),
     this.registeredAt = const Value.absent(),
     this.lastPurchaseAt = const Value.absent(),
+    this.commercialScore = const Value.absent(),
+    this.healthScore = const Value.absent(),
+    this.healthScoreBand = const Value.absent(),
+    this.scoreUpdatedAt = const Value.absent(),
+    this.scoreFormulaVersion = const Value.absent(),
+    this.scoreDataCoverage = const Value.absent(),
     this.tagsJson = const Value.absent(),
     this.customFieldsJson = const Value.absent(),
     this.createdAt = const Value.absent(),
@@ -1276,6 +1562,12 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     this.responsibleSellerId = const Value.absent(),
     required DateTime registeredAt,
     this.lastPurchaseAt = const Value.absent(),
+    this.commercialScore = const Value.absent(),
+    this.healthScore = const Value.absent(),
+    this.healthScoreBand = const Value.absent(),
+    this.scoreUpdatedAt = const Value.absent(),
+    this.scoreFormulaVersion = const Value.absent(),
+    this.scoreDataCoverage = const Value.absent(),
     this.tagsJson = const Value.absent(),
     this.customFieldsJson = const Value.absent(),
     required DateTime createdAt,
@@ -1319,6 +1611,12 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     Expression<String>? responsibleSellerId,
     Expression<DateTime>? registeredAt,
     Expression<DateTime>? lastPurchaseAt,
+    Expression<int>? commercialScore,
+    Expression<int>? healthScore,
+    Expression<String>? healthScoreBand,
+    Expression<DateTime>? scoreUpdatedAt,
+    Expression<String>? scoreFormulaVersion,
+    Expression<String>? scoreDataCoverage,
     Expression<String>? tagsJson,
     Expression<String>? customFieldsJson,
     Expression<DateTime>? createdAt,
@@ -1351,6 +1649,13 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
         'responsible_seller_id': responsibleSellerId,
       if (registeredAt != null) 'registered_at': registeredAt,
       if (lastPurchaseAt != null) 'last_purchase_at': lastPurchaseAt,
+      if (commercialScore != null) 'commercial_score': commercialScore,
+      if (healthScore != null) 'health_score': healthScore,
+      if (healthScoreBand != null) 'health_score_band': healthScoreBand,
+      if (scoreUpdatedAt != null) 'score_updated_at': scoreUpdatedAt,
+      if (scoreFormulaVersion != null)
+        'score_formula_version': scoreFormulaVersion,
+      if (scoreDataCoverage != null) 'score_data_coverage': scoreDataCoverage,
       if (tagsJson != null) 'tags_json': tagsJson,
       if (customFieldsJson != null) 'custom_fields_json': customFieldsJson,
       if (createdAt != null) 'created_at': createdAt,
@@ -1384,6 +1689,12 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     Value<String?>? responsibleSellerId,
     Value<DateTime>? registeredAt,
     Value<DateTime?>? lastPurchaseAt,
+    Value<int?>? commercialScore,
+    Value<int?>? healthScore,
+    Value<String?>? healthScoreBand,
+    Value<DateTime?>? scoreUpdatedAt,
+    Value<String?>? scoreFormulaVersion,
+    Value<String?>? scoreDataCoverage,
     Value<String?>? tagsJson,
     Value<String?>? customFieldsJson,
     Value<DateTime>? createdAt,
@@ -1415,6 +1726,12 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
       responsibleSellerId: responsibleSellerId ?? this.responsibleSellerId,
       registeredAt: registeredAt ?? this.registeredAt,
       lastPurchaseAt: lastPurchaseAt ?? this.lastPurchaseAt,
+      commercialScore: commercialScore ?? this.commercialScore,
+      healthScore: healthScore ?? this.healthScore,
+      healthScoreBand: healthScoreBand ?? this.healthScoreBand,
+      scoreUpdatedAt: scoreUpdatedAt ?? this.scoreUpdatedAt,
+      scoreFormulaVersion: scoreFormulaVersion ?? this.scoreFormulaVersion,
+      scoreDataCoverage: scoreDataCoverage ?? this.scoreDataCoverage,
       tagsJson: tagsJson ?? this.tagsJson,
       customFieldsJson: customFieldsJson ?? this.customFieldsJson,
       createdAt: createdAt ?? this.createdAt,
@@ -1490,6 +1807,26 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
     if (lastPurchaseAt.present) {
       map['last_purchase_at'] = Variable<DateTime>(lastPurchaseAt.value);
     }
+    if (commercialScore.present) {
+      map['commercial_score'] = Variable<int>(commercialScore.value);
+    }
+    if (healthScore.present) {
+      map['health_score'] = Variable<int>(healthScore.value);
+    }
+    if (healthScoreBand.present) {
+      map['health_score_band'] = Variable<String>(healthScoreBand.value);
+    }
+    if (scoreUpdatedAt.present) {
+      map['score_updated_at'] = Variable<DateTime>(scoreUpdatedAt.value);
+    }
+    if (scoreFormulaVersion.present) {
+      map['score_formula_version'] = Variable<String>(
+        scoreFormulaVersion.value,
+      );
+    }
+    if (scoreDataCoverage.present) {
+      map['score_data_coverage'] = Variable<String>(scoreDataCoverage.value);
+    }
     if (tagsJson.present) {
       map['tags_json'] = Variable<String>(tagsJson.value);
     }
@@ -1545,6 +1882,12 @@ class CustomersTableCompanion extends UpdateCompanion<CustomersTableData> {
           ..write('responsibleSellerId: $responsibleSellerId, ')
           ..write('registeredAt: $registeredAt, ')
           ..write('lastPurchaseAt: $lastPurchaseAt, ')
+          ..write('commercialScore: $commercialScore, ')
+          ..write('healthScore: $healthScore, ')
+          ..write('healthScoreBand: $healthScoreBand, ')
+          ..write('scoreUpdatedAt: $scoreUpdatedAt, ')
+          ..write('scoreFormulaVersion: $scoreFormulaVersion, ')
+          ..write('scoreDataCoverage: $scoreDataCoverage, ')
           ..write('tagsJson: $tagsJson, ')
           ..write('customFieldsJson: $customFieldsJson, ')
           ..write('createdAt: $createdAt, ')
@@ -3254,6 +3597,12 @@ typedef $$CustomersTableTableCreateCompanionBuilder =
       Value<String?> responsibleSellerId,
       required DateTime registeredAt,
       Value<DateTime?> lastPurchaseAt,
+      Value<int?> commercialScore,
+      Value<int?> healthScore,
+      Value<String?> healthScoreBand,
+      Value<DateTime?> scoreUpdatedAt,
+      Value<String?> scoreFormulaVersion,
+      Value<String?> scoreDataCoverage,
       Value<String?> tagsJson,
       Value<String?> customFieldsJson,
       required DateTime createdAt,
@@ -3286,6 +3635,12 @@ typedef $$CustomersTableTableUpdateCompanionBuilder =
       Value<String?> responsibleSellerId,
       Value<DateTime> registeredAt,
       Value<DateTime?> lastPurchaseAt,
+      Value<int?> commercialScore,
+      Value<int?> healthScore,
+      Value<String?> healthScoreBand,
+      Value<DateTime?> scoreUpdatedAt,
+      Value<String?> scoreFormulaVersion,
+      Value<String?> scoreDataCoverage,
       Value<String?> tagsJson,
       Value<String?> customFieldsJson,
       Value<DateTime> createdAt,
@@ -3463,6 +3818,36 @@ class $$CustomersTableTableFilterComposer
 
   ColumnFilters<DateTime> get lastPurchaseAt => $composableBuilder(
     column: $table.lastPurchaseAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get commercialScore => $composableBuilder(
+    column: $table.commercialScore,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get healthScore => $composableBuilder(
+    column: $table.healthScore,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get healthScoreBand => $composableBuilder(
+    column: $table.healthScoreBand,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get scoreUpdatedAt => $composableBuilder(
+    column: $table.scoreUpdatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get scoreFormulaVersion => $composableBuilder(
+    column: $table.scoreFormulaVersion,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get scoreDataCoverage => $composableBuilder(
+    column: $table.scoreDataCoverage,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -3668,6 +4053,36 @@ class $$CustomersTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<int> get commercialScore => $composableBuilder(
+    column: $table.commercialScore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get healthScore => $composableBuilder(
+    column: $table.healthScore,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get healthScoreBand => $composableBuilder(
+    column: $table.healthScoreBand,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get scoreUpdatedAt => $composableBuilder(
+    column: $table.scoreUpdatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get scoreFormulaVersion => $composableBuilder(
+    column: $table.scoreFormulaVersion,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get scoreDataCoverage => $composableBuilder(
+    column: $table.scoreDataCoverage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get tagsJson => $composableBuilder(
     column: $table.tagsJson,
     builder: (column) => ColumnOrderings(column),
@@ -3795,6 +4210,36 @@ class $$CustomersTableTableAnnotationComposer
 
   GeneratedColumn<DateTime> get lastPurchaseAt => $composableBuilder(
     column: $table.lastPurchaseAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get commercialScore => $composableBuilder(
+    column: $table.commercialScore,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get healthScore => $composableBuilder(
+    column: $table.healthScore,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get healthScoreBand => $composableBuilder(
+    column: $table.healthScoreBand,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get scoreUpdatedAt => $composableBuilder(
+    column: $table.scoreUpdatedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get scoreFormulaVersion => $composableBuilder(
+    column: $table.scoreFormulaVersion,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get scoreDataCoverage => $composableBuilder(
+    column: $table.scoreDataCoverage,
     builder: (column) => column,
   );
 
@@ -3934,6 +4379,12 @@ class $$CustomersTableTableTableManager
                 Value<String?> responsibleSellerId = const Value.absent(),
                 Value<DateTime> registeredAt = const Value.absent(),
                 Value<DateTime?> lastPurchaseAt = const Value.absent(),
+                Value<int?> commercialScore = const Value.absent(),
+                Value<int?> healthScore = const Value.absent(),
+                Value<String?> healthScoreBand = const Value.absent(),
+                Value<DateTime?> scoreUpdatedAt = const Value.absent(),
+                Value<String?> scoreFormulaVersion = const Value.absent(),
+                Value<String?> scoreDataCoverage = const Value.absent(),
                 Value<String?> tagsJson = const Value.absent(),
                 Value<String?> customFieldsJson = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
@@ -3964,6 +4415,12 @@ class $$CustomersTableTableTableManager
                 responsibleSellerId: responsibleSellerId,
                 registeredAt: registeredAt,
                 lastPurchaseAt: lastPurchaseAt,
+                commercialScore: commercialScore,
+                healthScore: healthScore,
+                healthScoreBand: healthScoreBand,
+                scoreUpdatedAt: scoreUpdatedAt,
+                scoreFormulaVersion: scoreFormulaVersion,
+                scoreDataCoverage: scoreDataCoverage,
                 tagsJson: tagsJson,
                 customFieldsJson: customFieldsJson,
                 createdAt: createdAt,
@@ -3996,6 +4453,12 @@ class $$CustomersTableTableTableManager
                 Value<String?> responsibleSellerId = const Value.absent(),
                 required DateTime registeredAt,
                 Value<DateTime?> lastPurchaseAt = const Value.absent(),
+                Value<int?> commercialScore = const Value.absent(),
+                Value<int?> healthScore = const Value.absent(),
+                Value<String?> healthScoreBand = const Value.absent(),
+                Value<DateTime?> scoreUpdatedAt = const Value.absent(),
+                Value<String?> scoreFormulaVersion = const Value.absent(),
+                Value<String?> scoreDataCoverage = const Value.absent(),
                 Value<String?> tagsJson = const Value.absent(),
                 Value<String?> customFieldsJson = const Value.absent(),
                 required DateTime createdAt,
@@ -4026,6 +4489,12 @@ class $$CustomersTableTableTableManager
                 responsibleSellerId: responsibleSellerId,
                 registeredAt: registeredAt,
                 lastPurchaseAt: lastPurchaseAt,
+                commercialScore: commercialScore,
+                healthScore: healthScore,
+                healthScoreBand: healthScoreBand,
+                scoreUpdatedAt: scoreUpdatedAt,
+                scoreFormulaVersion: scoreFormulaVersion,
+                scoreDataCoverage: scoreDataCoverage,
                 tagsJson: tagsJson,
                 customFieldsJson: customFieldsJson,
                 createdAt: createdAt,

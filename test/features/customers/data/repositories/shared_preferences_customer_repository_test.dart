@@ -53,6 +53,9 @@ void main() {
       expect(lookupResult, isA<AppSuccess<Customer>>());
       final loaded = (lookupResult as AppSuccess<Customer>).value;
       expect(loaded.syncStatus, CustomerSyncStatus.pending);
+      expect(loaded.commercialScore, 54);
+      expect(loaded.healthScoreBand, CustomerHealthScoreBand.attention);
+      expect(loaded.scoreDataCoverage, CustomerScoreDataCoverage.crmOnly);
       expect(loaded.addresses.single.zipCode, Cep.parse('89010-100'));
       expect(loaded.contacts.single.name, 'Ana Compras');
       expect((existsResult as AppSuccess<bool>).value, isTrue);
@@ -91,6 +94,12 @@ Customer _customer({
     primaryPhone: '+55 47 99999-0000',
     status: CustomerStatus.prospect,
     registeredAt: now,
+    commercialScore: 54,
+    healthScore: 62,
+    healthScoreBand: CustomerHealthScoreBand.attention,
+    scoreUpdatedAt: now.add(const Duration(hours: 2)),
+    scoreFormulaVersion: customerScoringFormulaVersion,
+    scoreDataCoverage: CustomerScoreDataCoverage.crmOnly,
     addresses: addresses,
     contacts: contacts,
     createdAt: now,

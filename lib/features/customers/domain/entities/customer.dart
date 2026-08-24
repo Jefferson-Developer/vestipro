@@ -1,6 +1,8 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../value_objects/cnpj_cpf.dart';
+import '../value_objects/customer_health_score_band.dart';
+import '../value_objects/customer_score_data_coverage.dart';
 import '../value_objects/customer_status.dart';
 import '../value_objects/customer_sync_status.dart';
 import '../value_objects/customer_type.dart';
@@ -42,6 +44,12 @@ abstract class Customer with _$Customer {
     String? sourceLeadId,
     required DateTime registeredAt,
     DateTime? lastPurchaseAt,
+    int? commercialScore,
+    int? healthScore,
+    CustomerHealthScoreBand? healthScoreBand,
+    DateTime? scoreUpdatedAt,
+    String? scoreFormulaVersion,
+    CustomerScoreDataCoverage? scoreDataCoverage,
     @Default(<CustomerAddress>[]) List<CustomerAddress> addresses,
     @Default(<CustomerContact>[]) List<CustomerContact> contacts,
     @Default(<String>[]) List<String> tags,
@@ -61,4 +69,12 @@ abstract class Customer with _$Customer {
       CustomerType.individual => fullName ?? document.formatted,
     };
   }
+
+  bool get hasCalculatedScores =>
+      commercialScore != null &&
+      healthScore != null &&
+      healthScoreBand != null &&
+      scoreUpdatedAt != null &&
+      scoreFormulaVersion != null &&
+      scoreDataCoverage != null;
 }
