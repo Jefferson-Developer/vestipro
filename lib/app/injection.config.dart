@@ -390,6 +390,7 @@ import '../features/organizations/domain/usecases/update_organization_settings_u
 import '../features/organizations/domain/usecases/update_team_use_case.dart'
     as _i207;
 import '../features/organizations/organizations.dart' as _i265;
+import '../features/products/data/mappers/product_mapper.dart' as _i309;
 import '../features/settings/data/datasources/about_app_data_source.dart'
     as _i364;
 import '../features/settings/data/datasources/in_memory_about_app_datasource.dart'
@@ -527,6 +528,7 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i1043.RoleMapper>(() => const _i1043.RoleMapper());
     gh.lazySingleton<_i802.TeamMapper>(() => const _i802.TeamMapper());
+    gh.lazySingleton<_i309.ProductMapper>(() => const _i309.ProductMapper());
     gh.lazySingleton<_i847.AboutAppMapper>(() => const _i847.AboutAppMapper());
     gh.lazySingleton<_i370.AboutAppNotesMapper>(
       () => const _i370.AboutAppNotesMapper(),
