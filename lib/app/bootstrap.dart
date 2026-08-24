@@ -170,6 +170,12 @@ class VestiProApp extends StatelessWidget {
                     userId: getIt<AuthRepository>().currentUser?.uid ?? '',
                     permissionService: getIt<PermissionService>(),
                     createBloc: () => getIt<CustomerPortfolioBloc>(),
+                    onCustomerSelected: (customer) => context.go(
+                      CustomerDetailRoute(
+                        orgId: orgId,
+                        customerId: customer.id,
+                      ).location,
+                    ),
                     initialSearchQuery: queryParameters['q'] ?? '',
                     initialFilters:
                         CustomerPortfolioFilters.fromQueryParameters(
@@ -185,6 +191,14 @@ class VestiProApp extends StatelessWidget {
                       ).location,
                     ),
                   ),
+          customerDetailPageBuilder: (context, orgId, customerId) =>
+              CustomerDetailPage(
+                organizationId: orgId,
+                customerId: customerId,
+                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                permissionService: getIt<PermissionService>(),
+                createBloc: () => getIt<CustomerDetailBloc>(),
+              ),
           loginPageBuilder: (context) =>
               LoginPage(createBloc: () => getIt<LoginBloc>()),
           signUpPageBuilder: (context) =>

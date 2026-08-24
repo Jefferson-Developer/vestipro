@@ -198,6 +198,58 @@ void main() {
       expect(find.byType(ForbiddenPage), findsOneWidget);
       expect(find.text('customer-portfolio:acme:company-1'), findsNothing);
     });
+
+    testWidgets('passes CustomerDetailRoute path parameters to the injected '
+        'page', (tester) async {
+      String? capturedOrgId;
+      String? capturedCustomerId;
+      final appRouter = _buildRouter(
+        customerDetailPageBuilder: (context, orgId, customerId) {
+          capturedOrgId = orgId;
+          capturedCustomerId = customerId;
+          return Scaffold(body: Text('customer-detail:$orgId:$customerId'));
+        },
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(
+        const CustomerDetailRoute(
+          orgId: 'acme',
+          customerId: 'customer-123',
+        ).location,
+      );
+      await tester.pumpAndSettle();
+
+      expect(capturedOrgId, 'acme');
+      expect(capturedCustomerId, 'customer-123');
+      expect(find.text('customer-detail:acme:customer-123'), findsOneWidget);
+    });
+
+    testWidgets('protects CustomerDetailRoute with customer.view', (
+      tester,
+    ) async {
+      final appRouter = _buildRouter(
+        authorizationGuard: const _DenyCustomerViewGuard(),
+        customerDetailPageBuilder: (context, orgId, customerId) =>
+            Scaffold(body: Text('customer-detail:$orgId:$customerId')),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(
+        const CustomerDetailRoute(
+          orgId: 'acme',
+          customerId: 'customer-123',
+        ).location,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ForbiddenPage), findsOneWidget);
+      expect(find.text('customer-detail:acme:customer-123'), findsNothing);
+    });
   });
 }
 
@@ -216,6 +268,8 @@ AppRouter _buildRouter({
     Map<String, String> queryParameters,
   )?
   customerPortfolioPageBuilder,
+  Widget Function(BuildContext context, String orgId, String customerId)?
+  customerDetailPageBuilder,
   WidgetBuilder? loginPageBuilder,
   Widget Function(BuildContext context, String token)? acceptInvitePageBuilder,
 }) {
@@ -231,6 +285,7 @@ AppRouter _buildRouter({
         (context, orgId) => Scaffold(body: Text('audit-log:$orgId')),
     customerFormPageBuilder: customerFormPageBuilder,
     customerPortfolioPageBuilder: customerPortfolioPageBuilder,
+    customerDetailPageBuilder: customerDetailPageBuilder,
     loginPageBuilder:
         loginPageBuilder ?? (context) => const Scaffold(body: Text('login')),
     signUpPageBuilder: (context) => const Scaffold(body: Text('sign-up')),

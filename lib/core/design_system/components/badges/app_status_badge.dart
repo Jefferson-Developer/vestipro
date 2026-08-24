@@ -72,9 +72,14 @@ class AppStatusBadge extends StatelessWidget {
               color: foreground,
             ),
             const SizedBox(width: AppSpacing.spacing8),
-            Text(
-              label,
-              style: AppTypography.labelMedium.copyWith(color: foreground),
+            Flexible(
+              child: Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                softWrap: false,
+                style: AppTypography.labelMedium.copyWith(color: foreground),
+              ),
             ),
           ],
         ),

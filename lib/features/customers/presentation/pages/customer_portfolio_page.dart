@@ -20,6 +20,7 @@ class CustomerPortfolioPage extends StatelessWidget {
     required this.createBloc,
     this.initialSearchQuery = '',
     this.initialFilters = CustomerPortfolioFilters.empty,
+    this.onCustomerSelected,
     this.onUrlStateChanged,
     super.key,
   });
@@ -31,6 +32,7 @@ class CustomerPortfolioPage extends StatelessWidget {
   final CustomerPortfolioBloc Function() createBloc;
   final String initialSearchQuery;
   final CustomerPortfolioFilters initialFilters;
+  final ValueChanged<Customer>? onCustomerSelected;
   final void Function(String searchQuery, CustomerPortfolioFilters filters)?
   onUrlStateChanged;
 
@@ -55,6 +57,7 @@ class CustomerPortfolioPage extends StatelessWidget {
               ),
             ),
           child: _CustomerPortfolioScaffold(
+            onCustomerSelected: onCustomerSelected,
             onUrlStateChanged: onUrlStateChanged,
           ),
         );
@@ -64,8 +67,12 @@ class CustomerPortfolioPage extends StatelessWidget {
 }
 
 class _CustomerPortfolioScaffold extends StatelessWidget {
-  const _CustomerPortfolioScaffold({this.onUrlStateChanged});
+  const _CustomerPortfolioScaffold({
+    this.onCustomerSelected,
+    this.onUrlStateChanged,
+  });
 
+  final ValueChanged<Customer>? onCustomerSelected;
   final void Function(String searchQuery, CustomerPortfolioFilters filters)?
   onUrlStateChanged;
 
@@ -84,7 +91,10 @@ class _CustomerPortfolioScaffold extends StatelessWidget {
               title: 'Carteira de clientes',
               filtersTitle: 'Filtros da carteira',
               filtersBuilder: (_) => _PortfolioFilters(state: state),
-              content: _PortfolioContent(state: state),
+              content: _PortfolioContent(
+                state: state,
+                onCustomerSelected: onCustomerSelected,
+              ),
             ),
           );
         },
@@ -94,9 +104,10 @@ class _CustomerPortfolioScaffold extends StatelessWidget {
 }
 
 class _PortfolioContent extends StatefulWidget {
-  const _PortfolioContent({required this.state});
+  const _PortfolioContent({required this.state, this.onCustomerSelected});
 
   final CustomerPortfolioState state;
+  final ValueChanged<Customer>? onCustomerSelected;
 
   @override
   State<_PortfolioContent> createState() => _PortfolioContentState();
@@ -168,7 +179,12 @@ class _PortfolioContentState extends State<_PortfolioContent> {
                   child: Center(child: CircularProgressIndicator()),
                 );
               }
-              return _CustomerPortfolioCard(customer: state.customers[index]);
+              return _CustomerPortfolioCard(
+                customer: state.customers[index],
+                onTap: widget.onCustomerSelected == null
+                    ? null
+                    : () => widget.onCustomerSelected!(state.customers[index]),
+              );
             },
           ),
         ),
@@ -401,14 +417,15 @@ class _OfflineCacheBanner extends StatelessWidget {
 }
 
 class _CustomerPortfolioCard extends StatelessWidget {
-  const _CustomerPortfolioCard({required this.customer});
+  const _CustomerPortfolioCard({required this.customer, this.onTap});
 
   final Customer customer;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final colors = context.colors;
-    return Container(
+    final card = Container(
       padding: const EdgeInsets.all(AppSpacing.spacing16),
       decoration: BoxDecoration(
         color: colors.surface,
@@ -474,6 +491,16 @@ class _CustomerPortfolioCard extends StatelessWidget {
             ],
           );
         },
+      ),
+    );
+    if (onTap == null) return card;
+    return Semantics(
+      button: true,
+      label: 'Abrir visao 360 de ${customer.displayName}',
+      child: InkWell(
+        borderRadius: BorderRadius.circular(AppRadius.radius8),
+        onTap: onTap,
+        child: card,
       ),
     );
   }

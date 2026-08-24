@@ -1,8 +1,11 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../entities/customer.dart';
 import '../repositories/customer_repository.dart';
 
+@injectable
 final class GetCustomerByIdUseCase {
   GetCustomerByIdUseCase(this._repository);
 

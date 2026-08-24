@@ -90,6 +90,21 @@ final class CustomerPortfolioRoute extends AppRoute {
   }
 }
 
+/// Customer 360 detail route (TASK-052), scoped by Organization and protected
+/// in [AppRouter] by `customer.view`.
+final class CustomerDetailRoute extends AppRoute {
+  const CustomerDetailRoute({required this.orgId, required this.customerId});
+
+  final String orgId;
+  final String customerId;
+
+  static const name = 'customerDetail';
+  static const pathPattern = '/org/:orgId/customers/:customerId';
+
+  @override
+  String get location => '/org/$orgId/customers/$customerId';
+}
+
 /// Route shown to sign a user in (TASK-034).
 ///
 /// [SessionAuthGuard] (TASK-041) redirects here for any unauthenticated

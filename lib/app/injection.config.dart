@@ -108,6 +108,8 @@ import '../features/customers/domain/usecases/customer_address_use_cases.dart'
     as _i860;
 import '../features/customers/domain/usecases/customer_contact_use_cases.dart'
     as _i442;
+import '../features/customers/domain/usecases/get_customer_by_id_use_case.dart'
+    as _i356;
 import '../features/customers/domain/usecases/get_customer_form_config_use_case.dart'
     as _i825;
 import '../features/customers/domain/usecases/get_customer_form_draft_use_case.dart'
@@ -118,6 +120,8 @@ import '../features/customers/domain/usecases/save_customer_form_draft_use_case.
     as _i780;
 import '../features/customers/domain/usecases/update_customer_use_case.dart'
     as _i172;
+import '../features/customers/presentation/bloc/customer_detail_bloc.dart'
+    as _i433;
 import '../features/customers/presentation/bloc/customer_form_bloc.dart'
     as _i478;
 import '../features/customers/presentation/bloc/customer_portfolio_bloc.dart'
@@ -553,6 +557,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i857.CustomerRepository>(),
       ),
     );
+    gh.factory<_i356.GetCustomerByIdUseCase>(
+      () => _i356.GetCustomerByIdUseCase(gh<_i857.CustomerRepository>()),
+    );
     gh.factory<_i172.UpdateCustomerUseCase>(
       () => _i172.UpdateCustomerUseCase(gh<_i857.CustomerRepository>()),
     );
@@ -630,6 +637,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i847.PortfolioAssignmentDataSource>(
       () => _i954.FirestorePortfolioAssignmentDataSource(
         gh<_i974.FirebaseFirestore>(),
+      ),
+    );
+    gh.factory<_i433.CustomerDetailBloc>(
+      () => _i433.CustomerDetailBloc(
+        getCustomerById: gh<_i356.GetCustomerByIdUseCase>(),
       ),
     );
     gh.lazySingleton<_i268.OrganizationDataSource>(
