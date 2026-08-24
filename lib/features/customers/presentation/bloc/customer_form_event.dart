@@ -1,4 +1,6 @@
 import '../../domain/entities/customer.dart';
+import '../../domain/value_objects/customer_address_type.dart';
+import '../../domain/value_objects/customer_contact_type.dart';
 import '../../domain/value_objects/customer_type.dart';
 
 sealed class CustomerFormEvent {
@@ -85,6 +87,122 @@ final class CustomerFormResponsibleSellerSelected extends CustomerFormEvent {
   const CustomerFormResponsibleSellerSelected(this.responsibleSellerId);
 
   final String? responsibleSellerId;
+}
+
+final class CustomerFormAddressAdded extends CustomerFormEvent {
+  const CustomerFormAddressAdded({
+    required this.type,
+    required this.street,
+    this.number,
+    this.complement,
+    this.district,
+    required this.city,
+    required this.state,
+    required this.zipCode,
+    this.country = 'BR',
+    this.isPrimary = false,
+  });
+
+  final CustomerAddressType type;
+  final String street;
+  final String? number;
+  final String? complement;
+  final String? district;
+  final String city;
+  final String state;
+  final String zipCode;
+  final String country;
+  final bool isPrimary;
+}
+
+final class CustomerFormAddressUpdated extends CustomerFormEvent {
+  const CustomerFormAddressUpdated({
+    required this.addressId,
+    required this.type,
+    required this.street,
+    this.number,
+    this.complement,
+    this.district,
+    required this.city,
+    required this.state,
+    required this.zipCode,
+    this.country = 'BR',
+    this.isPrimary = false,
+  });
+
+  final String addressId;
+  final CustomerAddressType type;
+  final String street;
+  final String? number;
+  final String? complement;
+  final String? district;
+  final String city;
+  final String state;
+  final String zipCode;
+  final String country;
+  final bool isPrimary;
+}
+
+final class CustomerFormAddressRemoved extends CustomerFormEvent {
+  const CustomerFormAddressRemoved(this.addressId);
+
+  final String addressId;
+}
+
+final class CustomerFormPrimaryAddressSelected extends CustomerFormEvent {
+  const CustomerFormPrimaryAddressSelected(this.addressId);
+
+  final String addressId;
+}
+
+final class CustomerFormContactAdded extends CustomerFormEvent {
+  const CustomerFormContactAdded({
+    required this.type,
+    required this.name,
+    this.role,
+    this.phone,
+    this.email,
+    this.isPrimary = false,
+  });
+
+  final CustomerContactType type;
+  final String name;
+  final String? role;
+  final String? phone;
+  final String? email;
+  final bool isPrimary;
+}
+
+final class CustomerFormContactUpdated extends CustomerFormEvent {
+  const CustomerFormContactUpdated({
+    required this.contactId,
+    required this.type,
+    required this.name,
+    this.role,
+    this.phone,
+    this.email,
+    this.isPrimary = false,
+  });
+
+  final String contactId;
+  final CustomerContactType type;
+  final String name;
+  final String? role;
+  final String? phone;
+  final String? email;
+  final bool isPrimary;
+}
+
+final class CustomerFormContactRemoved extends CustomerFormEvent {
+  const CustomerFormContactRemoved(this.contactId);
+
+  final String contactId;
+}
+
+final class CustomerFormPrimaryContactSelected extends CustomerFormEvent {
+  const CustomerFormPrimaryContactSelected(this.contactId);
+
+  final String contactId;
 }
 
 final class CustomerFormDraftSaved extends CustomerFormEvent {

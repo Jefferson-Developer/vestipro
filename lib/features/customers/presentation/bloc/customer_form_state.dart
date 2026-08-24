@@ -1,6 +1,8 @@
 import '../../../../core/errors/errors.dart';
 import '../../../users/users.dart';
 import '../../domain/entities/customer.dart';
+import '../../domain/entities/customer_address.dart';
+import '../../domain/entities/customer_contact.dart';
 import '../../domain/entities/customer_form_config.dart';
 import '../../domain/value_objects/customer_required_field.dart';
 import '../../domain/value_objects/customer_sync_status.dart';
@@ -35,6 +37,8 @@ final class CustomerFormState {
     this.classification = '',
     this.potential = '',
     this.responsibleSellerId,
+    this.addresses = const <CustomerAddress>[],
+    this.contacts = const <CustomerContact>[],
     this.fieldErrors = const <String, String>{},
     this.failure,
     this.savedCustomer,
@@ -62,6 +66,8 @@ final class CustomerFormState {
   final String classification;
   final String potential;
   final String? responsibleSellerId;
+  final List<CustomerAddress> addresses;
+  final List<CustomerContact> contacts;
   final Map<String, String> fieldErrors;
   final Failure? failure;
   final Customer? savedCustomer;
@@ -100,6 +106,8 @@ final class CustomerFormState {
     String? classification,
     String? potential,
     String? responsibleSellerId,
+    List<CustomerAddress>? addresses,
+    List<CustomerContact>? contacts,
     Map<String, String>? fieldErrors,
     Failure? failure,
     Customer? savedCustomer,
@@ -134,6 +142,8 @@ final class CustomerFormState {
       responsibleSellerId: clearResponsibleSellerId
           ? null
           : responsibleSellerId ?? this.responsibleSellerId,
+      addresses: addresses ?? this.addresses,
+      contacts: contacts ?? this.contacts,
       fieldErrors: clearFieldErrors
           ? const <String, String>{}
           : fieldErrors ?? this.fieldErrors,

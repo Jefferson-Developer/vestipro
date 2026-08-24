@@ -4,6 +4,8 @@ import '../value_objects/cnpj_cpf.dart';
 import '../value_objects/customer_status.dart';
 import '../value_objects/customer_sync_status.dart';
 import '../value_objects/customer_type.dart';
+import 'customer_address.dart';
+import 'customer_contact.dart';
 
 part 'customer.freezed.dart';
 
@@ -37,6 +39,8 @@ abstract class Customer with _$Customer {
     String? responsibleSellerId,
     required DateTime registeredAt,
     DateTime? lastPurchaseAt,
+    @Default(<CustomerAddress>[]) List<CustomerAddress> addresses,
+    @Default(<CustomerContact>[]) List<CustomerContact> contacts,
     @Default(<String>[]) List<String> tags,
     @Default(<String, Object?>{}) Map<String, Object?> customFields,
     required DateTime createdAt,

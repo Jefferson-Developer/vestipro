@@ -16,7 +16,28 @@ void main() {
     });
 
     test('persists a locally created customer as pending sync', () async {
-      final customer = _customer();
+      final customer = _customer(
+        addresses: <CustomerAddress>[
+          CustomerAddress(
+            id: 'address-1',
+            type: CustomerAddressType.shipping,
+            street: 'Rua das Colecoes',
+            city: 'Blumenau',
+            state: 'SC',
+            zipCode: Cep.parse('89010-100'),
+            isPrimary: true,
+          ),
+        ],
+        contacts: const <CustomerContact>[
+          CustomerContact(
+            id: 'contact-1',
+            type: CustomerContactType.buyer,
+            name: 'Ana Compras',
+            phone: '+55 47 99999-0000',
+            isPrimary: true,
+          ),
+        ],
+      );
 
       final createResult = await repository.create(customer: customer);
       final lookupResult = await repository.getById(
@@ -30,10 +51,10 @@ void main() {
 
       expect(createResult, isA<AppSuccess<Customer>>());
       expect(lookupResult, isA<AppSuccess<Customer>>());
-      expect(
-        (lookupResult as AppSuccess<Customer>).value.syncStatus,
-        CustomerSyncStatus.pending,
-      );
+      final loaded = (lookupResult as AppSuccess<Customer>).value;
+      expect(loaded.syncStatus, CustomerSyncStatus.pending);
+      expect(loaded.addresses.single.zipCode, Cep.parse('89010-100'));
+      expect(loaded.contacts.single.name, 'Ana Compras');
       expect((existsResult as AppSuccess<bool>).value, isTrue);
     });
 
@@ -53,7 +74,11 @@ void main() {
   });
 }
 
-Customer _customer({String id = 'customer-1'}) {
+Customer _customer({
+  String id = 'customer-1',
+  List<CustomerAddress> addresses = const <CustomerAddress>[],
+  List<CustomerContact> contacts = const <CustomerContact>[],
+}) {
   final now = DateTime.utc(2026, 1, 1);
   return Customer(
     id: id,
@@ -66,6 +91,8 @@ Customer _customer({String id = 'customer-1'}) {
     primaryPhone: '+55 47 99999-0000',
     status: CustomerStatus.prospect,
     registeredAt: now,
+    addresses: addresses,
+    contacts: contacts,
     createdAt: now,
     createdBy: 'user-1',
     updatedAt: now,

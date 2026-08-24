@@ -104,6 +104,10 @@ import '../features/customers/domain/usecases/clear_customer_form_draft_use_case
     as _i551;
 import '../features/customers/domain/usecases/create_customer_use_case.dart'
     as _i427;
+import '../features/customers/domain/usecases/customer_address_use_cases.dart'
+    as _i860;
+import '../features/customers/domain/usecases/customer_contact_use_cases.dart'
+    as _i442;
 import '../features/customers/domain/usecases/get_customer_form_config_use_case.dart'
     as _i825;
 import '../features/customers/domain/usecases/get_customer_form_draft_use_case.dart'
@@ -516,6 +520,34 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i427.CreateCustomerUseCase>(
       () => _i427.CreateCustomerUseCase(gh<_i857.CustomerRepository>()),
+    );
+    gh.factory<_i860.AddCustomerAddressUseCase>(
+      () => _i860.AddCustomerAddressUseCase(gh<_i857.CustomerRepository>()),
+    );
+    gh.factory<_i860.UpdateCustomerAddressUseCase>(
+      () => _i860.UpdateCustomerAddressUseCase(gh<_i857.CustomerRepository>()),
+    );
+    gh.factory<_i860.RemoveCustomerAddressUseCase>(
+      () => _i860.RemoveCustomerAddressUseCase(gh<_i857.CustomerRepository>()),
+    );
+    gh.factory<_i860.SetPrimaryCustomerAddressUseCase>(
+      () => _i860.SetPrimaryCustomerAddressUseCase(
+        gh<_i857.CustomerRepository>(),
+      ),
+    );
+    gh.factory<_i442.AddCustomerContactUseCase>(
+      () => _i442.AddCustomerContactUseCase(gh<_i857.CustomerRepository>()),
+    );
+    gh.factory<_i442.UpdateCustomerContactUseCase>(
+      () => _i442.UpdateCustomerContactUseCase(gh<_i857.CustomerRepository>()),
+    );
+    gh.factory<_i442.RemoveCustomerContactUseCase>(
+      () => _i442.RemoveCustomerContactUseCase(gh<_i857.CustomerRepository>()),
+    );
+    gh.factory<_i442.SetPrimaryCustomerContactUseCase>(
+      () => _i442.SetPrimaryCustomerContactUseCase(
+        gh<_i857.CustomerRepository>(),
+      ),
     );
     gh.factory<_i172.UpdateCustomerUseCase>(
       () => _i172.UpdateCustomerUseCase(gh<_i857.CustomerRepository>()),

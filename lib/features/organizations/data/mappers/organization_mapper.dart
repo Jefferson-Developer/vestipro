@@ -49,6 +49,8 @@ final class OrganizationMapper {
       segment: dto.segment,
       maxTeamsPerUser: dto.maxTeamsPerUser,
       requiredCustomerFields: dto.requiredCustomerFields,
+      customerAddressTypes: dto.customerAddressTypes,
+      customerContactTypes: dto.customerContactTypes,
     );
   }
 
@@ -60,6 +62,8 @@ final class OrganizationMapper {
       segment: settings.segment,
       maxTeamsPerUser: settings.maxTeamsPerUser,
       requiredCustomerFields: settings.requiredCustomerFields,
+      customerAddressTypes: settings.customerAddressTypes,
+      customerContactTypes: settings.customerContactTypes,
     );
   }
 

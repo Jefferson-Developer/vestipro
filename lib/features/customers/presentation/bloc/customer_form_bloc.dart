@@ -8,7 +8,10 @@ import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../../../organizations/organizations.dart';
 import '../../../users/users.dart';
+import '../../domain/customer_address_contact_rules.dart';
 import '../../domain/entities/customer.dart';
+import '../../domain/entities/customer_address.dart';
+import '../../domain/entities/customer_contact.dart';
 import '../../domain/entities/customer_form_config.dart';
 import '../../domain/entities/customer_form_draft.dart';
 import '../../domain/usecases/clear_customer_form_draft_use_case.dart';
@@ -104,6 +107,32 @@ final class CustomerFormBloc
       _onResponsibleSellerSelected,
       transformer: sequential(),
     );
+    on<CustomerFormAddressAdded>(_onAddressAdded, transformer: sequential());
+    on<CustomerFormAddressUpdated>(
+      _onAddressUpdated,
+      transformer: sequential(),
+    );
+    on<CustomerFormAddressRemoved>(
+      _onAddressRemoved,
+      transformer: sequential(),
+    );
+    on<CustomerFormPrimaryAddressSelected>(
+      _onPrimaryAddressSelected,
+      transformer: sequential(),
+    );
+    on<CustomerFormContactAdded>(_onContactAdded, transformer: sequential());
+    on<CustomerFormContactUpdated>(
+      _onContactUpdated,
+      transformer: sequential(),
+    );
+    on<CustomerFormContactRemoved>(
+      _onContactRemoved,
+      transformer: sequential(),
+    );
+    on<CustomerFormPrimaryContactSelected>(
+      _onPrimaryContactSelected,
+      transformer: sequential(),
+    );
     on<CustomerFormDraftSaved>(_onDraftSaved, transformer: droppable());
     on<CustomerFormSubmitted>(_onSubmitted, transformer: droppable());
   }
@@ -177,6 +206,8 @@ final class CustomerFormBloc
           classification: initial.classification ?? '',
           potential: initial.potential ?? '',
           responsibleSellerId: initial.responsibleSellerId,
+          addresses: normalizeCustomerAddresses(initial.addresses),
+          contacts: normalizeCustomerContacts(initial.contacts),
           clearFieldErrors: true,
           clearFailure: true,
         ),
@@ -210,6 +241,12 @@ final class CustomerFormBloc
         classification: draft?.classification ?? '',
         potential: draft?.potential ?? '',
         responsibleSellerId: draft?.responsibleSellerId,
+        addresses: normalizeCustomerAddresses(
+          draft?.addresses ?? const <CustomerAddress>[],
+        ),
+        contacts: normalizeCustomerContacts(
+          draft?.contacts ?? const <CustomerContact>[],
+        ),
         hasRestoredDraft: draft != null,
         clearFieldErrors: true,
         clearFailure: true,
@@ -303,6 +340,278 @@ final class CustomerFormBloc
         clearSavedCustomer: true,
       ),
     );
+  }
+
+  void _onAddressAdded(
+    CustomerFormAddressAdded event,
+    Emitter<CustomerFormState> emit,
+  ) {
+    try {
+      final address = buildCustomerAddress(
+        id: _uuid.v4(),
+        type: event.type,
+        street: event.street,
+        number: event.number,
+        complement: event.complement,
+        district: event.district,
+        city: _cityFromLocalZip(event.zipCode, event.city),
+        state: _stateFromLocalZip(event.zipCode, event.state),
+        zipCode: event.zipCode,
+        country: event.country,
+        isPrimary: event.isPrimary || state.addresses.isEmpty,
+      );
+      final next = normalizeCustomerAddresses(<CustomerAddress>[
+        if (address.isPrimary)
+          for (final existing in state.addresses)
+            existing.copyWith(isPrimary: false)
+        else
+          ...state.addresses,
+        address,
+      ]);
+      emit(
+        state.copyWith(
+          addresses: next,
+          submissionStatus: CustomerFormSubmissionStatus.idle,
+          draftStatus: CustomerFormDraftStatus.idle,
+          fieldErrors: _withoutPrefixedErrors('address.'),
+          clearFailure: true,
+          clearSavedCustomer: true,
+        ),
+      );
+    } on ValidationException catch (exception) {
+      emit(
+        state.copyWith(
+          submissionStatus: CustomerFormSubmissionStatus.failure,
+          fieldErrors: _withAddressErrors(exception),
+          clearFailure: true,
+        ),
+      );
+    }
+  }
+
+  void _onAddressUpdated(
+    CustomerFormAddressUpdated event,
+    Emitter<CustomerFormState> emit,
+  ) {
+    try {
+      final updated = buildCustomerAddress(
+        id: event.addressId,
+        type: event.type,
+        street: event.street,
+        number: event.number,
+        complement: event.complement,
+        district: event.district,
+        city: _cityFromLocalZip(event.zipCode, event.city),
+        state: _stateFromLocalZip(event.zipCode, event.state),
+        zipCode: event.zipCode,
+        country: event.country,
+        isPrimary: event.isPrimary,
+      );
+      final index = state.addresses.indexWhere(
+        (address) => address.id == event.addressId,
+      );
+      if (index == -1) {
+        emit(
+          state.copyWith(
+            submissionStatus: CustomerFormSubmissionStatus.failure,
+            fieldErrors: <String, String>{
+              ..._withoutPrefixedErrors('address.'),
+              'address.id': 'Endereço não encontrado.',
+            },
+            clearFailure: true,
+          ),
+        );
+        return;
+      }
+      final next = <CustomerAddress>[
+        for (
+          var itemIndex = 0;
+          itemIndex < state.addresses.length;
+          itemIndex += 1
+        )
+          itemIndex == index ? updated : state.addresses[itemIndex],
+      ];
+      emit(
+        state.copyWith(
+          addresses: normalizeCustomerAddresses(next),
+          submissionStatus: CustomerFormSubmissionStatus.idle,
+          draftStatus: CustomerFormDraftStatus.idle,
+          fieldErrors: _withoutPrefixedErrors('address.'),
+          clearFailure: true,
+          clearSavedCustomer: true,
+        ),
+      );
+    } on ValidationException catch (exception) {
+      emit(
+        state.copyWith(
+          submissionStatus: CustomerFormSubmissionStatus.failure,
+          fieldErrors: _withAddressErrors(exception),
+          clearFailure: true,
+        ),
+      );
+    }
+  }
+
+  void _onAddressRemoved(
+    CustomerFormAddressRemoved event,
+    Emitter<CustomerFormState> emit,
+  ) {
+    final next = state.addresses
+        .where((address) => address.id != event.addressId)
+        .toList(growable: false);
+    if (next.length == state.addresses.length) return;
+    emit(
+      state.copyWith(
+        addresses: normalizeCustomerAddresses(next),
+        submissionStatus: CustomerFormSubmissionStatus.idle,
+        draftStatus: CustomerFormDraftStatus.idle,
+        fieldErrors: _withoutPrefixedErrors('address.'),
+        clearFailure: true,
+        clearSavedCustomer: true,
+      ),
+    );
+  }
+
+  void _onPrimaryAddressSelected(
+    CustomerFormPrimaryAddressSelected event,
+    Emitter<CustomerFormState> emit,
+  ) {
+    if (!state.addresses.any((address) => address.id == event.addressId)) {
+      return;
+    }
+    emit(
+      state.copyWith(
+        addresses: <CustomerAddress>[
+          for (final address in state.addresses)
+            address.copyWith(isPrimary: address.id == event.addressId),
+        ],
+        submissionStatus: CustomerFormSubmissionStatus.idle,
+        draftStatus: CustomerFormDraftStatus.idle,
+        fieldErrors: _withoutPrefixedErrors('address.'),
+        clearFailure: true,
+        clearSavedCustomer: true,
+      ),
+    );
+  }
+
+  void _onContactAdded(
+    CustomerFormContactAdded event,
+    Emitter<CustomerFormState> emit,
+  ) {
+    try {
+      final contact = buildCustomerContact(
+        id: _uuid.v4(),
+        type: event.type,
+        name: event.name,
+        role: event.role,
+        phone: event.phone,
+        email: event.email,
+        isPrimary: event.isPrimary || state.contacts.isEmpty,
+      );
+      final next = normalizeCustomerContacts(<CustomerContact>[
+        if (contact.isPrimary)
+          for (final existing in state.contacts)
+            existing.copyWith(isPrimary: false)
+        else
+          ...state.contacts,
+        contact,
+      ]);
+      _emitContacts(
+        emit,
+        next,
+        fieldErrors: _withoutPrefixedErrors('contact.'),
+      );
+    } on ValidationException catch (exception) {
+      emit(
+        state.copyWith(
+          submissionStatus: CustomerFormSubmissionStatus.failure,
+          fieldErrors: _withContactErrors(exception),
+          clearFailure: true,
+        ),
+      );
+    }
+  }
+
+  void _onContactUpdated(
+    CustomerFormContactUpdated event,
+    Emitter<CustomerFormState> emit,
+  ) {
+    try {
+      final updated = buildCustomerContact(
+        id: event.contactId,
+        type: event.type,
+        name: event.name,
+        role: event.role,
+        phone: event.phone,
+        email: event.email,
+        isPrimary: event.isPrimary,
+      );
+      final index = state.contacts.indexWhere(
+        (contact) => contact.id == event.contactId,
+      );
+      if (index == -1) {
+        emit(
+          state.copyWith(
+            submissionStatus: CustomerFormSubmissionStatus.failure,
+            fieldErrors: <String, String>{
+              ..._withoutPrefixedErrors('contact.'),
+              'contact.id': 'Contato não encontrado.',
+            },
+            clearFailure: true,
+          ),
+        );
+        return;
+      }
+      final next = <CustomerContact>[
+        for (
+          var itemIndex = 0;
+          itemIndex < state.contacts.length;
+          itemIndex += 1
+        )
+          itemIndex == index ? updated : state.contacts[itemIndex],
+      ];
+      _emitContacts(
+        emit,
+        normalizeCustomerContacts(next),
+        fieldErrors: _withoutPrefixedErrors('contact.'),
+      );
+    } on ValidationException catch (exception) {
+      emit(
+        state.copyWith(
+          submissionStatus: CustomerFormSubmissionStatus.failure,
+          fieldErrors: _withContactErrors(exception),
+          clearFailure: true,
+        ),
+      );
+    }
+  }
+
+  void _onContactRemoved(
+    CustomerFormContactRemoved event,
+    Emitter<CustomerFormState> emit,
+  ) {
+    final next = state.contacts
+        .where((contact) => contact.id != event.contactId)
+        .toList(growable: false);
+    if (next.length == state.contacts.length) return;
+    _emitContacts(
+      emit,
+      normalizeCustomerContacts(next),
+      fieldErrors: _withoutPrefixedErrors('contact.'),
+    );
+  }
+
+  void _onPrimaryContactSelected(
+    CustomerFormPrimaryContactSelected event,
+    Emitter<CustomerFormState> emit,
+  ) {
+    if (!state.contacts.any((contact) => contact.id == event.contactId)) {
+      return;
+    }
+    _emitContacts(emit, <CustomerContact>[
+      for (final contact in state.contacts)
+        contact.copyWith(isPrimary: contact.id == event.contactId),
+    ], fieldErrors: _withoutPrefixedErrors('contact.'));
   }
 
   void _changeText(
@@ -403,14 +712,16 @@ final class CustomerFormBloc
             tradeName: state.tradeName,
             fullName: state.fullName,
             stateRegistration: state.stateRegistration,
-            primaryEmail: state.primaryEmail,
-            primaryPhone: state.primaryPhone,
+            primaryEmail: _primaryEmailForSubmit(),
+            primaryPhone: _primaryPhoneForSubmit(),
             status: state.initialCustomer!.status,
             classification: state.classification,
             potential: state.potential,
             segment: state.initialCustomer!.segment,
             originChannel: state.initialCustomer!.originChannel,
             responsibleSellerId: _responsibleSellerForSubmit(),
+            addresses: state.addresses,
+            contacts: state.contacts,
             tags: state.initialCustomer!.tags,
             customFields: state.initialCustomer!.customFields,
             updatedBy: state.userId,
@@ -425,12 +736,14 @@ final class CustomerFormBloc
             tradeName: state.tradeName,
             fullName: state.fullName,
             stateRegistration: state.stateRegistration,
-            primaryEmail: state.primaryEmail,
-            primaryPhone: state.primaryPhone,
+            primaryEmail: _primaryEmailForSubmit(),
+            primaryPhone: _primaryPhoneForSubmit(),
             status: CustomerStatus.prospect,
             classification: state.classification,
             potential: state.potential,
             responsibleSellerId: _responsibleSellerForSubmit(),
+            addresses: state.addresses,
+            contacts: state.contacts,
             createdBy: state.userId,
           );
     if (emit.isDone) return;
@@ -487,6 +800,8 @@ final class CustomerFormBloc
       classification: _blankToNull(state.classification),
       potential: _blankToNull(state.potential),
       responsibleSellerId: _blankToNull(state.responsibleSellerId),
+      addresses: state.addresses,
+      contacts: state.contacts,
       savedAt: DateTime.now().toUtc(),
     );
   }
@@ -508,15 +823,18 @@ final class CustomerFormBloc
       errors['fullName'] = 'Informe o nome completo.';
     }
 
-    final emailError = _emailError(form.primaryEmail, allowEmpty: true);
+    final primaryContact = primaryCustomerContact(form.contacts);
+    final resolvedPrimaryEmail = primaryContact?.email ?? form.primaryEmail;
+    final resolvedPrimaryPhone = primaryContact?.phone ?? form.primaryPhone;
+    final emailError = _emailError(resolvedPrimaryEmail, allowEmpty: true);
     if (emailError != null) errors['primaryEmail'] = emailError;
 
     if (form.isRequired(CustomerRequiredField.primaryEmail) &&
-        form.primaryEmail.trim().isEmpty) {
+        resolvedPrimaryEmail.trim().isEmpty) {
       errors['primaryEmail'] = 'Informe o e-mail principal.';
     }
     if (form.isRequired(CustomerRequiredField.primaryPhone) &&
-        form.primaryPhone.trim().isEmpty) {
+        resolvedPrimaryPhone.trim().isEmpty) {
       errors['primaryPhone'] = 'Informe o telefone principal.';
     }
     if (form.isRequired(CustomerRequiredField.classification) &&
@@ -619,12 +937,105 @@ final class CustomerFormBloc
         .toList(growable: false);
   }
 
+  void _emitContacts(
+    Emitter<CustomerFormState> emit,
+    List<CustomerContact> contacts, {
+    required Map<String, String> fieldErrors,
+  }) {
+    final normalized = normalizeCustomerContacts(contacts);
+    final primary = primaryCustomerContact(normalized);
+    emit(
+      state.copyWith(
+        contacts: normalized,
+        primaryEmail: primary?.email ?? '',
+        primaryPhone: primary?.phone ?? '',
+        submissionStatus: CustomerFormSubmissionStatus.idle,
+        draftStatus: CustomerFormDraftStatus.idle,
+        fieldErrors: fieldErrors,
+        clearFailure: true,
+        clearSavedCustomer: true,
+      ),
+    );
+  }
+
+  Map<String, String> _withoutPrefixedErrors(String prefix) {
+    return Map<String, String>.fromEntries(
+      state.fieldErrors.entries.where((entry) => !entry.key.startsWith(prefix)),
+    );
+  }
+
+  Map<String, String> _withAddressErrors(ValidationException exception) {
+    return <String, String>{
+      ..._withoutPrefixedErrors('address.'),
+      for (final field in exception.fieldErrors.keys)
+        'address.$field': _addressFieldMessage(field),
+    };
+  }
+
+  Map<String, String> _withContactErrors(ValidationException exception) {
+    return <String, String>{
+      ..._withoutPrefixedErrors('contact.'),
+      for (final field in exception.fieldErrors.keys)
+        'contact.$field': _contactFieldMessage(field),
+    };
+  }
+
+  String _cityFromLocalZip(String zipCode, String city) {
+    final trimmedCity = city.trim();
+    if (trimmedCity.isNotEmpty) return city;
+    final digits = zipCode.replaceAll(RegExp(r'\D'), '');
+    for (final address in state.addresses) {
+      if (address.zipCode.digits == digits) return address.city;
+    }
+    return city;
+  }
+
+  String _stateFromLocalZip(String zipCode, String stateCode) {
+    final trimmedState = stateCode.trim();
+    if (trimmedState.isNotEmpty) return stateCode;
+    final digits = zipCode.replaceAll(RegExp(r'\D'), '');
+    for (final address in state.addresses) {
+      if (address.zipCode.digits == digits) return address.state;
+    }
+    return stateCode;
+  }
+
+  String _addressFieldMessage(String field) {
+    return switch (field) {
+      'street' => 'Informe o logradouro.',
+      'city' => 'Informe a cidade.',
+      'state' => 'Informe a UF.',
+      'zipCode' => 'Informe um CEP válido.',
+      'country' => 'Informe o país.',
+      _ => 'Revise este campo.',
+    };
+  }
+
+  String _contactFieldMessage(String field) {
+    return switch (field) {
+      'name' => 'Informe o nome do contato.',
+      'phone' => 'Informe telefone ou e-mail.',
+      'email' => 'Informe um e-mail válido ou telefone.',
+      _ => 'Revise este campo.',
+    };
+  }
+
   String? _responsibleSellerForSubmit() {
     if (state.canChooseResponsibleSeller) {
       return _blankToNull(state.responsibleSellerId);
     }
     return _blankToNull(state.initialCustomer?.responsibleSellerId) ??
         _blankToNull(state.userId);
+  }
+
+  String? _primaryEmailForSubmit() {
+    return _blankToNull(primaryCustomerContact(state.contacts)?.email) ??
+        _blankToNull(state.primaryEmail);
+  }
+
+  String? _primaryPhoneForSubmit() {
+    return _blankToNull(primaryCustomerContact(state.contacts)?.phone) ??
+        _blankToNull(state.primaryPhone);
   }
 
   void _setOrRemove(Map<String, String> errors, String field, String? message) {

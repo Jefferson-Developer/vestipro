@@ -1,9 +1,15 @@
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/errors.dart';
+import '../../domain/customer_address_contact_rules.dart';
 import '../../domain/customer_identity_validator.dart';
 import '../../domain/entities/customer.dart';
+import '../../domain/entities/customer_address.dart';
+import '../../domain/entities/customer_contact.dart';
+import '../../domain/value_objects/cep.dart';
 import '../../domain/value_objects/cnpj_cpf.dart';
+import '../../domain/value_objects/customer_address_type.dart';
+import '../../domain/value_objects/customer_contact_type.dart';
 import '../../domain/value_objects/customer_status.dart';
 import '../../domain/value_objects/customer_sync_status.dart';
 import '../../domain/value_objects/customer_type.dart';
@@ -51,6 +57,10 @@ final class CustomerMapper {
       responsibleSellerId: dto.responsibleSellerId,
       registeredAt: dto.registeredAt,
       lastPurchaseAt: dto.lastPurchaseAt,
+      addresses: normalizeCustomerAddresses(
+        dto.addresses.map(_addressToEntity),
+      ),
+      contacts: normalizeCustomerContacts(dto.contacts.map(_contactToEntity)),
       tags: dto.tags,
       customFields: dto.customFields,
       createdAt: dto.createdAt,
@@ -84,6 +94,8 @@ final class CustomerMapper {
       responsibleSellerId: entity.responsibleSellerId,
       registeredAt: entity.registeredAt,
       lastPurchaseAt: entity.lastPurchaseAt,
+      addresses: entity.addresses.map(_addressToDto).toList(growable: false),
+      contacts: entity.contacts.map(_contactToDto).toList(growable: false),
       tags: entity.tags,
       customFields: entity.customFields,
       createdAt: entity.createdAt,
@@ -161,5 +173,69 @@ final class CustomerMapper {
       CustomerSyncStatus.failed => 'failed',
       CustomerSyncStatus.conflict => 'conflict',
     };
+  }
+
+  CustomerAddress _addressToEntity(CustomerAddressDto dto) {
+    final type =
+        customerAddressTypeFromCode(dto.typeCode, label: dto.typeLabel) ??
+        CustomerAddressType.custom(dto.typeCode, label: dto.typeLabel);
+    return CustomerAddress(
+      id: dto.id,
+      type: type,
+      street: dto.street,
+      number: dto.number,
+      complement: dto.complement,
+      district: dto.district,
+      city: dto.city,
+      state: dto.state,
+      zipCode: Cep.parse(dto.zipCode),
+      country: dto.country,
+      isPrimary: dto.isPrimary,
+    );
+  }
+
+  CustomerAddressDto _addressToDto(CustomerAddress address) {
+    return CustomerAddressDto(
+      id: address.id,
+      typeCode: address.type.code,
+      typeLabel: address.type.label,
+      street: address.street,
+      number: address.number,
+      complement: address.complement,
+      district: address.district,
+      city: address.city,
+      state: address.state,
+      zipCode: address.zipCode.digits,
+      country: address.country,
+      isPrimary: address.isPrimary,
+    );
+  }
+
+  CustomerContact _contactToEntity(CustomerContactDto dto) {
+    final type =
+        customerContactTypeFromCode(dto.typeCode, label: dto.typeLabel) ??
+        CustomerContactType.custom(dto.typeCode, label: dto.typeLabel);
+    return CustomerContact(
+      id: dto.id,
+      type: type,
+      name: dto.name,
+      role: dto.role,
+      phone: dto.phone,
+      email: dto.email,
+      isPrimary: dto.isPrimary,
+    );
+  }
+
+  CustomerContactDto _contactToDto(CustomerContact contact) {
+    return CustomerContactDto(
+      id: contact.id,
+      typeCode: contact.type.code,
+      typeLabel: contact.type.label,
+      name: contact.name,
+      role: contact.role,
+      phone: contact.phone,
+      email: contact.email,
+      isPrimary: contact.isPrimary,
+    );
   }
 }

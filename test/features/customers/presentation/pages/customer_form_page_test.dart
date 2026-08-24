@@ -142,6 +142,90 @@ void main() {
       expect(find.bySemanticsLabel('Vendedor responsável'), findsWidgets);
     });
 
+    testWidgets('shows empty states for addresses and contacts', (
+      tester,
+    ) async {
+      await pumpApp(tester, buildPage());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Nenhum endereço cadastrado'), findsOneWidget);
+      expect(find.text('Nenhum contato cadastrado'), findsOneWidget);
+    });
+
+    testWidgets('adds edits removes addresses and contacts inline', (
+      tester,
+    ) async {
+      await pumpApp(tester, buildPage());
+      await tester.pumpAndSettle();
+
+      await _tapAppButton(tester, 'Novo endereço');
+      await _enterTextField(tester, 'Logradouro', 'Rua das Colecoes');
+      await _enterTextField(tester, 'Número', '120');
+      await _enterTextField(tester, 'Cidade', 'Blumenau');
+      await _enterTextField(tester, 'UF', 'SC');
+      await _enterTextField(tester, 'CEP', '89010-100');
+      await _tapAppButton(tester, 'Adicionar endereço');
+
+      expect(find.textContaining('Rua das Colecoes'), findsOneWidget);
+      expect(find.text('Principal'), findsOneWidget);
+
+      await _tapAppButton(tester, 'Novo endereço');
+      await _enterTextField(tester, 'Logradouro', 'Rua Financeira');
+      await _enterTextField(tester, 'Cidade', 'Blumenau');
+      await _enterTextField(tester, 'UF', 'SC');
+      await _enterTextField(tester, 'CEP', '89020-100');
+      await _tapAppButton(tester, 'Adicionar endereço');
+
+      expect(find.textContaining('Rua das Colecoes'), findsOneWidget);
+      expect(find.textContaining('Rua Financeira'), findsOneWidget);
+
+      await _tapSemanticButton(tester, 'Editar endereço');
+      await _enterTextField(tester, 'Logradouro', 'Rua Editada');
+      await _tapAppButton(tester, 'Atualizar endereço');
+
+      expect(find.textContaining('Rua Editada'), findsOneWidget);
+      expect(find.textContaining('Rua das Colecoes'), findsNothing);
+
+      await _tapSemanticButton(tester, 'Remover endereço');
+
+      expect(find.textContaining('Rua Editada'), findsNothing);
+      expect(find.textContaining('Rua Financeira'), findsOneWidget);
+
+      await _tapAppButton(tester, 'Novo contato');
+      await _enterTextField(tester, 'Nome do contato', 'Ana Compras');
+      await _enterTextField(tester, 'Telefone do contato', '+55 47 99999-0000');
+      await _tapAppButton(tester, 'Adicionar contato');
+
+      expect(find.textContaining('Ana Compras'), findsOneWidget);
+
+      await _tapAppButton(tester, 'Novo contato');
+      await _enterTextField(tester, 'Nome do contato', 'Financeiro');
+      await _enterTextField(
+        tester,
+        'E-mail do contato',
+        'financeiro@cliente.test',
+      );
+      await _tapAppButton(tester, 'Adicionar contato');
+
+      expect(find.textContaining('Financeiro'), findsWidgets);
+
+      await _tapSemanticButton(
+        tester,
+        'Definir contato principal',
+        useLast: true,
+      );
+      await _tapSemanticButton(tester, 'Editar contato', useLast: true);
+      await _enterTextField(tester, 'Nome do contato', 'Financeiro Moda Sul');
+      await _tapAppButton(tester, 'Atualizar contato');
+
+      expect(find.textContaining('Financeiro Moda Sul'), findsOneWidget);
+
+      await _tapSemanticButton(tester, 'Remover contato');
+
+      expect(find.textContaining('Ana Compras'), findsNothing);
+      expect(find.textContaining('Financeiro Moda Sul'), findsOneWidget);
+    });
+
     testWidgets('hides responsible seller when RBAC denies assignment', (
       tester,
     ) async {
@@ -190,6 +274,44 @@ Future<void> _tapSaveCustomer(WidgetTester tester) async {
   final button = find.widgetWithText(AppButton, 'Salvar cliente');
   await tester.ensureVisible(button);
   await tester.tap(button);
+}
+
+Future<void> _tapAppButton(WidgetTester tester, String label) async {
+  final button = find.widgetWithText(AppButton, label).last;
+  await tester.ensureVisible(button);
+  await tester.tap(button);
+  await tester.pumpAndSettle();
+}
+
+Future<void> _enterTextField(
+  WidgetTester tester,
+  String label,
+  String value,
+) async {
+  final field = find
+      .byWidgetPredicate(
+        (widget) => widget is AppTextField && widget.label == label,
+      )
+      .last;
+  final editable = find.descendant(
+    of: field,
+    matching: find.byType(EditableText),
+  );
+  await tester.ensureVisible(field);
+  await tester.enterText(editable.first, value);
+  await tester.pumpAndSettle();
+}
+
+Future<void> _tapSemanticButton(
+  WidgetTester tester,
+  String label, {
+  bool useLast = false,
+}) async {
+  final finder = find.bySemanticsLabel(label);
+  final target = useLast ? finder.last : finder.first;
+  await tester.ensureVisible(target);
+  await tester.tap(target);
+  await tester.pumpAndSettle();
 }
 
 void _stubOrganization(

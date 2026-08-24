@@ -1,4 +1,6 @@
 import '../value_objects/customer_type.dart';
+import 'customer_address.dart';
+import 'customer_contact.dart';
 
 /// Persisted local draft for an unfinished customer form.
 final class CustomerFormDraft {
@@ -17,6 +19,8 @@ final class CustomerFormDraft {
     this.classification,
     this.potential,
     this.responsibleSellerId,
+    this.addresses = const <CustomerAddress>[],
+    this.contacts = const <CustomerContact>[],
     required this.savedAt,
   });
 
@@ -34,5 +38,7 @@ final class CustomerFormDraft {
   final String? classification;
   final String? potential;
   final String? responsibleSellerId;
+  final List<CustomerAddress> addresses;
+  final List<CustomerContact> contacts;
   final DateTime savedAt;
 }

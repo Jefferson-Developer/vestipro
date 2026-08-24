@@ -8,6 +8,8 @@ final class OrganizationSettingsDto {
     this.segment,
     this.maxTeamsPerUser,
     this.requiredCustomerFields = const <String>[],
+    this.customerAddressTypes = const <String>[],
+    this.customerContactTypes = const <String>[],
   });
 
   factory OrganizationSettingsDto.fromJson(Map<String, dynamic> json) {
@@ -17,6 +19,8 @@ final class OrganizationSettingsDto {
     final segment = json['segment'];
     final maxTeamsPerUser = json['maxTeamsPerUser'];
     final rawRequiredCustomerFields = json['requiredCustomerFields'];
+    final rawCustomerAddressTypes = json['customerAddressTypes'];
+    final rawCustomerContactTypes = json['customerContactTypes'];
 
     if (currency is! String ||
         country is! String ||
@@ -36,6 +40,8 @@ final class OrganizationSettingsDto {
       segment: segment as String?,
       maxTeamsPerUser: maxTeamsPerUser as int?,
       requiredCustomerFields: _stringListFromJson(rawRequiredCustomerFields),
+      customerAddressTypes: _stringListFromJson(rawCustomerAddressTypes),
+      customerContactTypes: _stringListFromJson(rawCustomerContactTypes),
     );
   }
 
@@ -56,6 +62,8 @@ final class OrganizationSettingsDto {
   final String? segment;
   final int? maxTeamsPerUser;
   final List<String> requiredCustomerFields;
+  final List<String> customerAddressTypes;
+  final List<String> customerContactTypes;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -66,6 +74,10 @@ final class OrganizationSettingsDto {
       if (maxTeamsPerUser != null) 'maxTeamsPerUser': maxTeamsPerUser,
       if (requiredCustomerFields.isNotEmpty)
         'requiredCustomerFields': requiredCustomerFields,
+      if (customerAddressTypes.isNotEmpty)
+        'customerAddressTypes': customerAddressTypes,
+      if (customerContactTypes.isNotEmpty)
+        'customerContactTypes': customerContactTypes,
     };
   }
 }

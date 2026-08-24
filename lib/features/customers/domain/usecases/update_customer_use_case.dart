@@ -2,8 +2,11 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
+import '../customer_address_contact_rules.dart';
 import '../customer_identity_validator.dart';
 import '../entities/customer.dart';
+import '../entities/customer_address.dart';
+import '../entities/customer_contact.dart';
 import '../repositories/customer_repository.dart';
 import '../value_objects/customer_sensitive_field.dart';
 import '../value_objects/customer_status.dart';
@@ -36,6 +39,8 @@ final class UpdateCustomerUseCase {
     String? responsibleSellerId,
     DateTime? registeredAt,
     DateTime? lastPurchaseAt,
+    List<CustomerAddress>? addresses,
+    List<CustomerContact>? contacts,
     List<String> tags = const <String>[],
     Map<String, Object?> customFields = const <String, Object?>{},
     required String updatedBy,
@@ -111,6 +116,13 @@ final class UpdateCustomerUseCase {
     if (current.legalName != normalizedLegalName) {
       sensitiveFieldsToAudit.add(CustomerSensitiveField.legalName);
     }
+    final normalizedAddresses = normalizeCustomerAddresses(
+      addresses ?? current.addresses,
+    );
+    final normalizedContacts = normalizeCustomerContacts(
+      contacts ?? current.contacts,
+    );
+    final primaryContact = primaryCustomerContact(normalizedContacts);
 
     final updated = current.copyWith(
       type: type,
@@ -125,8 +137,12 @@ final class UpdateCustomerUseCase {
       stateRegistration: type == CustomerType.legalEntity
           ? normalizeCustomerOptional(stateRegistration)
           : null,
-      primaryEmail: normalizeCustomerOptional(primaryEmail),
-      primaryPhone: normalizeCustomerOptional(primaryPhone),
+      primaryEmail:
+          normalizeCustomerOptional(primaryContact?.email) ??
+          normalizeCustomerOptional(primaryEmail),
+      primaryPhone:
+          normalizeCustomerOptional(primaryContact?.phone) ??
+          normalizeCustomerOptional(primaryPhone),
       status: status,
       classification: normalizeCustomerOptional(classification),
       potential: normalizeCustomerOptional(potential),
@@ -135,6 +151,8 @@ final class UpdateCustomerUseCase {
       responsibleSellerId: normalizeCustomerOptional(responsibleSellerId),
       registeredAt: registeredAt?.toUtc() ?? current.registeredAt,
       lastPurchaseAt: lastPurchaseAt?.toUtc(),
+      addresses: normalizedAddresses,
+      contacts: normalizedContacts,
       tags: normalizeCustomerTags(tags),
       customFields: normalizeCustomerCustomFields(customFields),
       updatedAt: DateTime.now().toUtc(),

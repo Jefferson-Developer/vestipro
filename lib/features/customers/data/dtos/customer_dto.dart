@@ -29,6 +29,8 @@ final class CustomerDto {
     this.responsibleSellerId,
     required this.registeredAt,
     this.lastPurchaseAt,
+    this.addresses = const <CustomerAddressDto>[],
+    this.contacts = const <CustomerContactDto>[],
     this.tags = const <String>[],
     this.customFields = const <String, Object?>{},
     required this.createdAt,
@@ -62,6 +64,8 @@ final class CustomerDto {
     final responsibleSellerId = json['responsibleSellerId'];
     final registeredAt = json['registeredAt'];
     final lastPurchaseAt = json['lastPurchaseAt'];
+    final rawAddresses = json['addresses'];
+    final rawContacts = json['contacts'];
     final createdAt = json['createdAt'];
     final createdBy = json['createdBy'];
     final updatedAt = json['updatedAt'];
@@ -121,6 +125,8 @@ final class CustomerDto {
       responsibleSellerId: responsibleSellerId as String?,
       registeredAt: registeredAt.toDate(),
       lastPurchaseAt: (lastPurchaseAt as Timestamp?)?.toDate(),
+      addresses: _addressDtosFromJson(rawAddresses),
+      contacts: _contactDtosFromJson(rawContacts),
       tags: _tagsFromJson(json['tags']),
       customFields: _customFieldsFromJson(json['customFields']),
       createdAt: createdAt.toDate(),
@@ -152,6 +158,8 @@ final class CustomerDto {
   final String? responsibleSellerId;
   final DateTime registeredAt;
   final DateTime? lastPurchaseAt;
+  final List<CustomerAddressDto> addresses;
+  final List<CustomerContactDto> contacts;
   final List<String> tags;
   final Map<String, Object?> customFields;
   final DateTime createdAt;
@@ -184,6 +192,12 @@ final class CustomerDto {
       'lastPurchaseAt': lastPurchaseAt == null
           ? null
           : Timestamp.fromDate(lastPurchaseAt!),
+      'addresses': addresses
+          .map((address) => address.toJson())
+          .toList(growable: false),
+      'contacts': contacts
+          .map((contact) => contact.toJson())
+          .toList(growable: false),
       'tags': tags,
       'customFields': customFields,
       'createdAt': Timestamp.fromDate(createdAt),
@@ -193,6 +207,118 @@ final class CustomerDto {
       'deletedAt': deletedAt == null ? null : Timestamp.fromDate(deletedAt!),
       'version': version,
       'syncStatus': syncStatus,
+    };
+  }
+}
+
+final class CustomerAddressDto {
+  const CustomerAddressDto({
+    required this.id,
+    required this.typeCode,
+    required this.typeLabel,
+    required this.street,
+    this.number,
+    this.complement,
+    this.district,
+    required this.city,
+    required this.state,
+    required this.zipCode,
+    required this.country,
+    required this.isPrimary,
+  });
+
+  factory CustomerAddressDto.fromJson(Map<String, dynamic> json) {
+    return CustomerAddressDto(
+      id: _requiredString(json, 'id'),
+      typeCode: _requiredString(json, 'typeCode'),
+      typeLabel: _requiredString(json, 'typeLabel'),
+      street: _requiredString(json, 'street'),
+      number: _optionalString(json, 'number'),
+      complement: _optionalString(json, 'complement'),
+      district: _optionalString(json, 'district'),
+      city: _requiredString(json, 'city'),
+      state: _requiredString(json, 'state'),
+      zipCode: _requiredString(json, 'zipCode'),
+      country: _requiredString(json, 'country'),
+      isPrimary: _requiredBool(json, 'isPrimary'),
+    );
+  }
+
+  final String id;
+  final String typeCode;
+  final String typeLabel;
+  final String street;
+  final String? number;
+  final String? complement;
+  final String? district;
+  final String city;
+  final String state;
+  final String zipCode;
+  final String country;
+  final bool isPrimary;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'typeCode': typeCode,
+      'typeLabel': typeLabel,
+      'street': street,
+      if (number != null) 'number': number,
+      if (complement != null) 'complement': complement,
+      if (district != null) 'district': district,
+      'city': city,
+      'state': state,
+      'zipCode': zipCode,
+      'country': country,
+      'isPrimary': isPrimary,
+    };
+  }
+}
+
+final class CustomerContactDto {
+  const CustomerContactDto({
+    required this.id,
+    required this.typeCode,
+    required this.typeLabel,
+    required this.name,
+    this.role,
+    this.phone,
+    this.email,
+    required this.isPrimary,
+  });
+
+  factory CustomerContactDto.fromJson(Map<String, dynamic> json) {
+    return CustomerContactDto(
+      id: _requiredString(json, 'id'),
+      typeCode: _requiredString(json, 'typeCode'),
+      typeLabel: _requiredString(json, 'typeLabel'),
+      name: _requiredString(json, 'name'),
+      role: _optionalString(json, 'role'),
+      phone: _optionalString(json, 'phone'),
+      email: _optionalString(json, 'email'),
+      isPrimary: _requiredBool(json, 'isPrimary'),
+    );
+  }
+
+  final String id;
+  final String typeCode;
+  final String typeLabel;
+  final String name;
+  final String? role;
+  final String? phone;
+  final String? email;
+  final bool isPrimary;
+
+  Map<String, dynamic> toJson() {
+    return <String, dynamic>{
+      'id': id,
+      'typeCode': typeCode,
+      'typeLabel': typeLabel,
+      'name': name,
+      if (role != null) 'role': role,
+      if (phone != null) 'phone': phone,
+      if (email != null) 'email': email,
+      'isPrimary': isPrimary,
     };
   }
 }
@@ -217,4 +343,73 @@ Map<String, Object?> _customFieldsFromJson(Object? value) {
     );
   }
   return Map<String, Object?>.unmodifiable(value);
+}
+
+List<CustomerAddressDto> _addressDtosFromJson(Object? value) {
+  if (value == null) return const <CustomerAddressDto>[];
+  if (value is! List<dynamic>) {
+    throw const ValidationException(
+      'Invalid customer addresses.',
+      code: 'invalid_customer_payload',
+    );
+  }
+  return value
+      .map((item) {
+        if (item is! Map<String, dynamic>) {
+          throw const ValidationException(
+            'Invalid customer address payload.',
+            code: 'invalid_customer_payload',
+          );
+        }
+        return CustomerAddressDto.fromJson(item);
+      })
+      .toList(growable: false);
+}
+
+List<CustomerContactDto> _contactDtosFromJson(Object? value) {
+  if (value == null) return const <CustomerContactDto>[];
+  if (value is! List<dynamic>) {
+    throw const ValidationException(
+      'Invalid customer contacts.',
+      code: 'invalid_customer_payload',
+    );
+  }
+  return value
+      .map((item) {
+        if (item is! Map<String, dynamic>) {
+          throw const ValidationException(
+            'Invalid customer contact payload.',
+            code: 'invalid_customer_payload',
+          );
+        }
+        return CustomerContactDto.fromJson(item);
+      })
+      .toList(growable: false);
+}
+
+String _requiredString(Map<String, dynamic> json, String field) {
+  final value = json[field];
+  if (value is String) return value;
+  throw const ValidationException(
+    'Invalid customer nested payload.',
+    code: 'invalid_customer_payload',
+  );
+}
+
+String? _optionalString(Map<String, dynamic> json, String field) {
+  final value = json[field];
+  if (value == null || value is String) return value as String?;
+  throw const ValidationException(
+    'Invalid customer nested payload.',
+    code: 'invalid_customer_payload',
+  );
+}
+
+bool _requiredBool(Map<String, dynamic> json, String field) {
+  final value = json[field];
+  if (value is bool) return value;
+  throw const ValidationException(
+    'Invalid customer nested payload.',
+    code: 'invalid_customer_payload',
+  );
 }

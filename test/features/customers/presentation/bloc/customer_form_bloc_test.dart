@@ -158,6 +158,23 @@ void main() {
         ..add(const CustomerFormDocumentChanged('04.252.011/0001-10'))
         ..add(const CustomerFormLegalNameChanged('Moda Sul Confeccoes Ltda'))
         ..add(const CustomerFormPrimaryPhoneChanged('+55 47 99999-0000'))
+        ..add(
+          const CustomerFormAddressAdded(
+            type: CustomerAddressType.shipping,
+            street: 'Rua das Colecoes',
+            number: '120',
+            city: 'Blumenau',
+            state: 'SC',
+            zipCode: '89010-100',
+          ),
+        )
+        ..add(
+          const CustomerFormContactAdded(
+            type: CustomerContactType.buyer,
+            name: 'Ana Compras',
+            phone: '+55 47 99999-0000',
+          ),
+        )
         ..add(const CustomerFormDraftSaved());
       await _drainBloc();
 
@@ -169,8 +186,34 @@ void main() {
       expect(secondBloc.state.hasRestoredDraft, isTrue);
       expect(secondBloc.state.document, '04.252.011/0001-10');
       expect(secondBloc.state.primaryPhone, '+55 47 99999-0000');
+      expect(secondBloc.state.addresses.single.zipCode, Cep.parse('89010-100'));
+      expect(secondBloc.state.contacts.single.name, 'Ana Compras');
 
       await secondBloc.close();
+    });
+
+    test('rejects malformed CEP before adding an address', () async {
+      final bloc = await startedBloc();
+
+      bloc.add(
+        const CustomerFormAddressAdded(
+          type: CustomerAddressType.shipping,
+          street: 'Rua das Colecoes',
+          number: '120',
+          city: 'Blumenau',
+          state: 'SC',
+          zipCode: '123',
+        ),
+      );
+      await _drainBloc();
+
+      expect(bloc.state.addresses, isEmpty);
+      expect(
+        bloc.state.fieldErrors['address.zipCode'],
+        'Informe um CEP válido.',
+      );
+
+      await bloc.close();
     });
 
     test(

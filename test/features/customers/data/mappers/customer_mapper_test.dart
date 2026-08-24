@@ -35,6 +35,30 @@ void main() {
         responsibleSellerId: 'user-1',
         registeredAt: registeredAt,
         lastPurchaseAt: DateTime.utc(2026, 2),
+        addresses: const <CustomerAddressDto>[
+          CustomerAddressDto(
+            id: 'address-1',
+            typeCode: 'shipping',
+            typeLabel: 'Entrega',
+            street: 'Rua das Colecoes',
+            number: '120',
+            city: 'Blumenau',
+            state: 'SC',
+            zipCode: '89010100',
+            country: 'BR',
+            isPrimary: true,
+          ),
+        ],
+        contacts: const <CustomerContactDto>[
+          CustomerContactDto(
+            id: 'contact-1',
+            typeCode: 'buyer',
+            typeLabel: 'Compras',
+            name: 'Ana Compras',
+            phone: '+55 47 99999-0000',
+            isPrimary: true,
+          ),
+        ],
         tags: const <String>['vip'],
         customFields: const <String, Object?>{'regionalCode': 'SC-01'},
         createdAt: createdAt,
@@ -83,6 +107,10 @@ void main() {
       expect(entity.originChannel, 'field_sales');
       expect(entity.responsibleSellerId, 'user-1');
       expect(entity.lastPurchaseAt, DateTime.utc(2026, 2));
+      expect(entity.addresses.single.zipCode, Cep.parse('89010-100'));
+      expect(entity.addresses.single.isPrimary, isTrue);
+      expect(entity.contacts.single.type, CustomerContactType.buyer);
+      expect(entity.contacts.single.isPrimary, isTrue);
       expect(entity.tags, const <String>['vip']);
       expect(entity.customFields, const <String, Object?>{
         'regionalCode': 'SC-01',
@@ -121,6 +149,8 @@ void main() {
       expect(roundTrippedDto.stateRegistration, dto.stateRegistration);
       expect(roundTrippedDto.status, dto.status);
       expect(roundTrippedDto.registeredAt, dto.registeredAt);
+      expect(roundTrippedDto.addresses.single.zipCode, '89010100');
+      expect(roundTrippedDto.contacts.single.name, 'Ana Compras');
       expect(roundTrippedDto.createdAt, dto.createdAt);
       expect(roundTrippedDto.updatedAt, dto.updatedAt);
       expect(roundTrippedDto.version, dto.version);

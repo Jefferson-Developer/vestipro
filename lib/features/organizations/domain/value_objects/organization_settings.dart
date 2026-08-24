@@ -36,6 +36,14 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     /// hard minimum (document + legal/full name). Stored as stable field codes
     /// so the Organization model stays decoupled from the customers feature.
     @Default(<String>[]) List<String> requiredCustomerFields,
+
+    /// Extra address type codes/labels available in the Customer form, e.g.
+    /// `showroom|Showroom` or `warehouse|Deposito`.
+    @Default(<String>[]) List<String> customerAddressTypes,
+
+    /// Extra contact type codes/labels available in the Customer form, e.g.
+    /// `logistics|Logistica`.
+    @Default(<String>[]) List<String> customerContactTypes,
   }) = _OrganizationSettings;
 
   /// Builds validated [OrganizationSettings], trimming each value and
@@ -53,6 +61,8 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     String? segment,
     int? maxTeamsPerUser,
     List<String> requiredCustomerFields = const <String>[],
+    List<String> customerAddressTypes = const <String>[],
+    List<String> customerContactTypes = const <String>[],
   }) {
     final fieldErrors = <String, String>{};
     final trimmedCurrency = currency.trim();
@@ -66,6 +76,12 @@ abstract class OrganizationSettings with _$OrganizationSettings {
             .toSet()
             .toList(growable: false)
           ..sort();
+    final normalizedCustomerAddressTypes = _normalizeSettingsList(
+      customerAddressTypes,
+    );
+    final normalizedCustomerContactTypes = _normalizeSettingsList(
+      customerContactTypes,
+    );
 
     if (trimmedCurrency.isEmpty) {
       fieldErrors['currency'] = 'Currency is required.';
@@ -98,6 +114,18 @@ abstract class OrganizationSettings with _$OrganizationSettings {
           : trimmedSegment,
       maxTeamsPerUser: maxTeamsPerUser,
       requiredCustomerFields: normalizedRequiredCustomerFields,
+      customerAddressTypes: normalizedCustomerAddressTypes,
+      customerContactTypes: normalizedCustomerContactTypes,
     );
   }
+}
+
+List<String> _normalizeSettingsList(Iterable<String> values) {
+  final normalized = values
+      .map((value) => value.trim())
+      .where((value) => value.isNotEmpty)
+      .toSet()
+      .toList(growable: false);
+  normalized.sort();
+  return normalized;
 }

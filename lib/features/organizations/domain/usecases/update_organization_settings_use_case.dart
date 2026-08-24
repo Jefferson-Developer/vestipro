@@ -25,6 +25,9 @@ final class UpdateOrganizationSettingsUseCase {
     required String country,
     required String defaultLanguage,
     required String updatedBy,
+    List<String> requiredCustomerFields = const <String>[],
+    List<String> customerAddressTypes = const <String>[],
+    List<String> customerContactTypes = const <String>[],
   }) async {
     final trimmedId = id.trim();
     final trimmedUpdatedBy = updatedBy.trim();
@@ -51,6 +54,9 @@ final class UpdateOrganizationSettingsUseCase {
         currency: currency,
         country: country,
         defaultLanguage: defaultLanguage,
+        requiredCustomerFields: requiredCustomerFields,
+        customerAddressTypes: customerAddressTypes,
+        customerContactTypes: customerContactTypes,
       );
     } on ValidationException catch (exception) {
       return AppFailure<Organization>(mapAppExceptionToFailure(exception));

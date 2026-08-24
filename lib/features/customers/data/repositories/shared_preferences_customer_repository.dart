@@ -5,9 +5,15 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
+import '../../domain/customer_address_contact_rules.dart';
 import '../../domain/entities/customer.dart';
+import '../../domain/entities/customer_address.dart';
+import '../../domain/entities/customer_contact.dart';
 import '../../domain/repositories/customer_repository.dart';
+import '../../domain/value_objects/cep.dart';
 import '../../domain/value_objects/cnpj_cpf.dart';
+import '../../domain/value_objects/customer_address_type.dart';
+import '../../domain/value_objects/customer_contact_type.dart';
 import '../../domain/value_objects/customer_sensitive_field.dart';
 import '../../domain/value_objects/customer_status.dart';
 import '../../domain/value_objects/customer_sync_status.dart';
@@ -238,6 +244,8 @@ final class SharedPreferencesCustomerRepository implements CustomerRepository {
       responsibleSellerId: _optionalString(json, 'responsibleSellerId'),
       registeredAt: _requiredDate(json, 'registeredAt'),
       lastPurchaseAt: _optionalDate(json, 'lastPurchaseAt'),
+      addresses: _addressesFromJson(json['addresses']),
+      contacts: _contactsFromJson(json['contacts']),
       tags: _stringList(json['tags']),
       customFields: _objectMap(json['customFields']),
       createdAt: _requiredDate(json, 'createdAt'),
@@ -278,6 +286,14 @@ final class SharedPreferencesCustomerRepository implements CustomerRepository {
       'registeredAt': customer.registeredAt.toUtc().toIso8601String(),
       if (customer.lastPurchaseAt != null)
         'lastPurchaseAt': customer.lastPurchaseAt!.toUtc().toIso8601String(),
+      if (customer.addresses.isNotEmpty)
+        'addresses': customer.addresses
+            .map(_addressToJson)
+            .toList(growable: false),
+      if (customer.contacts.isNotEmpty)
+        'contacts': customer.contacts
+            .map(_contactToJson)
+            .toList(growable: false),
       if (customer.tags.isNotEmpty) 'tags': customer.tags,
       if (customer.customFields.isNotEmpty)
         'customFields': customer.customFields,
@@ -351,5 +367,117 @@ final class SharedPreferencesCustomerRepository implements CustomerRepository {
       );
     }
     return Map<String, Object?>.unmodifiable(value);
+  }
+
+  List<CustomerAddress> _addressesFromJson(Object? value) {
+    if (value == null) return const <CustomerAddress>[];
+    if (value is! List<dynamic>) {
+      throw const ValidationException(
+        'Invalid local customer addresses.',
+        code: 'invalid_customer_local_payload',
+      );
+    }
+    return normalizeCustomerAddresses(
+      value.map((item) {
+        if (item is! Map<String, dynamic>) {
+          throw const ValidationException(
+            'Invalid local customer address payload.',
+            code: 'invalid_customer_local_payload',
+          );
+        }
+        final typeCode = _requiredString(item, 'typeCode');
+        final typeLabel = _requiredString(item, 'typeLabel');
+        final type =
+            customerAddressTypeFromCode(typeCode, label: typeLabel) ??
+            CustomerAddressType.custom(typeCode, label: typeLabel);
+        return CustomerAddress(
+          id: _requiredString(item, 'id'),
+          type: type,
+          street: _requiredString(item, 'street'),
+          number: _optionalString(item, 'number'),
+          complement: _optionalString(item, 'complement'),
+          district: _optionalString(item, 'district'),
+          city: _requiredString(item, 'city'),
+          state: _requiredString(item, 'state'),
+          zipCode: Cep.parse(_requiredString(item, 'zipCode')),
+          country: _requiredString(item, 'country'),
+          isPrimary: _requiredBool(item, 'isPrimary'),
+        );
+      }),
+    );
+  }
+
+  List<CustomerContact> _contactsFromJson(Object? value) {
+    if (value == null) return const <CustomerContact>[];
+    if (value is! List<dynamic>) {
+      throw const ValidationException(
+        'Invalid local customer contacts.',
+        code: 'invalid_customer_local_payload',
+      );
+    }
+    return normalizeCustomerContacts(
+      value.map((item) {
+        if (item is! Map<String, dynamic>) {
+          throw const ValidationException(
+            'Invalid local customer contact payload.',
+            code: 'invalid_customer_local_payload',
+          );
+        }
+        final typeCode = _requiredString(item, 'typeCode');
+        final typeLabel = _requiredString(item, 'typeLabel');
+        final type =
+            customerContactTypeFromCode(typeCode, label: typeLabel) ??
+            CustomerContactType.custom(typeCode, label: typeLabel);
+        return CustomerContact(
+          id: _requiredString(item, 'id'),
+          type: type,
+          name: _requiredString(item, 'name'),
+          role: _optionalString(item, 'role'),
+          phone: _optionalString(item, 'phone'),
+          email: _optionalString(item, 'email'),
+          isPrimary: _requiredBool(item, 'isPrimary'),
+        );
+      }),
+    );
+  }
+
+  Map<String, dynamic> _addressToJson(CustomerAddress address) {
+    return <String, dynamic>{
+      'id': address.id,
+      'typeCode': address.type.code,
+      'typeLabel': address.type.label,
+      'street': address.street,
+      if (address.number != null) 'number': address.number,
+      if (address.complement != null) 'complement': address.complement,
+      if (address.district != null) 'district': address.district,
+      'city': address.city,
+      'state': address.state,
+      'zipCode': address.zipCode.digits,
+      'country': address.country,
+      'isPrimary': address.isPrimary,
+    };
+  }
+
+  Map<String, dynamic> _contactToJson(CustomerContact contact) {
+    return <String, dynamic>{
+      'id': contact.id,
+      'typeCode': contact.type.code,
+      'typeLabel': contact.type.label,
+      'name': contact.name,
+      if (contact.role != null) 'role': contact.role,
+      if (contact.phone != null) 'phone': contact.phone,
+      if (contact.email != null) 'email': contact.email,
+      'isPrimary': contact.isPrimary,
+    };
+  }
+
+  bool _requiredBool(Map<String, dynamic> json, String field) {
+    final value = json[field];
+    if (value is bool) return value;
+    throw ValidationException(
+      'Invalid local customer boolean field.',
+      code: 'invalid_customer_local_payload',
+      cause: field,
+    );
   }
 }

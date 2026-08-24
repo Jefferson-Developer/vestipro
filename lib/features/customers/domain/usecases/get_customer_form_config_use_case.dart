@@ -26,9 +26,7 @@ final class GetCustomerFormConfigUseCase {
     final result = await _organizationRepository.getById(trimmedOrganizationId);
     return result.fold(
       onSuccess: (Organization organization) => AppSuccess<CustomerFormConfig>(
-        CustomerFormConfig.fromOrganizationFieldCodes(
-          organization.settings.requiredCustomerFields,
-        ),
+        CustomerFormConfig.fromOrganizationSettings(organization.settings),
       ),
       onFailure: (failure) {
         if (failure is NotFoundFailure || failure is ConnectivityFailure) {

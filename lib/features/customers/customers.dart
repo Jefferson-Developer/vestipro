@@ -2,12 +2,16 @@
 library;
 
 export 'domain/entities/customer.dart';
+export 'domain/entities/customer_address.dart';
+export 'domain/entities/customer_contact.dart';
 export 'domain/entities/customer_form_config.dart';
 export 'domain/entities/customer_form_draft.dart';
 export 'domain/repositories/customer_form_draft_repository.dart';
 export 'domain/repositories/customer_repository.dart';
 export 'domain/usecases/clear_customer_form_draft_use_case.dart';
 export 'domain/usecases/create_customer_use_case.dart';
+export 'domain/usecases/customer_address_use_cases.dart';
+export 'domain/usecases/customer_contact_use_cases.dart';
 export 'domain/usecases/deactivate_customer_use_case.dart';
 export 'domain/usecases/get_customer_form_config_use_case.dart';
 export 'domain/usecases/get_customer_form_draft_use_case.dart';
@@ -15,6 +19,9 @@ export 'domain/usecases/get_customer_by_id_use_case.dart';
 export 'domain/usecases/save_customer_form_draft_use_case.dart';
 export 'domain/usecases/update_customer_use_case.dart';
 export 'domain/value_objects/cnpj_cpf.dart';
+export 'domain/value_objects/cep.dart';
+export 'domain/value_objects/customer_address_type.dart';
+export 'domain/value_objects/customer_contact_type.dart';
 export 'domain/value_objects/customer_required_field.dart';
 export 'domain/value_objects/customer_sensitive_field.dart';
 export 'domain/value_objects/customer_status.dart';

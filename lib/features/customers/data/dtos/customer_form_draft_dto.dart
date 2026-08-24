@@ -1,4 +1,5 @@
 import '../../../../core/errors/errors.dart';
+import 'customer_dto.dart';
 
 final class CustomerFormDraftDto {
   const CustomerFormDraftDto({
@@ -16,6 +17,8 @@ final class CustomerFormDraftDto {
     this.classification,
     this.potential,
     this.responsibleSellerId,
+    this.addresses = const <CustomerAddressDto>[],
+    this.contacts = const <CustomerContactDto>[],
     required this.savedAt,
   });
 
@@ -34,6 +37,8 @@ final class CustomerFormDraftDto {
     final classification = json['classification'];
     final potential = json['potential'];
     final responsibleSellerId = json['responsibleSellerId'];
+    final rawAddresses = json['addresses'];
+    final rawContacts = json['contacts'];
     final savedAt = json['savedAt'];
 
     if (organizationId is! String ||
@@ -72,6 +77,8 @@ final class CustomerFormDraftDto {
       classification: classification as String?,
       potential: potential as String?,
       responsibleSellerId: responsibleSellerId as String?,
+      addresses: _addressDtosFromJson(rawAddresses),
+      contacts: _contactDtosFromJson(rawContacts),
       savedAt: DateTime.parse(savedAt),
     );
   }
@@ -90,6 +97,8 @@ final class CustomerFormDraftDto {
   final String? classification;
   final String? potential;
   final String? responsibleSellerId;
+  final List<CustomerAddressDto> addresses;
+  final List<CustomerContactDto> contacts;
   final DateTime savedAt;
 
   Map<String, dynamic> toJson() {
@@ -109,7 +118,57 @@ final class CustomerFormDraftDto {
       if (potential != null) 'potential': potential,
       if (responsibleSellerId != null)
         'responsibleSellerId': responsibleSellerId,
+      if (addresses.isNotEmpty)
+        'addresses': addresses
+            .map((address) => address.toJson())
+            .toList(growable: false),
+      if (contacts.isNotEmpty)
+        'contacts': contacts
+            .map((contact) => contact.toJson())
+            .toList(growable: false),
       'savedAt': savedAt.toUtc().toIso8601String(),
     };
   }
+}
+
+List<CustomerAddressDto> _addressDtosFromJson(Object? value) {
+  if (value == null) return const <CustomerAddressDto>[];
+  if (value is! List<dynamic>) {
+    throw const ValidationException(
+      'Invalid customer draft address payload.',
+      code: 'invalid_customer_draft_payload',
+    );
+  }
+  return value
+      .map((item) {
+        if (item is! Map<String, dynamic>) {
+          throw const ValidationException(
+            'Invalid customer draft address payload.',
+            code: 'invalid_customer_draft_payload',
+          );
+        }
+        return CustomerAddressDto.fromJson(item);
+      })
+      .toList(growable: false);
+}
+
+List<CustomerContactDto> _contactDtosFromJson(Object? value) {
+  if (value == null) return const <CustomerContactDto>[];
+  if (value is! List<dynamic>) {
+    throw const ValidationException(
+      'Invalid customer draft contact payload.',
+      code: 'invalid_customer_draft_payload',
+    );
+  }
+  return value
+      .map((item) {
+        if (item is! Map<String, dynamic>) {
+          throw const ValidationException(
+            'Invalid customer draft contact payload.',
+            code: 'invalid_customer_draft_payload',
+          );
+        }
+        return CustomerContactDto.fromJson(item);
+      })
+      .toList(growable: false);
 }
