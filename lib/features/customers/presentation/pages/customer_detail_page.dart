@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../crm/crm.dart';
 import '../../domain/entities/customer.dart';
 import '../../domain/entities/customer_address.dart';
 import '../../domain/entities/customer_contact.dart';
@@ -45,6 +46,7 @@ class CustomerDetailPage extends StatelessWidget {
               CustomerDetailStarted(
                 organizationId: organizationId,
                 customerId: customerId,
+                userId: userId,
               ),
             ),
           child: CustomerDetailView(
@@ -73,20 +75,51 @@ class CustomerDetailView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocBuilder<CustomerDetailBloc, CustomerDetailState>(
-      builder: (context, state) {
-        return Scaffold(
-          body: Padding(
-            padding: const EdgeInsets.all(AppSpacing.spacing24),
-            child: _CustomerDetailBody(
-              state: state,
-              organizationId: organizationId,
-              userId: userId,
-              permissionService: permissionService,
-            ),
-          ),
-        );
+    return BlocListener<CustomerDetailBloc, CustomerDetailState>(
+      listenWhen: (previous, current) =>
+          previous.activitySubmissionStatus != current.activitySubmissionStatus,
+      listener: (context, state) {
+        switch (state.activitySubmissionStatus) {
+          case CustomerDetailActivitySubmissionStatus.success:
+            AppSnackbar.show(
+              context,
+              message: 'Atividade registrada e salva offline.',
+              variant: AppSnackbarVariant.success,
+            );
+            context.read<CustomerDetailBloc>().add(
+              const CustomerDetailActivitySubmissionAcknowledged(),
+            );
+          case CustomerDetailActivitySubmissionStatus.failure:
+            AppSnackbar.show(
+              context,
+              message:
+                  state.activitySubmissionFailure?.message ??
+                  'Nao foi possivel registrar a atividade.',
+              variant: AppSnackbarVariant.error,
+            );
+            context.read<CustomerDetailBloc>().add(
+              const CustomerDetailActivitySubmissionAcknowledged(),
+            );
+          case CustomerDetailActivitySubmissionStatus.idle:
+          case CustomerDetailActivitySubmissionStatus.submitting:
+            break;
+        }
       },
+      child: BlocBuilder<CustomerDetailBloc, CustomerDetailState>(
+        builder: (context, state) {
+          return Scaffold(
+            body: Padding(
+              padding: const EdgeInsets.all(AppSpacing.spacing24),
+              child: _CustomerDetailBody(
+                state: state,
+                organizationId: organizationId,
+                userId: userId,
+                permissionService: permissionService,
+              ),
+            ),
+          );
+        },
+      ),
     );
   }
 }
@@ -192,7 +225,10 @@ class _StackedCustomerDetail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        _CustomerHeader(customer: customer),
+        _CustomerHeader(
+          customer: customer,
+          onRegisterActivity: () => _showRegisterActivitySheet(context),
+        ),
         const SizedBox(height: AppSpacing.spacing16),
         _RegistrationSection(customer: customer),
         const SizedBox(height: AppSpacing.spacing16),
@@ -234,7 +270,10 @@ class _DesktopCustomerDetail extends StatelessWidget {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
       children: <Widget>[
-        _CustomerHeader(customer: customer),
+        _CustomerHeader(
+          customer: customer,
+          onRegisterActivity: () => _showRegisterActivitySheet(context),
+        ),
         const SizedBox(height: AppSpacing.spacing16),
         Row(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -278,9 +317,13 @@ class _DesktopCustomerDetail extends StatelessWidget {
 }
 
 class _CustomerHeader extends StatelessWidget {
-  const _CustomerHeader({required this.customer});
+  const _CustomerHeader({
+    required this.customer,
+    required this.onRegisterActivity,
+  });
 
   final Customer customer;
+  final VoidCallback onRegisterActivity;
 
   @override
   Widget build(BuildContext context) {
@@ -318,7 +361,10 @@ class _CustomerHeader extends StatelessWidget {
             style: AppTypography.bodyLarge.copyWith(color: colors.outline),
           ),
           const SizedBox(height: AppSpacing.spacing16),
-          _QuickActions(customer: customer),
+          _QuickActions(
+            customer: customer,
+            onRegisterActivity: onRegisterActivity,
+          ),
         ],
       ),
     );
@@ -326,9 +372,13 @@ class _CustomerHeader extends StatelessWidget {
 }
 
 class _QuickActions extends StatelessWidget {
-  const _QuickActions({required this.customer});
+  const _QuickActions({
+    required this.customer,
+    required this.onRegisterActivity,
+  });
 
   final Customer customer;
+  final VoidCallback onRegisterActivity;
 
   @override
   Widget build(BuildContext context) {
@@ -368,10 +418,7 @@ class _QuickActions extends StatelessWidget {
           label: 'Atividade',
           leadingIcon: Icons.add_task_outlined,
           semanticLabel: 'Registrar atividade',
-          onPressed: () => _showPlaceholder(
-            context,
-            'Registro de atividade em breve no modulo CRM.',
-          ),
+          onPressed: onRegisterActivity,
         ),
       ],
     );
@@ -381,6 +428,102 @@ class _QuickActions extends StatelessWidget {
     ScaffoldMessenger.of(
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
+  }
+}
+
+Future<void> _showRegisterActivitySheet(BuildContext context) {
+  final bloc = context.read<CustomerDetailBloc>();
+  return AppBottomSheet.show<void>(
+    context: context,
+    title: 'Registrar atividade',
+    contentKey: const Key('register-crm-activity-sheet'),
+    builder: (sheetContext) => BlocProvider<CustomerDetailBloc>.value(
+      value: bloc,
+      child: const _RegisterActivitySheet(),
+    ),
+  );
+}
+
+class _RegisterActivitySheet extends StatefulWidget {
+  const _RegisterActivitySheet();
+
+  @override
+  State<_RegisterActivitySheet> createState() => _RegisterActivitySheetState();
+}
+
+class _RegisterActivitySheetState extends State<_RegisterActivitySheet> {
+  final _descriptionController = TextEditingController();
+  CrmActivityType _type = CrmActivityType.phoneCall;
+  String? _descriptionError;
+
+  @override
+  void dispose() {
+    _descriptionController.dispose();
+    super.dispose();
+  }
+
+  void _submit() {
+    final description = _descriptionController.text.trim();
+    if (description.isEmpty) {
+      setState(() => _descriptionError = 'Descreva a atividade realizada.');
+      return;
+    }
+    context.read<CustomerDetailBloc>().add(
+      CustomerDetailActivitySubmitted(description: description, type: _type),
+    );
+    Navigator.of(context).pop();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        AppDropdown<CrmActivityType>(
+          label: 'Tipo',
+          isRequired: true,
+          closeSemanticLabel: 'Fechar selecao de tipo',
+          enableSearch: false,
+          selectedValues: <CrmActivityType>{_type},
+          options: CrmActivityType.values
+              .map(
+                (type) => AppDropdownOption<CrmActivityType>(
+                  value: type,
+                  label: type.label,
+                ),
+              )
+              .toList(growable: false),
+          onChanged: (values) {
+            if (values.isNotEmpty) {
+              setState(() => _type = values.first);
+            }
+          },
+        ),
+        const SizedBox(height: AppSpacing.spacing12),
+        AppTextField(
+          controller: _descriptionController,
+          label: 'Descricao',
+          hintText: 'Ex.: Ligacao sobre reposicao da colecao',
+          isRequired: true,
+          maxLines: 3,
+          errorText: _descriptionError,
+          semanticLabel: 'Descricao da atividade CRM',
+          onChanged: (_) {
+            if (_descriptionError != null) {
+              setState(() => _descriptionError = null);
+            }
+          },
+        ),
+        const SizedBox(height: AppSpacing.spacing16),
+        AppButton(
+          label: 'Registrar atividade',
+          leadingIcon: Icons.add_task_outlined,
+          expand: true,
+          onPressed: _submit,
+        ),
+      ],
+    );
   }
 }
 
@@ -580,17 +723,42 @@ class _TimelineSection extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return const _SectionCard(
-      title: 'Timeline de atividades',
-      icon: Icons.timeline_outlined,
-      children: <Widget>[
-        _ComingSoonPanel(
-          title: 'Atividades CRM em breve',
-          description:
-              'Nao disponivel ate a TASK-059 implementar ligacoes, visitas, mensagens e notas.',
-          icon: Icons.event_note_outlined,
-        ),
-      ],
+    return BlocBuilder<CustomerDetailBloc, CustomerDetailState>(
+      builder: (context, state) {
+        final children = switch (state.timelineStatus) {
+          CustomerDetailTimelineStatus.initial ||
+          CustomerDetailTimelineStatus.loading => const <Widget>[
+            Center(child: CircularProgressIndicator()),
+          ],
+          CustomerDetailTimelineStatus.failure => <Widget>[
+            AppErrorState(
+              title: 'Nao foi possivel carregar a timeline',
+              message:
+                  state.timelineFailure?.message ?? 'Tente novamente em breve.',
+              retryLabel: 'Tentar novamente',
+              onRetry: () => context.read<CustomerDetailBloc>().add(
+                const CustomerDetailTimelineRetried(),
+              ),
+            ),
+          ],
+          CustomerDetailTimelineStatus.ready ||
+          CustomerDetailTimelineStatus.loadingMore => <Widget>[
+            CrmActivityTimeline(
+              activities: state.activities,
+              hasMore: state.activitiesHasMore,
+              isLoadingMore: state.isLoadingMoreActivities,
+              onLoadMore: () => context.read<CustomerDetailBloc>().add(
+                const CustomerDetailTimelineLoadMoreRequested(),
+              ),
+            ),
+          ],
+        };
+        return _SectionCard(
+          title: 'Timeline de atividades',
+          icon: Icons.timeline_outlined,
+          children: children,
+        );
+      },
     );
   }
 }

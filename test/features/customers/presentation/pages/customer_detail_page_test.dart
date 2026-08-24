@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/design_system/design_system.dart';
 import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/permissions/permissions.dart';
 import 'package:vestipro/core/utils/utils.dart';
+import 'package:vestipro/features/crm/crm.dart';
 import 'package:vestipro/features/customers/customers.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
 import 'package:vestipro/features/users/users.dart';
@@ -16,11 +18,15 @@ void main() {
     late _MockMembershipRepository membershipRepository;
     late PermissionService permissionService;
     late _InMemoryCustomerRepository customerRepository;
+    late _InMemoryCrmActivityRepository activityRepository;
+    late FakeAnalyticsService analyticsService;
 
     setUp(() {
       membershipRepository = _MockMembershipRepository();
       permissionService = PermissionService(membershipRepository);
       customerRepository = _InMemoryCustomerRepository()..seed(_fullCustomer);
+      activityRepository = _InMemoryCrmActivityRepository();
+      analyticsService = FakeAnalyticsService();
     });
 
     testWidgets('renders complete customer 360 data and quick actions', (
@@ -28,7 +34,13 @@ void main() {
     ) async {
       _grantRole(membershipRepository, 'SALES_MANAGER');
 
-      await _pumpPage(tester, permissionService, customerRepository);
+      await _pumpPage(
+        tester,
+        permissionService,
+        customerRepository,
+        activityRepository,
+        analyticsService,
+      );
       await tester.pumpAndSettle();
 
       expect(find.text('Atacado Alfa'), findsWidgets);
@@ -41,7 +53,47 @@ void main() {
       expect(find.text('Ligar'), findsOneWidget);
       expect(find.text('Mensagem'), findsOneWidget);
       expect(find.bySemanticsLabel('Registrar atividade'), findsOneWidget);
+      expect(find.text('Nenhuma atividade registrada ainda.'), findsOneWidget);
       expect(customerRepository.calls.single, ('org-1', 'customer-a'));
+    });
+
+    testWidgets('registers quick CRM activity from customer detail', (
+      tester,
+    ) async {
+      _grantRole(membershipRepository, 'SALES_MANAGER');
+
+      await _pumpPage(
+        tester,
+        permissionService,
+        customerRepository,
+        activityRepository,
+        analyticsService,
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.bySemanticsLabel('Registrar atividade'));
+      await tester.pumpAndSettle();
+      expect(
+        find.byKey(const Key('register-crm-activity-sheet')),
+        findsOneWidget,
+      );
+
+      await tester.enterText(
+        find.bySemanticsLabel('Descricao da atividade CRM'),
+        'Ligacao sobre reposicao',
+      );
+      await tester.tap(find.text('Registrar atividade').last);
+      await tester.pumpAndSettle();
+
+      expect(activityRepository.activities.single.customerId, 'customer-a');
+      expect(activityRepository.activities.single.userId, 'rep-1');
+      expect(find.text('Ligacao sobre reposicao'), findsOneWidget);
+      expect(
+        analyticsService.loggedEvents.where(
+          (event) => event.name == AnalyticsEvents.crmActivityCreated,
+        ),
+        hasLength(1),
+      );
     });
 
     testWidgets('renders partial data with explicit placeholders', (
@@ -56,6 +108,8 @@ void main() {
         tester,
         permissionService,
         customerRepository,
+        activityRepository,
+        analyticsService,
         customerId: 'customer-partial',
       );
       await tester.pumpAndSettle();
@@ -72,7 +126,7 @@ void main() {
         findsOneWidget,
       );
       expect(find.text('Score do cliente em breve'), findsOneWidget);
-      expect(find.text('Atividades CRM em breve'), findsOneWidget);
+      expect(find.text('Nenhuma atividade registrada ainda.'), findsOneWidget);
       expect(find.text('Oportunidades em breve'), findsOneWidget);
       expect(find.text('Pedidos em breve'), findsOneWidget);
       expect(find.text('Recomendacao em breve'), findsOneWidget);
@@ -84,19 +138,37 @@ void main() {
       _grantRole(membershipRepository, 'SALES_MANAGER');
 
       await tester.binding.setSurfaceSize(const Size(390, 820));
-      await _pumpPage(tester, permissionService, customerRepository);
+      await _pumpPage(
+        tester,
+        permissionService,
+        customerRepository,
+        activityRepository,
+        analyticsService,
+      );
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('customer-detail-mobile')), findsOneWidget);
 
       await tester.binding.setSurfaceSize(const Size(800, 900));
       await tester.pumpWidget(Container());
-      await _pumpPage(tester, permissionService, customerRepository);
+      await _pumpPage(
+        tester,
+        permissionService,
+        customerRepository,
+        activityRepository,
+        analyticsService,
+      );
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('customer-detail-tablet')), findsOneWidget);
 
       await tester.binding.setSurfaceSize(const Size(1200, 900));
       await tester.pumpWidget(Container());
-      await _pumpPage(tester, permissionService, customerRepository);
+      await _pumpPage(
+        tester,
+        permissionService,
+        customerRepository,
+        activityRepository,
+        analyticsService,
+      );
       await tester.pumpAndSettle();
       expect(find.byKey(const Key('customer-detail-desktop')), findsOneWidget);
 
@@ -107,7 +179,13 @@ void main() {
       'gates sensitive commercial indicators by reportViewSensitive',
       (tester) async {
         _grantRole(membershipRepository, 'SALES_REP');
-        await _pumpPage(tester, permissionService, customerRepository);
+        await _pumpPage(
+          tester,
+          permissionService,
+          customerRepository,
+          activityRepository,
+          analyticsService,
+        );
         await tester.pumpAndSettle();
 
         expect(find.text('Indicadores comerciais sensiveis'), findsOneWidget);
@@ -121,7 +199,13 @@ void main() {
 
         _grantRole(membershipRepository, 'SALES_MANAGER');
         await tester.pumpWidget(Container());
-        await _pumpPage(tester, permissionService, customerRepository);
+        await _pumpPage(
+          tester,
+          permissionService,
+          customerRepository,
+          activityRepository,
+          analyticsService,
+        );
         await tester.pumpAndSettle();
 
         expect(find.text('Margem e credito em breve'), findsOneWidget);
@@ -139,7 +223,9 @@ void main() {
 Future<void> _pumpPage(
   WidgetTester tester,
   PermissionService permissionService,
-  _InMemoryCustomerRepository customerRepository, {
+  _InMemoryCustomerRepository customerRepository,
+  _InMemoryCrmActivityRepository activityRepository,
+  FakeAnalyticsService analyticsService, {
   String customerId = 'customer-a',
 }) {
   return tester.pumpWidget(
@@ -152,10 +238,76 @@ Future<void> _pumpPage(
         permissionService: permissionService,
         createBloc: () => CustomerDetailBloc(
           getCustomerById: GetCustomerByIdUseCase(customerRepository),
+          listActivitiesForCustomer: ListCrmActivitiesForCustomerUseCase(
+            activityRepository,
+          ),
+          registerActivity: RegisterCrmActivityUseCase(activityRepository),
+          analyticsService: analyticsService,
         ),
       ),
     ),
   );
+}
+
+final class _InMemoryCrmActivityRepository implements CrmActivityRepository {
+  final List<CrmActivity> activities = <CrmActivity>[];
+
+  @override
+  Future<AppResult<CrmActivity>> create({required CrmActivity activity}) async {
+    activities.add(activity);
+    return AppSuccess<CrmActivity>(activity);
+  }
+
+  @override
+  Future<AppResult<CrmActivityPageResult>> listForCustomer({
+    required String organizationId,
+    required String customerId,
+    int limit = 20,
+    String? cursor,
+    bool ascending = false,
+  }) async {
+    final visible =
+        activities
+            .where(
+              (activity) =>
+                  activity.organizationId == organizationId &&
+                  activity.customerId == customerId,
+            )
+            .toList(growable: false)
+          ..sort(
+            (first, second) => second.occurredAt.compareTo(first.occurredAt),
+          );
+    return AppSuccess<CrmActivityPageResult>(
+      CrmActivityPageResult(
+        activities: visible.take(limit).toList(growable: false),
+        hasMore: visible.length > limit,
+        nextCursor: visible.isEmpty ? null : visible.last.id,
+        isFromLocalCache: true,
+      ),
+    );
+  }
+
+  @override
+  Future<AppResult<CrmActivityPageResult>> listForLead({
+    required String organizationId,
+    required String leadId,
+    int limit = 20,
+    String? cursor,
+    bool ascending = false,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<CrmActivityPageResult>> listForOpportunity({
+    required String organizationId,
+    required String opportunityId,
+    int limit = 20,
+    String? cursor,
+    bool ascending = false,
+  }) {
+    throw UnimplementedError();
+  }
 }
 
 void _grantRole(_MockMembershipRepository repository, String roleName) {

@@ -87,6 +87,20 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart'
 import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
+import '../features/crm/crm.dart' as _i205;
+import '../features/crm/data/mappers/crm_activity_mapper.dart' as _i203;
+import '../features/crm/data/repositories/shared_preferences_crm_activity_repository.dart'
+    as _i699;
+import '../features/crm/domain/repositories/crm_activity_repository.dart'
+    as _i558;
+import '../features/crm/domain/usecases/list_crm_activities_for_customer_use_case.dart'
+    as _i489;
+import '../features/crm/domain/usecases/list_crm_activities_for_lead_use_case.dart'
+    as _i554;
+import '../features/crm/domain/usecases/list_crm_activities_for_opportunity_use_case.dart'
+    as _i286;
+import '../features/crm/domain/usecases/register_crm_activity_use_case.dart'
+    as _i924;
 import '../features/customers/data/datasources/customer_form_draft_data_source.dart'
     as _i1036;
 import '../features/customers/data/datasources/customer_segment_data_source.dart'
@@ -439,6 +453,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i756.UserProfileMapper>(
       () => const _i756.UserProfileMapper(),
     );
+    gh.lazySingleton<_i203.CrmActivityMapper>(
+      () => const _i203.CrmActivityMapper(),
+    );
     gh.lazySingleton<_i258.CustomerFormDraftMapper>(
       () => const _i258.CustomerFormDraftMapper(),
     );
@@ -602,6 +619,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i845.AuthDataSource>(
       () => _i814.FirebaseAuthDataSource(gh<_i59.FirebaseAuth>()),
     );
+    gh.lazySingleton<_i558.CrmActivityRepository>(
+      () => _i699.SharedPreferencesCrmActivityRepository(
+        gh<_i203.CrmActivityMapper>(),
+      ),
+    );
     gh.lazySingleton<_i217.AuthRepository>(
       () => _i961.AuthRepositoryImpl(
         dataSource: gh<_i845.AuthDataSource>(),
@@ -757,6 +779,24 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1008.PerformanceMonitor>(
       () => _i387.FirebasePerformanceMonitor(gh<_i346.FirebasePerformance>()),
     );
+    gh.factory<_i489.ListCrmActivitiesForCustomerUseCase>(
+      () => _i489.ListCrmActivitiesForCustomerUseCase(
+        gh<_i558.CrmActivityRepository>(),
+      ),
+    );
+    gh.factory<_i554.ListCrmActivitiesForLeadUseCase>(
+      () => _i554.ListCrmActivitiesForLeadUseCase(
+        gh<_i558.CrmActivityRepository>(),
+      ),
+    );
+    gh.factory<_i286.ListCrmActivitiesForOpportunityUseCase>(
+      () => _i286.ListCrmActivitiesForOpportunityUseCase(
+        gh<_i558.CrmActivityRepository>(),
+      ),
+    );
+    gh.factory<_i924.RegisterCrmActivityUseCase>(
+      () => _i924.RegisterCrmActivityUseCase(gh<_i558.CrmActivityRepository>()),
+    );
     gh.lazySingleton<_i147.CloudFunctionsService>(
       () => _i147.CloudFunctionsService(
         gh<_i809.FirebaseFunctions>(),
@@ -821,11 +861,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
-    gh.factory<_i433.CustomerDetailBloc>(
-      () => _i433.CustomerDetailBloc(
-        getCustomerById: gh<_i356.GetCustomerByIdUseCase>(),
-      ),
-    );
     gh.lazySingleton<_i268.OrganizationDataSource>(
       () => _i455.FirestoreOrganizationDataSource(
         gh<_i974.FirebaseFirestore>(),
@@ -840,6 +875,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i923.RoleDataSource>(
       () => _i892.FirestoreRoleDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.factory<_i433.CustomerDetailBloc>(
+      () => _i433.CustomerDetailBloc(
+        getCustomerById: gh<_i356.GetCustomerByIdUseCase>(),
+        listActivitiesForCustomer:
+            gh<_i205.ListCrmActivitiesForCustomerUseCase>(),
+        registerActivity: gh<_i205.RegisterCrmActivityUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
     );
     gh.lazySingleton<_i228.TeamDataSource>(
       () => _i23.FirestoreTeamDataSource(gh<_i974.FirebaseFirestore>()),

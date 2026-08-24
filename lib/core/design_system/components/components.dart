@@ -39,3 +39,4 @@ export 'overlays/app_tooltip.dart';
 export 'selection/app_dropdown.dart';
 export 'tables/app_data_table.dart';
 export 'tables/app_pagination.dart';
+export 'timeline/app_timeline.dart';
