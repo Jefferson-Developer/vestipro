@@ -139,6 +139,65 @@ void main() {
       expect(find.text('Sem permissão'), findsOneWidget);
       expect(find.text('customer-form:acme:company-1'), findsNothing);
     });
+
+    testWidgets('passes CustomerPortfolioRoute query parameters to the '
+        'injected page', (tester) async {
+      Map<String, String>? capturedQuery;
+      final appRouter = _buildRouter(
+        customerPortfolioPageBuilder:
+            (context, orgId, companyId, queryParameters) {
+              capturedQuery = queryParameters;
+              return Scaffold(
+                body: Text(
+                  'customer-portfolio:$orgId:$companyId:${queryParameters['q']}',
+                ),
+              );
+            },
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(
+        const CustomerPortfolioRoute(
+          orgId: 'acme',
+          companyId: 'company-1',
+          queryParameters: <String, String>{'q': 'alfa', 'uf': 'SP'},
+        ).location,
+      );
+      await tester.pumpAndSettle();
+
+      expect(capturedQuery, <String, String>{'q': 'alfa', 'uf': 'SP'});
+      expect(
+        find.text('customer-portfolio:acme:company-1:alfa'),
+        findsOneWidget,
+      );
+    });
+
+    testWidgets('protects CustomerPortfolioRoute with customer.view', (
+      tester,
+    ) async {
+      final appRouter = _buildRouter(
+        authorizationGuard: const _DenyCustomerViewGuard(),
+        customerPortfolioPageBuilder:
+            (context, orgId, companyId, queryParameters) =>
+                Scaffold(body: Text('customer-portfolio:$orgId:$companyId')),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(
+        const CustomerPortfolioRoute(
+          orgId: 'acme',
+          companyId: 'company-1',
+        ).location,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ForbiddenPage), findsOneWidget);
+      expect(find.text('customer-portfolio:acme:company-1'), findsNothing);
+    });
   });
 }
 
@@ -150,6 +209,13 @@ AppRouter _buildRouter({
   Widget Function(BuildContext context, String orgId)? auditLogPageBuilder,
   Widget Function(BuildContext context, String orgId, String companyId)?
   customerFormPageBuilder,
+  Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  customerPortfolioPageBuilder,
   WidgetBuilder? loginPageBuilder,
   Widget Function(BuildContext context, String token)? acceptInvitePageBuilder,
 }) {
@@ -164,6 +230,7 @@ AppRouter _buildRouter({
         auditLogPageBuilder ??
         (context, orgId) => Scaffold(body: Text('audit-log:$orgId')),
     customerFormPageBuilder: customerFormPageBuilder,
+    customerPortfolioPageBuilder: customerPortfolioPageBuilder,
     loginPageBuilder:
         loginPageBuilder ?? (context) => const Scaffold(body: Text('login')),
     signUpPageBuilder: (context) => const Scaffold(body: Text('sign-up')),
@@ -215,6 +282,22 @@ final class _DenyCustomerCreateGuard implements AuthorizationGuard {
     required Capability requiredCapability,
   }) {
     if (requiredCapability == Capability.customerCreate) {
+      return const ForbiddenRoute().location;
+    }
+    return null;
+  }
+}
+
+final class _DenyCustomerViewGuard implements AuthorizationGuard {
+  const _DenyCustomerViewGuard();
+
+  @override
+  String? redirect(
+    BuildContext context,
+    GoRouterState state, {
+    required Capability requiredCapability,
+  }) {
+    if (requiredCapability == Capability.customerView) {
       return const ForbiddenRoute().location;
     }
     return null;

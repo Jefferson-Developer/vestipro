@@ -13,6 +13,7 @@
 /// trusted. [CapabilityCode.code] documents, capability by capability,
 /// which backend rule/Function name TASK-030 is expected to enforce.
 enum Capability {
+  customerView,
   customerCreate,
   customerUpdate,
   customerDelete,
@@ -45,6 +46,7 @@ extension CapabilityCode on Capability {
   /// whatever this client-side [PermissionService] resolved.
   String get code {
     return switch (this) {
+      Capability.customerView => 'customer.view',
       Capability.customerCreate => 'customer.create',
       Capability.customerUpdate => 'customer.update',
       Capability.customerDelete => 'customer.delete',

@@ -396,6 +396,24 @@ final class _InMemoryCustomerRepository implements CustomerRepository {
       NotFoundFailure('Customer not found.', code: 'customer_not_found'),
     );
   }
+
+  @override
+  Future<AppResult<CustomerPortfolioPageResult>> listPortfolioPage({
+    required CustomerVisibilityFilter visibility,
+    required List<PortfolioAssignment> activeAssignments,
+    required CustomerPortfolioFilters filters,
+    required String searchQuery,
+    required int limit,
+    String? cursor,
+    required DateTime now,
+  }) async {
+    return const AppFailure<CustomerPortfolioPageResult>(
+      UnexpectedFailure(
+        'Not used by CustomerFormBloc tests.',
+        code: 'customer_portfolio_not_used',
+      ),
+    );
+  }
 }
 
 final class _InMemoryCustomerFormDraftRepository

@@ -9,6 +9,8 @@ import '../../domain/customer_address_contact_rules.dart';
 import '../../domain/entities/customer.dart';
 import '../../domain/entities/customer_address.dart';
 import '../../domain/entities/customer_contact.dart';
+import '../../domain/entities/customer_portfolio_filters.dart';
+import '../../domain/entities/customer_portfolio_page_result.dart';
 import '../../domain/repositories/customer_repository.dart';
 import '../../domain/value_objects/cep.dart';
 import '../../domain/value_objects/cnpj_cpf.dart';
@@ -17,6 +19,7 @@ import '../../domain/value_objects/customer_contact_type.dart';
 import '../../domain/value_objects/customer_sensitive_field.dart';
 import '../../domain/value_objects/customer_status.dart';
 import '../../domain/value_objects/customer_sync_status.dart';
+import '../../../users/users.dart';
 import '../mappers/customer_mapper.dart';
 
 /// Local customer store used until the remote/outbox sync implementation
@@ -189,6 +192,69 @@ final class SharedPreferencesCustomerRepository implements CustomerRepository {
     }
   }
 
+  @override
+  Future<AppResult<CustomerPortfolioPageResult>> listPortfolioPage({
+    required CustomerVisibilityFilter visibility,
+    required List<PortfolioAssignment> activeAssignments,
+    required CustomerPortfolioFilters filters,
+    required String searchQuery,
+    required int limit,
+    String? cursor,
+    required DateTime now,
+  }) async {
+    try {
+      if (!visibility.canReadAny) {
+        return const AppSuccess<CustomerPortfolioPageResult>(
+          CustomerPortfolioPageResult(customers: <Customer>[], hasMore: false),
+        );
+      }
+
+      final normalizedSearch = _normalizeSearch(searchQuery);
+      final normalizedFilters = filters.normalized();
+      final visible =
+          (await _load(visibility.organizationId))
+              .where(
+                (customer) =>
+                    _matchesVisibility(
+                      customer,
+                      visibility,
+                      activeAssignments,
+                    ) &&
+                    _matchesSearch(customer, normalizedSearch) &&
+                    _matchesFilters(customer, normalizedFilters, now),
+              )
+              .toList(growable: false)
+            ..sort(_compareCustomers);
+
+      final startIndex = _startIndexAfterCursor(visible, cursor);
+      final pageItems = visible
+          .skip(startIndex)
+          .take(limit + 1)
+          .toList(growable: false);
+      final hasMore = pageItems.length > limit;
+      final customersPage = hasMore
+          ? pageItems.take(limit).toList(growable: false)
+          : pageItems;
+
+      return AppSuccess<CustomerPortfolioPageResult>(
+        CustomerPortfolioPageResult(
+          customers: customersPage,
+          hasMore: hasMore,
+          nextCursor: customersPage.isEmpty ? null : customersPage.last.id,
+          isFromLocalCache: true,
+        ),
+      );
+    } catch (exception) {
+      return AppFailure<CustomerPortfolioPageResult>(
+        UnexpectedFailure(
+          'Unexpected error listing customer portfolio locally.',
+          code: 'customer_portfolio_local_list_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
   Future<List<Customer>> _load(String organizationId) async {
     final prefs = await SharedPreferences.getInstance();
     final raw = prefs.getString(_keyFor(organizationId));
@@ -221,6 +287,188 @@ final class SharedPreferencesCustomerRepository implements CustomerRepository {
       _keyFor(organizationId),
       jsonEncode(customers.map(_toJson).toList(growable: false)),
     );
+  }
+
+  bool _matchesVisibility(
+    Customer customer,
+    CustomerVisibilityFilter visibility,
+    List<PortfolioAssignment> assignments,
+  ) {
+    if (customer.organizationId != visibility.organizationId ||
+        customer.companyId != visibility.companyId ||
+        customer.deletedAt != null) {
+      return false;
+    }
+
+    return switch (visibility.mode) {
+      CustomerVisibilityMode.allOrganization => true,
+      CustomerVisibilityMode.teams => _matchesAssignments(
+        customer,
+        assignments,
+      ),
+      CustomerVisibilityMode.ownCustomers =>
+        customer.responsibleSellerId == visibility.userId &&
+            _matchesAssignments(customer, assignments),
+      CustomerVisibilityMode.none => false,
+    };
+  }
+
+  bool _matchesAssignments(
+    Customer customer,
+    List<PortfolioAssignment> assignments,
+  ) {
+    for (final assignment in assignments) {
+      if (assignment.organizationId != customer.organizationId ||
+          assignment.companyId != customer.companyId ||
+          assignment.deletedAt != null ||
+          assignment.status != PortfolioAssignmentStatus.active) {
+        continue;
+      }
+      if (assignment.scope.type == PortfolioAssignmentScopeType.customer &&
+          assignment.scope.customerId == customer.id) {
+        return true;
+      }
+      if (assignment.scope.type == PortfolioAssignmentScopeType.criteria &&
+          _matchesCriteriaAssignment(customer, assignment.scope)) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  bool _matchesCriteriaAssignment(
+    Customer customer,
+    PortfolioAssignmentScope scope,
+  ) {
+    final region = scope.region?.trim().toUpperCase();
+    final segment = scope.segment?.trim().toLowerCase();
+    final matchesRegion =
+        region == null ||
+        region.isEmpty ||
+        _customerStateCodes(customer).contains(region);
+    final matchesSegment =
+        segment == null ||
+        segment.isEmpty ||
+        customer.segment?.trim().toLowerCase() == segment;
+    return matchesRegion && matchesSegment;
+  }
+
+  bool _matchesSearch(Customer customer, String search) {
+    if (search.isEmpty) return true;
+    final haystack = <String>[
+      customer.displayName,
+      customer.document.digits,
+      customer.document.formatted,
+      customer.legalName ?? '',
+      customer.tradeName ?? '',
+      customer.fullName ?? '',
+    ].map(_normalizeSearch).join(' ');
+    return haystack.contains(search);
+  }
+
+  bool _matchesFilters(
+    Customer customer,
+    CustomerPortfolioFilters filters,
+    DateTime now,
+  ) {
+    if (filters.statuses.isNotEmpty &&
+        !filters.statuses.contains(customer.status)) {
+      return false;
+    }
+    if (filters.stateCodes.isNotEmpty &&
+        filters.stateCodes
+            .intersection(_customerStateCodes(customer))
+            .isEmpty) {
+      return false;
+    }
+    if (filters.potentials.isNotEmpty) {
+      final potential = customer.potential?.trim().toLowerCase();
+      final filterPotentials = filters.potentials
+          .map((item) => item.toLowerCase())
+          .toSet();
+      if (potential == null || !filterPotentials.contains(potential)) {
+        return false;
+      }
+    }
+    return _matchesLastPurchase(
+      customer.lastPurchaseAt,
+      filters.lastPurchase,
+      now,
+    );
+  }
+
+  bool _matchesLastPurchase(
+    DateTime? lastPurchaseAt,
+    CustomerLastPurchaseFilter filter,
+    DateTime now,
+  ) {
+    return switch (filter) {
+      CustomerLastPurchaseFilter.any => true,
+      CustomerLastPurchaseFilter.never => lastPurchaseAt == null,
+      CustomerLastPurchaseFilter.last30Days =>
+        lastPurchaseAt != null &&
+            !lastPurchaseAt.isBefore(now.subtract(const Duration(days: 30))),
+      CustomerLastPurchaseFilter.last60Days =>
+        lastPurchaseAt != null &&
+            !lastPurchaseAt.isBefore(now.subtract(const Duration(days: 60))),
+      CustomerLastPurchaseFilter.last90Days =>
+        lastPurchaseAt != null &&
+            !lastPurchaseAt.isBefore(now.subtract(const Duration(days: 90))),
+      CustomerLastPurchaseFilter.olderThan90Days =>
+        lastPurchaseAt != null &&
+            lastPurchaseAt.isBefore(now.subtract(const Duration(days: 90))),
+    };
+  }
+
+  Set<String> _customerStateCodes(Customer customer) {
+    return customer.addresses
+        .map((address) => address.state.trim().toUpperCase())
+        .where((state) => state.isNotEmpty)
+        .toSet();
+  }
+
+  int _compareCustomers(Customer first, Customer second) {
+    final byName = first.displayName.toLowerCase().compareTo(
+      second.displayName.toLowerCase(),
+    );
+    if (byName != 0) return byName;
+    return first.id.compareTo(second.id);
+  }
+
+  int _startIndexAfterCursor(List<Customer> customers, String? cursor) {
+    if (cursor == null || cursor.trim().isEmpty) return 0;
+    final index = customers.indexWhere((customer) => customer.id == cursor);
+    return index == -1 ? 0 : index + 1;
+  }
+
+  String _normalizeSearch(String value) {
+    final lower = value.trim().toLowerCase();
+    const accents = <String, String>{
+      'á': 'a',
+      'à': 'a',
+      'ã': 'a',
+      'â': 'a',
+      'ä': 'a',
+      'é': 'e',
+      'è': 'e',
+      'ê': 'e',
+      'ë': 'e',
+      'í': 'i',
+      'ì': 'i',
+      'î': 'i',
+      'ï': 'i',
+      'ó': 'o',
+      'ò': 'o',
+      'õ': 'o',
+      'ô': 'o',
+      'ö': 'o',
+      'ú': 'u',
+      'ù': 'u',
+      'û': 'u',
+      'ü': 'u',
+      'ç': 'c',
+    };
+    return lower.split('').map((char) => accents[char] ?? char).join();
   }
 
   Customer _fromJson(Map<String, dynamic> json) {

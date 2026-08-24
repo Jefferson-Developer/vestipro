@@ -162,6 +162,29 @@ class VestiProApp extends StatelessWidget {
                 permissionService: getIt<PermissionService>(),
                 createBloc: () => getIt<CustomerFormBloc>(),
               ),
+          customerPortfolioPageBuilder:
+              (context, orgId, companyId, queryParameters) =>
+                  CustomerPortfolioPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    permissionService: getIt<PermissionService>(),
+                    createBloc: () => getIt<CustomerPortfolioBloc>(),
+                    initialSearchQuery: queryParameters['q'] ?? '',
+                    initialFilters:
+                        CustomerPortfolioFilters.fromQueryParameters(
+                          queryParameters,
+                        ),
+                    onUrlStateChanged: (searchQuery, filters) => context.go(
+                      CustomerPortfolioRoute(
+                        orgId: orgId,
+                        companyId: companyId,
+                        queryParameters: filters.toQueryParameters(
+                          search: searchQuery,
+                        ),
+                      ).location,
+                    ),
+                  ),
           loginPageBuilder: (context) =>
               LoginPage(createBloc: () => getIt<LoginBloc>()),
           signUpPageBuilder: (context) =>

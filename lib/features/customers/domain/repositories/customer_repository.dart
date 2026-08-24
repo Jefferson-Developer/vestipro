@@ -1,5 +1,8 @@
 import '../../../../core/utils/utils.dart';
+import '../../../users/users.dart';
 import '../entities/customer.dart';
+import '../entities/customer_portfolio_filters.dart';
+import '../entities/customer_portfolio_page_result.dart';
 import '../value_objects/cnpj_cpf.dart';
 import '../value_objects/customer_sensitive_field.dart';
 
@@ -31,5 +34,15 @@ abstract interface class CustomerRepository {
   Future<AppResult<Customer>> getById({
     required String organizationId,
     required String id,
+  });
+
+  Future<AppResult<CustomerPortfolioPageResult>> listPortfolioPage({
+    required CustomerVisibilityFilter visibility,
+    required List<PortfolioAssignment> activeAssignments,
+    required CustomerPortfolioFilters filters,
+    required String searchQuery,
+    required int limit,
+    String? cursor,
+    required DateTime now,
   });
 }

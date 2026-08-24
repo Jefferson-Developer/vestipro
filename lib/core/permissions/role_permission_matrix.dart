@@ -32,6 +32,7 @@ abstract final class RolePermissionMatrix {
       );
 
   static const Set<Capability> _salesManagerCapabilities = <Capability>{
+    Capability.customerView,
     Capability.customerCreate,
     Capability.customerUpdate,
     Capability.customerDelete,
@@ -44,6 +45,7 @@ abstract final class RolePermissionMatrix {
   };
 
   static const Set<Capability> _salesRepCapabilities = <Capability>{
+    Capability.customerView,
     Capability.customerCreate,
     Capability.customerUpdate,
     Capability.orderCreate,

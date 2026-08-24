@@ -112,12 +112,16 @@ import '../features/customers/domain/usecases/get_customer_form_config_use_case.
     as _i825;
 import '../features/customers/domain/usecases/get_customer_form_draft_use_case.dart'
     as _i504;
+import '../features/customers/domain/usecases/list_customer_portfolio_use_case.dart'
+    as _i576;
 import '../features/customers/domain/usecases/save_customer_form_draft_use_case.dart'
     as _i780;
 import '../features/customers/domain/usecases/update_customer_use_case.dart'
     as _i172;
 import '../features/customers/presentation/bloc/customer_form_bloc.dart'
     as _i478;
+import '../features/customers/presentation/bloc/customer_portfolio_bloc.dart'
+    as _i522;
 import '../features/invites/data/datasources/cloud_functions_invite_acceptance_data_source.dart'
     as _i674;
 import '../features/invites/data/datasources/firestore_invite_data_source.dart'
@@ -934,12 +938,24 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i576.ListCustomerPortfolioUseCase>(
+      () => _i576.ListCustomerPortfolioUseCase(
+        gh<_i857.CustomerRepository>(),
+        gh<_i220.PortfolioVisibilityService>(),
+        gh<_i220.PortfolioAssignmentRepository>(),
+      ),
+    );
     gh.factory<_i698.UserRoleEditBloc>(
       () => _i698.UserRoleEditBloc(
         updateUserRole: gh<_i428.UpdateUserRoleUseCase>(),
         membershipRepository: gh<_i957.MembershipRepository>(),
         authRepository: gh<_i472.AuthRepository>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i522.CustomerPortfolioBloc>(
+      () => _i522.CustomerPortfolioBloc(
+        listCustomerPortfolio: gh<_i576.ListCustomerPortfolioUseCase>(),
       ),
     );
     gh.factory<_i986.ListCommercialTeamsUseCase>(

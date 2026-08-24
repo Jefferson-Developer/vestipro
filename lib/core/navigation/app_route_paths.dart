@@ -65,6 +65,31 @@ final class CustomerFormRoute extends AppRoute {
   String get location => '/org/$orgId/companies/$companyId/customers/new';
 }
 
+/// Customer portfolio list route (TASK-051), scoped by Organization and
+/// Company. Search and filters are carried as query parameters so Flutter Web
+/// reloads/share links preserve the list state.
+final class CustomerPortfolioRoute extends AppRoute {
+  const CustomerPortfolioRoute({
+    required this.orgId,
+    required this.companyId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String companyId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'customerPortfolio';
+  static const pathPattern = '/org/:orgId/companies/:companyId/customers';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/companies/$companyId/customers';
+    if (queryParameters.isEmpty) return path;
+    return Uri(path: path, queryParameters: queryParameters).toString();
+  }
+}
+
 /// Route shown to sign a user in (TASK-034).
 ///
 /// [SessionAuthGuard] (TASK-041) redirects here for any unauthenticated

@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/customers/customers.dart';
+import 'package:vestipro/features/users/users.dart';
 
 void main() {
   group('Customer address use cases', () {
@@ -281,5 +282,23 @@ final class _InMemoryCustomerRepository implements CustomerRepository {
       );
     }
     return AppSuccess<Customer>(current);
+  }
+
+  @override
+  Future<AppResult<CustomerPortfolioPageResult>> listPortfolioPage({
+    required CustomerVisibilityFilter visibility,
+    required List<PortfolioAssignment> activeAssignments,
+    required CustomerPortfolioFilters filters,
+    required String searchQuery,
+    required int limit,
+    String? cursor,
+    required DateTime now,
+  }) async {
+    return const AppFailure<CustomerPortfolioPageResult>(
+      UnexpectedFailure(
+        'Not used by customer address/contact tests.',
+        code: 'customer_portfolio_not_used',
+      ),
+    );
   }
 }

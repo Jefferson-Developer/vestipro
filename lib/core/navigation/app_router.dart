@@ -26,6 +26,7 @@ class AppRouter {
     required this.onboardingWizardPageBuilder,
     required this.acceptInvitePageBuilder,
     this.customerFormPageBuilder,
+    this.customerPortfolioPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
     AuthorizationGuard? authorizationGuard,
@@ -42,6 +43,13 @@ class AppRouter {
   final Widget Function(BuildContext context, String orgId) auditLogPageBuilder;
   final Widget Function(BuildContext context, String orgId, String companyId)?
   customerFormPageBuilder;
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  customerPortfolioPageBuilder;
 
   /// Builds the real login screen (TASK-034). Injected from `VestiProApp`
   /// instead of imported here so `lib/core/navigation/` never depends on a
@@ -89,6 +97,25 @@ class AppRouter {
         ),
         builder: (context, state) =>
             auditLogPageBuilder(context, state.pathParameters['orgId']!),
+      ),
+      GoRoute(
+        path: CustomerPortfolioRoute.pathPattern,
+        name: CustomerPortfolioRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.customerView,
+        ),
+        builder: (context, state) {
+          final builder = customerPortfolioPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
       ),
       GoRoute(
         path: CustomerFormRoute.pathPattern,
