@@ -236,7 +236,7 @@ Não autorizado nesta rodada — apenas commit local, conforme instrução.
 
 ## Hash do commit
 
-Preenchido após o commit (ver resposta final da task).
+`f3f6880e929a0aa33b1c4695fde83892d68d2873`
 
 ## Branch
 
