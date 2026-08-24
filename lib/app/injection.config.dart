@@ -247,22 +247,36 @@ import '../features/onboarding/domain/usecases/save_onboarding_progress_use_case
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart' as _i593;
 import '../features/opportunities/data/mappers/opportunity_mapper.dart'
     as _i449;
+import '../features/opportunities/data/mappers/opportunity_outcome_reason_mapper.dart'
+    as _i210;
 import '../features/opportunities/data/mappers/pipeline_stage_mapper.dart'
     as _i772;
+import '../features/opportunities/data/repositories/shared_preferences_opportunity_outcome_reason_repository.dart'
+    as _i292;
 import '../features/opportunities/data/repositories/shared_preferences_opportunity_repository.dart'
     as _i771;
 import '../features/opportunities/data/repositories/shared_preferences_pipeline_stage_repository.dart'
     as _i319;
+import '../features/opportunities/domain/repositories/opportunity_outcome_reason_repository.dart'
+    as _i527;
 import '../features/opportunities/domain/repositories/opportunity_repository.dart'
     as _i43;
 import '../features/opportunities/domain/repositories/pipeline_stage_repository.dart'
     as _i385;
+import '../features/opportunities/domain/usecases/create_opportunity_outcome_reason_use_case.dart'
+    as _i254;
 import '../features/opportunities/domain/usecases/create_pipeline_stage_use_case.dart'
     as _i959;
+import '../features/opportunities/domain/usecases/deactivate_opportunity_outcome_reason_use_case.dart'
+    as _i287;
+import '../features/opportunities/domain/usecases/list_opportunity_outcome_reasons_use_case.dart'
+    as _i690;
 import '../features/opportunities/domain/usecases/list_pipeline_opportunities_use_case.dart'
     as _i891;
 import '../features/opportunities/domain/usecases/list_pipeline_stages_use_case.dart'
     as _i879;
+import '../features/opportunities/domain/usecases/list_top_opportunity_outcome_reasons_use_case.dart'
+    as _i546;
 import '../features/opportunities/domain/usecases/mark_opportunity_lost_use_case.dart'
     as _i416;
 import '../features/opportunities/domain/usecases/mark_opportunity_won_use_case.dart'
@@ -271,8 +285,12 @@ import '../features/opportunities/domain/usecases/rename_pipeline_stage_use_case
     as _i266;
 import '../features/opportunities/domain/usecases/reorder_pipeline_stages_use_case.dart'
     as _i482;
+import '../features/opportunities/domain/usecases/update_opportunity_outcome_reason_use_case.dart'
+    as _i552;
 import '../features/opportunities/domain/usecases/update_opportunity_stage_use_case.dart'
     as _i942;
+import '../features/opportunities/presentation/bloc/opportunity_outcome_reason_admin_bloc.dart'
+    as _i683;
 import '../features/opportunities/presentation/bloc/pipeline_stage_admin_bloc.dart'
     as _i31;
 import '../features/opportunities/presentation/bloc/sales_pipeline_bloc.dart'
@@ -487,6 +505,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i449.OpportunityMapper>(
       () => const _i449.OpportunityMapper(),
     );
+    gh.lazySingleton<_i210.OpportunityOutcomeReasonMapper>(
+      () => const _i210.OpportunityOutcomeReasonMapper(),
+    );
     gh.lazySingleton<_i772.PipelineStageMapper>(
       () => const _i772.PipelineStageMapper(),
     );
@@ -550,12 +571,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i43.OpportunityRepository>(),
       ),
     );
-    gh.factory<_i416.MarkOpportunityLostUseCase>(
-      () => _i416.MarkOpportunityLostUseCase(gh<_i43.OpportunityRepository>()),
-    );
-    gh.factory<_i657.MarkOpportunityWonUseCase>(
-      () => _i657.MarkOpportunityWonUseCase(gh<_i43.OpportunityRepository>()),
-    );
     gh.factory<_i942.UpdateOpportunityStageUseCase>(
       () =>
           _i942.UpdateOpportunityStageUseCase(gh<_i43.OpportunityRepository>()),
@@ -567,6 +582,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i803.OnboardingProgressRepositoryImpl(
         dataSource: gh<_i924.OnboardingProgressDataSource>(),
         mapper: gh<_i477.OnboardingProgressMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i527.OpportunityOutcomeReasonRepository>(
+      () => _i292.SharedPreferencesOpportunityOutcomeReasonRepository(
+        gh<_i210.OpportunityOutcomeReasonMapper>(),
       ),
     );
     gh.factory<_i770.CreateLeadUseCase>(
@@ -581,6 +601,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i924.QualifyLeadUseCase>(
       () => _i924.QualifyLeadUseCase(gh<_i472.LeadRepository>()),
     );
+    gh.factory<_i416.MarkOpportunityLostUseCase>(
+      () => _i416.MarkOpportunityLostUseCase(
+        gh<_i43.OpportunityRepository>(),
+        gh<_i527.OpportunityOutcomeReasonRepository>(),
+      ),
+    );
+    gh.factory<_i657.MarkOpportunityWonUseCase>(
+      () => _i657.MarkOpportunityWonUseCase(
+        gh<_i43.OpportunityRepository>(),
+        gh<_i527.OpportunityOutcomeReasonRepository>(),
+      ),
+    );
     gh.lazySingleton<_i857.CustomerRepository>(
       () =>
           _i784.SharedPreferencesCustomerRepository(gh<_i457.CustomerMapper>()),
@@ -592,6 +624,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1052.CustomerSegmentRepositoryImpl(
         dataSource: gh<_i659.CustomerSegmentDataSource>(),
         mapper: gh<_i712.CustomerSegmentMapper>(),
+      ),
+    );
+    gh.factory<_i546.ListTopOpportunityOutcomeReasonsUseCase>(
+      () => _i546.ListTopOpportunityOutcomeReasonsUseCase(
+        gh<_i527.OpportunityOutcomeReasonRepository>(),
+        gh<_i43.OpportunityRepository>(),
       ),
     );
     gh.factory<_i551.ClearCustomerFormDraftUseCase>(
@@ -607,6 +645,26 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i780.SaveCustomerFormDraftUseCase>(
       () => _i780.SaveCustomerFormDraftUseCase(
         gh<_i999.CustomerFormDraftRepository>(),
+      ),
+    );
+    gh.factory<_i254.CreateOpportunityOutcomeReasonUseCase>(
+      () => _i254.CreateOpportunityOutcomeReasonUseCase(
+        gh<_i527.OpportunityOutcomeReasonRepository>(),
+      ),
+    );
+    gh.factory<_i287.DeactivateOpportunityOutcomeReasonUseCase>(
+      () => _i287.DeactivateOpportunityOutcomeReasonUseCase(
+        gh<_i527.OpportunityOutcomeReasonRepository>(),
+      ),
+    );
+    gh.factory<_i690.ListOpportunityOutcomeReasonsUseCase>(
+      () => _i690.ListOpportunityOutcomeReasonsUseCase(
+        gh<_i527.OpportunityOutcomeReasonRepository>(),
+      ),
+    );
+    gh.factory<_i552.UpdateOpportunityOutcomeReasonUseCase>(
+      () => _i552.UpdateOpportunityOutcomeReasonUseCase(
+        gh<_i527.OpportunityOutcomeReasonRepository>(),
       ),
     );
     gh.lazySingleton<_i56.FirebaseAppCheck>(
@@ -799,13 +857,12 @@ extension GetItInjectableX on _i174.GetIt {
       ),
       registerFor: {_dev, _staging, _prod},
     );
-    gh.factory<_i339.SalesPipelineBloc>(
-      () => _i339.SalesPipelineBloc(
-        listStages: gh<_i879.ListPipelineStagesUseCase>(),
-        listOpportunities: gh<_i891.ListPipelineOpportunitiesUseCase>(),
-        updateStage: gh<_i942.UpdateOpportunityStageUseCase>(),
-        markWon: gh<_i657.MarkOpportunityWonUseCase>(),
-        markLost: gh<_i416.MarkOpportunityLostUseCase>(),
+    gh.factory<_i683.OpportunityOutcomeReasonAdminBloc>(
+      () => _i683.OpportunityOutcomeReasonAdminBloc(
+        listReasons: gh<_i690.ListOpportunityOutcomeReasonsUseCase>(),
+        createReason: gh<_i254.CreateOpportunityOutcomeReasonUseCase>(),
+        updateReason: gh<_i552.UpdateOpportunityOutcomeReasonUseCase>(),
+        deactivateReason: gh<_i287.DeactivateOpportunityOutcomeReasonUseCase>(),
       ),
     );
     gh.lazySingleton<_i972.FeatureFlagService>(
@@ -855,6 +912,16 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i960.CompanyRepositoryImpl(
         dataSource: gh<_i384.CompanyDataSource>(),
         mapper: gh<_i642.CompanyMapper>(),
+      ),
+    );
+    gh.factory<_i339.SalesPipelineBloc>(
+      () => _i339.SalesPipelineBloc(
+        listStages: gh<_i879.ListPipelineStagesUseCase>(),
+        listOutcomeReasons: gh<_i690.ListOpportunityOutcomeReasonsUseCase>(),
+        listOpportunities: gh<_i891.ListPipelineOpportunitiesUseCase>(),
+        updateStage: gh<_i942.UpdateOpportunityStageUseCase>(),
+        markWon: gh<_i657.MarkOpportunityWonUseCase>(),
+        markLost: gh<_i416.MarkOpportunityLostUseCase>(),
       ),
     );
     gh.lazySingleton<_i361.MembershipDataSource>(

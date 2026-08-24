@@ -1,0 +1,1 @@
+enum OpportunityOutcomeType { won, lost }

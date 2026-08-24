@@ -10,10 +10,14 @@ class _MockOpportunityRepository extends Mock
 class _MockPipelineStageRepository extends Mock
     implements PipelineStageRepository {}
 
+class _MockOutcomeReasonRepository extends Mock
+    implements OpportunityOutcomeReasonRepository {}
+
 void main() {
   group('SalesPipelineBloc', () {
     late _MockOpportunityRepository opportunityRepository;
     late _MockPipelineStageRepository stageRepository;
+    late _MockOutcomeReasonRepository reasonRepository;
 
     setUpAll(() {
       registerFallbackValue(_opportunity(status: OpportunityStatus.open));
@@ -22,17 +26,27 @@ void main() {
     setUp(() {
       opportunityRepository = _MockOpportunityRepository();
       stageRepository = _MockPipelineStageRepository();
+      reasonRepository = _MockOutcomeReasonRepository();
     });
 
     SalesPipelineBloc buildBloc() {
       return SalesPipelineBloc(
         listStages: ListPipelineStagesUseCase(stageRepository),
+        listOutcomeReasons: ListOpportunityOutcomeReasonsUseCase(
+          reasonRepository,
+        ),
         listOpportunities: ListPipelineOpportunitiesUseCase(
           opportunityRepository,
         ),
         updateStage: UpdateOpportunityStageUseCase(opportunityRepository),
-        markWon: MarkOpportunityWonUseCase(opportunityRepository),
-        markLost: MarkOpportunityLostUseCase(opportunityRepository),
+        markWon: MarkOpportunityWonUseCase(
+          opportunityRepository,
+          reasonRepository,
+        ),
+        markLost: MarkOpportunityLostUseCase(
+          opportunityRepository,
+          reasonRepository,
+        ),
       );
     }
 
@@ -67,6 +81,19 @@ void main() {
               status: OpportunityStatus.open,
             ),
           ]),
+        );
+        when(
+          () => reasonRepository.listByOrganization(
+            organizationId: any(named: 'organizationId'),
+            type: any(named: 'type'),
+            includeInactive: any(named: 'includeInactive'),
+          ),
+        ).thenAnswer(
+          (_) async => AppSuccess<List<OpportunityOutcomeReason>>(
+            <OpportunityOutcomeReason>[
+              _reason(id: 'reason-won-1', type: OpportunityOutcomeType.won),
+            ],
+          ),
         );
         return buildBloc();
       },
@@ -170,6 +197,16 @@ void main() {
             invocation.namedArguments[#opportunity] as Opportunity,
           );
         });
+        when(
+          () => reasonRepository.getById(
+            organizationId: any(named: 'organizationId'),
+            id: any(named: 'id'),
+          ),
+        ).thenAnswer(
+          (_) async => AppSuccess<OpportunityOutcomeReason>(
+            _reason(id: 'reason-won-1', type: OpportunityOutcomeType.won),
+          ),
+        );
         return buildBloc();
       },
       seed: () => SalesPipelineState(
@@ -189,7 +226,8 @@ void main() {
         const SalesPipelineOpportunityClosedWithReason(
           opportunityId: 'opp-1',
           targetStageId: 'stage-won',
-          reason: 'Preco competitivo',
+          reasonId: 'reason-won-1',
+          note: 'Preco competitivo',
         ),
       ),
       expect: () => <Object>[
@@ -224,6 +262,25 @@ void main() {
       ],
     );
   });
+}
+
+OpportunityOutcomeReason _reason({
+  required String id,
+  required OpportunityOutcomeType type,
+}) {
+  final now = DateTime.utc(2026, 1, 1);
+  return OpportunityOutcomeReason(
+    id: id,
+    organizationId: 'org-1',
+    type: type,
+    description: 'Motivo $id',
+    isActive: true,
+    createdAt: now,
+    createdBy: 'user-1',
+    updatedAt: now,
+    updatedBy: 'user-1',
+    version: 1,
+  );
 }
 
 PipelineStage _stage({

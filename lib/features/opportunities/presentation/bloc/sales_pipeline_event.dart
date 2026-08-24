@@ -46,7 +46,7 @@ final class SalesPipelineOpportunityMoveRequested extends SalesPipelineEvent {
 
 /// Closes [opportunityId] by moving it onto the terminal [targetStageId],
 /// after the caller (the page) has already collected the mandatory
-/// won/lost [reason] — never trusted as sufficient by itself:
+/// won/lost [reasonId] — never trusted as sufficient by itself:
 /// [SalesPipelineBloc] still re-validates [targetStageId] is actually a
 /// terminal stage before calling `MarkOpportunityWonUseCase`/
 /// `MarkOpportunityLostUseCase`.
@@ -55,12 +55,14 @@ final class SalesPipelineOpportunityClosedWithReason
   const SalesPipelineOpportunityClosedWithReason({
     required this.opportunityId,
     required this.targetStageId,
-    required this.reason,
+    required this.reasonId,
+    this.note,
   });
 
   final String opportunityId;
   final String targetStageId;
-  final String reason;
+  final String reasonId;
+  final String? note;
 }
 
 final class SalesPipelineActionDismissed extends SalesPipelineEvent {

@@ -3,14 +3,17 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../entities/opportunity.dart';
+import '../entities/opportunity_outcome_reason.dart';
+import '../repositories/opportunity_outcome_reason_repository.dart';
 import '../repositories/opportunity_repository.dart';
+import '../value_objects/opportunity_outcome_type.dart';
 import '../value_objects/opportunity_status.dart';
 import '../value_objects/opportunity_sync_status.dart';
+import 'opportunity_outcome_reason_use_case_helpers.dart';
 import 'opportunity_use_case_helpers.dart';
 
-/// Marks an open Opportunity as won, always requiring [wonReason] so the
-/// funnel keeps a traceable learning trail (a full configurable reason
-/// catalog is left for TASK-061; a free-text reason is accepted here).
+/// Marks an open Opportunity as won, always requiring an active won
+/// [reasonId] from the organization's configurable catalog (TASK-061).
 ///
 /// [stageId], when provided, also moves the Opportunity onto that pipeline
 /// stage in the same update (TASK-058: `SalesPipelineBloc` passes the
@@ -23,20 +26,23 @@ import 'opportunity_use_case_helpers.dart';
 /// status through this or `MarkOpportunityLostUseCase` again.
 @injectable
 final class MarkOpportunityWonUseCase {
-  MarkOpportunityWonUseCase(this._repository);
+  MarkOpportunityWonUseCase(this._repository, this._reasonRepository);
 
   final OpportunityRepository _repository;
+  final OpportunityOutcomeReasonRepository _reasonRepository;
 
   Future<AppResult<Opportunity>> call({
     required String organizationId,
     required String id,
-    required String wonReason,
+    required String reasonId,
+    String? note,
     required String updatedBy,
     String? stageId,
   }) async {
     final trimmedOrganizationId = organizationId.trim();
     final trimmedId = id.trim();
-    final trimmedWonReason = wonReason.trim();
+    final trimmedReasonId = reasonId.trim();
+    final normalizedNote = normalizeOutcomeNote(note);
     final trimmedUpdatedBy = updatedBy.trim();
     final normalizedStageId = normalizeOpportunityOptional(stageId);
     final fieldErrors = <String, String>{};
@@ -45,8 +51,8 @@ final class MarkOpportunityWonUseCase {
       fieldErrors['organizationId'] = 'OrganizationId is required.';
     }
     if (trimmedId.isEmpty) fieldErrors['id'] = 'Id is required.';
-    if (trimmedWonReason.isEmpty) {
-      fieldErrors['wonReason'] = 'Won reason is required.';
+    if (trimmedReasonId.isEmpty) {
+      fieldErrors['reasonId'] = 'ReasonId is required.';
     }
     if (trimmedUpdatedBy.isEmpty) {
       fieldErrors['updatedBy'] = 'UpdatedBy is required.';
@@ -78,11 +84,24 @@ final class MarkOpportunityWonUseCase {
       );
     }
 
+    final reasonResult = await loadSelectableOutcomeReason(
+      repository: _reasonRepository,
+      organizationId: trimmedOrganizationId,
+      reasonId: trimmedReasonId,
+      expectedType: OpportunityOutcomeType.won,
+    );
+    if (reasonResult is AppFailure<OpportunityOutcomeReason>) {
+      return AppFailure<Opportunity>(reasonResult.failure);
+    }
+    final reason = (reasonResult as AppSuccess<OpportunityOutcomeReason>).value;
+
     final now = DateTime.now().toUtc();
     final updated = opportunity.copyWith(
       stageId: normalizedStageId ?? opportunity.stageId,
       status: OpportunityStatus.won,
-      wonReason: trimmedWonReason,
+      wonReasonId: trimmedReasonId,
+      wonReason: snapshotForOutcomeReason(reason),
+      wonReasonNote: normalizedNote,
       closedAt: now,
       updatedAt: now,
       updatedBy: trimmedUpdatedBy,

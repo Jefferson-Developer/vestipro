@@ -5,8 +5,10 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/opportunity.dart';
+import '../../domain/entities/opportunity_outcome_reason.dart';
 import '../../domain/entities/pipeline_stage.dart';
 import '../../domain/pipeline_board_builder.dart';
+import '../../domain/usecases/list_opportunity_outcome_reasons_use_case.dart';
 import '../../domain/usecases/list_pipeline_opportunities_use_case.dart';
 import '../../domain/usecases/list_pipeline_stages_use_case.dart';
 import '../../domain/usecases/mark_opportunity_lost_use_case.dart';
@@ -26,6 +28,7 @@ final class SalesPipelineBloc
     extends Bloc<SalesPipelineEvent, SalesPipelineState> {
   SalesPipelineBloc({
     required this.listStages,
+    required this.listOutcomeReasons,
     required this.listOpportunities,
     required this.updateStage,
     required this.markWon,
@@ -39,6 +42,7 @@ final class SalesPipelineBloc
   }
 
   final ListPipelineStagesUseCase listStages;
+  final ListOpportunityOutcomeReasonsUseCase listOutcomeReasons;
   final ListPipelineOpportunitiesUseCase listOpportunities;
   final UpdateOpportunityStageUseCase updateStage;
   final MarkOpportunityWonUseCase markWon;
@@ -78,6 +82,7 @@ final class SalesPipelineBloc
     final results =
         await Future.wait<AppResult<Object>>(<Future<AppResult<Object>>>[
           listStages(organizationId: state.organizationId),
+          listOutcomeReasons(organizationId: state.organizationId),
           listOpportunities(
             organizationId: state.organizationId,
             companyId: state.companyId,
@@ -96,7 +101,17 @@ final class SalesPipelineBloc
       );
       return;
     }
-    final opportunitiesResult = results[1];
+    final reasonsResult = results[1];
+    if (reasonsResult is AppFailure<Object>) {
+      emit(
+        state.copyWith(
+          status: SalesPipelineLoadStatus.failure,
+          failure: reasonsResult.failure,
+        ),
+      );
+      return;
+    }
+    final opportunitiesResult = results[2];
     if (opportunitiesResult is AppFailure<Object>) {
       emit(
         state.copyWith(
@@ -109,6 +124,9 @@ final class SalesPipelineBloc
 
     final stages =
         (stagesResult as AppSuccess<Object>).value as List<PipelineStage>;
+    final outcomeReasons =
+        (reasonsResult as AppSuccess<Object>).value
+            as List<OpportunityOutcomeReason>;
     final opportunities =
         (opportunitiesResult as AppSuccess<Object>).value as List<Opportunity>;
 
@@ -116,6 +134,7 @@ final class SalesPipelineBloc
       state.copyWith(
         status: SalesPipelineLoadStatus.ready,
         stages: stages,
+        outcomeReasons: outcomeReasons,
         opportunities: opportunities,
         columns: buildPipelineColumns(
           stages: stages,
@@ -223,14 +242,16 @@ final class SalesPipelineBloc
       PipelineStageTerminalType.won => await markWon(
         organizationId: state.organizationId,
         id: event.opportunityId,
-        wonReason: event.reason,
+        reasonId: event.reasonId,
+        note: event.note,
         updatedBy: state.userId,
         stageId: event.targetStageId,
       ),
       PipelineStageTerminalType.lost => await markLost(
         organizationId: state.organizationId,
         id: event.opportunityId,
-        lostReason: event.reason,
+        reasonId: event.reasonId,
+        note: event.note,
         updatedBy: state.userId,
         stageId: event.targetStageId,
       ),

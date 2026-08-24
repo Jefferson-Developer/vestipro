@@ -1,13 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:collection/collection.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
 import '../../domain/entities/opportunity.dart';
+import '../../domain/entities/opportunity_outcome_reason.dart';
 import '../../domain/entities/pipeline_column.dart';
 import '../../domain/entities/pipeline_stage.dart';
+import '../../domain/value_objects/opportunity_outcome_type.dart';
 import '../../domain/value_objects/pipeline_stage_terminal_type.dart';
 import '../bloc/sales_pipeline_bloc.dart';
 import '../bloc/sales_pipeline_event.dart';
@@ -284,17 +287,23 @@ Future<void> _requestMove(
   final bloc = context.read<SalesPipelineBloc>();
 
   if (targetStage.isTerminal) {
-    final reason = await _CloseReasonDialog.show(
+    final outcomeType = _outcomeTypeForTerminal(targetStage.terminalType);
+    if (outcomeType == null) return;
+    final closeResult = await _CloseReasonDialog.show(
       context,
       opportunity: opportunity,
       targetStage: targetStage,
+      reasons: bloc.state.outcomeReasons
+          .where((reason) => reason.type == outcomeType && reason.isActive)
+          .toList(growable: false),
     );
-    if (reason == null) return;
+    if (closeResult == null) return;
     bloc.add(
       SalesPipelineOpportunityClosedWithReason(
         opportunityId: opportunity.id,
         targetStageId: targetStage.id,
-        reason: reason,
+        reasonId: closeResult.reasonId,
+        note: closeResult.note,
       ),
     );
     return;
@@ -306,6 +315,16 @@ Future<void> _requestMove(
       targetStageId: targetStage.id,
     ),
   );
+}
+
+OpportunityOutcomeType? _outcomeTypeForTerminal(
+  PipelineStageTerminalType terminalType,
+) {
+  return switch (terminalType) {
+    PipelineStageTerminalType.won => OpportunityOutcomeType.won,
+    PipelineStageTerminalType.lost => OpportunityOutcomeType.lost,
+    PipelineStageTerminalType.none => null,
+  };
 }
 
 class _SalesPipelineBoard extends StatelessWidget {
@@ -666,22 +685,26 @@ class _CloseReasonDialog extends StatefulWidget {
   const _CloseReasonDialog({
     required this.opportunity,
     required this.targetStage,
+    required this.reasons,
   });
 
   final Opportunity opportunity;
   final PipelineStage targetStage;
+  final List<OpportunityOutcomeReason> reasons;
 
-  static Future<String?> show(
+  static Future<_CloseReasonDialogResult?> show(
     BuildContext context, {
     required Opportunity opportunity,
     required PipelineStage targetStage,
+    required List<OpportunityOutcomeReason> reasons,
   }) {
-    return showDialog<String>(
+    return showDialog<_CloseReasonDialogResult>(
       context: context,
       barrierDismissible: true,
       builder: (_) => _CloseReasonDialog(
         opportunity: opportunity,
         targetStage: targetStage,
+        reasons: reasons,
       ),
     );
   }
@@ -690,22 +713,36 @@ class _CloseReasonDialog extends StatefulWidget {
   State<_CloseReasonDialog> createState() => _CloseReasonDialogState();
 }
 
+class _CloseReasonDialogResult {
+  const _CloseReasonDialogResult({required this.reasonId, this.note});
+
+  final String reasonId;
+  final String? note;
+}
+
 class _CloseReasonDialogState extends State<_CloseReasonDialog> {
-  final _reasonController = TextEditingController();
+  final _noteController = TextEditingController();
+  String? _selectedReasonId;
   String? _errorText;
 
   bool get _isWon =>
       widget.targetStage.terminalType == PipelineStageTerminalType.won;
 
   @override
+  void initState() {
+    super.initState();
+    _selectedReasonId = widget.reasons.firstOrNull?.id;
+  }
+
+  @override
   void dispose() {
-    _reasonController.dispose();
+    _noteController.dispose();
     super.dispose();
   }
 
   void _confirm() {
-    final reason = _reasonController.text.trim();
-    if (reason.isEmpty) {
+    final reasonId = _selectedReasonId;
+    if (reasonId == null || reasonId.isEmpty) {
       setState(
         () => _errorText = _isWon
             ? 'Informe o motivo do ganho.'
@@ -713,7 +750,13 @@ class _CloseReasonDialogState extends State<_CloseReasonDialog> {
       );
       return;
     }
-    Navigator.of(context).pop(reason);
+    final note = _noteController.text.trim();
+    Navigator.of(context).pop(
+      _CloseReasonDialogResult(
+        reasonId: reasonId,
+        note: note.isEmpty ? null : note,
+      ),
+    );
   }
 
   @override
@@ -759,20 +802,50 @@ class _CloseReasonDialogState extends State<_CloseReasonDialog> {
                 ],
               ),
               const SizedBox(height: AppSpacing.spacing16),
-              AppTextField(
-                controller: _reasonController,
-                label: 'Motivo',
-                hintText: _isWon
-                    ? 'Ex.: Melhor condicao comercial'
-                    : 'Ex.: Cliente escolheu concorrente',
-                semanticLabel: 'Motivo do fechamento',
-                isRequired: true,
-                errorText: _errorText,
-                maxLines: 3,
-                onChanged: (_) {
-                  if (_errorText != null) setState(() => _errorText = null);
-                },
-              ),
+              if (widget.reasons.isEmpty)
+                AppEmptyState(
+                  title: _isWon
+                      ? 'Nenhum motivo de ganho ativo'
+                      : 'Nenhum motivo de perda ativo',
+                  description:
+                      'Cadastre um motivo ativo antes de fechar a oportunidade.',
+                  icon: Icons.fact_check_outlined,
+                )
+              else ...<Widget>[
+                AppDropdown<String>(
+                  label: 'Motivo',
+                  closeSemanticLabel: 'Fechar selecao de motivo',
+                  enableSearch: false,
+                  options: widget.reasons
+                      .map(
+                        (reason) => AppDropdownOption<String>(
+                          value: reason.id,
+                          label: reason.description,
+                        ),
+                      )
+                      .toList(growable: false),
+                  selectedValues: _selectedReasonId == null
+                      ? const <String>{}
+                      : <String>{_selectedReasonId!},
+                  errorText: _errorText,
+                  onChanged: (selected) {
+                    setState(() {
+                      _selectedReasonId = selected.firstOrNull;
+                      _errorText = null;
+                    });
+                  },
+                ),
+                const SizedBox(height: AppSpacing.spacing16),
+                AppTextField(
+                  controller: _noteController,
+                  label: 'Observacao',
+                  hintText: _isWon
+                      ? 'Ex.: cliente valorizou pronta entrega'
+                      : 'Ex.: retornar na proxima colecao',
+                  semanticLabel: 'Observacao do fechamento',
+                  maxLines: 3,
+                ),
+              ],
               const SizedBox(height: AppSpacing.spacing24),
               Wrap(
                 alignment: WrapAlignment.end,
@@ -789,7 +862,7 @@ class _CloseReasonDialogState extends State<_CloseReasonDialog> {
                     variant: _isWon
                         ? AppButtonVariant.primary
                         : AppButtonVariant.destructive,
-                    onPressed: _confirm,
+                    onPressed: widget.reasons.isEmpty ? null : _confirm,
                   ),
                 ],
               ),

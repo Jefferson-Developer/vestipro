@@ -14,8 +14,12 @@ void main() {
     OpportunityDto buildDto({
       String status = 'open',
       String syncStatus = 'synced',
+      String? wonReasonId,
       String? wonReason,
+      String? wonReasonNote,
+      String? lostReasonId,
       String? lostReason,
+      String? lostReasonNote,
       DateTime? closedAt,
     }) {
       return OpportunityDto(
@@ -32,8 +36,12 @@ void main() {
         stageId: 'stage-qualification',
         status: status,
         expectedCloseDate: expectedCloseDate,
+        wonReasonId: wonReasonId,
         wonReason: wonReason,
+        wonReasonNote: wonReasonNote,
+        lostReasonId: lostReasonId,
         lostReason: lostReason,
+        lostReasonNote: lostReasonNote,
         closedAt: closedAt,
         createdAt: createdAt,
         createdBy: 'user-1',
@@ -70,13 +78,17 @@ void main() {
       final entity = mapper.toEntity(
         buildDto(
           status: 'won',
+          wonReasonId: 'reason-won-1',
           wonReason: 'Preço competitivo',
+          wonReasonNote: 'Pedido aprovado com entrega parcial',
           closedAt: closedAt,
         ),
       );
 
       expect(entity.status, OpportunityStatus.won);
+      expect(entity.wonReasonId, 'reason-won-1');
       expect(entity.wonReason, 'Preço competitivo');
+      expect(entity.wonReasonNote, 'Pedido aprovado com entrega parcial');
       expect(entity.closedAt, closedAt);
     });
 
@@ -94,6 +106,22 @@ void main() {
       expect(roundTripped.status, dto.status);
       expect(roundTripped.version, dto.version);
       expect(roundTripped.syncStatus, dto.syncStatus);
+    });
+
+    test('toDto preserves outcome reason ids, snapshots and notes', () {
+      final dto = buildDto(
+        status: 'lost',
+        lostReasonId: 'reason-lost-1',
+        lostReason: 'Concorrente',
+        lostReasonNote: 'Retomar no inverno',
+        closedAt: DateTime.utc(2026, 1, 10),
+      );
+
+      final roundTripped = mapper.toDto(mapper.toEntity(dto));
+
+      expect(roundTripped.lostReasonId, 'reason-lost-1');
+      expect(roundTripped.lostReason, 'Concorrente');
+      expect(roundTripped.lostReasonNote, 'Retomar no inverno');
     });
 
     test('toEntity throws for an unknown status or sync status', () {

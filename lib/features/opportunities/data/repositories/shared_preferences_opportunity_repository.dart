@@ -200,8 +200,12 @@ final class SharedPreferencesOpportunityRepository
       stageId: _requiredString(json, 'stageId'),
       status: _mapper.statusToEntity(_requiredString(json, 'status')),
       expectedCloseDate: _requiredDate(json, 'expectedCloseDate'),
+      wonReasonId: _optionalString(json, 'wonReasonId'),
       wonReason: _optionalString(json, 'wonReason'),
+      wonReasonNote: _optionalString(json, 'wonReasonNote'),
+      lostReasonId: _optionalString(json, 'lostReasonId'),
       lostReason: _optionalString(json, 'lostReason'),
+      lostReasonNote: _optionalString(json, 'lostReasonNote'),
       closedAt: _optionalDate(json, 'closedAt'),
       createdAt: _requiredDate(json, 'createdAt'),
       createdBy: _requiredString(json, 'createdBy'),
@@ -233,8 +237,16 @@ final class SharedPreferencesOpportunityRepository
       'expectedCloseDate': opportunity.expectedCloseDate
           .toUtc()
           .toIso8601String(),
+      if (opportunity.wonReasonId != null)
+        'wonReasonId': opportunity.wonReasonId,
       if (opportunity.wonReason != null) 'wonReason': opportunity.wonReason,
+      if (opportunity.wonReasonNote != null)
+        'wonReasonNote': opportunity.wonReasonNote,
+      if (opportunity.lostReasonId != null)
+        'lostReasonId': opportunity.lostReasonId,
       if (opportunity.lostReason != null) 'lostReason': opportunity.lostReason,
+      if (opportunity.lostReasonNote != null)
+        'lostReasonNote': opportunity.lostReasonNote,
       if (opportunity.closedAt != null)
         'closedAt': opportunity.closedAt!.toUtc().toIso8601String(),
       'createdAt': opportunity.createdAt.toUtc().toIso8601String(),

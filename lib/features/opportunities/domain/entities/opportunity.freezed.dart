@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$Opportunity {
 
- String get id; String get organizationId; String? get companyId; String get title; String? get description; String? get customerId; String? get leadId; double get estimatedValue; int get probability; double get revenueForecast; String get responsibleUserId; String get stageId; OpportunityStatus get status; DateTime get expectedCloseDate; String? get wonReason; String? get lostReason; DateTime? get closedAt; DateTime get createdAt; String get createdBy; DateTime get updatedAt; String get updatedBy; int get version; OpportunitySyncStatus get syncStatus;
+ String get id; String get organizationId; String? get companyId; String get title; String? get description; String? get customerId; String? get leadId; double get estimatedValue; int get probability; double get revenueForecast; String get responsibleUserId; String get stageId; OpportunityStatus get status; DateTime get expectedCloseDate; String? get wonReasonId; String? get wonReason; String? get wonReasonNote; String? get lostReasonId; String? get lostReason; String? get lostReasonNote; DateTime? get closedAt; DateTime get createdAt; String get createdBy; DateTime get updatedAt; String get updatedBy; int get version; OpportunitySyncStatus get syncStatus;
 /// Create a copy of Opportunity
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $OpportunityCopyWith<Opportunity> get copyWith => _$OpportunityCopyWithImpl<Oppo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Opportunity&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.companyId, companyId) || other.companyId == companyId)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.customerId, customerId) || other.customerId == customerId)&&(identical(other.leadId, leadId) || other.leadId == leadId)&&(identical(other.estimatedValue, estimatedValue) || other.estimatedValue == estimatedValue)&&(identical(other.probability, probability) || other.probability == probability)&&(identical(other.revenueForecast, revenueForecast) || other.revenueForecast == revenueForecast)&&(identical(other.responsibleUserId, responsibleUserId) || other.responsibleUserId == responsibleUserId)&&(identical(other.stageId, stageId) || other.stageId == stageId)&&(identical(other.status, status) || other.status == status)&&(identical(other.expectedCloseDate, expectedCloseDate) || other.expectedCloseDate == expectedCloseDate)&&(identical(other.wonReason, wonReason) || other.wonReason == wonReason)&&(identical(other.lostReason, lostReason) || other.lostReason == lostReason)&&(identical(other.closedAt, closedAt) || other.closedAt == closedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.version, version) || other.version == version)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Opportunity&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.companyId, companyId) || other.companyId == companyId)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.customerId, customerId) || other.customerId == customerId)&&(identical(other.leadId, leadId) || other.leadId == leadId)&&(identical(other.estimatedValue, estimatedValue) || other.estimatedValue == estimatedValue)&&(identical(other.probability, probability) || other.probability == probability)&&(identical(other.revenueForecast, revenueForecast) || other.revenueForecast == revenueForecast)&&(identical(other.responsibleUserId, responsibleUserId) || other.responsibleUserId == responsibleUserId)&&(identical(other.stageId, stageId) || other.stageId == stageId)&&(identical(other.status, status) || other.status == status)&&(identical(other.expectedCloseDate, expectedCloseDate) || other.expectedCloseDate == expectedCloseDate)&&(identical(other.wonReasonId, wonReasonId) || other.wonReasonId == wonReasonId)&&(identical(other.wonReason, wonReason) || other.wonReason == wonReason)&&(identical(other.wonReasonNote, wonReasonNote) || other.wonReasonNote == wonReasonNote)&&(identical(other.lostReasonId, lostReasonId) || other.lostReasonId == lostReasonId)&&(identical(other.lostReason, lostReason) || other.lostReason == lostReason)&&(identical(other.lostReasonNote, lostReasonNote) || other.lostReasonNote == lostReasonNote)&&(identical(other.closedAt, closedAt) || other.closedAt == closedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.version, version) || other.version == version)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
 }
 
 
 @override
-int get hashCode => Object.hashAll([runtimeType,id,organizationId,companyId,title,description,customerId,leadId,estimatedValue,probability,revenueForecast,responsibleUserId,stageId,status,expectedCloseDate,wonReason,lostReason,closedAt,createdAt,createdBy,updatedAt,updatedBy,version,syncStatus]);
+int get hashCode => Object.hashAll([runtimeType,id,organizationId,companyId,title,description,customerId,leadId,estimatedValue,probability,revenueForecast,responsibleUserId,stageId,status,expectedCloseDate,wonReasonId,wonReason,wonReasonNote,lostReasonId,lostReason,lostReasonNote,closedAt,createdAt,createdBy,updatedAt,updatedBy,version,syncStatus]);
 
 @override
 String toString() {
-  return 'Opportunity(id: $id, organizationId: $organizationId, companyId: $companyId, title: $title, description: $description, customerId: $customerId, leadId: $leadId, estimatedValue: $estimatedValue, probability: $probability, revenueForecast: $revenueForecast, responsibleUserId: $responsibleUserId, stageId: $stageId, status: $status, expectedCloseDate: $expectedCloseDate, wonReason: $wonReason, lostReason: $lostReason, closedAt: $closedAt, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, version: $version, syncStatus: $syncStatus)';
+  return 'Opportunity(id: $id, organizationId: $organizationId, companyId: $companyId, title: $title, description: $description, customerId: $customerId, leadId: $leadId, estimatedValue: $estimatedValue, probability: $probability, revenueForecast: $revenueForecast, responsibleUserId: $responsibleUserId, stageId: $stageId, status: $status, expectedCloseDate: $expectedCloseDate, wonReasonId: $wonReasonId, wonReason: $wonReason, wonReasonNote: $wonReasonNote, lostReasonId: $lostReasonId, lostReason: $lostReason, lostReasonNote: $lostReasonNote, closedAt: $closedAt, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, version: $version, syncStatus: $syncStatus)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $OpportunityCopyWith<$Res>  {
   factory $OpportunityCopyWith(Opportunity value, $Res Function(Opportunity) _then) = _$OpportunityCopyWithImpl;
 @useResult
 $Res call({
- String id, String organizationId, String? companyId, String title, String? description, String? customerId, String? leadId, double estimatedValue, int probability, double revenueForecast, String responsibleUserId, String stageId, OpportunityStatus status, DateTime expectedCloseDate, String? wonReason, String? lostReason, DateTime? closedAt, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, int version, OpportunitySyncStatus syncStatus
+ String id, String organizationId, String? companyId, String title, String? description, String? customerId, String? leadId, double estimatedValue, int probability, double revenueForecast, String responsibleUserId, String stageId, OpportunityStatus status, DateTime expectedCloseDate, String? wonReasonId, String? wonReason, String? wonReasonNote, String? lostReasonId, String? lostReason, String? lostReasonNote, DateTime? closedAt, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, int version, OpportunitySyncStatus syncStatus
 });
 
 
@@ -62,7 +62,7 @@ class _$OpportunityCopyWithImpl<$Res>
 
 /// Create a copy of Opportunity
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? organizationId = null,Object? companyId = freezed,Object? title = null,Object? description = freezed,Object? customerId = freezed,Object? leadId = freezed,Object? estimatedValue = null,Object? probability = null,Object? revenueForecast = null,Object? responsibleUserId = null,Object? stageId = null,Object? status = null,Object? expectedCloseDate = null,Object? wonReason = freezed,Object? lostReason = freezed,Object? closedAt = freezed,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? version = null,Object? syncStatus = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? organizationId = null,Object? companyId = freezed,Object? title = null,Object? description = freezed,Object? customerId = freezed,Object? leadId = freezed,Object? estimatedValue = null,Object? probability = null,Object? revenueForecast = null,Object? responsibleUserId = null,Object? stageId = null,Object? status = null,Object? expectedCloseDate = null,Object? wonReasonId = freezed,Object? wonReason = freezed,Object? wonReasonNote = freezed,Object? lostReasonId = freezed,Object? lostReason = freezed,Object? lostReasonNote = freezed,Object? closedAt = freezed,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? version = null,Object? syncStatus = null,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
@@ -78,8 +78,12 @@ as double,responsibleUserId: null == responsibleUserId ? _self.responsibleUserId
 as String,stageId: null == stageId ? _self.stageId : stageId // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as OpportunityStatus,expectedCloseDate: null == expectedCloseDate ? _self.expectedCloseDate : expectedCloseDate // ignore: cast_nullable_to_non_nullable
-as DateTime,wonReason: freezed == wonReason ? _self.wonReason : wonReason // ignore: cast_nullable_to_non_nullable
+as DateTime,wonReasonId: freezed == wonReasonId ? _self.wonReasonId : wonReasonId // ignore: cast_nullable_to_non_nullable
+as String?,wonReason: freezed == wonReason ? _self.wonReason : wonReason // ignore: cast_nullable_to_non_nullable
+as String?,wonReasonNote: freezed == wonReasonNote ? _self.wonReasonNote : wonReasonNote // ignore: cast_nullable_to_non_nullable
+as String?,lostReasonId: freezed == lostReasonId ? _self.lostReasonId : lostReasonId // ignore: cast_nullable_to_non_nullable
 as String?,lostReason: freezed == lostReason ? _self.lostReason : lostReason // ignore: cast_nullable_to_non_nullable
+as String?,lostReasonNote: freezed == lostReasonNote ? _self.lostReasonNote : lostReasonNote // ignore: cast_nullable_to_non_nullable
 as String?,closedAt: freezed == closedAt ? _self.closedAt : closedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,createdBy: null == createdBy ? _self.createdBy : createdBy // ignore: cast_nullable_to_non_nullable
@@ -172,10 +176,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String organizationId,  String? companyId,  String title,  String? description,  String? customerId,  String? leadId,  double estimatedValue,  int probability,  double revenueForecast,  String responsibleUserId,  String stageId,  OpportunityStatus status,  DateTime expectedCloseDate,  String? wonReason,  String? lostReason,  DateTime? closedAt,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  int version,  OpportunitySyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String organizationId,  String? companyId,  String title,  String? description,  String? customerId,  String? leadId,  double estimatedValue,  int probability,  double revenueForecast,  String responsibleUserId,  String stageId,  OpportunityStatus status,  DateTime expectedCloseDate,  String? wonReasonId,  String? wonReason,  String? wonReasonNote,  String? lostReasonId,  String? lostReason,  String? lostReasonNote,  DateTime? closedAt,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  int version,  OpportunitySyncStatus syncStatus)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Opportunity() when $default != null:
-return $default(_that.id,_that.organizationId,_that.companyId,_that.title,_that.description,_that.customerId,_that.leadId,_that.estimatedValue,_that.probability,_that.revenueForecast,_that.responsibleUserId,_that.stageId,_that.status,_that.expectedCloseDate,_that.wonReason,_that.lostReason,_that.closedAt,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.version,_that.syncStatus);case _:
+return $default(_that.id,_that.organizationId,_that.companyId,_that.title,_that.description,_that.customerId,_that.leadId,_that.estimatedValue,_that.probability,_that.revenueForecast,_that.responsibleUserId,_that.stageId,_that.status,_that.expectedCloseDate,_that.wonReasonId,_that.wonReason,_that.wonReasonNote,_that.lostReasonId,_that.lostReason,_that.lostReasonNote,_that.closedAt,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.version,_that.syncStatus);case _:
   return orElse();
 
 }
@@ -193,10 +197,10 @@ return $default(_that.id,_that.organizationId,_that.companyId,_that.title,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String organizationId,  String? companyId,  String title,  String? description,  String? customerId,  String? leadId,  double estimatedValue,  int probability,  double revenueForecast,  String responsibleUserId,  String stageId,  OpportunityStatus status,  DateTime expectedCloseDate,  String? wonReason,  String? lostReason,  DateTime? closedAt,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  int version,  OpportunitySyncStatus syncStatus)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String organizationId,  String? companyId,  String title,  String? description,  String? customerId,  String? leadId,  double estimatedValue,  int probability,  double revenueForecast,  String responsibleUserId,  String stageId,  OpportunityStatus status,  DateTime expectedCloseDate,  String? wonReasonId,  String? wonReason,  String? wonReasonNote,  String? lostReasonId,  String? lostReason,  String? lostReasonNote,  DateTime? closedAt,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  int version,  OpportunitySyncStatus syncStatus)  $default,) {final _that = this;
 switch (_that) {
 case _Opportunity():
-return $default(_that.id,_that.organizationId,_that.companyId,_that.title,_that.description,_that.customerId,_that.leadId,_that.estimatedValue,_that.probability,_that.revenueForecast,_that.responsibleUserId,_that.stageId,_that.status,_that.expectedCloseDate,_that.wonReason,_that.lostReason,_that.closedAt,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.version,_that.syncStatus);case _:
+return $default(_that.id,_that.organizationId,_that.companyId,_that.title,_that.description,_that.customerId,_that.leadId,_that.estimatedValue,_that.probability,_that.revenueForecast,_that.responsibleUserId,_that.stageId,_that.status,_that.expectedCloseDate,_that.wonReasonId,_that.wonReason,_that.wonReasonNote,_that.lostReasonId,_that.lostReason,_that.lostReasonNote,_that.closedAt,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.version,_that.syncStatus);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -213,10 +217,10 @@ return $default(_that.id,_that.organizationId,_that.companyId,_that.title,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String organizationId,  String? companyId,  String title,  String? description,  String? customerId,  String? leadId,  double estimatedValue,  int probability,  double revenueForecast,  String responsibleUserId,  String stageId,  OpportunityStatus status,  DateTime expectedCloseDate,  String? wonReason,  String? lostReason,  DateTime? closedAt,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  int version,  OpportunitySyncStatus syncStatus)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String organizationId,  String? companyId,  String title,  String? description,  String? customerId,  String? leadId,  double estimatedValue,  int probability,  double revenueForecast,  String responsibleUserId,  String stageId,  OpportunityStatus status,  DateTime expectedCloseDate,  String? wonReasonId,  String? wonReason,  String? wonReasonNote,  String? lostReasonId,  String? lostReason,  String? lostReasonNote,  DateTime? closedAt,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  int version,  OpportunitySyncStatus syncStatus)?  $default,) {final _that = this;
 switch (_that) {
 case _Opportunity() when $default != null:
-return $default(_that.id,_that.organizationId,_that.companyId,_that.title,_that.description,_that.customerId,_that.leadId,_that.estimatedValue,_that.probability,_that.revenueForecast,_that.responsibleUserId,_that.stageId,_that.status,_that.expectedCloseDate,_that.wonReason,_that.lostReason,_that.closedAt,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.version,_that.syncStatus);case _:
+return $default(_that.id,_that.organizationId,_that.companyId,_that.title,_that.description,_that.customerId,_that.leadId,_that.estimatedValue,_that.probability,_that.revenueForecast,_that.responsibleUserId,_that.stageId,_that.status,_that.expectedCloseDate,_that.wonReasonId,_that.wonReason,_that.wonReasonNote,_that.lostReasonId,_that.lostReason,_that.lostReasonNote,_that.closedAt,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.version,_that.syncStatus);case _:
   return null;
 
 }
@@ -228,7 +232,7 @@ return $default(_that.id,_that.organizationId,_that.companyId,_that.title,_that.
 
 
 class _Opportunity extends Opportunity {
-  const _Opportunity({required this.id, required this.organizationId, this.companyId, required this.title, this.description, this.customerId, this.leadId, required this.estimatedValue, required this.probability, required this.revenueForecast, required this.responsibleUserId, required this.stageId, required this.status, required this.expectedCloseDate, this.wonReason, this.lostReason, this.closedAt, required this.createdAt, required this.createdBy, required this.updatedAt, required this.updatedBy, required this.version, required this.syncStatus}): super._();
+  const _Opportunity({required this.id, required this.organizationId, this.companyId, required this.title, this.description, this.customerId, this.leadId, required this.estimatedValue, required this.probability, required this.revenueForecast, required this.responsibleUserId, required this.stageId, required this.status, required this.expectedCloseDate, this.wonReasonId, this.wonReason, this.wonReasonNote, this.lostReasonId, this.lostReason, this.lostReasonNote, this.closedAt, required this.createdAt, required this.createdBy, required this.updatedAt, required this.updatedBy, required this.version, required this.syncStatus}): super._();
   
 
 @override final  String id;
@@ -245,8 +249,12 @@ class _Opportunity extends Opportunity {
 @override final  String stageId;
 @override final  OpportunityStatus status;
 @override final  DateTime expectedCloseDate;
+@override final  String? wonReasonId;
 @override final  String? wonReason;
+@override final  String? wonReasonNote;
+@override final  String? lostReasonId;
 @override final  String? lostReason;
+@override final  String? lostReasonNote;
 @override final  DateTime? closedAt;
 @override final  DateTime createdAt;
 @override final  String createdBy;
@@ -265,16 +273,16 @@ _$OpportunityCopyWith<_Opportunity> get copyWith => __$OpportunityCopyWithImpl<_
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Opportunity&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.companyId, companyId) || other.companyId == companyId)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.customerId, customerId) || other.customerId == customerId)&&(identical(other.leadId, leadId) || other.leadId == leadId)&&(identical(other.estimatedValue, estimatedValue) || other.estimatedValue == estimatedValue)&&(identical(other.probability, probability) || other.probability == probability)&&(identical(other.revenueForecast, revenueForecast) || other.revenueForecast == revenueForecast)&&(identical(other.responsibleUserId, responsibleUserId) || other.responsibleUserId == responsibleUserId)&&(identical(other.stageId, stageId) || other.stageId == stageId)&&(identical(other.status, status) || other.status == status)&&(identical(other.expectedCloseDate, expectedCloseDate) || other.expectedCloseDate == expectedCloseDate)&&(identical(other.wonReason, wonReason) || other.wonReason == wonReason)&&(identical(other.lostReason, lostReason) || other.lostReason == lostReason)&&(identical(other.closedAt, closedAt) || other.closedAt == closedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.version, version) || other.version == version)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _Opportunity&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.companyId, companyId) || other.companyId == companyId)&&(identical(other.title, title) || other.title == title)&&(identical(other.description, description) || other.description == description)&&(identical(other.customerId, customerId) || other.customerId == customerId)&&(identical(other.leadId, leadId) || other.leadId == leadId)&&(identical(other.estimatedValue, estimatedValue) || other.estimatedValue == estimatedValue)&&(identical(other.probability, probability) || other.probability == probability)&&(identical(other.revenueForecast, revenueForecast) || other.revenueForecast == revenueForecast)&&(identical(other.responsibleUserId, responsibleUserId) || other.responsibleUserId == responsibleUserId)&&(identical(other.stageId, stageId) || other.stageId == stageId)&&(identical(other.status, status) || other.status == status)&&(identical(other.expectedCloseDate, expectedCloseDate) || other.expectedCloseDate == expectedCloseDate)&&(identical(other.wonReasonId, wonReasonId) || other.wonReasonId == wonReasonId)&&(identical(other.wonReason, wonReason) || other.wonReason == wonReason)&&(identical(other.wonReasonNote, wonReasonNote) || other.wonReasonNote == wonReasonNote)&&(identical(other.lostReasonId, lostReasonId) || other.lostReasonId == lostReasonId)&&(identical(other.lostReason, lostReason) || other.lostReason == lostReason)&&(identical(other.lostReasonNote, lostReasonNote) || other.lostReasonNote == lostReasonNote)&&(identical(other.closedAt, closedAt) || other.closedAt == closedAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.version, version) || other.version == version)&&(identical(other.syncStatus, syncStatus) || other.syncStatus == syncStatus));
 }
 
 
 @override
-int get hashCode => Object.hashAll([runtimeType,id,organizationId,companyId,title,description,customerId,leadId,estimatedValue,probability,revenueForecast,responsibleUserId,stageId,status,expectedCloseDate,wonReason,lostReason,closedAt,createdAt,createdBy,updatedAt,updatedBy,version,syncStatus]);
+int get hashCode => Object.hashAll([runtimeType,id,organizationId,companyId,title,description,customerId,leadId,estimatedValue,probability,revenueForecast,responsibleUserId,stageId,status,expectedCloseDate,wonReasonId,wonReason,wonReasonNote,lostReasonId,lostReason,lostReasonNote,closedAt,createdAt,createdBy,updatedAt,updatedBy,version,syncStatus]);
 
 @override
 String toString() {
-  return 'Opportunity(id: $id, organizationId: $organizationId, companyId: $companyId, title: $title, description: $description, customerId: $customerId, leadId: $leadId, estimatedValue: $estimatedValue, probability: $probability, revenueForecast: $revenueForecast, responsibleUserId: $responsibleUserId, stageId: $stageId, status: $status, expectedCloseDate: $expectedCloseDate, wonReason: $wonReason, lostReason: $lostReason, closedAt: $closedAt, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, version: $version, syncStatus: $syncStatus)';
+  return 'Opportunity(id: $id, organizationId: $organizationId, companyId: $companyId, title: $title, description: $description, customerId: $customerId, leadId: $leadId, estimatedValue: $estimatedValue, probability: $probability, revenueForecast: $revenueForecast, responsibleUserId: $responsibleUserId, stageId: $stageId, status: $status, expectedCloseDate: $expectedCloseDate, wonReasonId: $wonReasonId, wonReason: $wonReason, wonReasonNote: $wonReasonNote, lostReasonId: $lostReasonId, lostReason: $lostReason, lostReasonNote: $lostReasonNote, closedAt: $closedAt, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, version: $version, syncStatus: $syncStatus)';
 }
 
 
@@ -285,7 +293,7 @@ abstract mixin class _$OpportunityCopyWith<$Res> implements $OpportunityCopyWith
   factory _$OpportunityCopyWith(_Opportunity value, $Res Function(_Opportunity) _then) = __$OpportunityCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String organizationId, String? companyId, String title, String? description, String? customerId, String? leadId, double estimatedValue, int probability, double revenueForecast, String responsibleUserId, String stageId, OpportunityStatus status, DateTime expectedCloseDate, String? wonReason, String? lostReason, DateTime? closedAt, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, int version, OpportunitySyncStatus syncStatus
+ String id, String organizationId, String? companyId, String title, String? description, String? customerId, String? leadId, double estimatedValue, int probability, double revenueForecast, String responsibleUserId, String stageId, OpportunityStatus status, DateTime expectedCloseDate, String? wonReasonId, String? wonReason, String? wonReasonNote, String? lostReasonId, String? lostReason, String? lostReasonNote, DateTime? closedAt, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, int version, OpportunitySyncStatus syncStatus
 });
 
 
@@ -302,7 +310,7 @@ class __$OpportunityCopyWithImpl<$Res>
 
 /// Create a copy of Opportunity
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? organizationId = null,Object? companyId = freezed,Object? title = null,Object? description = freezed,Object? customerId = freezed,Object? leadId = freezed,Object? estimatedValue = null,Object? probability = null,Object? revenueForecast = null,Object? responsibleUserId = null,Object? stageId = null,Object? status = null,Object? expectedCloseDate = null,Object? wonReason = freezed,Object? lostReason = freezed,Object? closedAt = freezed,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? version = null,Object? syncStatus = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? organizationId = null,Object? companyId = freezed,Object? title = null,Object? description = freezed,Object? customerId = freezed,Object? leadId = freezed,Object? estimatedValue = null,Object? probability = null,Object? revenueForecast = null,Object? responsibleUserId = null,Object? stageId = null,Object? status = null,Object? expectedCloseDate = null,Object? wonReasonId = freezed,Object? wonReason = freezed,Object? wonReasonNote = freezed,Object? lostReasonId = freezed,Object? lostReason = freezed,Object? lostReasonNote = freezed,Object? closedAt = freezed,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? version = null,Object? syncStatus = null,}) {
   return _then(_Opportunity(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
@@ -318,8 +326,12 @@ as double,responsibleUserId: null == responsibleUserId ? _self.responsibleUserId
 as String,stageId: null == stageId ? _self.stageId : stageId // ignore: cast_nullable_to_non_nullable
 as String,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as OpportunityStatus,expectedCloseDate: null == expectedCloseDate ? _self.expectedCloseDate : expectedCloseDate // ignore: cast_nullable_to_non_nullable
-as DateTime,wonReason: freezed == wonReason ? _self.wonReason : wonReason // ignore: cast_nullable_to_non_nullable
+as DateTime,wonReasonId: freezed == wonReasonId ? _self.wonReasonId : wonReasonId // ignore: cast_nullable_to_non_nullable
+as String?,wonReason: freezed == wonReason ? _self.wonReason : wonReason // ignore: cast_nullable_to_non_nullable
+as String?,wonReasonNote: freezed == wonReasonNote ? _self.wonReasonNote : wonReasonNote // ignore: cast_nullable_to_non_nullable
+as String?,lostReasonId: freezed == lostReasonId ? _self.lostReasonId : lostReasonId // ignore: cast_nullable_to_non_nullable
 as String?,lostReason: freezed == lostReason ? _self.lostReason : lostReason // ignore: cast_nullable_to_non_nullable
+as String?,lostReasonNote: freezed == lostReasonNote ? _self.lostReasonNote : lostReasonNote // ignore: cast_nullable_to_non_nullable
 as String?,closedAt: freezed == closedAt ? _self.closedAt : closedAt // ignore: cast_nullable_to_non_nullable
 as DateTime?,createdAt: null == createdAt ? _self.createdAt : createdAt // ignore: cast_nullable_to_non_nullable
 as DateTime,createdBy: null == createdBy ? _self.createdBy : createdBy // ignore: cast_nullable_to_non_nullable

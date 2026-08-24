@@ -7,9 +7,13 @@ import 'package:vestipro/features/opportunities/opportunities.dart';
 class _MockOpportunityRepository extends Mock
     implements OpportunityRepository {}
 
+class _MockOutcomeReasonRepository extends Mock
+    implements OpportunityOutcomeReasonRepository {}
+
 void main() {
   group('MarkOpportunityLostUseCase', () {
     late _MockOpportunityRepository repository;
+    late _MockOutcomeReasonRepository reasonRepository;
     late MarkOpportunityLostUseCase useCase;
 
     setUpAll(() {
@@ -18,62 +22,59 @@ void main() {
 
     setUp(() {
       repository = _MockOpportunityRepository();
-      useCase = MarkOpportunityLostUseCase(repository);
+      reasonRepository = _MockOutcomeReasonRepository();
+      useCase = MarkOpportunityLostUseCase(repository, reasonRepository);
     });
 
-    test('marks an open opportunity as lost with a reason', () async {
-      final opportunity = _buildOpportunity(status: OpportunityStatus.open);
-      when(
-        () => repository.getById(
-          organizationId: any(named: 'organizationId'),
-          id: any(named: 'id'),
-        ),
-      ).thenAnswer((_) async => AppSuccess<Opportunity>(opportunity));
-      when(
-        () => repository.update(opportunity: any(named: 'opportunity')),
-      ).thenAnswer((invocation) async {
-        return AppSuccess<Opportunity>(
-          invocation.namedArguments[#opportunity] as Opportunity,
+    test(
+      'marks an open opportunity as lost with an active lost reason',
+      () async {
+        final opportunity = _buildOpportunity(status: OpportunityStatus.open);
+        _stubOpportunity(repository, opportunity);
+        _stubReason(
+          reasonRepository,
+          _reason(
+            id: 'reason-lost-1',
+            type: OpportunityOutcomeType.lost,
+            description: 'Concorrente com preço menor',
+          ),
         );
-      });
+        _stubUpdate(repository);
 
-      final result = await useCase.call(
-        organizationId: 'org-1',
-        id: 'opportunity-1',
-        lostReason: 'Concorrente com preço menor',
-        updatedBy: 'user-2',
-      );
+        final result = await useCase.call(
+          organizationId: 'org-1',
+          id: 'opportunity-1',
+          reasonId: 'reason-lost-1',
+          note: 'Retomar no proximo ciclo',
+          updatedBy: 'user-2',
+        );
 
-      expect(result, isA<AppSuccess<Opportunity>>());
-      final updated = (result as AppSuccess<Opportunity>).value;
-      expect(updated.status, OpportunityStatus.lost);
-      expect(updated.lostReason, 'Concorrente com preço menor');
-      expect(updated.closedAt, isNotNull);
-      expect(updated.version, opportunity.version + 1);
-    });
+        expect(result, isA<AppSuccess<Opportunity>>());
+        final updated = (result as AppSuccess<Opportunity>).value;
+        expect(updated.status, OpportunityStatus.lost);
+        expect(updated.lostReasonId, 'reason-lost-1');
+        expect(updated.lostReason, 'Concorrente com preço menor');
+        expect(updated.lostReasonNote, 'Retomar no proximo ciclo');
+        expect(updated.closedAt, isNotNull);
+        expect(updated.version, opportunity.version + 1);
+      },
+    );
 
     test(
       'moves the opportunity onto the given stageId (TASK-058 board close)',
       () async {
         final opportunity = _buildOpportunity(status: OpportunityStatus.open);
-        when(
-          () => repository.getById(
-            organizationId: any(named: 'organizationId'),
-            id: any(named: 'id'),
-          ),
-        ).thenAnswer((_) async => AppSuccess<Opportunity>(opportunity));
-        when(
-          () => repository.update(opportunity: any(named: 'opportunity')),
-        ).thenAnswer((invocation) async {
-          return AppSuccess<Opportunity>(
-            invocation.namedArguments[#opportunity] as Opportunity,
-          );
-        });
+        _stubOpportunity(repository, opportunity);
+        _stubReason(
+          reasonRepository,
+          _reason(id: 'reason-lost-1', type: OpportunityOutcomeType.lost),
+        );
+        _stubUpdate(repository);
 
         final result = await useCase.call(
           organizationId: 'org-1',
           id: 'opportunity-1',
-          lostReason: 'Concorrente com preço menor',
+          reasonId: 'reason-lost-1',
           updatedBy: 'user-2',
           stageId: 'stage-lost',
         );
@@ -83,11 +84,11 @@ void main() {
       },
     );
 
-    test('rejects marking as lost without a reason', () async {
+    test('rejects marking as lost without a reason id', () async {
       final result = await useCase.call(
         organizationId: 'org-1',
         id: 'opportunity-1',
-        lostReason: '',
+        reasonId: '',
         updatedBy: 'user-2',
       );
 
@@ -95,7 +96,7 @@ void main() {
       final failure = (result as AppFailure<Opportunity>).failure;
       expect(
         (failure as ValidationFailure).fieldErrors,
-        containsPair('lostReason', 'Lost reason is required.'),
+        containsPair('reasonId', 'ReasonId is required.'),
       );
       verifyNever(
         () => repository.getById(
@@ -105,23 +106,30 @@ void main() {
       );
     });
 
-    test('blocks marking an already-lost opportunity as lost again', () async {
-      final opportunity = _buildOpportunity(status: OpportunityStatus.lost);
-      when(
-        () => repository.getById(
-          organizationId: any(named: 'organizationId'),
-          id: any(named: 'id'),
+    test('rejects an inactive lost reason', () async {
+      final opportunity = _buildOpportunity(status: OpportunityStatus.open);
+      _stubOpportunity(repository, opportunity);
+      _stubReason(
+        reasonRepository,
+        _reason(
+          id: 'reason-lost-1',
+          type: OpportunityOutcomeType.lost,
+          isActive: false,
         ),
-      ).thenAnswer((_) async => AppSuccess<Opportunity>(opportunity));
+      );
 
       final result = await useCase.call(
         organizationId: 'org-1',
         id: 'opportunity-1',
-        lostReason: 'Motivo qualquer',
+        reasonId: 'reason-lost-1',
         updatedBy: 'user-2',
       );
 
       expect(result, isA<AppFailure<Opportunity>>());
+      expect(
+        (result as AppFailure<Opportunity>).failure.code,
+        'inactive_opportunity_outcome_reason',
+      );
       verifyNever(
         () => repository.update(opportunity: any(named: 'opportunity')),
       );
@@ -129,17 +137,12 @@ void main() {
 
     test('blocks marking a won opportunity as lost', () async {
       final opportunity = _buildOpportunity(status: OpportunityStatus.won);
-      when(
-        () => repository.getById(
-          organizationId: any(named: 'organizationId'),
-          id: any(named: 'id'),
-        ),
-      ).thenAnswer((_) async => AppSuccess<Opportunity>(opportunity));
+      _stubOpportunity(repository, opportunity);
 
       final result = await useCase.call(
         organizationId: 'org-1',
         id: 'opportunity-1',
-        lostReason: 'Motivo qualquer',
+        reasonId: 'reason-lost-1',
         updatedBy: 'user-2',
       );
 
@@ -147,8 +150,69 @@ void main() {
       verifyNever(
         () => repository.update(opportunity: any(named: 'opportunity')),
       );
+      verifyNever(
+        () => reasonRepository.getById(
+          organizationId: any(named: 'organizationId'),
+          id: any(named: 'id'),
+        ),
+      );
     });
   });
+}
+
+void _stubOpportunity(
+  _MockOpportunityRepository repository,
+  Opportunity opportunity,
+) {
+  when(
+    () => repository.getById(
+      organizationId: any(named: 'organizationId'),
+      id: any(named: 'id'),
+    ),
+  ).thenAnswer((_) async => AppSuccess<Opportunity>(opportunity));
+}
+
+void _stubReason(
+  _MockOutcomeReasonRepository repository,
+  OpportunityOutcomeReason reason,
+) {
+  when(
+    () => repository.getById(
+      organizationId: any(named: 'organizationId'),
+      id: any(named: 'id'),
+    ),
+  ).thenAnswer((_) async => AppSuccess<OpportunityOutcomeReason>(reason));
+}
+
+void _stubUpdate(_MockOpportunityRepository repository) {
+  when(
+    () => repository.update(opportunity: any(named: 'opportunity')),
+  ).thenAnswer((invocation) async {
+    return AppSuccess<Opportunity>(
+      invocation.namedArguments[#opportunity] as Opportunity,
+    );
+  });
+}
+
+OpportunityOutcomeReason _reason({
+  required String id,
+  required OpportunityOutcomeType type,
+  String description = 'Motivo configurado',
+  bool isActive = true,
+}) {
+  final now = DateTime.utc(2026, 1, 1);
+  return OpportunityOutcomeReason(
+    id: id,
+    organizationId: 'org-1',
+    type: type,
+    description: description,
+    isActive: isActive,
+    createdAt: now,
+    createdBy: 'user-1',
+    updatedAt: now,
+    updatedBy: 'user-1',
+    version: 1,
+  );
 }
 
 Opportunity _buildOpportunity({required OpportunityStatus status}) {

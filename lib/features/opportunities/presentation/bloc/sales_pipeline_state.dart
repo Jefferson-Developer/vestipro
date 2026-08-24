@@ -1,5 +1,6 @@
 import '../../../../core/errors/errors.dart';
 import '../../domain/entities/opportunity.dart';
+import '../../domain/entities/opportunity_outcome_reason.dart';
 import '../../domain/entities/pipeline_column.dart';
 import '../../domain/entities/pipeline_stage.dart';
 
@@ -15,6 +16,7 @@ final class SalesPipelineState {
     this.userId = '',
     this.responsibleUserIds = const <String>{},
     this.stages = const <PipelineStage>[],
+    this.outcomeReasons = const <OpportunityOutcomeReason>[],
     this.opportunities = const <Opportunity>[],
     this.columns = const <PipelineColumn>[],
     this.failure,
@@ -29,6 +31,7 @@ final class SalesPipelineState {
   final String userId;
   final Set<String> responsibleUserIds;
   final List<PipelineStage> stages;
+  final List<OpportunityOutcomeReason> outcomeReasons;
   final List<Opportunity> opportunities;
   final List<PipelineColumn> columns;
   final Failure? failure;
@@ -51,6 +54,7 @@ final class SalesPipelineState {
     String? userId,
     Set<String>? responsibleUserIds,
     List<PipelineStage>? stages,
+    List<OpportunityOutcomeReason>? outcomeReasons,
     List<Opportunity>? opportunities,
     List<PipelineColumn>? columns,
     Failure? failure,
@@ -68,6 +72,7 @@ final class SalesPipelineState {
       userId: userId ?? this.userId,
       responsibleUserIds: responsibleUserIds ?? this.responsibleUserIds,
       stages: stages ?? this.stages,
+      outcomeReasons: outcomeReasons ?? this.outcomeReasons,
       opportunities: opportunities ?? this.opportunities,
       columns: columns ?? this.columns,
       failure: clearFailure ? null : failure ?? this.failure,

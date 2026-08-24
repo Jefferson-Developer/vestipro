@@ -18,12 +18,14 @@ void main() {
     late _MockMembershipRepository membershipRepository;
     late _InMemoryOpportunityRepository opportunityRepository;
     late _InMemoryPipelineStageRepository stageRepository;
+    late _InMemoryOutcomeReasonRepository reasonRepository;
     late PermissionService permissionService;
 
     setUp(() {
       membershipRepository = _MockMembershipRepository();
       opportunityRepository = _InMemoryOpportunityRepository();
       stageRepository = _InMemoryPipelineStageRepository();
+      reasonRepository = _InMemoryOutcomeReasonRepository();
       permissionService = PermissionService(membershipRepository);
       _stubMembership(membershipRepository, roleName: 'SALES_MANAGER');
 
@@ -42,12 +44,21 @@ void main() {
     SalesPipelineBloc buildBloc() {
       return SalesPipelineBloc(
         listStages: ListPipelineStagesUseCase(stageRepository),
+        listOutcomeReasons: ListOpportunityOutcomeReasonsUseCase(
+          reasonRepository,
+        ),
         listOpportunities: ListPipelineOpportunitiesUseCase(
           opportunityRepository,
         ),
         updateStage: UpdateOpportunityStageUseCase(opportunityRepository),
-        markWon: MarkOpportunityWonUseCase(opportunityRepository),
-        markLost: MarkOpportunityLostUseCase(opportunityRepository),
+        markWon: MarkOpportunityWonUseCase(
+          opportunityRepository,
+          reasonRepository,
+        ),
+        markLost: MarkOpportunityLostUseCase(
+          opportunityRepository,
+          reasonRepository,
+        ),
       );
     }
 
@@ -133,6 +144,45 @@ void main() {
         _expectColumnCount(tester, stageId: 'stage-proposal', count: 1);
       },
     );
+
+    testWidgets(
+      'Mobile: closing on a terminal stage requires an active catalog reason',
+      (tester) async {
+        stageRepository.seed(
+          _stage(
+            id: 'stage-won',
+            name: 'Ganha',
+            order: 2,
+            terminalType: PipelineStageTerminalType.won,
+          ),
+        );
+        reasonRepository.seed(
+          _reason(
+            id: 'reason-won-1',
+            type: OpportunityOutcomeType.won,
+            description: 'Produto aderente a colecao',
+          ),
+        );
+
+        await pumpApp(tester, buildPage());
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.widgetWithText(AppButton, 'Mover'));
+        await tester.pumpAndSettle();
+        await tester.tap(find.text('Ganha').last);
+        await tester.pumpAndSettle();
+        expect(find.text('Produto aderente a colecao'), findsOneWidget);
+
+        await tester.tap(find.widgetWithText(AppButton, 'Marcar como ganha'));
+        await tester.pumpAndSettle();
+
+        final updated = opportunityRepository.opportunities.single;
+        expect(updated.status, OpportunityStatus.won);
+        expect(updated.stageId, 'stage-won');
+        expect(updated.wonReasonId, 'reason-won-1');
+        expect(updated.wonReason, 'Produto aderente a colecao');
+      },
+    );
   });
 }
 
@@ -181,6 +231,7 @@ PipelineStage _stage({
   required String id,
   required String name,
   required int order,
+  PipelineStageTerminalType terminalType = PipelineStageTerminalType.none,
 }) {
   final now = DateTime.utc(2026, 1, 1);
   return PipelineStage(
@@ -189,7 +240,28 @@ PipelineStage _stage({
     name: name,
     order: order,
     colorHex: '#2563EB',
-    terminalType: PipelineStageTerminalType.none,
+    terminalType: terminalType,
+    createdAt: now,
+    createdBy: 'current-user',
+    updatedAt: now,
+    updatedBy: 'current-user',
+    version: 1,
+  );
+}
+
+OpportunityOutcomeReason _reason({
+  required String id,
+  required OpportunityOutcomeType type,
+  required String description,
+  bool isActive = true,
+}) {
+  final now = DateTime.utc(2026, 1, 1);
+  return OpportunityOutcomeReason(
+    id: id,
+    organizationId: 'org-1',
+    type: type,
+    description: description,
+    isActive: isActive,
     createdAt: now,
     createdBy: 'current-user',
     updatedAt: now,
@@ -341,5 +413,72 @@ final class _InMemoryPipelineStageRepository
       ..clear()
       ..addAll(reordered);
     return AppSuccess<List<PipelineStage>>(reordered);
+  }
+}
+
+final class _InMemoryOutcomeReasonRepository
+    implements OpportunityOutcomeReasonRepository {
+  final List<OpportunityOutcomeReason> reasons = <OpportunityOutcomeReason>[];
+
+  void seed(OpportunityOutcomeReason reason) => reasons.add(reason);
+
+  @override
+  Future<AppResult<OpportunityOutcomeReason>> create({
+    required OpportunityOutcomeReason reason,
+  }) async {
+    reasons.add(reason);
+    return AppSuccess<OpportunityOutcomeReason>(reason);
+  }
+
+  @override
+  Future<AppResult<OpportunityOutcomeReason>> update({
+    required OpportunityOutcomeReason reason,
+  }) async {
+    final index = reasons.indexWhere((existing) => existing.id == reason.id);
+    if (index == -1) {
+      return const AppFailure<OpportunityOutcomeReason>(
+        NotFoundFailure(
+          'Opportunity outcome reason not found.',
+          code: 'opportunity_outcome_reason_not_found',
+        ),
+      );
+    }
+    reasons[index] = reason;
+    return AppSuccess<OpportunityOutcomeReason>(reason);
+  }
+
+  @override
+  Future<AppResult<OpportunityOutcomeReason>> getById({
+    required String organizationId,
+    required String id,
+  }) async {
+    for (final reason in reasons) {
+      if (reason.organizationId == organizationId && reason.id == id) {
+        return AppSuccess<OpportunityOutcomeReason>(reason);
+      }
+    }
+    return const AppFailure<OpportunityOutcomeReason>(
+      NotFoundFailure(
+        'Opportunity outcome reason not found.',
+        code: 'opportunity_outcome_reason_not_found',
+      ),
+    );
+  }
+
+  @override
+  Future<AppResult<List<OpportunityOutcomeReason>>> listByOrganization({
+    required String organizationId,
+    OpportunityOutcomeType? type,
+    bool includeInactive = false,
+  }) async {
+    final visible = reasons
+        .where(
+          (reason) =>
+              reason.organizationId == organizationId &&
+              (type == null || reason.type == type) &&
+              (includeInactive || reason.isActive),
+        )
+        .toList(growable: false);
+    return AppSuccess<List<OpportunityOutcomeReason>>(visible);
   }
 }

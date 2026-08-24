@@ -23,8 +23,12 @@ final class OpportunityDto {
     required this.stageId,
     required this.status,
     required this.expectedCloseDate,
+    this.wonReasonId,
     this.wonReason,
+    this.wonReasonNote,
+    this.lostReasonId,
     this.lostReason,
+    this.lostReasonNote,
     this.closedAt,
     required this.createdAt,
     required this.createdBy,
@@ -51,8 +55,12 @@ final class OpportunityDto {
     final stageId = json['stageId'];
     final status = json['status'];
     final expectedCloseDate = json['expectedCloseDate'];
+    final wonReasonId = json['wonReasonId'];
     final wonReason = json['wonReason'];
+    final wonReasonNote = json['wonReasonNote'];
+    final lostReasonId = json['lostReasonId'];
     final lostReason = json['lostReason'];
+    final lostReasonNote = json['lostReasonNote'];
     final closedAt = json['closedAt'];
     final createdAt = json['createdAt'];
     final createdBy = json['createdBy'];
@@ -74,8 +82,12 @@ final class OpportunityDto {
         stageId is! String ||
         status is! String ||
         expectedCloseDate is! Timestamp ||
+        (wonReasonId != null && wonReasonId is! String) ||
         (wonReason != null && wonReason is! String) ||
+        (wonReasonNote != null && wonReasonNote is! String) ||
+        (lostReasonId != null && lostReasonId is! String) ||
         (lostReason != null && lostReason is! String) ||
+        (lostReasonNote != null && lostReasonNote is! String) ||
         (closedAt != null && closedAt is! Timestamp) ||
         createdAt is! Timestamp ||
         createdBy is! String ||
@@ -104,8 +116,12 @@ final class OpportunityDto {
       stageId: stageId,
       status: status,
       expectedCloseDate: expectedCloseDate.toDate(),
+      wonReasonId: wonReasonId as String?,
       wonReason: wonReason as String?,
+      wonReasonNote: wonReasonNote as String?,
+      lostReasonId: lostReasonId as String?,
       lostReason: lostReason as String?,
+      lostReasonNote: lostReasonNote as String?,
       closedAt: (closedAt as Timestamp?)?.toDate(),
       createdAt: createdAt.toDate(),
       createdBy: createdBy,
@@ -130,8 +146,12 @@ final class OpportunityDto {
   final String stageId;
   final String status;
   final DateTime expectedCloseDate;
+  final String? wonReasonId;
   final String? wonReason;
+  final String? wonReasonNote;
+  final String? lostReasonId;
   final String? lostReason;
+  final String? lostReasonNote;
   final DateTime? closedAt;
   final DateTime createdAt;
   final String createdBy;
@@ -155,8 +175,12 @@ final class OpportunityDto {
       'stageId': stageId,
       'status': status,
       'expectedCloseDate': Timestamp.fromDate(expectedCloseDate),
+      'wonReasonId': wonReasonId,
       'wonReason': wonReason,
+      'wonReasonNote': wonReasonNote,
+      'lostReasonId': lostReasonId,
       'lostReason': lostReason,
+      'lostReasonNote': lostReasonNote,
       'closedAt': closedAt == null ? null : Timestamp.fromDate(closedAt!),
       'createdAt': Timestamp.fromDate(createdAt),
       'createdBy': createdBy,
