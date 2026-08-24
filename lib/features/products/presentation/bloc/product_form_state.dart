@@ -1,4 +1,5 @@
 import '../../../../core/errors/errors.dart';
+import '../../domain/entities/category.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/value_objects/product_gender.dart';
 import '../../domain/value_objects/product_status.dart';
@@ -25,6 +26,7 @@ final class ProductFormState {
     this.actorName = '',
     this.canPublish = false,
     this.currentProduct,
+    this.categories = const <Category>[],
     this.name = '',
     this.sku = '',
     this.reference = '',
@@ -69,6 +71,11 @@ final class ProductFormState {
   /// never been saved yet.
   final Product? currentProduct;
 
+  /// The whole organization's `Category` tree (TASK-067), the single
+  /// source of truth for the "Categoria"/"Subcategoria" pickers below —
+  /// never a free-text field. Loaded once when the form starts.
+  final List<Category> categories;
+
   final String name;
   final String sku;
   final String reference;
@@ -110,6 +117,21 @@ final class ProductFormState {
   bool get canRequestPublish =>
       canPublish && currentProduct?.status == ProductStatus.draft;
 
+  /// Root-level entries of [categories] (`parentId == null`), offered by
+  /// the "Categoria" picker.
+  List<Category> get rootCategories => categories
+      .where((category) => category.parentId == null)
+      .toList(growable: false);
+
+  /// Direct children of [categoryId] in [categories], offered by the
+  /// "Subcategoria" picker. Empty until a root category is selected.
+  List<Category> get subcategoryOptions {
+    if (categoryId.isEmpty) return const <Category>[];
+    return categories
+        .where((category) => category.parentId == categoryId)
+        .toList(growable: false);
+  }
+
   ProductFormState copyWith({
     ProductFormLoadStatus? loadStatus,
     ProductFormSubmissionStatus? submissionStatus,
@@ -121,6 +143,7 @@ final class ProductFormState {
     String? actorName,
     bool? canPublish,
     Product? currentProduct,
+    List<Category>? categories,
     String? name,
     String? sku,
     String? reference,
@@ -164,6 +187,7 @@ final class ProductFormState {
       actorName: actorName ?? this.actorName,
       canPublish: canPublish ?? this.canPublish,
       currentProduct: currentProduct ?? this.currentProduct,
+      categories: categories ?? this.categories,
       name: name ?? this.name,
       sku: sku ?? this.sku,
       reference: reference ?? this.reference,

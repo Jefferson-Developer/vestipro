@@ -10,12 +10,14 @@ void main() {
     late _InMemoryProductRepository productRepository;
     late _InMemoryProductFormDraftRepository draftRepository;
     late _InMemoryAuditLogRepository auditLogRepository;
+    late _InMemoryCategoryRepository categoryRepository;
     late FakeAnalyticsService analyticsService;
 
     setUp(() {
       productRepository = _InMemoryProductRepository();
       draftRepository = _InMemoryProductFormDraftRepository();
       auditLogRepository = _InMemoryAuditLogRepository();
+      categoryRepository = _InMemoryCategoryRepository();
       analyticsService = FakeAnalyticsService();
     });
 
@@ -33,6 +35,7 @@ void main() {
           productRepository,
           auditLogRepository,
         ),
+        listCategories: ListCategoriesUseCase(categoryRepository),
         analyticsService: analyticsService,
       );
     }
@@ -346,4 +349,81 @@ final class _InMemoryAuditLogRepository implements AuditLogRepository {
       AuditLogEntryPage(entries: <AuditLogEntry>[], hasMore: false),
     );
   }
+}
+
+final class _InMemoryCategoryRepository implements CategoryRepository {
+  final List<Category> categories = <Category>[];
+
+  @override
+  Future<AppResult<Category>> create({required Category category}) async {
+    categories.add(category);
+    return AppSuccess<Category>(category);
+  }
+
+  @override
+  Future<AppResult<Category>> update({required Category category}) async {
+    final index = categories.indexWhere((item) => item.id == category.id);
+    categories[index] = category;
+    return AppSuccess<Category>(category);
+  }
+
+  @override
+  Future<AppResult<List<Category>>> listByOrganization(
+    String organizationId,
+  ) async {
+    return AppSuccess<List<Category>>(
+      categories
+          .where((category) => category.organizationId == organizationId)
+          .toList(),
+    );
+  }
+
+  @override
+  Future<AppResult<Category>> getById({
+    required String organizationId,
+    required String id,
+  }) async {
+    for (final category in categories) {
+      if (category.id == id) return AppSuccess<Category>(category);
+    }
+    return const AppFailure<Category>(
+      NotFoundFailure('Category not found.', code: 'category_not_found'),
+    );
+  }
+
+  @override
+  Future<AppResult<bool>> existsByName({
+    required String organizationId,
+    required String name,
+    String? parentId,
+    String? excludingCategoryId,
+  }) async => const AppSuccess<bool>(false);
+
+  @override
+  Future<AppResult<bool>> hasProducts({
+    required String organizationId,
+    required String categoryId,
+  }) async => const AppSuccess<bool>(false);
+
+  @override
+  Future<AppResult<Category>> delete({
+    required String organizationId,
+    required String id,
+    required String deletedBy,
+  }) async {
+    final index = categories.indexWhere((item) => item.id == id);
+    final deleted = categories[index].copyWith(
+      deletedAt: DateTime.utc(2026, 1, 2),
+    );
+    categories[index] = deleted;
+    return AppSuccess<Category>(deleted);
+  }
+
+  @override
+  Future<AppResult<List<Category>>> reorder({
+    required String organizationId,
+    required String? parentId,
+    required List<String> orderedIds,
+    required String updatedBy,
+  }) async => const AppSuccess<List<Category>>(<Category>[]);
 }

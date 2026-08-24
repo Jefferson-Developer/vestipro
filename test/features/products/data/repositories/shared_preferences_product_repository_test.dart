@@ -3,6 +3,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/products/data/mappers/product_mapper.dart';
+import 'package:vestipro/features/products/data/repositories/shared_preferences_category_repository.dart';
 import 'package:vestipro/features/products/data/repositories/shared_preferences_product_repository.dart';
 import 'package:vestipro/features/products/products.dart';
 
@@ -87,6 +88,50 @@ void main() {
       expect(result, isA<AppFailure<Product>>());
       expect((result as AppFailure<Product>).failure, isA<NotFoundFailure>());
     });
+
+    test(
+      'syncs a category/subcategory usage index so CategoryRepository can '
+      'block deleting a Category still referenced by a Product (TASK-067)',
+      () async {
+        const categoryRepository = SharedPreferencesCategoryRepository();
+
+        await repository.create(
+          product: _product(categoryId: 'cat-1', subcategoryId: 'sub-1'),
+        );
+
+        final categoryInUse = await categoryRepository.hasProducts(
+          organizationId: 'org-1',
+          categoryId: 'cat-1',
+        );
+        final subcategoryInUse = await categoryRepository.hasProducts(
+          organizationId: 'org-1',
+          categoryId: 'sub-1',
+        );
+        final unrelatedNotInUse = await categoryRepository.hasProducts(
+          organizationId: 'org-1',
+          categoryId: 'cat-2',
+        );
+
+        expect((categoryInUse as AppSuccess<bool>).value, isTrue);
+        expect((subcategoryInUse as AppSuccess<bool>).value, isTrue);
+        expect((unrelatedNotInUse as AppSuccess<bool>).value, isFalse);
+      },
+    );
+
+    test('removes a category from the usage index once no product references '
+        'it anymore', () async {
+      const categoryRepository = SharedPreferencesCategoryRepository();
+      final product = _product(categoryId: 'cat-1');
+      await repository.create(product: product);
+
+      await repository.update(product: product.copyWith(categoryId: null));
+
+      final stillInUse = await categoryRepository.hasProducts(
+        organizationId: 'org-1',
+        categoryId: 'cat-1',
+      );
+      expect((stillInUse as AppSuccess<bool>).value, isFalse);
+    });
   });
 }
 
@@ -95,6 +140,8 @@ Product _product({
   String sku = 'CAMISA-001',
   String? seoTitle,
   String? ean,
+  String? categoryId,
+  String? subcategoryId,
 }) {
   final now = DateTime.utc(2026, 1, 1);
   return Product(
@@ -105,6 +152,8 @@ Product _product({
     name: 'Produto $id',
     ean: ean == null ? null : Ean.parse(ean),
     seoTitle: seoTitle,
+    categoryId: categoryId,
+    subcategoryId: subcategoryId,
     status: ProductStatus.draft,
     createdAt: now,
     createdBy: 'user-1',

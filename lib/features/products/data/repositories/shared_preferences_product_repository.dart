@@ -32,6 +32,13 @@ final class SharedPreferencesProductRepository implements ProductRepository {
 
   String _keyFor(String organizationId) => 'products_$organizationId';
 
+  /// Key `SharedPreferencesCategoryRepository.hasProducts` reads from to
+  /// block deleting a `Category` still referenced by a Product, the same
+  /// decoupled-usage-index pattern `SharedPreferencesCollectionRepository`
+  /// already maintains for Season usage.
+  String _categoryUsageKeyFor(String organizationId) =>
+      'category_product_usage_$organizationId';
+
   @override
   Future<AppResult<bool>> existsBySku({
     required String organizationId,
@@ -85,6 +92,7 @@ final class SharedPreferencesProductRepository implements ProductRepository {
         product,
       ];
       await _save(product.organizationId, next);
+      await _syncCategoryUsage(product.organizationId, next);
       return AppSuccess<Product>(product);
     } catch (exception) {
       return AppFailure<Product>(
@@ -112,6 +120,7 @@ final class SharedPreferencesProductRepository implements ProductRepository {
 
       final next = List<Product>.of(products)..[index] = product;
       await _save(product.organizationId, next);
+      await _syncCategoryUsage(product.organizationId, next);
       return AppSuccess<Product>(product);
     } catch (exception) {
       return AppFailure<Product>(
@@ -170,6 +179,25 @@ final class SharedPreferencesProductRepository implements ProductRepository {
         ),
       );
     }
+  }
+
+  Future<void> _syncCategoryUsage(
+    String organizationId,
+    List<Product> products,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    final categoryIds = products
+        .where((product) => product.deletedAt == null)
+        .expand(
+          (product) => <String?>[product.categoryId, product.subcategoryId],
+        )
+        .whereType<String>()
+        .toSet()
+        .toList(growable: false);
+    await prefs.setStringList(
+      _categoryUsageKeyFor(organizationId),
+      categoryIds,
+    );
   }
 
   Future<List<Product>> _load(String organizationId) async {

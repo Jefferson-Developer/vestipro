@@ -6,11 +6,13 @@ import 'package:uuid/uuid.dart';
 import '../../../../core/analytics/analytics.dart';
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
+import '../../domain/entities/category.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/entities/product_form_draft.dart';
 import '../../domain/usecases/clear_product_form_draft_use_case.dart';
 import '../../domain/usecases/create_product_use_case.dart';
 import '../../domain/usecases/get_product_form_draft_use_case.dart';
+import '../../domain/usecases/list_categories_use_case.dart';
 import '../../domain/usecases/publish_product_use_case.dart';
 import '../../domain/usecases/save_product_form_draft_use_case.dart';
 import '../../domain/usecases/update_product_use_case.dart';
@@ -36,6 +38,7 @@ final class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
     required this.createProduct,
     required this.updateProduct,
     required this.publishProduct,
+    required this.listCategories,
     required this.analyticsService,
   }) : super(const ProductFormState()) {
     on<ProductFormStarted>(_onStarted, transformer: restartable());
@@ -77,6 +80,7 @@ final class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
   final CreateProductUseCase createProduct;
   final UpdateProductUseCase updateProduct;
   final PublishProductUseCase publishProduct;
+  final ListCategoriesUseCase listCategories;
   final AnalyticsService analyticsService;
   final Uuid _uuid = const Uuid();
 
@@ -94,6 +98,14 @@ final class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
         canPublish: event.canPublish,
       ),
     );
+
+    final categoriesResult = await listCategories(event.organizationId);
+    if (emit.isDone) return;
+    final categories = categoriesResult.fold(
+      onSuccess: (value) => value,
+      onFailure: (_) => const <Category>[],
+    );
+    emit(state.copyWith(categories: categories));
 
     final initial = event.initialProduct;
     if (initial != null) {

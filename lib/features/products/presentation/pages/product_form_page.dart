@@ -435,6 +435,7 @@ class _CategorySection extends StatelessWidget {
     final bloc = context.read<ProductFormBloc>();
     void emitCategory({
       String? categoryId,
+      bool clearSubcategoryId = false,
       String? subcategoryId,
       String? collectionId,
       String? seasonId,
@@ -447,7 +448,9 @@ class _CategorySection extends StatelessWidget {
       bloc.add(
         ProductFormCategorySectionChanged(
           categoryId: categoryId ?? state.categoryId,
-          subcategoryId: subcategoryId ?? state.subcategoryId,
+          subcategoryId: clearSubcategoryId
+              ? ''
+              : subcategoryId ?? state.subcategoryId,
           collectionId: collectionId ?? state.collectionId,
           seasonId: seasonId ?? state.seasonId,
           line: line ?? state.line,
@@ -464,24 +467,57 @@ class _CategorySection extends StatelessWidget {
       children: <Widget>[
         _FieldGrid(
           children: <Widget>[
-            _SyncedAppTextField(
-              value: state.categoryId,
+            AppDropdown<String>(
               label: 'Categoria',
+              hintText: 'Selecione uma categoria',
               semanticLabel: 'Categoria',
+              closeSemanticLabel: 'Fechar seleção de categoria',
               isRequired: true,
               isDisabled: state.isBusy,
+              options: state.rootCategories
+                  .map(
+                    (category) => AppDropdownOption<String>(
+                      value: category.id,
+                      label: category.name,
+                    ),
+                  )
+                  .toList(growable: false),
+              selectedValues: state.categoryId.isEmpty
+                  ? const <String>{}
+                  : <String>{state.categoryId},
+              onChanged: (selected) => emitCategory(
+                categoryId: selected.isEmpty ? '' : selected.first,
+                clearSubcategoryId: true,
+              ),
+              searchHintText: 'Buscar categoria',
+              noResultsLabel: 'Nenhuma categoria encontrada',
               errorText: state.fieldErrors['categoryId'],
-              helperText:
-                  'Identificador da categoria (telas dedicadas de '
-                  'categoria/subcategoria chegam em tasks futuras).',
-              onChanged: (value) => emitCategory(categoryId: value),
             ),
-            _SyncedAppTextField(
-              value: state.subcategoryId,
+            AppDropdown<String>(
               label: 'Subcategoria',
+              hintText: state.categoryId.isEmpty
+                  ? 'Selecione uma categoria primeiro'
+                  : 'Selecione uma subcategoria',
               semanticLabel: 'Subcategoria',
-              isDisabled: state.isBusy,
-              onChanged: (value) => emitCategory(subcategoryId: value),
+              closeSemanticLabel: 'Fechar seleção de subcategoria',
+              isDisabled: state.isBusy || state.categoryId.isEmpty,
+              options: state.subcategoryOptions
+                  .map(
+                    (category) => AppDropdownOption<String>(
+                      value: category.id,
+                      label: category.name,
+                    ),
+                  )
+                  .toList(growable: false),
+              selectedValues: state.subcategoryId.isEmpty
+                  ? const <String>{}
+                  : <String>{state.subcategoryId},
+              onChanged: (selected) => emitCategory(
+                subcategoryId: selected.isEmpty ? '' : selected.first,
+              ),
+              searchHintText: 'Buscar subcategoria',
+              noResultsLabel: 'Nenhuma subcategoria encontrada',
+              errorText: state.fieldErrors['subcategoryId'],
             ),
             _SyncedAppTextField(
               value: state.collectionId,
