@@ -85,6 +85,7 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart'
 import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
+import '../features/customers/data/mappers/customer_mapper.dart' as _i457;
 import '../features/invites/data/datasources/cloud_functions_invite_acceptance_data_source.dart'
     as _i674;
 import '../features/invites/data/datasources/firestore_invite_data_source.dart'
@@ -324,6 +325,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i756.UserProfileMapper>(
       () => const _i756.UserProfileMapper(),
     );
+    gh.lazySingleton<_i457.CustomerMapper>(() => const _i457.CustomerMapper());
     gh.lazySingleton<_i649.InviteMapper>(() => const _i649.InviteMapper());
     gh.lazySingleton<_i477.OnboardingProgressMapper>(
       () => const _i477.OnboardingProgressMapper(),

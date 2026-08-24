@@ -142,7 +142,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-047 — Implementar tela de auditoria de acessos](TASK-047-implementar-tela-de-auditoria-de-acessos.md) — Flutter Senior + Front-end
 
 ### EPIC-06 — Clientes
-- [ ] [TASK-048 — Modelar Customer](TASK-048-modelar-customer.md) — Flutter Senior
+- [x] [TASK-048 — Modelar Customer](TASK-048-modelar-customer.md) — Flutter Senior
 - [ ] [TASK-049 — Implementar cadastro de cliente](TASK-049-implementar-cadastro-de-cliente.md) — Flutter Senior + Front-end
 - [ ] [TASK-050 — Implementar endereços e contatos do cliente](TASK-050-implementar-enderecos-e-contatos.md) — Flutter Senior + Front-end
 - [ ] [TASK-051 — Implementar carteira de clientes](TASK-051-implementar-carteira-de-clientes.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 47 / 220 tasks concluídas.
+**Progresso:** 48 / 220 tasks concluídas.
