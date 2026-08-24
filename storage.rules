@@ -94,9 +94,26 @@ service firebase.storage {
     // Validação de tipo/tamanho no upload — nunca só na UI/client. Só se
     // aplica a `create`/`update` (em `delete` não existe `request.resource`).
 
+    // TASK-068: a product's media is a photo (unchanged 10 MB cap) or a
+    // short video. Duration cannot be checked server-side (Storage Rules
+    // has no way to inspect a video file's contents) — that limit is only
+    // enforced client-side, before upload even starts (see
+    // `FeatureFlagRegistry.configProductsVideoMaxDurationSeconds`); this
+    // rule still re-validates the one thing it *can* check server-side for
+    // a video, its byte size, the same defense-in-depth every other upload
+    // path here already gets.
     function isValidProductImage() {
       return request.resource.size <= 10 * 1024 * 1024
         && request.resource.contentType.matches('image/.*');
+    }
+
+    function isValidProductVideo() {
+      return request.resource.size <= 100 * 1024 * 1024
+        && request.resource.contentType.matches('video/.*');
+    }
+
+    function isValidProductMedia() {
+      return isValidProductImage() || isValidProductVideo();
     }
 
     function isValidOrderAttachment() {
@@ -127,7 +144,7 @@ service firebase.storage {
       allow read: if isActiveMember(organizationId);
 
       allow create, update: if hasCapability(organizationId, 'catalog.manage')
-        && isValidProductImage();
+        && isValidProductMedia();
 
       // Exclusão é sempre administrativa (ex.: remover imagem de produto
       // enviada por outro usuário) — mesma capability de escrita, nunca

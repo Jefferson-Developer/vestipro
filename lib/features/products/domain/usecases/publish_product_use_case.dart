@@ -89,6 +89,7 @@ final class PublishProductUseCase {
       sku: current.sku.value,
       reference: current.reference,
       categoryId: current.categoryId,
+      hasPrincipalPhoto: current.hasPrincipalPhoto,
     );
     if (completenessErrors.isNotEmpty) {
       return AppFailure<Product>(

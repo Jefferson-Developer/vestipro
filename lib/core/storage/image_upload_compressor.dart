@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+import 'package:injectable/injectable.dart';
+
 import 'image_compressor.dart';
 
 /// Compresses/resizes an image before it reaches
@@ -13,6 +15,7 @@ import 'image_compressor.dart';
 /// `file_picker`, a generated thumbnail, etc.) — selecting the source is a
 /// feature concern (out of scope for this task); this class only prepares
 /// already-obtained bytes for upload.
+@lazySingleton
 final class ImageUploadCompressor {
   const ImageUploadCompressor({ImageCompressor? compressor})
     : _compressor = compressor ?? const FlutterImageCompressor();

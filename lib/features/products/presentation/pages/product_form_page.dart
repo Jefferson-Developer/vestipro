@@ -11,6 +11,9 @@ import '../../domain/value_objects/target_audience.dart';
 import '../bloc/product_form_bloc.dart';
 import '../bloc/product_form_event.dart';
 import '../bloc/product_form_state.dart';
+import '../bloc/product_media_bloc.dart';
+import '../bloc/product_media_event.dart';
+import '../widgets/product_media_gallery.dart';
 
 /// Administrative create/edit form for [Product] (TASK-065): six sections
 /// (Básico, Categoria, Conteúdo, Características, SEO, Agendamento), a
@@ -25,6 +28,7 @@ class ProductFormPage extends StatelessWidget {
     required this.actorName,
     required this.permissionService,
     required this.createBloc,
+    required this.createMediaBloc,
     this.initialProduct,
     this.onSaved,
     super.key,
@@ -36,6 +40,11 @@ class ProductFormPage extends StatelessWidget {
   final String actorName;
   final PermissionService permissionService;
   final ProductFormBloc Function() createBloc;
+
+  /// Creates the [ProductMediaBloc] backing the "Mídia" section (TASK-068).
+  /// Only ever invoked once `ProductFormState.currentProduct` exists — see
+  /// `_MediaSection`.
+  final ProductMediaBloc Function() createMediaBloc;
   final Product? initialProduct;
   final void Function(Product product)? onSaved;
 
@@ -63,7 +72,10 @@ class ProductFormPage extends StatelessWidget {
           child: Scaffold(
             body: AppAdminPageLayout(
               title: initialProduct == null ? 'Novo produto' : 'Editar produto',
-              content: _ProductFormView(onSaved: onSaved),
+              content: _ProductFormView(
+                createMediaBloc: createMediaBloc,
+                onSaved: onSaved,
+              ),
             ),
           ),
         );
@@ -73,8 +85,9 @@ class ProductFormPage extends StatelessWidget {
 }
 
 class _ProductFormView extends StatefulWidget {
-  const _ProductFormView({this.onSaved});
+  const _ProductFormView({required this.createMediaBloc, this.onSaved});
 
+  final ProductMediaBloc Function() createMediaBloc;
   final void Function(Product product)? onSaved;
 
   @override
@@ -174,6 +187,7 @@ class _ProductFormViewState extends State<_ProductFormView> {
             nameFocus: _nameFocus,
             skuFocus: _skuFocus,
             referenceFocus: _referenceFocus,
+            createMediaBloc: widget.createMediaBloc,
           ),
         };
       },
@@ -203,12 +217,14 @@ class _ProductFormContent extends StatelessWidget {
     required this.nameFocus,
     required this.skuFocus,
     required this.referenceFocus,
+    required this.createMediaBloc,
   });
 
   final ProductFormState state;
   final FocusNode nameFocus;
   final FocusNode skuFocus;
   final FocusNode referenceFocus;
+  final ProductMediaBloc Function() createMediaBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -230,6 +246,13 @@ class _ProductFormContent extends StatelessWidget {
                   nameFocus: nameFocus,
                   skuFocus: skuFocus,
                   referenceFocus: referenceFocus,
+                ),
+              ),
+              _FormSection(
+                title: 'Mídia',
+                child: _MediaSection(
+                  state: state,
+                  createMediaBloc: createMediaBloc,
                 ),
               ),
               _FormSection(
@@ -421,6 +444,43 @@ class _BasicSection extends StatelessWidget {
           onChanged: (value) => emitBasic(brand: value),
         ),
       ],
+    );
+  }
+}
+
+/// Wraps [ProductMediaGallerySection] with its own [ProductMediaBloc]
+/// (TASK-068) once the product actually exists — every Storage path needs a
+/// real `productId`, so a brand-new, not-yet-saved draft shows a
+/// placeholder asking the seller to save first instead.
+class _MediaSection extends StatelessWidget {
+  const _MediaSection({required this.state, required this.createMediaBloc});
+
+  final ProductFormState state;
+  final ProductMediaBloc Function() createMediaBloc;
+
+  @override
+  Widget build(BuildContext context) {
+    final product = state.currentProduct;
+    if (product == null) {
+      return Text(
+        'Salve o produto para adicionar fotos e vídeos.',
+        style: AppTypography.bodySmall.copyWith(color: context.colors.outline),
+      );
+    }
+
+    return BlocProvider<ProductMediaBloc>(
+      key: ValueKey('product-media-bloc-${product.id}'),
+      create: (_) => createMediaBloc()
+        ..add(
+          ProductMediaStarted(
+            organizationId: state.organizationId,
+            productId: product.id,
+            updatedBy: state.userId,
+            actorName: state.actorName,
+            initialMedia: product.media,
+          ),
+        ),
+      child: const ProductMediaGallerySection(),
     );
   }
 }

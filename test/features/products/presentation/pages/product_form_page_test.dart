@@ -1,10 +1,14 @@
+import 'dart:typed_data';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/design_system/design_system.dart';
 import 'package:vestipro/core/errors/errors.dart';
+import 'package:vestipro/core/feature_flags/feature_flags.dart';
 import 'package:vestipro/core/permissions/permissions.dart';
+import 'package:vestipro/core/storage/storage.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/audit_log/audit_log.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
@@ -58,6 +62,18 @@ void main() {
       );
     }
 
+    ProductMediaBloc buildMediaBloc() {
+      return ProductMediaBloc(
+        storage: _InMemoryStorageDataSource(),
+        updateMedia: UpdateProductMediaUseCase(
+          productRepository,
+          auditLogRepository,
+        ),
+        featureFlagService: FakeFeatureFlagService(),
+        analyticsService: analyticsService,
+      );
+    }
+
     Widget buildPage() {
       return ProductFormPage(
         organizationId: 'org-1',
@@ -66,6 +82,7 @@ void main() {
         actorName: 'Ana Souza',
         permissionService: permissionService,
         createBloc: buildBloc,
+        createMediaBloc: buildMediaBloc,
       );
     }
 
@@ -317,6 +334,36 @@ final class _InMemoryAuditLogRepository implements AuditLogRepository {
     return const AppSuccess<AuditLogEntryPage>(
       AuditLogEntryPage(entries: <AuditLogEntry>[], hasMore: false),
     );
+  }
+}
+
+/// Minimal in-memory `StorageDataSource` (TASK-068) — `ProductMediaBloc`
+/// only needs a working upload/delete round trip for
+/// `ProductFormPage`'s own tests, which never actually exercise the media
+/// gallery's upload flow (see `product_media_bloc_test.dart` for that).
+final class _InMemoryStorageDataSource implements StorageDataSource {
+  final Map<String, Uint8List> _files = <String, Uint8List>{};
+
+  @override
+  Future<String> uploadFile({
+    required String path,
+    required Uint8List bytes,
+    String? contentType,
+    void Function(StorageUploadProgress progress)? onProgress,
+    StorageUploadCancelToken? cancelToken,
+  }) async {
+    _files[path] = bytes;
+    return 'https://storage.test/$path';
+  }
+
+  @override
+  Future<String> getDownloadUrl({required String path}) async {
+    return 'https://storage.test/$path';
+  }
+
+  @override
+  Future<void> deleteFile({required String path}) async {
+    _files.remove(path);
   }
 }
 

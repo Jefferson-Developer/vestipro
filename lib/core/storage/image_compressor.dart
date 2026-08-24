@@ -1,6 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:flutter_image_compress/flutter_image_compress.dart';
+import 'package:injectable/injectable.dart';
 
 /// Thin, mockable wrapper around the `flutter_image_compress` static API.
 ///
@@ -22,6 +23,7 @@ abstract interface class ImageCompressor {
   });
 }
 
+@LazySingleton(as: ImageCompressor)
 final class FlutterImageCompressor implements ImageCompressor {
   const FlutterImageCompressor();
 

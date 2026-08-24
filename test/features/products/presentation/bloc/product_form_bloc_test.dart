@@ -144,6 +144,24 @@ void main() {
       await _drainBloc();
       expect(bloc.state.submissionStatus, ProductFormSubmissionStatus.success);
 
+      // A principal photo (TASK-068) is set through the separate media
+      // gallery (`ProductMediaBloc`), not through this form — simulate that
+      // step having already happened before publishing.
+      final createdProduct = bloc.state.currentProduct!;
+      await productRepository.update(
+        product: createdProduct.copyWith(
+          media: const <ProductMedia>[
+            ProductMedia(
+              id: 'photo-1.jpg',
+              type: ProductMediaType.photo,
+              url: 'https://cdn.example.com/photo-1.jpg',
+              order: 0,
+              principal: true,
+            ),
+          ],
+        ),
+      );
+
       bloc.add(const ProductFormPublishRequested());
       await _drainBloc();
 

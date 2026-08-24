@@ -2,11 +2,13 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 
 import '../value_objects/ean.dart';
 import '../value_objects/product_gender.dart';
+import '../value_objects/product_media_type.dart';
 import '../value_objects/product_status.dart';
 import '../value_objects/product_sync_status.dart';
 import '../value_objects/sku.dart';
 import '../value_objects/target_audience.dart';
 import 'product_custom_field_value.dart';
+import 'product_media.dart';
 
 part 'product.freezed.dart';
 
@@ -58,8 +60,7 @@ abstract class Product with _$Product {
     String? seoTitle,
     String? seoDescription,
     String? seoSlug,
-    @Default(<String>[]) List<String> photoUrls,
-    @Default(<String>[]) List<String> videoUrls,
+    @Default(<ProductMedia>[]) List<ProductMedia> media,
     @Default(<ProductCustomFieldValue>[])
     List<ProductCustomFieldValue> customFieldValues,
     required DateTime createdAt,
@@ -70,4 +71,33 @@ abstract class Product with _$Product {
     required int version,
     required ProductSyncStatus syncStatus,
   }) = _Product;
+
+  /// [media] restricted to [ProductMediaType.photo], sorted by `order` —
+  /// the sequence catalog grids/detail (EPIC-10) and this admin form's
+  /// gallery (TASK-068) both render.
+  List<ProductMedia> get photos =>
+      _mediaOfType(ProductMediaType.photo)
+        ..sort((a, b) => a.order.compareTo(b.order));
+
+  /// [media] restricted to [ProductMediaType.video], sorted by `order`.
+  List<ProductMedia> get videos =>
+      _mediaOfType(ProductMediaType.video)
+        ..sort((a, b) => a.order.compareTo(b.order));
+
+  /// The single photo marked `principal`, if any — the cover image every
+  /// catalog card/grid (EPIC-10) shows for this product.
+  ProductMedia? get principalPhoto {
+    for (final item in media) {
+      if (item.type == ProductMediaType.photo && item.principal) return item;
+    }
+    return null;
+  }
+
+  /// Whether this product has a principal photo defined — the minimal media
+  /// completeness rule `validateProductCompletenessForPublish` (TASK-068)
+  /// enforces before a draft can become [ProductStatus.active].
+  bool get hasPrincipalPhoto => principalPhoto != null;
+
+  List<ProductMedia> _mediaOfType(ProductMediaType type) =>
+      media.where((item) => item.type == type).toList(growable: true);
 }

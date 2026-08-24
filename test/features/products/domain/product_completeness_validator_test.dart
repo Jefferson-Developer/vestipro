@@ -9,6 +9,7 @@ void main() {
         sku: 'CAMISA-001',
         reference: 'REF-001',
         categoryId: 'category-1',
+        hasPrincipalPhoto: true,
       );
 
       expect(errors, isEmpty);
@@ -20,6 +21,7 @@ void main() {
         sku: '  ',
         reference: '',
         categoryId: 'category-1',
+        hasPrincipalPhoto: true,
       );
 
       expect(errors['name'], isNotNull);
@@ -33,16 +35,30 @@ void main() {
         name: 'Camisa Essential',
         sku: 'CAMISA-001',
         reference: 'REF-001',
+        hasPrincipalPhoto: true,
       );
       final blank = validateProductCompletenessForPublish(
         name: 'Camisa Essential',
         sku: 'CAMISA-001',
         reference: 'REF-001',
         categoryId: '   ',
+        hasPrincipalPhoto: true,
       );
 
       expect(missing['categoryId'], isNotNull);
       expect(blank['categoryId'], isNotNull);
+    });
+
+    test('flags a missing principal photo (TASK-068)', () {
+      final errors = validateProductCompletenessForPublish(
+        name: 'Camisa Essential',
+        sku: 'CAMISA-001',
+        reference: 'REF-001',
+        categoryId: 'category-1',
+        hasPrincipalPhoto: false,
+      );
+
+      expect(errors['media'], isNotNull);
     });
   });
 }

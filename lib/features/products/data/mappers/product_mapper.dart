@@ -4,15 +4,18 @@ import '../../../../core/errors/errors.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/entities/product_custom_field_definition.dart';
 import '../../domain/entities/product_custom_field_value.dart';
+import '../../domain/entities/product_media.dart';
 import '../../domain/value_objects/ean.dart';
 import '../../domain/value_objects/product_custom_field_type.dart';
 import '../../domain/value_objects/product_gender.dart';
+import '../../domain/value_objects/product_media_type.dart';
 import '../../domain/value_objects/product_status.dart';
 import '../../domain/value_objects/product_sync_status.dart';
 import '../../domain/value_objects/sku.dart';
 import '../../domain/value_objects/target_audience.dart';
 import '../dtos/product_custom_field_definition_dto.dart';
 import '../dtos/product_dto.dart';
+import '../dtos/product_media_dto.dart';
 
 @lazySingleton
 final class ProductMapper {
@@ -49,8 +52,7 @@ final class ProductMapper {
       seoTitle: dto.seoTitle,
       seoDescription: dto.seoDescription,
       seoSlug: dto.seoSlug,
-      photoUrls: dto.photoUrls,
-      videoUrls: dto.videoUrls,
+      media: dto.media.map(_mediaToEntity).toList(growable: false),
       customFieldValues: dto.customFieldValues
           .map(_customFieldValueToEntity)
           .toList(growable: false),
@@ -95,8 +97,7 @@ final class ProductMapper {
       seoTitle: entity.seoTitle,
       seoDescription: entity.seoDescription,
       seoSlug: entity.seoSlug,
-      photoUrls: entity.photoUrls,
-      videoUrls: entity.videoUrls,
+      media: entity.media.map(_mediaToDto).toList(growable: false),
       customFieldValues: entity.customFieldValues
           .map(_customFieldValueToDto)
           .toList(growable: false),
@@ -250,6 +251,49 @@ final class ProductMapper {
       ProductCustomFieldType.number => 'number',
       ProductCustomFieldType.boolean => 'boolean',
       ProductCustomFieldType.list => 'list',
+    };
+  }
+
+  ProductMedia _mediaToEntity(ProductMediaDto dto) {
+    return ProductMedia(
+      id: dto.id,
+      type: mediaTypeToEntity(dto.type),
+      url: dto.url,
+      thumbnailUrl: dto.thumbnailUrl,
+      order: dto.order,
+      principal: dto.principal,
+      colorId: dto.colorId,
+    );
+  }
+
+  ProductMediaDto _mediaToDto(ProductMedia entity) {
+    return ProductMediaDto(
+      id: entity.id,
+      type: mediaTypeToDto(entity.type),
+      url: entity.url,
+      thumbnailUrl: entity.thumbnailUrl,
+      order: entity.order,
+      principal: entity.principal,
+      colorId: entity.colorId,
+    );
+  }
+
+  ProductMediaType mediaTypeToEntity(String value) {
+    return switch (value) {
+      'photo' => ProductMediaType.photo,
+      'video' => ProductMediaType.video,
+      _ => throw ValidationException(
+        'Invalid product media type.',
+        code: 'invalid_product_media_type',
+        cause: value,
+      ),
+    };
+  }
+
+  String mediaTypeToDto(ProductMediaType type) {
+    return switch (type) {
+      ProductMediaType.photo => 'photo',
+      ProductMediaType.video => 'video',
     };
   }
 

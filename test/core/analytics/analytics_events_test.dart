@@ -39,6 +39,7 @@ void main() {
           'product_created',
           'product_updated',
           'product_published',
+          'product_media_updated',
         ]),
       );
 

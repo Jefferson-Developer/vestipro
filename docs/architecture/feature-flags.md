@@ -42,6 +42,8 @@ without an `owner` and a `reviewBy` date must not be merged (see `AGENTS.md`). C
 | Key                          | Type      | Default | Description                                                                                                                      | Owner                        | Created    | Review by  |
 | ----------------------------- | --------- | ------- | --------------------------------------------------------------------------------------------------------------------------------- | ----------------------------- | ---------- | ---------- |
 | `feature_insights_enabled`    | boolean   | `false` | Shows the "Insights" shortcut in the reference module (`AboutAppPage`) — placeholder created to validate the Remote Config pipeline end to end, before the real Insights module ships (EPIC-17). | `flutter-senior-architect`    | 2026-08-22 | 2026-11-22 |
+| `config_products_video_max_duration_seconds` | integer | `60` | Maximum accepted duration (seconds) for a product's short video in the media gallery (TASK-068) — checked client-side before any upload starts. | `flutter-senior-architect` | 2026-08-24 | 2027-02-24 |
+| `config_products_video_max_size_mb` | integer | `50` | Maximum accepted file size (MB) for a product's short video in the media gallery (TASK-068) — checked client-side before any upload starts. | `flutter-senior-architect` | 2026-08-24 | 2027-02-24 |
 
 ## Defaults and fetch policy
 

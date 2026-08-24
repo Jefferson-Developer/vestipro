@@ -48,6 +48,7 @@ final class AnalyticsEvents {
   static const String productCreated = 'product_created';
   static const String productUpdated = 'product_updated';
   static const String productPublished = 'product_published';
+  static const String productMediaUpdated = 'product_media_updated';
 
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
@@ -85,5 +86,6 @@ final class AnalyticsEvents {
     productCreated,
     productUpdated,
     productPublished,
+    productMediaUpdated,
   ];
 }

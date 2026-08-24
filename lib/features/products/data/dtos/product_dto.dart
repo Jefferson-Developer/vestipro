@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/errors/errors.dart';
+import 'product_media_dto.dart';
 
 /// Firestore document shape for a Product scoped by organization.
 ///
@@ -36,8 +37,7 @@ final class ProductDto {
     this.seoTitle,
     this.seoDescription,
     this.seoSlug,
-    this.photoUrls = const <String>[],
-    this.videoUrls = const <String>[],
+    this.media = const <ProductMediaDto>[],
     this.customFieldValues = const <ProductCustomFieldValueDto>[],
     required this.createdAt,
     required this.createdBy,
@@ -148,8 +148,7 @@ final class ProductDto {
       seoTitle: seoTitle as String?,
       seoDescription: seoDescription as String?,
       seoSlug: seoSlug as String?,
-      photoUrls: _stringListFromJson(json['photoUrls'], field: 'photoUrls'),
-      videoUrls: _stringListFromJson(json['videoUrls'], field: 'videoUrls'),
+      media: _mediaDtosFromJson(json['media']),
       customFieldValues: _customFieldValueDtosFromJson(
         json['customFieldValues'],
       ),
@@ -190,8 +189,7 @@ final class ProductDto {
   final String? seoTitle;
   final String? seoDescription;
   final String? seoSlug;
-  final List<String> photoUrls;
-  final List<String> videoUrls;
+  final List<ProductMediaDto> media;
   final List<ProductCustomFieldValueDto> customFieldValues;
   final DateTime createdAt;
   final String createdBy;
@@ -229,8 +227,7 @@ final class ProductDto {
       'seoTitle': seoTitle,
       'seoDescription': seoDescription,
       'seoSlug': seoSlug,
-      'photoUrls': photoUrls,
-      'videoUrls': videoUrls,
+      'media': media.map((item) => item.toJson()).toList(growable: false),
       'customFieldValues': customFieldValues
           .map((value) => value.toJson())
           .toList(growable: false),
@@ -287,6 +284,27 @@ List<String> _stringListFromJson(Object? value, {required String field}) {
     );
   }
   return List<String>.unmodifiable(value.cast<String>());
+}
+
+List<ProductMediaDto> _mediaDtosFromJson(Object? value) {
+  if (value == null) return const <ProductMediaDto>[];
+  if (value is! List<dynamic>) {
+    throw const ValidationException(
+      'Invalid product media list.',
+      code: 'invalid_product_payload',
+    );
+  }
+  return value
+      .map((item) {
+        if (item is! Map<String, dynamic>) {
+          throw const ValidationException(
+            'Invalid product media payload.',
+            code: 'invalid_product_payload',
+          );
+        }
+        return ProductMediaDto.fromJson(item);
+      })
+      .toList(growable: false);
 }
 
 List<ProductCustomFieldValueDto> _customFieldValueDtosFromJson(Object? value) {

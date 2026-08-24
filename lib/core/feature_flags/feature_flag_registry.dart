@@ -18,6 +18,21 @@ final class FeatureFlagRegistry {
   /// `docs/architecture/feature-flags.md`.
   static const String featureInsightsEnabled = 'feature_insights_enabled';
 
+  /// Maximum accepted product video duration (TASK-068), read by
+  /// `ProductMediaBloc` and enforced client-side *before* any byte is
+  /// transferred — `storage.rules` cannot inspect video duration server-side,
+  /// so this is the only enforcement point for this particular limit (file
+  /// size/content-type are still re-validated server-side, see
+  /// `isValidProductMedia` in `storage.rules`).
+  static const String configProductsVideoMaxDurationSeconds =
+      'config_products_video_max_duration_seconds';
+
+  /// Maximum accepted product video file size in megabytes (TASK-068),
+  /// pre-checked client-side for a fast/clear rejection message; the real
+  /// authorization boundary is still `storage.rules`' own byte-size check.
+  static const String configProductsVideoMaxSizeMb =
+      'config_products_video_max_size_mb';
+
   static final List<FeatureFlagDefinition> _definitions =
       <FeatureFlagDefinition>[
         FeatureFlagDefinition(
@@ -32,6 +47,30 @@ final class FeatureFlagRegistry {
           reviewBy: DateTime.utc(2026, 11, 22),
           type: FeatureFlagValueType.boolean,
           defaultValue: false,
+        ),
+        FeatureFlagDefinition(
+          key: configProductsVideoMaxDurationSeconds,
+          description:
+              'Duracao maxima (em segundos) aceita para um video curto de '
+              'produto no cadastro/galeria de midia — rejeitado no '
+              'cliente antes do upload (TASK-068).',
+          owner: 'flutter-senior-architect',
+          createdAt: DateTime.utc(2026, 8, 24),
+          reviewBy: DateTime.utc(2027, 2, 24),
+          type: FeatureFlagValueType.integer,
+          defaultValue: 60,
+        ),
+        FeatureFlagDefinition(
+          key: configProductsVideoMaxSizeMb,
+          description:
+              'Tamanho maximo (em megabytes) aceito para um video curto de '
+              'produto no cadastro/galeria de midia — rejeitado no '
+              'cliente antes do upload (TASK-068).',
+          owner: 'flutter-senior-architect',
+          createdAt: DateTime.utc(2026, 8, 24),
+          reviewBy: DateTime.utc(2027, 2, 24),
+          type: FeatureFlagValueType.integer,
+          defaultValue: 50,
         ),
       ];
 

@@ -40,6 +40,7 @@ import '../core/database/app_database.dart' as _i935;
 import '../core/database/database.dart' as _i658;
 import '../core/environment/app_environment.dart' as _i461;
 import '../core/feature_flags/feature_flag_service.dart' as _i972;
+import '../core/feature_flags/feature_flags.dart' as _i869;
 import '../core/feature_flags/firebase_feature_flag_service.dart' as _i845;
 import '../core/functions/app_client_metadata.dart' as _i465;
 import '../core/functions/cloud_functions_service.dart' as _i147;
@@ -51,6 +52,9 @@ import '../core/permissions/permissions.dart' as _i47;
 import '../core/services/crash_reporter.dart' as _i349;
 import '../core/services/firebase_crash_reporter.dart' as _i559;
 import '../core/storage/firebase_storage_data_source.dart' as _i833;
+import '../core/storage/image_compressor.dart' as _i611;
+import '../core/storage/image_upload_compressor.dart' as _i620;
+import '../core/storage/storage.dart' as _i209;
 import '../core/storage/storage_data_source.dart' as _i904;
 import '../features/audit_log/data/datasources/audit_log_data_source.dart'
     as _i432;
@@ -463,6 +467,8 @@ import '../features/products/domain/usecases/update_category_use_case.dart'
     as _i328;
 import '../features/products/domain/usecases/update_collection_use_case.dart'
     as _i779;
+import '../features/products/domain/usecases/update_product_media_use_case.dart'
+    as _i739;
 import '../features/products/domain/usecases/update_product_use_case.dart'
     as _i12;
 import '../features/products/domain/usecases/update_season_use_case.dart'
@@ -476,6 +482,8 @@ import '../features/products/presentation/bloc/collection_form_bloc.dart'
 import '../features/products/presentation/bloc/collection_list_bloc.dart'
     as _i41;
 import '../features/products/presentation/bloc/product_form_bloc.dart' as _i198;
+import '../features/products/presentation/bloc/product_media_bloc.dart'
+    as _i968;
 import '../features/products/presentation/bloc/season_form_bloc.dart' as _i98;
 import '../features/products/presentation/bloc/season_list_bloc.dart' as _i986;
 import '../features/settings/data/datasources/about_app_data_source.dart'
@@ -641,6 +649,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i472.LeadRepository>(
       () => _i185.SharedPreferencesLeadRepository(gh<_i265.LeadMapper>()),
     );
+    gh.lazySingleton<_i611.ImageCompressor>(
+      () => const _i611.FlutterImageCompressor(),
+    );
     gh.lazySingleton<_i99.SecureSessionStore>(
       () => _i772.SecureFlutterSessionStore(gh<_i558.FlutterSecureStorage>()),
     );
@@ -803,6 +814,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1015.ProductCollectionLinkRepository>(),
         gh<_i321.ProductRepository>(),
       ),
+    );
+    gh.lazySingleton<_i620.ImageUploadCompressor>(
+      () =>
+          _i620.ImageUploadCompressor(compressor: gh<_i611.ImageCompressor>()),
     );
     gh.factory<_i551.ClearCustomerFormDraftUseCase>(
       () => _i551.ClearCustomerFormDraftUseCase(
@@ -1362,6 +1377,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i753.AuditLogRepository>(),
       ),
     );
+    gh.factory<_i739.UpdateProductMediaUseCase>(
+      () => _i739.UpdateProductMediaUseCase(
+        gh<_i321.ProductRepository>(),
+        gh<_i753.AuditLogRepository>(),
+      ),
+    );
     gh.factory<_i12.UpdateProductUseCase>(
       () => _i12.UpdateProductUseCase(
         gh<_i321.ProductRepository>(),
@@ -1444,6 +1465,16 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i820.UpdateBranchUseCase>(
       () => _i820.UpdateBranchUseCase(gh<_i160.BranchRepository>()),
+    );
+    gh.factory<_i968.ProductMediaBloc>(
+      () => _i968.ProductMediaBloc(
+        storage: gh<_i209.StorageDataSource>(),
+        updateMedia: gh<_i739.UpdateProductMediaUseCase>(),
+        featureFlagService: gh<_i869.FeatureFlagService>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+        compressor: gh<_i209.ImageUploadCompressor>(),
+        thumbnailCompressor: gh<_i209.ImageCompressor>(),
+      ),
     );
     gh.factory<_i835.AddUserToTeamUseCase>(
       () => _i835.AddUserToTeamUseCase(gh<_i320.TeamRepository>()),

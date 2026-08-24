@@ -35,6 +35,7 @@ const ORG_A = 'org-a';
 const ORG_B = 'org-b';
 
 const PRODUCT_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
+const PRODUCT_VIDEO_MAX_BYTES = 100 * 1024 * 1024;
 const ORDER_ATTACHMENT_MAX_BYTES = 20 * 1024 * 1024;
 
 const now = () => new Date();
@@ -172,6 +173,16 @@ describe('organizations/{organizationId}/products/{productId}/{fileName}', () =>
   test('upload de foto de produto acima do tamanho máximo permitido é rejeitado', async () => {
     const oversized = new Uint8Array(PRODUCT_IMAGE_MAX_BYTES + 1);
     await assertFails(upload('owner-a', PATH_A, oversized, 'image/jpeg'));
+  });
+
+  test('OWNER (catalog.manage) consegue enviar video curto de produto (TASK-068)', async () => {
+    const validVideo = new Uint8Array([0x00, 0x00, 0x00, 0x18, 0x66, 0x74, 0x79, 0x70]);
+    await assertSucceeds(upload('owner-a', `organizations/${ORG_A}/products/product-1/clip.mp4`, validVideo, 'video/mp4'));
+  });
+
+  test('upload de video de produto acima do tamanho máximo permitido é rejeitado (TASK-068)', async () => {
+    const oversized = new Uint8Array(PRODUCT_VIDEO_MAX_BYTES + 1);
+    await assertFails(upload('owner-a', `organizations/${ORG_A}/products/product-1/clip.mp4`, oversized, 'video/mp4'));
   });
 
   test('OWNER consegue excluir foto de produto enviada por outro usuário (ação administrativa)', async () => {

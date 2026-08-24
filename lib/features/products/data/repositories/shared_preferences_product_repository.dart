@@ -7,6 +7,7 @@ import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/entities/product_custom_field_value.dart';
+import '../../domain/entities/product_media.dart';
 import '../../domain/repositories/product_repository.dart';
 import '../../domain/value_objects/ean.dart';
 import '../../domain/value_objects/sku.dart';
@@ -271,8 +272,7 @@ final class SharedPreferencesProductRepository implements ProductRepository {
       seoTitle: _optionalString(json, 'seoTitle'),
       seoDescription: _optionalString(json, 'seoDescription'),
       seoSlug: _optionalString(json, 'seoSlug'),
-      photoUrls: _stringList(json['photoUrls']),
-      videoUrls: _stringList(json['videoUrls']),
+      media: _mediaFromJson(json['media']),
       customFieldValues: _customFieldValuesFromJson(json['customFieldValues']),
       createdAt: _requiredDate(json, 'createdAt'),
       createdBy: _requiredString(json, 'createdBy'),
@@ -321,8 +321,8 @@ final class SharedPreferencesProductRepository implements ProductRepository {
       if (product.seoDescription != null)
         'seoDescription': product.seoDescription,
       if (product.seoSlug != null) 'seoSlug': product.seoSlug,
-      if (product.photoUrls.isNotEmpty) 'photoUrls': product.photoUrls,
-      if (product.videoUrls.isNotEmpty) 'videoUrls': product.videoUrls,
+      if (product.media.isNotEmpty)
+        'media': product.media.map(_mediaToJson).toList(growable: false),
       if (product.customFieldValues.isNotEmpty)
         'customFieldValues': product.customFieldValues
             .map(_customFieldValueToJson)
@@ -335,6 +335,47 @@ final class SharedPreferencesProductRepository implements ProductRepository {
         'deletedAt': product.deletedAt!.toUtc().toIso8601String(),
       'version': product.version,
       'syncStatus': _mapper.syncStatusToDto(product.syncStatus),
+    };
+  }
+
+  List<ProductMedia> _mediaFromJson(Object? value) {
+    if (value == null) return const <ProductMedia>[];
+    if (value is! List<dynamic>) {
+      throw const ValidationException(
+        'Invalid local product media list.',
+        code: 'invalid_product_local_payload',
+      );
+    }
+    return value
+        .map((item) {
+          if (item is! Map<String, dynamic>) {
+            throw const ValidationException(
+              'Invalid local product media payload.',
+              code: 'invalid_product_local_payload',
+            );
+          }
+          return ProductMedia(
+            id: _requiredString(item, 'id'),
+            type: _mapper.mediaTypeToEntity(_requiredString(item, 'type')),
+            url: _requiredString(item, 'url'),
+            thumbnailUrl: _optionalString(item, 'thumbnailUrl'),
+            order: _requiredInt(item, 'order'),
+            principal: (item['principal'] as bool?) ?? false,
+            colorId: _optionalString(item, 'colorId'),
+          );
+        })
+        .toList(growable: false);
+  }
+
+  Map<String, dynamic> _mediaToJson(ProductMedia media) {
+    return <String, dynamic>{
+      'id': media.id,
+      'type': _mapper.mediaTypeToDto(media.type),
+      'url': media.url,
+      if (media.thumbnailUrl != null) 'thumbnailUrl': media.thumbnailUrl,
+      'order': media.order,
+      'principal': media.principal,
+      if (media.colorId != null) 'colorId': media.colorId,
     };
   }
 

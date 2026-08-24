@@ -5,161 +5,129 @@ import 'package:vestipro/features/audit_log/audit_log.dart';
 import 'package:vestipro/features/products/products.dart';
 
 void main() {
-  group('PublishProductUseCase', () {
+  group('UpdateProductMediaUseCase', () {
     late _InMemoryProductRepository repository;
     late _InMemoryAuditLogRepository auditLogRepository;
-    late PublishProductUseCase useCase;
+    late UpdateProductMediaUseCase useCase;
 
     setUp(() {
       repository = _InMemoryProductRepository();
       auditLogRepository = _InMemoryAuditLogRepository();
-      useCase = PublishProductUseCase(repository, auditLogRepository);
-    });
-
-    test('publishes a complete draft and records an audit entry', () async {
-      repository.seed(
-        _buildProduct(
-          id: 'product-1',
-          categoryId: 'category-1',
-          media: const <ProductMedia>[
-            ProductMedia(
-              id: 'photo-1.jpg',
-              type: ProductMediaType.photo,
-              url: 'https://cdn.example.com/photo-1.jpg',
-              order: 0,
-              principal: true,
-            ),
-          ],
-        ),
-      );
-
-      final result = await useCase.call(
-        organizationId: 'org-1',
-        id: 'product-1',
-        publishedBy: 'user-1',
-        actorName: 'Ana Souza',
-      );
-
-      expect(result, isA<AppSuccess<Product>>());
-      final product = (result as AppSuccess<Product>).value;
-      expect(product.status, ProductStatus.active);
-      expect(product.version, 2);
-      expect(
-        auditLogRepository.entries.single.action,
-        AuditAction.productPublished,
-      );
-      expect(auditLogRepository.entries.single.entityId, 'product-1');
+      useCase = UpdateProductMediaUseCase(repository, auditLogRepository);
     });
 
     test(
-      'blocks publishing when the category is missing, with a clear message',
+      'replaces the media list of a draft product without an audit entry',
       () async {
         repository.seed(_buildProduct(id: 'product-1'));
 
         final result = await useCase.call(
           organizationId: 'org-1',
           id: 'product-1',
-          publishedBy: 'user-1',
-          actorName: 'Ana Souza',
-        );
-
-        expect(result, isA<AppFailure<Product>>());
-        final failure = (result as AppFailure<Product>).failure;
-        expect(failure, isA<ValidationFailure>());
-        expect(
-          (failure as ValidationFailure).fieldErrors,
-          containsPair('categoryId', isNotEmpty),
-        );
-        expect(
-          repository.products.single.status,
-          ProductStatus.draft,
-          reason: 'a blocked publish must never mutate the product',
-        );
-        expect(auditLogRepository.entries, isEmpty);
-      },
-    );
-
-    test('blocks publishing when there is no principal photo, with a clear '
-        'message (TASK-068)', () async {
-      repository.seed(_buildProduct(id: 'product-1', categoryId: 'category-1'));
-
-      final result = await useCase.call(
-        organizationId: 'org-1',
-        id: 'product-1',
-        publishedBy: 'user-1',
-        actorName: 'Ana Souza',
-      );
-
-      expect(result, isA<AppFailure<Product>>());
-      final failure = (result as AppFailure<Product>).failure;
-      expect(failure, isA<ValidationFailure>());
-      expect(
-        (failure as ValidationFailure).fieldErrors,
-        containsPair('media', isNotEmpty),
-      );
-      expect(auditLogRepository.entries, isEmpty);
-    });
-
-    test('refuses to publish a product that is not a draft', () async {
-      repository.seed(
-        _buildProduct(
-          id: 'product-1',
-          categoryId: 'category-1',
-          status: ProductStatus.active,
           media: const <ProductMedia>[
             ProductMedia(
-              id: 'photo-1.jpg',
+              id: 'a.jpg',
               type: ProductMediaType.photo,
-              url: 'https://cdn.example.com/photo-1.jpg',
+              url: 'https://cdn.example.com/a.jpg',
               order: 0,
               principal: true,
             ),
           ],
-        ),
+          updatedBy: 'user-2',
+          actorName: 'Ana Souza',
+        );
+
+        expect(result, isA<AppSuccess<Product>>());
+        final product = (result as AppSuccess<Product>).value;
+        expect(product.media, hasLength(1));
+        expect(product.hasPrincipalPhoto, isTrue);
+        expect(product.version, 2);
+        expect(product.syncStatus, ProductSyncStatus.pending);
+        expect(auditLogRepository.entries, isEmpty);
+      },
+    );
+
+    test('records an audit entry (mediaCount/principalPhotoId) when the '
+        'product was already published', () async {
+      repository.seed(
+        _buildProduct(id: 'product-1', status: ProductStatus.active),
       );
 
       final result = await useCase.call(
         organizationId: 'org-1',
         id: 'product-1',
-        publishedBy: 'user-1',
+        media: const <ProductMedia>[
+          ProductMedia(
+            id: 'a.jpg',
+            type: ProductMediaType.photo,
+            url: 'https://cdn.example.com/a.jpg',
+            order: 0,
+            principal: true,
+          ),
+        ],
+        updatedBy: 'user-2',
         actorName: 'Ana Souza',
       );
 
-      expect(result, isA<AppFailure<Product>>());
-      expect((result as AppFailure<Product>).failure, isA<ValidationFailure>());
-      expect(auditLogRepository.entries, isEmpty);
+      expect(result, isA<AppSuccess<Product>>());
+      expect(auditLogRepository.entries, hasLength(1));
+      final entry = auditLogRepository.entries.single;
+      expect(entry.action, AuditAction.productUpdated);
+      expect(entry.previousValue?['mediaCount'], 0);
+      expect(entry.newValue?['mediaCount'], 1);
+      expect(entry.newValue?['principalPhotoId'], 'a.jpg');
     });
 
     test('fails when the product does not exist', () async {
       final result = await useCase.call(
         organizationId: 'org-1',
         id: 'missing',
-        publishedBy: 'user-1',
+        media: const <ProductMedia>[],
+        updatedBy: 'user-2',
         actorName: 'Ana Souza',
       );
 
       expect(result, isA<AppFailure<Product>>());
       expect((result as AppFailure<Product>).failure, isA<NotFoundFailure>());
     });
+
+    test(
+      'rejects an empty updatedBy without touching the repository',
+      () async {
+        repository.seed(_buildProduct(id: 'product-1'));
+
+        final result = await useCase.call(
+          organizationId: 'org-1',
+          id: 'product-1',
+          media: const <ProductMedia>[],
+          updatedBy: '   ',
+          actorName: 'Ana Souza',
+        );
+
+        expect(result, isA<AppFailure<Product>>());
+        expect(
+          (result as AppFailure<Product>).failure,
+          isA<ValidationFailure>(),
+        );
+        expect(repository.products.single.version, 1);
+      },
+    );
   });
 }
 
 Product _buildProduct({
   required String id,
-  String? categoryId,
+  String organizationId = 'org-1',
   ProductStatus status = ProductStatus.draft,
-  List<ProductMedia> media = const <ProductMedia>[],
 }) {
   final now = DateTime.utc(2026, 1, 1);
   return Product(
     id: id,
-    organizationId: 'org-1',
+    organizationId: organizationId,
     sku: Sku.parse('CAMISA-001'),
     reference: 'REF-$id',
     name: 'Produto $id',
-    categoryId: categoryId,
     status: status,
-    media: media,
     createdAt: now,
     createdBy: 'user-1',
     updatedAt: now,

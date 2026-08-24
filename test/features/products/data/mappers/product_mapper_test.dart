@@ -2,6 +2,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/features/products/data/dtos/product_custom_field_definition_dto.dart';
 import 'package:vestipro/features/products/data/dtos/product_dto.dart';
+import 'package:vestipro/features/products/data/dtos/product_media_dto.dart';
 import 'package:vestipro/features/products/data/mappers/product_mapper.dart';
 import 'package:vestipro/features/products/products.dart';
 
@@ -43,8 +44,22 @@ void main() {
         seoTitle: 'Camisa Essential | Malwee',
         seoDescription: 'Camisa basica de algodao pima para o verao.',
         seoSlug: 'camisa-essential',
-        photoUrls: const <String>['https://cdn.example.com/foto1.jpg'],
-        videoUrls: const <String>['https://cdn.example.com/video1.mp4'],
+        media: const <ProductMediaDto>[
+          ProductMediaDto(
+            id: 'foto1.jpg',
+            type: 'photo',
+            url: 'https://cdn.example.com/foto1.jpg',
+            thumbnailUrl: 'https://cdn.example.com/foto1_thumb.jpg',
+            order: 0,
+            principal: true,
+          ),
+          ProductMediaDto(
+            id: 'video1.mp4',
+            type: 'video',
+            url: 'https://cdn.example.com/video1.mp4',
+            order: 0,
+          ),
+        ],
         customFieldValues: const <ProductCustomFieldValueDto>[
           ProductCustomFieldValueDto(
             fieldDefinitionId: 'field-1',
@@ -99,8 +114,13 @@ void main() {
         'Camisa basica de algodao pima para o verao.',
       );
       expect(entity.seoSlug, 'camisa-essential');
-      expect(entity.photoUrls, <String>['https://cdn.example.com/foto1.jpg']);
-      expect(entity.videoUrls, <String>['https://cdn.example.com/video1.mp4']);
+      expect(entity.photos.single.url, 'https://cdn.example.com/foto1.jpg');
+      expect(
+        entity.photos.single.thumbnailUrl,
+        'https://cdn.example.com/foto1_thumb.jpg',
+      );
+      expect(entity.photos.single.principal, isTrue);
+      expect(entity.videos.single.url, 'https://cdn.example.com/video1.mp4');
       expect(entity.customFieldValues.single.fieldDefinitionId, 'field-1');
       expect(entity.customFieldValues.single.value, 'algodao-organico');
       expect(entity.version, 3);
@@ -124,8 +144,7 @@ void main() {
         expect(entity.seoDescription, isNull);
         expect(entity.seoSlug, isNull);
         expect(entity.tags, isEmpty);
-        expect(entity.photoUrls, isEmpty);
-        expect(entity.videoUrls, isEmpty);
+        expect(entity.media, isEmpty);
         expect(entity.customFieldValues, isEmpty);
         expect(entity.status, ProductStatus.draft);
         expect(entity.syncStatus, ProductSyncStatus.pending);
@@ -151,8 +170,10 @@ void main() {
       expect(roundTripped.seoTitle, dto.seoTitle);
       expect(roundTripped.seoDescription, dto.seoDescription);
       expect(roundTripped.seoSlug, dto.seoSlug);
-      expect(roundTripped.photoUrls, dto.photoUrls);
-      expect(roundTripped.videoUrls, dto.videoUrls);
+      expect(
+        roundTripped.media.map((item) => item.toJson()).toList(),
+        dto.media.map((item) => item.toJson()).toList(),
+      );
       expect(
         roundTripped.customFieldValues.single.fieldDefinitionId,
         dto.customFieldValues.single.fieldDefinitionId,
