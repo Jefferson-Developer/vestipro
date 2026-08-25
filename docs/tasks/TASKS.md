@@ -175,7 +175,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-072 — Implementar geração de variantes produto-cor-tamanho](TASK-072-implementar-geracao-de-variantes.md) — Flutter Senior
 - [x] [TASK-073 — Implementar UI de grade comercial](TASK-073-implementar-ui-de-grade-comercial.md) — Flutter Senior + Front-end
 - [x] [TASK-074 — Implementar disponibilidade por variante](TASK-074-implementar-disponibilidade-por-variante.md) — Flutter Senior + Front-end
-- [ ] [TASK-075 — Implementar ordenação personalizada de tamanhos](TASK-075-implementar-ordenacao-de-tamanhos.md) — Flutter Senior + Front-end
+- [x] [TASK-075 — Implementar ordenação personalizada de tamanhos](TASK-075-implementar-ordenacao-de-tamanhos.md) — Flutter Senior + Front-end
 
 ### EPIC-10 — Catálogo Premium
 - [ ] [TASK-076 — Implementar home do catálogo](TASK-076-implementar-home-do-catalogo.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 74 / 220 tasks concluídas.
+**Progresso:** 75 / 220 tasks concluídas.

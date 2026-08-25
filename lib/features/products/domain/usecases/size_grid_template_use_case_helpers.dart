@@ -9,12 +9,9 @@ typedef SizeGridValidationResult = ({
 String normalizeSizeGridTemplateName(String value) => value.trim();
 
 List<SizeGridSize> normalizeSizeGridSizes(List<SizeGridSize> sizes) {
-  final ordered = List<SizeGridSize>.of(sizes)
-    ..sort((a, b) {
-      final byScore = a.orderScore.compareTo(b.orderScore);
-      if (byScore != 0) return byScore;
-      return a.label.compareTo(b.label);
-    });
+  // Ordering always goes through the central comparator (TASK-075) — never
+  // reimplement score/label comparison here.
+  final ordered = sizes.sortedByCommercialOrder();
 
   return List<SizeGridSize>.unmodifiable(
     ordered.indexed.map((entry) {

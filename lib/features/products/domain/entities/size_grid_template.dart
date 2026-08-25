@@ -27,6 +27,32 @@ final class SizeGridSize {
   }
 }
 
+/// Central commercial ordering comparator for [SizeGridSize] (TASK-075).
+///
+/// This is the single source of truth for size ordering across the app:
+/// every screen or query that lists sizes (grade comercial, formulário de
+/// cadastro, relatórios, detalhe de produto) must sort through this
+/// comparator — directly or via [SizeGridSizeOrdering.sortedByCommercialOrder]
+/// or [SizeGridTemplate.orderedSizes] — instead of reimplementing sorting.
+///
+/// Sizes are always ordered by the explicit, required [SizeGridSize.orderScore]
+/// (e.g. PP=1, P=2, M=3 or 34=1, 36=2, 38=3), never by alphabetical label.
+/// The label is used only as a deterministic tie-breaker when two sizes of
+/// the same template share the same score — it never substitutes for a
+/// missing or inconsistent score, which the data layer must reject outright.
+int compareSizeGridSizesByOrder(SizeGridSize a, SizeGridSize b) {
+  final byScore = a.orderScore.compareTo(b.orderScore);
+  if (byScore != 0) return byScore;
+  return a.label.compareTo(b.label);
+}
+
+/// Shared extension so any list of [SizeGridSize] can be sorted using the
+/// single central commercial-order comparator (TASK-075).
+extension SizeGridSizeOrdering on List<SizeGridSize> {
+  List<SizeGridSize> sortedByCommercialOrder() =>
+      List<SizeGridSize>.of(this)..sort(compareSizeGridSizesByOrder);
+}
+
 /// Reusable organization-scoped size grid, associated to many products by id.
 final class SizeGridTemplate {
   const SizeGridTemplate({
@@ -55,8 +81,7 @@ final class SizeGridTemplate {
   final int version;
   final ProductSyncStatus syncStatus;
 
-  List<SizeGridSize> get orderedSizes =>
-      List<SizeGridSize>.of(sizes)..sort(_compareSizes);
+  List<SizeGridSize> get orderedSizes => sizes.sortedByCommercialOrder();
 
   bool get isDeleted => deletedAt != null;
 
@@ -82,11 +107,5 @@ final class SizeGridTemplate {
       version: version ?? this.version,
       syncStatus: syncStatus ?? this.syncStatus,
     );
-  }
-
-  static int _compareSizes(SizeGridSize a, SizeGridSize b) {
-    final byScore = a.orderScore.compareTo(b.orderScore);
-    if (byScore != 0) return byScore;
-    return a.label.compareTo(b.label);
   }
 }
