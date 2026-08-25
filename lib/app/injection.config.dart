@@ -118,6 +118,8 @@ import '../features/catalog/domain/usecases/load_catalog_home_cache_use_case.dar
 import '../features/catalog/domain/usecases/save_catalog_home_cache_use_case.dart'
     as _i64;
 import '../features/catalog/presentation/bloc/catalog_home_bloc.dart' as _i420;
+import '../features/catalog/presentation/bloc/product_detail_bloc.dart'
+    as _i578;
 import '../features/catalog/presentation/bloc/product_grid_bloc.dart' as _i331;
 import '../features/crm/crm.dart' as _i205;
 import '../features/crm/data/mappers/crm_activity_mapper.dart' as _i203;
@@ -529,6 +531,8 @@ import '../features/products/domain/usecases/get_product_by_id_use_case.dart'
     as _i721;
 import '../features/products/domain/usecases/get_product_form_draft_use_case.dart'
     as _i1021;
+import '../features/products/domain/usecases/get_size_grid_template_by_id_use_case.dart'
+    as _i194;
 import '../features/products/domain/usecases/get_variant_availability_use_case.dart'
     as _i385;
 import '../features/products/domain/usecases/list_categories_use_case.dart'
@@ -537,6 +541,8 @@ import '../features/products/domain/usecases/list_collections_use_case.dart'
     as _i1023;
 import '../features/products/domain/usecases/list_product_colors_use_case.dart'
     as _i789;
+import '../features/products/domain/usecases/list_product_variants_by_product_use_case.dart'
+    as _i530;
 import '../features/products/domain/usecases/list_products_by_collection_use_case.dart'
     as _i815;
 import '../features/products/domain/usecases/list_seasons_use_case.dart'
@@ -1057,6 +1063,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i795.ProductVariantRepository>(),
       ),
     );
+    gh.factory<_i530.ListProductVariantsByProductUseCase>(
+      () => _i530.ListProductVariantsByProductUseCase(
+        gh<_i795.ProductVariantRepository>(),
+      ),
+    );
     gh.factory<_i615.UpdateProductVariantUseCase>(
       () => _i615.UpdateProductVariantUseCase(
         gh<_i795.ProductVariantRepository>(),
@@ -1250,6 +1261,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i715.CreateSizeGridTemplateUseCase>(
       () => _i715.CreateSizeGridTemplateUseCase(
+        gh<_i174.SizeGridTemplateRepository>(),
+      ),
+    );
+    gh.factory<_i194.GetSizeGridTemplateByIdUseCase>(
+      () => _i194.GetSizeGridTemplateByIdUseCase(
         gh<_i174.SizeGridTemplateRepository>(),
       ),
     );
@@ -1523,6 +1539,16 @@ extension GetItInjectableX on _i174.GetIt {
         createStage: gh<_i959.CreatePipelineStageUseCase>(),
         renameStage: gh<_i266.RenamePipelineStageUseCase>(),
         reorderStages: gh<_i482.ReorderPipelineStagesUseCase>(),
+      ),
+    );
+    gh.factory<_i578.ProductDetailBloc>(
+      () => _i578.ProductDetailBloc(
+        getProductById: gh<_i721.GetProductByIdUseCase>(),
+        listVariantsByProduct: gh<_i530.ListProductVariantsByProductUseCase>(),
+        listProductColors: gh<_i789.ListProductColorsUseCase>(),
+        getSizeGridTemplateById: gh<_i194.GetSizeGridTemplateByIdUseCase>(),
+        getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i330.CreateCompanyUseCase>(
