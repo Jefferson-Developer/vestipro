@@ -24,6 +24,9 @@ void main() {
             initialSource: ProductSearchSource.offline,
             createBloc: () => ProductSearchBloc.testing(
               searchProducts: SearchProductsUseCase(repository),
+              getVariantAvailability: GetVariantAvailabilityUseCase(
+                const _FakeVariantAvailabilityRepository(),
+              ),
               debounceDuration: const Duration(milliseconds: 1),
             ),
           ),
@@ -39,6 +42,27 @@ void main() {
       );
     });
   });
+}
+
+final class _FakeVariantAvailabilityRepository
+    implements VariantAvailabilityRepository {
+  const _FakeVariantAvailabilityRepository();
+
+  @override
+  Future<AppResult<List<VariantAvailability>>> listByProductIds({
+    required String organizationId,
+    required Iterable<String> productIds,
+  }) async {
+    return const AppSuccess<List<VariantAvailability>>(<VariantAvailability>[]);
+  }
+
+  @override
+  Future<AppResult<List<VariantAvailability>>> listByVariantIds({
+    required String organizationId,
+    required Iterable<String> variantIds,
+  }) async {
+    return const AppSuccess<List<VariantAvailability>>(<VariantAvailability>[]);
+  }
 }
 
 final class _FakeProductSearchRepository implements ProductSearchRepository {

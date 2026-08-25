@@ -202,6 +202,9 @@ service cloud.firestore {
           'sizeId',
           'sku',
           'ean',
+          'manualAvailabilityStatus',
+          'manualAvailableQuantity',
+          'manualFutureAvailableAt',
           'status',
           'createdAt',
           'createdBy',
@@ -246,6 +249,25 @@ service cloud.firestore {
               || data.ean.matches('^[0-9]{13}$')
             )
           )
+        )
+        && (
+          !data.keys().hasAny(['manualAvailabilityStatus'])
+          || data.manualAvailabilityStatus in [
+            'readyStock',
+            'futureStock',
+            'unavailable'
+          ]
+        )
+        && (
+          !data.keys().hasAny(['manualAvailableQuantity'])
+          || (
+            data.manualAvailableQuantity is int
+            && data.manualAvailableQuantity >= 0
+          )
+        )
+        && (
+          !data.keys().hasAny(['manualFutureAvailableAt'])
+          || data.manualFutureAvailableAt is timestamp
         )
         && data.status in ['active', 'inactive']
         && data.createdAt is timestamp

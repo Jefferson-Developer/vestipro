@@ -4,7 +4,10 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/commercial_size_grid_draft.dart';
+import '../../domain/entities/variant_availability.dart';
+import '../../domain/entities/variant_availability_snapshot.dart';
 import '../../domain/usecases/get_commercial_size_grid_draft_use_case.dart';
+import '../../domain/usecases/get_variant_availability_use_case.dart';
 import '../../domain/usecases/save_commercial_size_grid_draft_use_case.dart';
 import 'commercial_size_grid_event.dart';
 import 'commercial_size_grid_state.dart';
@@ -12,8 +15,11 @@ import 'commercial_size_grid_state.dart';
 @injectable
 final class CommercialSizeGridBloc
     extends Bloc<CommercialSizeGridEvent, CommercialSizeGridState> {
-  CommercialSizeGridBloc({required this.getDraft, required this.saveDraft})
-    : super(const CommercialSizeGridState()) {
+  CommercialSizeGridBloc({
+    required this.getDraft,
+    required this.saveDraft,
+    required this.getAvailability,
+  }) : super(const CommercialSizeGridState()) {
     on<CommercialSizeGridStarted>(_onStarted, transformer: restartable());
     on<CommercialSizeGridQuantityChanged>(
       _onQuantityChanged,
@@ -27,46 +33,66 @@ final class CommercialSizeGridBloc
 
   final GetCommercialSizeGridDraftUseCase getDraft;
   final SaveCommercialSizeGridDraftUseCase saveDraft;
+  final GetVariantAvailabilityUseCase getAvailability;
 
   Future<void> _onStarted(
     CommercialSizeGridStarted event,
     Emitter<CommercialSizeGridState> emit,
   ) async {
+    final variants = event.variants
+        .where(
+          (variant) =>
+              variant.organizationId == event.product.organizationId &&
+              variant.productId == event.product.id,
+        )
+        .toList(growable: false);
+
     emit(
       state.copyWith(
         loadStatus: CommercialSizeGridLoadStatus.loading,
         product: event.product,
         colors: event.colors,
         sizeGridTemplate: event.sizeGridTemplate,
-        variants: event.variants
-            .where(
-              (variant) =>
-                  variant.organizationId == event.product.organizationId &&
-                  variant.productId == event.product.id,
-            )
-            .toList(growable: false),
-        availabilityByVariantId: event.availabilityByVariantId,
+        variants: variants,
+        availabilityByVariantId: const <String, VariantAvailability>{},
         clearFailure: true,
       ),
     );
 
-    final result = await getDraft(
+    final draftResult = await getDraft(
       organizationId: event.product.organizationId,
       productId: event.product.id,
     );
     if (emit.isDone) return;
-    switch (result) {
+    switch (draftResult) {
       case AppSuccess<CommercialSizeGridDraft?>(value: final draft):
-        emit(
-          state.copyWith(
-            loadStatus: CommercialSizeGridLoadStatus.ready,
-            saveStatus: CommercialSizeGridSaveStatus.idle,
-            quantitiesByVariantId: _filteredQuantities(
-              draft?.quantitiesByVariantId ?? const <String, int>{},
-            ),
-            clearFailure: true,
-          ),
+        final availabilityResult = await getAvailability(
+          organizationId: event.product.organizationId,
+          variantIds: variants.map((variant) => variant.id),
         );
+        if (emit.isDone) return;
+        switch (availabilityResult) {
+          case AppSuccess<VariantAvailabilitySnapshot>(value: final snapshot):
+            emit(
+              state.copyWith(
+                loadStatus: CommercialSizeGridLoadStatus.ready,
+                saveStatus: CommercialSizeGridSaveStatus.idle,
+                availabilityByVariantId: snapshot.byVariantId,
+                quantitiesByVariantId: _filteredQuantities(
+                  draft?.quantitiesByVariantId ?? const <String, int>{},
+                  availabilityByVariantId: snapshot.byVariantId,
+                ),
+                clearFailure: true,
+              ),
+            );
+          case AppFailure<VariantAvailabilitySnapshot>(failure: final failure):
+            emit(
+              state.copyWith(
+                loadStatus: CommercialSizeGridLoadStatus.failure,
+                failure: failure,
+              ),
+            );
+        }
       case AppFailure<CommercialSizeGridDraft?>(failure: final failure):
         emit(
           state.copyWith(
@@ -137,9 +163,17 @@ final class CommercialSizeGridBloc
     emit(state.copyWith(isOnline: event.isOnline));
   }
 
-  Map<String, int> _filteredQuantities(Map<String, int> draftQuantities) {
+  Map<String, int> _filteredQuantities(
+    Map<String, int> draftQuantities, {
+    Map<String, VariantAvailability>? availabilityByVariantId,
+  }) {
     final validVariantIds = state.variants
-        .where(state.isVariantEditable)
+        .where((variant) {
+          final availability =
+              availabilityByVariantId?[variant.id] ??
+              state.availabilityForVariant(variant);
+          return availability.acceptsQuantity;
+        })
         .map((variant) => variant.id)
         .toSet();
     return Map<String, int>.unmodifiable(

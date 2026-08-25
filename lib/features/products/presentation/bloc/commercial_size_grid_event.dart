@@ -2,7 +2,6 @@ import '../../domain/entities/product.dart';
 import '../../domain/entities/product_color.dart';
 import '../../domain/entities/product_variant.dart';
 import '../../domain/entities/size_grid_template.dart';
-import '../../domain/value_objects/commercial_variant_availability.dart';
 
 sealed class CommercialSizeGridEvent {
   const CommercialSizeGridEvent();
@@ -14,15 +13,12 @@ final class CommercialSizeGridStarted extends CommercialSizeGridEvent {
     required this.colors,
     required this.sizeGridTemplate,
     required this.variants,
-    this.availabilityByVariantId =
-        const <String, CommercialVariantAvailability>{},
   });
 
   final Product product;
   final List<ProductColor> colors;
   final SizeGridTemplate sizeGridTemplate;
   final List<ProductVariant> variants;
-  final Map<String, CommercialVariantAvailability> availabilityByVariantId;
 }
 
 final class CommercialSizeGridQuantityChanged extends CommercialSizeGridEvent {

@@ -4,6 +4,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/entities/product_search_source.dart';
+import '../../domain/entities/variant_availability.dart';
+import '../../domain/value_objects/variant_availability_status.dart';
 import '../bloc/product_search_bloc.dart';
 import '../bloc/product_search_event.dart';
 import '../bloc/product_search_state.dart';
@@ -99,7 +101,7 @@ class _ProductSearchView extends StatelessWidget {
                     child: AppProductGrid(
                       status: _gridStatus(state),
                       products: state.products
-                          .map(_cardDataForProduct)
+                          .map((product) => _cardDataForProduct(product, state))
                           .toList(growable: false),
                       emptyTitle: state.status == ProductSearchStatus.idle
                           ? 'Digite para buscar produtos'
@@ -139,19 +141,59 @@ class _ProductSearchView extends StatelessWidget {
     };
   }
 
-  AppProductCardData _cardDataForProduct(Product product) {
+  AppProductCardData _cardDataForProduct(
+    Product product,
+    ProductSearchState state,
+  ) {
     final principalPhoto = product.principalPhoto;
     final imageUrl = principalPhoto?.thumbnailUrl ?? principalPhoto?.url;
+    final availability = state.availabilityByProductId[product.id];
     return AppProductCardData(
       id: product.id,
       name: product.name,
       brandOrCollection: product.brand ?? product.reference,
       imageUrl: imageUrl,
+      availability: _productAvailabilityFor(availability?.status),
+      availabilityLabel: availability == null
+          ? null
+          : _availabilityLabelFor(availability),
       badgeLabels: <String>[
         product.sku.value,
         if (product.tags.isNotEmpty) product.tags.first,
       ],
     );
+  }
+
+  AppProductAvailability _productAvailabilityFor(
+    VariantAvailabilityStatus? status,
+  ) {
+    return switch (status ?? VariantAvailabilityStatus.readyStock) {
+      VariantAvailabilityStatus.readyStock => AppProductAvailability.readyStock,
+      VariantAvailabilityStatus.futureStock =>
+        AppProductAvailability.futureStock,
+      VariantAvailabilityStatus.unavailable =>
+        AppProductAvailability.unavailable,
+    };
+  }
+
+  String _availabilityLabelFor(VariantAvailability availability) {
+    return switch (availability.status) {
+      VariantAvailabilityStatus.readyStock =>
+        availability.availableQuantity == null
+            ? 'Pronta entrega'
+            : 'Pronta entrega: ${availability.availableQuantity}',
+      VariantAvailabilityStatus.futureStock =>
+        availability.futureAvailableAt == null
+            ? 'Estoque futuro'
+            : 'Estoque futuro ${_formatDate(availability.futureAvailableAt!)}',
+      VariantAvailabilityStatus.unavailable => 'Indisponivel',
+    };
+  }
+
+  String _formatDate(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    return '$day/$month/${date.year}';
   }
 }
 

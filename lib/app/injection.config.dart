@@ -415,6 +415,8 @@ import '../features/products/data/repositories/product_form_draft_repository_imp
     as _i873;
 import '../features/products/data/repositories/product_search_repository_impl.dart'
     as _i941;
+import '../features/products/data/repositories/product_variant_availability_repository.dart'
+    as _i994;
 import '../features/products/data/repositories/shared_preferences_category_repository.dart'
     as _i597;
 import '../features/products/data/repositories/shared_preferences_collection_repository.dart'
@@ -455,6 +457,8 @@ import '../features/products/domain/repositories/season_repository.dart'
     as _i260;
 import '../features/products/domain/repositories/size_grid_template_repository.dart'
     as _i174;
+import '../features/products/domain/repositories/variant_availability_repository.dart'
+    as _i766;
 import '../features/products/domain/services/product_color_similarity_service.dart'
     as _i8;
 import '../features/products/domain/usecases/associate_product_colors_use_case.dart'
@@ -497,6 +501,8 @@ import '../features/products/domain/usecases/get_product_by_id_use_case.dart'
     as _i721;
 import '../features/products/domain/usecases/get_product_form_draft_use_case.dart'
     as _i1021;
+import '../features/products/domain/usecases/get_variant_availability_use_case.dart'
+    as _i385;
 import '../features/products/domain/usecases/list_categories_use_case.dart'
     as _i435;
 import '../features/products/domain/usecases/list_collections_use_case.dart'
@@ -1081,6 +1087,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i385.PipelineStageRepository>(),
       ),
     );
+    gh.lazySingleton<_i766.VariantAvailabilityRepository>(
+      () => _i994.ProductVariantAvailabilityRepository(
+        gh<_i795.ProductVariantRepository>(),
+      ),
+    );
     gh.factory<_i452.AssociateProductWithCollectionUseCase>(
       () => _i452.AssociateProductWithCollectionUseCase(
         gh<_i1015.ProductCollectionLinkRepository>(),
@@ -1309,6 +1320,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i924.RegisterCrmActivityUseCase>(
       () => _i924.RegisterCrmActivityUseCase(gh<_i558.CrmActivityRepository>()),
     );
+    gh.factory<_i385.GetVariantAvailabilityUseCase>(
+      () => _i385.GetVariantAvailabilityUseCase(
+        gh<_i766.VariantAvailabilityRepository>(),
+      ),
+    );
     gh.lazySingleton<_i147.CloudFunctionsService>(
       () => _i147.CloudFunctionsService(
         gh<_i809.FirebaseFunctions>(),
@@ -1334,12 +1350,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i526.BranchDataSource>(
       () => _i878.FirestoreBranchDataSource(gh<_i974.FirebaseFirestore>()),
-    );
-    gh.factory<_i769.CommercialSizeGridBloc>(
-      () => _i769.CommercialSizeGridBloc(
-        getDraft: gh<_i801.GetCommercialSizeGridDraftUseCase>(),
-        saveDraft: gh<_i644.SaveCommercialSizeGridDraftUseCase>(),
-      ),
     );
     gh.lazySingleton<_i384.CompanyDataSource>(
       () => _i512.FirestoreCompanyDataSource(gh<_i974.FirebaseFirestore>()),
@@ -1426,6 +1436,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i923.RoleDataSource>(
       () => _i892.FirestoreRoleDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.factory<_i769.CommercialSizeGridBloc>(
+      () => _i769.CommercialSizeGridBloc(
+        getDraft: gh<_i801.GetCommercialSizeGridDraftUseCase>(),
+        saveDraft: gh<_i644.SaveCommercialSizeGridDraftUseCase>(),
+        getAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
+      ),
     );
     gh.lazySingleton<_i228.TeamDataSource>(
       () => _i23.FirestoreTeamDataSource(gh<_i974.FirebaseFirestore>()),
@@ -1734,11 +1751,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i756.OrganizationRepository>(),
       ),
     );
-    gh.factory<_i965.ProductSearchBloc>(
-      () => _i965.ProductSearchBloc(
-        searchProducts: gh<_i268.SearchProductsUseCase>(),
-      ),
-    );
     gh.factory<_i481.SignUpBloc>(
       () => _i481.SignUpBloc(
         createAccountWithEmailAndPassword:
@@ -1846,6 +1858,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i857.CustomerRepository>(),
         gh<_i220.PortfolioVisibilityService>(),
         gh<_i220.PortfolioAssignmentRepository>(),
+      ),
+    );
+    gh.factory<_i965.ProductSearchBloc>(
+      () => _i965.ProductSearchBloc(
+        searchProducts: gh<_i268.SearchProductsUseCase>(),
+        getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
       ),
     );
     gh.factory<_i698.UserRoleEditBloc>(

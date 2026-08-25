@@ -3,8 +3,7 @@ import '../../domain/entities/product.dart';
 import '../../domain/entities/product_color.dart';
 import '../../domain/entities/product_variant.dart';
 import '../../domain/entities/size_grid_template.dart';
-import '../../domain/value_objects/commercial_variant_availability.dart';
-import '../../domain/value_objects/product_variant_status.dart';
+import '../../domain/entities/variant_availability.dart';
 
 enum CommercialSizeGridLoadStatus { loading, ready, failure }
 
@@ -19,8 +18,7 @@ final class CommercialSizeGridState {
     this.sizeGridTemplate,
     this.variants = const <ProductVariant>[],
     this.quantitiesByVariantId = const <String, int>{},
-    this.availabilityByVariantId =
-        const <String, CommercialVariantAvailability>{},
+    this.availabilityByVariantId = const <String, VariantAvailability>{},
     this.isOnline = true,
     this.failure,
   });
@@ -32,7 +30,7 @@ final class CommercialSizeGridState {
   final SizeGridTemplate? sizeGridTemplate;
   final List<ProductVariant> variants;
   final Map<String, int> quantitiesByVariantId;
-  final Map<String, CommercialVariantAvailability> availabilityByVariantId;
+  final Map<String, VariantAvailability> availabilityByVariantId;
   final bool isOnline;
   final Failure? failure;
 
@@ -71,17 +69,12 @@ final class CommercialSizeGridState {
     return null;
   }
 
-  CommercialVariantAvailability availabilityForVariant(ProductVariant variant) {
-    if (variant.status == ProductVariantStatus.inactive) {
-      return CommercialVariantAvailability.unavailable;
-    }
-    return availabilityByVariantId[variant.id] ??
-        CommercialVariantAvailability.readyStock;
-  }
+  VariantAvailability availabilityForVariant(ProductVariant variant) =>
+      availabilityByVariantId[variant.id] ??
+      VariantAvailability.fromVariant(variant);
 
   bool isVariantEditable(ProductVariant variant) =>
-      availabilityForVariant(variant) !=
-      CommercialVariantAvailability.unavailable;
+      availabilityForVariant(variant).acceptsQuantity;
 
   int quantityForVariant(ProductVariant variant) {
     if (!isVariantEditable(variant)) return 0;
@@ -99,7 +92,7 @@ final class CommercialSizeGridState {
     SizeGridTemplate? sizeGridTemplate,
     List<ProductVariant>? variants,
     Map<String, int>? quantitiesByVariantId,
-    Map<String, CommercialVariantAvailability>? availabilityByVariantId,
+    Map<String, VariantAvailability>? availabilityByVariantId,
     bool? isOnline,
     Failure? failure,
     bool clearFailure = false,

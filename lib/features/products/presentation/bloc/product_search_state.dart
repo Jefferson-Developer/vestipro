@@ -1,6 +1,7 @@
 import '../../../../core/errors/errors.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/entities/product_search_source.dart';
+import '../../domain/entities/variant_availability.dart';
 
 enum ProductSearchStatus { idle, loading, success, empty, failure }
 
@@ -12,6 +13,7 @@ final class ProductSearchState {
     this.normalizedQuery = '',
     this.source = ProductSearchSource.remote,
     this.products = const <Product>[],
+    this.availabilityByProductId = const <String, VariantAvailability>{},
     this.failure,
   });
 
@@ -21,6 +23,7 @@ final class ProductSearchState {
   final String normalizedQuery;
   final ProductSearchSource source;
   final List<Product> products;
+  final Map<String, VariantAvailability> availabilityByProductId;
   final Failure? failure;
 
   bool get isSearching => status == ProductSearchStatus.loading;
@@ -37,6 +40,7 @@ final class ProductSearchState {
     String? normalizedQuery,
     ProductSearchSource? source,
     List<Product>? products,
+    Map<String, VariantAvailability>? availabilityByProductId,
     Failure? failure,
     bool clearFailure = false,
   }) {
@@ -47,6 +51,8 @@ final class ProductSearchState {
       normalizedQuery: normalizedQuery ?? this.normalizedQuery,
       source: source ?? this.source,
       products: products ?? this.products,
+      availabilityByProductId:
+          availabilityByProductId ?? this.availabilityByProductId,
       failure: clearFailure ? null : failure ?? this.failure,
     );
   }

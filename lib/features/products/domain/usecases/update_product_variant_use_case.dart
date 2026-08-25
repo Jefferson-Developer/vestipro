@@ -8,6 +8,7 @@ import '../value_objects/ean.dart';
 import '../value_objects/product_sync_status.dart';
 import '../value_objects/product_variant_status.dart';
 import '../value_objects/sku.dart';
+import '../value_objects/variant_availability_status.dart';
 
 @injectable
 final class UpdateProductVariantUseCase {
@@ -21,6 +22,12 @@ final class UpdateProductVariantUseCase {
     required String sku,
     String? ean,
     ProductVariantStatus? status,
+    VariantAvailabilityStatus? manualAvailabilityStatus,
+    int? manualAvailableQuantity,
+    DateTime? manualFutureAvailableAt,
+    bool clearManualAvailabilityStatus = false,
+    bool clearManualAvailableQuantity = false,
+    bool clearManualFutureAvailableAt = false,
     required String updatedBy,
   }) async {
     final fieldErrors = <String, String>{};
@@ -50,6 +57,15 @@ final class UpdateProductVariantUseCase {
     }
     if (updatedBy.trim().isEmpty) {
       fieldErrors['updatedBy'] = 'UpdatedBy is required.';
+    }
+    if (manualAvailableQuantity != null && manualAvailableQuantity < 0) {
+      fieldErrors['manualAvailableQuantity'] =
+          'Manual available quantity must be non-negative.';
+    }
+    if (manualAvailabilityStatus == VariantAvailabilityStatus.futureStock &&
+        manualFutureAvailableAt == null) {
+      fieldErrors['manualFutureAvailableAt'] =
+          'Future stock availability needs an expected date.';
     }
     if (fieldErrors.isNotEmpty || parsedSku == null) {
       return AppFailure<ProductVariant>(
@@ -108,6 +124,12 @@ final class UpdateProductVariantUseCase {
       sku: parsedSku,
       ean: parsedEan,
       clearEan: trimmedEan == null || trimmedEan.isEmpty,
+      manualAvailabilityStatus: manualAvailabilityStatus,
+      manualAvailableQuantity: manualAvailableQuantity,
+      manualFutureAvailableAt: manualFutureAvailableAt?.toUtc(),
+      clearManualAvailabilityStatus: clearManualAvailabilityStatus,
+      clearManualAvailableQuantity: clearManualAvailableQuantity,
+      clearManualFutureAvailableAt: clearManualFutureAvailableAt,
       status: status,
       updatedAt: DateTime.now().toUtc(),
       updatedBy: updatedBy.trim(),

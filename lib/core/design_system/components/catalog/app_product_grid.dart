@@ -57,6 +57,7 @@ class AppProductCardData {
     this.priceLabel,
     this.previousPriceLabel,
     this.availability = AppProductAvailability.readyStock,
+    this.availabilityLabel,
     this.badgeLabels = const <String>[],
   });
 
@@ -84,6 +85,7 @@ class AppProductCardData {
   final String? previousPriceLabel;
 
   final AppProductAvailability availability;
+  final String? availabilityLabel;
 
   /// At most 2 short tags (e.g. "Lançamento", "Oferta"). Any further labels
   /// passed in are silently ignored by [AppProductGrid] — never queued or
@@ -282,9 +284,12 @@ class _AppProductGridCard extends StatelessWidget {
   final String unavailableLabel;
 
   String get _availabilityLabel => switch (product.availability) {
-    AppProductAvailability.readyStock => readyStockLabel,
-    AppProductAvailability.futureStock => futureStockLabel,
-    AppProductAvailability.unavailable => unavailableLabel,
+    AppProductAvailability.readyStock =>
+      product.availabilityLabel ?? readyStockLabel,
+    AppProductAvailability.futureStock =>
+      product.availabilityLabel ?? futureStockLabel,
+    AppProductAvailability.unavailable =>
+      product.availabilityLabel ?? unavailableLabel,
   };
 
   IconData get _availabilityIcon => switch (product.availability) {

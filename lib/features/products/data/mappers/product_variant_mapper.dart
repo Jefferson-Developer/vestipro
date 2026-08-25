@@ -4,6 +4,7 @@ import '../../domain/value_objects/ean.dart';
 import '../../domain/value_objects/product_sync_status.dart';
 import '../../domain/value_objects/product_variant_status.dart';
 import '../../domain/value_objects/sku.dart';
+import '../../domain/value_objects/variant_availability_status.dart';
 import '../dtos/product_variant_dto.dart';
 
 final class ProductVariantMapper {
@@ -19,6 +20,11 @@ final class ProductVariantMapper {
       sizeId: dto.sizeId,
       sku: Sku.parse(dto.sku),
       ean: dto.ean == null ? null : Ean.parse(dto.ean!),
+      manualAvailabilityStatus: dto.manualAvailabilityStatus == null
+          ? null
+          : availabilityStatusToEntity(dto.manualAvailabilityStatus!),
+      manualAvailableQuantity: dto.manualAvailableQuantity,
+      manualFutureAvailableAt: dto.manualFutureAvailableAt?.toUtc(),
       status: statusToEntity(dto.status),
       createdAt: dto.createdAt,
       createdBy: dto.createdBy,
@@ -39,6 +45,11 @@ final class ProductVariantMapper {
       sizeId: entity.sizeId,
       sku: entity.sku.value,
       ean: entity.ean?.digits,
+      manualAvailabilityStatus: entity.manualAvailabilityStatus == null
+          ? null
+          : availabilityStatusToDto(entity.manualAvailabilityStatus!),
+      manualAvailableQuantity: entity.manualAvailableQuantity,
+      manualFutureAvailableAt: entity.manualFutureAvailableAt?.toUtc(),
       status: statusToDto(entity.status),
       createdAt: entity.createdAt,
       createdBy: entity.createdBy,
@@ -65,6 +76,27 @@ final class ProductVariantMapper {
     return switch (status) {
       ProductVariantStatus.active => 'active',
       ProductVariantStatus.inactive => 'inactive',
+    };
+  }
+
+  VariantAvailabilityStatus availabilityStatusToEntity(String value) {
+    return switch (value) {
+      'readyStock' => VariantAvailabilityStatus.readyStock,
+      'futureStock' => VariantAvailabilityStatus.futureStock,
+      'unavailable' => VariantAvailabilityStatus.unavailable,
+      _ => throw ValidationException(
+        'Invalid product variant availability status.',
+        code: 'invalid_product_variant_availability_status',
+        cause: value,
+      ),
+    };
+  }
+
+  String availabilityStatusToDto(VariantAvailabilityStatus status) {
+    return switch (status) {
+      VariantAvailabilityStatus.readyStock => 'readyStock',
+      VariantAvailabilityStatus.futureStock => 'futureStock',
+      VariantAvailabilityStatus.unavailable => 'unavailable',
     };
   }
 

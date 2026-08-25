@@ -11,6 +11,7 @@ import '../../domain/value_objects/ean.dart';
 import '../../domain/value_objects/product_sync_status.dart';
 import '../../domain/value_objects/product_variant_status.dart';
 import '../../domain/value_objects/sku.dart';
+import '../../domain/value_objects/variant_availability_status.dart';
 
 @LazySingleton(as: ProductVariantRepository)
 final class SharedPreferencesProductVariantRepository
@@ -279,6 +280,14 @@ final class SharedPreferencesProductVariantRepository
       ean: _optionalString(value, 'ean') == null
           ? null
           : Ean.parse(_requiredString(value, 'ean')),
+      manualAvailabilityStatus:
+          _optionalString(value, 'manualAvailabilityStatus') == null
+          ? null
+          : _availabilityStatusFromJson(
+              _requiredString(value, 'manualAvailabilityStatus'),
+            ),
+      manualAvailableQuantity: _optionalInt(value, 'manualAvailableQuantity'),
+      manualFutureAvailableAt: _optionalDate(value, 'manualFutureAvailableAt'),
       status: _statusFromJson(_requiredString(value, 'status')),
       createdAt: _requiredDate(value, 'createdAt'),
       createdBy: _requiredString(value, 'createdBy'),
@@ -299,6 +308,16 @@ final class SharedPreferencesProductVariantRepository
       'sizeId': variant.sizeId,
       'sku': variant.sku.value,
       if (variant.ean != null) 'ean': variant.ean!.digits,
+      if (variant.manualAvailabilityStatus != null)
+        'manualAvailabilityStatus': _availabilityStatusToJson(
+          variant.manualAvailabilityStatus!,
+        ),
+      if (variant.manualAvailableQuantity != null)
+        'manualAvailableQuantity': variant.manualAvailableQuantity,
+      if (variant.manualFutureAvailableAt != null)
+        'manualFutureAvailableAt': variant.manualFutureAvailableAt!
+            .toUtc()
+            .toIso8601String(),
       'status': _statusToJson(variant.status),
       'createdAt': variant.createdAt.toUtc().toIso8601String(),
       'createdBy': variant.createdBy,
@@ -325,6 +344,27 @@ final class SharedPreferencesProductVariantRepository
     return switch (status) {
       ProductVariantStatus.active => 'active',
       ProductVariantStatus.inactive => 'inactive',
+    };
+  }
+
+  VariantAvailabilityStatus _availabilityStatusFromJson(String value) {
+    return switch (value) {
+      'readyStock' => VariantAvailabilityStatus.readyStock,
+      'futureStock' => VariantAvailabilityStatus.futureStock,
+      'unavailable' => VariantAvailabilityStatus.unavailable,
+      _ => throw ValidationException(
+        'Invalid product variant availability status.',
+        code: 'invalid_product_variant_availability_status',
+        cause: value,
+      ),
+    };
+  }
+
+  String _availabilityStatusToJson(VariantAvailabilityStatus status) {
+    return switch (status) {
+      VariantAvailabilityStatus.readyStock => 'readyStock',
+      VariantAvailabilityStatus.futureStock => 'futureStock',
+      VariantAvailabilityStatus.unavailable => 'unavailable',
     };
   }
 
@@ -373,6 +413,16 @@ final class SharedPreferencesProductVariantRepository
     );
   }
 
+  int? _optionalInt(Map<String, dynamic> json, String field) {
+    final value = json[field];
+    if (value == null || value is int) return value as int?;
+    throw ValidationException(
+      'Invalid local product variant integer field.',
+      code: 'invalid_product_variant_local_payload',
+      cause: field,
+    );
+  }
+
   int _requiredInt(Map<String, dynamic> json, String field) {
     final value = json[field];
     if (value is int) return value;
@@ -385,6 +435,11 @@ final class SharedPreferencesProductVariantRepository
 
   DateTime _requiredDate(Map<String, dynamic> json, String field) {
     return DateTime.parse(_requiredString(json, field)).toUtc();
+  }
+
+  DateTime? _optionalDate(Map<String, dynamic> json, String field) {
+    final value = _optionalString(json, field);
+    return value == null ? null : DateTime.parse(value).toUtc();
   }
 
   int _compareVariants(ProductVariant a, ProductVariant b) {

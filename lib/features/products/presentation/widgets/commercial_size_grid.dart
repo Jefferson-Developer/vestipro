@@ -3,7 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../domain/entities/product_color.dart';
-import '../../domain/value_objects/commercial_variant_availability.dart';
+import '../../domain/entities/variant_availability.dart';
+import '../../domain/value_objects/variant_availability_status.dart';
 import '../bloc/commercial_size_grid_bloc.dart';
 import '../bloc/commercial_size_grid_event.dart';
 import '../bloc/commercial_size_grid_state.dart';
@@ -120,7 +121,12 @@ class _CommercialSizeGridReady extends StatelessWidget {
       if (variant == null) continue;
       cells[size.id] = AppSizeGridCell(
         quantity: state.quantityForVariant(variant),
-        availability: _availabilityFor(state.availabilityForVariant(variant)),
+        availability: _availabilityFor(
+          state.availabilityForVariant(variant).status,
+        ),
+        availabilityLabel: _availabilityLabelFor(
+          state.availabilityForVariant(variant),
+        ),
       );
     }
 
@@ -133,16 +139,36 @@ class _CommercialSizeGridReady extends StatelessWidget {
   }
 
   AppSizeGridCellAvailability _availabilityFor(
-    CommercialVariantAvailability availability,
+    VariantAvailabilityStatus availability,
   ) {
     return switch (availability) {
-      CommercialVariantAvailability.readyStock =>
+      VariantAvailabilityStatus.readyStock =>
         AppSizeGridCellAvailability.readyStock,
-      CommercialVariantAvailability.futureStock =>
+      VariantAvailabilityStatus.futureStock =>
         AppSizeGridCellAvailability.futureStock,
-      CommercialVariantAvailability.unavailable =>
+      VariantAvailabilityStatus.unavailable =>
         AppSizeGridCellAvailability.unavailable,
     };
+  }
+
+  String? _availabilityLabelFor(VariantAvailability availability) {
+    return switch (availability.status) {
+      VariantAvailabilityStatus.readyStock =>
+        availability.availableQuantity == null
+            ? null
+            : 'Pronta entrega: ${availability.availableQuantity}',
+      VariantAvailabilityStatus.futureStock =>
+        availability.futureAvailableAt == null
+            ? 'Estoque futuro'
+            : 'Estoque futuro ${_formatDate(availability.futureAvailableAt!)}',
+      VariantAvailabilityStatus.unavailable => 'Indisponivel',
+    };
+  }
+
+  String _formatDate(DateTime date) {
+    final day = date.day.toString().padLeft(2, '0');
+    final month = date.month.toString().padLeft(2, '0');
+    return '$day/$month/${date.year}';
   }
 
   Color _colorFromHex(String value) {

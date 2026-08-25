@@ -15,6 +15,9 @@ void main() {
         repository = _FakeProductSearchRepository();
         return ProductSearchBloc.testing(
           searchProducts: SearchProductsUseCase(repository),
+          getVariantAvailability: GetVariantAvailabilityUseCase(
+            const _FakeVariantAvailabilityRepository(),
+          ),
           debounceDuration: const Duration(milliseconds: 40),
         )..add(const ProductSearchStarted(organizationId: 'org-1'));
       },
@@ -38,6 +41,9 @@ void main() {
         );
         return ProductSearchBloc.testing(
           searchProducts: SearchProductsUseCase(repository),
+          getVariantAvailability: GetVariantAvailabilityUseCase(
+            const _FakeVariantAvailabilityRepository(),
+          ),
           debounceDuration: const Duration(milliseconds: 1),
         );
       },
@@ -60,6 +66,9 @@ void main() {
         repository = _FakeProductSearchRepository();
         return ProductSearchBloc.testing(
           searchProducts: SearchProductsUseCase(repository),
+          getVariantAvailability: GetVariantAvailabilityUseCase(
+            const _FakeVariantAvailabilityRepository(),
+          ),
           debounceDuration: const Duration(milliseconds: 1),
         );
       },
@@ -74,6 +83,27 @@ void main() {
       },
     );
   });
+}
+
+final class _FakeVariantAvailabilityRepository
+    implements VariantAvailabilityRepository {
+  const _FakeVariantAvailabilityRepository();
+
+  @override
+  Future<AppResult<List<VariantAvailability>>> listByProductIds({
+    required String organizationId,
+    required Iterable<String> productIds,
+  }) async {
+    return const AppSuccess<List<VariantAvailability>>(<VariantAvailability>[]);
+  }
+
+  @override
+  Future<AppResult<List<VariantAvailability>>> listByVariantIds({
+    required String organizationId,
+    required Iterable<String> variantIds,
+  }) async {
+    return const AppSuccess<List<VariantAvailability>>(<VariantAvailability>[]);
+  }
 }
 
 final class _FakeProductSearchRepository implements ProductSearchRepository {

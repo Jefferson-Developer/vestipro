@@ -19,6 +19,9 @@ void main() {
         sizeId: 'size-p',
         sku: Sku.parse('CAMISA-001-PRETO-P'),
         ean: Ean.parse('4006381333931'),
+        manualAvailabilityStatus: VariantAvailabilityStatus.futureStock,
+        manualAvailableQuantity: 12,
+        manualFutureAvailableAt: DateTime.utc(2026, 9, 15),
         status: ProductVariantStatus.active,
         createdAt: now,
         createdBy: 'user-1',
@@ -31,6 +34,9 @@ void main() {
       final dto = mapper.toDto(entity);
       final json = dto.toJson();
       expect(json['ean'], '4006381333931');
+      expect(json['manualAvailabilityStatus'], 'futureStock');
+      expect(json['manualAvailableQuantity'], 12);
+      expect(json['manualFutureAvailableAt'], isA<Timestamp>());
       expect(json['createdAt'], isA<Timestamp>());
 
       final parsed = mapper.toEntity(
@@ -39,6 +45,12 @@ void main() {
       expect(parsed.id, entity.id);
       expect(parsed.sku, entity.sku);
       expect(parsed.ean, entity.ean);
+      expect(
+        parsed.manualAvailabilityStatus,
+        VariantAvailabilityStatus.futureStock,
+      );
+      expect(parsed.manualAvailableQuantity, 12);
+      expect(parsed.manualFutureAvailableAt, DateTime.utc(2026, 9, 15));
       expect(parsed.status, ProductVariantStatus.active);
       expect(parsed.syncStatus, ProductSyncStatus.pending);
     });

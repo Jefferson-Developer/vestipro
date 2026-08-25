@@ -3,8 +3,12 @@ import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/utils/utils.dart';
+import '../../domain/entities/product.dart';
 import '../../domain/entities/product_search_result.dart';
+import '../../domain/entities/variant_availability.dart';
+import '../../domain/entities/variant_availability_snapshot.dart';
 import '../../domain/services/product_search_normalizer.dart';
+import '../../domain/usecases/get_variant_availability_use_case.dart';
 import '../../domain/usecases/search_products_use_case.dart';
 import 'product_search_event.dart';
 import 'product_search_state.dart';
@@ -12,14 +16,17 @@ import 'product_search_state.dart';
 @injectable
 final class ProductSearchBloc
     extends Bloc<ProductSearchEvent, ProductSearchState> {
-  ProductSearchBloc({required this.searchProducts})
-    : debounceDuration = defaultDebounceDuration,
-      super(const ProductSearchState()) {
+  ProductSearchBloc({
+    required this.searchProducts,
+    required this.getVariantAvailability,
+  }) : debounceDuration = defaultDebounceDuration,
+       super(const ProductSearchState()) {
     _registerHandlers();
   }
 
   ProductSearchBloc.testing({
     required this.searchProducts,
+    required this.getVariantAvailability,
     required this.debounceDuration,
   }) : super(const ProductSearchState()) {
     _registerHandlers();
@@ -29,6 +36,7 @@ final class ProductSearchBloc
   static const defaultDebounceDuration = Duration(milliseconds: 350);
 
   final SearchProductsUseCase searchProducts;
+  final GetVariantAvailabilityUseCase getVariantAvailability;
   final Duration debounceDuration;
 
   int _requestToken = 0;
@@ -76,6 +84,7 @@ final class ProductSearchBloc
         query: event.query,
         normalizedQuery: normalizedQuery,
         products: const <Never>[],
+        availabilityByProductId: const <String, VariantAvailability>{},
         clearFailure: true,
       ),
     );
@@ -111,6 +120,7 @@ final class ProductSearchBloc
       state.copyWith(
         status: ProductSearchStatus.loading,
         products: const <Never>[],
+        availabilityByProductId: const <String, VariantAvailability>{},
         clearFailure: true,
       ),
     );
@@ -124,25 +134,61 @@ final class ProductSearchBloc
 
     switch (result) {
       case AppSuccess<ProductSearchResult>(value: final searchResult):
-        emit(
-          state.copyWith(
-            status: searchResult.products.isEmpty
-                ? ProductSearchStatus.empty
-                : ProductSearchStatus.success,
-            products: searchResult.products,
-            normalizedQuery: searchResult.normalizedQuery,
-            source: searchResult.source,
-            clearFailure: true,
-          ),
+        final availabilityResult = await getVariantAvailability(
+          organizationId: state.organizationId,
+          productIds: searchResult.products.map((product) => product.id),
         );
+        if (emit.isDone || requestToken != _requestToken) return;
+        switch (availabilityResult) {
+          case AppSuccess<VariantAvailabilitySnapshot>(value: final snapshot):
+            emit(
+              state.copyWith(
+                status: searchResult.products.isEmpty
+                    ? ProductSearchStatus.empty
+                    : ProductSearchStatus.success,
+                products: searchResult.products,
+                availabilityByProductId: _availabilityByProductId(
+                  searchResult.products,
+                  snapshot,
+                ),
+                normalizedQuery: searchResult.normalizedQuery,
+                source: searchResult.source,
+                clearFailure: true,
+              ),
+            );
+          case AppFailure<VariantAvailabilitySnapshot>(failure: final failure):
+            emit(
+              state.copyWith(
+                status: ProductSearchStatus.failure,
+                products: const <Never>[],
+                availabilityByProductId: const <String, VariantAvailability>{},
+                failure: failure,
+              ),
+            );
+        }
       case AppFailure<ProductSearchResult>(failure: final failure):
         emit(
           state.copyWith(
             status: ProductSearchStatus.failure,
             products: const <Never>[],
+            availabilityByProductId: const <String, VariantAvailability>{},
             failure: failure,
           ),
         );
     }
+  }
+
+  Map<String, VariantAvailability> _availabilityByProductId(
+    List<Product> products,
+    VariantAvailabilitySnapshot snapshot,
+  ) {
+    final result = <String, VariantAvailability>{};
+    for (final product in products) {
+      final availability = snapshot.primaryForProduct(product.id);
+      if (availability != null) {
+        result[product.id] = availability;
+      }
+    }
+    return Map<String, VariantAvailability>.unmodifiable(result);
   }
 }

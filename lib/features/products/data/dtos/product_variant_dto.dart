@@ -16,6 +16,9 @@ final class ProductVariantDto {
     required this.sizeId,
     required this.sku,
     this.ean,
+    this.manualAvailabilityStatus,
+    this.manualAvailableQuantity,
+    this.manualFutureAvailableAt,
     required this.status,
     required this.createdAt,
     required this.createdBy,
@@ -36,6 +39,9 @@ final class ProductVariantDto {
     final sizeId = json['sizeId'];
     final sku = json['sku'];
     final ean = json['ean'];
+    final manualAvailabilityStatus = json['manualAvailabilityStatus'];
+    final manualAvailableQuantity = json['manualAvailableQuantity'];
+    final manualFutureAvailableAt = json['manualFutureAvailableAt'];
     final status = json['status'];
     final createdAt = json['createdAt'];
     final createdBy = json['createdBy'];
@@ -51,6 +57,11 @@ final class ProductVariantDto {
         sizeId is! String ||
         sku is! String ||
         (ean != null && ean is! String) ||
+        (manualAvailabilityStatus != null &&
+            manualAvailabilityStatus is! String) ||
+        (manualAvailableQuantity != null && manualAvailableQuantity is! int) ||
+        (manualFutureAvailableAt != null &&
+            manualFutureAvailableAt is! Timestamp) ||
         status is! String ||
         createdAt is! Timestamp ||
         createdBy is! String ||
@@ -73,6 +84,11 @@ final class ProductVariantDto {
       sizeId: sizeId,
       sku: sku,
       ean: ean as String?,
+      manualAvailabilityStatus: manualAvailabilityStatus as String?,
+      manualAvailableQuantity: manualAvailableQuantity as int?,
+      manualFutureAvailableAt: manualFutureAvailableAt == null
+          ? null
+          : (manualFutureAvailableAt as Timestamp).toDate(),
       status: status,
       createdAt: createdAt.toDate(),
       createdBy: createdBy,
@@ -91,6 +107,9 @@ final class ProductVariantDto {
   final String sizeId;
   final String sku;
   final String? ean;
+  final String? manualAvailabilityStatus;
+  final int? manualAvailableQuantity;
+  final DateTime? manualFutureAvailableAt;
   final String status;
   final DateTime createdAt;
   final String createdBy;
@@ -108,6 +127,12 @@ final class ProductVariantDto {
       'sizeId': sizeId,
       'sku': sku,
       'ean': ean,
+      if (manualAvailabilityStatus != null)
+        'manualAvailabilityStatus': manualAvailabilityStatus,
+      if (manualAvailableQuantity != null)
+        'manualAvailableQuantity': manualAvailableQuantity,
+      if (manualFutureAvailableAt != null)
+        'manualFutureAvailableAt': Timestamp.fromDate(manualFutureAvailableAt!),
       'status': status,
       'createdAt': Timestamp.fromDate(createdAt),
       'createdBy': createdBy,

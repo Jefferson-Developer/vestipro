@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import 'package:vestipro/features/products/data/repositories/product_variant_availability_repository.dart';
 import 'package:vestipro/features/products/data/repositories/shared_preferences_commercial_size_grid_draft_repository.dart';
+import 'package:vestipro/features/products/data/repositories/shared_preferences_product_variant_repository.dart';
 import 'package:vestipro/features/products/products.dart';
 
 import '../../../../core/design_system/components/test_pump_app.dart';
@@ -13,14 +15,22 @@ void main() {
     WidgetTester tester, {
     required String name,
     required double width,
-    required Map<String, CommercialVariantAvailability> availabilityByVariantId,
+    required Map<String, VariantAvailabilityStatus> availabilityByVariantId,
   }) async {
     SharedPreferences.setMockInitialValues(<String, Object>{});
     final repository =
         const SharedPreferencesCommercialSizeGridDraftRepository();
+    final variantRepository = const SharedPreferencesProductVariantRepository();
+    final variants = _variantsWithAvailability(availabilityByVariantId);
+    for (final variant in variants) {
+      await variantRepository.create(variant: variant);
+    }
     final bloc = CommercialSizeGridBloc(
       getDraft: GetCommercialSizeGridDraftUseCase(repository),
       saveDraft: SaveCommercialSizeGridDraftUseCase(repository),
+      getAvailability: GetVariantAvailabilityUseCase(
+        ProductVariantAvailabilityRepository(variantRepository),
+      ),
     );
     addTearDown(bloc.close);
 
@@ -48,8 +58,7 @@ void main() {
         product: _product,
         colors: _colors,
         sizeGridTemplate: _template,
-        variants: _variants,
-        availabilityByVariantId: availabilityByVariantId,
+        variants: variants,
       ),
     );
     await tester.pumpAndSettle();
@@ -61,7 +70,7 @@ void main() {
       tester,
       name: 'commercial_size_grid_mobile_ready',
       width: 375,
-      availabilityByVariantId: const <String, CommercialVariantAvailability>{},
+      availabilityByVariantId: const <String, VariantAvailabilityStatus>{},
     );
   });
 
@@ -70,7 +79,7 @@ void main() {
       tester,
       name: 'commercial_size_grid_desktop_ready',
       width: 1200,
-      availabilityByVariantId: const <String, CommercialVariantAvailability>{},
+      availabilityByVariantId: const <String, VariantAvailabilityStatus>{},
     );
   });
 
@@ -93,9 +102,9 @@ void main() {
   });
 }
 
-const _availability = <String, CommercialVariantAvailability>{
-  'variant-preto-m': CommercialVariantAvailability.futureStock,
-  'variant-branco-m': CommercialVariantAvailability.unavailable,
+const _availability = <String, VariantAvailabilityStatus>{
+  'variant-preto-m': VariantAvailabilityStatus.futureStock,
+  'variant-branco-m': VariantAvailabilityStatus.unavailable,
 };
 
 final _product = buildTestProduct(
@@ -148,6 +157,23 @@ final _variants = <ProductVariant>[
   _variant('variant-branco-m', 'color-branco', 'size-m'),
   _variant('variant-branco-g', 'color-branco', 'size-g'),
 ];
+
+List<ProductVariant> _variantsWithAvailability(
+  Map<String, VariantAvailabilityStatus> availabilityByVariantId,
+) {
+  return _variants
+      .map(
+        (variant) => variant.copyWith(
+          manualAvailabilityStatus: availabilityByVariantId[variant.id],
+          manualFutureAvailableAt:
+              availabilityByVariantId[variant.id] ==
+                  VariantAvailabilityStatus.futureStock
+              ? DateTime.utc(2026, 9, 15)
+              : null,
+        ),
+      )
+      .toList(growable: false);
+}
 
 ProductColor _color(String id, String name, String hex) {
   return ProductColor(

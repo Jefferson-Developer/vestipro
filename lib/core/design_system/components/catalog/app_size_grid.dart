@@ -31,10 +31,12 @@ class AppSizeGridCell {
   const AppSizeGridCell({
     this.quantity = 0,
     this.availability = AppSizeGridCellAvailability.readyStock,
+    this.availabilityLabel,
   });
 
   final int quantity;
   final AppSizeGridCellAvailability availability;
+  final String? availabilityLabel;
 }
 
 /// A single size column of an [AppSizeGrid] (e.g. "P", "M", "38", "40").
@@ -388,6 +390,7 @@ class AppSizeGrid extends StatelessWidget {
         semanticLabel: '${row.label} ${column.label}',
         unavailableLabel: unavailableLabel,
         futureStockLabel: futureStockLabel,
+        availabilityLabel: cell.availabilityLabel,
         onChanged: (quantity) => onQuantityChanged(row.id, column.id, quantity),
       ),
     );
@@ -406,6 +409,7 @@ class _AppSizeGridCellField extends StatefulWidget {
     required this.semanticLabel,
     required this.unavailableLabel,
     required this.futureStockLabel,
+    required this.availabilityLabel,
     required this.onChanged,
   });
 
@@ -414,6 +418,7 @@ class _AppSizeGridCellField extends StatefulWidget {
   final String semanticLabel;
   final String unavailableLabel;
   final String futureStockLabel;
+  final String? availabilityLabel;
   final ValueChanged<int> onChanged;
 
   @override
@@ -466,14 +471,16 @@ class _AppSizeGridCellFieldState extends State<_AppSizeGridCellField> {
     final colors = context.colors;
 
     if (widget.cell.availability == AppSizeGridCellAvailability.unavailable) {
+      final unavailableMessage =
+          widget.availabilityLabel ?? widget.unavailableLabel;
       return SizedBox(
         width: widget.width,
         height: AppSpacing.spacing48,
         child: Center(
           child: AppTooltip(
-            message: widget.unavailableLabel,
+            message: unavailableMessage,
             child: Semantics(
-              label: '${widget.semanticLabel}: ${widget.unavailableLabel}',
+              label: '${widget.semanticLabel}: $unavailableMessage',
               child: Icon(
                 Icons.block,
                 size: AppIconSizes.md,
@@ -487,6 +494,8 @@ class _AppSizeGridCellFieldState extends State<_AppSizeGridCellField> {
 
     final isFutureStock =
         widget.cell.availability == AppSizeGridCellAvailability.futureStock;
+    final futureStockMessage =
+        widget.availabilityLabel ?? widget.futureStockLabel;
 
     return SizedBox(
       width: widget.width,
@@ -494,7 +503,9 @@ class _AppSizeGridCellFieldState extends State<_AppSizeGridCellField> {
       child: Stack(
         children: <Widget>[
           Semantics(
-            label: widget.semanticLabel,
+            label: isFutureStock
+                ? '${widget.semanticLabel}: $futureStockMessage'
+                : widget.semanticLabel,
             textField: true,
             child: TextField(
               controller: _controller,
@@ -537,7 +548,7 @@ class _AppSizeGridCellFieldState extends State<_AppSizeGridCellField> {
               top: 0,
               right: 0,
               child: AppTooltip(
-                message: widget.futureStockLabel,
+                message: futureStockMessage,
                 child: Icon(
                   Icons.schedule,
                   size: AppIconSizes.sm,
