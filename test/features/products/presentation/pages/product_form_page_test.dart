@@ -25,6 +25,7 @@ void main() {
     late _InMemoryProductFormDraftRepository draftRepository;
     late _InMemoryAuditLogRepository auditLogRepository;
     late _InMemoryCategoryRepository categoryRepository;
+    late _InMemoryProductColorRepository colorRepository;
     late PermissionService permissionService;
     late FakeAnalyticsService analyticsService;
 
@@ -34,6 +35,7 @@ void main() {
       draftRepository = _InMemoryProductFormDraftRepository();
       auditLogRepository = _InMemoryAuditLogRepository();
       categoryRepository = _InMemoryCategoryRepository();
+      colorRepository = _InMemoryProductColorRepository();
       permissionService = PermissionService(membershipRepository);
       analyticsService = FakeAnalyticsService();
 
@@ -58,6 +60,7 @@ void main() {
           auditLogRepository,
         ),
         listCategories: ListCategoriesUseCase(categoryRepository),
+        listProductColors: ListProductColorsUseCase(colorRepository),
         analyticsService: analyticsService,
       );
     }
@@ -144,6 +147,56 @@ void main() {
       expect(find.text('Publicar produto'), findsOneWidget);
     });
   });
+}
+
+final class _InMemoryProductColorRepository implements ProductColorRepository {
+  final List<ProductColor> colors = <ProductColor>[];
+
+  @override
+  Future<AppResult<ProductColor>> create({required ProductColor color}) async {
+    colors.add(color);
+    return AppSuccess<ProductColor>(color);
+  }
+
+  @override
+  Future<AppResult<ProductColor>> update({required ProductColor color}) async {
+    final index = colors.indexWhere((item) => item.id == color.id);
+    colors[index] = color;
+    return AppSuccess<ProductColor>(color);
+  }
+
+  @override
+  Future<AppResult<List<ProductColor>>> listByOrganization(
+    String organizationId,
+  ) async {
+    return AppSuccess<List<ProductColor>>(
+      colors
+          .where((color) => color.organizationId == organizationId)
+          .toList(growable: false),
+    );
+  }
+
+  @override
+  Future<AppResult<ProductColor>> getById({
+    required String organizationId,
+    required String id,
+  }) async {
+    for (final color in colors) {
+      if (color.organizationId == organizationId && color.id == id) {
+        return AppSuccess<ProductColor>(color);
+      }
+    }
+    return const AppFailure<ProductColor>(
+      NotFoundFailure('Color not found.', code: 'color_not_found'),
+    );
+  }
+
+  @override
+  Future<AppResult<bool>> eanExists({
+    required String organizationId,
+    required Ean ean,
+    String? excludingColorId,
+  }) async => const AppSuccess<bool>(false);
 }
 
 Future<void> _enterTextField(

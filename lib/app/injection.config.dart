@@ -421,6 +421,8 @@ import '../features/products/data/repositories/shared_preferences_collection_rep
     as _i717;
 import '../features/products/data/repositories/shared_preferences_product_collection_link_repository.dart'
     as _i654;
+import '../features/products/data/repositories/shared_preferences_product_color_repository.dart'
+    as _i173;
 import '../features/products/data/repositories/shared_preferences_product_repository.dart'
     as _i323;
 import '../features/products/data/repositories/shared_preferences_season_repository.dart'
@@ -431,6 +433,8 @@ import '../features/products/domain/repositories/collection_repository.dart'
     as _i626;
 import '../features/products/domain/repositories/product_collection_link_repository.dart'
     as _i1015;
+import '../features/products/domain/repositories/product_color_repository.dart'
+    as _i298;
 import '../features/products/domain/repositories/product_form_draft_repository.dart'
     as _i459;
 import '../features/products/domain/repositories/product_repository.dart'
@@ -439,6 +443,10 @@ import '../features/products/domain/repositories/product_search_repository.dart'
     as _i568;
 import '../features/products/domain/repositories/season_repository.dart'
     as _i260;
+import '../features/products/domain/services/product_color_similarity_service.dart'
+    as _i8;
+import '../features/products/domain/usecases/associate_product_colors_use_case.dart'
+    as _i1037;
 import '../features/products/domain/usecases/associate_product_with_collection_use_case.dart'
     as _i452;
 import '../features/products/domain/usecases/clear_product_form_draft_use_case.dart'
@@ -449,6 +457,8 @@ import '../features/products/domain/usecases/create_category_use_case.dart'
     as _i538;
 import '../features/products/domain/usecases/create_collection_use_case.dart'
     as _i426;
+import '../features/products/domain/usecases/create_product_color_use_case.dart'
+    as _i975;
 import '../features/products/domain/usecases/create_product_use_case.dart'
     as _i300;
 import '../features/products/domain/usecases/create_season_use_case.dart'
@@ -467,10 +477,14 @@ import '../features/products/domain/usecases/list_categories_use_case.dart'
     as _i435;
 import '../features/products/domain/usecases/list_collections_use_case.dart'
     as _i1023;
+import '../features/products/domain/usecases/list_product_colors_use_case.dart'
+    as _i789;
 import '../features/products/domain/usecases/list_products_by_collection_use_case.dart'
     as _i815;
 import '../features/products/domain/usecases/list_seasons_use_case.dart'
     as _i722;
+import '../features/products/domain/usecases/mark_product_color_unavailable_use_case.dart'
+    as _i76;
 import '../features/products/domain/usecases/publish_product_use_case.dart'
     as _i647;
 import '../features/products/domain/usecases/reorder_categories_use_case.dart'
@@ -483,6 +497,8 @@ import '../features/products/domain/usecases/update_category_use_case.dart'
     as _i328;
 import '../features/products/domain/usecases/update_collection_use_case.dart'
     as _i779;
+import '../features/products/domain/usecases/update_product_color_use_case.dart'
+    as _i657;
 import '../features/products/domain/usecases/update_product_media_use_case.dart'
     as _i739;
 import '../features/products/domain/usecases/update_product_use_case.dart'
@@ -497,6 +513,8 @@ import '../features/products/presentation/bloc/collection_form_bloc.dart'
     as _i89;
 import '../features/products/presentation/bloc/collection_list_bloc.dart'
     as _i41;
+import '../features/products/presentation/bloc/product_color_palette_bloc.dart'
+    as _i522;
 import '../features/products/presentation/bloc/product_form_bloc.dart' as _i198;
 import '../features/products/presentation/bloc/product_media_bloc.dart'
     as _i968;
@@ -645,6 +663,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => const _i325.ProductFormDraftMapper(),
     );
     gh.lazySingleton<_i309.ProductMapper>(() => const _i309.ProductMapper());
+    gh.lazySingleton<_i8.ProductColorSimilarityService>(
+      () => const _i8.ProductColorSimilarityService(),
+    );
     gh.lazySingleton<_i847.AboutAppMapper>(() => const _i847.AboutAppMapper());
     gh.lazySingleton<_i370.AboutAppNotesMapper>(
       () => const _i370.AboutAppNotesMapper(),
@@ -669,6 +690,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i611.ImageCompressor>(
       () => const _i611.FlutterImageCompressor(),
+    );
+    gh.lazySingleton<_i298.ProductColorRepository>(
+      () => const _i173.SharedPreferencesProductColorRepository(),
     );
     gh.lazySingleton<_i99.SecureSessionStore>(
       () => _i772.SecureFlutterSessionStore(gh<_i558.FlutterSecureStorage>()),
@@ -821,6 +845,14 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i712.CustomerSegmentMapper>(),
       ),
     );
+    gh.factory<_i789.ListProductColorsUseCase>(
+      () => _i789.ListProductColorsUseCase(gh<_i298.ProductColorRepository>()),
+    );
+    gh.factory<_i76.MarkProductColorUnavailableUseCase>(
+      () => _i76.MarkProductColorUnavailableUseCase(
+        gh<_i298.ProductColorRepository>(),
+      ),
+    );
     gh.factory<_i546.ListTopOpportunityOutcomeReasonsUseCase>(
       () => _i546.ListTopOpportunityOutcomeReasonsUseCase(
         gh<_i527.OpportunityOutcomeReasonRepository>(),
@@ -889,6 +921,18 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i477.AboutAppSeedModel>(
       () => appInjectionModule.aboutAppSeedModel(gh<_i461.AppEnvironment>()),
+    );
+    gh.factory<_i975.CreateProductColorUseCase>(
+      () => _i975.CreateProductColorUseCase(
+        gh<_i298.ProductColorRepository>(),
+        gh<_i8.ProductColorSimilarityService>(),
+      ),
+    );
+    gh.factory<_i657.UpdateProductColorUseCase>(
+      () => _i657.UpdateProductColorUseCase(
+        gh<_i298.ProductColorRepository>(),
+        gh<_i8.ProductColorSimilarityService>(),
+      ),
     );
     gh.lazySingleton<_i932.AnalyticsService>(
       () => _i569.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
@@ -976,6 +1020,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i721.GetProductByIdUseCase>(
       () => _i721.GetProductByIdUseCase(gh<_i321.ProductRepository>()),
     );
+    gh.factory<_i522.ProductColorPaletteBloc>(
+      () => _i522.ProductColorPaletteBloc(
+        listProductColors: gh<_i789.ListProductColorsUseCase>(),
+        createProductColor: gh<_i975.CreateProductColorUseCase>(),
+        updateProductColor: gh<_i657.UpdateProductColorUseCase>(),
+        markProductColorUnavailable:
+            gh<_i76.MarkProductColorUnavailableUseCase>(),
+      ),
+    );
     gh.factory<_i776.LoginBloc>(
       () => _i776.LoginBloc(
         signInWithEmailAndPassword:
@@ -999,6 +1052,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => appInjectionModule.firebaseFunctions(
         gh<_i461.AppEnvironment>(),
         gh<_i56.FirebaseAppCheck>(),
+      ),
+    );
+    gh.factory<_i1037.AssociateProductColorsUseCase>(
+      () => _i1037.AssociateProductColorsUseCase(
+        gh<_i321.ProductRepository>(),
+        gh<_i298.ProductColorRepository>(),
       ),
     );
     gh.factory<_i96.CompleteCrmTaskUseCase>(
@@ -1518,6 +1577,19 @@ extension GetItInjectableX on _i174.GetIt {
         thumbnailCompressor: gh<_i209.ImageCompressor>(),
       ),
     );
+    gh.factory<_i198.ProductFormBloc>(
+      () => _i198.ProductFormBloc(
+        getDraft: gh<_i1021.GetProductFormDraftUseCase>(),
+        saveDraft: gh<_i244.SaveProductFormDraftUseCase>(),
+        clearDraft: gh<_i19.ClearProductFormDraftUseCase>(),
+        createProduct: gh<_i300.CreateProductUseCase>(),
+        updateProduct: gh<_i12.UpdateProductUseCase>(),
+        publishProduct: gh<_i647.PublishProductUseCase>(),
+        listCategories: gh<_i435.ListCategoriesUseCase>(),
+        listProductColors: gh<_i789.ListProductColorsUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i835.AddUserToTeamUseCase>(
       () => _i835.AddUserToTeamUseCase(gh<_i320.TeamRepository>()),
     );
@@ -1587,18 +1659,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i302.PortfolioVisibilityService(
         gh<_i265.MembershipRepository>(),
         gh<_i265.TeamRepository>(),
-      ),
-    );
-    gh.factory<_i198.ProductFormBloc>(
-      () => _i198.ProductFormBloc(
-        getDraft: gh<_i1021.GetProductFormDraftUseCase>(),
-        saveDraft: gh<_i244.SaveProductFormDraftUseCase>(),
-        clearDraft: gh<_i19.ClearProductFormDraftUseCase>(),
-        createProduct: gh<_i300.CreateProductUseCase>(),
-        updateProduct: gh<_i12.UpdateProductUseCase>(),
-        publishProduct: gh<_i647.PublishProductUseCase>(),
-        listCategories: gh<_i435.ListCategoriesUseCase>(),
-        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i977.LoadInitialCustomerOfflineDataUseCase>(

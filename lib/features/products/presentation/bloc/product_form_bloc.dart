@@ -8,11 +8,13 @@ import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/product.dart';
+import '../../domain/entities/product_color.dart';
 import '../../domain/entities/product_form_draft.dart';
 import '../../domain/usecases/clear_product_form_draft_use_case.dart';
 import '../../domain/usecases/create_product_use_case.dart';
 import '../../domain/usecases/get_product_form_draft_use_case.dart';
 import '../../domain/usecases/list_categories_use_case.dart';
+import '../../domain/usecases/list_product_colors_use_case.dart';
 import '../../domain/usecases/publish_product_use_case.dart';
 import '../../domain/usecases/save_product_form_draft_use_case.dart';
 import '../../domain/usecases/update_product_use_case.dart';
@@ -39,6 +41,7 @@ final class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
     required this.updateProduct,
     required this.publishProduct,
     required this.listCategories,
+    required this.listProductColors,
     required this.analyticsService,
   }) : super(const ProductFormState()) {
     on<ProductFormStarted>(_onStarted, transformer: restartable());
@@ -54,6 +57,7 @@ final class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
       _onContentSectionChanged,
       transformer: sequential(),
     );
+    on<ProductFormColorsChanged>(_onColorsChanged, transformer: sequential());
     on<ProductFormCharacteristicsSectionChanged>(
       _onCharacteristicsSectionChanged,
       transformer: sequential(),
@@ -81,6 +85,7 @@ final class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
   final UpdateProductUseCase updateProduct;
   final PublishProductUseCase publishProduct;
   final ListCategoriesUseCase listCategories;
+  final ListProductColorsUseCase listProductColors;
   final AnalyticsService analyticsService;
   final Uuid _uuid = const Uuid();
 
@@ -106,6 +111,14 @@ final class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
       onFailure: (_) => const <Category>[],
     );
     emit(state.copyWith(categories: categories));
+
+    final colorsResult = await listProductColors(event.organizationId);
+    if (emit.isDone) return;
+    final colors = colorsResult.fold(
+      onSuccess: (value) => value,
+      onFailure: (_) => const <ProductColor>[],
+    );
+    emit(state.copyWith(colors: colors));
 
     final initial = event.initialProduct;
     if (initial != null) {
@@ -214,6 +227,24 @@ final class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
           shortDescription: event.shortDescription,
           fullDescription: event.fullDescription,
           tags: event.tags,
+          clearFailure: true,
+        ),
+      ),
+    );
+  }
+
+  void _onColorsChanged(
+    ProductFormColorsChanged event,
+    Emitter<ProductFormState> emit,
+  ) {
+    emit(
+      _resetTransientStatus(
+        state.copyWith(
+          colorIds: event.colorIds
+              .map((id) => id.trim())
+              .where((id) => id.isNotEmpty)
+              .toSet()
+              .toList(growable: false),
           clearFailure: true,
         ),
       ),
@@ -340,6 +371,7 @@ final class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
             ncm: state.ncm,
             ean: state.ean,
             tags: state.tags,
+            colorIds: state.colorIds,
             launchDate: state.launchDate,
             seoTitle: state.seoTitle,
             seoDescription: state.seoDescription,
@@ -368,6 +400,7 @@ final class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
             ncm: state.ncm,
             ean: state.ean,
             tags: state.tags,
+            colorIds: state.colorIds,
             launchDate: state.launchDate,
             seoTitle: state.seoTitle,
             seoDescription: state.seoDescription,
@@ -513,6 +546,7 @@ final class ProductFormBloc extends Bloc<ProductFormEvent, ProductFormState> {
       shortDescription: product.shortDescription ?? '',
       fullDescription: product.fullDescription ?? '',
       tags: product.tags,
+      colorIds: product.colorIds,
       fabric: product.fabric ?? '',
       composition: product.composition ?? '',
       supplierId: product.supplierId ?? '',

@@ -55,6 +55,7 @@ abstract class Product with _$Product {
     String? ncm,
     Ean? ean,
     @Default(<String>[]) List<String> tags,
+    @Default(<String>[]) List<String> colorIds,
     required ProductStatus status,
     DateTime? launchDate,
     String? seoTitle,

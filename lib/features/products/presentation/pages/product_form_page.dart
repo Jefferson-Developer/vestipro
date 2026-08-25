@@ -5,6 +5,7 @@ import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
 import '../../domain/entities/product.dart';
+import '../../domain/value_objects/product_color_status.dart';
 import '../../domain/value_objects/product_gender.dart';
 import '../../domain/value_objects/product_status.dart';
 import '../../domain/value_objects/target_audience.dart';
@@ -260,6 +261,10 @@ class _ProductFormContent extends StatelessWidget {
                 child: _CategorySection(state: state),
               ),
               _FormSection(
+                title: 'Cores',
+                child: _ColorsSection(state: state),
+              ),
+              _FormSection(
                 title: 'Conteúdo',
                 child: _ContentSection(state: state),
               ),
@@ -281,6 +286,74 @@ class _ProductFormContent extends StatelessWidget {
           ),
         ),
       ),
+    );
+  }
+}
+
+class _ColorsSection extends StatelessWidget {
+  const _ColorsSection({required this.state});
+
+  final ProductFormState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final bloc = context.read<ProductFormBloc>();
+    if (state.colors.isEmpty) {
+      return Text(
+        'Cadastre a paleta de cores antes de associar cores ao produto.',
+        style: AppTypography.bodySmall.copyWith(color: context.colors.outline),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        AppDropdown<String>(
+          label: 'Cores do produto',
+          hintText: 'Selecione uma ou mais cores',
+          semanticLabel: 'Cores do produto',
+          closeSemanticLabel: 'Fechar seleção de cores',
+          options: state.colors
+              .map(
+                (color) => AppDropdownOption<String>(
+                  value: color.id,
+                  label:
+                      '${color.name} (${color.code})${color.status == ProductColorStatus.unavailable ? ' - indisponível' : ''}',
+                ),
+              )
+              .toList(growable: false),
+          selectedValues: state.colorIds.toSet(),
+          multiple: true,
+          onChanged: (selected) => bloc.add(
+            ProductFormColorsChanged(selected.toList(growable: false)),
+          ),
+          searchHintText: 'Buscar cor',
+          noResultsLabel: 'Nenhuma cor encontrada',
+        ),
+        const SizedBox(height: AppSpacing.spacing12),
+        AppColorSwatchSelector(
+          options: state.colors
+              .where((color) => state.colorIds.contains(color.id))
+              .map(
+                (color) => AppColorSwatchOption(
+                  id: color.id,
+                  label: color.name,
+                  color: Color(
+                    int.parse(color.hex.value.substring(1), radix: 16) |
+                        0xFF000000,
+                  ),
+                  previewImageUrl: color.mainImageUrl,
+                  availability: color.status == ProductColorStatus.available
+                      ? AppColorAvailability.readyStock
+                      : AppColorAvailability.unavailable,
+                ),
+              )
+              .toList(growable: false),
+          selectedId: state.colorIds.isEmpty ? null : state.colorIds.first,
+          onSelected: (_) {},
+          semanticLabel: 'Cores associadas ao produto',
+        ),
+      ],
     );
   }
 }

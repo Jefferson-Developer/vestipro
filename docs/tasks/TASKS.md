@@ -170,7 +170,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-069 — Implementar busca global de produtos](TASK-069-implementar-busca-global-de-produtos.md) — Flutter Senior + Front-end
 
 ### EPIC-09 — Cores, Grades e Variantes
-- [ ] [TASK-070 — Implementar cadastro de cores](TASK-070-implementar-cadastro-de-cores.md) — Flutter Senior + Front-end
+- [x] [TASK-070 — Implementar cadastro de cores](TASK-070-implementar-cadastro-de-cores.md) — Flutter Senior + Front-end
 - [ ] [TASK-071 — Implementar templates de grade de tamanho](TASK-071-implementar-templates-de-grade.md) — Flutter Senior + Front-end
 - [ ] [TASK-072 — Implementar geração de variantes produto-cor-tamanho](TASK-072-implementar-geracao-de-variantes.md) — Flutter Senior
 - [ ] [TASK-073 — Implementar UI de grade comercial](TASK-073-implementar-ui-de-grade-comercial.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 69 / 220 tasks concluídas.
+**Progresso:** 70 / 220 tasks concluídas.

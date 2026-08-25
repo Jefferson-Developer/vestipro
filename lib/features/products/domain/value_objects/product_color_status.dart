@@ -1,0 +1,1 @@
+enum ProductColorStatus { available, unavailable }

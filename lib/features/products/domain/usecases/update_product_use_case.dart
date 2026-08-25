@@ -66,6 +66,7 @@ final class UpdateProductUseCase {
     String? ncm,
     String? ean,
     List<String> tags = const <String>[],
+    List<String>? colorIds,
     DateTime? launchDate,
     String? seoTitle,
     String? seoDescription,
@@ -175,6 +176,7 @@ final class UpdateProductUseCase {
       ncm: normalizeProductOptional(ncm),
       ean: parsedEan,
       tags: normalizeProductTags(tags),
+      colorIds: colorIds == null ? current.colorIds : _normalizeIds(colorIds),
       launchDate: launchDate?.toUtc(),
       seoTitle: normalizeProductOptional(seoTitle),
       seoDescription: normalizeProductOptional(seoDescription),
@@ -233,11 +235,18 @@ final class UpdateProductUseCase {
     track('collectionId', previous.collectionId, next.collectionId);
     track('seasonId', previous.seasonId, next.seasonId);
     track('ean', previous.ean?.digits, next.ean?.digits);
+    track('colorIds', previous.colorIds.join(','), next.colorIds.join(','));
     track('ncm', previous.ncm, next.ncm);
 
     return _ProductDiff(previousValue: previousValue, newValue: newValue);
   }
 }
+
+List<String> _normalizeIds(List<String> values) => values
+    .map((value) => value.trim())
+    .where((value) => value.isNotEmpty)
+    .toSet()
+    .toList(growable: false);
 
 final class _ProductDiff {
   const _ProductDiff({required this.previousValue, required this.newValue});

@@ -50,6 +50,7 @@ final class CreateProductUseCase {
     String? ncm,
     String? ean,
     List<String> tags = const <String>[],
+    List<String> colorIds = const <String>[],
     DateTime? launchDate,
     String? seoTitle,
     String? seoDescription,
@@ -154,6 +155,7 @@ final class CreateProductUseCase {
       ncm: normalizeProductOptional(ncm),
       ean: parsedEan,
       tags: normalizeProductTags(tags),
+      colorIds: _normalizeIds(colorIds),
       status: ProductStatus.draft,
       launchDate: launchDate?.toUtc(),
       seoTitle: normalizeProductOptional(seoTitle),
@@ -171,3 +173,9 @@ final class CreateProductUseCase {
     return _repository.create(product: product);
   }
 }
+
+List<String> _normalizeIds(List<String> values) => values
+    .map((value) => value.trim())
+    .where((value) => value.isNotEmpty)
+    .toSet()
+    .toList(growable: false);

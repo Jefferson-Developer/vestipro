@@ -68,6 +68,13 @@ final class ProductFormCategorySectionChanged extends ProductFormEvent {
   final TargetAudience? targetAudience;
 }
 
+/// "Cores": reusable color palette ids associated to this product.
+final class ProductFormColorsChanged extends ProductFormEvent {
+  const ProductFormColorsChanged(this.colorIds);
+
+  final List<String> colorIds;
+}
+
 /// "Conteúdo": short/full description and tags.
 final class ProductFormContentSectionChanged extends ProductFormEvent {
   const ProductFormContentSectionChanged({

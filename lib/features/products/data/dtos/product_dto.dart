@@ -33,6 +33,7 @@ final class ProductDto {
     this.ncm,
     this.ean,
     this.tags = const <String>[],
+    this.colorIds = const <String>[],
     required this.status,
     this.launchDate,
     this.seoTitle,
@@ -70,6 +71,7 @@ final class ProductDto {
     final supplierId = json['supplierId'];
     final ncm = json['ncm'];
     final ean = json['ean'];
+    final colorIds = json['colorIds'];
     final status = json['status'];
     final launchDate = json['launchDate'];
     final seoTitle = json['seoTitle'];
@@ -103,6 +105,9 @@ final class ProductDto {
         (supplierId != null && supplierId is! String) ||
         (ncm != null && ncm is! String) ||
         (ean != null && ean is! String) ||
+        (colorIds != null &&
+            (colorIds is! List<dynamic> ||
+                colorIds.any((item) => item is! String))) ||
         status is! String ||
         (launchDate != null && launchDate is! Timestamp) ||
         (seoTitle != null && seoTitle is! String) ||
@@ -144,6 +149,7 @@ final class ProductDto {
       ncm: ncm as String?,
       ean: ean as String?,
       tags: _stringListFromJson(json['tags'], field: 'tags'),
+      colorIds: _stringListFromJson(json['colorIds'], field: 'colorIds'),
       status: status,
       launchDate: (launchDate as Timestamp?)?.toDate(),
       seoTitle: seoTitle as String?,
@@ -185,6 +191,7 @@ final class ProductDto {
   final String? ncm;
   final String? ean;
   final List<String> tags;
+  final List<String> colorIds;
   final String status;
   final DateTime? launchDate;
   final String? seoTitle;
@@ -228,6 +235,7 @@ final class ProductDto {
       'ncm': ncm,
       'ean': ean,
       'tags': tags,
+      'colorIds': colorIds,
       'status': status,
       'launchDate': launchDate == null ? null : Timestamp.fromDate(launchDate!),
       'seoTitle': seoTitle,
