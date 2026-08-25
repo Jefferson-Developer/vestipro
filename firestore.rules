@@ -193,6 +193,94 @@ service cloud.firestore {
         && validProductReadPayload(organizationId);
     }
 
+    function validProductVariantPayload(organizationId, data) {
+      return data.keys().hasOnly([
+          'organizationId',
+          'productId',
+          'colorId',
+          'sizeGridTemplateId',
+          'sizeId',
+          'sku',
+          'ean',
+          'status',
+          'createdAt',
+          'createdBy',
+          'updatedAt',
+          'updatedBy',
+          'version',
+          'syncStatus'
+        ])
+        && data.keys().hasAll([
+          'organizationId',
+          'productId',
+          'colorId',
+          'sizeGridTemplateId',
+          'sizeId',
+          'sku',
+          'status',
+          'createdAt',
+          'createdBy',
+          'updatedAt',
+          'updatedBy',
+          'version',
+          'syncStatus'
+        ])
+        && data.organizationId == organizationId
+        && data.productId is string
+        && data.productId.size() > 0
+        && data.colorId is string
+        && data.colorId.size() > 0
+        && data.sizeGridTemplateId is string
+        && data.sizeGridTemplateId.size() > 0
+        && data.sizeId is string
+        && data.sizeId.size() > 0
+        && data.sku is string
+        && data.sku.matches('^[A-Z0-9]+([_-][A-Z0-9]+)*$')
+        && (
+          !data.keys().hasAny(['ean'])
+          || data.ean == null
+          || (
+            data.ean is string
+            && (
+              data.ean.matches('^[0-9]{8}$')
+              || data.ean.matches('^[0-9]{13}$')
+            )
+          )
+        )
+        && data.status in ['active', 'inactive']
+        && data.createdAt is timestamp
+        && data.createdBy is string
+        && data.createdBy.size() > 0
+        && data.updatedAt is timestamp
+        && data.updatedBy is string
+        && data.updatedBy.size() > 0
+        && data.version is int
+        && data.version >= 1
+        && data.syncStatus in ['pending', 'syncing', 'synced', 'failed', 'conflict'];
+    }
+
+    function canReadProductVariant(organizationId) {
+      return isActiveMember(organizationId)
+        && resource.data.organizationId == organizationId;
+    }
+
+    function canCreateProductVariant(organizationId) {
+      return hasCapability(organizationId, 'catalog.manage')
+        && validProductVariantPayload(organizationId, request.resource.data);
+    }
+
+    function canUpdateProductVariant(organizationId) {
+      return hasCapability(organizationId, 'catalog.manage')
+        && validProductVariantPayload(organizationId, request.resource.data)
+        && unchanged('organizationId')
+        && unchanged('productId')
+        && unchanged('colorId')
+        && unchanged('sizeGridTemplateId')
+        && unchanged('sizeId')
+        && unchanged('createdAt')
+        && unchanged('createdBy');
+    }
+
     function portfolioAssignmentPayloadValid(organizationId, data) {
       return data.organizationId == organizationId
         && data.companyId is string
@@ -440,6 +528,18 @@ service cloud.firestore {
         // future server-side sync/validation work. The client may search/read
         // active catalog data, never directly create/update/delete it here.
         allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/productVariants/{variantId}
+      // (TASK-072 generated sellable color/size variants)
+      // -------------------------------------------------------------------
+
+      match /productVariants/{variantId} {
+        allow get, list: if canReadProductVariant(organizationId);
+        allow create: if canCreateProductVariant(organizationId);
+        allow update: if canUpdateProductVariant(organizationId);
+        allow delete: if false;
       }
 
       // -------------------------------------------------------------------

@@ -10,6 +10,8 @@ Product buildTestProduct({
   String? brand = 'VestiPro',
   String? ean = '4006381333931',
   List<String> tags = const <String>['lancamento'],
+  List<String> colorIds = const <String>[],
+  String? sizeGridTemplateId,
   DateTime? deletedAt,
 }) {
   final now = DateTime.utc(2026, 1, 1);
@@ -23,6 +25,8 @@ Product buildTestProduct({
     brand: brand,
     ean: ean == null ? null : Ean.parse(ean),
     tags: tags,
+    colorIds: colorIds,
+    sizeGridTemplateId: sizeGridTemplateId,
     status: ProductStatus.active,
     createdAt: now,
     createdBy: 'user-1',

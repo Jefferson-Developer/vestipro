@@ -425,6 +425,8 @@ import '../features/products/data/repositories/shared_preferences_product_color_
     as _i173;
 import '../features/products/data/repositories/shared_preferences_product_repository.dart'
     as _i323;
+import '../features/products/data/repositories/shared_preferences_product_variant_repository.dart'
+    as _i912;
 import '../features/products/data/repositories/shared_preferences_season_repository.dart'
     as _i860;
 import '../features/products/data/repositories/shared_preferences_size_grid_template_repository.dart'
@@ -443,6 +445,8 @@ import '../features/products/domain/repositories/product_repository.dart'
     as _i321;
 import '../features/products/domain/repositories/product_search_repository.dart'
     as _i568;
+import '../features/products/domain/repositories/product_variant_repository.dart'
+    as _i795;
 import '../features/products/domain/repositories/season_repository.dart'
     as _i260;
 import '../features/products/domain/repositories/size_grid_template_repository.dart'
@@ -473,12 +477,16 @@ import '../features/products/domain/usecases/create_size_grid_template_use_case.
     as _i715;
 import '../features/products/domain/usecases/delete_category_use_case.dart'
     as _i578;
+import '../features/products/domain/usecases/delete_product_variant_use_case.dart'
+    as _i273;
 import '../features/products/domain/usecases/delete_season_use_case.dart'
     as _i389;
 import '../features/products/domain/usecases/disassociate_product_from_collection_use_case.dart'
     as _i134;
 import '../features/products/domain/usecases/duplicate_size_grid_template_use_case.dart'
     as _i200;
+import '../features/products/domain/usecases/generate_product_variants_use_case.dart'
+    as _i751;
 import '../features/products/domain/usecases/get_product_by_id_use_case.dart'
     as _i721;
 import '../features/products/domain/usecases/get_product_form_draft_use_case.dart'
@@ -517,6 +525,8 @@ import '../features/products/domain/usecases/update_product_media_use_case.dart'
     as _i739;
 import '../features/products/domain/usecases/update_product_use_case.dart'
     as _i12;
+import '../features/products/domain/usecases/update_product_variant_use_case.dart'
+    as _i615;
 import '../features/products/domain/usecases/update_season_use_case.dart'
     as _i814;
 import '../features/products/domain/usecases/update_size_grid_template_use_case.dart'
@@ -753,6 +763,9 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i942.UpdateOpportunityStageUseCase(gh<_i43.OpportunityRepository>()),
     );
+    gh.lazySingleton<_i795.ProductVariantRepository>(
+      () => const _i912.SharedPreferencesProductVariantRepository(),
+    );
     gh.lazySingleton<_i725.CustomerLocalMapper>(
       () => _i725.CustomerLocalMapper(gh<_i457.CustomerMapper>()),
     );
@@ -961,6 +974,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i8.ProductColorSimilarityService>(),
       ),
     );
+    gh.factory<_i273.DeleteProductVariantUseCase>(
+      () => _i273.DeleteProductVariantUseCase(
+        gh<_i795.ProductVariantRepository>(),
+      ),
+    );
+    gh.factory<_i615.UpdateProductVariantUseCase>(
+      () => _i615.UpdateProductVariantUseCase(
+        gh<_i795.ProductVariantRepository>(),
+      ),
+    );
     gh.lazySingleton<_i932.AnalyticsService>(
       () => _i569.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
     );
@@ -1079,6 +1102,14 @@ extension GetItInjectableX on _i174.GetIt {
       () => appInjectionModule.firebaseFunctions(
         gh<_i461.AppEnvironment>(),
         gh<_i56.FirebaseAppCheck>(),
+      ),
+    );
+    gh.factory<_i751.GenerateProductVariantsUseCase>(
+      () => _i751.GenerateProductVariantsUseCase(
+        gh<_i321.ProductRepository>(),
+        gh<_i298.ProductColorRepository>(),
+        gh<_i174.SizeGridTemplateRepository>(),
+        gh<_i795.ProductVariantRepository>(),
       ),
     );
     gh.factory<_i1037.AssociateProductColorsUseCase>(
