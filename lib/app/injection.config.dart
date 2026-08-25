@@ -419,6 +419,8 @@ import '../features/products/data/repositories/shared_preferences_category_repos
     as _i597;
 import '../features/products/data/repositories/shared_preferences_collection_repository.dart'
     as _i717;
+import '../features/products/data/repositories/shared_preferences_commercial_size_grid_draft_repository.dart'
+    as _i79;
 import '../features/products/data/repositories/shared_preferences_product_collection_link_repository.dart'
     as _i654;
 import '../features/products/data/repositories/shared_preferences_product_color_repository.dart'
@@ -435,6 +437,8 @@ import '../features/products/domain/repositories/category_repository.dart'
     as _i648;
 import '../features/products/domain/repositories/collection_repository.dart'
     as _i626;
+import '../features/products/domain/repositories/commercial_size_grid_draft_repository.dart'
+    as _i512;
 import '../features/products/domain/repositories/product_collection_link_repository.dart'
     as _i1015;
 import '../features/products/domain/repositories/product_color_repository.dart'
@@ -487,6 +491,8 @@ import '../features/products/domain/usecases/duplicate_size_grid_template_use_ca
     as _i200;
 import '../features/products/domain/usecases/generate_product_variants_use_case.dart'
     as _i751;
+import '../features/products/domain/usecases/get_commercial_size_grid_draft_use_case.dart'
+    as _i801;
 import '../features/products/domain/usecases/get_product_by_id_use_case.dart'
     as _i721;
 import '../features/products/domain/usecases/get_product_form_draft_use_case.dart'
@@ -511,6 +517,8 @@ import '../features/products/domain/usecases/reorder_categories_use_case.dart'
     as _i892;
 import '../features/products/domain/usecases/reorder_size_grid_template_sizes_use_case.dart'
     as _i236;
+import '../features/products/domain/usecases/save_commercial_size_grid_draft_use_case.dart'
+    as _i644;
 import '../features/products/domain/usecases/save_product_form_draft_use_case.dart'
     as _i244;
 import '../features/products/domain/usecases/search_products_use_case.dart'
@@ -539,6 +547,8 @@ import '../features/products/presentation/bloc/collection_form_bloc.dart'
     as _i89;
 import '../features/products/presentation/bloc/collection_list_bloc.dart'
     as _i41;
+import '../features/products/presentation/bloc/commercial_size_grid_bloc.dart'
+    as _i769;
 import '../features/products/presentation/bloc/product_color_palette_bloc.dart'
     as _i522;
 import '../features/products/presentation/bloc/product_form_bloc.dart' as _i198;
@@ -742,6 +752,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1015.ProductCollectionLinkRepository>(
       () => const _i654.SharedPreferencesProductCollectionLinkRepository(),
     );
+    gh.lazySingleton<_i512.CommercialSizeGridDraftRepository>(
+      () => const _i79.SharedPreferencesCommercialSizeGridDraftRepository(),
+    );
     gh.lazySingleton<_i999.CustomerFormDraftRepository>(
       () => _i920.CustomerFormDraftRepositoryImpl(
         dataSource: gh<_i1036.CustomerFormDraftDataSource>(),
@@ -871,6 +884,16 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i244.SaveProductFormDraftUseCase>(
       () => _i244.SaveProductFormDraftUseCase(
         gh<_i459.ProductFormDraftRepository>(),
+      ),
+    );
+    gh.factory<_i801.GetCommercialSizeGridDraftUseCase>(
+      () => _i801.GetCommercialSizeGridDraftUseCase(
+        gh<_i512.CommercialSizeGridDraftRepository>(),
+      ),
+    );
+    gh.factory<_i644.SaveCommercialSizeGridDraftUseCase>(
+      () => _i644.SaveCommercialSizeGridDraftUseCase(
+        gh<_i512.CommercialSizeGridDraftRepository>(),
       ),
     );
     gh.lazySingleton<_i748.CustomerSegmentRepository>(
@@ -1311,6 +1334,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i526.BranchDataSource>(
       () => _i878.FirestoreBranchDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.factory<_i769.CommercialSizeGridBloc>(
+      () => _i769.CommercialSizeGridBloc(
+        getDraft: gh<_i801.GetCommercialSizeGridDraftUseCase>(),
+        saveDraft: gh<_i644.SaveCommercialSizeGridDraftUseCase>(),
+      ),
     );
     gh.lazySingleton<_i384.CompanyDataSource>(
       () => _i512.FirestoreCompanyDataSource(gh<_i974.FirebaseFirestore>()),
