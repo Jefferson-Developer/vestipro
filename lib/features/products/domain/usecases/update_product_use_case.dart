@@ -67,6 +67,7 @@ final class UpdateProductUseCase {
     String? ean,
     List<String> tags = const <String>[],
     List<String>? colorIds,
+    String? sizeGridTemplateId,
     DateTime? launchDate,
     String? seoTitle,
     String? seoDescription,
@@ -177,6 +178,7 @@ final class UpdateProductUseCase {
       ean: parsedEan,
       tags: normalizeProductTags(tags),
       colorIds: colorIds == null ? current.colorIds : _normalizeIds(colorIds),
+      sizeGridTemplateId: normalizeProductOptional(sizeGridTemplateId),
       launchDate: launchDate?.toUtc(),
       seoTitle: normalizeProductOptional(seoTitle),
       seoDescription: normalizeProductOptional(seoDescription),
@@ -236,6 +238,11 @@ final class UpdateProductUseCase {
     track('seasonId', previous.seasonId, next.seasonId);
     track('ean', previous.ean?.digits, next.ean?.digits);
     track('colorIds', previous.colorIds.join(','), next.colorIds.join(','));
+    track(
+      'sizeGridTemplateId',
+      previous.sizeGridTemplateId,
+      next.sizeGridTemplateId,
+    );
     track('ncm', previous.ncm, next.ncm);
 
     return _ProductDiff(previousValue: previousValue, newValue: newValue);

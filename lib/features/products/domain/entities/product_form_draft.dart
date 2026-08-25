@@ -26,6 +26,7 @@ final class ProductFormDraft {
     this.shortDescription,
     this.fullDescription,
     this.tags = const <String>[],
+    this.sizeGridTemplateId,
     this.fabric,
     this.composition,
     this.supplierId,
@@ -60,6 +61,7 @@ final class ProductFormDraft {
   final String? shortDescription;
   final String? fullDescription;
   final List<String> tags;
+  final String? sizeGridTemplateId;
   final String? fabric;
   final String? composition;
   final String? supplierId;

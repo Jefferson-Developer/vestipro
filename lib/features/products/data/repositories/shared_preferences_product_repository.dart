@@ -268,6 +268,7 @@ final class SharedPreferencesProductRepository implements ProductRepository {
           : Ean.parse(_requiredString(json, 'ean')),
       tags: _stringList(json['tags']),
       colorIds: _stringList(json['colorIds']),
+      sizeGridTemplateId: _optionalString(json, 'sizeGridTemplateId'),
       status: _mapper.statusToEntity(_requiredString(json, 'status')),
       launchDate: _optionalDate(json, 'launchDate'),
       seoTitle: _optionalString(json, 'seoTitle'),
@@ -316,6 +317,8 @@ final class SharedPreferencesProductRepository implements ProductRepository {
       if (product.ean != null) 'ean': product.ean!.digits,
       if (product.tags.isNotEmpty) 'tags': product.tags,
       if (product.colorIds.isNotEmpty) 'colorIds': product.colorIds,
+      if (product.sizeGridTemplateId != null)
+        'sizeGridTemplateId': product.sizeGridTemplateId,
       'status': _mapper.statusToDto(product.status),
       if (product.launchDate != null)
         'launchDate': product.launchDate!.toUtc().toIso8601String(),

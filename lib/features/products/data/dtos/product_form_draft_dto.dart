@@ -20,6 +20,7 @@ final class ProductFormDraftDto {
     this.shortDescription,
     this.fullDescription,
     this.tags = const <String>[],
+    this.sizeGridTemplateId,
     this.fabric,
     this.composition,
     this.supplierId,
@@ -67,6 +68,7 @@ final class ProductFormDraftDto {
       shortDescription: _optionalString(json, 'shortDescription'),
       fullDescription: _optionalString(json, 'fullDescription'),
       tags: _stringListFromJson(json['tags']),
+      sizeGridTemplateId: _optionalString(json, 'sizeGridTemplateId'),
       fabric: _optionalString(json, 'fabric'),
       composition: _optionalString(json, 'composition'),
       supplierId: _optionalString(json, 'supplierId'),
@@ -100,6 +102,7 @@ final class ProductFormDraftDto {
   final String? shortDescription;
   final String? fullDescription;
   final List<String> tags;
+  final String? sizeGridTemplateId;
   final String? fabric;
   final String? composition;
   final String? supplierId;
@@ -131,6 +134,7 @@ final class ProductFormDraftDto {
       if (shortDescription != null) 'shortDescription': shortDescription,
       if (fullDescription != null) 'fullDescription': fullDescription,
       if (tags.isNotEmpty) 'tags': tags,
+      if (sizeGridTemplateId != null) 'sizeGridTemplateId': sizeGridTemplateId,
       if (fabric != null) 'fabric': fabric,
       if (composition != null) 'composition': composition,
       if (supplierId != null) 'supplierId': supplierId,

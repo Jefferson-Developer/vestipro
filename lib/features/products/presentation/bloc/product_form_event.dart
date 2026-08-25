@@ -75,6 +75,13 @@ final class ProductFormColorsChanged extends ProductFormEvent {
   final List<String> colorIds;
 }
 
+/// "Grade": reusable size-grid template associated to this product.
+final class ProductFormSizeGridTemplateChanged extends ProductFormEvent {
+  const ProductFormSizeGridTemplateChanged(this.sizeGridTemplateId);
+
+  final String sizeGridTemplateId;
+}
+
 /// "Conteúdo": short/full description and tags.
 final class ProductFormContentSectionChanged extends ProductFormEvent {
   const ProductFormContentSectionChanged({

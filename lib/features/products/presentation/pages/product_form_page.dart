@@ -265,6 +265,10 @@ class _ProductFormContent extends StatelessWidget {
                 child: _ColorsSection(state: state),
               ),
               _FormSection(
+                title: 'Grade',
+                child: _SizeGridSection(state: state),
+              ),
+              _FormSection(
                 title: 'Conteúdo',
                 child: _ContentSection(state: state),
               ),
@@ -354,6 +358,50 @@ class _ColorsSection extends StatelessWidget {
           semanticLabel: 'Cores associadas ao produto',
         ),
       ],
+    );
+  }
+}
+
+class _SizeGridSection extends StatelessWidget {
+  const _SizeGridSection({required this.state});
+
+  final ProductFormState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final bloc = context.read<ProductFormBloc>();
+    if (state.sizeGridTemplates.isEmpty) {
+      return Text(
+        'Cadastre templates de grade antes de associar tamanhos ao produto.',
+        style: AppTypography.bodySmall.copyWith(color: context.colors.outline),
+      );
+    }
+
+    return AppDropdown<String>(
+      label: 'Template de grade',
+      hintText: 'Selecione a grade de tamanhos',
+      semanticLabel: 'Template de grade do produto',
+      closeSemanticLabel: 'Fechar seleção de template de grade',
+      isDisabled: state.isBusy,
+      options: state.sizeGridTemplates
+          .map(
+            (template) => AppDropdownOption<String>(
+              value: template.id,
+              label:
+                  '${template.name} (${template.orderedSizes.map((size) => size.label).join(' / ')})',
+            ),
+          )
+          .toList(growable: false),
+      selectedValues: state.sizeGridTemplateId.isEmpty
+          ? const <String>{}
+          : <String>{state.sizeGridTemplateId},
+      onChanged: (selected) => bloc.add(
+        ProductFormSizeGridTemplateChanged(
+          selected.isEmpty ? '' : selected.first,
+        ),
+      ),
+      searchHintText: 'Buscar grade',
+      noResultsLabel: 'Nenhuma grade encontrada',
     );
   }
 }

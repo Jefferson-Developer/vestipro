@@ -427,6 +427,8 @@ import '../features/products/data/repositories/shared_preferences_product_reposi
     as _i323;
 import '../features/products/data/repositories/shared_preferences_season_repository.dart'
     as _i860;
+import '../features/products/data/repositories/shared_preferences_size_grid_template_repository.dart'
+    as _i409;
 import '../features/products/domain/repositories/category_repository.dart'
     as _i648;
 import '../features/products/domain/repositories/collection_repository.dart'
@@ -443,10 +445,14 @@ import '../features/products/domain/repositories/product_search_repository.dart'
     as _i568;
 import '../features/products/domain/repositories/season_repository.dart'
     as _i260;
+import '../features/products/domain/repositories/size_grid_template_repository.dart'
+    as _i174;
 import '../features/products/domain/services/product_color_similarity_service.dart'
     as _i8;
 import '../features/products/domain/usecases/associate_product_colors_use_case.dart'
     as _i1037;
+import '../features/products/domain/usecases/associate_product_size_grid_template_use_case.dart'
+    as _i70;
 import '../features/products/domain/usecases/associate_product_with_collection_use_case.dart'
     as _i452;
 import '../features/products/domain/usecases/clear_product_form_draft_use_case.dart'
@@ -463,12 +469,16 @@ import '../features/products/domain/usecases/create_product_use_case.dart'
     as _i300;
 import '../features/products/domain/usecases/create_season_use_case.dart'
     as _i176;
+import '../features/products/domain/usecases/create_size_grid_template_use_case.dart'
+    as _i715;
 import '../features/products/domain/usecases/delete_category_use_case.dart'
     as _i578;
 import '../features/products/domain/usecases/delete_season_use_case.dart'
     as _i389;
 import '../features/products/domain/usecases/disassociate_product_from_collection_use_case.dart'
     as _i134;
+import '../features/products/domain/usecases/duplicate_size_grid_template_use_case.dart'
+    as _i200;
 import '../features/products/domain/usecases/get_product_by_id_use_case.dart'
     as _i721;
 import '../features/products/domain/usecases/get_product_form_draft_use_case.dart'
@@ -483,12 +493,16 @@ import '../features/products/domain/usecases/list_products_by_collection_use_cas
     as _i815;
 import '../features/products/domain/usecases/list_seasons_use_case.dart'
     as _i722;
+import '../features/products/domain/usecases/list_size_grid_templates_use_case.dart'
+    as _i646;
 import '../features/products/domain/usecases/mark_product_color_unavailable_use_case.dart'
     as _i76;
 import '../features/products/domain/usecases/publish_product_use_case.dart'
     as _i647;
 import '../features/products/domain/usecases/reorder_categories_use_case.dart'
     as _i892;
+import '../features/products/domain/usecases/reorder_size_grid_template_sizes_use_case.dart'
+    as _i236;
 import '../features/products/domain/usecases/save_product_form_draft_use_case.dart'
     as _i244;
 import '../features/products/domain/usecases/search_products_use_case.dart'
@@ -505,6 +519,8 @@ import '../features/products/domain/usecases/update_product_use_case.dart'
     as _i12;
 import '../features/products/domain/usecases/update_season_use_case.dart'
     as _i814;
+import '../features/products/domain/usecases/update_size_grid_template_use_case.dart'
+    as _i807;
 import '../features/products/presentation/bloc/category_form_bloc.dart'
     as _i296;
 import '../features/products/presentation/bloc/category_list_bloc.dart'
@@ -522,6 +538,8 @@ import '../features/products/presentation/bloc/product_search_bloc.dart'
     as _i965;
 import '../features/products/presentation/bloc/season_form_bloc.dart' as _i98;
 import '../features/products/presentation/bloc/season_list_bloc.dart' as _i986;
+import '../features/products/presentation/bloc/size_grid_template_bloc.dart'
+    as _i415;
 import '../features/settings/data/datasources/about_app_data_source.dart'
     as _i364;
 import '../features/settings/data/datasources/in_memory_about_app_datasource.dart'
@@ -720,6 +738,9 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i258.CustomerFormDraftMapper>(),
       ),
     );
+    gh.lazySingleton<_i174.SizeGridTemplateRepository>(
+      () => const _i409.SharedPreferencesSizeGridTemplateRepository(),
+    );
     gh.lazySingleton<_i924.OnboardingProgressDataSource>(
       () => const _i1035.SharedPreferencesOnboardingProgressDataSource(),
     );
@@ -857,6 +878,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i546.ListTopOpportunityOutcomeReasonsUseCase(
         gh<_i527.OpportunityOutcomeReasonRepository>(),
         gh<_i43.OpportunityRepository>(),
+      ),
+    );
+    gh.factory<_i70.AssociateProductSizeGridTemplateUseCase>(
+      () => _i70.AssociateProductSizeGridTemplateUseCase(
+        gh<_i321.ProductRepository>(),
+        gh<_i174.SizeGridTemplateRepository>(),
       ),
     );
     gh.factory<_i815.ListProductsByCollectionUseCase>(
@@ -1096,6 +1123,26 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i886.OnboardingProgressRepository>(),
       ),
     );
+    gh.factory<_i715.CreateSizeGridTemplateUseCase>(
+      () => _i715.CreateSizeGridTemplateUseCase(
+        gh<_i174.SizeGridTemplateRepository>(),
+      ),
+    );
+    gh.factory<_i646.ListSizeGridTemplatesUseCase>(
+      () => _i646.ListSizeGridTemplatesUseCase(
+        gh<_i174.SizeGridTemplateRepository>(),
+      ),
+    );
+    gh.factory<_i236.ReorderSizeGridTemplateSizesUseCase>(
+      () => _i236.ReorderSizeGridTemplateSizesUseCase(
+        gh<_i174.SizeGridTemplateRepository>(),
+      ),
+    );
+    gh.factory<_i807.UpdateSizeGridTemplateUseCase>(
+      () => _i807.UpdateSizeGridTemplateUseCase(
+        gh<_i174.SizeGridTemplateRepository>(),
+      ),
+    );
     gh.lazySingleton<_i349.CrashReporter>(
       () => _i559.FirebaseCrashReporter(
         gh<_i141.FirebaseCrashlytics>(),
@@ -1184,6 +1231,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i779.UpdateCollectionUseCase>(
       () => _i779.UpdateCollectionUseCase(gh<_i626.CollectionRepository>()),
     );
+    gh.factory<_i200.DuplicateSizeGridTemplateUseCase>(
+      () => _i200.DuplicateSizeGridTemplateUseCase(
+        gh<_i174.SizeGridTemplateRepository>(),
+        gh<_i715.CreateSizeGridTemplateUseCase>(),
+      ),
+    );
     gh.factory<_i489.ListCrmActivitiesForCustomerUseCase>(
       () => _i489.ListCrmActivitiesForCustomerUseCase(
         gh<_i558.CrmActivityRepository>(),
@@ -1213,6 +1266,16 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i520.SessionServiceImpl(
         authRepository: gh<_i217.AuthRepository>(),
         secureSessionStore: gh<_i99.SecureSessionStore>(),
+      ),
+    );
+    gh.factory<_i415.SizeGridTemplateBloc>(
+      () => _i415.SizeGridTemplateBloc(
+        listSizeGridTemplates: gh<_i646.ListSizeGridTemplatesUseCase>(),
+        createSizeGridTemplate: gh<_i715.CreateSizeGridTemplateUseCase>(),
+        updateSizeGridTemplate: gh<_i807.UpdateSizeGridTemplateUseCase>(),
+        duplicateSizeGridTemplate: gh<_i200.DuplicateSizeGridTemplateUseCase>(),
+        reorderSizeGridTemplateSizes:
+            gh<_i236.ReorderSizeGridTemplateSizesUseCase>(),
       ),
     );
     gh.lazySingleton<_i526.BranchDataSource>(
@@ -1587,6 +1650,7 @@ extension GetItInjectableX on _i174.GetIt {
         publishProduct: gh<_i647.PublishProductUseCase>(),
         listCategories: gh<_i435.ListCategoriesUseCase>(),
         listProductColors: gh<_i789.ListProductColorsUseCase>(),
+        listSizeGridTemplates: gh<_i646.ListSizeGridTemplatesUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );

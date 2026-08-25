@@ -2,6 +2,7 @@ import '../../../../core/errors/errors.dart';
 import '../../domain/entities/category.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/entities/product_color.dart';
+import '../../domain/entities/size_grid_template.dart';
 import '../../domain/value_objects/product_gender.dart';
 import '../../domain/value_objects/product_status.dart';
 import '../../domain/value_objects/product_sync_status.dart';
@@ -29,6 +30,7 @@ final class ProductFormState {
     this.currentProduct,
     this.categories = const <Category>[],
     this.colors = const <ProductColor>[],
+    this.sizeGridTemplates = const <SizeGridTemplate>[],
     this.name = '',
     this.sku = '',
     this.reference = '',
@@ -44,6 +46,7 @@ final class ProductFormState {
     this.fullDescription = '',
     this.tags = const <String>[],
     this.colorIds = const <String>[],
+    this.sizeGridTemplateId = '',
     this.fabric = '',
     this.composition = '',
     this.supplierId = '',
@@ -79,6 +82,7 @@ final class ProductFormState {
   /// never a free-text field. Loaded once when the form starts.
   final List<Category> categories;
   final List<ProductColor> colors;
+  final List<SizeGridTemplate> sizeGridTemplates;
 
   final String name;
   final String sku;
@@ -95,6 +99,7 @@ final class ProductFormState {
   final String fullDescription;
   final List<String> tags;
   final List<String> colorIds;
+  final String sizeGridTemplateId;
   final String fabric;
   final String composition;
   final String supplierId;
@@ -150,6 +155,7 @@ final class ProductFormState {
     Product? currentProduct,
     List<Category>? categories,
     List<ProductColor>? colors,
+    List<SizeGridTemplate>? sizeGridTemplates,
     String? name,
     String? sku,
     String? reference,
@@ -165,6 +171,7 @@ final class ProductFormState {
     String? fullDescription,
     List<String>? tags,
     List<String>? colorIds,
+    String? sizeGridTemplateId,
     String? fabric,
     String? composition,
     String? supplierId,
@@ -196,6 +203,7 @@ final class ProductFormState {
       currentProduct: currentProduct ?? this.currentProduct,
       categories: categories ?? this.categories,
       colors: colors ?? this.colors,
+      sizeGridTemplates: sizeGridTemplates ?? this.sizeGridTemplates,
       name: name ?? this.name,
       sku: sku ?? this.sku,
       reference: reference ?? this.reference,
@@ -213,6 +221,7 @@ final class ProductFormState {
       fullDescription: fullDescription ?? this.fullDescription,
       tags: tags ?? this.tags,
       colorIds: colorIds ?? this.colorIds,
+      sizeGridTemplateId: sizeGridTemplateId ?? this.sizeGridTemplateId,
       fabric: fabric ?? this.fabric,
       composition: composition ?? this.composition,
       supplierId: supplierId ?? this.supplierId,

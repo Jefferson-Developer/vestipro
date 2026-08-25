@@ -26,6 +26,7 @@ void main() {
     late _InMemoryAuditLogRepository auditLogRepository;
     late _InMemoryCategoryRepository categoryRepository;
     late _InMemoryProductColorRepository colorRepository;
+    late _InMemorySizeGridTemplateRepository sizeGridTemplateRepository;
     late PermissionService permissionService;
     late FakeAnalyticsService analyticsService;
 
@@ -36,6 +37,7 @@ void main() {
       auditLogRepository = _InMemoryAuditLogRepository();
       categoryRepository = _InMemoryCategoryRepository();
       colorRepository = _InMemoryProductColorRepository();
+      sizeGridTemplateRepository = _InMemorySizeGridTemplateRepository();
       permissionService = PermissionService(membershipRepository);
       analyticsService = FakeAnalyticsService();
 
@@ -61,6 +63,9 @@ void main() {
         ),
         listCategories: ListCategoriesUseCase(categoryRepository),
         listProductColors: ListProductColorsUseCase(colorRepository),
+        listSizeGridTemplates: ListSizeGridTemplatesUseCase(
+          sizeGridTemplateRepository,
+        ),
         analyticsService: analyticsService,
       );
     }
@@ -196,6 +201,84 @@ final class _InMemoryProductColorRepository implements ProductColorRepository {
     required String organizationId,
     required Ean ean,
     String? excludingColorId,
+  }) async => const AppSuccess<bool>(false);
+}
+
+final class _InMemorySizeGridTemplateRepository
+    implements SizeGridTemplateRepository {
+  final List<SizeGridTemplate> templates = <SizeGridTemplate>[];
+
+  @override
+  Future<AppResult<SizeGridTemplate>> create({
+    required SizeGridTemplate template,
+  }) async {
+    templates.add(template);
+    return AppSuccess<SizeGridTemplate>(template);
+  }
+
+  @override
+  Future<AppResult<SizeGridTemplate>> update({
+    required SizeGridTemplate template,
+  }) async {
+    final index = templates.indexWhere((item) => item.id == template.id);
+    templates[index] = template;
+    return AppSuccess<SizeGridTemplate>(template);
+  }
+
+  @override
+  Future<AppResult<List<SizeGridTemplate>>> listByOrganization(
+    String organizationId,
+  ) async {
+    return AppSuccess<List<SizeGridTemplate>>(
+      templates
+          .where((template) => template.organizationId == organizationId)
+          .toList(growable: false),
+    );
+  }
+
+  @override
+  Future<AppResult<SizeGridTemplate>> getById({
+    required String organizationId,
+    required String id,
+  }) async {
+    for (final template in templates) {
+      if (template.organizationId == organizationId && template.id == id) {
+        return AppSuccess<SizeGridTemplate>(template);
+      }
+    }
+    return const AppFailure<SizeGridTemplate>(
+      NotFoundFailure(
+        'Size grid template not found.',
+        code: 'size_grid_template_not_found',
+      ),
+    );
+  }
+
+  @override
+  Future<AppResult<bool>> nameExists({
+    required String organizationId,
+    required String name,
+    String? excludingTemplateId,
+  }) async => AppSuccess<bool>(
+    templates.any(
+      (template) =>
+          template.organizationId == organizationId &&
+          template.name.toLowerCase() == name.trim().toLowerCase() &&
+          template.id != excludingTemplateId,
+    ),
+  );
+
+  @override
+  Future<AppResult<bool>> hasPublishedProductsUsingTemplate({
+    required String organizationId,
+    required String templateId,
+  }) async => const AppSuccess<bool>(false);
+
+  @override
+  Future<AppResult<bool>> sizeHasGeneratedVariants({
+    required String organizationId,
+    required String templateId,
+    required String sizeId,
   }) async => const AppSuccess<bool>(false);
 }
 
