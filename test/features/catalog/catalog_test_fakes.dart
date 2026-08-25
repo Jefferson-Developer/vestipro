@@ -87,6 +87,21 @@ class FakeCatalogHomeProductRepository implements ProductRepository {
     String? companyId,
     int limit = 12,
   }) async => result;
+
+  @override
+  Future<AppResult<ProductCatalogPage>> listCatalog({
+    required String organizationId,
+    String? companyId,
+    String? cursor,
+    int limit = 20,
+  }) async {
+    return result.fold(
+      onSuccess: (products) => AppSuccess<ProductCatalogPage>(
+        ProductCatalogPage(products: products, hasMore: false),
+      ),
+      onFailure: (failure) => AppFailure<ProductCatalogPage>(failure),
+    );
+  }
 }
 
 class FakeCatalogCampaignRepository implements CatalogCampaignRepository {

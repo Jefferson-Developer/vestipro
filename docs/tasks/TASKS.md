@@ -179,7 +179,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ### EPIC-10 — Catálogo Premium
 - [x] [TASK-076 — Implementar home do catálogo](TASK-076-implementar-home-do-catalogo.md) — Flutter Senior + Front-end
-- [ ] [TASK-077 — Implementar grid visual de produtos](TASK-077-implementar-grid-visual-de-produtos.md) — Flutter Senior + Front-end
+- [x] [TASK-077 — Implementar grid visual de produtos](TASK-077-implementar-grid-visual-de-produtos.md) — Flutter Senior + Front-end
 - [ ] [TASK-078 — Implementar detalhe visual de produto](TASK-078-implementar-detalhe-visual-de-produto.md) — Flutter Senior + Front-end
 - [ ] [TASK-079 — Implementar favoritos](TASK-079-implementar-favoritos.md) — Flutter Senior + Front-end
 - [ ] [TASK-080 — Implementar lookbook e campanhas visuais](TASK-080-implementar-lookbook-e-campanhas.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 76 / 220 tasks concluídas.
+**Progresso:** 77 / 220 tasks concluídas.

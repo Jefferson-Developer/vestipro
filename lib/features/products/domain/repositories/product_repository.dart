@@ -1,5 +1,6 @@
 import '../../../../core/utils/utils.dart';
 import '../entities/product.dart';
+import '../entities/product_catalog_page.dart';
 import '../value_objects/sku.dart';
 
 /// Domain contract for Product persistence, decoupled from Firestore/Drift.
@@ -57,5 +58,29 @@ abstract interface class ProductRepository {
     required String organizationId,
     String? companyId,
     int limit = 12,
+  });
+
+  /// Cursor-paginated listing of every active (non soft-deleted) Product of
+  /// [organizationId] — newest first, ranked by `Product.createdAt` (ties
+  /// broken by `Product.id` for a stable order). This is the query behind
+  /// the catalog's full visual grid (TASK-077, `ProductGridBloc`): unlike
+  /// [listRecentlyLaunched] (a fixed top-N for the home's "lançamentos"
+  /// section), callers keep paging through the whole catalog by feeding the
+  /// previous page's `ProductCatalogPage.nextCursor` back in, never loading
+  /// every Product into memory at once.
+  ///
+  /// [cursor] is the previous page's `ProductCatalogPage.nextCursor`; `null`
+  /// (or omitted) starts from the first page. A [cursor] that no longer
+  /// matches any Product (e.g. it was deleted between page loads) safely
+  /// restarts pagination from the first page rather than failing.
+  ///
+  /// [companyId] restricts the result the same way [listRecentlyLaunched]
+  /// does: Products scoped to that company, plus Products shared across the
+  /// whole organization (`Product.companyId == null`).
+  Future<AppResult<ProductCatalogPage>> listCatalog({
+    required String organizationId,
+    String? companyId,
+    String? cursor,
+    int limit = 20,
   });
 }

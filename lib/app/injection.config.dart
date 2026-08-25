@@ -111,11 +111,14 @@ import '../features/catalog/domain/usecases/get_featured_collections_section_use
     as _i1042;
 import '../features/catalog/domain/usecases/get_new_arrivals_section_use_case.dart'
     as _i76;
+import '../features/catalog/domain/usecases/list_catalog_products_use_case.dart'
+    as _i448;
 import '../features/catalog/domain/usecases/load_catalog_home_cache_use_case.dart'
     as _i249;
 import '../features/catalog/domain/usecases/save_catalog_home_cache_use_case.dart'
     as _i64;
 import '../features/catalog/presentation/bloc/catalog_home_bloc.dart' as _i420;
+import '../features/catalog/presentation/bloc/product_grid_bloc.dart' as _i331;
 import '../features/crm/crm.dart' as _i205;
 import '../features/crm/data/mappers/crm_activity_mapper.dart' as _i203;
 import '../features/crm/data/mappers/crm_task_mapper.dart' as _i519;
@@ -1087,6 +1090,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i76.GetNewArrivalsSectionUseCase>(
       () => _i76.GetNewArrivalsSectionUseCase(gh<_i321.ProductRepository>()),
     );
+    gh.factory<_i448.ListCatalogProductsUseCase>(
+      () => _i448.ListCatalogProductsUseCase(gh<_i321.ProductRepository>()),
+    );
     gh.lazySingleton<_i361.CustomerLocalStoreRepository>(
       () => _i674.DriftCustomerLocalStoreRepository(
         gh<_i658.AppDatabase>(),
@@ -1563,6 +1569,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i580.FirestoreProductRemoteSearchDataSource(
         gh<_i974.FirebaseFirestore>(),
         gh<_i309.ProductMapper>(),
+      ),
+    );
+    gh.factory<_i331.ProductGridBloc>(
+      () => _i331.ProductGridBloc(
+        listCatalogProducts: gh<_i448.ListCatalogProductsUseCase>(),
+        getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i316.GetCatalogHomeConfigUseCase>(

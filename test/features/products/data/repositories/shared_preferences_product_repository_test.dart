@@ -231,6 +231,171 @@ void main() {
         },
       );
     });
+
+    group('listCatalog', () {
+      test('orders active products by createdAt, newest first', () async {
+        final older = _product(id: 'product-older', sku: 'SKU-OLDER').copyWith(
+          status: ProductStatus.active,
+          createdAt: DateTime.utc(2026, 1, 1),
+        );
+        final newer = _product(id: 'product-newer', sku: 'SKU-NEWER').copyWith(
+          status: ProductStatus.active,
+          createdAt: DateTime.utc(2026, 6, 1),
+        );
+        await repository.create(product: older);
+        await repository.create(product: newer);
+
+        final result = await repository.listCatalog(organizationId: 'org-1');
+
+        final page = (result as AppSuccess<ProductCatalogPage>).value;
+        expect(page.products.map((p) => p.id).toList(), <String>[
+          'product-newer',
+          'product-older',
+        ]);
+        expect(page.hasMore, isFalse);
+        expect(page.nextCursor, isNull);
+      });
+
+      test('excludes draft/inactive and soft-deleted products', () async {
+        final active = _product(
+          id: 'product-active',
+          sku: 'SKU-ACTIVE',
+        ).copyWith(status: ProductStatus.active);
+        final draft = _product(id: 'product-draft', sku: 'SKU-DRAFT');
+        final deleted = _product(id: 'product-deleted', sku: 'SKU-DELETED')
+            .copyWith(
+              status: ProductStatus.active,
+              deletedAt: DateTime.utc(2026, 2, 1),
+            );
+        await repository.create(product: active);
+        await repository.create(product: draft);
+        await repository.create(product: deleted);
+
+        final result = await repository.listCatalog(organizationId: 'org-1');
+
+        final page = (result as AppSuccess<ProductCatalogPage>).value;
+        expect(page.products.map((p) => p.id).toList(), <String>[
+          'product-active',
+        ]);
+      });
+
+      test(
+        'paginates with a cursor, never duplicating or skipping items',
+        () async {
+          for (var i = 0; i < 5; i++) {
+            await repository.create(
+              product: _product(id: 'product-$i', sku: 'SKU-$i').copyWith(
+                status: ProductStatus.active,
+                createdAt: DateTime.utc(2026, 1, 1 + i),
+              ),
+            );
+          }
+          // Newest first: product-4, product-3, product-2, product-1, product-0.
+
+          final firstPage =
+              (await repository.listCatalog(organizationId: 'org-1', limit: 2))
+                  as AppSuccess<ProductCatalogPage>;
+          expect(firstPage.value.products.map((p) => p.id).toList(), <String>[
+            'product-4',
+            'product-3',
+          ]);
+          expect(firstPage.value.hasMore, isTrue);
+          expect(firstPage.value.nextCursor, 'product-3');
+
+          final secondPage =
+              (await repository.listCatalog(
+                    organizationId: 'org-1',
+                    limit: 2,
+                    cursor: firstPage.value.nextCursor,
+                  ))
+                  as AppSuccess<ProductCatalogPage>;
+          expect(secondPage.value.products.map((p) => p.id).toList(), <String>[
+            'product-2',
+            'product-1',
+          ]);
+          expect(secondPage.value.hasMore, isTrue);
+
+          final thirdPage =
+              (await repository.listCatalog(
+                    organizationId: 'org-1',
+                    limit: 2,
+                    cursor: secondPage.value.nextCursor,
+                  ))
+                  as AppSuccess<ProductCatalogPage>;
+          expect(thirdPage.value.products.map((p) => p.id).toList(), <String>[
+            'product-0',
+          ]);
+          expect(thirdPage.value.hasMore, isFalse);
+          expect(thirdPage.value.nextCursor, isNull);
+        },
+      );
+
+      test(
+        'restarts from the first page when the cursor no longer matches any product',
+        () async {
+          await repository.create(
+            product: _product(
+              id: 'product-1',
+              sku: 'SKU-1',
+            ).copyWith(status: ProductStatus.active),
+          );
+
+          final result = await repository.listCatalog(
+            organizationId: 'org-1',
+            cursor: 'does-not-exist',
+          );
+
+          final page = (result as AppSuccess<ProductCatalogPage>).value;
+          expect(page.products.map((p) => p.id).toList(), <String>[
+            'product-1',
+          ]);
+        },
+      );
+
+      test(
+        'includes company-scoped and organization-wide products for a given company',
+        () async {
+          final companyScoped = _product(
+            id: 'product-company',
+            sku: 'SKU-C',
+          ).copyWith(status: ProductStatus.active, companyId: 'company-1');
+          final orgWide = _product(
+            id: 'product-org-wide',
+            sku: 'SKU-O',
+          ).copyWith(status: ProductStatus.active);
+          final otherCompany = _product(
+            id: 'product-other',
+            sku: 'SKU-X',
+          ).copyWith(status: ProductStatus.active, companyId: 'company-2');
+          await repository.create(product: companyScoped);
+          await repository.create(product: orgWide);
+          await repository.create(product: otherCompany);
+
+          final result = await repository.listCatalog(
+            organizationId: 'org-1',
+            companyId: 'company-1',
+          );
+
+          final ids = (result as AppSuccess<ProductCatalogPage>).value.products
+              .map((p) => p.id)
+              .toSet();
+          expect(ids, <String>{'product-company', 'product-org-wide'});
+          expect(ids.contains('product-other'), isFalse);
+        },
+      );
+
+      test(
+        'returns an empty page with hasMore false when there is nothing to show',
+        () async {
+          final result = await repository.listCatalog(organizationId: 'org-1');
+
+          final page = (result as AppSuccess<ProductCatalogPage>).value;
+          expect(page.products, isEmpty);
+          expect(page.hasMore, isFalse);
+          expect(page.nextCursor, isNull);
+        },
+      );
+    });
   });
 }
 

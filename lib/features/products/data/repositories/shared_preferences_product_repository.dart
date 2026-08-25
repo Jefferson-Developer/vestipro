@@ -6,6 +6,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/product.dart';
+import '../../domain/entities/product_catalog_page.dart';
 import '../../domain/entities/product_custom_field_value.dart';
 import '../../domain/entities/product_media.dart';
 import '../../domain/repositories/product_repository.dart';
@@ -218,6 +219,68 @@ final class SharedPreferencesProductRepository implements ProductRepository {
         UnexpectedFailure(
           'Unexpected error listing recently launched products locally.',
           code: 'product_local_list_recently_launched_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<AppResult<ProductCatalogPage>> listCatalog({
+    required String organizationId,
+    String? companyId,
+    String? cursor,
+    int limit = 20,
+  }) async {
+    try {
+      final products = await _load(organizationId);
+      final trimmedCompanyId = companyId?.trim();
+      final eligible =
+          products
+              .where(
+                (product) =>
+                    product.deletedAt == null &&
+                    product.status == ProductStatus.active &&
+                    (trimmedCompanyId == null ||
+                        trimmedCompanyId.isEmpty ||
+                        product.companyId == null ||
+                        product.companyId == trimmedCompanyId),
+              )
+              .toList(growable: true)
+            ..sort((a, b) {
+              final createdAtComparison = b.createdAt.compareTo(a.createdAt);
+              return createdAtComparison != 0
+                  ? createdAtComparison
+                  : b.id.compareTo(a.id);
+            });
+
+      final trimmedCursor = cursor?.trim();
+      final resumeIndex = trimmedCursor == null || trimmedCursor.isEmpty
+          ? 0
+          : eligible.indexWhere((product) => product.id == trimmedCursor) + 1;
+      // A cursor that no longer matches any eligible Product (deleted, or
+      // simply invalid) yields indexWhere == -1 -> resumeIndex == 0, which
+      // safely restarts pagination from the first page instead of failing.
+      final startIndex = resumeIndex < 0 ? 0 : resumeIndex;
+
+      final page = eligible
+          .skip(startIndex)
+          .take(limit)
+          .toList(growable: false);
+      final hasMore = startIndex + page.length < eligible.length;
+
+      return AppSuccess<ProductCatalogPage>(
+        ProductCatalogPage(
+          products: page,
+          hasMore: hasMore,
+          nextCursor: hasMore ? page.last.id : null,
+        ),
+      );
+    } catch (exception) {
+      return AppFailure<ProductCatalogPage>(
+        UnexpectedFailure(
+          'Unexpected error listing the product catalog locally.',
+          code: 'product_local_list_catalog_unexpected',
           cause: exception,
         ),
       );

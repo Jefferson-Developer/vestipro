@@ -88,6 +88,18 @@ class _FakeProductRepository implements ProductRepository {
   }) async {
     return const AppSuccess<List<Product>>(<Product>[]);
   }
+
+  @override
+  Future<AppResult<ProductCatalogPage>> listCatalog({
+    required String organizationId,
+    String? companyId,
+    String? cursor,
+    int limit = 20,
+  }) async {
+    return const AppSuccess<ProductCatalogPage>(
+      ProductCatalogPage(products: <Product>[], hasMore: false),
+    );
+  }
 }
 
 void main() {

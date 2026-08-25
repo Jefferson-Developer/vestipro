@@ -6,6 +6,7 @@ export 'domain/entities/category.dart';
 export 'domain/entities/collection.dart';
 export 'domain/entities/commercial_size_grid_draft.dart';
 export 'domain/entities/product.dart';
+export 'domain/entities/product_catalog_page.dart';
 export 'domain/entities/product_collection_link.dart';
 export 'domain/entities/product_color.dart';
 export 'domain/entities/product_custom_field_definition.dart';
