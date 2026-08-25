@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 
 import '../../foundations/foundations.dart';
 import '../../theme/theme.dart';
+import '../buttons/app_icon_button.dart';
 import '../feedback/app_empty_state.dart';
 import '../feedback/app_error_state.dart';
 import '../feedback/app_skeleton.dart';
@@ -59,6 +60,8 @@ class AppProductCardData {
     this.availability = AppProductAvailability.readyStock,
     this.availabilityLabel,
     this.badgeLabels = const <String>[],
+    this.isFavorite = false,
+    this.onFavoriteTap,
   });
 
   final Object id;
@@ -91,6 +94,17 @@ class AppProductCardData {
   /// passed in are silently ignored by [AppProductGrid] — never queued or
   /// rotated — to avoid a false sense of urgency/clutter.
   final List<String> badgeLabels;
+
+  /// Whether this product is currently favorited by the viewer (TASK-079).
+  /// Only meaningful together with [onFavoriteTap] — see its doc.
+  final bool isFavorite;
+
+  /// Shows a favorite (heart) button over the card's photo when non-`null`,
+  /// tapping it calls this instead of [AppProductGrid.onProductTap]. `null`
+  /// (the default) hides the button entirely, so every existing caller that
+  /// does not wire favorites (e.g. `AppProductCarousel`, the catalog home)
+  /// renders exactly as before.
+  final VoidCallback? onFavoriteTap;
 }
 
 /// The product grid every catalog/order/pick-list screen reuses.
@@ -341,6 +355,12 @@ class AppProductCard extends StatelessWidget {
                           .toList(growable: false),
                     ),
                   ),
+                if (product.onFavoriteTap != null)
+                  Positioned(
+                    top: AppSpacing.spacing4,
+                    right: AppSpacing.spacing4,
+                    child: _buildFavoriteButton(colors),
+                  ),
               ],
             ),
             const SizedBox(height: AppSpacing.spacing8),
@@ -413,6 +433,24 @@ class AppProductCard extends StatelessWidget {
       child: Text(
         label,
         style: AppTypography.labelSmall.copyWith(color: colors.onPrimary),
+      ),
+    );
+  }
+
+  /// A translucent circular backdrop (for contrast over any photo) around a
+  /// reused [AppIconButton] — never a bespoke icon widget — so the favorite
+  /// button gets the same debounce/loading/disabled/accessibility behavior
+  /// every other icon action in the app already has.
+  Widget _buildFavoriteButton(AppColors colors) {
+    return Material(
+      color: colors.surface.withValues(alpha: 0.85),
+      shape: const CircleBorder(),
+      child: AppIconButton(
+        icon: product.isFavorite ? Icons.favorite : Icons.favorite_border,
+        semanticLabel: product.isFavorite
+            ? 'Remover dos favoritos'
+            : 'Adicionar aos favoritos',
+        onPressed: product.onFavoriteTap,
       ),
     );
   }

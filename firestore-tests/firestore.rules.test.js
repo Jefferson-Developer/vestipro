@@ -198,6 +198,16 @@ function productDoc({ organizationId, deletedAt = null }) {
   };
 }
 
+function favoriteDoc({ organizationId, userId = 'rep-a', productId = 'product-a', companyId = 'company-a' }) {
+  return {
+    organizationId,
+    userId,
+    productId,
+    companyId,
+    createdAt: now(),
+  };
+}
+
 function auditLogDoc({ organizationId, actorUserId, action = 'role.changed' }) {
   return {
     organizationId,
@@ -762,6 +772,72 @@ describe('organizations/{organizationId}/products/{productId}  (TASK-069 global 
       db.doc(`organizations/${ORG_A}/products/product-a`).update({ name: 'Nome alterado' }),
     );
     await assertFails(db.doc(`organizations/${ORG_A}/products/product-a`).delete());
+  });
+});
+
+describe('organizations/{organizationId}/favorites/{favoriteId}  (TASK-079 personal favorites)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/favorites/rep-a_product-a`)
+        .set(favoriteDoc({ organizationId: ORG_A, userId: 'rep-a', productId: 'product-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/favorites/rep-b_product-a`)
+        .set(favoriteDoc({ organizationId: ORG_A, userId: 'rep-b', productId: 'product-a' }));
+    });
+  });
+
+  test('usuário cria o próprio favorito com o id {userId}_{productId}', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      db
+        .doc(`organizations/${ORG_A}/favorites/rep-a_product-new`)
+        .set(favoriteDoc({ organizationId: ORG_A, userId: 'rep-a', productId: 'product-new' })),
+    );
+  });
+
+  test('usuário não cria favorito em nome de outro usuário', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/favorites/rep-b_product-new`)
+        .set(favoriteDoc({ organizationId: ORG_A, userId: 'rep-b', productId: 'product-new' })),
+    );
+  });
+
+  test('usuário lê e apaga o próprio favorito', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/favorites/rep-a_product-a`).get());
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/favorites/rep-a_product-a`).delete());
+  });
+
+  test('usuário não lê nem apaga favorito de outro usuário, mesmo sabendo o id', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/favorites/rep-b_product-a`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/favorites/rep-b_product-a`).delete());
+  });
+
+  test('usuário lista apenas os próprios favoritos quando a query filtra userId', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      db.collection(`organizations/${ORG_A}/favorites`).where('userId', '==', 'rep-a').get(),
+    );
+    await assertFails(
+      db.collection(`organizations/${ORG_A}/favorites`).where('userId', '==', 'rep-b').get(),
+    );
+  });
+
+  test('membro da Org A não lê favorito da Org B', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_B}/favorites/owner-b_product-b`)
+        .set(favoriteDoc({ organizationId: ORG_B, userId: 'owner-b', productId: 'product-b' }));
+    });
+
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/favorites/owner-b_product-b`).get());
   });
 });
 

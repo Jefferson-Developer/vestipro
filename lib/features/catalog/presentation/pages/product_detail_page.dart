@@ -26,6 +26,8 @@ class ProductDetailPage extends StatelessWidget {
     required this.createBloc,
     this.origin = 'grid',
     this.onAddToOrder,
+    this.isFavorite = false,
+    this.onFavoriteToggle,
     super.key,
   });
 
@@ -46,6 +48,15 @@ class ProductDetailPage extends StatelessWidget {
   final void Function(Product product, List<ProductDetailOrderLine> lines)?
   onAddToOrder;
 
+  /// Whether this product is currently favorited (TASK-079) — same
+  /// "caller owns the favorites state" contract as
+  /// `ProductGridPage.favoriteProductIds`.
+  final bool isFavorite;
+
+  /// Shows a favorite button in the app bar when non-`null`; `null` (the
+  /// default) keeps this screen exactly as it rendered before TASK-079.
+  final VoidCallback? onFavoriteToggle;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ProductDetailBloc>(
@@ -57,16 +68,26 @@ class ProductDetailPage extends StatelessWidget {
             origin: origin,
           ),
         ),
-      child: _ProductDetailView(onAddToOrder: onAddToOrder),
+      child: _ProductDetailView(
+        onAddToOrder: onAddToOrder,
+        isFavorite: isFavorite,
+        onFavoriteToggle: onFavoriteToggle,
+      ),
     );
   }
 }
 
 class _ProductDetailView extends StatelessWidget {
-  const _ProductDetailView({this.onAddToOrder});
+  const _ProductDetailView({
+    this.onAddToOrder,
+    this.isFavorite = false,
+    this.onFavoriteToggle,
+  });
 
   final void Function(Product product, List<ProductDetailOrderLine> lines)?
   onAddToOrder;
+  final bool isFavorite;
+  final VoidCallback? onFavoriteToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -74,7 +95,19 @@ class _ProductDetailView extends StatelessWidget {
       builder: (context, state) {
         final bloc = context.read<ProductDetailBloc>();
         return Scaffold(
-          appBar: AppBar(title: Text(state.product?.name ?? 'Produto')),
+          appBar: AppBar(
+            title: Text(state.product?.name ?? 'Produto'),
+            actions: <Widget>[
+              if (onFavoriteToggle != null)
+                AppIconButton(
+                  icon: isFavorite ? Icons.favorite : Icons.favorite_border,
+                  semanticLabel: isFavorite
+                      ? 'Remover dos favoritos'
+                      : 'Adicionar aos favoritos',
+                  onPressed: onFavoriteToggle,
+                ),
+            ],
+          ),
           body: SafeArea(child: _buildBody(context, bloc, state)),
           bottomNavigationBar: state.status == ProductDetailLoadStatus.success
               ? _AddToOrderBar(state: state, onAddToOrder: onAddToOrder)

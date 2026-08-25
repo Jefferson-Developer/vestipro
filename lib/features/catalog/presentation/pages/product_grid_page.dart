@@ -25,6 +25,8 @@ class ProductGridPage extends StatelessWidget {
     this.companyId,
     this.title = 'Catálogo',
     this.onProductSelected,
+    this.favoriteProductIds,
+    this.onFavoriteToggle,
     super.key,
   });
 
@@ -37,6 +39,17 @@ class ProductGridPage extends StatelessWidget {
   /// product detail (TASK-078) is decided by whoever instantiates this page,
   /// never by the page itself.
   final ValueChanged<Product>? onProductSelected;
+
+  /// Every currently favorited `Product.id` (TASK-079), or `null` to hide
+  /// the favorite button entirely — this page never depends on the
+  /// favorites feature itself, the caller (which already watches
+  /// `FavoriteStatusCubit`) owns that state, same "host decides" contract
+  /// [onProductSelected] already has.
+  final Set<String>? favoriteProductIds;
+
+  /// Called when a card's favorite button is tapped — `null` (the default)
+  /// keeps every card exactly as it rendered before TASK-079.
+  final void Function(Product product)? onFavoriteToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -51,16 +64,25 @@ class ProductGridPage extends StatelessWidget {
       child: _ProductGridView(
         title: title,
         onProductSelected: onProductSelected,
+        favoriteProductIds: favoriteProductIds,
+        onFavoriteToggle: onFavoriteToggle,
       ),
     );
   }
 }
 
 class _ProductGridView extends StatelessWidget {
-  const _ProductGridView({required this.title, this.onProductSelected});
+  const _ProductGridView({
+    required this.title,
+    this.onProductSelected,
+    this.favoriteProductIds,
+    this.onFavoriteToggle,
+  });
 
   final String title;
   final ValueChanged<Product>? onProductSelected;
+  final Set<String>? favoriteProductIds;
+  final void Function(Product product)? onFavoriteToggle;
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +151,10 @@ class _ProductGridView extends StatelessWidget {
           ? null
           : _availabilityLabelFor(availability),
       badgeLabels: <String>[if (product.tags.isNotEmpty) product.tags.first],
+      isFavorite: favoriteProductIds?.contains(product.id) ?? false,
+      onFavoriteTap: onFavoriteToggle == null
+          ? null
+          : () => onFavoriteToggle!(product),
     );
   }
 

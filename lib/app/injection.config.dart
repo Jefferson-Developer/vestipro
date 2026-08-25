@@ -221,6 +221,26 @@ import '../features/customers/presentation/bloc/customer_portfolio_bloc.dart'
     as _i522;
 import '../features/customers/presentation/bloc/customer_segment_bloc.dart'
     as _i901;
+import '../features/favorites/data/datasources/favorite_remote_data_source.dart'
+    as _i1002;
+import '../features/favorites/data/datasources/firestore_favorite_remote_data_source.dart'
+    as _i349;
+import '../features/favorites/data/mappers/favorite_local_mapper.dart' as _i619;
+import '../features/favorites/data/repositories/drift_favorite_repository.dart'
+    as _i204;
+import '../features/favorites/domain/repositories/favorite_repository.dart'
+    as _i761;
+import '../features/favorites/domain/usecases/add_favorite_product_use_case.dart'
+    as _i1016;
+import '../features/favorites/domain/usecases/list_favorite_products_use_case.dart'
+    as _i72;
+import '../features/favorites/domain/usecases/remove_favorite_product_use_case.dart'
+    as _i214;
+import '../features/favorites/domain/usecases/watch_favorite_product_ids_use_case.dart'
+    as _i487;
+import '../features/favorites/presentation/bloc/favorites_bloc.dart' as _i318;
+import '../features/favorites/presentation/cubit/favorite_status_cubit.dart'
+    as _i249;
 import '../features/invites/data/datasources/cloud_functions_invite_acceptance_data_source.dart'
     as _i674;
 import '../features/invites/data/datasources/firestore_invite_data_source.dart'
@@ -684,6 +704,9 @@ extension GetItInjectableX on _i174.GetIt {
   }) {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final appInjectionModule = _$AppInjectionModule();
+    gh.factory<_i619.FavoriteLocalMapper>(
+      () => const _i619.FavoriteLocalMapper(),
+    );
     gh.lazySingleton<_i461.AppEnvironment>(
       () => appInjectionModule.appEnvironment,
     );
@@ -1541,6 +1564,11 @@ extension GetItInjectableX on _i174.GetIt {
         reorderStages: gh<_i482.ReorderPipelineStagesUseCase>(),
       ),
     );
+    gh.lazySingleton<_i1002.FavoriteRemoteDataSource>(
+      () => _i349.FirestoreFavoriteRemoteDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.factory<_i578.ProductDetailBloc>(
       () => _i578.ProductDetailBloc(
         getProductById: gh<_i721.GetProductByIdUseCase>(),
@@ -1647,6 +1675,13 @@ extension GetItInjectableX on _i174.GetIt {
         deleteSeason: gh<_i389.DeleteSeasonUseCase>(),
       ),
     );
+    gh.lazySingleton<_i761.FavoriteRepository>(
+      () => _i204.DriftFavoriteRepository(
+        gh<_i658.AppDatabase>(),
+        gh<_i619.FavoriteLocalMapper>(),
+        gh<_i1002.FavoriteRemoteDataSource>(),
+      ),
+    );
     gh.lazySingleton<_i753.AuditLogRepository>(
       () => _i303.AuditLogRepositoryImpl(
         dataSource: gh<_i432.AuditLogDataSource>(),
@@ -1692,6 +1727,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i485.TeamRepositoryImpl(
         dataSource: gh<_i228.TeamDataSource>(),
         mapper: gh<_i802.TeamMapper>(),
+      ),
+    );
+    gh.factory<_i72.ListFavoriteProductsUseCase>(
+      () => _i72.ListFavoriteProductsUseCase(
+        gh<_i761.FavoriteRepository>(),
+        gh<_i321.ProductRepository>(),
+        gh<_i385.GetVariantAvailabilityUseCase>(),
       ),
     );
     gh.factory<_i335.RemoveMemberFromTeamUseCase>(
@@ -1823,6 +1865,16 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i268.SearchProductsUseCase>(
       () => _i268.SearchProductsUseCase(gh<_i568.ProductSearchRepository>()),
     );
+    gh.factory<_i1016.AddFavoriteProductUseCase>(
+      () => _i1016.AddFavoriteProductUseCase(gh<_i761.FavoriteRepository>()),
+    );
+    gh.factory<_i214.RemoveFavoriteProductUseCase>(
+      () => _i214.RemoveFavoriteProductUseCase(gh<_i761.FavoriteRepository>()),
+    );
+    gh.factory<_i487.WatchFavoriteProductIdsUseCase>(
+      () =>
+          _i487.WatchFavoriteProductIdsUseCase(gh<_i761.FavoriteRepository>()),
+    );
     gh.factory<_i968.ProductMediaBloc>(
       () => _i968.ProductMediaBloc(
         storage: gh<_i209.StorageDataSource>(),
@@ -1831,6 +1883,13 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
         compressor: gh<_i209.ImageUploadCompressor>(),
         thumbnailCompressor: gh<_i209.ImageCompressor>(),
+      ),
+    );
+    gh.factory<_i318.FavoritesBloc>(
+      () => _i318.FavoritesBloc(
+        listFavoriteProducts: gh<_i72.ListFavoriteProductsUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+        sessionService: gh<_i885.SessionService>(),
       ),
     );
     gh.factory<_i198.ProductFormBloc>(
@@ -1996,6 +2055,15 @@ extension GetItInjectableX on _i174.GetIt {
         qualifyLead: gh<_i924.QualifyLeadUseCase>(),
         disqualifyLead: gh<_i904.DisqualifyLeadUseCase>(),
         listOrganizationUsers: gh<_i220.ListOrganizationUsersUseCase>(),
+      ),
+    );
+    gh.factory<_i249.FavoriteStatusCubit>(
+      () => _i249.FavoriteStatusCubit(
+        watchFavoriteProductIds: gh<_i487.WatchFavoriteProductIdsUseCase>(),
+        addFavoriteProduct: gh<_i1016.AddFavoriteProductUseCase>(),
+        removeFavoriteProduct: gh<_i214.RemoveFavoriteProductUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+        sessionService: gh<_i885.SessionService>(),
       ),
     );
     gh.factory<_i438.PreviewCustomerSegmentCountUseCase>(

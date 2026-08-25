@@ -553,6 +553,38 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/favorites/{favoriteId}
+      // (TASK-079 personal, per-user product favorites — best-effort mirror
+      // of the local-first Drift favorite store, never shared between
+      // users. `favoriteId` is always `{userId}_{productId}`.)
+      // -------------------------------------------------------------------
+
+      match /favorites/{favoriteId} {
+        // "read" (not split get/list) so a list query is only ever allowed
+        // when every document it could return already satisfies
+        // `resource.data.userId == request.auth.uid` — same pattern
+        // `portfolioAssignments` above already relies on; the client query
+        // itself must filter by `userId` for a list to actually succeed.
+        allow read: if isActiveMember(organizationId)
+          && resource.data.userId == request.auth.uid;
+
+        allow create: if isActiveMember(organizationId)
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.userId == request.auth.uid
+          && favoriteId
+            == request.resource.data.userId + '_' + request.resource.data.productId;
+
+        allow update: if isActiveMember(organizationId)
+          && resource.data.userId == request.auth.uid
+          && unchanged('organizationId')
+          && unchanged('userId')
+          && unchanged('productId');
+
+        allow delete: if isActiveMember(organizationId)
+          && resource.data.userId == request.auth.uid;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/productVariants/{variantId}
       // (TASK-072 generated sellable color/size variants)
       // -------------------------------------------------------------------

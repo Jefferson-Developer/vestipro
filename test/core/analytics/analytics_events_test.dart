@@ -43,6 +43,9 @@ void main() {
           'catalog_home_viewed',
           'catalog_section_opened',
           'catalog_grid_viewed',
+          'product_favorited',
+          'product_unfavorited',
+          'favorites_viewed',
         ]),
       );
 

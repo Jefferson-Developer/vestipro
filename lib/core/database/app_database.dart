@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'tables/customer_addresses_table.dart';
 import 'tables/customer_contacts_table.dart';
 import 'tables/customers_table.dart';
+import 'tables/favorites_table.dart';
 import 'tables/product_search_index_table.dart';
 
 part 'app_database.g.dart';
@@ -43,13 +44,14 @@ class ProductSearchIndexRow {
     CustomerAddressesTable,
     CustomerContactsTable,
     ProductSearchIndexTable,
+    FavoritesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 3;
+  int get schemaVersion => 4;
 
   @override
   MigrationStrategy get migration {
@@ -83,6 +85,9 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 3) {
           await migrator.createTable(productSearchIndexTable);
+        }
+        if (from < 4) {
+          await migrator.createTable(favoritesTable);
         }
       },
       beforeOpen: (details) async {
@@ -236,5 +241,133 @@ class AppDatabase extends _$AppDatabase {
     return rows
         .map((product) => ProductSearchIndexRow(product: product))
         .toList(growable: false);
+  }
+
+  /// Favorites [productId] for ([organizationId], [userId]), or resurrects
+  /// its tombstone if it was previously soft-deleted (unfavorited) but never
+  /// synced — `insertOnConflictUpdate` on the same primary key means a
+  /// repeated tap before an earlier write lands only ever updates the same
+  /// row, never inserts a duplicate.
+  Future<void> upsertFavorite(FavoritesTableCompanion row) {
+    return into(favoritesTable).insertOnConflictUpdate(row);
+  }
+
+  /// Marks a favorite as pending remote deletion instead of deleting the row
+  /// outright, so an unfavorite made while offline is never lost before it
+  /// actually syncs. A no-op (0 rows affected) if the favorite does not
+  /// exist, keeping unfavoriting idempotent.
+  Future<int> softDeleteFavorite({
+    required String organizationId,
+    required String userId,
+    required String productId,
+    required DateTime deletedAt,
+  }) {
+    return (update(favoritesTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.userId.equals(userId) &
+              row.productId.equals(productId),
+        ))
+        .write(
+          FavoritesTableCompanion(
+            deletedAt: Value(deletedAt),
+            syncStatus: const Value('pending'),
+          ),
+        );
+  }
+
+  /// Physically removes a favorite row — only ever called once its remote
+  /// deletion has been confirmed, never directly by an "unfavorite" tap
+  /// (see [softDeleteFavorite]).
+  Future<void> deleteFavoriteRow({
+    required String organizationId,
+    required String userId,
+    required String productId,
+  }) {
+    return (delete(favoritesTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.userId.equals(userId) &
+              row.productId.equals(productId),
+        ))
+        .go();
+  }
+
+  Future<void> updateFavoriteSyncStatus({
+    required String organizationId,
+    required String userId,
+    required String productId,
+    required String syncStatus,
+  }) {
+    return (update(favoritesTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.userId.equals(userId) &
+              row.productId.equals(productId),
+        ))
+        .write(FavoritesTableCompanion(syncStatus: Value(syncStatus)));
+  }
+
+  /// Reactive set of every currently favorited (not soft-deleted) Product id
+  /// for ([organizationId], [userId]) — re-emits on every local write to
+  /// [FavoritesTable] in that scope, which is what lets a favorite button
+  /// reflect an add/remove immediately, online or offline.
+  Stream<Set<String>> watchFavoriteProductIds({
+    required String organizationId,
+    required String userId,
+  }) {
+    final query = select(favoritesTable)
+      ..where(
+        (row) =>
+            row.organizationId.equals(organizationId) &
+            row.userId.equals(userId) &
+            row.deletedAt.isNull(),
+      );
+    return query.watch().map(
+      (rows) => rows.map((row) => row.productId).toSet(),
+    );
+  }
+
+  /// Newest-favorited-first page of [FavoritesTable] rows for
+  /// ([organizationId], [userId]). Fetches `limit + 1` rows to derive
+  /// `hasMore` without a separate count query, mirroring
+  /// `FirestoreCollectionDataSource.getPage`'s same trick.
+  Future<List<FavoritesTableData>> listFavorites({
+    required String organizationId,
+    required String userId,
+    required int offset,
+    required int limit,
+  }) {
+    return (select(favoritesTable)
+          ..where(
+            (row) =>
+                row.organizationId.equals(organizationId) &
+                row.userId.equals(userId) &
+                row.deletedAt.isNull(),
+          )
+          ..orderBy([
+            (row) => OrderingTerm.desc(row.createdAt),
+            (row) => OrderingTerm.asc(row.productId),
+          ])
+          ..limit(limit + 1, offset: offset))
+        .get();
+  }
+
+  /// Every locally pending favorite mutation (add or tombstoned remove) for
+  /// ([organizationId], [userId]) — what `DriftFavoriteRepository` drains
+  /// opportunistically (e.g. when the favorites/catalog screen starts) to
+  /// sync what could not reach Firestore while offline, ahead of a real
+  /// connectivity-triggered Outbox (EPIC-14).
+  Future<List<FavoritesTableData>> listPendingFavoriteSync({
+    required String organizationId,
+    required String userId,
+  }) {
+    return (select(favoritesTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.userId.equals(userId) &
+              row.syncStatus.equals('pending'),
+        ))
+        .get();
   }
 }
