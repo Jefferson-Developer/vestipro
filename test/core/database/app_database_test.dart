@@ -16,7 +16,7 @@ void main() {
     });
 
     test('creates the customer schema on a fresh database', () async {
-      expect(database.schemaVersion, 2);
+      expect(database.schemaVersion, 3);
 
       // Exercises `onCreate`/`beforeOpen` by forcing the connection open.
       await database.customStatement('SELECT 1');
@@ -35,6 +35,7 @@ void main() {
           'customers',
           'customer_addresses',
           'customer_contacts',
+          'product_search_index',
         ]),
       );
     });

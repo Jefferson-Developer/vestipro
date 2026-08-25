@@ -47,6 +47,15 @@
         { "fieldPath": "status", "order": "ASCENDING" },
         { "fieldPath": "deletedAt", "order": "ASCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "products",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "organizationId", "order": "ASCENDING" },
+        { "fieldPath": "deletedAt", "order": "ASCENDING" },
+        { "fieldPath": "searchPrefixes", "arrayConfig": "CONTAINS" }
+      ]
     }
   ],
   "fieldOverrides": [

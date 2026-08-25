@@ -3525,6 +3525,2046 @@ class CustomerContactsTableCompanion
   }
 }
 
+class $ProductSearchIndexTableTable extends ProductSearchIndexTable
+    with TableInfo<$ProductSearchIndexTableTable, ProductSearchIndexTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProductSearchIndexTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _productIdMeta = const VerificationMeta(
+    'productId',
+  );
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+    'product_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _skuMeta = const VerificationMeta('sku');
+  @override
+  late final GeneratedColumn<String> sku = GeneratedColumn<String>(
+    'sku',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _referenceMeta = const VerificationMeta(
+    'reference',
+  );
+  @override
+  late final GeneratedColumn<String> reference = GeneratedColumn<String>(
+    'reference',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _shortDescriptionMeta = const VerificationMeta(
+    'shortDescription',
+  );
+  @override
+  late final GeneratedColumn<String> shortDescription = GeneratedColumn<String>(
+    'short_description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fullDescriptionMeta = const VerificationMeta(
+    'fullDescription',
+  );
+  @override
+  late final GeneratedColumn<String> fullDescription = GeneratedColumn<String>(
+    'full_description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _brandMeta = const VerificationMeta('brand');
+  @override
+  late final GeneratedColumn<String> brand = GeneratedColumn<String>(
+    'brand',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _collectionIdMeta = const VerificationMeta(
+    'collectionId',
+  );
+  @override
+  late final GeneratedColumn<String> collectionId = GeneratedColumn<String>(
+    'collection_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _seasonIdMeta = const VerificationMeta(
+    'seasonId',
+  );
+  @override
+  late final GeneratedColumn<String> seasonId = GeneratedColumn<String>(
+    'season_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lineMeta = const VerificationMeta('line');
+  @override
+  late final GeneratedColumn<String> line = GeneratedColumn<String>(
+    'line',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _subcategoryIdMeta = const VerificationMeta(
+    'subcategoryId',
+  );
+  @override
+  late final GeneratedColumn<String> subcategoryId = GeneratedColumn<String>(
+    'subcategory_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _genderMeta = const VerificationMeta('gender');
+  @override
+  late final GeneratedColumn<String> gender = GeneratedColumn<String>(
+    'gender',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _targetAudienceMeta = const VerificationMeta(
+    'targetAudience',
+  );
+  @override
+  late final GeneratedColumn<String> targetAudience = GeneratedColumn<String>(
+    'target_audience',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fabricMeta = const VerificationMeta('fabric');
+  @override
+  late final GeneratedColumn<String> fabric = GeneratedColumn<String>(
+    'fabric',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _compositionMeta = const VerificationMeta(
+    'composition',
+  );
+  @override
+  late final GeneratedColumn<String> composition = GeneratedColumn<String>(
+    'composition',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _supplierIdMeta = const VerificationMeta(
+    'supplierId',
+  );
+  @override
+  late final GeneratedColumn<String> supplierId = GeneratedColumn<String>(
+    'supplier_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ncmMeta = const VerificationMeta('ncm');
+  @override
+  late final GeneratedColumn<String> ncm = GeneratedColumn<String>(
+    'ncm',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _eanMeta = const VerificationMeta('ean');
+  @override
+  late final GeneratedColumn<String> ean = GeneratedColumn<String>(
+    'ean',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _tagsJsonMeta = const VerificationMeta(
+    'tagsJson',
+  );
+  @override
+  late final GeneratedColumn<String> tagsJson = GeneratedColumn<String>(
+    'tags_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _launchDateMeta = const VerificationMeta(
+    'launchDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> launchDate = GeneratedColumn<DateTime>(
+    'launch_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _seoTitleMeta = const VerificationMeta(
+    'seoTitle',
+  );
+  @override
+  late final GeneratedColumn<String> seoTitle = GeneratedColumn<String>(
+    'seo_title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _seoDescriptionMeta = const VerificationMeta(
+    'seoDescription',
+  );
+  @override
+  late final GeneratedColumn<String> seoDescription = GeneratedColumn<String>(
+    'seo_description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _seoSlugMeta = const VerificationMeta(
+    'seoSlug',
+  );
+  @override
+  late final GeneratedColumn<String> seoSlug = GeneratedColumn<String>(
+    'seo_slug',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _mediaJsonMeta = const VerificationMeta(
+    'mediaJson',
+  );
+  @override
+  late final GeneratedColumn<String> mediaJson = GeneratedColumn<String>(
+    'media_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _customFieldValuesJsonMeta =
+      const VerificationMeta('customFieldValuesJson');
+  @override
+  late final GeneratedColumn<String> customFieldValuesJson =
+      GeneratedColumn<String>(
+        'custom_field_values_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedByMeta = const VerificationMeta(
+    'updatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
+    'updated_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _normalizedSearchTextMeta =
+      const VerificationMeta('normalizedSearchText');
+  @override
+  late final GeneratedColumn<String> normalizedSearchText =
+      GeneratedColumn<String>(
+        'normalized_search_text',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _indexedAtMeta = const VerificationMeta(
+    'indexedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> indexedAt = GeneratedColumn<DateTime>(
+    'indexed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    productId,
+    organizationId,
+    companyId,
+    sku,
+    reference,
+    name,
+    shortDescription,
+    fullDescription,
+    brand,
+    collectionId,
+    seasonId,
+    line,
+    categoryId,
+    subcategoryId,
+    gender,
+    targetAudience,
+    fabric,
+    composition,
+    supplierId,
+    ncm,
+    ean,
+    tagsJson,
+    status,
+    launchDate,
+    seoTitle,
+    seoDescription,
+    seoSlug,
+    mediaJson,
+    customFieldValuesJson,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+    normalizedSearchText,
+    indexedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'product_search_index';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProductSearchIndexTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('product_id')) {
+      context.handle(
+        _productIdMeta,
+        productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_productIdMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    }
+    if (data.containsKey('sku')) {
+      context.handle(
+        _skuMeta,
+        sku.isAcceptableOrUnknown(data['sku']!, _skuMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_skuMeta);
+    }
+    if (data.containsKey('reference')) {
+      context.handle(
+        _referenceMeta,
+        reference.isAcceptableOrUnknown(data['reference']!, _referenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_referenceMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('short_description')) {
+      context.handle(
+        _shortDescriptionMeta,
+        shortDescription.isAcceptableOrUnknown(
+          data['short_description']!,
+          _shortDescriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('full_description')) {
+      context.handle(
+        _fullDescriptionMeta,
+        fullDescription.isAcceptableOrUnknown(
+          data['full_description']!,
+          _fullDescriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('brand')) {
+      context.handle(
+        _brandMeta,
+        brand.isAcceptableOrUnknown(data['brand']!, _brandMeta),
+      );
+    }
+    if (data.containsKey('collection_id')) {
+      context.handle(
+        _collectionIdMeta,
+        collectionId.isAcceptableOrUnknown(
+          data['collection_id']!,
+          _collectionIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('season_id')) {
+      context.handle(
+        _seasonIdMeta,
+        seasonId.isAcceptableOrUnknown(data['season_id']!, _seasonIdMeta),
+      );
+    }
+    if (data.containsKey('line')) {
+      context.handle(
+        _lineMeta,
+        line.isAcceptableOrUnknown(data['line']!, _lineMeta),
+      );
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    }
+    if (data.containsKey('subcategory_id')) {
+      context.handle(
+        _subcategoryIdMeta,
+        subcategoryId.isAcceptableOrUnknown(
+          data['subcategory_id']!,
+          _subcategoryIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('gender')) {
+      context.handle(
+        _genderMeta,
+        gender.isAcceptableOrUnknown(data['gender']!, _genderMeta),
+      );
+    }
+    if (data.containsKey('target_audience')) {
+      context.handle(
+        _targetAudienceMeta,
+        targetAudience.isAcceptableOrUnknown(
+          data['target_audience']!,
+          _targetAudienceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fabric')) {
+      context.handle(
+        _fabricMeta,
+        fabric.isAcceptableOrUnknown(data['fabric']!, _fabricMeta),
+      );
+    }
+    if (data.containsKey('composition')) {
+      context.handle(
+        _compositionMeta,
+        composition.isAcceptableOrUnknown(
+          data['composition']!,
+          _compositionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('supplier_id')) {
+      context.handle(
+        _supplierIdMeta,
+        supplierId.isAcceptableOrUnknown(data['supplier_id']!, _supplierIdMeta),
+      );
+    }
+    if (data.containsKey('ncm')) {
+      context.handle(
+        _ncmMeta,
+        ncm.isAcceptableOrUnknown(data['ncm']!, _ncmMeta),
+      );
+    }
+    if (data.containsKey('ean')) {
+      context.handle(
+        _eanMeta,
+        ean.isAcceptableOrUnknown(data['ean']!, _eanMeta),
+      );
+    }
+    if (data.containsKey('tags_json')) {
+      context.handle(
+        _tagsJsonMeta,
+        tagsJson.isAcceptableOrUnknown(data['tags_json']!, _tagsJsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_tagsJsonMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('launch_date')) {
+      context.handle(
+        _launchDateMeta,
+        launchDate.isAcceptableOrUnknown(data['launch_date']!, _launchDateMeta),
+      );
+    }
+    if (data.containsKey('seo_title')) {
+      context.handle(
+        _seoTitleMeta,
+        seoTitle.isAcceptableOrUnknown(data['seo_title']!, _seoTitleMeta),
+      );
+    }
+    if (data.containsKey('seo_description')) {
+      context.handle(
+        _seoDescriptionMeta,
+        seoDescription.isAcceptableOrUnknown(
+          data['seo_description']!,
+          _seoDescriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('seo_slug')) {
+      context.handle(
+        _seoSlugMeta,
+        seoSlug.isAcceptableOrUnknown(data['seo_slug']!, _seoSlugMeta),
+      );
+    }
+    if (data.containsKey('media_json')) {
+      context.handle(
+        _mediaJsonMeta,
+        mediaJson.isAcceptableOrUnknown(data['media_json']!, _mediaJsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_mediaJsonMeta);
+    }
+    if (data.containsKey('custom_field_values_json')) {
+      context.handle(
+        _customFieldValuesJsonMeta,
+        customFieldValuesJson.isAcceptableOrUnknown(
+          data['custom_field_values_json']!,
+          _customFieldValuesJsonMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_customFieldValuesJsonMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('updated_by')) {
+      context.handle(
+        _updatedByMeta,
+        updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedByMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    if (data.containsKey('normalized_search_text')) {
+      context.handle(
+        _normalizedSearchTextMeta,
+        normalizedSearchText.isAcceptableOrUnknown(
+          data['normalized_search_text']!,
+          _normalizedSearchTextMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_normalizedSearchTextMeta);
+    }
+    if (data.containsKey('indexed_at')) {
+      context.handle(
+        _indexedAtMeta,
+        indexedAt.isAcceptableOrUnknown(data['indexed_at']!, _indexedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_indexedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {organizationId, productId};
+  @override
+  ProductSearchIndexTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProductSearchIndexTableData(
+      productId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      ),
+      sku: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sku'],
+      )!,
+      reference: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reference'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      shortDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}short_description'],
+      ),
+      fullDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}full_description'],
+      ),
+      brand: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}brand'],
+      ),
+      collectionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collection_id'],
+      ),
+      seasonId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}season_id'],
+      ),
+      line: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}line'],
+      ),
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      ),
+      subcategoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subcategory_id'],
+      ),
+      gender: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}gender'],
+      ),
+      targetAudience: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_audience'],
+      ),
+      fabric: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fabric'],
+      ),
+      composition: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}composition'],
+      ),
+      supplierId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supplier_id'],
+      ),
+      ncm: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ncm'],
+      ),
+      ean: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ean'],
+      ),
+      tagsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tags_json'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      launchDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}launch_date'],
+      ),
+      seoTitle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seo_title'],
+      ),
+      seoDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seo_description'],
+      ),
+      seoSlug: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seo_slug'],
+      ),
+      mediaJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}media_json'],
+      )!,
+      customFieldValuesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}custom_field_values_json'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      updatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_by'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+      normalizedSearchText: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}normalized_search_text'],
+      )!,
+      indexedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}indexed_at'],
+      )!,
+    );
+  }
+
+  @override
+  $ProductSearchIndexTableTable createAlias(String alias) {
+    return $ProductSearchIndexTableTable(attachedDatabase, alias);
+  }
+}
+
+class ProductSearchIndexTableData extends DataClass
+    implements Insertable<ProductSearchIndexTableData> {
+  final String productId;
+  final String organizationId;
+  final String? companyId;
+  final String sku;
+  final String reference;
+  final String name;
+  final String? shortDescription;
+  final String? fullDescription;
+  final String? brand;
+  final String? collectionId;
+  final String? seasonId;
+  final String? line;
+  final String? categoryId;
+  final String? subcategoryId;
+  final String? gender;
+  final String? targetAudience;
+  final String? fabric;
+  final String? composition;
+  final String? supplierId;
+  final String? ncm;
+  final String? ean;
+  final String tagsJson;
+  final String status;
+  final DateTime? launchDate;
+  final String? seoTitle;
+  final String? seoDescription;
+  final String? seoSlug;
+  final String mediaJson;
+  final String customFieldValuesJson;
+  final DateTime createdAt;
+  final String createdBy;
+  final DateTime updatedAt;
+  final String updatedBy;
+  final DateTime? deletedAt;
+  final int version;
+  final String syncStatus;
+  final String normalizedSearchText;
+  final DateTime indexedAt;
+  const ProductSearchIndexTableData({
+    required this.productId,
+    required this.organizationId,
+    this.companyId,
+    required this.sku,
+    required this.reference,
+    required this.name,
+    this.shortDescription,
+    this.fullDescription,
+    this.brand,
+    this.collectionId,
+    this.seasonId,
+    this.line,
+    this.categoryId,
+    this.subcategoryId,
+    this.gender,
+    this.targetAudience,
+    this.fabric,
+    this.composition,
+    this.supplierId,
+    this.ncm,
+    this.ean,
+    required this.tagsJson,
+    required this.status,
+    this.launchDate,
+    this.seoTitle,
+    this.seoDescription,
+    this.seoSlug,
+    required this.mediaJson,
+    required this.customFieldValuesJson,
+    required this.createdAt,
+    required this.createdBy,
+    required this.updatedAt,
+    required this.updatedBy,
+    this.deletedAt,
+    required this.version,
+    required this.syncStatus,
+    required this.normalizedSearchText,
+    required this.indexedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['product_id'] = Variable<String>(productId);
+    map['organization_id'] = Variable<String>(organizationId);
+    if (!nullToAbsent || companyId != null) {
+      map['company_id'] = Variable<String>(companyId);
+    }
+    map['sku'] = Variable<String>(sku);
+    map['reference'] = Variable<String>(reference);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || shortDescription != null) {
+      map['short_description'] = Variable<String>(shortDescription);
+    }
+    if (!nullToAbsent || fullDescription != null) {
+      map['full_description'] = Variable<String>(fullDescription);
+    }
+    if (!nullToAbsent || brand != null) {
+      map['brand'] = Variable<String>(brand);
+    }
+    if (!nullToAbsent || collectionId != null) {
+      map['collection_id'] = Variable<String>(collectionId);
+    }
+    if (!nullToAbsent || seasonId != null) {
+      map['season_id'] = Variable<String>(seasonId);
+    }
+    if (!nullToAbsent || line != null) {
+      map['line'] = Variable<String>(line);
+    }
+    if (!nullToAbsent || categoryId != null) {
+      map['category_id'] = Variable<String>(categoryId);
+    }
+    if (!nullToAbsent || subcategoryId != null) {
+      map['subcategory_id'] = Variable<String>(subcategoryId);
+    }
+    if (!nullToAbsent || gender != null) {
+      map['gender'] = Variable<String>(gender);
+    }
+    if (!nullToAbsent || targetAudience != null) {
+      map['target_audience'] = Variable<String>(targetAudience);
+    }
+    if (!nullToAbsent || fabric != null) {
+      map['fabric'] = Variable<String>(fabric);
+    }
+    if (!nullToAbsent || composition != null) {
+      map['composition'] = Variable<String>(composition);
+    }
+    if (!nullToAbsent || supplierId != null) {
+      map['supplier_id'] = Variable<String>(supplierId);
+    }
+    if (!nullToAbsent || ncm != null) {
+      map['ncm'] = Variable<String>(ncm);
+    }
+    if (!nullToAbsent || ean != null) {
+      map['ean'] = Variable<String>(ean);
+    }
+    map['tags_json'] = Variable<String>(tagsJson);
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || launchDate != null) {
+      map['launch_date'] = Variable<DateTime>(launchDate);
+    }
+    if (!nullToAbsent || seoTitle != null) {
+      map['seo_title'] = Variable<String>(seoTitle);
+    }
+    if (!nullToAbsent || seoDescription != null) {
+      map['seo_description'] = Variable<String>(seoDescription);
+    }
+    if (!nullToAbsent || seoSlug != null) {
+      map['seo_slug'] = Variable<String>(seoSlug);
+    }
+    map['media_json'] = Variable<String>(mediaJson);
+    map['custom_field_values_json'] = Variable<String>(customFieldValuesJson);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_by'] = Variable<String>(createdBy);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_by'] = Variable<String>(updatedBy);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['version'] = Variable<int>(version);
+    map['sync_status'] = Variable<String>(syncStatus);
+    map['normalized_search_text'] = Variable<String>(normalizedSearchText);
+    map['indexed_at'] = Variable<DateTime>(indexedAt);
+    return map;
+  }
+
+  ProductSearchIndexTableCompanion toCompanion(bool nullToAbsent) {
+    return ProductSearchIndexTableCompanion(
+      productId: Value(productId),
+      organizationId: Value(organizationId),
+      companyId: companyId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(companyId),
+      sku: Value(sku),
+      reference: Value(reference),
+      name: Value(name),
+      shortDescription: shortDescription == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shortDescription),
+      fullDescription: fullDescription == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fullDescription),
+      brand: brand == null && nullToAbsent
+          ? const Value.absent()
+          : Value(brand),
+      collectionId: collectionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(collectionId),
+      seasonId: seasonId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seasonId),
+      line: line == null && nullToAbsent ? const Value.absent() : Value(line),
+      categoryId: categoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryId),
+      subcategoryId: subcategoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subcategoryId),
+      gender: gender == null && nullToAbsent
+          ? const Value.absent()
+          : Value(gender),
+      targetAudience: targetAudience == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetAudience),
+      fabric: fabric == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fabric),
+      composition: composition == null && nullToAbsent
+          ? const Value.absent()
+          : Value(composition),
+      supplierId: supplierId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supplierId),
+      ncm: ncm == null && nullToAbsent ? const Value.absent() : Value(ncm),
+      ean: ean == null && nullToAbsent ? const Value.absent() : Value(ean),
+      tagsJson: Value(tagsJson),
+      status: Value(status),
+      launchDate: launchDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(launchDate),
+      seoTitle: seoTitle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seoTitle),
+      seoDescription: seoDescription == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seoDescription),
+      seoSlug: seoSlug == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seoSlug),
+      mediaJson: Value(mediaJson),
+      customFieldValuesJson: Value(customFieldValuesJson),
+      createdAt: Value(createdAt),
+      createdBy: Value(createdBy),
+      updatedAt: Value(updatedAt),
+      updatedBy: Value(updatedBy),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      version: Value(version),
+      syncStatus: Value(syncStatus),
+      normalizedSearchText: Value(normalizedSearchText),
+      indexedAt: Value(indexedAt),
+    );
+  }
+
+  factory ProductSearchIndexTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProductSearchIndexTableData(
+      productId: serializer.fromJson<String>(json['productId']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String?>(json['companyId']),
+      sku: serializer.fromJson<String>(json['sku']),
+      reference: serializer.fromJson<String>(json['reference']),
+      name: serializer.fromJson<String>(json['name']),
+      shortDescription: serializer.fromJson<String?>(json['shortDescription']),
+      fullDescription: serializer.fromJson<String?>(json['fullDescription']),
+      brand: serializer.fromJson<String?>(json['brand']),
+      collectionId: serializer.fromJson<String?>(json['collectionId']),
+      seasonId: serializer.fromJson<String?>(json['seasonId']),
+      line: serializer.fromJson<String?>(json['line']),
+      categoryId: serializer.fromJson<String?>(json['categoryId']),
+      subcategoryId: serializer.fromJson<String?>(json['subcategoryId']),
+      gender: serializer.fromJson<String?>(json['gender']),
+      targetAudience: serializer.fromJson<String?>(json['targetAudience']),
+      fabric: serializer.fromJson<String?>(json['fabric']),
+      composition: serializer.fromJson<String?>(json['composition']),
+      supplierId: serializer.fromJson<String?>(json['supplierId']),
+      ncm: serializer.fromJson<String?>(json['ncm']),
+      ean: serializer.fromJson<String?>(json['ean']),
+      tagsJson: serializer.fromJson<String>(json['tagsJson']),
+      status: serializer.fromJson<String>(json['status']),
+      launchDate: serializer.fromJson<DateTime?>(json['launchDate']),
+      seoTitle: serializer.fromJson<String?>(json['seoTitle']),
+      seoDescription: serializer.fromJson<String?>(json['seoDescription']),
+      seoSlug: serializer.fromJson<String?>(json['seoSlug']),
+      mediaJson: serializer.fromJson<String>(json['mediaJson']),
+      customFieldValuesJson: serializer.fromJson<String>(
+        json['customFieldValuesJson'],
+      ),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedBy: serializer.fromJson<String>(json['updatedBy']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+      normalizedSearchText: serializer.fromJson<String>(
+        json['normalizedSearchText'],
+      ),
+      indexedAt: serializer.fromJson<DateTime>(json['indexedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'productId': serializer.toJson<String>(productId),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String?>(companyId),
+      'sku': serializer.toJson<String>(sku),
+      'reference': serializer.toJson<String>(reference),
+      'name': serializer.toJson<String>(name),
+      'shortDescription': serializer.toJson<String?>(shortDescription),
+      'fullDescription': serializer.toJson<String?>(fullDescription),
+      'brand': serializer.toJson<String?>(brand),
+      'collectionId': serializer.toJson<String?>(collectionId),
+      'seasonId': serializer.toJson<String?>(seasonId),
+      'line': serializer.toJson<String?>(line),
+      'categoryId': serializer.toJson<String?>(categoryId),
+      'subcategoryId': serializer.toJson<String?>(subcategoryId),
+      'gender': serializer.toJson<String?>(gender),
+      'targetAudience': serializer.toJson<String?>(targetAudience),
+      'fabric': serializer.toJson<String?>(fabric),
+      'composition': serializer.toJson<String?>(composition),
+      'supplierId': serializer.toJson<String?>(supplierId),
+      'ncm': serializer.toJson<String?>(ncm),
+      'ean': serializer.toJson<String?>(ean),
+      'tagsJson': serializer.toJson<String>(tagsJson),
+      'status': serializer.toJson<String>(status),
+      'launchDate': serializer.toJson<DateTime?>(launchDate),
+      'seoTitle': serializer.toJson<String?>(seoTitle),
+      'seoDescription': serializer.toJson<String?>(seoDescription),
+      'seoSlug': serializer.toJson<String?>(seoSlug),
+      'mediaJson': serializer.toJson<String>(mediaJson),
+      'customFieldValuesJson': serializer.toJson<String>(customFieldValuesJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedBy': serializer.toJson<String>(updatedBy),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'version': serializer.toJson<int>(version),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+      'normalizedSearchText': serializer.toJson<String>(normalizedSearchText),
+      'indexedAt': serializer.toJson<DateTime>(indexedAt),
+    };
+  }
+
+  ProductSearchIndexTableData copyWith({
+    String? productId,
+    String? organizationId,
+    Value<String?> companyId = const Value.absent(),
+    String? sku,
+    String? reference,
+    String? name,
+    Value<String?> shortDescription = const Value.absent(),
+    Value<String?> fullDescription = const Value.absent(),
+    Value<String?> brand = const Value.absent(),
+    Value<String?> collectionId = const Value.absent(),
+    Value<String?> seasonId = const Value.absent(),
+    Value<String?> line = const Value.absent(),
+    Value<String?> categoryId = const Value.absent(),
+    Value<String?> subcategoryId = const Value.absent(),
+    Value<String?> gender = const Value.absent(),
+    Value<String?> targetAudience = const Value.absent(),
+    Value<String?> fabric = const Value.absent(),
+    Value<String?> composition = const Value.absent(),
+    Value<String?> supplierId = const Value.absent(),
+    Value<String?> ncm = const Value.absent(),
+    Value<String?> ean = const Value.absent(),
+    String? tagsJson,
+    String? status,
+    Value<DateTime?> launchDate = const Value.absent(),
+    Value<String?> seoTitle = const Value.absent(),
+    Value<String?> seoDescription = const Value.absent(),
+    Value<String?> seoSlug = const Value.absent(),
+    String? mediaJson,
+    String? customFieldValuesJson,
+    DateTime? createdAt,
+    String? createdBy,
+    DateTime? updatedAt,
+    String? updatedBy,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? version,
+    String? syncStatus,
+    String? normalizedSearchText,
+    DateTime? indexedAt,
+  }) => ProductSearchIndexTableData(
+    productId: productId ?? this.productId,
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId.present ? companyId.value : this.companyId,
+    sku: sku ?? this.sku,
+    reference: reference ?? this.reference,
+    name: name ?? this.name,
+    shortDescription: shortDescription.present
+        ? shortDescription.value
+        : this.shortDescription,
+    fullDescription: fullDescription.present
+        ? fullDescription.value
+        : this.fullDescription,
+    brand: brand.present ? brand.value : this.brand,
+    collectionId: collectionId.present ? collectionId.value : this.collectionId,
+    seasonId: seasonId.present ? seasonId.value : this.seasonId,
+    line: line.present ? line.value : this.line,
+    categoryId: categoryId.present ? categoryId.value : this.categoryId,
+    subcategoryId: subcategoryId.present
+        ? subcategoryId.value
+        : this.subcategoryId,
+    gender: gender.present ? gender.value : this.gender,
+    targetAudience: targetAudience.present
+        ? targetAudience.value
+        : this.targetAudience,
+    fabric: fabric.present ? fabric.value : this.fabric,
+    composition: composition.present ? composition.value : this.composition,
+    supplierId: supplierId.present ? supplierId.value : this.supplierId,
+    ncm: ncm.present ? ncm.value : this.ncm,
+    ean: ean.present ? ean.value : this.ean,
+    tagsJson: tagsJson ?? this.tagsJson,
+    status: status ?? this.status,
+    launchDate: launchDate.present ? launchDate.value : this.launchDate,
+    seoTitle: seoTitle.present ? seoTitle.value : this.seoTitle,
+    seoDescription: seoDescription.present
+        ? seoDescription.value
+        : this.seoDescription,
+    seoSlug: seoSlug.present ? seoSlug.value : this.seoSlug,
+    mediaJson: mediaJson ?? this.mediaJson,
+    customFieldValuesJson: customFieldValuesJson ?? this.customFieldValuesJson,
+    createdAt: createdAt ?? this.createdAt,
+    createdBy: createdBy ?? this.createdBy,
+    updatedAt: updatedAt ?? this.updatedAt,
+    updatedBy: updatedBy ?? this.updatedBy,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    version: version ?? this.version,
+    syncStatus: syncStatus ?? this.syncStatus,
+    normalizedSearchText: normalizedSearchText ?? this.normalizedSearchText,
+    indexedAt: indexedAt ?? this.indexedAt,
+  );
+  ProductSearchIndexTableData copyWithCompanion(
+    ProductSearchIndexTableCompanion data,
+  ) {
+    return ProductSearchIndexTableData(
+      productId: data.productId.present ? data.productId.value : this.productId,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      sku: data.sku.present ? data.sku.value : this.sku,
+      reference: data.reference.present ? data.reference.value : this.reference,
+      name: data.name.present ? data.name.value : this.name,
+      shortDescription: data.shortDescription.present
+          ? data.shortDescription.value
+          : this.shortDescription,
+      fullDescription: data.fullDescription.present
+          ? data.fullDescription.value
+          : this.fullDescription,
+      brand: data.brand.present ? data.brand.value : this.brand,
+      collectionId: data.collectionId.present
+          ? data.collectionId.value
+          : this.collectionId,
+      seasonId: data.seasonId.present ? data.seasonId.value : this.seasonId,
+      line: data.line.present ? data.line.value : this.line,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      subcategoryId: data.subcategoryId.present
+          ? data.subcategoryId.value
+          : this.subcategoryId,
+      gender: data.gender.present ? data.gender.value : this.gender,
+      targetAudience: data.targetAudience.present
+          ? data.targetAudience.value
+          : this.targetAudience,
+      fabric: data.fabric.present ? data.fabric.value : this.fabric,
+      composition: data.composition.present
+          ? data.composition.value
+          : this.composition,
+      supplierId: data.supplierId.present
+          ? data.supplierId.value
+          : this.supplierId,
+      ncm: data.ncm.present ? data.ncm.value : this.ncm,
+      ean: data.ean.present ? data.ean.value : this.ean,
+      tagsJson: data.tagsJson.present ? data.tagsJson.value : this.tagsJson,
+      status: data.status.present ? data.status.value : this.status,
+      launchDate: data.launchDate.present
+          ? data.launchDate.value
+          : this.launchDate,
+      seoTitle: data.seoTitle.present ? data.seoTitle.value : this.seoTitle,
+      seoDescription: data.seoDescription.present
+          ? data.seoDescription.value
+          : this.seoDescription,
+      seoSlug: data.seoSlug.present ? data.seoSlug.value : this.seoSlug,
+      mediaJson: data.mediaJson.present ? data.mediaJson.value : this.mediaJson,
+      customFieldValuesJson: data.customFieldValuesJson.present
+          ? data.customFieldValuesJson.value
+          : this.customFieldValuesJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      version: data.version.present ? data.version.value : this.version,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+      normalizedSearchText: data.normalizedSearchText.present
+          ? data.normalizedSearchText.value
+          : this.normalizedSearchText,
+      indexedAt: data.indexedAt.present ? data.indexedAt.value : this.indexedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProductSearchIndexTableData(')
+          ..write('productId: $productId, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('sku: $sku, ')
+          ..write('reference: $reference, ')
+          ..write('name: $name, ')
+          ..write('shortDescription: $shortDescription, ')
+          ..write('fullDescription: $fullDescription, ')
+          ..write('brand: $brand, ')
+          ..write('collectionId: $collectionId, ')
+          ..write('seasonId: $seasonId, ')
+          ..write('line: $line, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('subcategoryId: $subcategoryId, ')
+          ..write('gender: $gender, ')
+          ..write('targetAudience: $targetAudience, ')
+          ..write('fabric: $fabric, ')
+          ..write('composition: $composition, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('ncm: $ncm, ')
+          ..write('ean: $ean, ')
+          ..write('tagsJson: $tagsJson, ')
+          ..write('status: $status, ')
+          ..write('launchDate: $launchDate, ')
+          ..write('seoTitle: $seoTitle, ')
+          ..write('seoDescription: $seoDescription, ')
+          ..write('seoSlug: $seoSlug, ')
+          ..write('mediaJson: $mediaJson, ')
+          ..write('customFieldValuesJson: $customFieldValuesJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('normalizedSearchText: $normalizedSearchText, ')
+          ..write('indexedAt: $indexedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    productId,
+    organizationId,
+    companyId,
+    sku,
+    reference,
+    name,
+    shortDescription,
+    fullDescription,
+    brand,
+    collectionId,
+    seasonId,
+    line,
+    categoryId,
+    subcategoryId,
+    gender,
+    targetAudience,
+    fabric,
+    composition,
+    supplierId,
+    ncm,
+    ean,
+    tagsJson,
+    status,
+    launchDate,
+    seoTitle,
+    seoDescription,
+    seoSlug,
+    mediaJson,
+    customFieldValuesJson,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+    normalizedSearchText,
+    indexedAt,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProductSearchIndexTableData &&
+          other.productId == this.productId &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.sku == this.sku &&
+          other.reference == this.reference &&
+          other.name == this.name &&
+          other.shortDescription == this.shortDescription &&
+          other.fullDescription == this.fullDescription &&
+          other.brand == this.brand &&
+          other.collectionId == this.collectionId &&
+          other.seasonId == this.seasonId &&
+          other.line == this.line &&
+          other.categoryId == this.categoryId &&
+          other.subcategoryId == this.subcategoryId &&
+          other.gender == this.gender &&
+          other.targetAudience == this.targetAudience &&
+          other.fabric == this.fabric &&
+          other.composition == this.composition &&
+          other.supplierId == this.supplierId &&
+          other.ncm == this.ncm &&
+          other.ean == this.ean &&
+          other.tagsJson == this.tagsJson &&
+          other.status == this.status &&
+          other.launchDate == this.launchDate &&
+          other.seoTitle == this.seoTitle &&
+          other.seoDescription == this.seoDescription &&
+          other.seoSlug == this.seoSlug &&
+          other.mediaJson == this.mediaJson &&
+          other.customFieldValuesJson == this.customFieldValuesJson &&
+          other.createdAt == this.createdAt &&
+          other.createdBy == this.createdBy &&
+          other.updatedAt == this.updatedAt &&
+          other.updatedBy == this.updatedBy &&
+          other.deletedAt == this.deletedAt &&
+          other.version == this.version &&
+          other.syncStatus == this.syncStatus &&
+          other.normalizedSearchText == this.normalizedSearchText &&
+          other.indexedAt == this.indexedAt);
+}
+
+class ProductSearchIndexTableCompanion
+    extends UpdateCompanion<ProductSearchIndexTableData> {
+  final Value<String> productId;
+  final Value<String> organizationId;
+  final Value<String?> companyId;
+  final Value<String> sku;
+  final Value<String> reference;
+  final Value<String> name;
+  final Value<String?> shortDescription;
+  final Value<String?> fullDescription;
+  final Value<String?> brand;
+  final Value<String?> collectionId;
+  final Value<String?> seasonId;
+  final Value<String?> line;
+  final Value<String?> categoryId;
+  final Value<String?> subcategoryId;
+  final Value<String?> gender;
+  final Value<String?> targetAudience;
+  final Value<String?> fabric;
+  final Value<String?> composition;
+  final Value<String?> supplierId;
+  final Value<String?> ncm;
+  final Value<String?> ean;
+  final Value<String> tagsJson;
+  final Value<String> status;
+  final Value<DateTime?> launchDate;
+  final Value<String?> seoTitle;
+  final Value<String?> seoDescription;
+  final Value<String?> seoSlug;
+  final Value<String> mediaJson;
+  final Value<String> customFieldValuesJson;
+  final Value<DateTime> createdAt;
+  final Value<String> createdBy;
+  final Value<DateTime> updatedAt;
+  final Value<String> updatedBy;
+  final Value<DateTime?> deletedAt;
+  final Value<int> version;
+  final Value<String> syncStatus;
+  final Value<String> normalizedSearchText;
+  final Value<DateTime> indexedAt;
+  final Value<int> rowid;
+  const ProductSearchIndexTableCompanion({
+    this.productId = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.sku = const Value.absent(),
+    this.reference = const Value.absent(),
+    this.name = const Value.absent(),
+    this.shortDescription = const Value.absent(),
+    this.fullDescription = const Value.absent(),
+    this.brand = const Value.absent(),
+    this.collectionId = const Value.absent(),
+    this.seasonId = const Value.absent(),
+    this.line = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.subcategoryId = const Value.absent(),
+    this.gender = const Value.absent(),
+    this.targetAudience = const Value.absent(),
+    this.fabric = const Value.absent(),
+    this.composition = const Value.absent(),
+    this.supplierId = const Value.absent(),
+    this.ncm = const Value.absent(),
+    this.ean = const Value.absent(),
+    this.tagsJson = const Value.absent(),
+    this.status = const Value.absent(),
+    this.launchDate = const Value.absent(),
+    this.seoTitle = const Value.absent(),
+    this.seoDescription = const Value.absent(),
+    this.seoSlug = const Value.absent(),
+    this.mediaJson = const Value.absent(),
+    this.customFieldValuesJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.normalizedSearchText = const Value.absent(),
+    this.indexedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ProductSearchIndexTableCompanion.insert({
+    required String productId,
+    required String organizationId,
+    this.companyId = const Value.absent(),
+    required String sku,
+    required String reference,
+    required String name,
+    this.shortDescription = const Value.absent(),
+    this.fullDescription = const Value.absent(),
+    this.brand = const Value.absent(),
+    this.collectionId = const Value.absent(),
+    this.seasonId = const Value.absent(),
+    this.line = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.subcategoryId = const Value.absent(),
+    this.gender = const Value.absent(),
+    this.targetAudience = const Value.absent(),
+    this.fabric = const Value.absent(),
+    this.composition = const Value.absent(),
+    this.supplierId = const Value.absent(),
+    this.ncm = const Value.absent(),
+    this.ean = const Value.absent(),
+    required String tagsJson,
+    required String status,
+    this.launchDate = const Value.absent(),
+    this.seoTitle = const Value.absent(),
+    this.seoDescription = const Value.absent(),
+    this.seoSlug = const Value.absent(),
+    required String mediaJson,
+    required String customFieldValuesJson,
+    required DateTime createdAt,
+    required String createdBy,
+    required DateTime updatedAt,
+    required String updatedBy,
+    this.deletedAt = const Value.absent(),
+    required int version,
+    required String syncStatus,
+    required String normalizedSearchText,
+    required DateTime indexedAt,
+    this.rowid = const Value.absent(),
+  }) : productId = Value(productId),
+       organizationId = Value(organizationId),
+       sku = Value(sku),
+       reference = Value(reference),
+       name = Value(name),
+       tagsJson = Value(tagsJson),
+       status = Value(status),
+       mediaJson = Value(mediaJson),
+       customFieldValuesJson = Value(customFieldValuesJson),
+       createdAt = Value(createdAt),
+       createdBy = Value(createdBy),
+       updatedAt = Value(updatedAt),
+       updatedBy = Value(updatedBy),
+       version = Value(version),
+       syncStatus = Value(syncStatus),
+       normalizedSearchText = Value(normalizedSearchText),
+       indexedAt = Value(indexedAt);
+  static Insertable<ProductSearchIndexTableData> custom({
+    Expression<String>? productId,
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? sku,
+    Expression<String>? reference,
+    Expression<String>? name,
+    Expression<String>? shortDescription,
+    Expression<String>? fullDescription,
+    Expression<String>? brand,
+    Expression<String>? collectionId,
+    Expression<String>? seasonId,
+    Expression<String>? line,
+    Expression<String>? categoryId,
+    Expression<String>? subcategoryId,
+    Expression<String>? gender,
+    Expression<String>? targetAudience,
+    Expression<String>? fabric,
+    Expression<String>? composition,
+    Expression<String>? supplierId,
+    Expression<String>? ncm,
+    Expression<String>? ean,
+    Expression<String>? tagsJson,
+    Expression<String>? status,
+    Expression<DateTime>? launchDate,
+    Expression<String>? seoTitle,
+    Expression<String>? seoDescription,
+    Expression<String>? seoSlug,
+    Expression<String>? mediaJson,
+    Expression<String>? customFieldValuesJson,
+    Expression<DateTime>? createdAt,
+    Expression<String>? createdBy,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? updatedBy,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? version,
+    Expression<String>? syncStatus,
+    Expression<String>? normalizedSearchText,
+    Expression<DateTime>? indexedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (productId != null) 'product_id': productId,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (sku != null) 'sku': sku,
+      if (reference != null) 'reference': reference,
+      if (name != null) 'name': name,
+      if (shortDescription != null) 'short_description': shortDescription,
+      if (fullDescription != null) 'full_description': fullDescription,
+      if (brand != null) 'brand': brand,
+      if (collectionId != null) 'collection_id': collectionId,
+      if (seasonId != null) 'season_id': seasonId,
+      if (line != null) 'line': line,
+      if (categoryId != null) 'category_id': categoryId,
+      if (subcategoryId != null) 'subcategory_id': subcategoryId,
+      if (gender != null) 'gender': gender,
+      if (targetAudience != null) 'target_audience': targetAudience,
+      if (fabric != null) 'fabric': fabric,
+      if (composition != null) 'composition': composition,
+      if (supplierId != null) 'supplier_id': supplierId,
+      if (ncm != null) 'ncm': ncm,
+      if (ean != null) 'ean': ean,
+      if (tagsJson != null) 'tags_json': tagsJson,
+      if (status != null) 'status': status,
+      if (launchDate != null) 'launch_date': launchDate,
+      if (seoTitle != null) 'seo_title': seoTitle,
+      if (seoDescription != null) 'seo_description': seoDescription,
+      if (seoSlug != null) 'seo_slug': seoSlug,
+      if (mediaJson != null) 'media_json': mediaJson,
+      if (customFieldValuesJson != null)
+        'custom_field_values_json': customFieldValuesJson,
+      if (createdAt != null) 'created_at': createdAt,
+      if (createdBy != null) 'created_by': createdBy,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (updatedBy != null) 'updated_by': updatedBy,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (version != null) 'version': version,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (normalizedSearchText != null)
+        'normalized_search_text': normalizedSearchText,
+      if (indexedAt != null) 'indexed_at': indexedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ProductSearchIndexTableCompanion copyWith({
+    Value<String>? productId,
+    Value<String>? organizationId,
+    Value<String?>? companyId,
+    Value<String>? sku,
+    Value<String>? reference,
+    Value<String>? name,
+    Value<String?>? shortDescription,
+    Value<String?>? fullDescription,
+    Value<String?>? brand,
+    Value<String?>? collectionId,
+    Value<String?>? seasonId,
+    Value<String?>? line,
+    Value<String?>? categoryId,
+    Value<String?>? subcategoryId,
+    Value<String?>? gender,
+    Value<String?>? targetAudience,
+    Value<String?>? fabric,
+    Value<String?>? composition,
+    Value<String?>? supplierId,
+    Value<String?>? ncm,
+    Value<String?>? ean,
+    Value<String>? tagsJson,
+    Value<String>? status,
+    Value<DateTime?>? launchDate,
+    Value<String?>? seoTitle,
+    Value<String?>? seoDescription,
+    Value<String?>? seoSlug,
+    Value<String>? mediaJson,
+    Value<String>? customFieldValuesJson,
+    Value<DateTime>? createdAt,
+    Value<String>? createdBy,
+    Value<DateTime>? updatedAt,
+    Value<String>? updatedBy,
+    Value<DateTime?>? deletedAt,
+    Value<int>? version,
+    Value<String>? syncStatus,
+    Value<String>? normalizedSearchText,
+    Value<DateTime>? indexedAt,
+    Value<int>? rowid,
+  }) {
+    return ProductSearchIndexTableCompanion(
+      productId: productId ?? this.productId,
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      sku: sku ?? this.sku,
+      reference: reference ?? this.reference,
+      name: name ?? this.name,
+      shortDescription: shortDescription ?? this.shortDescription,
+      fullDescription: fullDescription ?? this.fullDescription,
+      brand: brand ?? this.brand,
+      collectionId: collectionId ?? this.collectionId,
+      seasonId: seasonId ?? this.seasonId,
+      line: line ?? this.line,
+      categoryId: categoryId ?? this.categoryId,
+      subcategoryId: subcategoryId ?? this.subcategoryId,
+      gender: gender ?? this.gender,
+      targetAudience: targetAudience ?? this.targetAudience,
+      fabric: fabric ?? this.fabric,
+      composition: composition ?? this.composition,
+      supplierId: supplierId ?? this.supplierId,
+      ncm: ncm ?? this.ncm,
+      ean: ean ?? this.ean,
+      tagsJson: tagsJson ?? this.tagsJson,
+      status: status ?? this.status,
+      launchDate: launchDate ?? this.launchDate,
+      seoTitle: seoTitle ?? this.seoTitle,
+      seoDescription: seoDescription ?? this.seoDescription,
+      seoSlug: seoSlug ?? this.seoSlug,
+      mediaJson: mediaJson ?? this.mediaJson,
+      customFieldValuesJson:
+          customFieldValuesJson ?? this.customFieldValuesJson,
+      createdAt: createdAt ?? this.createdAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      updatedBy: updatedBy ?? this.updatedBy,
+      deletedAt: deletedAt ?? this.deletedAt,
+      version: version ?? this.version,
+      syncStatus: syncStatus ?? this.syncStatus,
+      normalizedSearchText: normalizedSearchText ?? this.normalizedSearchText,
+      indexedAt: indexedAt ?? this.indexedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (sku.present) {
+      map['sku'] = Variable<String>(sku.value);
+    }
+    if (reference.present) {
+      map['reference'] = Variable<String>(reference.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (shortDescription.present) {
+      map['short_description'] = Variable<String>(shortDescription.value);
+    }
+    if (fullDescription.present) {
+      map['full_description'] = Variable<String>(fullDescription.value);
+    }
+    if (brand.present) {
+      map['brand'] = Variable<String>(brand.value);
+    }
+    if (collectionId.present) {
+      map['collection_id'] = Variable<String>(collectionId.value);
+    }
+    if (seasonId.present) {
+      map['season_id'] = Variable<String>(seasonId.value);
+    }
+    if (line.present) {
+      map['line'] = Variable<String>(line.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (subcategoryId.present) {
+      map['subcategory_id'] = Variable<String>(subcategoryId.value);
+    }
+    if (gender.present) {
+      map['gender'] = Variable<String>(gender.value);
+    }
+    if (targetAudience.present) {
+      map['target_audience'] = Variable<String>(targetAudience.value);
+    }
+    if (fabric.present) {
+      map['fabric'] = Variable<String>(fabric.value);
+    }
+    if (composition.present) {
+      map['composition'] = Variable<String>(composition.value);
+    }
+    if (supplierId.present) {
+      map['supplier_id'] = Variable<String>(supplierId.value);
+    }
+    if (ncm.present) {
+      map['ncm'] = Variable<String>(ncm.value);
+    }
+    if (ean.present) {
+      map['ean'] = Variable<String>(ean.value);
+    }
+    if (tagsJson.present) {
+      map['tags_json'] = Variable<String>(tagsJson.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (launchDate.present) {
+      map['launch_date'] = Variable<DateTime>(launchDate.value);
+    }
+    if (seoTitle.present) {
+      map['seo_title'] = Variable<String>(seoTitle.value);
+    }
+    if (seoDescription.present) {
+      map['seo_description'] = Variable<String>(seoDescription.value);
+    }
+    if (seoSlug.present) {
+      map['seo_slug'] = Variable<String>(seoSlug.value);
+    }
+    if (mediaJson.present) {
+      map['media_json'] = Variable<String>(mediaJson.value);
+    }
+    if (customFieldValuesJson.present) {
+      map['custom_field_values_json'] = Variable<String>(
+        customFieldValuesJson.value,
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (updatedBy.present) {
+      map['updated_by'] = Variable<String>(updatedBy.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (normalizedSearchText.present) {
+      map['normalized_search_text'] = Variable<String>(
+        normalizedSearchText.value,
+      );
+    }
+    if (indexedAt.present) {
+      map['indexed_at'] = Variable<DateTime>(indexedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProductSearchIndexTableCompanion(')
+          ..write('productId: $productId, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('sku: $sku, ')
+          ..write('reference: $reference, ')
+          ..write('name: $name, ')
+          ..write('shortDescription: $shortDescription, ')
+          ..write('fullDescription: $fullDescription, ')
+          ..write('brand: $brand, ')
+          ..write('collectionId: $collectionId, ')
+          ..write('seasonId: $seasonId, ')
+          ..write('line: $line, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('subcategoryId: $subcategoryId, ')
+          ..write('gender: $gender, ')
+          ..write('targetAudience: $targetAudience, ')
+          ..write('fabric: $fabric, ')
+          ..write('composition: $composition, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('ncm: $ncm, ')
+          ..write('ean: $ean, ')
+          ..write('tagsJson: $tagsJson, ')
+          ..write('status: $status, ')
+          ..write('launchDate: $launchDate, ')
+          ..write('seoTitle: $seoTitle, ')
+          ..write('seoDescription: $seoDescription, ')
+          ..write('seoSlug: $seoSlug, ')
+          ..write('mediaJson: $mediaJson, ')
+          ..write('customFieldValuesJson: $customFieldValuesJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('normalizedSearchText: $normalizedSearchText, ')
+          ..write('indexedAt: $indexedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -3533,6 +5573,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $CustomerAddressesTableTable(this);
   late final $CustomerContactsTableTable customerContactsTable =
       $CustomerContactsTableTable(this);
+  late final $ProductSearchIndexTableTable productSearchIndexTable =
+      $ProductSearchIndexTableTable(this);
   late final Index idxCustomersOrgCompany = Index(
     'idx_customers_org_company',
     'CREATE INDEX idx_customers_org_company ON customers (organization_id, company_id)',
@@ -3545,6 +5587,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_customer_contacts_customer',
     'CREATE INDEX idx_customer_contacts_customer ON customer_contacts (customer_id)',
   );
+  late final Index idxProductSearchIndexOrgText = Index(
+    'idx_product_search_index_org_text',
+    'CREATE INDEX idx_product_search_index_org_text ON product_search_index (organization_id, normalized_search_text)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -3553,9 +5599,11 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     customersTable,
     customerAddressesTable,
     customerContactsTable,
+    productSearchIndexTable,
     idxCustomersOrgCompany,
     idxCustomerAddressesCustomer,
     idxCustomerContactsCustomer,
+    idxProductSearchIndexOrgText,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -5623,6 +7671,880 @@ typedef $$CustomerContactsTableTableProcessedTableManager =
       CustomerContactsTableData,
       PrefetchHooks Function({bool customerId})
     >;
+typedef $$ProductSearchIndexTableTableCreateCompanionBuilder =
+    ProductSearchIndexTableCompanion Function({
+      required String productId,
+      required String organizationId,
+      Value<String?> companyId,
+      required String sku,
+      required String reference,
+      required String name,
+      Value<String?> shortDescription,
+      Value<String?> fullDescription,
+      Value<String?> brand,
+      Value<String?> collectionId,
+      Value<String?> seasonId,
+      Value<String?> line,
+      Value<String?> categoryId,
+      Value<String?> subcategoryId,
+      Value<String?> gender,
+      Value<String?> targetAudience,
+      Value<String?> fabric,
+      Value<String?> composition,
+      Value<String?> supplierId,
+      Value<String?> ncm,
+      Value<String?> ean,
+      required String tagsJson,
+      required String status,
+      Value<DateTime?> launchDate,
+      Value<String?> seoTitle,
+      Value<String?> seoDescription,
+      Value<String?> seoSlug,
+      required String mediaJson,
+      required String customFieldValuesJson,
+      required DateTime createdAt,
+      required String createdBy,
+      required DateTime updatedAt,
+      required String updatedBy,
+      Value<DateTime?> deletedAt,
+      required int version,
+      required String syncStatus,
+      required String normalizedSearchText,
+      required DateTime indexedAt,
+      Value<int> rowid,
+    });
+typedef $$ProductSearchIndexTableTableUpdateCompanionBuilder =
+    ProductSearchIndexTableCompanion Function({
+      Value<String> productId,
+      Value<String> organizationId,
+      Value<String?> companyId,
+      Value<String> sku,
+      Value<String> reference,
+      Value<String> name,
+      Value<String?> shortDescription,
+      Value<String?> fullDescription,
+      Value<String?> brand,
+      Value<String?> collectionId,
+      Value<String?> seasonId,
+      Value<String?> line,
+      Value<String?> categoryId,
+      Value<String?> subcategoryId,
+      Value<String?> gender,
+      Value<String?> targetAudience,
+      Value<String?> fabric,
+      Value<String?> composition,
+      Value<String?> supplierId,
+      Value<String?> ncm,
+      Value<String?> ean,
+      Value<String> tagsJson,
+      Value<String> status,
+      Value<DateTime?> launchDate,
+      Value<String?> seoTitle,
+      Value<String?> seoDescription,
+      Value<String?> seoSlug,
+      Value<String> mediaJson,
+      Value<String> customFieldValuesJson,
+      Value<DateTime> createdAt,
+      Value<String> createdBy,
+      Value<DateTime> updatedAt,
+      Value<String> updatedBy,
+      Value<DateTime?> deletedAt,
+      Value<int> version,
+      Value<String> syncStatus,
+      Value<String> normalizedSearchText,
+      Value<DateTime> indexedAt,
+      Value<int> rowid,
+    });
+
+class $$ProductSearchIndexTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ProductSearchIndexTableTable> {
+  $$ProductSearchIndexTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sku => $composableBuilder(
+    column: $table.sku,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get shortDescription => $composableBuilder(
+    column: $table.shortDescription,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fullDescription => $composableBuilder(
+    column: $table.fullDescription,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get brand => $composableBuilder(
+    column: $table.brand,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get collectionId => $composableBuilder(
+    column: $table.collectionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seasonId => $composableBuilder(
+    column: $table.seasonId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get line => $composableBuilder(
+    column: $table.line,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subcategoryId => $composableBuilder(
+    column: $table.subcategoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get gender => $composableBuilder(
+    column: $table.gender,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get targetAudience => $composableBuilder(
+    column: $table.targetAudience,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fabric => $composableBuilder(
+    column: $table.fabric,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get composition => $composableBuilder(
+    column: $table.composition,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ncm => $composableBuilder(
+    column: $table.ncm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ean => $composableBuilder(
+    column: $table.ean,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tagsJson => $composableBuilder(
+    column: $table.tagsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get launchDate => $composableBuilder(
+    column: $table.launchDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seoTitle => $composableBuilder(
+    column: $table.seoTitle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seoDescription => $composableBuilder(
+    column: $table.seoDescription,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seoSlug => $composableBuilder(
+    column: $table.seoSlug,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mediaJson => $composableBuilder(
+    column: $table.mediaJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customFieldValuesJson => $composableBuilder(
+    column: $table.customFieldValuesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get normalizedSearchText => $composableBuilder(
+    column: $table.normalizedSearchText,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get indexedAt => $composableBuilder(
+    column: $table.indexedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ProductSearchIndexTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProductSearchIndexTableTable> {
+  $$ProductSearchIndexTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sku => $composableBuilder(
+    column: $table.sku,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get shortDescription => $composableBuilder(
+    column: $table.shortDescription,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fullDescription => $composableBuilder(
+    column: $table.fullDescription,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get brand => $composableBuilder(
+    column: $table.brand,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get collectionId => $composableBuilder(
+    column: $table.collectionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seasonId => $composableBuilder(
+    column: $table.seasonId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get line => $composableBuilder(
+    column: $table.line,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subcategoryId => $composableBuilder(
+    column: $table.subcategoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get gender => $composableBuilder(
+    column: $table.gender,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get targetAudience => $composableBuilder(
+    column: $table.targetAudience,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fabric => $composableBuilder(
+    column: $table.fabric,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get composition => $composableBuilder(
+    column: $table.composition,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ncm => $composableBuilder(
+    column: $table.ncm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ean => $composableBuilder(
+    column: $table.ean,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tagsJson => $composableBuilder(
+    column: $table.tagsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get launchDate => $composableBuilder(
+    column: $table.launchDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seoTitle => $composableBuilder(
+    column: $table.seoTitle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seoDescription => $composableBuilder(
+    column: $table.seoDescription,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seoSlug => $composableBuilder(
+    column: $table.seoSlug,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mediaJson => $composableBuilder(
+    column: $table.mediaJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customFieldValuesJson => $composableBuilder(
+    column: $table.customFieldValuesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get normalizedSearchText => $composableBuilder(
+    column: $table.normalizedSearchText,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get indexedAt => $composableBuilder(
+    column: $table.indexedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ProductSearchIndexTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProductSearchIndexTableTable> {
+  $$ProductSearchIndexTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get sku =>
+      $composableBuilder(column: $table.sku, builder: (column) => column);
+
+  GeneratedColumn<String> get reference =>
+      $composableBuilder(column: $table.reference, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get shortDescription => $composableBuilder(
+    column: $table.shortDescription,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fullDescription => $composableBuilder(
+    column: $table.fullDescription,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get brand =>
+      $composableBuilder(column: $table.brand, builder: (column) => column);
+
+  GeneratedColumn<String> get collectionId => $composableBuilder(
+    column: $table.collectionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get seasonId =>
+      $composableBuilder(column: $table.seasonId, builder: (column) => column);
+
+  GeneratedColumn<String> get line =>
+      $composableBuilder(column: $table.line, builder: (column) => column);
+
+  GeneratedColumn<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get subcategoryId => $composableBuilder(
+    column: $table.subcategoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get gender =>
+      $composableBuilder(column: $table.gender, builder: (column) => column);
+
+  GeneratedColumn<String> get targetAudience => $composableBuilder(
+    column: $table.targetAudience,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fabric =>
+      $composableBuilder(column: $table.fabric, builder: (column) => column);
+
+  GeneratedColumn<String> get composition => $composableBuilder(
+    column: $table.composition,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ncm =>
+      $composableBuilder(column: $table.ncm, builder: (column) => column);
+
+  GeneratedColumn<String> get ean =>
+      $composableBuilder(column: $table.ean, builder: (column) => column);
+
+  GeneratedColumn<String> get tagsJson =>
+      $composableBuilder(column: $table.tagsJson, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get launchDate => $composableBuilder(
+    column: $table.launchDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get seoTitle =>
+      $composableBuilder(column: $table.seoTitle, builder: (column) => column);
+
+  GeneratedColumn<String> get seoDescription => $composableBuilder(
+    column: $table.seoDescription,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get seoSlug =>
+      $composableBuilder(column: $table.seoSlug, builder: (column) => column);
+
+  GeneratedColumn<String> get mediaJson =>
+      $composableBuilder(column: $table.mediaJson, builder: (column) => column);
+
+  GeneratedColumn<String> get customFieldValuesJson => $composableBuilder(
+    column: $table.customFieldValuesJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedBy =>
+      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get normalizedSearchText => $composableBuilder(
+    column: $table.normalizedSearchText,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get indexedAt =>
+      $composableBuilder(column: $table.indexedAt, builder: (column) => column);
+}
+
+class $$ProductSearchIndexTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProductSearchIndexTableTable,
+          ProductSearchIndexTableData,
+          $$ProductSearchIndexTableTableFilterComposer,
+          $$ProductSearchIndexTableTableOrderingComposer,
+          $$ProductSearchIndexTableTableAnnotationComposer,
+          $$ProductSearchIndexTableTableCreateCompanionBuilder,
+          $$ProductSearchIndexTableTableUpdateCompanionBuilder,
+          (
+            ProductSearchIndexTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $ProductSearchIndexTableTable,
+              ProductSearchIndexTableData
+            >,
+          ),
+          ProductSearchIndexTableData,
+          PrefetchHooks Function()
+        > {
+  $$ProductSearchIndexTableTableTableManager(
+    _$AppDatabase db,
+    $ProductSearchIndexTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProductSearchIndexTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ProductSearchIndexTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ProductSearchIndexTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> productId = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String?> companyId = const Value.absent(),
+                Value<String> sku = const Value.absent(),
+                Value<String> reference = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> shortDescription = const Value.absent(),
+                Value<String?> fullDescription = const Value.absent(),
+                Value<String?> brand = const Value.absent(),
+                Value<String?> collectionId = const Value.absent(),
+                Value<String?> seasonId = const Value.absent(),
+                Value<String?> line = const Value.absent(),
+                Value<String?> categoryId = const Value.absent(),
+                Value<String?> subcategoryId = const Value.absent(),
+                Value<String?> gender = const Value.absent(),
+                Value<String?> targetAudience = const Value.absent(),
+                Value<String?> fabric = const Value.absent(),
+                Value<String?> composition = const Value.absent(),
+                Value<String?> supplierId = const Value.absent(),
+                Value<String?> ncm = const Value.absent(),
+                Value<String?> ean = const Value.absent(),
+                Value<String> tagsJson = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime?> launchDate = const Value.absent(),
+                Value<String?> seoTitle = const Value.absent(),
+                Value<String?> seoDescription = const Value.absent(),
+                Value<String?> seoSlug = const Value.absent(),
+                Value<String> mediaJson = const Value.absent(),
+                Value<String> customFieldValuesJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> updatedBy = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<String> normalizedSearchText = const Value.absent(),
+                Value<DateTime> indexedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProductSearchIndexTableCompanion(
+                productId: productId,
+                organizationId: organizationId,
+                companyId: companyId,
+                sku: sku,
+                reference: reference,
+                name: name,
+                shortDescription: shortDescription,
+                fullDescription: fullDescription,
+                brand: brand,
+                collectionId: collectionId,
+                seasonId: seasonId,
+                line: line,
+                categoryId: categoryId,
+                subcategoryId: subcategoryId,
+                gender: gender,
+                targetAudience: targetAudience,
+                fabric: fabric,
+                composition: composition,
+                supplierId: supplierId,
+                ncm: ncm,
+                ean: ean,
+                tagsJson: tagsJson,
+                status: status,
+                launchDate: launchDate,
+                seoTitle: seoTitle,
+                seoDescription: seoDescription,
+                seoSlug: seoSlug,
+                mediaJson: mediaJson,
+                customFieldValuesJson: customFieldValuesJson,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                normalizedSearchText: normalizedSearchText,
+                indexedAt: indexedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String productId,
+                required String organizationId,
+                Value<String?> companyId = const Value.absent(),
+                required String sku,
+                required String reference,
+                required String name,
+                Value<String?> shortDescription = const Value.absent(),
+                Value<String?> fullDescription = const Value.absent(),
+                Value<String?> brand = const Value.absent(),
+                Value<String?> collectionId = const Value.absent(),
+                Value<String?> seasonId = const Value.absent(),
+                Value<String?> line = const Value.absent(),
+                Value<String?> categoryId = const Value.absent(),
+                Value<String?> subcategoryId = const Value.absent(),
+                Value<String?> gender = const Value.absent(),
+                Value<String?> targetAudience = const Value.absent(),
+                Value<String?> fabric = const Value.absent(),
+                Value<String?> composition = const Value.absent(),
+                Value<String?> supplierId = const Value.absent(),
+                Value<String?> ncm = const Value.absent(),
+                Value<String?> ean = const Value.absent(),
+                required String tagsJson,
+                required String status,
+                Value<DateTime?> launchDate = const Value.absent(),
+                Value<String?> seoTitle = const Value.absent(),
+                Value<String?> seoDescription = const Value.absent(),
+                Value<String?> seoSlug = const Value.absent(),
+                required String mediaJson,
+                required String customFieldValuesJson,
+                required DateTime createdAt,
+                required String createdBy,
+                required DateTime updatedAt,
+                required String updatedBy,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required int version,
+                required String syncStatus,
+                required String normalizedSearchText,
+                required DateTime indexedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => ProductSearchIndexTableCompanion.insert(
+                productId: productId,
+                organizationId: organizationId,
+                companyId: companyId,
+                sku: sku,
+                reference: reference,
+                name: name,
+                shortDescription: shortDescription,
+                fullDescription: fullDescription,
+                brand: brand,
+                collectionId: collectionId,
+                seasonId: seasonId,
+                line: line,
+                categoryId: categoryId,
+                subcategoryId: subcategoryId,
+                gender: gender,
+                targetAudience: targetAudience,
+                fabric: fabric,
+                composition: composition,
+                supplierId: supplierId,
+                ncm: ncm,
+                ean: ean,
+                tagsJson: tagsJson,
+                status: status,
+                launchDate: launchDate,
+                seoTitle: seoTitle,
+                seoDescription: seoDescription,
+                seoSlug: seoSlug,
+                mediaJson: mediaJson,
+                customFieldValuesJson: customFieldValuesJson,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                normalizedSearchText: normalizedSearchText,
+                indexedAt: indexedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ProductSearchIndexTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProductSearchIndexTableTable,
+      ProductSearchIndexTableData,
+      $$ProductSearchIndexTableTableFilterComposer,
+      $$ProductSearchIndexTableTableOrderingComposer,
+      $$ProductSearchIndexTableTableAnnotationComposer,
+      $$ProductSearchIndexTableTableCreateCompanionBuilder,
+      $$ProductSearchIndexTableTableUpdateCompanionBuilder,
+      (
+        ProductSearchIndexTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $ProductSearchIndexTableTable,
+          ProductSearchIndexTableData
+        >,
+      ),
+      ProductSearchIndexTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -5636,4 +8558,9 @@ class $AppDatabaseManager {
       );
   $$CustomerContactsTableTableTableManager get customerContactsTable =>
       $$CustomerContactsTableTableTableManager(_db, _db.customerContactsTable);
+  $$ProductSearchIndexTableTableTableManager get productSearchIndexTable =>
+      $$ProductSearchIndexTableTableTableManager(
+        _db,
+        _db.productSearchIndexTable,
+      );
 }

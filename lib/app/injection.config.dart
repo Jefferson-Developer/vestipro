@@ -394,15 +394,27 @@ import '../features/organizations/domain/usecases/update_organization_settings_u
 import '../features/organizations/domain/usecases/update_team_use_case.dart'
     as _i207;
 import '../features/organizations/organizations.dart' as _i265;
+import '../features/products/data/datasources/drift_product_local_search_index_data_source.dart'
+    as _i74;
+import '../features/products/data/datasources/firestore_product_remote_search_data_source.dart'
+    as _i580;
 import '../features/products/data/datasources/product_form_draft_data_source.dart'
     as _i960;
+import '../features/products/data/datasources/product_local_search_index_data_source.dart'
+    as _i42;
+import '../features/products/data/datasources/product_remote_search_data_source.dart'
+    as _i671;
 import '../features/products/data/datasources/shared_preferences_product_form_draft_data_source.dart'
     as _i1033;
 import '../features/products/data/mappers/product_form_draft_mapper.dart'
     as _i325;
 import '../features/products/data/mappers/product_mapper.dart' as _i309;
+import '../features/products/data/mappers/product_search_index_mapper.dart'
+    as _i184;
 import '../features/products/data/repositories/product_form_draft_repository_impl.dart'
     as _i873;
+import '../features/products/data/repositories/product_search_repository_impl.dart'
+    as _i941;
 import '../features/products/data/repositories/shared_preferences_category_repository.dart'
     as _i597;
 import '../features/products/data/repositories/shared_preferences_collection_repository.dart'
@@ -423,6 +435,8 @@ import '../features/products/domain/repositories/product_form_draft_repository.d
     as _i459;
 import '../features/products/domain/repositories/product_repository.dart'
     as _i321;
+import '../features/products/domain/repositories/product_search_repository.dart'
+    as _i568;
 import '../features/products/domain/repositories/season_repository.dart'
     as _i260;
 import '../features/products/domain/usecases/associate_product_with_collection_use_case.dart'
@@ -463,6 +477,8 @@ import '../features/products/domain/usecases/reorder_categories_use_case.dart'
     as _i892;
 import '../features/products/domain/usecases/save_product_form_draft_use_case.dart'
     as _i244;
+import '../features/products/domain/usecases/search_products_use_case.dart'
+    as _i268;
 import '../features/products/domain/usecases/update_category_use_case.dart'
     as _i328;
 import '../features/products/domain/usecases/update_collection_use_case.dart'
@@ -484,6 +500,8 @@ import '../features/products/presentation/bloc/collection_list_bloc.dart'
 import '../features/products/presentation/bloc/product_form_bloc.dart' as _i198;
 import '../features/products/presentation/bloc/product_media_bloc.dart'
     as _i968;
+import '../features/products/presentation/bloc/product_search_bloc.dart'
+    as _i965;
 import '../features/products/presentation/bloc/season_form_bloc.dart' as _i98;
 import '../features/products/presentation/bloc/season_list_bloc.dart' as _i986;
 import '../features/settings/data/datasources/about_app_data_source.dart'
@@ -888,6 +906,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i203.CrmActivityMapper>(),
       ),
     );
+    gh.lazySingleton<_i184.ProductSearchIndexMapper>(
+      () => _i184.ProductSearchIndexMapper(gh<_i309.ProductMapper>()),
+    );
     gh.lazySingleton<_i217.AuthRepository>(
       () => _i961.AuthRepositoryImpl(
         dataSource: gh<_i845.AuthDataSource>(),
@@ -1182,6 +1203,12 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i714.MembershipMapper>(),
       ),
     );
+    gh.lazySingleton<_i42.ProductLocalSearchIndexDataSource>(
+      () => _i74.DriftProductLocalSearchIndexDataSource(
+        gh<_i658.AppDatabase>(),
+        gh<_i184.ProductSearchIndexMapper>(),
+      ),
+    );
     gh.factory<_i1015.ForgotPasswordBloc>(
       () => _i1015.ForgotPasswordBloc(
         sendPasswordResetEmail: gh<_i820.SendPasswordResetEmailUseCase>(),
@@ -1273,6 +1300,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i668.UserProfileDataSource>(
       () =>
           _i1043.FirestoreUserProfileDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.lazySingleton<_i671.ProductRemoteSearchDataSource>(
+      () => _i580.FirestoreProductRemoteSearchDataSource(
+        gh<_i974.FirebaseFirestore>(),
+        gh<_i309.ProductMapper>(),
+      ),
     );
     gh.lazySingleton<_i160.BranchRepository>(
       () => _i375.BranchRepositoryImpl(
@@ -1443,6 +1476,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i488.UserProfileRepository>(),
       ),
     );
+    gh.lazySingleton<_i568.ProductSearchRepository>(
+      () => _i941.ProductSearchRepositoryImpl(
+        remoteDataSource: gh<_i671.ProductRemoteSearchDataSource>(),
+        localDataSource: gh<_i42.ProductLocalSearchIndexDataSource>(),
+      ),
+    );
     gh.factory<_i201.ListAuditLogEntriesUseCase>(
       () => _i201.ListAuditLogEntriesUseCase(
         gh<_i753.AuditLogRepository>(),
@@ -1465,6 +1504,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i820.UpdateBranchUseCase>(
       () => _i820.UpdateBranchUseCase(gh<_i160.BranchRepository>()),
+    );
+    gh.factory<_i268.SearchProductsUseCase>(
+      () => _i268.SearchProductsUseCase(gh<_i568.ProductSearchRepository>()),
     );
     gh.factory<_i968.ProductMediaBloc>(
       () => _i968.ProductMediaBloc(
@@ -1494,6 +1536,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i320.TeamRepository>(),
         gh<_i957.MembershipRepository>(),
         gh<_i756.OrganizationRepository>(),
+      ),
+    );
+    gh.factory<_i965.ProductSearchBloc>(
+      () => _i965.ProductSearchBloc(
+        searchProducts: gh<_i268.SearchProductsUseCase>(),
       ),
     );
     gh.factory<_i481.SignUpBloc>(

@@ -177,6 +177,27 @@ function inviteDoc({ organizationId, email = 'novo@vestipro.com.br', roleName = 
   };
 }
 
+function productDoc({ organizationId, deletedAt = null }) {
+  return {
+    organizationId,
+    companyId: 'company-a',
+    sku: 'CAMISA-001',
+    reference: 'REF-001',
+    name: 'Camisa Basica',
+    tags: ['lancamento'],
+    status: 'active',
+    deletedAt,
+    searchText: 'camisa basica camisa 001 ref 001 lancamento',
+    searchPrefixes: ['c', 'ca', 'cam', 'camisa', 'ref', 'lancamento'],
+    version: 1,
+    createdAt: now(),
+    createdBy: 'owner-a',
+    updatedAt: now(),
+    updatedBy: 'owner-a',
+    syncStatus: 'synced',
+  };
+}
+
 function auditLogDoc({ organizationId, actorUserId, action = 'role.changed' }) {
   return {
     organizationId,
@@ -686,6 +707,61 @@ describe('organizations/{organizationId}/customers/{customerId}  (TASK-045 visib
   test('membro da Org A não lê clientes da Org B', async () => {
     const db = testEnv.authenticatedContext('owner-a').firestore();
     await assertFails(db.doc(`organizations/${ORG_B}/customers/customer-other-tenant`).get());
+  });
+});
+
+describe('organizations/{organizationId}/products/{productId}  (TASK-069 global search)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/products/product-a`)
+        .set(productDoc({ organizationId: ORG_A }));
+      await db
+        .doc(`organizations/${ORG_A}/products/product-deleted`)
+        .set(productDoc({ organizationId: ORG_A, deletedAt: now() }));
+      await db
+        .doc(`organizations/${ORG_B}/products/product-b`)
+        .set(productDoc({ organizationId: ORG_B }));
+    });
+  });
+
+  test('membro ativo le produto da propria organization', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/products/product-a`).get());
+  });
+
+  test('membro lista produtos pela query de busca contratada', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      db
+        .collection(`organizations/${ORG_A}/products`)
+        .where('organizationId', '==', ORG_A)
+        .where('deletedAt', '==', null)
+        .where('searchPrefixes', 'array-contains', 'cam')
+        .get(),
+    );
+  });
+
+  test('membro da Org A nao le produto da Org B', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/products/product-b`).get());
+  });
+
+  test('produto soft-deleted nao fica legivel pelo cliente', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/products/product-deleted`).get());
+  });
+
+  test('cliente nao cria, altera nem exclui produto por Rules', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/products/new-product`).set(productDoc({ organizationId: ORG_A })),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/products/product-a`).update({ name: 'Nome alterado' }),
+    );
+    await assertFails(db.doc(`organizations/${ORG_A}/products/product-a`).delete());
   });
 });
 

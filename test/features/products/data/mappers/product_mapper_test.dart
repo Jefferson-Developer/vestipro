@@ -197,6 +197,16 @@ void main() {
       expect(roundTripped.syncStatus, 'pending');
     });
 
+    test('ProductDto.toJson includes normalized remote search fields', () {
+      final json = buildFullDto().toJson();
+
+      expect(json['searchText'], contains('camisa essential'));
+      expect(json['searchText'], contains('camisa 001'));
+      expect(json['searchText'], contains('ref 001'));
+      expect(json['searchText'], contains('4006381333931'));
+      expect(json['searchPrefixes'], containsAll(<String>['cam', 'ref']));
+    });
+
     test('toEntity throws for an unknown status, gender or sync status', () {
       expect(
         () => mapper.toEntity(buildFullDto(status: 'archived')),

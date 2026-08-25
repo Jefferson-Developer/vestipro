@@ -1,6 +1,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 import '../../../../core/errors/errors.dart';
+import '../../domain/services/product_search_normalizer.dart';
 import 'product_media_dto.dart';
 
 /// Firestore document shape for a Product scoped by organization.
@@ -200,6 +201,11 @@ final class ProductDto {
   final String syncStatus;
 
   Map<String, dynamic> toJson() {
+    final searchValues = <String>[name, sku, reference, ?ean, ...tags];
+    final searchPrefixes = ProductSearchNormalizer.prefixesForValues(
+      searchValues,
+    ).toList(growable: false)..sort();
+
     return <String, dynamic>{
       'organizationId': organizationId,
       'companyId': companyId,
@@ -238,6 +244,11 @@ final class ProductDto {
       'deletedAt': deletedAt == null ? null : Timestamp.fromDate(deletedAt!),
       'version': version,
       'syncStatus': syncStatus,
+      'searchText': searchValues
+          .map(ProductSearchNormalizer.normalize)
+          .where((value) => value.isNotEmpty)
+          .join(' '),
+      'searchPrefixes': searchPrefixes,
     };
   }
 }

@@ -179,6 +179,20 @@ service cloud.firestore {
         );
     }
 
+    function validProductReadPayload(organizationId) {
+      return resource.data.keys().hasAll([
+          'organizationId',
+          'deletedAt'
+        ])
+        && resource.data.organizationId == organizationId
+        && resource.data.deletedAt == null;
+    }
+
+    function canReadProduct(organizationId) {
+      return isActiveMember(organizationId)
+        && validProductReadPayload(organizationId);
+    }
+
     function portfolioAssignmentPayloadValid(organizationId, data) {
       return data.organizationId == organizationId
         && data.companyId is string
@@ -411,6 +425,20 @@ service cloud.firestore {
         allow list: if canListCustomers(organizationId);
 
         // Customer creation/editing belongs to TASK-048/TASK-049/TASK-051.
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/products/{productId}
+      // (TASK-069 global product search)
+      // -------------------------------------------------------------------
+
+      match /products/{productId} {
+        allow get, list: if canReadProduct(organizationId);
+
+        // Product mutations still go through the local pending-sync path and
+        // future server-side sync/validation work. The client may search/read
+        // active catalog data, never directly create/update/delete it here.
         allow create, update, delete: if false;
       }
 

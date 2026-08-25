@@ -3,6 +3,7 @@ import 'package:drift/drift.dart';
 import 'tables/customer_addresses_table.dart';
 import 'tables/customer_contacts_table.dart';
 import 'tables/customers_table.dart';
+import 'tables/product_search_index_table.dart';
 
 part 'app_database.g.dart';
 
@@ -21,23 +22,34 @@ class CustomerWithRelationsRow {
   final List<CustomerContactsTableData> contacts;
 }
 
+class ProductSearchIndexRow {
+  const ProductSearchIndexRow({required this.product});
+
+  final ProductSearchIndexTableData product;
+}
+
 /// VestiPro local (offline) database.
 ///
-/// TASK-054 seeds this database with only the tables needed for the Customer
-/// initial offline load: [CustomersTable], [CustomerAddressesTable] and
-/// [CustomerContactsTable]. It is intentionally scoped to Customers — the
+/// TASK-054 seeds this database with the tables needed for the Customer
+/// initial offline load. TASK-069 adds [ProductSearchIndexTable] as a narrow
+/// read index for product search, not yet the full Product sync schema. The
 /// general-purpose local schema for every other offline-capable entity
-/// (products, price tables, orders, Outbox, ...) is EPIC-14 work
-/// (TASK-106/TASK-108/TASK-109) and must extend this same [AppDatabase]
-/// class/migration chain rather than create a second local database.
+/// (price tables, orders, Outbox, ...) is EPIC-14 work and must keep extending
+/// this same [AppDatabase] class/migration chain rather than create a second
+/// local database.
 @DriftDatabase(
-  tables: [CustomersTable, CustomerAddressesTable, CustomerContactsTable],
+  tables: [
+    CustomersTable,
+    CustomerAddressesTable,
+    CustomerContactsTable,
+    ProductSearchIndexTable,
+  ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 2;
+  int get schemaVersion => 3;
 
   @override
   MigrationStrategy get migration {
@@ -68,6 +80,9 @@ class AppDatabase extends _$AppDatabase {
             customersTable,
             customersTable.scoreDataCoverage,
           );
+        }
+        if (from < 3) {
+          await migrator.createTable(productSearchIndexTable);
         }
       },
       beforeOpen: (details) async {
@@ -172,5 +187,54 @@ class AppDatabase extends _$AppDatabase {
       );
     final row = await query.getSingle();
     return row.read(countExpression) ?? 0;
+  }
+
+  Future<void> replaceProductSearchIndex({
+    required String organizationId,
+    required List<ProductSearchIndexTableCompanion> productRows,
+  }) {
+    return transaction(() async {
+      await (delete(
+        productSearchIndexTable,
+      )..where((row) => row.organizationId.equals(organizationId))).go();
+
+      await batch((batch) {
+        batch.insertAllOnConflictUpdate(productSearchIndexTable, productRows);
+      });
+    });
+  }
+
+  Future<void> upsertProductSearchIndex({
+    required ProductSearchIndexTableCompanion productRow,
+  }) {
+    return into(productSearchIndexTable).insertOnConflictUpdate(productRow);
+  }
+
+  Future<List<ProductSearchIndexRow>> searchProductIndex({
+    required String organizationId,
+    required String normalizedQuery,
+    int limit = 20,
+  }) async {
+    final query = normalizedQuery.trim();
+    if (query.isEmpty) return const <ProductSearchIndexRow>[];
+
+    final rows =
+        await (select(productSearchIndexTable)
+              ..where(
+                (row) =>
+                    row.organizationId.equals(organizationId) &
+                    row.deletedAt.isNull() &
+                    row.normalizedSearchText.like('%$query%'),
+              )
+              ..orderBy([
+                (row) => OrderingTerm.desc(row.updatedAt),
+                (row) => OrderingTerm.asc(row.name),
+              ])
+              ..limit(limit))
+            .get();
+
+    return rows
+        .map((product) => ProductSearchIndexRow(product: product))
+        .toList(growable: false);
   }
 }
