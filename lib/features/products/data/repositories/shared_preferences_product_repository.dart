@@ -10,6 +10,7 @@ import '../../domain/entities/product_custom_field_value.dart';
 import '../../domain/entities/product_media.dart';
 import '../../domain/repositories/product_repository.dart';
 import '../../domain/value_objects/ean.dart';
+import '../../domain/value_objects/product_status.dart';
 import '../../domain/value_objects/sku.dart';
 import '../mappers/product_mapper.dart';
 
@@ -176,6 +177,47 @@ final class SharedPreferencesProductRepository implements ProductRepository {
         UnexpectedFailure(
           'Unexpected error loading products locally.',
           code: 'product_local_get_by_ids_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<AppResult<List<Product>>> listRecentlyLaunched({
+    required String organizationId,
+    String? companyId,
+    int limit = 12,
+  }) async {
+    try {
+      final products = await _load(organizationId);
+      final trimmedCompanyId = companyId?.trim();
+      final eligible =
+          products
+              .where(
+                (product) =>
+                    product.deletedAt == null &&
+                    product.status == ProductStatus.active &&
+                    (trimmedCompanyId == null ||
+                        trimmedCompanyId.isEmpty ||
+                        product.companyId == null ||
+                        product.companyId == trimmedCompanyId),
+              )
+              .toList(growable: true)
+            ..sort(
+              (a, b) => (b.launchDate ?? b.createdAt).compareTo(
+                a.launchDate ?? a.createdAt,
+              ),
+            );
+
+      return AppSuccess<List<Product>>(
+        eligible.take(limit).toList(growable: false),
+      );
+    } catch (exception) {
+      return AppFailure<List<Product>>(
+        UnexpectedFailure(
+          'Unexpected error listing recently launched products locally.',
+          code: 'product_local_list_recently_launched_unexpected',
           cause: exception,
         ),
       );

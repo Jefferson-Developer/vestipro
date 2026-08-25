@@ -1,0 +1,23 @@
+/// Public surface of `lib/features/catalog/`.
+library;
+
+export 'domain/entities/catalog_campaign.dart';
+export 'domain/entities/catalog_home_item.dart';
+export 'domain/entities/catalog_home_section.dart';
+export 'domain/entities/catalog_home_section_config.dart';
+export 'domain/entities/catalog_home_section_type.dart';
+export 'domain/entities/catalog_home_snapshot.dart';
+export 'domain/repositories/catalog_campaign_repository.dart';
+export 'domain/repositories/catalog_home_cache_repository.dart';
+export 'domain/repositories/catalog_home_config_repository.dart';
+export 'domain/usecases/get_catalog_campaigns_section_use_case.dart';
+export 'domain/usecases/get_catalog_home_config_use_case.dart';
+export 'domain/usecases/get_featured_collections_section_use_case.dart';
+export 'domain/usecases/get_new_arrivals_section_use_case.dart';
+export 'domain/usecases/load_catalog_home_cache_use_case.dart';
+export 'domain/usecases/save_catalog_home_cache_use_case.dart';
+export 'presentation/bloc/catalog_home_bloc.dart';
+export 'presentation/bloc/catalog_home_event.dart';
+export 'presentation/bloc/catalog_home_state.dart';
+export 'presentation/pages/catalog_home_page.dart';
+export 'presentation/widgets/catalog_home_section_view.dart';

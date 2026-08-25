@@ -40,6 +40,8 @@ void main() {
           'product_updated',
           'product_published',
           'product_media_updated',
+          'catalog_home_viewed',
+          'catalog_section_opened',
         ]),
       );
 

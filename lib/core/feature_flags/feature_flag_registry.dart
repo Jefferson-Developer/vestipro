@@ -33,6 +33,18 @@ final class FeatureFlagRegistry {
   static const String configProductsVideoMaxSizeMb =
       'config_products_video_max_size_mb';
 
+  /// JSON array describing the catalog home's section composition
+  /// (TASK-076) — one `{type, title, order, priority, enabled, itemLimit}`
+  /// object per `CatalogHomeSectionType`, read by
+  /// `RemoteConfigCatalogHomeConfigRepository`. Empty string default means
+  /// "no override yet": the repository falls back to
+  /// `defaultCatalogHomeSectionConfigs` (code-defined), so a manager can
+  /// reorder/rename/disable a section from the Remote Config console
+  /// without an app deploy, without the app ever depending solely on the
+  /// remote value being present.
+  static const String configCatalogHomeSectionsJson =
+      'config_catalog_home_sections_json';
+
   static final List<FeatureFlagDefinition> _definitions =
       <FeatureFlagDefinition>[
         FeatureFlagDefinition(
@@ -71,6 +83,19 @@ final class FeatureFlagRegistry {
           reviewBy: DateTime.utc(2027, 2, 24),
           type: FeatureFlagValueType.integer,
           defaultValue: 50,
+        ),
+        FeatureFlagDefinition(
+          key: configCatalogHomeSectionsJson,
+          description:
+              'Composicao das secoes da home do catalogo premium (JSON), '
+              'permitindo reordenar/renomear/desabilitar uma secao sem '
+              'deploy do app (TASK-076). Vazio = usa a composicao padrao '
+              'definida em codigo (defaultCatalogHomeSectionConfigs).',
+          owner: 'flutter-senior-architect',
+          createdAt: DateTime.utc(2026, 8, 25),
+          reviewBy: DateTime.utc(2027, 2, 25),
+          type: FeatureFlagValueType.string,
+          defaultValue: '',
         ),
       ];
 

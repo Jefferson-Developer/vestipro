@@ -18,6 +18,7 @@ export 'buttons/app_button.dart';
 export 'buttons/app_icon_button.dart';
 export 'cards/app_kpi_card.dart';
 export 'catalog/app_color_swatch_selector.dart';
+export 'catalog/app_product_carousel.dart';
 export 'catalog/app_product_grid.dart';
 export 'catalog/app_quantity_stepper.dart';
 export 'catalog/app_size_grid.dart';

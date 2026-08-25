@@ -217,10 +217,10 @@ class AppProductGrid extends StatelessWidget {
               ),
               itemBuilder: (context, index) {
                 if (status == AppProductGridStatus.loading) {
-                  return const _AppProductGridSkeletonCard();
+                  return const AppProductCardSkeleton();
                 }
                 final product = products[index];
-                return _AppProductGridCard(
+                return AppProductCard(
                   product: product,
                   onTap: () => onProductTap(product),
                   readyStockLabel: readyStockLabel,
@@ -243,8 +243,8 @@ class AppProductGrid extends StatelessWidget {
   }
 }
 
-class _AppProductGridSkeletonCard extends StatelessWidget {
-  const _AppProductGridSkeletonCard();
+class AppProductCardSkeleton extends StatelessWidget {
+  const AppProductCardSkeleton({super.key});
 
   @override
   Widget build(BuildContext context) {
@@ -268,13 +268,14 @@ class _AppProductGridSkeletonCard extends StatelessWidget {
   }
 }
 
-class _AppProductGridCard extends StatelessWidget {
-  const _AppProductGridCard({
+class AppProductCard extends StatelessWidget {
+  const AppProductCard({
     required this.product,
     required this.onTap,
     required this.readyStockLabel,
     required this.futureStockLabel,
     required this.unavailableLabel,
+    super.key,
   });
 
   final AppProductCardData product;

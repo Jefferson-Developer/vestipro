@@ -79,6 +79,15 @@ class _FakeProductRepository implements ProductRepository {
           .toList(growable: false),
     );
   }
+
+  @override
+  Future<AppResult<List<Product>>> listRecentlyLaunched({
+    required String organizationId,
+    String? companyId,
+    int limit = 12,
+  }) async {
+    return const AppSuccess<List<Product>>(<Product>[]);
+  }
 }
 
 void main() {

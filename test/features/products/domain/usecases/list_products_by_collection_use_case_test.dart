@@ -104,6 +104,15 @@ class _InMemoryProductRepository implements ProductRepository {
       products.where((product) => wanted.contains(product.id)).toList(),
     );
   }
+
+  @override
+  Future<AppResult<List<Product>>> listRecentlyLaunched({
+    required String organizationId,
+    String? companyId,
+    int limit = 12,
+  }) async {
+    return const AppSuccess<List<Product>>(<Product>[]);
+  }
 }
 
 Product _buildProduct(String id) {

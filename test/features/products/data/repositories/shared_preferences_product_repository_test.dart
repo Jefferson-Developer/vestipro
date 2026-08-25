@@ -132,6 +132,105 @@ void main() {
       );
       expect((stillInUse as AppSuccess<bool>).value, isFalse);
     });
+
+    group('listRecentlyLaunched', () {
+      test('orders active products by launchDate, newest first', () async {
+        final older = _product(id: 'product-older', sku: 'SKU-OLDER').copyWith(
+          status: ProductStatus.active,
+          launchDate: DateTime.utc(2026, 1, 1),
+        );
+        final newer = _product(id: 'product-newer', sku: 'SKU-NEWER').copyWith(
+          status: ProductStatus.active,
+          launchDate: DateTime.utc(2026, 6, 1),
+        );
+        await repository.create(product: older);
+        await repository.create(product: newer);
+
+        final result = await repository.listRecentlyLaunched(
+          organizationId: 'org-1',
+        );
+
+        final products = (result as AppSuccess<List<Product>>).value;
+        expect(products.map((p) => p.id).toList(), <String>[
+          'product-newer',
+          'product-older',
+        ]);
+      });
+
+      test('excludes draft/inactive and soft-deleted products', () async {
+        final active = _product(
+          id: 'product-active',
+          sku: 'SKU-ACTIVE',
+        ).copyWith(status: ProductStatus.active);
+        final draft = _product(id: 'product-draft', sku: 'SKU-DRAFT');
+        final deleted = _product(id: 'product-deleted', sku: 'SKU-DELETED')
+            .copyWith(
+              status: ProductStatus.active,
+              deletedAt: DateTime.utc(2026, 2, 1),
+            );
+        await repository.create(product: active);
+        await repository.create(product: draft);
+        await repository.create(product: deleted);
+
+        final result = await repository.listRecentlyLaunched(
+          organizationId: 'org-1',
+        );
+
+        final products = (result as AppSuccess<List<Product>>).value;
+        expect(products.map((p) => p.id).toList(), <String>['product-active']);
+      });
+
+      test('caps the result at the requested limit', () async {
+        for (var i = 0; i < 5; i++) {
+          await repository.create(
+            product: _product(id: 'product-$i', sku: 'SKU-$i').copyWith(
+              status: ProductStatus.active,
+              launchDate: DateTime.utc(2026, 1, 1 + i),
+            ),
+          );
+        }
+
+        final result = await repository.listRecentlyLaunched(
+          organizationId: 'org-1',
+          limit: 2,
+        );
+
+        final products = (result as AppSuccess<List<Product>>).value;
+        expect(products, hasLength(2));
+      });
+
+      test(
+        'includes company-scoped and organization-wide products for a given company',
+        () async {
+          final companyScoped = _product(
+            id: 'product-company',
+            sku: 'SKU-C',
+          ).copyWith(status: ProductStatus.active, companyId: 'company-1');
+          final orgWide = _product(
+            id: 'product-org-wide',
+            sku: 'SKU-O',
+          ).copyWith(status: ProductStatus.active);
+          final otherCompany = _product(
+            id: 'product-other',
+            sku: 'SKU-X',
+          ).copyWith(status: ProductStatus.active, companyId: 'company-2');
+          await repository.create(product: companyScoped);
+          await repository.create(product: orgWide);
+          await repository.create(product: otherCompany);
+
+          final result = await repository.listRecentlyLaunched(
+            organizationId: 'org-1',
+            companyId: 'company-1',
+          );
+
+          final ids = (result as AppSuccess<List<Product>>).value
+              .map((p) => p.id)
+              .toSet();
+          expect(ids, <String>{'product-company', 'product-org-wide'});
+          expect(ids.contains('product-other'), isFalse);
+        },
+      );
+    });
   });
 }
 

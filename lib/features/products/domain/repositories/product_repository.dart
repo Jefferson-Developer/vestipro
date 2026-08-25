@@ -40,4 +40,22 @@ abstract interface class ProductRepository {
     required String organizationId,
     required List<String> ids,
   });
+
+  /// Lists the most recently launched, currently active (non soft-deleted)
+  /// Products of [organizationId] — newest first, ranked by
+  /// `Product.launchDate` when set, falling back to `Product.createdAt`
+  /// otherwise. Capped at [limit]. Used by the catalog home's "lançamentos"
+  /// section (TASK-076, `GetNewArrivalsSectionUseCase`) so the ranking is a
+  /// repository/query concern, never a client-side scan by the BLoC.
+  ///
+  /// [companyId], when provided, restricts the result to Products either
+  /// scoped to that company or shared across the whole organization
+  /// (`Product.companyId == null`) — mirroring how `Product.companyId`
+  /// itself is documented as optional for organizations that share a single
+  /// catalog across companies.
+  Future<AppResult<List<Product>>> listRecentlyLaunched({
+    required String organizationId,
+    String? companyId,
+    int limit = 12,
+  });
 }

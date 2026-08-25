@@ -91,6 +91,31 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart'
 import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
+import '../features/catalog/data/repositories/remote_config_catalog_home_config_repository.dart'
+    as _i288;
+import '../features/catalog/data/repositories/shared_preferences_catalog_campaign_repository.dart'
+    as _i565;
+import '../features/catalog/data/repositories/shared_preferences_catalog_home_cache_repository.dart'
+    as _i26;
+import '../features/catalog/domain/repositories/catalog_campaign_repository.dart'
+    as _i150;
+import '../features/catalog/domain/repositories/catalog_home_cache_repository.dart'
+    as _i841;
+import '../features/catalog/domain/repositories/catalog_home_config_repository.dart'
+    as _i1072;
+import '../features/catalog/domain/usecases/get_catalog_campaigns_section_use_case.dart'
+    as _i151;
+import '../features/catalog/domain/usecases/get_catalog_home_config_use_case.dart'
+    as _i316;
+import '../features/catalog/domain/usecases/get_featured_collections_section_use_case.dart'
+    as _i1042;
+import '../features/catalog/domain/usecases/get_new_arrivals_section_use_case.dart'
+    as _i76;
+import '../features/catalog/domain/usecases/load_catalog_home_cache_use_case.dart'
+    as _i249;
+import '../features/catalog/domain/usecases/save_catalog_home_cache_use_case.dart'
+    as _i64;
+import '../features/catalog/presentation/bloc/catalog_home_bloc.dart' as _i420;
 import '../features/crm/crm.dart' as _i205;
 import '../features/crm/data/mappers/crm_activity_mapper.dart' as _i203;
 import '../features/crm/data/mappers/crm_task_mapper.dart' as _i519;
@@ -755,6 +780,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i87.InviteAcceptanceMapper>(
       () => _i87.InviteAcceptanceMapper(gh<_i649.InviteMapper>()),
     );
+    gh.lazySingleton<_i841.CatalogHomeCacheRepository>(
+      () => const _i26.SharedPreferencesCatalogHomeCacheRepository(),
+    );
     gh.lazySingleton<_i1015.ProductCollectionLinkRepository>(
       () => const _i654.SharedPreferencesProductCollectionLinkRepository(),
     );
@@ -784,6 +812,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i795.ProductVariantRepository>(
       () => const _i912.SharedPreferencesProductVariantRepository(),
+    );
+    gh.lazySingleton<_i150.CatalogCampaignRepository>(
+      () => const _i565.SharedPreferencesCatalogCampaignRepository(),
     );
     gh.lazySingleton<_i725.CustomerLocalMapper>(
       () => _i725.CustomerLocalMapper(gh<_i457.CustomerMapper>()),
@@ -870,12 +901,27 @@ extension GetItInjectableX on _i174.GetIt {
         reorderCategories: gh<_i892.ReorderCategoriesUseCase>(),
       ),
     );
+    gh.factory<_i249.LoadCatalogHomeCacheUseCase>(
+      () => _i249.LoadCatalogHomeCacheUseCase(
+        gh<_i841.CatalogHomeCacheRepository>(),
+      ),
+    );
+    gh.factory<_i64.SaveCatalogHomeCacheUseCase>(
+      () => _i64.SaveCatalogHomeCacheUseCase(
+        gh<_i841.CatalogHomeCacheRepository>(),
+      ),
+    );
     gh.lazySingleton<_i857.CustomerRepository>(
       () =>
           _i784.SharedPreferencesCustomerRepository(gh<_i457.CustomerMapper>()),
     );
     gh.lazySingleton<_i588.CrmTaskRepository>(
       () => _i150.SharedPreferencesCrmTaskRepository(gh<_i519.CrmTaskMapper>()),
+    );
+    gh.factory<_i151.GetCatalogCampaignsSectionUseCase>(
+      () => _i151.GetCatalogCampaignsSectionUseCase(
+        gh<_i150.CatalogCampaignRepository>(),
+      ),
     );
     gh.factory<_i19.ClearProductFormDraftUseCase>(
       () => _i19.ClearProductFormDraftUseCase(
@@ -1038,6 +1084,9 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i26.AuthUserMapper>(),
       ),
     );
+    gh.factory<_i76.GetNewArrivalsSectionUseCase>(
+      () => _i76.GetNewArrivalsSectionUseCase(gh<_i321.ProductRepository>()),
+    );
     gh.lazySingleton<_i361.CustomerLocalStoreRepository>(
       () => _i674.DriftCustomerLocalStoreRepository(
         gh<_i658.AppDatabase>(),
@@ -1049,6 +1098,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i185.SignInWithEmailAndPasswordUseCase>(
       () => _i185.SignInWithEmailAndPasswordUseCase(gh<_i472.AuthRepository>()),
+    );
+    gh.factory<_i1042.GetFeaturedCollectionsSectionUseCase>(
+      () => _i1042.GetFeaturedCollectionsSectionUseCase(
+        gh<_i626.CollectionRepository>(),
+      ),
     );
     gh.factory<_i134.DisassociateProductFromCollectionUseCase>(
       () => _i134.DisassociateProductFromCollectionUseCase(
@@ -1415,6 +1469,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
+    gh.lazySingleton<_i1072.CatalogHomeConfigRepository>(
+      () => _i288.RemoteConfigCatalogHomeConfigRepository(
+        gh<_i972.FeatureFlagService>(),
+      ),
+    );
     gh.lazySingleton<_i268.OrganizationDataSource>(
       () => _i455.FirestoreOrganizationDataSource(
         gh<_i974.FirebaseFirestore>(),
@@ -1504,6 +1563,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i580.FirestoreProductRemoteSearchDataSource(
         gh<_i974.FirebaseFirestore>(),
         gh<_i309.ProductMapper>(),
+      ),
+    );
+    gh.factory<_i316.GetCatalogHomeConfigUseCase>(
+      () => _i316.GetCatalogHomeConfigUseCase(
+        gh<_i1072.CatalogHomeConfigRepository>(),
       ),
     );
     gh.lazySingleton<_i160.BranchRepository>(
@@ -1667,6 +1731,19 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i226.SubmitAboutAppDiagnosticsUseCase>(
       () => _i226.SubmitAboutAppDiagnosticsUseCase(
         gh<_i794.AboutAppRepository>(),
+      ),
+    );
+    gh.factory<_i420.CatalogHomeBloc>(
+      () => _i420.CatalogHomeBloc(
+        getCatalogHomeConfig: gh<_i316.GetCatalogHomeConfigUseCase>(),
+        getFeaturedCollectionsSection:
+            gh<_i1042.GetFeaturedCollectionsSectionUseCase>(),
+        getNewArrivalsSection: gh<_i76.GetNewArrivalsSectionUseCase>(),
+        getCatalogCampaignsSection:
+            gh<_i151.GetCatalogCampaignsSectionUseCase>(),
+        loadCatalogHomeCache: gh<_i249.LoadCatalogHomeCacheUseCase>(),
+        saveCatalogHomeCache: gh<_i64.SaveCatalogHomeCacheUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i90.CreateAccountWithEmailAndPasswordUseCase>(
