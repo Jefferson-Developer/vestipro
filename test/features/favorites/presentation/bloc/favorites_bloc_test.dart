@@ -51,10 +51,11 @@ void main() {
             hasMore: false,
           ),
         ),
-        productRepository: _ScriptedFavoritesProductRepository(<String, Product>{
-          'product-1': _buildProduct(id: 'product-1'),
-          'product-2': _buildProduct(id: 'product-2'),
-        }),
+        productRepository:
+            _ScriptedFavoritesProductRepository(<String, Product>{
+              'product-1': _buildProduct(id: 'product-1'),
+              'product-2': _buildProduct(id: 'product-2'),
+            }),
       ),
       act: (bloc) => bloc.add(const FavoritesStarted(organizationId: 'org-1')),
       expect: () => <Object>[
@@ -74,11 +75,7 @@ void main() {
               'products',
               <String>['product-1', 'product-2'],
             )
-            .having(
-              (state) => state.unavailableCount,
-              'unavailableCount',
-              0,
-            ),
+            .having((state) => state.unavailableCount, 'unavailableCount', 0),
       ],
       verify: (_) {
         expect(
@@ -101,9 +98,9 @@ void main() {
             hasMore: false,
           ),
         ),
-        productRepository: _ScriptedFavoritesProductRepository(<String, Product>{
-          'product-1': _buildProduct(id: 'product-1'),
-        }),
+        productRepository: _ScriptedFavoritesProductRepository(
+          <String, Product>{'product-1': _buildProduct(id: 'product-1')},
+        ),
       ),
       act: (bloc) => bloc.add(const FavoritesStarted(organizationId: 'org-1')),
       skip: 1,
@@ -119,11 +116,7 @@ void main() {
               'products',
               <String>['product-1'],
             )
-            .having(
-              (state) => state.unavailableCount,
-              'unavailableCount',
-              1,
-            ),
+            .having((state) => state.unavailableCount, 'unavailableCount', 1),
       ],
     );
 
@@ -155,7 +148,10 @@ void main() {
         when(() => sessionService.currentUser).thenReturn(null);
         return buildBloc(
           favoriteRepository: _ScriptedFavoriteRepository(
-            const FavoriteProductPage(items: <FavoriteProduct>[], hasMore: false),
+            const FavoriteProductPage(
+              items: <FavoriteProduct>[],
+              hasMore: false,
+            ),
           ),
           productRepository: _ScriptedFavoritesProductRepository(
             const <String, Product>{},

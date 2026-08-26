@@ -134,6 +134,19 @@ final class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
             ? page.unavailableCount
             : state.unavailableCount + page.unavailableCount;
 
+        final shouldLogViewed =
+            !state.hasLoggedViewed && mergedProducts.isNotEmpty;
+        if (shouldLogViewed) {
+          await analyticsService.logEvent(
+            AnalyticsEvents.favoritesViewed,
+            parameters: <String, Object?>{
+              'organization_id': state.organizationId,
+              'favorites_count': mergedProducts.length,
+            },
+          );
+        }
+        if (emit.isDone) return;
+
         emit(
           state.copyWith(
             status: mergedProducts.isEmpty
@@ -146,9 +159,9 @@ final class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
             isLoadingMore: false,
             unavailableCount: mergedUnavailable,
             clearFailure: true,
+            hasLoggedViewed: shouldLogViewed ? true : null,
           ),
         );
-        await _logViewedIfNeeded(emit);
       case AppFailure<FavoriteCatalogPage>(failure: final failure):
         if (replace) {
           emit(
@@ -173,18 +186,5 @@ final class FavoritesBloc extends Bloc<FavoritesEvent, FavoritesState> {
       (product) => !existingIds.contains(product.id),
     );
     return <Product>[...current, ...newProducts];
-  }
-
-  Future<void> _logViewedIfNeeded(Emitter<FavoritesState> emit) async {
-    if (state.hasLoggedViewed || state.products.isEmpty) return;
-    await analyticsService.logEvent(
-      AnalyticsEvents.favoritesViewed,
-      parameters: <String, Object?>{
-        'organization_id': state.organizationId,
-        'favorites_count': state.products.length,
-      },
-    );
-    if (emit.isDone) return;
-    emit(state.copyWith(hasLoggedViewed: true));
   }
 }

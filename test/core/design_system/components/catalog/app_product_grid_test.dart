@@ -186,64 +186,62 @@ void main() {
       },
     );
 
-    testWidgets(
-      'shows an outline heart for a non-favorited product and calls '
-      'onFavoriteTap without triggering onProductTap (TASK-079)',
-      (tester) async {
-        var favoriteTapped = false;
-        var productTapped = false;
+    testWidgets('shows an outline heart for a non-favorited product and calls '
+        'onFavoriteTap without triggering onProductTap (TASK-079)', (
+      tester,
+    ) async {
+      var favoriteTapped = false;
+      var productTapped = false;
 
-        await mockNetworkImagesFor(() async {
-          await _pumpGrid(
-            tester,
-            AppProductGrid(
-              products: [
-                AppProductCardData(
-                  id: _shirt.id,
-                  name: _shirt.name,
-                  onFavoriteTap: () => favoriteTapped = true,
-                ),
-              ],
-              onProductTap: (_) => productTapped = true,
-            ),
-          );
+      await mockNetworkImagesFor(() async {
+        await _pumpGrid(
+          tester,
+          AppProductGrid(
+            products: [
+              AppProductCardData(
+                id: _shirt.id,
+                name: _shirt.name,
+                onFavoriteTap: () => favoriteTapped = true,
+              ),
+            ],
+            onProductTap: (_) => productTapped = true,
+          ),
+        );
 
-          expect(find.byIcon(Icons.favorite_border), findsOneWidget);
-          expect(find.byIcon(Icons.favorite), findsNothing);
+        expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+        expect(find.byIcon(Icons.favorite), findsNothing);
 
-          await tester.tap(find.byIcon(Icons.favorite_border));
-          await tester.pump();
+        await tester.tap(find.byIcon(Icons.favorite_border));
+        await tester.pump();
 
-          expect(favoriteTapped, isTrue);
-          expect(productTapped, isFalse);
-        });
-      },
-    );
+        expect(favoriteTapped, isTrue);
+        expect(productTapped, isFalse);
+      });
+    });
 
-    testWidgets(
-      'shows a filled heart when isFavorite is true (TASK-079)',
-      (tester) async {
-        await mockNetworkImagesFor(() async {
-          await _pumpGrid(
-            tester,
-            AppProductGrid(
-              products: [
-                AppProductCardData(
-                  id: _shirt.id,
-                  name: _shirt.name,
-                  isFavorite: true,
-                  onFavoriteTap: () {},
-                ),
-              ],
-              onProductTap: (_) {},
-            ),
-          );
+    testWidgets('shows a filled heart when isFavorite is true (TASK-079)', (
+      tester,
+    ) async {
+      await mockNetworkImagesFor(() async {
+        await _pumpGrid(
+          tester,
+          AppProductGrid(
+            products: [
+              AppProductCardData(
+                id: _shirt.id,
+                name: _shirt.name,
+                isFavorite: true,
+                onFavoriteTap: () {},
+              ),
+            ],
+            onProductTap: (_) {},
+          ),
+        );
 
-          expect(find.byIcon(Icons.favorite), findsOneWidget);
-          expect(find.byIcon(Icons.favorite_border), findsNothing);
-        });
-      },
-    );
+        expect(find.byIcon(Icons.favorite), findsOneWidget);
+        expect(find.byIcon(Icons.favorite_border), findsNothing);
+      });
+    });
 
     testWidgets('calls onProductTap with the tapped product', (tester) async {
       AppProductCardData? tapped;

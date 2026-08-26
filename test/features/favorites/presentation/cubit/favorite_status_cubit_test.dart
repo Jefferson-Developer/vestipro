@@ -34,53 +34,50 @@ void main() {
 
     tearDown(() => cubit.close());
 
-    test('reflects favorites already present once it starts watching', () async {
-      repository.seed(<String>{'product-1'});
+    test(
+      'reflects favorites already present once it starts watching',
+      () async {
+        repository.seed(<String>{'product-1'});
 
+        cubit.start(organizationId: 'org-1');
+        await Future<void>.delayed(Duration.zero);
+
+        expect(cubit.state.favoriteProductIds, <String>{'product-1'});
+      },
+    );
+
+    test('toggle favorites a product that is not favorited yet and logs '
+        'product_favorited', () async {
       cubit.start(organizationId: 'org-1');
       await Future<void>.delayed(Duration.zero);
 
-      expect(cubit.state.favoriteProductIds, <String>{'product-1'});
+      await cubit.toggle(productId: 'product-1', source: 'catalog_grid');
+
+      expect(cubit.state.favoriteProductIds, contains('product-1'));
+      expect(repository.addedProductIds, <String>['product-1']);
+      final logged = analyticsService.loggedEvents.firstWhere(
+        (event) => event.name == AnalyticsEvents.productFavorited,
+      );
+      expect(logged.parameters?['organization_id'], 'org-1');
+      expect(logged.parameters?['product_id'], 'product-1');
+      expect(logged.parameters?['source'], 'catalog_grid');
     });
 
-    test(
-      'toggle favorites a product that is not favorited yet and logs '
-      'product_favorited',
-      () async {
-        cubit.start(organizationId: 'org-1');
-        await Future<void>.delayed(Duration.zero);
+    test('toggle unfavorites an already-favorited product and logs '
+        'product_unfavorited', () async {
+      repository.seed(<String>{'product-1'});
+      cubit.start(organizationId: 'org-1');
+      await Future<void>.delayed(Duration.zero);
 
-        await cubit.toggle(productId: 'product-1', source: 'catalog_grid');
+      await cubit.toggle(productId: 'product-1', source: 'product_detail');
 
-        expect(cubit.state.favoriteProductIds, contains('product-1'));
-        expect(repository.addedProductIds, <String>['product-1']);
-        final logged = analyticsService.loggedEvents.firstWhere(
-          (event) => event.name == AnalyticsEvents.productFavorited,
-        );
-        expect(logged.parameters?['organization_id'], 'org-1');
-        expect(logged.parameters?['product_id'], 'product-1');
-        expect(logged.parameters?['source'], 'catalog_grid');
-      },
-    );
-
-    test(
-      'toggle unfavorites an already-favorited product and logs '
-      'product_unfavorited',
-      () async {
-        repository.seed(<String>{'product-1'});
-        cubit.start(organizationId: 'org-1');
-        await Future<void>.delayed(Duration.zero);
-
-        await cubit.toggle(productId: 'product-1', source: 'product_detail');
-
-        expect(cubit.state.favoriteProductIds, isNot(contains('product-1')));
-        expect(repository.removedProductIds, <String>['product-1']);
-        expect(
-          analyticsService.loggedEvents.map((event) => event.name),
-          contains(AnalyticsEvents.productUnfavorited),
-        );
-      },
-    );
+      expect(cubit.state.favoriteProductIds, isNot(contains('product-1')));
+      expect(repository.removedProductIds, <String>['product-1']);
+      expect(
+        analyticsService.loggedEvents.map((event) => event.name),
+        contains(AnalyticsEvents.productUnfavorited),
+      );
+    });
 
     test(
       'toggling repeatedly before the state re-emits never sends more than '

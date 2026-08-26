@@ -358,6 +358,12 @@ class AppDatabase extends _$AppDatabase {
   /// opportunistically (e.g. when the favorites/catalog screen starts) to
   /// sync what could not reach Firestore while offline, ahead of a real
   /// connectivity-triggered Outbox (EPIC-14).
+  ///
+  /// Includes both `pending` (never attempted yet) and `failed` (attempted
+  /// but the remote call errored) rows — a `failed` mutation must still be
+  /// retried the next time the scope is watched, otherwise a favorite that
+  /// failed to sync once would never sync again, even after the connection
+  /// comes back.
   Future<List<FavoritesTableData>> listPendingFavoriteSync({
     required String organizationId,
     required String userId,
@@ -366,7 +372,8 @@ class AppDatabase extends _$AppDatabase {
           (row) =>
               row.organizationId.equals(organizationId) &
               row.userId.equals(userId) &
-              row.syncStatus.equals('pending'),
+              (row.syncStatus.equals('pending') |
+                  row.syncStatus.equals('failed')),
         ))
         .get();
   }
