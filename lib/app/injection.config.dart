@@ -136,6 +136,38 @@ import '../features/catalog/presentation/bloc/lookbook_bloc.dart' as _i630;
 import '../features/catalog/presentation/bloc/product_detail_bloc.dart'
     as _i578;
 import '../features/catalog/presentation/bloc/product_grid_bloc.dart' as _i331;
+import '../features/catalog_share/data/datasources/catalog_share_data_source.dart'
+    as _i993;
+import '../features/catalog_share/data/datasources/catalog_share_lookup_data_source.dart'
+    as _i979;
+import '../features/catalog_share/data/datasources/cloud_functions_catalog_share_lookup_data_source.dart'
+    as _i354;
+import '../features/catalog_share/data/datasources/firestore_catalog_share_data_source.dart'
+    as _i1002;
+import '../features/catalog_share/data/mappers/catalog_share_mapper.dart'
+    as _i1010;
+import '../features/catalog_share/data/repositories/catalog_share_lookup_repository_impl.dart'
+    as _i667;
+import '../features/catalog_share/data/repositories/catalog_share_repository_impl.dart'
+    as _i54;
+import '../features/catalog_share/domain/repositories/catalog_share_lookup_repository.dart'
+    as _i344;
+import '../features/catalog_share/domain/repositories/catalog_share_repository.dart'
+    as _i558;
+import '../features/catalog_share/domain/usecases/create_catalog_share_link_use_case.dart'
+    as _i990;
+import '../features/catalog_share/domain/usecases/get_catalog_share_use_case.dart'
+    as _i795;
+import '../features/catalog_share/domain/usecases/preview_catalog_share_use_case.dart'
+    as _i620;
+import '../features/catalog_share/domain/usecases/register_catalog_share_open_use_case.dart'
+    as _i298;
+import '../features/catalog_share/domain/usecases/revoke_catalog_share_use_case.dart'
+    as _i601;
+import '../features/catalog_share/presentation/bloc/catalog_share_public_bloc.dart'
+    as _i447;
+import '../features/catalog_share/presentation/bloc/catalog_share_sheet_bloc.dart'
+    as _i511;
 import '../features/crm/crm.dart' as _i205;
 import '../features/crm/data/mappers/crm_activity_mapper.dart' as _i203;
 import '../features/crm/data/mappers/crm_task_mapper.dart' as _i519;
@@ -738,6 +770,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i756.UserProfileMapper>(
       () => const _i756.UserProfileMapper(),
+    );
+    gh.lazySingleton<_i1010.CatalogShareMapper>(
+      () => const _i1010.CatalogShareMapper(),
     );
     gh.lazySingleton<_i203.CrmActivityMapper>(
       () => const _i203.CrmActivityMapper(),
@@ -1631,6 +1666,11 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.lazySingleton<_i979.CatalogShareLookupDataSource>(
+      () => _i354.CloudFunctionsCatalogShareLookupDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.factory<_i330.CreateCompanyUseCase>(
       () => _i330.CreateCompanyUseCase(gh<_i799.CompanyRepository>()),
     );
@@ -1670,6 +1710,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i41.CollectionListBloc(
         listCollections: gh<_i1023.ListCollectionsUseCase>(),
         closeCollection: gh<_i367.CloseCollectionUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i993.CatalogShareDataSource>(
+      () => _i1002.FirestoreCatalogShareDataSource(
+        gh<_i340.CloudFunctionsService>(),
+        gh<_i974.FirebaseFirestore>(),
       ),
     );
     gh.lazySingleton<_i668.UserProfileDataSource>(
@@ -1781,6 +1827,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i90.InviteRepositoryImpl(
         dataSource: gh<_i814.InviteDataSource>(),
         mapper: gh<_i649.InviteMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i558.CatalogShareRepository>(
+      () => _i54.CatalogShareRepositoryImpl(
+        dataSource: gh<_i993.CatalogShareDataSource>(),
+        mapper: gh<_i1010.CatalogShareMapper>(),
       ),
     );
     gh.lazySingleton<_i440.RoleRepository>(
@@ -1899,10 +1951,26 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i488.UserProfileRepository>(),
       ),
     );
+    gh.lazySingleton<_i344.CatalogShareLookupRepository>(
+      () => _i667.CatalogShareLookupRepositoryImpl(
+        dataSource: gh<_i979.CatalogShareLookupDataSource>(),
+        mapper: gh<_i1010.CatalogShareMapper>(),
+      ),
+    );
     gh.lazySingleton<_i568.ProductSearchRepository>(
       () => _i941.ProductSearchRepositoryImpl(
         remoteDataSource: gh<_i671.ProductRemoteSearchDataSource>(),
         localDataSource: gh<_i42.ProductLocalSearchIndexDataSource>(),
+      ),
+    );
+    gh.factory<_i620.PreviewCatalogShareUseCase>(
+      () => _i620.PreviewCatalogShareUseCase(
+        gh<_i344.CatalogShareLookupRepository>(),
+      ),
+    );
+    gh.factory<_i298.RegisterCatalogShareOpenUseCase>(
+      () => _i298.RegisterCatalogShareOpenUseCase(
+        gh<_i344.CatalogShareLookupRepository>(),
       ),
     );
     gh.factory<_i201.ListAuditLogEntriesUseCase>(
@@ -1971,6 +2039,17 @@ extension GetItInjectableX on _i174.GetIt {
         listSizeGridTemplates: gh<_i646.ListSizeGridTemplatesUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
+    );
+    gh.factory<_i990.CreateCatalogShareLinkUseCase>(
+      () => _i990.CreateCatalogShareLinkUseCase(
+        gh<_i558.CatalogShareRepository>(),
+      ),
+    );
+    gh.factory<_i795.GetCatalogShareUseCase>(
+      () => _i795.GetCatalogShareUseCase(gh<_i558.CatalogShareRepository>()),
+    );
+    gh.factory<_i601.RevokeCatalogShareUseCase>(
+      () => _i601.RevokeCatalogShareUseCase(gh<_i558.CatalogShareRepository>()),
     );
     gh.factory<_i835.AddUserToTeamUseCase>(
       () => _i835.AddUserToTeamUseCase(gh<_i320.TeamRepository>()),
@@ -2057,6 +2136,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i295.PortfolioAssignmentRepository>(),
         gh<_i265.MembershipRepository>(),
         gh<_i265.TeamRepository>(),
+      ),
+    );
+    gh.factory<_i447.CatalogSharePublicBloc>(
+      () => _i447.CatalogSharePublicBloc(
+        previewCatalogShare: gh<_i620.PreviewCatalogShareUseCase>(),
+        registerCatalogShareOpen: gh<_i298.RegisterCatalogShareOpenUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i516.TeamFormBloc>(
@@ -2168,6 +2254,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i831.TeamListBloc(
         listCommercialTeams: gh<_i986.ListCommercialTeamsUseCase>(),
         deleteTeam: gh<_i265.DeleteTeamUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i511.CatalogShareSheetBloc>(
+      () => _i511.CatalogShareSheetBloc(
+        createCatalogShareLink: gh<_i990.CreateCatalogShareLinkUseCase>(),
+        getCatalogShare: gh<_i795.GetCatalogShareUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );

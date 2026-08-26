@@ -117,6 +117,12 @@ void main() {
       await tester.pumpAndSettle();
       expect(find.text('accept-invite-page:abc'), findsOneWidget);
 
+      appRouter.router.go(
+        const CatalogSharePublicRoute(token: 'share-abc').location,
+      );
+      await tester.pumpAndSettle();
+      expect(find.text('catalog-share-public-page:share-abc'), findsOneWidget);
+
       verifyNever(() => sessionService.ensureSessionIsActive());
     });
   });
@@ -141,5 +147,7 @@ AppRouter _buildRouter(SessionAuthGuard guard) {
         const Scaffold(body: Text('onboarding-wizard-page')),
     acceptInvitePageBuilder: (context, token) =>
         Scaffold(body: Text('accept-invite-page:$token')),
+    catalogSharePublicPageBuilder: (context, token) =>
+        Scaffold(body: Text('catalog-share-public-page:$token')),
   );
 }

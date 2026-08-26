@@ -585,6 +585,37 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/catalogShares/{shareId}  (TASK-081)
+      // -------------------------------------------------------------------
+      //
+      // Exclusively written by the `createCatalogShareLink`/
+      // `registerCatalogShareOpen`/`revokeCatalogShareLink` Cloud Functions
+      // (Admin SDK, which ignores these Rules) — same rationale as
+      // `invites`: a share token needs to be generated server-side (never
+      // guessable/reproducible from the client) and only its SHA-256 hash
+      // (`tokenHash`) is ever persisted here, so `create`/`update`/`delete`
+      // are all `if false` unconditionally.
+      //
+      // Reading a share directly from Firestore is restricted to its
+      // creator (to see "foi aberto em...") or an OWNER/ADMIN auditing the
+      // organization's shares (`catalog.manage`) — never to an anonymous or
+      // unrelated caller, and never by presenting the plaintext token as a
+      // document id/field: the public/anonymous recipient of a share link
+      // never talks to Firestore directly at all, only to the
+      // `getCatalogShareLink`/`registerCatalogShareOpen` Functions above,
+      // which look the document up server-side by `tokenHash`. That is what
+      // guarantees "nenhuma outra coleção fica acessível via o mesmo token"
+      // (TASK-081): the token is never even presented to Firestore Rules in
+      // the first place, by anyone, authenticated or not.
+
+      match /catalogShares/{shareId} {
+        allow read: if hasCapability(organizationId, 'catalog.manage')
+          || (isActiveMember(organizationId) && resource.data.createdBy == request.auth.uid);
+
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/productVariants/{variantId}
       // (TASK-072 generated sellable color/size variants)
       // -------------------------------------------------------------------

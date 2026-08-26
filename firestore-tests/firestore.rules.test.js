@@ -208,6 +208,31 @@ function favoriteDoc({ organizationId, userId = 'rep-a', productId = 'product-a'
   };
 }
 
+function catalogShareDoc({
+  organizationId,
+  createdBy = 'rep-a',
+  status = 'active',
+  expiresAt = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+}) {
+  return {
+    organizationId,
+    scope: 'product',
+    items: [{ productId: 'product-a', name: 'Camisa Linho', imageUrl: null }],
+    collectionId: null,
+    collectionName: null,
+    tokenHash: 'fake-hash-for-tests',
+    status,
+    openCount: 0,
+    firstOpenedAt: null,
+    lastOpenedAt: null,
+    expiresAt,
+    createdBy,
+    createdByName: 'Rep A',
+    createdAt: now(),
+    updatedAt: now(),
+  };
+}
+
 function auditLogDoc({ organizationId, actorUserId, action = 'role.changed' }) {
   return {
     organizationId,
@@ -838,6 +863,64 @@ describe('organizations/{organizationId}/favorites/{favoriteId}  (TASK-079 perso
 
     const db = testEnv.authenticatedContext('owner-a').firestore();
     await assertFails(db.doc(`organizations/${ORG_B}/favorites/owner-b_product-b`).get());
+  });
+});
+
+describe('organizations/{organizationId}/catalogShares/{shareId}  (TASK-081 catalog sharing)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/catalogShares/share-rep-a`)
+        .set(catalogShareDoc({ organizationId: ORG_A, createdBy: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/catalogShares/share-rep-b`)
+        .set(catalogShareDoc({ organizationId: ORG_A, createdBy: 'rep-b' }));
+      await db
+        .doc(`organizations/${ORG_B}/catalogShares/share-owner-b`)
+        .set(catalogShareDoc({ organizationId: ORG_B, createdBy: 'owner-b' }));
+    });
+  });
+
+  test('criador lê o próprio compartilhamento', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/catalogShares/share-rep-a`).get());
+  });
+
+  test('membro comum não lê compartilhamento criado por outro membro', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/catalogShares/share-rep-b`).get());
+  });
+
+  test('OWNER/ADMIN (catalog.manage) lê qualquer compartilhamento da própria organization', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    await assertSucceeds(ownerDb.doc(`organizations/${ORG_A}/catalogShares/share-rep-b`).get());
+
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+    await assertSucceeds(adminDb.doc(`organizations/${ORG_A}/catalogShares/share-rep-b`).get());
+  });
+
+  test('membro da Org A não lê compartilhamento da Org B, mesmo sabendo o id', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/catalogShares/share-owner-b`).get());
+  });
+
+  test('visitante não autenticado não lê nenhum compartilhamento diretamente', async () => {
+    const db = testEnv.unauthenticatedContext().firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/catalogShares/share-rep-a`).get());
+  });
+
+  test('cliente não cria, altera nem exclui compartilhamento por Rules (somente as Cloud Functions, via Admin SDK)', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/catalogShares/new-share`)
+        .set(catalogShareDoc({ organizationId: ORG_A, createdBy: 'rep-a' })),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/catalogShares/share-rep-a`).update({ status: 'revoked' }),
+    );
+    await assertFails(db.doc(`organizations/${ORG_A}/catalogShares/share-rep-a`).delete());
   });
 });
 

@@ -48,6 +48,8 @@ void main() {
           'favorites_viewed',
           'campaign_viewed',
           'campaign_product_clicked',
+          'catalog_share_created',
+          'catalog_share_opened',
         ]),
       );
 

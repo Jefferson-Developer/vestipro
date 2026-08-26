@@ -48,6 +48,7 @@ final class SessionAuthGuard implements AuthGuard {
         path == SignUpRoute.pathPattern ||
         path == PasswordResetRoute.pathPattern ||
         path == TermsOfServiceRoute.pathPattern ||
-        path.startsWith('/invite/');
+        path.startsWith('/invite/') ||
+        path.startsWith('/share/');
   }
 }

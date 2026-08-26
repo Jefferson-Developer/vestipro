@@ -27,6 +27,7 @@ class AppRouter {
     required this.forgotPasswordPageBuilder,
     required this.onboardingWizardPageBuilder,
     required this.acceptInvitePageBuilder,
+    required this.catalogSharePublicPageBuilder,
     this.customerFormPageBuilder,
     this.productFormPageBuilder,
     this.customerPortfolioPageBuilder,
@@ -86,6 +87,12 @@ class AppRouter {
   /// composition rationale as [loginPageBuilder].
   final Widget Function(BuildContext context, String token)
   acceptInvitePageBuilder;
+
+  /// Builds the real public catalog share screen (TASK-081), given the
+  /// `token` path parameter extracted from [CatalogSharePublicRoute]. Same
+  /// composition rationale as [loginPageBuilder].
+  final Widget Function(BuildContext context, String token)
+  catalogSharePublicPageBuilder;
 
   late final GoRouter router = GoRouter(
     initialLocation: const CatalogHomeRoute(
@@ -228,6 +235,14 @@ class AppRouter {
         name: InviteAcceptanceRoute.name,
         builder: (context, state) =>
             acceptInvitePageBuilder(context, state.pathParameters['token']!),
+      ),
+      GoRoute(
+        path: CatalogSharePublicRoute.pathPattern,
+        name: CatalogSharePublicRoute.name,
+        builder: (context, state) => catalogSharePublicPageBuilder(
+          context,
+          state.pathParameters['token']!,
+        ),
       ),
       GoRoute(
         path: ForbiddenRoute.pathPattern,

@@ -281,6 +281,29 @@ final class InviteAcceptanceRoute extends AppRoute {
   String get location => '/invite/$token';
 }
 
+/// Route reached via the link a vendor sends a customer to view a shared
+/// catalog selection (TASK-081, consuming the `CatalogShare` created by
+/// `createCatalogShareLink`).
+///
+/// Deliberately outside the `/org/:orgId/...` convention every other
+/// authenticated route follows, same rationale as [InviteAcceptanceRoute]:
+/// the organization is not known ahead of time here — it is resolved from
+/// [token] itself, by `getCatalogShareLink`, once `CatalogSharePublicPage`
+/// loads. Must never require [AuthGuard]/[ActiveOrganizationGuard] the way
+/// protected routes do: a share link has to work for a customer who is not
+/// signed in at all (TASK-081: "sem exigir login do cliente").
+final class CatalogSharePublicRoute extends AppRoute {
+  const CatalogSharePublicRoute({required this.token});
+
+  final String token;
+
+  static const name = 'catalogSharePublic';
+  static const pathPattern = '/share/:token';
+
+  @override
+  String get location => '/share/$token';
+}
+
 /// Route shown when a guard denies access to the requested location.
 final class ForbiddenRoute extends AppRoute {
   const ForbiddenRoute();

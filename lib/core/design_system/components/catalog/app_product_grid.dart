@@ -62,6 +62,7 @@ class AppProductCardData {
     this.badgeLabels = const <String>[],
     this.isFavorite = false,
     this.onFavoriteTap,
+    this.onShareTap,
   });
 
   final Object id;
@@ -105,6 +106,12 @@ class AppProductCardData {
   /// does not wire favorites (e.g. `AppProductCarousel`, the catalog home)
   /// renders exactly as before.
   final VoidCallback? onFavoriteTap;
+
+  /// Shows a share button over the card's photo when non-`null` (TASK-081),
+  /// tapping it calls this instead of [AppProductGrid.onProductTap]. `null`
+  /// (the default) hides the button entirely, same "opt-in, zero impact on
+  /// existing callers" contract [onFavoriteTap] already sets.
+  final VoidCallback? onShareTap;
 }
 
 /// The product grid every catalog/order/pick-list screen reuses.
@@ -355,11 +362,21 @@ class AppProductCard extends StatelessWidget {
                           .toList(growable: false),
                     ),
                   ),
-                if (product.onFavoriteTap != null)
+                if (product.onFavoriteTap != null || product.onShareTap != null)
                   Positioned(
                     top: AppSpacing.spacing4,
                     right: AppSpacing.spacing4,
-                    child: _buildFavoriteButton(colors),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: <Widget>[
+                        if (product.onShareTap != null) ...<Widget>[
+                          _buildShareButton(colors),
+                          const SizedBox(width: AppSpacing.spacing4),
+                        ],
+                        if (product.onFavoriteTap != null)
+                          _buildFavoriteButton(colors),
+                      ],
+                    ),
                   ),
               ],
             ),
@@ -451,6 +468,21 @@ class AppProductCard extends StatelessWidget {
             ? 'Remover dos favoritos'
             : 'Adicionar aos favoritos',
         onPressed: product.onFavoriteTap,
+      ),
+    );
+  }
+
+  /// Same translucent-backdrop-around-[AppIconButton] treatment as
+  /// [_buildFavoriteButton] — kept as a separate method (not a shared
+  /// helper) since the two differ in icon/semantics/callback.
+  Widget _buildShareButton(AppColors colors) {
+    return Material(
+      color: colors.surface.withValues(alpha: 0.85),
+      shape: const CircleBorder(),
+      child: AppIconButton(
+        icon: Icons.share_outlined,
+        semanticLabel: 'Compartilhar produto',
+        onPressed: product.onShareTap,
       ),
     );
   }

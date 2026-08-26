@@ -67,6 +67,13 @@
       ]
     },
     {
+      "collectionGroup": "catalogShares",
+      "fieldPath": "tokenHash",
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
+    },
+    {
       "collectionGroup": "members",
       "fieldPath": "userId",
       "indexes": [

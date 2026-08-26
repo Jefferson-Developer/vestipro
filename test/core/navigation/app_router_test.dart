@@ -135,6 +135,28 @@ void main() {
       expect(find.text('accept-invite:abc-123'), findsOneWidget);
     });
 
+    testWidgets('extracts the token path parameter for CatalogSharePublicRoute '
+        '(TASK-081)', (tester) async {
+      String? capturedToken;
+      final appRouter = _buildRouter(
+        catalogSharePublicPageBuilder: (context, token) {
+          capturedToken = token;
+          return Scaffold(body: Text('catalog-share-public:$token'));
+        },
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(
+        const CatalogSharePublicRoute(token: 'share-token-1').location,
+      );
+      await tester.pumpAndSettle();
+
+      expect(capturedToken, 'share-token-1');
+      expect(find.text('catalog-share-public:share-token-1'), findsOneWidget);
+    });
+
     testWidgets('protects AuditLogRoute with audit.log.view', (tester) async {
       final appRouter = _buildRouter(
         authorizationGuard: const _DenyAuditLogGuard(),
@@ -402,6 +424,8 @@ AppRouter _buildRouter({
   customerDetailPageBuilder,
   WidgetBuilder? loginPageBuilder,
   Widget Function(BuildContext context, String token)? acceptInvitePageBuilder,
+  Widget Function(BuildContext context, String token)?
+  catalogSharePublicPageBuilder,
 }) {
   return AppRouter(
     authGuard: authGuard,
@@ -434,6 +458,9 @@ AppRouter _buildRouter({
     acceptInvitePageBuilder:
         acceptInvitePageBuilder ??
         (context, token) => Scaffold(body: Text('accept-invite:$token')),
+    catalogSharePublicPageBuilder:
+        catalogSharePublicPageBuilder ??
+        (context, token) => Scaffold(body: Text('catalog-share-public:$token')),
   );
 }
 

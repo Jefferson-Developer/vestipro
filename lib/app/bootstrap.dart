@@ -23,6 +23,7 @@ import '../features/authentication/presentation/bloc/sign_up_bloc.dart';
 import '../features/audit_log/audit_log.dart';
 import '../features/catalog/catalog.dart';
 import '../features/customers/customers.dart';
+import '../features/catalog_share/catalog_share.dart';
 import '../features/invites/invites.dart';
 import '../features/onboarding/onboarding.dart';
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
@@ -251,6 +252,11 @@ class VestiProApp extends StatelessWidget {
             createBloc: () => getIt<AcceptInviteBloc>(),
             createSignUpBloc: () => getIt<SignUpBloc>(),
           ),
+          catalogSharePublicPageBuilder: (context, token) =>
+              CatalogSharePublicPage(
+                token: token,
+                createBloc: () => getIt<CatalogSharePublicBloc>(),
+              ),
         );
 
     return MaterialApp.router(

@@ -27,6 +27,7 @@ class ProductGridPage extends StatelessWidget {
     this.onProductSelected,
     this.favoriteProductIds,
     this.onFavoriteToggle,
+    this.onShareTap,
     super.key,
   });
 
@@ -51,6 +52,13 @@ class ProductGridPage extends StatelessWidget {
   /// keeps every card exactly as it rendered before TASK-079.
   final void Function(Product product)? onFavoriteToggle;
 
+  /// Called when a card's share button is tapped (TASK-081) — `null` (the
+  /// default) hides the button and keeps every card exactly as it rendered
+  /// before. Opening the actual share sheet (`CatalogShareSheet`) is decided
+  /// by whoever hosts this page, same "host decides" contract
+  /// [onFavoriteToggle]/[onProductSelected] already set.
+  final void Function(Product product)? onShareTap;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ProductGridBloc>(
@@ -66,6 +74,7 @@ class ProductGridPage extends StatelessWidget {
         onProductSelected: onProductSelected,
         favoriteProductIds: favoriteProductIds,
         onFavoriteToggle: onFavoriteToggle,
+        onShareTap: onShareTap,
       ),
     );
   }
@@ -77,12 +86,14 @@ class _ProductGridView extends StatelessWidget {
     this.onProductSelected,
     this.favoriteProductIds,
     this.onFavoriteToggle,
+    this.onShareTap,
   });
 
   final String title;
   final ValueChanged<Product>? onProductSelected;
   final Set<String>? favoriteProductIds;
   final void Function(Product product)? onFavoriteToggle;
+  final void Function(Product product)? onShareTap;
 
   @override
   Widget build(BuildContext context) {
@@ -155,6 +166,7 @@ class _ProductGridView extends StatelessWidget {
       onFavoriteTap: onFavoriteToggle == null
           ? null
           : () => onFavoriteToggle!(product),
+      onShareTap: onShareTap == null ? null : () => onShareTap!(product),
     );
   }
 

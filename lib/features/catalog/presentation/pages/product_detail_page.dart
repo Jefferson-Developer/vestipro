@@ -28,6 +28,7 @@ class ProductDetailPage extends StatelessWidget {
     this.onAddToOrder,
     this.isFavorite = false,
     this.onFavoriteToggle,
+    this.onSharePressed,
     super.key,
   });
 
@@ -57,6 +58,14 @@ class ProductDetailPage extends StatelessWidget {
   /// default) keeps this screen exactly as it rendered before TASK-079.
   final VoidCallback? onFavoriteToggle;
 
+  /// Shows a "Compartilhar" button in the app bar when non-`null` (TASK-081);
+  /// `null` (the default) keeps this screen exactly as it rendered before.
+  /// Opening the actual share sheet (`CatalogShareSheet`) is decided by
+  /// whoever hosts this page, never by the page itself — same "host decides"
+  /// contract [onFavoriteToggle]/[onAddToOrder] already set, so `catalog`
+  /// never depends on the `catalog_share` feature directly.
+  final VoidCallback? onSharePressed;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ProductDetailBloc>(
@@ -72,6 +81,7 @@ class ProductDetailPage extends StatelessWidget {
         onAddToOrder: onAddToOrder,
         isFavorite: isFavorite,
         onFavoriteToggle: onFavoriteToggle,
+        onSharePressed: onSharePressed,
       ),
     );
   }
@@ -82,12 +92,14 @@ class _ProductDetailView extends StatelessWidget {
     this.onAddToOrder,
     this.isFavorite = false,
     this.onFavoriteToggle,
+    this.onSharePressed,
   });
 
   final void Function(Product product, List<ProductDetailOrderLine> lines)?
   onAddToOrder;
   final bool isFavorite;
   final VoidCallback? onFavoriteToggle;
+  final VoidCallback? onSharePressed;
 
   @override
   Widget build(BuildContext context) {
@@ -98,6 +110,12 @@ class _ProductDetailView extends StatelessWidget {
           appBar: AppBar(
             title: Text(state.product?.name ?? 'Produto'),
             actions: <Widget>[
+              if (onSharePressed != null)
+                AppIconButton(
+                  icon: Icons.share_outlined,
+                  semanticLabel: 'Compartilhar produto',
+                  onPressed: onSharePressed,
+                ),
               if (onFavoriteToggle != null)
                 AppIconButton(
                   icon: isFavorite ? Icons.favorite : Icons.favorite_border,

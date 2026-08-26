@@ -243,6 +243,73 @@ void main() {
       });
     });
 
+    testWidgets('hides the share button when onShareTap is not provided', (
+      tester,
+    ) async {
+      await mockNetworkImagesFor(() async {
+        await _pumpGrid(
+          tester,
+          AppProductGrid(products: const [_shirt], onProductTap: (_) {}),
+        );
+
+        expect(find.byIcon(Icons.share_outlined), findsNothing);
+      });
+    });
+
+    testWidgets('shows a share button and calls onShareTap without '
+        'triggering onProductTap (TASK-081)', (tester) async {
+      var shareTapped = false;
+      var productTapped = false;
+
+      await mockNetworkImagesFor(() async {
+        await _pumpGrid(
+          tester,
+          AppProductGrid(
+            products: [
+              AppProductCardData(
+                id: _shirt.id,
+                name: _shirt.name,
+                onShareTap: () => shareTapped = true,
+              ),
+            ],
+            onProductTap: (_) => productTapped = true,
+          ),
+        );
+
+        expect(find.byIcon(Icons.share_outlined), findsOneWidget);
+
+        await tester.tap(find.byIcon(Icons.share_outlined));
+        await tester.pump();
+
+        expect(shareTapped, isTrue);
+        expect(productTapped, isFalse);
+      });
+    });
+
+    testWidgets('shows both the share and favorite buttons together', (
+      tester,
+    ) async {
+      await mockNetworkImagesFor(() async {
+        await _pumpGrid(
+          tester,
+          AppProductGrid(
+            products: [
+              AppProductCardData(
+                id: _shirt.id,
+                name: _shirt.name,
+                onShareTap: () {},
+                onFavoriteTap: () {},
+              ),
+            ],
+            onProductTap: (_) {},
+          ),
+        );
+
+        expect(find.byIcon(Icons.share_outlined), findsOneWidget);
+        expect(find.byIcon(Icons.favorite_border), findsOneWidget);
+      });
+    });
+
     testWidgets('calls onProductTap with the tapped product', (tester) async {
       AppProductCardData? tapped;
 
