@@ -22,39 +22,47 @@ const _signedUpUser = SessionUser(uid: 'user-1', emailVerified: false);
 
 void main() {
   group('SignUpPage', () {
-    testWidgets('blocks submission while the terms checkbox is unchecked', (
-      tester,
-    ) async {
-      final authRepository = _AuthRepositoryStub(
-        result: const AppSuccess<SessionUser>(_signedUpUser),
-      );
-      await tester.pumpWidget(_buildApp(authRepository));
-      await tester.pumpAndSettle();
+    testWidgets(
+      'shows a terms validation error when the checkbox is unchecked',
+      (tester) async {
+        final authRepository = _AuthRepositoryStub(
+          result: const AppSuccess<SessionUser>(_signedUpUser),
+        );
+        await tester.pumpWidget(_buildApp(authRepository));
+        await tester.pumpAndSettle();
 
-      await tester.enterText(
-        find.bySemanticsLabel('Campo de nome'),
-        _validName,
-      );
-      await tester.enterText(
-        find.bySemanticsLabel('Campo de e-mail'),
-        _validEmail,
-      );
-      await tester.enterText(
-        find.bySemanticsLabel('Campo de senha'),
-        _validPassword,
-      );
-      await tester.enterText(
-        find.bySemanticsLabel('Campo de confirmação de senha'),
-        _validPassword,
-      );
-      await tester.pump();
+        await tester.enterText(
+          find.bySemanticsLabel('Campo de nome'),
+          _validName,
+        );
+        await tester.enterText(
+          find.bySemanticsLabel('Campo de e-mail'),
+          _validEmail,
+        );
+        await tester.enterText(
+          find.bySemanticsLabel('Campo de senha'),
+          _validPassword,
+        );
+        await tester.enterText(
+          find.bySemanticsLabel('Campo de confirmação de senha'),
+          _validPassword,
+        );
+        await tester.pump();
 
-      await tester.tap(find.text('Criar conta'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Criar conta'));
+        await tester.pumpAndSettle();
 
-      expect(authRepository.createAccountCallCount, 0);
-      expect(find.text('about-app-page'), findsNothing);
-    });
+        expect(authRepository.createAccountCallCount, 0);
+        expect(
+          find.text(
+            'É necessário aceitar os Termos de Uso e a Política de '
+            'Privacidade.',
+          ),
+          findsOneWidget,
+        );
+        expect(find.text('about-app-page'), findsNothing);
+      },
+    );
 
     testWidgets(
       'accepting the terms checkbox enables submission and creates the '

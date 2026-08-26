@@ -23,11 +23,10 @@ final class SessionAuthGuard implements AuthGuard {
 
   @override
   Future<String?> redirect(BuildContext context, GoRouterState state) async {
-    // Never redirect a request that is already headed to the login page
-    // itself — comparing only `.path` (not the full location) so this
-    // still holds once `LoginRoute` carries `returnTo`/`reason` query
-    // parameters of its own.
-    if (state.uri.path == const LoginRoute().location) return null;
+    // Public auth routes must be reachable before the user has a session.
+    // Comparing only `.path` keeps query parameters such as `returnTo`
+    // transparent to this decision.
+    if (_isPublicRoute(state.uri.path)) return null;
 
     if (_sessionService.currentUser == null) {
       return LoginRoute(returnTo: state.uri.toString()).location;
@@ -42,5 +41,13 @@ final class SessionAuthGuard implements AuthGuard {
     }
 
     return null;
+  }
+
+  static bool _isPublicRoute(String path) {
+    return path == LoginRoute.pathPattern ||
+        path == SignUpRoute.pathPattern ||
+        path == PasswordResetRoute.pathPattern ||
+        path == TermsOfServiceRoute.pathPattern ||
+        path.startsWith('/invite/');
   }
 }

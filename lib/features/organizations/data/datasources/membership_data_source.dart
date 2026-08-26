@@ -32,4 +32,10 @@ abstract interface class MembershipDataSource {
     required DateTime updatedAt,
     required String updatedBy,
   });
+
+  /// Every non-deleted, `active` Membership document belonging to [userId],
+  /// across every Organization (a Firestore collection-group query on
+  /// `members` filtered by `userId`) — see [MembershipRepository]'s own docs
+  /// for why this is the one method not scoped by `organizationId`.
+  Future<List<MembershipDto>> listActiveByUser(String userId);
 }

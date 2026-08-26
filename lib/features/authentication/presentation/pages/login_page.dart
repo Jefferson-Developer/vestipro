@@ -42,15 +42,7 @@ class LoginView extends StatelessWidget {
         listener: (context, state) {
           switch (state.status) {
             case LoginSubmissionStatus.success:
-              // The real authenticated area (organization/branch selection)
-              // does not exist yet (TASK-026/TASK-037); this placeholder
-              // destination is the same one `AppRouter.initialLocation` and
-              // `ForbiddenPage`/`NotFoundPage` already use while it does
-              // not. Session persistence across app restarts is TASK-041's
-              // responsibility, not this screen's.
-              context.go(
-                const AboutAppRoute(orgId: kPlaceholderOrganizationId).location,
-              );
+              context.go(_resolvePostLoginDestination(context, state));
             case LoginSubmissionStatus.failure:
               final failure = state.failure;
               if (failure != null) {
@@ -80,6 +72,56 @@ class LoginView extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Where to navigate right after a successful [LoginSubmissionStatus.success]
+/// — in priority order:
+///
+/// 1. Back to whatever protected route originally sent the user to
+///    [LoginRoute] with a `returnTo` query parameter (deep link,
+///    `SessionAuthGuard`), when it is safe to reuse as-is.
+/// 2. [OnboardingWizardRoute], when [LoginBloc] resolved that this user has
+///    no active Organization Membership yet ([LoginState.requiresOnboarding]).
+/// 3. [CatalogHomeRoute] scoped to [LoginState.organizationId], the real
+///    Organization [LoginBloc] resolved for this user
+///    (`ResolveActiveOrganizationIdUseCase`) — the common case.
+/// 4. [kPlaceholderOrganizationId] as a last-resort fallback, only reached
+///    when that resolution itself failed (e.g. offline). `ActiveOrganizationGuard`
+///    still fails closed from there on the very next navigation, so this
+///    never actually grants access to anything.
+String _resolvePostLoginDestination(BuildContext context, LoginState state) {
+  final safeReturnTo = _safeReturnToFrom(context);
+  if (safeReturnTo != null) return safeReturnTo;
+
+  if (state.requiresOnboarding) return const OnboardingWizardRoute().location;
+
+  final organizationId = state.organizationId;
+  if (organizationId != null && organizationId.isNotEmpty) {
+    return CatalogHomeRoute(orgId: organizationId).location;
+  }
+
+  return const CatalogHomeRoute(orgId: kPlaceholderOrganizationId).location;
+}
+
+String? _safeReturnToFrom(BuildContext context) {
+  try {
+    final returnTo = GoRouterState.of(context).uri.queryParameters['returnTo'];
+    return _safeReturnTo(returnTo);
+  } catch (_) {
+    return null;
+  }
+}
+
+String? _safeReturnTo(String? value) {
+  final trimmed = value?.trim();
+  if (trimmed == null || trimmed.isEmpty) return null;
+  if (!trimmed.startsWith('/') || trimmed.startsWith('//')) return null;
+
+  final uri = Uri.tryParse(trimmed);
+  if (uri == null || uri.hasScheme || uri.hasAuthority) return null;
+  if (uri.path == LoginRoute.pathPattern) return null;
+
+  return uri.toString();
 }
 
 /// Single-column layout for phones and tablets: logo on top, form below,

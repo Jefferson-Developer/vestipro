@@ -92,7 +92,6 @@ class _SignUpFormState extends State<SignUpForm> {
     return BlocBuilder<SignUpBloc, SignUpState>(
       builder: (context, state) {
         final isSubmitting = state.status == SignUpSubmissionStatus.submitting;
-        final canSubmit = state.termsAccepted && !isSubmitting;
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -220,7 +219,7 @@ class _SignUpFormState extends State<SignUpForm> {
               label: 'Criar conta',
               expand: true,
               isLoading: isSubmitting,
-              onPressed: canSubmit ? () => _submit(context) : null,
+              onPressed: isSubmitting ? null : () => _submit(context),
             ),
             if (widget.showAlternateAuthLink) ...<Widget>[
               const SizedBox(height: AppSpacing.spacing8),

@@ -12,6 +12,17 @@ import '../value_objects/membership_status.dart';
 /// [Membership.organizationId] or [Membership.userId] — moving a user to
 /// another Organization means creating a new [Membership], not editing this
 /// one.
+///
+/// [listActiveByUser] is the sole, deliberate exception to "every method
+/// requires [organizationId]": resolving *which* Organization(s) a
+/// just-signed-in user belongs to is exactly the information not yet known
+/// at that point (post-login redirect, [ActiveOrganizationGuard] self-heal),
+/// so it cannot be tenant-scoped by construction like every other method
+/// here. It is still not an open query: it is a Firestore collection-group
+/// query filtered to `userId == request.auth.uid`, and `firestore.rules`
+/// only grants `list` on `members` when that exact filter holds for every
+/// document the query could return — a caller can only ever see their own
+/// Memberships, never another user's.
 abstract interface class MembershipRepository {
   Future<AppResult<Membership>> create({
     required String organizationId,
@@ -46,4 +57,12 @@ abstract interface class MembershipRepository {
     required MembershipStatus status,
     required String updatedBy,
   });
+
+  /// Every non-deleted, [MembershipStatus.active] [Membership] belonging to
+  /// [userId], across every Organization — see this interface's own docs for
+  /// why this is the one method that does not take an [organizationId].
+  /// Most users have exactly one; a caller that finds more than one is
+  /// responsible for deciding which one is "active" (no multi-organization
+  /// switcher exists yet).
+  Future<AppResult<List<Membership>>> listActiveByUser(String userId);
 }

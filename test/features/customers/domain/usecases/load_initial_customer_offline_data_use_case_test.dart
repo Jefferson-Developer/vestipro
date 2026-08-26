@@ -476,6 +476,11 @@ final class _FakeMembershipRepository implements MembershipRepository {
   }
 
   @override
+  Future<AppResult<List<Membership>>> listActiveByUser(String userId) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<AppResult<Membership>> update({
     required String organizationId,
     required String userId,

@@ -137,9 +137,8 @@ final class SignUpBloc extends Bloc<SignUpEvent, SignUpState> {
       passwordConfirmation,
     );
     // Not a per-field validator (there is no string to validate): the
-    // acceptance checkbox itself already keeps the submit button disabled,
-    // this is only defense-in-depth for a submit that somehow still fires
-    // (see `SignUpState.termsAccepted`'s doc).
+    // acceptance checkbox lives alongside the form fields, and a submit
+    // attempt without it should surface a visible, local validation error.
     final termsError = state.termsAccepted
         ? null
         : 'É necessário aceitar os Termos de Uso e a Política de '

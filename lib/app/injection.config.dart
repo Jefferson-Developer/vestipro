@@ -435,6 +435,8 @@ import '../features/organizations/domain/usecases/list_companies_use_case.dart'
     as _i628;
 import '../features/organizations/domain/usecases/remove_member_from_team_use_case.dart'
     as _i335;
+import '../features/organizations/domain/usecases/resolve_active_organization_id_use_case.dart'
+    as _i267;
 import '../features/organizations/domain/usecases/update_branch_use_case.dart'
     as _i820;
 import '../features/organizations/domain/usecases/update_company_use_case.dart'
@@ -1207,13 +1209,6 @@ extension GetItInjectableX on _i174.GetIt {
             gh<_i76.MarkProductColorUnavailableUseCase>(),
       ),
     );
-    gh.factory<_i776.LoginBloc>(
-      () => _i776.LoginBloc(
-        signInWithEmailAndPassword:
-            gh<_i185.SignInWithEmailAndPasswordUseCase>(),
-        analyticsService: gh<_i202.AnalyticsService>(),
-      ),
-    );
     gh.lazySingleton<_i974.FirebaseFirestore>(
       () => appInjectionModule.firebaseFirestore(
         gh<_i461.AppEnvironment>(),
@@ -1603,6 +1598,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i70.GetUserMembershipUseCase>(
       () => _i70.GetUserMembershipUseCase(gh<_i957.MembershipRepository>()),
     );
+    gh.factory<_i267.ResolveActiveOrganizationIdUseCase>(
+      () => _i267.ResolveActiveOrganizationIdUseCase(
+        gh<_i957.MembershipRepository>(),
+      ),
+    );
     gh.lazySingleton<_i33.UserAccessRepository>(
       () => _i591.UserAccessRepositoryImpl(
         dataSource: gh<_i681.UserAccessDataSource>(),
@@ -1667,6 +1667,15 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i667.PortfolioAssignmentRepositoryImpl(
         dataSource: gh<_i847.PortfolioAssignmentDataSource>(),
         mapper: gh<_i708.PortfolioAssignmentMapper>(),
+      ),
+    );
+    gh.factory<_i776.LoginBloc>(
+      () => _i776.LoginBloc(
+        signInWithEmailAndPassword:
+            gh<_i185.SignInWithEmailAndPasswordUseCase>(),
+        resolveActiveOrganizationId:
+            gh<_i267.ResolveActiveOrganizationIdUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i986.SeasonListBloc>(

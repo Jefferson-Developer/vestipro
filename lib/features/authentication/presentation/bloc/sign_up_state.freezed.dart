@@ -17,10 +17,9 @@ mixin _$SignUpState {
  String get name; String get email; String get password; String get passwordConfirmation;/// `null` until the field has been validated at least once (first
 /// submit attempt) or until a fresh edit clears the previous error.
  String? get nameError; String? get emailError; String? get passwordError; String? get passwordConfirmationError;/// Whether the user checked the Terms of Service/Privacy Policy
-/// acceptance box. The submit button stays disabled while this is
-/// `false` — [termsError] is only ever shown if [SignUpEvent.submitted]
-/// somehow still fires while unchecked (e.g. a screen reader/testing
-/// bypass of the disabled button).
+/// acceptance box. Kept separate from the text fields because a submit
+/// attempt without it still needs a visible validation message instead
+/// of a silent disabled button.
  bool get termsAccepted; String? get termsError; bool get obscurePassword; bool get obscurePasswordConfirmation; SignUpSubmissionStatus get status;/// Only meaningful when [status] is [SignUpSubmissionStatus.failure].
 /// [Failure.message] is always the amiable, already-in-Portuguese
 /// message computed by `firebase_auth_exception_mapper.dart` — never a
@@ -244,10 +243,9 @@ class _SignUpState implements SignUpState {
 @override final  String? passwordError;
 @override final  String? passwordConfirmationError;
 /// Whether the user checked the Terms of Service/Privacy Policy
-/// acceptance box. The submit button stays disabled while this is
-/// `false` — [termsError] is only ever shown if [SignUpEvent.submitted]
-/// somehow still fires while unchecked (e.g. a screen reader/testing
-/// bypass of the disabled button).
+/// acceptance box. Kept separate from the text fields because a submit
+/// attempt without it still needs a visible validation message instead
+/// of a silent disabled button.
 @override@JsonKey() final  bool termsAccepted;
 @override final  String? termsError;
 @override@JsonKey() final  bool obscurePassword;

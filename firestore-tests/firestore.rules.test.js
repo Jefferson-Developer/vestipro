@@ -870,6 +870,39 @@ describe('organizations/{organizationId}/members/{userId}  (Membership)', () => 
     },
   );
 
+  test(
+    'qualquer usuário consegue resolver a(s) própria(s) organization(s) via ' +
+      'collectionGroup("members") filtrado pelo próprio userId ' +
+      '(MembershipRepository.listActiveByUser)',
+    async () => {
+      const db = testEnv.authenticatedContext('rep-a').firestore();
+      const snapshot = await assertSucceeds(
+        db.collectionGroup('members').where('userId', '==', 'rep-a').get(),
+      );
+      expect(snapshot.docs.map((doc) => doc.data().organizationId)).toEqual([ORG_A]);
+    },
+  );
+
+  test(
+    'collectionGroup("members") filtrado pelo userId de outra pessoa é negado ' +
+      '(nunca enumera Membership alheia)',
+    async () => {
+      const db = testEnv.authenticatedContext('owner-a').firestore();
+      await assertFails(
+        db.collectionGroup('members').where('userId', '==', 'rep-a').get(),
+      );
+    },
+  );
+
+  test(
+    'collectionGroup("members") sem filtro por userId é negado (não é uma ' +
+      'enumeração aberta, mesmo autenticado)',
+    async () => {
+      const db = testEnv.authenticatedContext('owner-a').firestore();
+      await assertFails(db.collectionGroup('members').get());
+    },
+  );
+
   test('OWNER consegue convidar (criar Membership) um novo usuário', async () => {
     const db = testEnv.authenticatedContext('owner-a').firestore();
     await assertSucceeds(

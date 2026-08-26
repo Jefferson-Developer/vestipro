@@ -23,6 +23,7 @@ class CatalogHomePage extends StatelessWidget {
     required this.userId,
     required this.createBloc,
     this.companyId,
+    this.onCreateProductTap,
     this.onSectionItemTap,
     super.key,
   });
@@ -31,6 +32,7 @@ class CatalogHomePage extends StatelessWidget {
   final String? companyId;
   final String userId;
   final CatalogHomeBloc Function() createBloc;
+  final VoidCallback? onCreateProductTap;
 
   /// Called when the viewer taps a section item — routing to the
   /// product/collection/campaign detail is decided by whoever instantiates
@@ -50,14 +52,18 @@ class CatalogHomePage extends StatelessWidget {
             userId: userId,
           ),
         ),
-      child: _CatalogHomeView(onSectionItemTap: onSectionItemTap),
+      child: _CatalogHomeView(
+        onCreateProductTap: onCreateProductTap,
+        onSectionItemTap: onSectionItemTap,
+      ),
     );
   }
 }
 
 class _CatalogHomeView extends StatelessWidget {
-  const _CatalogHomeView({this.onSectionItemTap});
+  const _CatalogHomeView({this.onCreateProductTap, this.onSectionItemTap});
 
+  final VoidCallback? onCreateProductTap;
   final void Function(CatalogHomeSectionType type, CatalogHomeItem item)?
   onSectionItemTap;
 
@@ -89,6 +95,8 @@ class _CatalogHomeView extends StatelessWidget {
                 description:
                     'Assim que houver coleções, lançamentos ou campanhas '
                     'ativas, eles aparecem aqui.',
+                actionLabel: onCreateProductTap == null ? null : 'Novo produto',
+                onAction: onCreateProductTap,
               );
             }
 

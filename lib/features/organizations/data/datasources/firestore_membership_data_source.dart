@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:flutter/foundation.dart' show debugPrint;
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/database/database.dart';
@@ -18,7 +19,8 @@ import 'membership_data_source.dart';
 @LazySingleton(as: MembershipDataSource)
 final class FirestoreMembershipDataSource implements MembershipDataSource {
   FirestoreMembershipDataSource(FirebaseFirestore firestore)
-    : _collection = FirestoreCollectionDataSource<MembershipDto>(
+    : _firestore = firestore,
+      _collection = FirestoreCollectionDataSource<MembershipDto>(
         firestore: firestore,
         collectionName: 'members',
         converter: FirestoreConverter<MembershipDto>(
@@ -27,6 +29,11 @@ final class FirestoreMembershipDataSource implements MembershipDataSource {
         ),
       );
 
+  /// Kept alongside [_collection] only for [listActiveByUser]: a
+  /// collection-group query spans every `organizations/*/members`
+  /// subcollection at once, which [FirestoreCollectionDataSource] — scoped
+  /// to a single `organizationId` by design — cannot express.
+  final FirebaseFirestore _firestore;
   final FirestoreCollectionDataSource<MembershipDto> _collection;
 
   @override
@@ -93,5 +100,39 @@ final class FirestoreMembershipDataSource implements MembershipDataSource {
       );
     }
     return updated;
+  }
+
+  @override
+  Future<List<MembershipDto>> listActiveByUser(String userId) async {
+    debugPrint('[DEBUG-MEMBERSHIP] listActiveByUser(userId=$userId) start');
+    try {
+      // A raw `collectionGroup` query (not `_collection`, which is always
+      // rooted at one `organizations/{organizationId}`): this is the one
+      // read that needs to span every Organization's `members`
+      // subcollection at once, filtered to the caller's own `userId` —
+      // `firestore.rules` only grants `list` on `members` when that exact
+      // filter is present, see this class's own doc and `firestore.rules`.
+      final snapshot = await _firestore
+          .collectionGroup('members')
+          .where('userId', isEqualTo: userId)
+          .get();
+
+      debugPrint(
+        '[DEBUG-MEMBERSHIP] listActiveByUser query OK, '
+        'docs=${snapshot.docs.length} '
+        'paths=${snapshot.docs.map((d) => d.reference.path).toList()}',
+      );
+
+      return snapshot.docs
+          .map((doc) => MembershipDto.fromJson(doc.data(), id: doc.id))
+          .where((dto) => dto.deletedAt == null && dto.status == 'active')
+          .toList(growable: false);
+    } on FirebaseException catch (exception, stackTrace) {
+      debugPrint(
+        '[DEBUG-MEMBERSHIP] listActiveByUser FirebaseException '
+        'code=${exception.code} message=${exception.message}',
+      );
+      throw mapFirestoreExceptionToAppException(exception, stackTrace);
+    }
   }
 }

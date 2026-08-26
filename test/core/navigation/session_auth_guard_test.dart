@@ -94,6 +94,31 @@ void main() {
         expect(find.text('login-page'), findsOneWidget);
       },
     );
+
+    testWidgets('allows public auth routes when no session is signed in', (
+      tester,
+    ) async {
+      when(() => sessionService.currentUser).thenReturn(null);
+      final appRouter = _buildRouter(guard);
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+
+      appRouter.router.go(const SignUpRoute().location);
+      await tester.pumpAndSettle();
+      expect(find.text('sign-up-page'), findsOneWidget);
+
+      appRouter.router.go(const PasswordResetRoute().location);
+      await tester.pumpAndSettle();
+      expect(find.text('forgot-password-page'), findsOneWidget);
+
+      appRouter.router.go(const InviteAcceptanceRoute(token: 'abc').location);
+      await tester.pumpAndSettle();
+      expect(find.text('accept-invite-page:abc'), findsOneWidget);
+
+      verifyNever(() => sessionService.ensureSessionIsActive());
+    });
   });
 }
 
@@ -102,8 +127,12 @@ AppRouter _buildRouter(SessionAuthGuard guard) {
     authGuard: guard,
     aboutAppPageBuilder: (context, orgId) =>
         Scaffold(body: Text('about-app:$orgId')),
+    catalogHomePageBuilder: (context, orgId, companyId) =>
+        Scaffold(body: Text('catalog-home:$orgId:${companyId ?? 'all'}')),
     auditLogPageBuilder: (context, orgId) =>
         Scaffold(body: Text('audit-log:$orgId')),
+    userManagementPageBuilder: (context, orgId) =>
+        Scaffold(body: Text('user-management:$orgId')),
     loginPageBuilder: (context) => const Scaffold(body: Text('login-page')),
     signUpPageBuilder: (context) => const Scaffold(body: Text('sign-up-page')),
     forgotPasswordPageBuilder: (context) =>

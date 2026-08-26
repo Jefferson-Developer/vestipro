@@ -58,7 +58,9 @@ class _OnboardingWizardView extends StatelessWidget {
             case OnboardingSubmissionStatus.success:
               final organization = state.createdOrganization;
               if (organization != null) {
-                context.go(AboutAppRoute(orgId: organization.id).location);
+                context.go(
+                  CatalogHomeRoute(orgId: organization.id).location,
+                );
               }
             case OnboardingSubmissionStatus.failure:
               final failure = state.failure;

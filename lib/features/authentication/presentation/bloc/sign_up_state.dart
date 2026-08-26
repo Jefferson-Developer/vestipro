@@ -26,10 +26,9 @@ abstract class SignUpState with _$SignUpState {
     String? passwordConfirmationError,
 
     /// Whether the user checked the Terms of Service/Privacy Policy
-    /// acceptance box. The submit button stays disabled while this is
-    /// `false` — [termsError] is only ever shown if [SignUpEvent.submitted]
-    /// somehow still fires while unchecked (e.g. a screen reader/testing
-    /// bypass of the disabled button).
+    /// acceptance box. Kept separate from the text fields because a submit
+    /// attempt without it still needs a visible validation message instead
+    /// of a silent disabled button.
     @Default(false) bool termsAccepted,
     String? termsError,
     @Default(true) bool obscurePassword,

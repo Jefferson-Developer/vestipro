@@ -8,6 +8,7 @@ import 'package:vestipro/features/authentication/domain/usecases/sign_in_with_em
 import 'package:vestipro/features/authentication/presentation/bloc/login_bloc.dart';
 import 'package:vestipro/features/authentication/presentation/bloc/login_event.dart';
 import 'package:vestipro/features/authentication/presentation/bloc/login_state.dart';
+import 'package:vestipro/features/organizations/organizations.dart';
 
 void main() {
   group('LoginBloc', () {
@@ -125,6 +126,7 @@ void main() {
           email: ' $validEmail ',
           password: validPassword,
           status: LoginSubmissionStatus.success,
+          organizationId: 'org-real',
         ),
       ],
       verify: (_) {
@@ -135,6 +137,59 @@ void main() {
         expect(event.parameters, isNot(contains('email')));
         expect(event.parameters!.values, isNot(contains(validEmail)));
       },
+    );
+
+    blocTest<LoginBloc, LoginState>(
+      'sends a user with no active Membership yet to onboarding, without '
+      'crashing or picking a placeholder organization',
+      build: () => _buildBloc(
+        authRepository: _AuthRepositoryStub(
+          result: const AppSuccess<SessionUser>(signedInUser),
+        ),
+        analyticsService: analyticsService,
+        activeMemberships: const <Membership>[],
+      ),
+      seed: () => const LoginState(email: validEmail, password: validPassword),
+      act: (bloc) => bloc.add(const LoginEvent.submitted()),
+      expect: () => <LoginState>[
+        const LoginState(
+          email: validEmail,
+          password: validPassword,
+          status: LoginSubmissionStatus.submitting,
+        ),
+        const LoginState(
+          email: validEmail,
+          password: validPassword,
+          status: LoginSubmissionStatus.success,
+          requiresOnboarding: true,
+        ),
+      ],
+    );
+
+    blocTest<LoginBloc, LoginState>(
+      'never blocks an already-successful sign-in when resolving the active '
+      'organization itself fails (e.g. offline)',
+      build: () => _buildBloc(
+        authRepository: _AuthRepositoryStub(
+          result: const AppSuccess<SessionUser>(signedInUser),
+        ),
+        analyticsService: analyticsService,
+        membershipRepository: _FailingMembershipRepository(),
+      ),
+      seed: () => const LoginState(email: validEmail, password: validPassword),
+      act: (bloc) => bloc.add(const LoginEvent.submitted()),
+      expect: () => <LoginState>[
+        const LoginState(
+          email: validEmail,
+          password: validPassword,
+          status: LoginSubmissionStatus.submitting,
+        ),
+        const LoginState(
+          email: validEmail,
+          password: validPassword,
+          status: LoginSubmissionStatus.success,
+        ),
+      ],
     );
 
     blocTest<LoginBloc, LoginState>(
@@ -250,6 +305,7 @@ void main() {
           email: validEmail,
           password: validPassword,
           status: LoginSubmissionStatus.success,
+          organizationId: 'org-real',
         ),
       ],
       verify: (_) {
@@ -262,13 +318,137 @@ void main() {
 LoginBloc _buildBloc({
   required AuthRepository authRepository,
   required AnalyticsService analyticsService,
+  List<Membership>? activeMemberships,
+  MembershipRepository? membershipRepository,
 }) {
   return LoginBloc(
     signInWithEmailAndPassword: SignInWithEmailAndPasswordUseCase(
       authRepository,
     ),
+    resolveActiveOrganizationId: ResolveActiveOrganizationIdUseCase(
+      membershipRepository ??
+          _MembershipRepositoryStub(
+            activeMemberships ?? <Membership>[_ownedMembership],
+          ),
+    ),
     analyticsService: analyticsService,
   );
+}
+
+final _ownedMembership = Membership(
+  id: 'user-1',
+  organizationId: 'org-real',
+  userId: 'user-1',
+  roleId: 'OWNER',
+  roleName: 'OWNER',
+  status: MembershipStatus.active,
+  version: 1,
+  createdAt: DateTime.utc(2026, 1, 1),
+  createdBy: 'user-1',
+  updatedAt: DateTime.utc(2026, 1, 1),
+  updatedBy: 'user-1',
+);
+
+final class _MembershipRepositoryStub implements MembershipRepository {
+  const _MembershipRepositoryStub(this.activeMemberships);
+
+  final List<Membership> activeMemberships;
+
+  @override
+  Future<AppResult<List<Membership>>> listActiveByUser(String userId) async {
+    return AppSuccess<List<Membership>>(activeMemberships);
+  }
+
+  @override
+  Future<AppResult<Membership>> create({
+    required String organizationId,
+    required String userId,
+    required String roleId,
+    required String roleName,
+    List<String> teamIds = const <String>[],
+    required String createdBy,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<Membership>> getByUser({
+    required String organizationId,
+    required String userId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<List<Membership>>> listByOrganization(
+    String organizationId,
+  ) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<Membership>> update({
+    required String organizationId,
+    required String userId,
+    required String roleId,
+    required String roleName,
+    required List<String> teamIds,
+    required MembershipStatus status,
+    required String updatedBy,
+  }) {
+    throw UnimplementedError();
+  }
+}
+
+final class _FailingMembershipRepository implements MembershipRepository {
+  const _FailingMembershipRepository();
+
+  @override
+  Future<AppResult<List<Membership>>> listActiveByUser(String userId) async {
+    return AppFailure<List<Membership>>(
+      const ConnectivityFailure('Sem conexão com a internet.'),
+    );
+  }
+
+  @override
+  Future<AppResult<Membership>> create({
+    required String organizationId,
+    required String userId,
+    required String roleId,
+    required String roleName,
+    List<String> teamIds = const <String>[],
+    required String createdBy,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<Membership>> getByUser({
+    required String organizationId,
+    required String userId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<List<Membership>>> listByOrganization(
+    String organizationId,
+  ) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<Membership>> update({
+    required String organizationId,
+    required String userId,
+    required String roleId,
+    required String roleName,
+    required List<String> teamIds,
+    required MembershipStatus status,
+    required String updatedBy,
+  }) {
+    throw UnimplementedError();
+  }
 }
 
 final class _AuthRepositoryStub implements AuthRepository {

@@ -127,7 +127,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(organizationRepository.createCallCount, 1);
-        expect(find.text('about-app-page:org-42'), findsOneWidget);
+        expect(find.text('catalog-home-page:org-42'), findsOneWidget);
       },
     );
   });
@@ -162,10 +162,10 @@ Widget _buildApp({
         ),
       ),
       GoRoute(
-        path: AboutAppRoute.pathPattern,
-        name: AboutAppRoute.name,
+        path: CatalogHomeRoute.pathPattern,
+        name: CatalogHomeRoute.name,
         builder: (context, state) => Scaffold(
-          body: Text('about-app-page:${state.pathParameters['orgId']}'),
+          body: Text('catalog-home-page:${state.pathParameters['orgId']}'),
         ),
       ),
     ],

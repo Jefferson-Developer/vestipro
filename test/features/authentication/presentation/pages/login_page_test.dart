@@ -13,10 +13,25 @@ import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/authentication/domain/usecases/sign_in_with_email_and_password_use_case.dart';
 import 'package:vestipro/features/authentication/presentation/bloc/login_bloc.dart';
 import 'package:vestipro/features/authentication/presentation/pages/login_page.dart';
+import 'package:vestipro/features/organizations/organizations.dart';
 
 const _validEmail = 'vendedor@vestipro.com.br';
 const _validPassword = 'super-secret';
 const _signedInUser = SessionUser(uid: 'user-1', emailVerified: true);
+
+final _ownedMembership = Membership(
+  id: 'user-1',
+  organizationId: 'org-acme',
+  userId: 'user-1',
+  roleId: 'OWNER',
+  roleName: 'OWNER',
+  status: MembershipStatus.active,
+  version: 1,
+  createdAt: DateTime.utc(2026, 1, 1),
+  createdBy: 'user-1',
+  updatedAt: DateTime.utc(2026, 1, 1),
+  updatedBy: 'user-1',
+);
 
 void main() {
   group('LoginPage', () {
@@ -94,9 +109,69 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(authRepository.signInCallCount, 1);
-        expect(find.text('about-app-page'), findsOneWidget);
+        expect(find.text('catalog-home-page:org-acme'), findsOneWidget);
       },
     );
+
+    testWidgets(
+      'sends a user with no active Membership yet to onboarding, instead of '
+      'a placeholder organization scope',
+      (tester) async {
+        final authRepository = _AuthRepositoryStub(
+          result: const AppSuccess<SessionUser>(_signedInUser),
+        );
+        await tester.pumpWidget(
+          _buildApp(authRepository, activeMemberships: const <Membership>[]),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.enterText(
+          find.bySemanticsLabel('Campo de e-mail'),
+          _validEmail,
+        );
+        await tester.enterText(
+          find.bySemanticsLabel('Campo de senha'),
+          _validPassword,
+        );
+        await tester.tap(find.text('Entrar'));
+        await tester.pumpAndSettle();
+
+        expect(find.text('onboarding-wizard-page'), findsOneWidget);
+      },
+    );
+
+    testWidgets('returns to the originally requested route after login', (
+      tester,
+    ) async {
+      final authRepository = _AuthRepositoryStub(
+        result: const AppSuccess<SessionUser>(_signedInUser),
+      );
+      await tester.pumpWidget(
+        _buildApp(
+          authRepository,
+          initialLocation: LoginRoute(
+            returnTo: const CatalogHomeRoute(
+              orgId: 'acme',
+              companyId: 'company-1',
+            ).location,
+          ).location,
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.enterText(
+        find.bySemanticsLabel('Campo de e-mail'),
+        _validEmail,
+      );
+      await tester.enterText(
+        find.bySemanticsLabel('Campo de senha'),
+        _validPassword,
+      );
+      await tester.tap(find.text('Entrar'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('catalog-home-page:acme:company-1'), findsOneWidget);
+    });
 
     testWidgets(
       'shows a generic error message without clearing the typed fields',
@@ -124,7 +199,7 @@ void main() {
 
         expect(find.text('E-mail ou senha inválidos.'), findsOneWidget);
         expect(find.text(_validEmail), findsOneWidget);
-        expect(find.text('about-app-page'), findsNothing);
+        expect(find.textContaining('catalog-home-page'), findsNothing);
       },
     );
 
@@ -188,6 +263,24 @@ void main() {
       },
     );
 
+    testWidgets('navigates to the sign-up route via "Criar conta"', (
+      tester,
+    ) async {
+      await tester.pumpWidget(
+        _buildApp(
+          _AuthRepositoryStub(
+            result: const AppSuccess<SessionUser>(_signedInUser),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Criar conta'));
+      await tester.pumpAndSettle();
+
+      expect(find.text('sign-up-page'), findsOneWidget);
+    });
+
     testWidgets(
       'moves focus from e-mail to password with Tab (Web keyboard nav)',
       (tester) async {
@@ -218,9 +311,13 @@ void main() {
   });
 }
 
-Widget _buildApp(AuthRepositoryStub authRepository) {
+Widget _buildApp(
+  AuthRepositoryStub authRepository, {
+  String? initialLocation,
+  List<Membership>? activeMemberships,
+}) {
   final router = GoRouter(
-    initialLocation: const LoginRoute().location,
+    initialLocation: initialLocation ?? const LoginRoute().location,
     routes: <RouteBase>[
       GoRoute(
         path: LoginRoute.pathPattern,
@@ -230,15 +327,33 @@ Widget _buildApp(AuthRepositoryStub authRepository) {
             signInWithEmailAndPassword: SignInWithEmailAndPasswordUseCase(
               authRepository,
             ),
+            resolveActiveOrganizationId: ResolveActiveOrganizationIdUseCase(
+              _MembershipRepositoryStub(
+                activeMemberships ?? <Membership>[_ownedMembership],
+              ),
+            ),
             analyticsService: FakeAnalyticsService(),
           ),
         ),
       ),
       GoRoute(
-        path: AboutAppRoute.pathPattern,
-        name: AboutAppRoute.name,
+        path: CatalogHomeRoute.pathPattern,
+        name: CatalogHomeRoute.name,
+        builder: (context, state) {
+          final companyId = state.uri.queryParameters['companyId'];
+          return Scaffold(
+            body: Text(
+              'catalog-home-page:${state.pathParameters['orgId']}'
+              '${companyId == null ? '' : ':$companyId'}',
+            ),
+          );
+        },
+      ),
+      GoRoute(
+        path: OnboardingWizardRoute.pathPattern,
+        name: OnboardingWizardRoute.name,
         builder: (context, state) =>
-            const Scaffold(body: Text('about-app-page')),
+            const Scaffold(body: Text('onboarding-wizard-page')),
       ),
       GoRoute(
         path: PasswordResetRoute.pathPattern,
@@ -246,10 +361,66 @@ Widget _buildApp(AuthRepositoryStub authRepository) {
         builder: (context, state) =>
             const Scaffold(body: Text('password-reset-page')),
       ),
+      GoRoute(
+        path: SignUpRoute.pathPattern,
+        name: SignUpRoute.name,
+        builder: (context, state) => const Scaffold(body: Text('sign-up-page')),
+      ),
     ],
   );
 
   return MaterialApp.router(theme: AppTheme.light, routerConfig: router);
+}
+
+final class _MembershipRepositoryStub implements MembershipRepository {
+  const _MembershipRepositoryStub(this.activeMemberships);
+
+  final List<Membership> activeMemberships;
+
+  @override
+  Future<AppResult<List<Membership>>> listActiveByUser(String userId) async {
+    return AppSuccess<List<Membership>>(activeMemberships);
+  }
+
+  @override
+  Future<AppResult<Membership>> create({
+    required String organizationId,
+    required String userId,
+    required String roleId,
+    required String roleName,
+    List<String> teamIds = const <String>[],
+    required String createdBy,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<Membership>> getByUser({
+    required String organizationId,
+    required String userId,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<List<Membership>>> listByOrganization(
+    String organizationId,
+  ) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<Membership>> update({
+    required String organizationId,
+    required String userId,
+    required String roleId,
+    required String roleName,
+    required List<String> teamIds,
+    required MembershipStatus status,
+    required String updatedBy,
+  }) {
+    throw UnimplementedError();
+  }
 }
 
 typedef AuthRepositoryStub = _AuthRepositoryStub;

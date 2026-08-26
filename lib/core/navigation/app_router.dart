@@ -19,13 +19,16 @@ import 'widgets/not_found_page.dart';
 class AppRouter {
   AppRouter({
     required this.aboutAppPageBuilder,
+    required this.catalogHomePageBuilder,
     required this.auditLogPageBuilder,
+    required this.userManagementPageBuilder,
     required this.loginPageBuilder,
     required this.signUpPageBuilder,
     required this.forgotPasswordPageBuilder,
     required this.onboardingWizardPageBuilder,
     required this.acceptInvitePageBuilder,
     this.customerFormPageBuilder,
+    this.productFormPageBuilder,
     this.customerPortfolioPageBuilder,
     this.customerDetailPageBuilder,
     AuthGuard? authGuard,
@@ -41,9 +44,15 @@ class AppRouter {
   final ActiveOrganizationGuard organizationGuard;
   final AuthorizationGuard authorizationGuard;
   final Widget Function(BuildContext context, String orgId) aboutAppPageBuilder;
+  final Widget Function(BuildContext context, String orgId, String? companyId)
+  catalogHomePageBuilder;
   final Widget Function(BuildContext context, String orgId) auditLogPageBuilder;
+  final Widget Function(BuildContext context, String orgId)
+  userManagementPageBuilder;
   final Widget Function(BuildContext context, String orgId, String companyId)?
   customerFormPageBuilder;
+  final Widget Function(BuildContext context, String orgId, String companyId)?
+  productFormPageBuilder;
   final Widget Function(
     BuildContext context,
     String orgId,
@@ -79,11 +88,20 @@ class AppRouter {
   acceptInvitePageBuilder;
 
   late final GoRouter router = GoRouter(
-    initialLocation: const AboutAppRoute(
+    initialLocation: const CatalogHomeRoute(
       orgId: kPlaceholderOrganizationId,
     ).location,
     redirect: _redirect,
     routes: [
+      GoRoute(
+        path: CatalogHomeRoute.pathPattern,
+        name: CatalogHomeRoute.name,
+        builder: (context, state) => catalogHomePageBuilder(
+          context,
+          state.pathParameters['orgId']!,
+          state.uri.queryParameters['companyId'],
+        ),
+      ),
       GoRoute(
         path: AboutAppRoute.pathPattern,
         name: AboutAppRoute.name,
@@ -100,6 +118,17 @@ class AppRouter {
         ),
         builder: (context, state) =>
             auditLogPageBuilder(context, state.pathParameters['orgId']!),
+      ),
+      GoRoute(
+        path: UserManagementRoute.pathPattern,
+        name: UserManagementRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.userChangeRole,
+        ),
+        builder: (context, state) =>
+            userManagementPageBuilder(context, state.pathParameters['orgId']!),
       ),
       GoRoute(
         path: CustomerPortfolioRoute.pathPattern,
@@ -148,6 +177,24 @@ class AppRouter {
         ),
         builder: (context, state) {
           final builder = customerFormPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: ProductFormRoute.pathPattern,
+        name: ProductFormRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.catalogManage,
+        ),
+        builder: (context, state) {
+          final builder = productFormPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,

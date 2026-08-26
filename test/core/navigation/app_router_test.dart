@@ -53,6 +53,37 @@ void main() {
       expect(find.text('about-app:acme-fashion'), findsOneWidget);
     });
 
+    testWidgets('resolves CatalogHomeRoute parameters for the catalog home', (
+      tester,
+    ) async {
+      String? capturedOrgId;
+      String? capturedCompanyId;
+      final appRouter = _buildRouter(
+        catalogHomePageBuilder: (context, orgId, companyId) {
+          capturedOrgId = orgId;
+          capturedCompanyId = companyId;
+          return Scaffold(
+            body: Text('catalog-home:$orgId:${companyId ?? 'all'}'),
+          );
+        },
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(
+        const CatalogHomeRoute(
+          orgId: 'acme-fashion',
+          companyId: 'company-1',
+        ).location,
+      );
+      await tester.pumpAndSettle();
+
+      expect(capturedOrgId, 'acme-fashion');
+      expect(capturedCompanyId, 'company-1');
+      expect(find.text('catalog-home:acme-fashion:company-1'), findsOneWidget);
+    });
+
     testWidgets('allows navigation by default (stub guards)', (tester) async {
       final appRouter = _buildRouter();
 
@@ -119,6 +150,48 @@ void main() {
       expect(find.text('audit-log:acme'), findsNothing);
     });
 
+    testWidgets('resolves UserManagementRoute for role management', (
+      tester,
+    ) async {
+      String? capturedOrgId;
+      final appRouter = _buildRouter(
+        userManagementPageBuilder: (context, orgId) {
+          capturedOrgId = orgId;
+          return Scaffold(body: Text('user-management:$orgId'));
+        },
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(
+        const UserManagementRoute(orgId: 'acme-fashion').location,
+      );
+      await tester.pumpAndSettle();
+
+      expect(capturedOrgId, 'acme-fashion');
+      expect(find.text('user-management:acme-fashion'), findsOneWidget);
+    });
+
+    testWidgets('protects UserManagementRoute with user.changeRole', (
+      tester,
+    ) async {
+      final appRouter = _buildRouter(
+        authorizationGuard: const _DenyUserChangeRoleGuard(),
+        userManagementPageBuilder: (context, orgId) =>
+            Scaffold(body: Text('user-management:$orgId')),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(const UserManagementRoute(orgId: 'acme').location);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ForbiddenPage), findsOneWidget);
+      expect(find.text('user-management:acme'), findsNothing);
+    });
+
     testWidgets('protects CustomerFormRoute with customer.create', (
       tester,
     ) async {
@@ -138,6 +211,57 @@ void main() {
 
       expect(find.text('Sem permissão'), findsOneWidget);
       expect(find.text('customer-form:acme:company-1'), findsNothing);
+    });
+
+    testWidgets(
+      'passes ProductFormRoute path parameters to the injected page',
+      (tester) async {
+        String? capturedOrgId;
+        String? capturedCompanyId;
+        final appRouter = _buildRouter(
+          productFormPageBuilder: (context, orgId, companyId) {
+            capturedOrgId = orgId;
+            capturedCompanyId = companyId;
+            return Scaffold(body: Text('product-form:$orgId:$companyId'));
+          },
+        );
+
+        await tester.pumpWidget(
+          MaterialApp.router(routerConfig: appRouter.router),
+        );
+        appRouter.router.go(
+          const ProductFormRoute(
+            orgId: 'acme',
+            companyId: 'company-1',
+          ).location,
+        );
+        await tester.pumpAndSettle();
+
+        expect(capturedOrgId, 'acme');
+        expect(capturedCompanyId, 'company-1');
+        expect(find.text('product-form:acme:company-1'), findsOneWidget);
+      },
+    );
+
+    testWidgets('protects ProductFormRoute with catalog.manage', (
+      tester,
+    ) async {
+      final appRouter = _buildRouter(
+        authorizationGuard: const _DenyCatalogManageGuard(),
+        productFormPageBuilder: (context, orgId, companyId) =>
+            Scaffold(body: Text('product-form:$orgId:$companyId')),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(
+        const ProductFormRoute(orgId: 'acme', companyId: 'company-1').location,
+      );
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ForbiddenPage), findsOneWidget);
+      expect(find.text('product-form:acme:company-1'), findsNothing);
     });
 
     testWidgets('passes CustomerPortfolioRoute query parameters to the '
@@ -258,9 +382,15 @@ AppRouter _buildRouter({
   ActiveOrganizationGuard? organizationGuard,
   AuthorizationGuard? authorizationGuard,
   Widget Function(BuildContext context, String orgId)? aboutAppPageBuilder,
+  Widget Function(BuildContext context, String orgId, String? companyId)?
+  catalogHomePageBuilder,
   Widget Function(BuildContext context, String orgId)? auditLogPageBuilder,
+  Widget Function(BuildContext context, String orgId)?
+  userManagementPageBuilder,
   Widget Function(BuildContext context, String orgId, String companyId)?
   customerFormPageBuilder,
+  Widget Function(BuildContext context, String orgId, String companyId)?
+  productFormPageBuilder,
   Widget Function(
     BuildContext context,
     String orgId,
@@ -280,10 +410,18 @@ AppRouter _buildRouter({
     aboutAppPageBuilder:
         aboutAppPageBuilder ??
         (context, orgId) => Scaffold(body: Text('about-app:$orgId')),
+    catalogHomePageBuilder:
+        catalogHomePageBuilder ??
+        (context, orgId, companyId) =>
+            Scaffold(body: Text('catalog-home:$orgId:${companyId ?? 'all'}')),
     auditLogPageBuilder:
         auditLogPageBuilder ??
         (context, orgId) => Scaffold(body: Text('audit-log:$orgId')),
+    userManagementPageBuilder:
+        userManagementPageBuilder ??
+        (context, orgId) => Scaffold(body: Text('user-management:$orgId')),
     customerFormPageBuilder: customerFormPageBuilder,
+    productFormPageBuilder: productFormPageBuilder,
     customerPortfolioPageBuilder: customerPortfolioPageBuilder,
     customerDetailPageBuilder: customerDetailPageBuilder,
     loginPageBuilder:
@@ -327,6 +465,22 @@ final class _DenyAuditLogGuard implements AuthorizationGuard {
   }
 }
 
+final class _DenyUserChangeRoleGuard implements AuthorizationGuard {
+  const _DenyUserChangeRoleGuard();
+
+  @override
+  String? redirect(
+    BuildContext context,
+    GoRouterState state, {
+    required Capability requiredCapability,
+  }) {
+    if (requiredCapability == Capability.userChangeRole) {
+      return const ForbiddenRoute().location;
+    }
+    return null;
+  }
+}
+
 final class _DenyCustomerCreateGuard implements AuthorizationGuard {
   const _DenyCustomerCreateGuard();
 
@@ -337,6 +491,22 @@ final class _DenyCustomerCreateGuard implements AuthorizationGuard {
     required Capability requiredCapability,
   }) {
     if (requiredCapability == Capability.customerCreate) {
+      return const ForbiddenRoute().location;
+    }
+    return null;
+  }
+}
+
+final class _DenyCatalogManageGuard implements AuthorizationGuard {
+  const _DenyCatalogManageGuard();
+
+  @override
+  String? redirect(
+    BuildContext context,
+    GoRouterState state, {
+    required Capability requiredCapability,
+  }) {
+    if (requiredCapability == Capability.catalogManage) {
       return const ForbiddenRoute().location;
     }
     return null;

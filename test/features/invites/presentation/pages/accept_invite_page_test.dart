@@ -91,7 +91,7 @@ void main() {
 
         expect(authRepository.createAccountCallCount, 1);
         expect(inviteRepository.acceptCallCount, 1);
-        expect(find.text('about-app-page:org-1'), findsOneWidget);
+        expect(find.text('catalog-home-page:org-1'), findsOneWidget);
       },
     );
 
@@ -122,7 +122,7 @@ void main() {
         await tester.pumpAndSettle();
 
         expect(inviteRepository.acceptCallCount, 1);
-        expect(find.text('about-app-page:org-1'), findsOneWidget);
+        expect(find.text('catalog-home-page:org-1'), findsOneWidget);
       },
     );
 
@@ -199,10 +199,10 @@ Widget _buildApp({
         builder: (context, state) => const Scaffold(body: Text('login-page')),
       ),
       GoRoute(
-        path: AboutAppRoute.pathPattern,
-        name: AboutAppRoute.name,
+        path: CatalogHomeRoute.pathPattern,
+        name: CatalogHomeRoute.name,
         builder: (context, state) => Scaffold(
-          body: Text('about-app-page:${state.pathParameters['orgId']}'),
+          body: Text('catalog-home-page:${state.pathParameters['orgId']}'),
         ),
       ),
     ],

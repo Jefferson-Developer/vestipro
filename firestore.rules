@@ -615,7 +615,20 @@ service cloud.firestore {
         // `MembershipRepository.listByOrganization` fora desse fluxo
         // administrativo, então esta restrição não quebra nenhum caminho
         // existente (self-check usa sempre `get`, nunca `list`).
-        allow list: if hasCapability(organizationId, 'user.changeRole');
+        //
+        // The second clause is what makes `MembershipRepository.listActiveByUser`
+        // possible: a `collectionGroup('members')` query, spanning every
+        // Organization at once, filtered by the caller's own `userId` (post-
+        // login redirect/`ActiveOrganizationGuard` self-heal — see that
+        // repository method's own docs for why it is the one exception to
+        // every other method here requiring `organizationId`). Firestore
+        // only allows a collection-group `list` when this holds for every
+        // document it could return, so the client query itself must filter
+        // by `userId`, same precedent as `favorites`/`portfolioAssignments`
+        // above — nobody can ever enumerate another user's Memberships this
+        // way.
+        allow list: if hasCapability(organizationId, 'user.changeRole')
+          || resource.data.userId == request.auth.uid;
 
         // A primeira Membership (OWNER) só nasce dentro da transação
         // server-side de `createOrganization` (Admin SDK, TASK-037) — nunca

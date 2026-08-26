@@ -6,6 +6,7 @@ import 'package:injectable/injectable.dart';
 import '../../../../core/analytics/analytics.dart';
 import '../../../../core/auth/auth.dart';
 import '../../../../core/utils/utils.dart';
+import '../../../organizations/domain/usecases/resolve_active_organization_id_use_case.dart';
 import '../../domain/usecases/sign_in_with_email_and_password_use_case.dart';
 import '../../domain/validators/login_form_validators.dart';
 import 'login_event.dart';
@@ -18,10 +19,17 @@ import 'login_state.dart';
 /// directly — every state transition goes through this bloc, which is the
 /// only place that decides when a field is invalid, when a submission is in
 /// flight and what the resulting [LoginState.failure] message is.
+///
+/// A successful sign-in also resolves the real Organization to land on
+/// ([resolveActiveOrganizationId] — replaces the `kPlaceholderOrganizationId`
+/// every post-login navigation used to hardcode) — never leaving that
+/// decision to `LoginPage`, same rationale as every other business decision
+/// this bloc already owns.
 @injectable
 final class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({
     required this.signInWithEmailAndPassword,
+    required this.resolveActiveOrganizationId,
     required this.analyticsService,
   }) : super(const LoginState()) {
     on<LoginEmailChanged>(_onEmailChanged);
@@ -34,6 +42,7 @@ final class LoginBloc extends Bloc<LoginEvent, LoginState> {
   }
 
   final SignInWithEmailAndPasswordUseCase signInWithEmailAndPassword;
+  final ResolveActiveOrganizationIdUseCase resolveActiveOrganizationId;
   final AnalyticsService analyticsService;
 
   void _onEmailChanged(LoginEmailChanged event, Emitter<LoginState> emit) {
@@ -106,7 +115,7 @@ final class LoginBloc extends Bloc<LoginEvent, LoginState> {
     }
 
     switch (result) {
-      case AppSuccess<SessionUser>():
+      case AppSuccess<SessionUser>(value: final sessionUser):
         // Only technical metadata — never the e-mail/uid — per the LGPD
         // restriction on `AnalyticsService.logEvent` (see `AGENTS.md`).
         await analyticsService.logEvent(
@@ -116,7 +125,34 @@ final class LoginBloc extends Bloc<LoginEvent, LoginState> {
             'platform': defaultTargetPlatform.name,
           },
         );
-        emit(state.copyWith(status: LoginSubmissionStatus.success));
+        if (emit.isDone) {
+          return;
+        }
+
+        final organizationResult = await resolveActiveOrganizationId(
+          userId: sessionUser.uid,
+        );
+        if (emit.isDone) {
+          return;
+        }
+
+        organizationResult.fold(
+          onSuccess: (organizationId) => emit(
+            state.copyWith(
+              status: LoginSubmissionStatus.success,
+              organizationId: organizationId,
+              requiresOnboarding: organizationId == null,
+            ),
+          ),
+          // A resolution failure (e.g. offline before any Membership was
+          // ever cached locally) must never turn an already-successful
+          // sign-in into a failure screen: `LoginPage` falls back to
+          // `kPlaceholderOrganizationId`, and `ActiveOrganizationGuard`
+          // fails closed from there on the very next navigation — same
+          // precedent as `PermissionAuthorizationGuard`.
+          onFailure: (_) =>
+              emit(state.copyWith(status: LoginSubmissionStatus.success)),
+        );
       case AppFailure<SessionUser>(failure: final failure):
         emit(
           state.copyWith(

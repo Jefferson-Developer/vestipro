@@ -67,7 +67,7 @@ class AcceptInviteView extends StatelessWidget {
             case AcceptInviteAcceptanceStatus.success:
               final organizationId = state.acceptedOrganizationId;
               if (organizationId != null) {
-                context.go(AboutAppRoute(orgId: organizationId).location);
+                context.go(CatalogHomeRoute(orgId: organizationId).location);
               }
             case AcceptInviteAcceptanceStatus.failure:
               final failure = state.failure;

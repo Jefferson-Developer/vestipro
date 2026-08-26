@@ -20,7 +20,20 @@ mixin _$LoginState {
 /// [Failure.message] is always the amiable, already-in-Portuguese
 /// message computed by `firebase_auth_exception_mapper.dart` — never a
 /// raw Firebase error code/string.
- Failure? get failure;
+ Failure? get failure;/// Only meaningful when [status] is [LoginSubmissionStatus.success]: the
+/// real Organization `ResolveActiveOrganizationIdUseCase` resolved for
+/// the signed-in user right after authenticating, `null` when it could
+/// not be resolved (no Membership yet, or the resolution itself failed —
+/// `LoginBloc` never blocks a successful sign-in on this). `LoginPage`
+/// falls back to `kPlaceholderOrganizationId` when this is `null` and
+/// [requiresOnboarding] is also `false`, same precedent as
+/// `ActiveOrganizationGuard`'s own fail-closed default.
+ String? get organizationId;/// Only meaningful when [status] is [LoginSubmissionStatus.success]:
+/// `true` when the resolution above succeeded but found no active
+/// Membership at all — the signed-in user has never completed
+/// onboarding, so `LoginPage` sends them to `OnboardingWizardRoute`
+/// instead of a placeholder Organization scope.
+ bool get requiresOnboarding;
 /// Create a copy of LoginState
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -31,16 +44,16 @@ $LoginStateCopyWith<LoginState> get copyWith => _$LoginStateCopyWithImpl<LoginSt
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginState&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.emailError, emailError) || other.emailError == emailError)&&(identical(other.passwordError, passwordError) || other.passwordError == passwordError)&&(identical(other.obscurePassword, obscurePassword) || other.obscurePassword == obscurePassword)&&(identical(other.status, status) || other.status == status)&&(identical(other.failure, failure) || other.failure == failure));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginState&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.emailError, emailError) || other.emailError == emailError)&&(identical(other.passwordError, passwordError) || other.passwordError == passwordError)&&(identical(other.obscurePassword, obscurePassword) || other.obscurePassword == obscurePassword)&&(identical(other.status, status) || other.status == status)&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.requiresOnboarding, requiresOnboarding) || other.requiresOnboarding == requiresOnboarding));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,email,password,emailError,passwordError,obscurePassword,status,failure);
+int get hashCode => Object.hash(runtimeType,email,password,emailError,passwordError,obscurePassword,status,failure,organizationId,requiresOnboarding);
 
 @override
 String toString() {
-  return 'LoginState(email: $email, password: $password, emailError: $emailError, passwordError: $passwordError, obscurePassword: $obscurePassword, status: $status, failure: $failure)';
+  return 'LoginState(email: $email, password: $password, emailError: $emailError, passwordError: $passwordError, obscurePassword: $obscurePassword, status: $status, failure: $failure, organizationId: $organizationId, requiresOnboarding: $requiresOnboarding)';
 }
 
 
@@ -51,7 +64,7 @@ abstract mixin class $LoginStateCopyWith<$Res>  {
   factory $LoginStateCopyWith(LoginState value, $Res Function(LoginState) _then) = _$LoginStateCopyWithImpl;
 @useResult
 $Res call({
- String email, String password, String? emailError, String? passwordError, bool obscurePassword, LoginSubmissionStatus status, Failure? failure
+ String email, String password, String? emailError, String? passwordError, bool obscurePassword, LoginSubmissionStatus status, Failure? failure, String? organizationId, bool requiresOnboarding
 });
 
 
@@ -68,7 +81,7 @@ class _$LoginStateCopyWithImpl<$Res>
 
 /// Create a copy of LoginState
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? email = null,Object? password = null,Object? emailError = freezed,Object? passwordError = freezed,Object? obscurePassword = null,Object? status = null,Object? failure = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? email = null,Object? password = null,Object? emailError = freezed,Object? passwordError = freezed,Object? obscurePassword = null,Object? status = null,Object? failure = freezed,Object? organizationId = freezed,Object? requiresOnboarding = null,}) {
   return _then(_self.copyWith(
 email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
@@ -77,7 +90,9 @@ as String?,passwordError: freezed == passwordError ? _self.passwordError : passw
 as String?,obscurePassword: null == obscurePassword ? _self.obscurePassword : obscurePassword // ignore: cast_nullable_to_non_nullable
 as bool,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as LoginSubmissionStatus,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
-as Failure?,
+as Failure?,organizationId: freezed == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
+as String?,requiresOnboarding: null == requiresOnboarding ? _self.requiresOnboarding : requiresOnboarding // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -162,10 +177,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String email,  String password,  String? emailError,  String? passwordError,  bool obscurePassword,  LoginSubmissionStatus status,  Failure? failure)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String email,  String password,  String? emailError,  String? passwordError,  bool obscurePassword,  LoginSubmissionStatus status,  Failure? failure,  String? organizationId,  bool requiresOnboarding)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _LoginState() when $default != null:
-return $default(_that.email,_that.password,_that.emailError,_that.passwordError,_that.obscurePassword,_that.status,_that.failure);case _:
+return $default(_that.email,_that.password,_that.emailError,_that.passwordError,_that.obscurePassword,_that.status,_that.failure,_that.organizationId,_that.requiresOnboarding);case _:
   return orElse();
 
 }
@@ -183,10 +198,10 @@ return $default(_that.email,_that.password,_that.emailError,_that.passwordError,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String email,  String password,  String? emailError,  String? passwordError,  bool obscurePassword,  LoginSubmissionStatus status,  Failure? failure)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String email,  String password,  String? emailError,  String? passwordError,  bool obscurePassword,  LoginSubmissionStatus status,  Failure? failure,  String? organizationId,  bool requiresOnboarding)  $default,) {final _that = this;
 switch (_that) {
 case _LoginState():
-return $default(_that.email,_that.password,_that.emailError,_that.passwordError,_that.obscurePassword,_that.status,_that.failure);case _:
+return $default(_that.email,_that.password,_that.emailError,_that.passwordError,_that.obscurePassword,_that.status,_that.failure,_that.organizationId,_that.requiresOnboarding);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -203,10 +218,10 @@ return $default(_that.email,_that.password,_that.emailError,_that.passwordError,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String email,  String password,  String? emailError,  String? passwordError,  bool obscurePassword,  LoginSubmissionStatus status,  Failure? failure)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String email,  String password,  String? emailError,  String? passwordError,  bool obscurePassword,  LoginSubmissionStatus status,  Failure? failure,  String? organizationId,  bool requiresOnboarding)?  $default,) {final _that = this;
 switch (_that) {
 case _LoginState() when $default != null:
-return $default(_that.email,_that.password,_that.emailError,_that.passwordError,_that.obscurePassword,_that.status,_that.failure);case _:
+return $default(_that.email,_that.password,_that.emailError,_that.passwordError,_that.obscurePassword,_that.status,_that.failure,_that.organizationId,_that.requiresOnboarding);case _:
   return null;
 
 }
@@ -218,7 +233,7 @@ return $default(_that.email,_that.password,_that.emailError,_that.passwordError,
 
 
 class _LoginState implements LoginState {
-  const _LoginState({this.email = '', this.password = '', this.emailError, this.passwordError, this.obscurePassword = true, this.status = LoginSubmissionStatus.idle, this.failure});
+  const _LoginState({this.email = '', this.password = '', this.emailError, this.passwordError, this.obscurePassword = true, this.status = LoginSubmissionStatus.idle, this.failure, this.organizationId, this.requiresOnboarding = false});
   
 
 @override@JsonKey() final  String email;
@@ -234,6 +249,21 @@ class _LoginState implements LoginState {
 /// message computed by `firebase_auth_exception_mapper.dart` — never a
 /// raw Firebase error code/string.
 @override final  Failure? failure;
+/// Only meaningful when [status] is [LoginSubmissionStatus.success]: the
+/// real Organization `ResolveActiveOrganizationIdUseCase` resolved for
+/// the signed-in user right after authenticating, `null` when it could
+/// not be resolved (no Membership yet, or the resolution itself failed —
+/// `LoginBloc` never blocks a successful sign-in on this). `LoginPage`
+/// falls back to `kPlaceholderOrganizationId` when this is `null` and
+/// [requiresOnboarding] is also `false`, same precedent as
+/// `ActiveOrganizationGuard`'s own fail-closed default.
+@override final  String? organizationId;
+/// Only meaningful when [status] is [LoginSubmissionStatus.success]:
+/// `true` when the resolution above succeeded but found no active
+/// Membership at all — the signed-in user has never completed
+/// onboarding, so `LoginPage` sends them to `OnboardingWizardRoute`
+/// instead of a placeholder Organization scope.
+@override@JsonKey() final  bool requiresOnboarding;
 
 /// Create a copy of LoginState
 /// with the given fields replaced by the non-null parameter values.
@@ -245,16 +275,16 @@ _$LoginStateCopyWith<_LoginState> get copyWith => __$LoginStateCopyWithImpl<_Log
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoginState&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.emailError, emailError) || other.emailError == emailError)&&(identical(other.passwordError, passwordError) || other.passwordError == passwordError)&&(identical(other.obscurePassword, obscurePassword) || other.obscurePassword == obscurePassword)&&(identical(other.status, status) || other.status == status)&&(identical(other.failure, failure) || other.failure == failure));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _LoginState&&(identical(other.email, email) || other.email == email)&&(identical(other.password, password) || other.password == password)&&(identical(other.emailError, emailError) || other.emailError == emailError)&&(identical(other.passwordError, passwordError) || other.passwordError == passwordError)&&(identical(other.obscurePassword, obscurePassword) || other.obscurePassword == obscurePassword)&&(identical(other.status, status) || other.status == status)&&(identical(other.failure, failure) || other.failure == failure)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.requiresOnboarding, requiresOnboarding) || other.requiresOnboarding == requiresOnboarding));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,email,password,emailError,passwordError,obscurePassword,status,failure);
+int get hashCode => Object.hash(runtimeType,email,password,emailError,passwordError,obscurePassword,status,failure,organizationId,requiresOnboarding);
 
 @override
 String toString() {
-  return 'LoginState(email: $email, password: $password, emailError: $emailError, passwordError: $passwordError, obscurePassword: $obscurePassword, status: $status, failure: $failure)';
+  return 'LoginState(email: $email, password: $password, emailError: $emailError, passwordError: $passwordError, obscurePassword: $obscurePassword, status: $status, failure: $failure, organizationId: $organizationId, requiresOnboarding: $requiresOnboarding)';
 }
 
 
@@ -265,7 +295,7 @@ abstract mixin class _$LoginStateCopyWith<$Res> implements $LoginStateCopyWith<$
   factory _$LoginStateCopyWith(_LoginState value, $Res Function(_LoginState) _then) = __$LoginStateCopyWithImpl;
 @override @useResult
 $Res call({
- String email, String password, String? emailError, String? passwordError, bool obscurePassword, LoginSubmissionStatus status, Failure? failure
+ String email, String password, String? emailError, String? passwordError, bool obscurePassword, LoginSubmissionStatus status, Failure? failure, String? organizationId, bool requiresOnboarding
 });
 
 
@@ -282,7 +312,7 @@ class __$LoginStateCopyWithImpl<$Res>
 
 /// Create a copy of LoginState
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? email = null,Object? password = null,Object? emailError = freezed,Object? passwordError = freezed,Object? obscurePassword = null,Object? status = null,Object? failure = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? email = null,Object? password = null,Object? emailError = freezed,Object? passwordError = freezed,Object? obscurePassword = null,Object? status = null,Object? failure = freezed,Object? organizationId = freezed,Object? requiresOnboarding = null,}) {
   return _then(_LoginState(
 email: null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
 as String,password: null == password ? _self.password : password // ignore: cast_nullable_to_non_nullable
@@ -291,7 +321,9 @@ as String?,passwordError: freezed == passwordError ? _self.passwordError : passw
 as String?,obscurePassword: null == obscurePassword ? _self.obscurePassword : obscurePassword // ignore: cast_nullable_to_non_nullable
 as bool,status: null == status ? _self.status : status // ignore: cast_nullable_to_non_nullable
 as LoginSubmissionStatus,failure: freezed == failure ? _self.failure : failure // ignore: cast_nullable_to_non_nullable
-as Failure?,
+as Failure?,organizationId: freezed == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
+as String?,requiresOnboarding: null == requiresOnboarding ? _self.requiresOnboarding : requiresOnboarding // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

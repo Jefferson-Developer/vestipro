@@ -17,6 +17,7 @@ Future<void> _pumpCatalogHome(
   required AppResult<List<CatalogCampaign>> campaignsResult,
   CatalogHomeSnapshot? cachedSnapshot,
   double width = 400,
+  VoidCallback? onCreateProductTap,
 }) async {
   tester.view.physicalSize = Size(width, 900);
   tester.view.devicePixelRatio = 1;
@@ -29,6 +30,7 @@ Future<void> _pumpCatalogHome(
       home: CatalogHomePage(
         organizationId: 'org-1',
         userId: 'user-1',
+        onCreateProductTap: onCreateProductTap,
         createBloc: () => buildTestCatalogHomeBloc(
           collectionsResult: collectionsResult,
           productsResult: productsResult,
@@ -100,6 +102,27 @@ void main() {
       await tester.pumpAndSettle();
 
       expect(find.text('Catálogo em preparação'), findsOneWidget);
+    });
+
+    testWidgets('offers product creation from the empty catalog when wired', (
+      tester,
+    ) async {
+      var tapped = false;
+      await _pumpCatalogHome(
+        tester,
+        onCreateProductTap: () => tapped = true,
+        collectionsResult: const AppSuccess<List<Collection>>(<Collection>[]),
+        productsResult: const AppSuccess<List<Product>>(<Product>[]),
+        campaignsResult: const AppSuccess<List<CatalogCampaign>>(
+          <CatalogCampaign>[],
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('Novo produto'));
+      await tester.pumpAndSettle();
+
+      expect(tapped, isTrue);
     });
 
     testWidgets('shows a full error state with retry when everything fails '

@@ -21,12 +21,16 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart';
 import '../features/authentication/presentation/bloc/login_bloc.dart';
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart';
 import '../features/audit_log/audit_log.dart';
+import '../features/catalog/catalog.dart';
 import '../features/customers/customers.dart';
 import '../features/invites/invites.dart';
 import '../features/onboarding/onboarding.dart';
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
+import '../features/organizations/organizations.dart';
+import '../features/products/products.dart';
 import '../features/settings/presentation/bloc/about_app_bloc.dart';
 import '../features/settings/settings.dart';
+import '../features/users/users.dart';
 import '../firebase_options.dart';
 import 'firebase_bootstrap_error_app.dart';
 import 'injection.dart';
@@ -141,11 +145,25 @@ class VestiProApp extends StatelessWidget {
           // its own default so tests/examples that build their own
           // [AppRouter] are unaffected unless they opt in.
           authGuard: SessionAuthGuard(getIt<SessionService>()),
+          organizationGuard: const _LazyActiveOrganizationGuard(),
           authorizationGuard: const _LazyPermissionAuthorizationGuard(),
           aboutAppPageBuilder: (context, orgId) => AboutAppPage(
             createBloc: () => getIt<AboutAppBloc>(),
             showInsightsShortcut: _resolveShowInsightsShortcut(),
           ),
+          catalogHomePageBuilder: (context, orgId, companyId) =>
+              CatalogHomePage(
+                organizationId: orgId,
+                companyId: companyId,
+                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                createBloc: () => getIt<CatalogHomeBloc>(),
+                onCreateProductTap: () => context.go(
+                  ProductFormRoute(
+                    orgId: orgId,
+                    companyId: companyId ?? kPlaceholderCompanyId,
+                  ).location,
+                ),
+              ),
           auditLogPageBuilder: (context, orgId) => AuditLogPage(
             organizationId: orgId,
             userId: getIt<AuthRepository>().currentUser?.uid ?? '',
@@ -153,6 +171,13 @@ class VestiProApp extends StatelessWidget {
             createBloc: () => AuditLogBloc(
               listAuditLogEntries: getIt<ListAuditLogEntriesUseCase>(),
             ),
+          ),
+          userManagementPageBuilder: (context, orgId) => UserListPage(
+            organizationId: orgId,
+            userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+            permissionService: getIt<PermissionService>(),
+            createBloc: () => getIt<UserListBloc>(),
+            createRoleEditBloc: () => getIt<UserRoleEditBloc>(),
           ),
           customerFormPageBuilder: (context, orgId, companyId) =>
               CustomerFormPage(
@@ -162,6 +187,19 @@ class VestiProApp extends StatelessWidget {
                 permissionService: getIt<PermissionService>(),
                 createBloc: () => getIt<CustomerFormBloc>(),
               ),
+          productFormPageBuilder: (context, orgId, companyId) {
+            final currentUser = getIt<AuthRepository>().currentUser;
+            return ProductFormPage(
+              organizationId: orgId,
+              companyId: companyId,
+              userId: currentUser?.uid ?? '',
+              actorName:
+                  currentUser?.displayName ?? currentUser?.email ?? 'Usuário',
+              permissionService: getIt<PermissionService>(),
+              createBloc: () => getIt<ProductFormBloc>(),
+              createMediaBloc: () => getIt<ProductMediaBloc>(),
+            );
+          },
           customerPortfolioPageBuilder:
               (context, orgId, companyId, queryParameters) =>
                   CustomerPortfolioPage(
@@ -248,6 +286,23 @@ bool _resolveShowInsightsShortcut() {
       stackTrace: stackTrace,
     );
     return false;
+  }
+}
+
+/// Lazily resolves [MembershipActiveOrganizationGuard]'s dependencies from
+/// [getIt] only when a redirect is actually evaluated — same rationale as
+/// [_LazyPermissionAuthorizationGuard]: `VestiProApp.build` must not force a
+/// real DI resolution just to construct [AppRouter].
+final class _LazyActiveOrganizationGuard implements ActiveOrganizationGuard {
+  const _LazyActiveOrganizationGuard();
+
+  @override
+  Future<String?> redirect(BuildContext context, GoRouterState state) {
+    return MembershipActiveOrganizationGuard(
+      getIt<AuthRepository>(),
+      getIt<GetUserMembershipUseCase>(),
+      getIt<ResolveActiveOrganizationIdUseCase>(),
+    ).redirect(context, state);
   }
 }
 

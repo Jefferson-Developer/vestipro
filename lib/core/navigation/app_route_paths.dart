@@ -16,6 +16,10 @@ sealed class AppRoute {
   String get location;
 }
 
+/// Temporary company scope used while the real active-company selector is not
+/// wired yet, mirroring [kPlaceholderOrganizationId]'s current role.
+const kPlaceholderCompanyId = 'default';
+
 /// Example module route (see TASK-004) rendering the "About app" page.
 ///
 /// Every authenticated feature route must follow the same
@@ -34,6 +38,29 @@ final class AboutAppRoute extends AppRoute {
   String get location => '/org/$orgId/settings/about';
 }
 
+/// Catalog entry route (TASK-076), the first real in-app screen already
+/// available for representatives and customers.
+final class CatalogHomeRoute extends AppRoute {
+  const CatalogHomeRoute({required this.orgId, this.companyId});
+
+  final String orgId;
+  final String? companyId;
+
+  static const name = 'catalogHome';
+  static const pathPattern = '/org/:orgId/catalog';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/catalog';
+    final scopedCompanyId = companyId?.trim();
+    if (scopedCompanyId == null || scopedCompanyId.isEmpty) return path;
+    return Uri(
+      path: path,
+      queryParameters: <String, String>{'companyId': scopedCompanyId},
+    ).toString();
+  }
+}
+
 /// Read-only administrative audit log route (TASK-047).
 ///
 /// It lives under the active organization scope and is protected in
@@ -50,6 +77,20 @@ final class AuditLogRoute extends AppRoute {
   String get location => '/org/$orgId/settings/audit-log';
 }
 
+/// User and permission management route (TASK-042/TASK-043), scoped by
+/// Organization. Protected in [AppRouter] by `user.changeRole`.
+final class UserManagementRoute extends AppRoute {
+  const UserManagementRoute({required this.orgId});
+
+  final String orgId;
+
+  static const name = 'userManagement';
+  static const pathPattern = '/org/:orgId/settings/users';
+
+  @override
+  String get location => '/org/$orgId/settings/users';
+}
+
 /// Customer creation form route (TASK-049), scoped by Organization and
 /// Company. Protected in [AppRouter] by `customer.create`.
 final class CustomerFormRoute extends AppRoute {
@@ -63,6 +104,21 @@ final class CustomerFormRoute extends AppRoute {
 
   @override
   String get location => '/org/$orgId/companies/$companyId/customers/new';
+}
+
+/// Product creation form route (TASK-065), scoped by Organization and Company.
+/// Protected in [AppRouter] by `catalog.manage`.
+final class ProductFormRoute extends AppRoute {
+  const ProductFormRoute({required this.orgId, required this.companyId});
+
+  final String orgId;
+  final String companyId;
+
+  static const name = 'productForm';
+  static const pathPattern = '/org/:orgId/companies/:companyId/products/new';
+
+  @override
+  String get location => '/org/$orgId/companies/$companyId/products/new';
 }
 
 /// Customer portfolio list route (TASK-051), scoped by Organization and
@@ -173,9 +229,8 @@ final class PasswordResetRoute extends AppRoute {
 ///
 /// `SignUpPage` (TASK-035) navigates here on a successful account creation;
 /// `OnboardingWizardPage`, once its last step is submitted, navigates away
-/// to [AboutAppRoute] with the real Organization id it just created — there
-/// is no dedicated "post-onboarding home" route yet (that is a later task's
-/// scope), so [AboutAppRoute] is reused as the first real in-app screen.
+/// to [CatalogHomeRoute] with the real Organization id it just created —
+/// that is the app's real post-onboarding home.
 final class OnboardingWizardRoute extends AppRoute {
   const OnboardingWizardRoute();
 

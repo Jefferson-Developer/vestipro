@@ -149,4 +149,24 @@ final class MembershipRepositoryImpl implements MembershipRepository {
       );
     }
   }
+
+  @override
+  Future<AppResult<List<Membership>>> listActiveByUser(String userId) async {
+    try {
+      final dtos = await dataSource.listActiveByUser(userId);
+      return AppSuccess<List<Membership>>(
+        dtos.map(mapper.toEntity).toList(growable: false),
+      );
+    } on AppException catch (exception) {
+      return AppFailure<List<Membership>>(mapAppExceptionToFailure(exception));
+    } catch (exception) {
+      return AppFailure<List<Membership>>(
+        UnexpectedFailure(
+          'Unexpected error listing memberships for user.',
+          code: 'membership_list_active_by_user_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
 }

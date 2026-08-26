@@ -31,6 +31,7 @@ export 'domain/usecases/get_user_membership_use_case.dart';
 export 'domain/usecases/list_branches_by_company_use_case.dart';
 export 'domain/usecases/list_companies_use_case.dart';
 export 'domain/usecases/remove_member_from_team_use_case.dart';
+export 'domain/usecases/resolve_active_organization_id_use_case.dart';
 export 'domain/usecases/update_branch_use_case.dart';
 export 'domain/usecases/update_company_use_case.dart';
 export 'domain/usecases/update_organization_settings_use_case.dart';
