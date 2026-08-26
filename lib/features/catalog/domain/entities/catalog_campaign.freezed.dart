@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CatalogCampaign {
 
- String get id; String get organizationId; String get title; String? get subtitle; String? get imageUrl; String? get collectionId; int get order; bool get active; DateTime? get startAt; DateTime? get endAt; DateTime get createdAt; String get createdBy; DateTime get updatedAt; String get updatedBy; DateTime? get deletedAt;
+ String get id; String get organizationId; String get title; String? get subtitle; String? get description; String? get imageUrl; List<String> get editorialImageUrls; List<String> get relatedProductIds; String? get collectionId; int get order; bool get active; DateTime? get startAt; DateTime? get endAt; DateTime get createdAt; String get createdBy; DateTime get updatedAt; String get updatedBy; DateTime? get deletedAt;
 /// Create a copy of CatalogCampaign
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $CatalogCampaignCopyWith<CatalogCampaign> get copyWith => _$CatalogCampaignCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CatalogCampaign&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.title, title) || other.title == title)&&(identical(other.subtitle, subtitle) || other.subtitle == subtitle)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.collectionId, collectionId) || other.collectionId == collectionId)&&(identical(other.order, order) || other.order == order)&&(identical(other.active, active) || other.active == active)&&(identical(other.startAt, startAt) || other.startAt == startAt)&&(identical(other.endAt, endAt) || other.endAt == endAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CatalogCampaign&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.title, title) || other.title == title)&&(identical(other.subtitle, subtitle) || other.subtitle == subtitle)&&(identical(other.description, description) || other.description == description)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&const DeepCollectionEquality().equals(other.editorialImageUrls, editorialImageUrls)&&const DeepCollectionEquality().equals(other.relatedProductIds, relatedProductIds)&&(identical(other.collectionId, collectionId) || other.collectionId == collectionId)&&(identical(other.order, order) || other.order == order)&&(identical(other.active, active) || other.active == active)&&(identical(other.startAt, startAt) || other.startAt == startAt)&&(identical(other.endAt, endAt) || other.endAt == endAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,organizationId,title,subtitle,imageUrl,collectionId,order,active,startAt,endAt,createdAt,createdBy,updatedAt,updatedBy,deletedAt);
+int get hashCode => Object.hash(runtimeType,id,organizationId,title,subtitle,description,imageUrl,const DeepCollectionEquality().hash(editorialImageUrls),const DeepCollectionEquality().hash(relatedProductIds),collectionId,order,active,startAt,endAt,createdAt,createdBy,updatedAt,updatedBy,deletedAt);
 
 @override
 String toString() {
-  return 'CatalogCampaign(id: $id, organizationId: $organizationId, title: $title, subtitle: $subtitle, imageUrl: $imageUrl, collectionId: $collectionId, order: $order, active: $active, startAt: $startAt, endAt: $endAt, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, deletedAt: $deletedAt)';
+  return 'CatalogCampaign(id: $id, organizationId: $organizationId, title: $title, subtitle: $subtitle, description: $description, imageUrl: $imageUrl, editorialImageUrls: $editorialImageUrls, relatedProductIds: $relatedProductIds, collectionId: $collectionId, order: $order, active: $active, startAt: $startAt, endAt: $endAt, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, deletedAt: $deletedAt)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $CatalogCampaignCopyWith<$Res>  {
   factory $CatalogCampaignCopyWith(CatalogCampaign value, $Res Function(CatalogCampaign) _then) = _$CatalogCampaignCopyWithImpl;
 @useResult
 $Res call({
- String id, String organizationId, String title, String? subtitle, String? imageUrl, String? collectionId, int order, bool active, DateTime? startAt, DateTime? endAt, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, DateTime? deletedAt
+ String id, String organizationId, String title, String? subtitle, String? description, String? imageUrl, List<String> editorialImageUrls, List<String> relatedProductIds, String? collectionId, int order, bool active, DateTime? startAt, DateTime? endAt, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, DateTime? deletedAt
 });
 
 
@@ -62,14 +62,17 @@ class _$CatalogCampaignCopyWithImpl<$Res>
 
 /// Create a copy of CatalogCampaign
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? organizationId = null,Object? title = null,Object? subtitle = freezed,Object? imageUrl = freezed,Object? collectionId = freezed,Object? order = null,Object? active = null,Object? startAt = freezed,Object? endAt = freezed,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? deletedAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? organizationId = null,Object? title = null,Object? subtitle = freezed,Object? description = freezed,Object? imageUrl = freezed,Object? editorialImageUrls = null,Object? relatedProductIds = null,Object? collectionId = freezed,Object? order = null,Object? active = null,Object? startAt = freezed,Object? endAt = freezed,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? deletedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,subtitle: freezed == subtitle ? _self.subtitle : subtitle // ignore: cast_nullable_to_non_nullable
+as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
-as String?,collectionId: freezed == collectionId ? _self.collectionId : collectionId // ignore: cast_nullable_to_non_nullable
+as String?,editorialImageUrls: null == editorialImageUrls ? _self.editorialImageUrls : editorialImageUrls // ignore: cast_nullable_to_non_nullable
+as List<String>,relatedProductIds: null == relatedProductIds ? _self.relatedProductIds : relatedProductIds // ignore: cast_nullable_to_non_nullable
+as List<String>,collectionId: freezed == collectionId ? _self.collectionId : collectionId // ignore: cast_nullable_to_non_nullable
 as String?,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
 as int,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
 as bool,startAt: freezed == startAt ? _self.startAt : startAt // ignore: cast_nullable_to_non_nullable
@@ -164,10 +167,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String organizationId,  String title,  String? subtitle,  String? imageUrl,  String? collectionId,  int order,  bool active,  DateTime? startAt,  DateTime? endAt,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String organizationId,  String title,  String? subtitle,  String? description,  String? imageUrl,  List<String> editorialImageUrls,  List<String> relatedProductIds,  String? collectionId,  int order,  bool active,  DateTime? startAt,  DateTime? endAt,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CatalogCampaign() when $default != null:
-return $default(_that.id,_that.organizationId,_that.title,_that.subtitle,_that.imageUrl,_that.collectionId,_that.order,_that.active,_that.startAt,_that.endAt,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
+return $default(_that.id,_that.organizationId,_that.title,_that.subtitle,_that.description,_that.imageUrl,_that.editorialImageUrls,_that.relatedProductIds,_that.collectionId,_that.order,_that.active,_that.startAt,_that.endAt,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
   return orElse();
 
 }
@@ -185,10 +188,10 @@ return $default(_that.id,_that.organizationId,_that.title,_that.subtitle,_that.i
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String organizationId,  String title,  String? subtitle,  String? imageUrl,  String? collectionId,  int order,  bool active,  DateTime? startAt,  DateTime? endAt,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String organizationId,  String title,  String? subtitle,  String? description,  String? imageUrl,  List<String> editorialImageUrls,  List<String> relatedProductIds,  String? collectionId,  int order,  bool active,  DateTime? startAt,  DateTime? endAt,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)  $default,) {final _that = this;
 switch (_that) {
 case _CatalogCampaign():
-return $default(_that.id,_that.organizationId,_that.title,_that.subtitle,_that.imageUrl,_that.collectionId,_that.order,_that.active,_that.startAt,_that.endAt,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
+return $default(_that.id,_that.organizationId,_that.title,_that.subtitle,_that.description,_that.imageUrl,_that.editorialImageUrls,_that.relatedProductIds,_that.collectionId,_that.order,_that.active,_that.startAt,_that.endAt,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -205,10 +208,10 @@ return $default(_that.id,_that.organizationId,_that.title,_that.subtitle,_that.i
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String organizationId,  String title,  String? subtitle,  String? imageUrl,  String? collectionId,  int order,  bool active,  DateTime? startAt,  DateTime? endAt,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String organizationId,  String title,  String? subtitle,  String? description,  String? imageUrl,  List<String> editorialImageUrls,  List<String> relatedProductIds,  String? collectionId,  int order,  bool active,  DateTime? startAt,  DateTime? endAt,  DateTime createdAt,  String createdBy,  DateTime updatedAt,  String updatedBy,  DateTime? deletedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _CatalogCampaign() when $default != null:
-return $default(_that.id,_that.organizationId,_that.title,_that.subtitle,_that.imageUrl,_that.collectionId,_that.order,_that.active,_that.startAt,_that.endAt,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
+return $default(_that.id,_that.organizationId,_that.title,_that.subtitle,_that.description,_that.imageUrl,_that.editorialImageUrls,_that.relatedProductIds,_that.collectionId,_that.order,_that.active,_that.startAt,_that.endAt,_that.createdAt,_that.createdBy,_that.updatedAt,_that.updatedBy,_that.deletedAt);case _:
   return null;
 
 }
@@ -220,14 +223,29 @@ return $default(_that.id,_that.organizationId,_that.title,_that.subtitle,_that.i
 
 
 class _CatalogCampaign extends CatalogCampaign {
-  const _CatalogCampaign({required this.id, required this.organizationId, required this.title, this.subtitle, this.imageUrl, this.collectionId, required this.order, required this.active, this.startAt, this.endAt, required this.createdAt, required this.createdBy, required this.updatedAt, required this.updatedBy, this.deletedAt}): super._();
+  const _CatalogCampaign({required this.id, required this.organizationId, required this.title, this.subtitle, this.description, this.imageUrl, final  List<String> editorialImageUrls = const <String>[], final  List<String> relatedProductIds = const <String>[], this.collectionId, required this.order, required this.active, this.startAt, this.endAt, required this.createdAt, required this.createdBy, required this.updatedAt, required this.updatedBy, this.deletedAt}): _editorialImageUrls = editorialImageUrls,_relatedProductIds = relatedProductIds,super._();
   
 
 @override final  String id;
 @override final  String organizationId;
 @override final  String title;
 @override final  String? subtitle;
+@override final  String? description;
 @override final  String? imageUrl;
+ final  List<String> _editorialImageUrls;
+@override@JsonKey() List<String> get editorialImageUrls {
+  if (_editorialImageUrls is EqualUnmodifiableListView) return _editorialImageUrls;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_editorialImageUrls);
+}
+
+ final  List<String> _relatedProductIds;
+@override@JsonKey() List<String> get relatedProductIds {
+  if (_relatedProductIds is EqualUnmodifiableListView) return _relatedProductIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_relatedProductIds);
+}
+
 @override final  String? collectionId;
 @override final  int order;
 @override final  bool active;
@@ -249,16 +267,16 @@ _$CatalogCampaignCopyWith<_CatalogCampaign> get copyWith => __$CatalogCampaignCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CatalogCampaign&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.title, title) || other.title == title)&&(identical(other.subtitle, subtitle) || other.subtitle == subtitle)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&(identical(other.collectionId, collectionId) || other.collectionId == collectionId)&&(identical(other.order, order) || other.order == order)&&(identical(other.active, active) || other.active == active)&&(identical(other.startAt, startAt) || other.startAt == startAt)&&(identical(other.endAt, endAt) || other.endAt == endAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CatalogCampaign&&(identical(other.id, id) || other.id == id)&&(identical(other.organizationId, organizationId) || other.organizationId == organizationId)&&(identical(other.title, title) || other.title == title)&&(identical(other.subtitle, subtitle) || other.subtitle == subtitle)&&(identical(other.description, description) || other.description == description)&&(identical(other.imageUrl, imageUrl) || other.imageUrl == imageUrl)&&const DeepCollectionEquality().equals(other._editorialImageUrls, _editorialImageUrls)&&const DeepCollectionEquality().equals(other._relatedProductIds, _relatedProductIds)&&(identical(other.collectionId, collectionId) || other.collectionId == collectionId)&&(identical(other.order, order) || other.order == order)&&(identical(other.active, active) || other.active == active)&&(identical(other.startAt, startAt) || other.startAt == startAt)&&(identical(other.endAt, endAt) || other.endAt == endAt)&&(identical(other.createdAt, createdAt) || other.createdAt == createdAt)&&(identical(other.createdBy, createdBy) || other.createdBy == createdBy)&&(identical(other.updatedAt, updatedAt) || other.updatedAt == updatedAt)&&(identical(other.updatedBy, updatedBy) || other.updatedBy == updatedBy)&&(identical(other.deletedAt, deletedAt) || other.deletedAt == deletedAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,organizationId,title,subtitle,imageUrl,collectionId,order,active,startAt,endAt,createdAt,createdBy,updatedAt,updatedBy,deletedAt);
+int get hashCode => Object.hash(runtimeType,id,organizationId,title,subtitle,description,imageUrl,const DeepCollectionEquality().hash(_editorialImageUrls),const DeepCollectionEquality().hash(_relatedProductIds),collectionId,order,active,startAt,endAt,createdAt,createdBy,updatedAt,updatedBy,deletedAt);
 
 @override
 String toString() {
-  return 'CatalogCampaign(id: $id, organizationId: $organizationId, title: $title, subtitle: $subtitle, imageUrl: $imageUrl, collectionId: $collectionId, order: $order, active: $active, startAt: $startAt, endAt: $endAt, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, deletedAt: $deletedAt)';
+  return 'CatalogCampaign(id: $id, organizationId: $organizationId, title: $title, subtitle: $subtitle, description: $description, imageUrl: $imageUrl, editorialImageUrls: $editorialImageUrls, relatedProductIds: $relatedProductIds, collectionId: $collectionId, order: $order, active: $active, startAt: $startAt, endAt: $endAt, createdAt: $createdAt, createdBy: $createdBy, updatedAt: $updatedAt, updatedBy: $updatedBy, deletedAt: $deletedAt)';
 }
 
 
@@ -269,7 +287,7 @@ abstract mixin class _$CatalogCampaignCopyWith<$Res> implements $CatalogCampaign
   factory _$CatalogCampaignCopyWith(_CatalogCampaign value, $Res Function(_CatalogCampaign) _then) = __$CatalogCampaignCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String organizationId, String title, String? subtitle, String? imageUrl, String? collectionId, int order, bool active, DateTime? startAt, DateTime? endAt, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, DateTime? deletedAt
+ String id, String organizationId, String title, String? subtitle, String? description, String? imageUrl, List<String> editorialImageUrls, List<String> relatedProductIds, String? collectionId, int order, bool active, DateTime? startAt, DateTime? endAt, DateTime createdAt, String createdBy, DateTime updatedAt, String updatedBy, DateTime? deletedAt
 });
 
 
@@ -286,14 +304,17 @@ class __$CatalogCampaignCopyWithImpl<$Res>
 
 /// Create a copy of CatalogCampaign
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? organizationId = null,Object? title = null,Object? subtitle = freezed,Object? imageUrl = freezed,Object? collectionId = freezed,Object? order = null,Object? active = null,Object? startAt = freezed,Object? endAt = freezed,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? deletedAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? organizationId = null,Object? title = null,Object? subtitle = freezed,Object? description = freezed,Object? imageUrl = freezed,Object? editorialImageUrls = null,Object? relatedProductIds = null,Object? collectionId = freezed,Object? order = null,Object? active = null,Object? startAt = freezed,Object? endAt = freezed,Object? createdAt = null,Object? createdBy = null,Object? updatedAt = null,Object? updatedBy = null,Object? deletedAt = freezed,}) {
   return _then(_CatalogCampaign(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,organizationId: null == organizationId ? _self.organizationId : organizationId // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
 as String,subtitle: freezed == subtitle ? _self.subtitle : subtitle // ignore: cast_nullable_to_non_nullable
+as String?,description: freezed == description ? _self.description : description // ignore: cast_nullable_to_non_nullable
 as String?,imageUrl: freezed == imageUrl ? _self.imageUrl : imageUrl // ignore: cast_nullable_to_non_nullable
-as String?,collectionId: freezed == collectionId ? _self.collectionId : collectionId // ignore: cast_nullable_to_non_nullable
+as String?,editorialImageUrls: null == editorialImageUrls ? _self._editorialImageUrls : editorialImageUrls // ignore: cast_nullable_to_non_nullable
+as List<String>,relatedProductIds: null == relatedProductIds ? _self._relatedProductIds : relatedProductIds // ignore: cast_nullable_to_non_nullable
+as List<String>,collectionId: freezed == collectionId ? _self.collectionId : collectionId // ignore: cast_nullable_to_non_nullable
 as String?,order: null == order ? _self.order : order // ignore: cast_nullable_to_non_nullable
 as int,active: null == active ? _self.active : active // ignore: cast_nullable_to_non_nullable
 as bool,startAt: freezed == startAt ? _self.startAt : startAt // ignore: cast_nullable_to_non_nullable

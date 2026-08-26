@@ -88,5 +88,26 @@ void main() {
         throwsA(isA<ArgumentError>()),
       );
     });
+
+    test('campaignFile builds organizations/{org}/campaigns/{id}/{file}', () {
+      final path = StoragePaths.campaignFile(
+        organizationId: 'org-1',
+        campaignId: 'campaign-1',
+        fileName: 'cover.jpg',
+      );
+
+      expect(path, 'organizations/org-1/campaigns/campaign-1/cover.jpg');
+    });
+
+    test('campaignFile throws ArgumentError for empty campaignId', () {
+      expect(
+        () => StoragePaths.campaignFile(
+          organizationId: 'org-1',
+          campaignId: '',
+          fileName: 'cover.jpg',
+        ),
+        throwsA(isA<ArgumentError>()),
+      );
+    });
   });
 }

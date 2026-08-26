@@ -55,6 +55,8 @@ final class AnalyticsEvents {
   static const String productFavorited = 'product_favorited';
   static const String productUnfavorited = 'product_unfavorited';
   static const String favoritesViewed = 'favorites_viewed';
+  static const String campaignViewed = 'campaign_viewed';
+  static const String campaignProductClicked = 'campaign_product_clicked';
 
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
@@ -99,5 +101,7 @@ final class AnalyticsEvents {
     productFavorited,
     productUnfavorited,
     favoritesViewed,
+    campaignViewed,
+    campaignProductClicked,
   ];
 }

@@ -88,4 +88,27 @@ class _FakeRepository implements CatalogCampaignRepository {
   Future<AppResult<List<CatalogCampaign>>> listByOrganization(
     String organizationId,
   ) async => _result;
+
+  @override
+  Future<AppResult<CatalogCampaign>> getById({
+    required String organizationId,
+    required String id,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<AppResult<CatalogCampaign>> create({
+    required CatalogCampaign campaign,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<AppResult<CatalogCampaign>> update({
+    required CatalogCampaign campaign,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<AppResult<CatalogCampaign>> delete({
+    required String organizationId,
+    required String id,
+    required String updatedBy,
+  }) => throw UnimplementedError();
 }

@@ -1,4 +1,5 @@
 import 'package:vestipro/core/analytics/analytics.dart';
+import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/catalog/catalog.dart';
 import 'package:vestipro/features/products/products.dart';
@@ -113,6 +114,29 @@ class FakeCatalogCampaignRepository implements CatalogCampaignRepository {
   Future<AppResult<List<CatalogCampaign>>> listByOrganization(
     String organizationId,
   ) async => result;
+
+  @override
+  Future<AppResult<CatalogCampaign>> getById({
+    required String organizationId,
+    required String id,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<AppResult<CatalogCampaign>> create({
+    required CatalogCampaign campaign,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<AppResult<CatalogCampaign>> update({
+    required CatalogCampaign campaign,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<AppResult<CatalogCampaign>> delete({
+    required String organizationId,
+    required String id,
+    required String updatedBy,
+  }) => throw UnimplementedError();
 }
 
 class FakeCatalogHomeCacheRepository implements CatalogHomeCacheRepository {
@@ -138,6 +162,192 @@ class FakeCatalogHomeCacheRepository implements CatalogHomeCacheRepository {
     saved.add(snapshot);
     return const AppSuccess<void>(null);
   }
+}
+
+/// In-memory `CatalogCampaignRepository` (TASK-080), reused by every
+/// campaign create/update/delete/get use case test plus `CampaignListBloc`/
+/// `CampaignFormBloc`/`LookbookBloc` tests — avoids redefining the same
+/// small in-memory store 6+ times, the same reuse `catalog_test_fakes.dart`
+/// already applies to `CatalogHomeBloc`'s fakes.
+class InMemoryCatalogCampaignRepository implements CatalogCampaignRepository {
+  final Map<String, CatalogCampaign> campaigns = <String, CatalogCampaign>{};
+  bool shouldFail = false;
+
+  void seed(CatalogCampaign campaign) => campaigns[campaign.id] = campaign;
+
+  @override
+  Future<AppResult<List<CatalogCampaign>>> listByOrganization(
+    String organizationId,
+  ) async {
+    if (shouldFail) {
+      return const AppFailure<List<CatalogCampaign>>(
+        UnexpectedFailure('Boom.', code: 'boom'),
+      );
+    }
+    return AppSuccess<List<CatalogCampaign>>(
+      campaigns.values
+          .where(
+            (campaign) =>
+                campaign.organizationId == organizationId &&
+                campaign.deletedAt == null,
+          )
+          .toList(growable: false),
+    );
+  }
+
+  @override
+  Future<AppResult<CatalogCampaign>> getById({
+    required String organizationId,
+    required String id,
+  }) async {
+    if (shouldFail) {
+      return const AppFailure<CatalogCampaign>(
+        UnexpectedFailure('Boom.', code: 'boom'),
+      );
+    }
+    final campaign = campaigns[id];
+    if (campaign == null) {
+      return const AppFailure<CatalogCampaign>(
+        NotFoundFailure(
+          'Catalog campaign not found.',
+          code: 'catalog_campaign_not_found',
+        ),
+      );
+    }
+    return AppSuccess<CatalogCampaign>(campaign);
+  }
+
+  @override
+  Future<AppResult<CatalogCampaign>> create({
+    required CatalogCampaign campaign,
+  }) async {
+    if (shouldFail) {
+      return const AppFailure<CatalogCampaign>(
+        UnexpectedFailure('Boom.', code: 'boom'),
+      );
+    }
+    campaigns[campaign.id] = campaign;
+    return AppSuccess<CatalogCampaign>(campaign);
+  }
+
+  @override
+  Future<AppResult<CatalogCampaign>> update({
+    required CatalogCampaign campaign,
+  }) async {
+    if (shouldFail) {
+      return const AppFailure<CatalogCampaign>(
+        UnexpectedFailure('Boom.', code: 'boom'),
+      );
+    }
+    if (!campaigns.containsKey(campaign.id)) {
+      return const AppFailure<CatalogCampaign>(
+        NotFoundFailure(
+          'Catalog campaign not found.',
+          code: 'catalog_campaign_not_found',
+        ),
+      );
+    }
+    campaigns[campaign.id] = campaign;
+    return AppSuccess<CatalogCampaign>(campaign);
+  }
+
+  @override
+  Future<AppResult<CatalogCampaign>> delete({
+    required String organizationId,
+    required String id,
+    required String updatedBy,
+  }) async {
+    if (shouldFail) {
+      return const AppFailure<CatalogCampaign>(
+        UnexpectedFailure('Boom.', code: 'boom'),
+      );
+    }
+    final campaign = campaigns[id];
+    if (campaign == null) {
+      return const AppFailure<CatalogCampaign>(
+        NotFoundFailure(
+          'Catalog campaign not found.',
+          code: 'catalog_campaign_not_found',
+        ),
+      );
+    }
+    final deleted = campaign.copyWith(
+      deletedAt: DateTime.utc(2026, 1, 1),
+      updatedBy: updatedBy,
+    );
+    campaigns[id] = deleted;
+    return AppSuccess<CatalogCampaign>(deleted);
+  }
+}
+
+/// In-memory `ProductRepository` (full CRUD, unlike
+/// `FakeCatalogHomeProductRepository` above which only supports the reads
+/// the catalog home needs), reused by `ListCampaignRelatedProductsUseCase`/
+/// `CampaignFormBloc`/`LookbookBloc` tests (TASK-080) that need a working
+/// `getByIds`.
+class InMemoryCatalogProductRepository implements ProductRepository {
+  final List<Product> products = <Product>[];
+
+  @override
+  Future<AppResult<bool>> existsBySku({
+    required String organizationId,
+    required Sku sku,
+    String? excludingProductId,
+  }) async => const AppSuccess<bool>(false);
+
+  @override
+  Future<AppResult<Product>> create({required Product product}) async {
+    products.add(product);
+    return AppSuccess<Product>(product);
+  }
+
+  @override
+  Future<AppResult<Product>> update({required Product product}) async {
+    final index = products.indexWhere((item) => item.id == product.id);
+    products[index] = product;
+    return AppSuccess<Product>(product);
+  }
+
+  @override
+  Future<AppResult<Product>> getById({
+    required String organizationId,
+    required String id,
+  }) async {
+    for (final product in products) {
+      if (product.id == id) return AppSuccess<Product>(product);
+    }
+    return const AppFailure<Product>(
+      NotFoundFailure('Product not found.', code: 'product_not_found'),
+    );
+  }
+
+  @override
+  Future<AppResult<List<Product>>> getByIds({
+    required String organizationId,
+    required List<String> ids,
+  }) async {
+    final wanted = ids.toSet();
+    return AppSuccess<List<Product>>(
+      products.where((product) => wanted.contains(product.id)).toList(),
+    );
+  }
+
+  @override
+  Future<AppResult<List<Product>>> listRecentlyLaunched({
+    required String organizationId,
+    String? companyId,
+    int limit = 12,
+  }) async => const AppSuccess<List<Product>>(<Product>[]);
+
+  @override
+  Future<AppResult<ProductCatalogPage>> listCatalog({
+    required String organizationId,
+    String? companyId,
+    String? cursor,
+    int limit = 20,
+  }) async => const AppSuccess<ProductCatalogPage>(
+    ProductCatalogPage(products: <Product>[], hasMore: false),
+  );
 }
 
 Collection buildTestCollection({required String id}) {

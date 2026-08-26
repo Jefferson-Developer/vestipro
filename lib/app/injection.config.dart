@@ -103,6 +103,12 @@ import '../features/catalog/domain/repositories/catalog_home_cache_repository.da
     as _i841;
 import '../features/catalog/domain/repositories/catalog_home_config_repository.dart'
     as _i1072;
+import '../features/catalog/domain/usecases/create_campaign_use_case.dart'
+    as _i169;
+import '../features/catalog/domain/usecases/delete_campaign_use_case.dart'
+    as _i961;
+import '../features/catalog/domain/usecases/get_campaign_use_case.dart'
+    as _i746;
 import '../features/catalog/domain/usecases/get_catalog_campaigns_section_use_case.dart'
     as _i151;
 import '../features/catalog/domain/usecases/get_catalog_home_config_use_case.dart'
@@ -111,13 +117,22 @@ import '../features/catalog/domain/usecases/get_featured_collections_section_use
     as _i1042;
 import '../features/catalog/domain/usecases/get_new_arrivals_section_use_case.dart'
     as _i76;
+import '../features/catalog/domain/usecases/list_campaign_related_products_use_case.dart'
+    as _i345;
+import '../features/catalog/domain/usecases/list_campaigns_use_case.dart'
+    as _i328;
 import '../features/catalog/domain/usecases/list_catalog_products_use_case.dart'
     as _i448;
 import '../features/catalog/domain/usecases/load_catalog_home_cache_use_case.dart'
     as _i249;
 import '../features/catalog/domain/usecases/save_catalog_home_cache_use_case.dart'
     as _i64;
+import '../features/catalog/domain/usecases/update_campaign_use_case.dart'
+    as _i598;
+import '../features/catalog/presentation/bloc/campaign_form_bloc.dart' as _i419;
+import '../features/catalog/presentation/bloc/campaign_list_bloc.dart' as _i59;
 import '../features/catalog/presentation/bloc/catalog_home_bloc.dart' as _i420;
+import '../features/catalog/presentation/bloc/lookbook_bloc.dart' as _i630;
 import '../features/catalog/presentation/bloc/product_detail_bloc.dart'
     as _i578;
 import '../features/catalog/presentation/bloc/product_grid_bloc.dart' as _i331;
@@ -850,6 +865,21 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i150.CatalogCampaignRepository>(
       () => const _i565.SharedPreferencesCatalogCampaignRepository(),
     );
+    gh.factory<_i169.CreateCampaignUseCase>(
+      () => _i169.CreateCampaignUseCase(gh<_i150.CatalogCampaignRepository>()),
+    );
+    gh.factory<_i961.DeleteCampaignUseCase>(
+      () => _i961.DeleteCampaignUseCase(gh<_i150.CatalogCampaignRepository>()),
+    );
+    gh.factory<_i746.GetCampaignUseCase>(
+      () => _i746.GetCampaignUseCase(gh<_i150.CatalogCampaignRepository>()),
+    );
+    gh.factory<_i328.ListCampaignsUseCase>(
+      () => _i328.ListCampaignsUseCase(gh<_i150.CatalogCampaignRepository>()),
+    );
+    gh.factory<_i598.UpdateCampaignUseCase>(
+      () => _i598.UpdateCampaignUseCase(gh<_i150.CatalogCampaignRepository>()),
+    );
     gh.lazySingleton<_i725.CustomerLocalMapper>(
       () => _i725.CustomerLocalMapper(gh<_i457.CustomerMapper>()),
     );
@@ -996,6 +1026,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i298.ProductColorRepository>(),
       ),
     );
+    gh.factory<_i59.CampaignListBloc>(
+      () => _i59.CampaignListBloc(
+        listCampaigns: gh<_i328.ListCampaignsUseCase>(),
+        deleteCampaign: gh<_i961.DeleteCampaignUseCase>(),
+      ),
+    );
     gh.factory<_i546.ListTopOpportunityOutcomeReasonsUseCase>(
       () => _i546.ListTopOpportunityOutcomeReasonsUseCase(
         gh<_i527.OpportunityOutcomeReasonRepository>(),
@@ -1125,6 +1161,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i76.GetNewArrivalsSectionUseCase>(
       () => _i76.GetNewArrivalsSectionUseCase(gh<_i321.ProductRepository>()),
+    );
+    gh.factory<_i345.ListCampaignRelatedProductsUseCase>(
+      () => _i345.ListCampaignRelatedProductsUseCase(
+        gh<_i321.ProductRepository>(),
+      ),
     );
     gh.factory<_i448.ListCatalogProductsUseCase>(
       () => _i448.ListCatalogProductsUseCase(gh<_i321.ProductRepository>()),
@@ -1514,6 +1555,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i972.FeatureFlagService>(),
       ),
     );
+    gh.factory<_i630.LookbookBloc>(
+      () => _i630.LookbookBloc(
+        getCampaign: gh<_i746.GetCampaignUseCase>(),
+        listRelatedProducts: gh<_i345.ListCampaignRelatedProductsUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.lazySingleton<_i268.OrganizationDataSource>(
       () => _i455.FirestoreOrganizationDataSource(
         gh<_i974.FirebaseFirestore>(),
@@ -1535,6 +1583,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i923.RoleDataSource>(
       () => _i892.FirestoreRoleDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.factory<_i419.CampaignFormBloc>(
+      () => _i419.CampaignFormBloc(
+        storage: gh<_i209.StorageDataSource>(),
+        createCampaign: gh<_i169.CreateCampaignUseCase>(),
+        updateCampaign: gh<_i598.UpdateCampaignUseCase>(),
+        listRelatedProducts: gh<_i345.ListCampaignRelatedProductsUseCase>(),
+        compressor: gh<_i209.ImageUploadCompressor>(),
+      ),
     );
     gh.factory<_i769.CommercialSizeGridBloc>(
       () => _i769.CommercialSizeGridBloc(

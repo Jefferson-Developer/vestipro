@@ -46,6 +46,8 @@ void main() {
           'product_favorited',
           'product_unfavorited',
           'favorites_viewed',
+          'campaign_viewed',
+          'campaign_product_clicked',
         ]),
       );
 

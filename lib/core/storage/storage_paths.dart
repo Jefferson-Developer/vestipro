@@ -15,6 +15,7 @@
 /// - Product media: `organizations/{organizationId}/products/{productId}/{fileName}`
 /// - Order attachments: `organizations/{organizationId}/orders/{orderId}/attachments/{fileName}`
 /// - User avatar: `organizations/{organizationId}/users/{userId}/avatar`
+/// - Campaign media: `organizations/{organizationId}/campaigns/{campaignId}/{fileName}`
 final class StoragePaths {
   const StoragePaths._();
 
@@ -27,6 +28,20 @@ final class StoragePaths {
     _requireNonEmpty(productId, 'productId');
     _requireNonEmpty(fileName, 'fileName');
     return 'organizations/$organizationId/products/$productId/$fileName';
+  }
+
+  /// Cover/editorial images of a `CatalogCampaign` lookbook (TASK-080),
+  /// following the exact same "compression, format and reordering rules"
+  /// product media already uses (TASK-068) — only the folder differs.
+  static String campaignFile({
+    required String organizationId,
+    required String campaignId,
+    required String fileName,
+  }) {
+    _requireNonEmpty(organizationId, 'organizationId');
+    _requireNonEmpty(campaignId, 'campaignId');
+    _requireNonEmpty(fileName, 'fileName');
+    return 'organizations/$organizationId/campaigns/$campaignId/$fileName';
   }
 
   static String orderAttachment({
