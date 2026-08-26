@@ -1,4 +1,5 @@
 import '../../../../core/utils/utils.dart';
+import '../entities/catalog_filter.dart';
 import '../entities/product.dart';
 import '../entities/product_catalog_page.dart';
 import '../value_objects/sku.dart';
@@ -77,10 +78,18 @@ abstract interface class ProductRepository {
   /// [companyId] restricts the result the same way [listRecentlyLaunched]
   /// does: Products scoped to that company, plus Products shared across the
   /// whole organization (`Product.companyId == null`).
+  ///
+  /// [filter] (TASK-082), when provided, narrows the result to Products
+  /// matching every active dimension of `CatalogFilter.matches` *before*
+  /// pagination is applied — so [ProductCatalogPage.hasMore]/[cursor]
+  /// pagination stays accurate for the filtered set, never the full
+  /// catalog. `null`/`CatalogFilter.empty` behaves exactly as before
+  /// TASK-082.
   Future<AppResult<ProductCatalogPage>> listCatalog({
     required String organizationId,
     String? companyId,
     String? cursor,
     int limit = 20,
+    CatalogFilter? filter,
   });
 }

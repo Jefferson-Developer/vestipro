@@ -172,6 +172,7 @@ final class _ScriptedProductRepository implements ProductRepository {
     String? companyId,
     String? cursor,
     int limit = 20,
+    CatalogFilter? filter,
   }) async {
     final result = _pages[cursor];
     if (result == null) {

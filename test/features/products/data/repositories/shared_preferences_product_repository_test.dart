@@ -395,6 +395,157 @@ void main() {
           expect(page.nextCursor, isNull);
         },
       );
+
+      group('with a CatalogFilter (TASK-082)', () {
+        test('narrows by a single dimension before pagination', () async {
+          final matching = _product(
+            id: 'product-match',
+            sku: 'SKU-MATCH',
+          ).copyWith(status: ProductStatus.active, collectionId: 'col-1');
+          final other = _product(
+            id: 'product-other',
+            sku: 'SKU-OTHER',
+          ).copyWith(status: ProductStatus.active, collectionId: 'col-2');
+          await repository.create(product: matching);
+          await repository.create(product: other);
+
+          final result = await repository.listCatalog(
+            organizationId: 'org-1',
+            filter: const CatalogFilter(collectionId: 'col-1'),
+          );
+
+          final page = (result as AppSuccess<ProductCatalogPage>).value;
+          expect(page.products.map((p) => p.id).toList(), <String>[
+            'product-match',
+          ]);
+        });
+
+        test(
+          'combines multiple dimensions (AND across, OR within a set)',
+          () async {
+            final matching = _product(id: 'product-match', sku: 'SKU-MATCH')
+                .copyWith(
+                  status: ProductStatus.active,
+                  collectionId: 'col-1',
+                  brand: 'Malwee',
+                  colorIds: const <String>['red', 'blue'],
+                  tags: const <String>['casual'],
+                );
+            final wrongBrand =
+                _product(id: 'product-wrong-brand', sku: 'SKU-WB').copyWith(
+                  status: ProductStatus.active,
+                  collectionId: 'col-1',
+                  brand: 'OutraMarca',
+                  colorIds: const <String>['red'],
+                  tags: const <String>['casual'],
+                );
+            final wrongColor =
+                _product(id: 'product-wrong-color', sku: 'SKU-WC').copyWith(
+                  status: ProductStatus.active,
+                  collectionId: 'col-1',
+                  brand: 'Malwee',
+                  colorIds: const <String>['green'],
+                  tags: const <String>['casual'],
+                );
+            await repository.create(product: matching);
+            await repository.create(product: wrongBrand);
+            await repository.create(product: wrongColor);
+
+            final result = await repository.listCatalog(
+              organizationId: 'org-1',
+              filter: const CatalogFilter(
+                collectionId: 'col-1',
+                brand: 'malwee',
+                colorIds: <String>{'red', 'yellow'},
+                tags: <String>{'casual', 'formal'},
+              ),
+            );
+
+            final page = (result as AppSuccess<ProductCatalogPage>).value;
+            expect(page.products.map((p) => p.id).toList(), <String>[
+              'product-match',
+            ]);
+          },
+        );
+
+        test(
+          'returns an empty (never broken) page for a combination with no match',
+          () async {
+            final product = _product(
+              id: 'product-1',
+              sku: 'SKU-1',
+            ).copyWith(status: ProductStatus.active, brand: 'Malwee');
+            await repository.create(product: product);
+
+            final result = await repository.listCatalog(
+              organizationId: 'org-1',
+              filter: const CatalogFilter(brand: 'Inexistente'),
+            );
+
+            final page = (result as AppSuccess<ProductCatalogPage>).value;
+            expect(page.products, isEmpty);
+            expect(page.hasMore, isFalse);
+          },
+        );
+
+        test(
+          'launchOnly ranks by launchDate (newest first), like listRecentlyLaunched',
+          () async {
+            final noLaunchDate =
+                _product(id: 'product-no-launch', sku: 'SKU-NL').copyWith(
+                  status: ProductStatus.active,
+                  createdAt: DateTime.utc(2026, 5, 1),
+                );
+            final olderLaunch =
+                _product(id: 'product-older-launch', sku: 'SKU-OL').copyWith(
+                  status: ProductStatus.active,
+                  launchDate: DateTime.utc(2026, 1, 1),
+                );
+            final newerLaunch =
+                _product(id: 'product-newer-launch', sku: 'SKU-NEL').copyWith(
+                  status: ProductStatus.active,
+                  launchDate: DateTime.utc(2026, 6, 1),
+                );
+            await repository.create(product: noLaunchDate);
+            await repository.create(product: olderLaunch);
+            await repository.create(product: newerLaunch);
+
+            final result = await repository.listCatalog(
+              organizationId: 'org-1',
+              filter: const CatalogFilter(launchOnly: true),
+            );
+
+            final page = (result as AppSuccess<ProductCatalogPage>).value;
+            expect(page.products.map((p) => p.id).toList(), <String>[
+              'product-newer-launch',
+              'product-older-launch',
+            ]);
+          },
+        );
+
+        test('material matches Product.fabric case-insensitively', () async {
+          final matching = _product(
+            id: 'product-match',
+            sku: 'SKU-MATCH',
+          ).copyWith(status: ProductStatus.active, fabric: 'Algodão Pima');
+          final other = _product(
+            id: 'product-other',
+            sku: 'SKU-OTHER',
+          ).copyWith(status: ProductStatus.active, fabric: 'Poliéster');
+          await repository.create(product: matching);
+          await repository.create(product: other);
+
+          final result = await repository.listCatalog(
+            organizationId: 'org-1',
+            filter: const CatalogFilter(material: 'algodão'),
+          );
+
+          final page = (result as AppSuccess<ProductCatalogPage>).value;
+          expect(page.products.map((p) => p.id).toList(), <String>[
+            'product-match',
+          ]);
+        });
+      });
     });
   });
 }

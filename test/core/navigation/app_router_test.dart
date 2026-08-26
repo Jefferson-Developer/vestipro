@@ -320,6 +320,58 @@ void main() {
       );
     });
 
+    testWidgets(
+      'passes CatalogBrowseRoute query parameters to the injected page '
+      '(TASK-082)',
+      (tester) async {
+        Map<String, String>? capturedQuery;
+        final appRouter = _buildRouter(
+          catalogBrowsePageBuilder: (context, orgId, queryParameters) {
+            capturedQuery = queryParameters;
+            return Scaffold(
+              body: Text('catalog-browse:$orgId:${queryParameters['mode']}'),
+            );
+          },
+        );
+
+        await tester.pumpWidget(
+          MaterialApp.router(routerConfig: appRouter.router),
+        );
+        appRouter.router.go(
+          const CatalogBrowseRoute(
+            orgId: 'acme',
+            queryParameters: <String, String>{
+              'mode': 'list',
+              'collectionId': 'col-1',
+            },
+          ).location,
+        );
+        await tester.pumpAndSettle();
+
+        expect(capturedQuery, <String, String>{
+          'mode': 'list',
+          'collectionId': 'col-1',
+        });
+        expect(find.text('catalog-browse:acme:list'), findsOneWidget);
+      },
+    );
+
+    testWidgets(
+      'falls back to the not found page when no catalogBrowsePageBuilder '
+      'is wired',
+      (tester) async {
+        final appRouter = _buildRouter();
+
+        await tester.pumpWidget(
+          MaterialApp.router(routerConfig: appRouter.router),
+        );
+        appRouter.router.go(const CatalogBrowseRoute(orgId: 'acme').location);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Página não encontrada'), findsOneWidget);
+      },
+    );
+
     testWidgets('protects CustomerPortfolioRoute with customer.view', (
       tester,
     ) async {
@@ -422,6 +474,12 @@ AppRouter _buildRouter({
   customerPortfolioPageBuilder,
   Widget Function(BuildContext context, String orgId, String customerId)?
   customerDetailPageBuilder,
+  Widget Function(
+    BuildContext context,
+    String orgId,
+    Map<String, String> queryParameters,
+  )?
+  catalogBrowsePageBuilder,
   WidgetBuilder? loginPageBuilder,
   Widget Function(BuildContext context, String token)? acceptInvitePageBuilder,
   Widget Function(BuildContext context, String token)?
@@ -448,6 +506,7 @@ AppRouter _buildRouter({
     productFormPageBuilder: productFormPageBuilder,
     customerPortfolioPageBuilder: customerPortfolioPageBuilder,
     customerDetailPageBuilder: customerDetailPageBuilder,
+    catalogBrowsePageBuilder: catalogBrowsePageBuilder,
     loginPageBuilder:
         loginPageBuilder ?? (context) => const Scaffold(body: Text('login')),
     signUpPageBuilder: (context) => const Scaffold(body: Text('sign-up')),

@@ -26,6 +26,20 @@ enum AppProductGridStatus {
   error,
 }
 
+/// Which layout [AppProductGrid] renders its [AppProductGrid.products] in
+/// (TASK-082) — purely visual, every other behavior (pagination, tap,
+/// favorite/share) is identical between the two.
+enum AppProductGridLayout {
+  /// The default multi-column card grid (2 on mobile, 3 on tablet, 4 on
+  /// desktop, 5 on large desktop — see [AppProductGrid._resolveCrossAxisCount]).
+  grid,
+
+  /// A single-column list of wide rows — same information as a grid card,
+  /// laid out horizontally (photo left, details right) for quicker
+  /// scanning of many products at once.
+  list,
+}
+
 /// Whether a product (at the color/variant level the caller has already
 /// resolved for this grid card) can currently be sold.
 enum AppProductAvailability {
@@ -144,6 +158,7 @@ class AppProductGrid extends StatelessWidget {
     required this.products,
     required this.onProductTap,
     this.status = AppProductGridStatus.idle,
+    this.layout = AppProductGridLayout.grid,
     this.loadingItemCount = 6,
     this.hasMore = false,
     this.isLoadingMore = false,
@@ -163,6 +178,11 @@ class AppProductGrid extends StatelessWidget {
   final List<AppProductCardData> products;
   final ValueChanged<AppProductCardData> onProductTap;
   final AppProductGridStatus status;
+
+  /// [AppProductGridLayout.grid] (the default) preserves every existing
+  /// caller's exact rendering. [AppProductGridLayout.list] (TASK-082) is
+  /// opt-in.
+  final AppProductGridLayout layout;
   final int loadingItemCount;
 
   final bool hasMore;
@@ -214,50 +234,78 @@ class AppProductGrid extends StatelessWidget {
         break;
     }
 
+    final itemCount = status == AppProductGridStatus.loading
+        ? loadingItemCount
+        : products.length;
+
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        layout == AppProductGridLayout.list
+            ? _buildList(itemCount)
+            : _buildGrid(itemCount),
+        if (status == AppProductGridStatus.idle && (hasMore || isLoadingMore))
+          AppPagination(
+            hasMore: hasMore,
+            isLoadingMore: isLoadingMore,
+            onLoadMore: onLoadMore,
+          ),
+      ],
+    );
+  }
+
+  Widget _buildGrid(int itemCount) {
     return LayoutBuilder(
       builder: (context, constraints) {
         final breakpoint = AppBreakpoints.resolve(constraints.maxWidth);
         final columns = _resolveCrossAxisCount(breakpoint);
-        final itemCount = status == AppProductGridStatus.loading
-            ? loadingItemCount
-            : products.length;
 
-        return Column(
-          mainAxisSize: MainAxisSize.min,
-          crossAxisAlignment: CrossAxisAlignment.stretch,
-          children: <Widget>[
-            GridView.builder(
-              shrinkWrap: true,
-              physics: const NeverScrollableScrollPhysics(),
-              itemCount: itemCount,
-              gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
-                crossAxisCount: columns,
-                mainAxisSpacing: AppSpacing.spacing16,
-                crossAxisSpacing: AppSpacing.spacing16,
-                childAspectRatio: 0.46,
-              ),
-              itemBuilder: (context, index) {
-                if (status == AppProductGridStatus.loading) {
-                  return const AppProductCardSkeleton();
-                }
-                final product = products[index];
-                return AppProductCard(
-                  product: product,
-                  onTap: () => onProductTap(product),
-                  readyStockLabel: readyStockLabel,
-                  futureStockLabel: futureStockLabel,
-                  unavailableLabel: unavailableLabel,
-                );
-              },
-            ),
-            if (status == AppProductGridStatus.idle &&
-                (hasMore || isLoadingMore))
-              AppPagination(
-                hasMore: hasMore,
-                isLoadingMore: isLoadingMore,
-                onLoadMore: onLoadMore,
-              ),
-          ],
+        return GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          itemCount: itemCount,
+          gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: columns,
+            mainAxisSpacing: AppSpacing.spacing16,
+            crossAxisSpacing: AppSpacing.spacing16,
+            childAspectRatio: 0.46,
+          ),
+          itemBuilder: (context, index) {
+            if (status == AppProductGridStatus.loading) {
+              return const AppProductCardSkeleton();
+            }
+            final product = products[index];
+            return AppProductCard(
+              product: product,
+              onTap: () => onProductTap(product),
+              readyStockLabel: readyStockLabel,
+              futureStockLabel: futureStockLabel,
+              unavailableLabel: unavailableLabel,
+            );
+          },
+        );
+      },
+    );
+  }
+
+  Widget _buildList(int itemCount) {
+    return ListView.separated(
+      shrinkWrap: true,
+      physics: const NeverScrollableScrollPhysics(),
+      itemCount: itemCount,
+      separatorBuilder: (_, _) => const SizedBox(height: AppSpacing.spacing12),
+      itemBuilder: (context, index) {
+        if (status == AppProductGridStatus.loading) {
+          return const AppProductListRowSkeleton();
+        }
+        final product = products[index];
+        return AppProductListRow(
+          product: product,
+          onTap: () => onProductTap(product),
+          readyStockLabel: readyStockLabel,
+          futureStockLabel: futureStockLabel,
+          unavailableLabel: unavailableLabel,
         );
       },
     );
@@ -563,6 +611,212 @@ class AppProductCard extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// The [AppProductGridLayout.list] row (TASK-082) — same [AppProductCardData]
+/// input, laid out horizontally (a fixed-size thumbnail, then name/brand/
+/// colors/price/availability stacked beside it) instead of [AppProductCard]'s
+/// vertical card, for faster scanning of many products at once.
+class AppProductListRow extends StatelessWidget {
+  const AppProductListRow({
+    required this.product,
+    required this.onTap,
+    required this.readyStockLabel,
+    required this.futureStockLabel,
+    required this.unavailableLabel,
+    super.key,
+  });
+
+  final AppProductCardData product;
+  final VoidCallback onTap;
+  final String readyStockLabel;
+  final String futureStockLabel;
+  final String unavailableLabel;
+
+  String get _availabilityLabel => switch (product.availability) {
+    AppProductAvailability.readyStock =>
+      product.availabilityLabel ?? readyStockLabel,
+    AppProductAvailability.futureStock =>
+      product.availabilityLabel ?? futureStockLabel,
+    AppProductAvailability.unavailable =>
+      product.availabilityLabel ?? unavailableLabel,
+  };
+
+  Color _availabilityColor(AppColors colors) => switch (product.availability) {
+    AppProductAvailability.readyStock => colors.success,
+    AppProductAvailability.futureStock => colors.warning,
+    AppProductAvailability.unavailable => colors.outline,
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Semantics(
+      label:
+          '${product.name}${product.priceLabel != null ? ', ${product.priceLabel}' : ''}, $_availabilityLabel',
+      button: true,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppRadius.radius12),
+        child: Padding(
+          padding: const EdgeInsets.all(AppSpacing.spacing8),
+          child: Row(
+            crossAxisAlignment: CrossAxisAlignment.center,
+            children: <Widget>[
+              SizedBox(
+                width: AppSpacing.spacing64,
+                height: AppSpacing.spacing64,
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppRadius.radius8),
+                  child: _buildImage(colors),
+                ),
+              ),
+              const SizedBox(width: AppSpacing.spacing12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  mainAxisSize: MainAxisSize.min,
+                  children: <Widget>[
+                    Text(
+                      product.name,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.bodyMedium.copyWith(
+                        color: colors.onSurface,
+                      ),
+                    ),
+                    if (product.brandOrCollection != null)
+                      Text(
+                        product.brandOrCollection!,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: AppTypography.bodySmall.copyWith(
+                          color: colors.outline,
+                        ),
+                      ),
+                    const SizedBox(height: AppSpacing.spacing4),
+                    Row(
+                      children: <Widget>[
+                        Icon(
+                          Icons.circle,
+                          size: AppIconSizes.sm,
+                          color: _availabilityColor(colors),
+                        ),
+                        const SizedBox(width: AppSpacing.spacing4),
+                        Flexible(
+                          child: Text(
+                            _availabilityLabel,
+                            maxLines: 1,
+                            overflow: TextOverflow.ellipsis,
+                            style: AppTypography.labelSmall.copyWith(
+                              color: _availabilityColor(colors),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              if (product.priceLabel != null) ...<Widget>[
+                const SizedBox(width: AppSpacing.spacing8),
+                Text(
+                  product.priceLabel!,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: AppTypography.labelLarge.copyWith(
+                    color: colors.onSurface,
+                  ),
+                ),
+              ],
+              if (product.onFavoriteTap != null) ...<Widget>[
+                const SizedBox(width: AppSpacing.spacing4),
+                AppIconButton(
+                  icon: product.isFavorite
+                      ? Icons.favorite
+                      : Icons.favorite_border,
+                  semanticLabel: product.isFavorite
+                      ? 'Remover dos favoritos'
+                      : 'Adicionar aos favoritos',
+                  onPressed: product.onFavoriteTap,
+                ),
+              ],
+              if (product.onShareTap != null) ...<Widget>[
+                const SizedBox(width: AppSpacing.spacing4),
+                AppIconButton(
+                  icon: Icons.share_outlined,
+                  semanticLabel: 'Compartilhar produto',
+                  onPressed: product.onShareTap,
+                ),
+              ],
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildImage(AppColors colors) {
+    final imageUrl = product.imageUrl;
+    if (imageUrl == null || imageUrl.isEmpty) {
+      return _buildImageFallback(colors);
+    }
+    return CachedNetworkImage(
+      imageUrl: imageUrl,
+      fit: BoxFit.cover,
+      placeholder: (context, url) =>
+          const AppSkeleton(shape: AppSkeletonShape.block),
+      errorWidget: (context, url, error) => _buildImageFallback(colors),
+    );
+  }
+
+  Widget _buildImageFallback(AppColors colors) {
+    return Container(
+      color: colors.surfaceContainer,
+      alignment: Alignment.center,
+      child: Icon(
+        Icons.image_not_supported_outlined,
+        size: AppIconSizes.md,
+        color: colors.outline,
+      ),
+    );
+  }
+}
+
+class AppProductListRowSkeleton extends StatelessWidget {
+  const AppProductListRowSkeleton({super.key});
+
+  @override
+  Widget build(BuildContext context) {
+    return Padding(
+      padding: const EdgeInsets.all(AppSpacing.spacing8),
+      child: Row(
+        children: <Widget>[
+          SizedBox(
+            width: AppSpacing.spacing64,
+            height: AppSpacing.spacing64,
+            child: AppSkeleton(
+              shape: AppSkeletonShape.card,
+              radius: AppRadius.radius8,
+            ),
+          ),
+          const SizedBox(width: AppSpacing.spacing12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: <Widget>[
+                const AppSkeleton.line(),
+                const SizedBox(height: AppSpacing.spacing4),
+                AppSkeleton.line(width: AppSpacing.spacing64),
+              ],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }

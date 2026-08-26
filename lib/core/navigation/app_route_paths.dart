@@ -61,6 +61,43 @@ final class CatalogHomeRoute extends AppRoute {
   }
 }
 
+/// The catalog's filterable, multi-view-mode browsing screen (TASK-082,
+/// EPIC-10) — [queryParameters] carries the active view mode (`mode`) and
+/// every `CatalogFilter` dimension (see `CatalogFilter.toQueryParameters`),
+/// so a Flutter Web reload/shared link restores exactly the same view.
+/// Kept as its own route (not folded into [CatalogHomeRoute]) since the
+/// home screen (sections: lançamentos, campanhas, coleções) and this
+/// browsing screen (one filterable, paginated grid/list) are different
+/// screens with different states to reflect in the URL — same rationale
+/// [CustomerPortfolioRoute] already sets apart from a customer's own detail
+/// route.
+final class CatalogBrowseRoute extends AppRoute {
+  const CatalogBrowseRoute({
+    required this.orgId,
+    this.companyId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String? companyId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'catalogBrowse';
+  static const pathPattern = '/org/:orgId/catalog/browse';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/catalog/browse';
+    final allParameters = <String, String>{
+      ...queryParameters,
+      if (companyId != null && companyId!.trim().isNotEmpty)
+        'companyId': companyId!.trim(),
+    };
+    if (allParameters.isEmpty) return path;
+    return Uri(path: path, queryParameters: allParameters).toString();
+  }
+}
+
 /// Read-only administrative audit log route (TASK-047).
 ///
 /// It lives under the active organization scope and is protected in

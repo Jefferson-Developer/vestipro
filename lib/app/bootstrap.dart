@@ -231,6 +231,29 @@ class VestiProApp extends StatelessWidget {
                       ).location,
                     ),
                   ),
+          catalogBrowsePageBuilder: (context, orgId, queryParameters) =>
+              CatalogFilterPage(
+                organizationId: orgId,
+                companyId: queryParameters['companyId'],
+                createBloc: () => getIt<CatalogFilterBloc>(),
+                initialViewMode: queryParameters.containsKey('mode')
+                    ? CatalogViewMode.fromCode(queryParameters['mode'])
+                    : null,
+                initialFilter: CatalogFilter.fromQueryParameters(
+                  queryParameters,
+                ),
+                onProductSelected: (product) =>
+                    context.go(CatalogBrowseRoute(orgId: orgId).location),
+                onUrlStateChanged: (viewMode, filter) => context.go(
+                  CatalogBrowseRoute(
+                    orgId: orgId,
+                    queryParameters: <String, String>{
+                      'mode': viewMode.code,
+                      ...filter.toQueryParameters(),
+                    },
+                  ).location,
+                ),
+              ),
           customerDetailPageBuilder: (context, orgId, customerId) =>
               CustomerDetailPage(
                 organizationId: orgId,

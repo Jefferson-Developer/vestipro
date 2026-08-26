@@ -328,6 +328,65 @@ void main() {
         expect(tapped?.id, _shirt.id);
       });
     });
+
+    group('AppProductGridLayout.list (TASK-082)', () {
+      testWidgets('renders a single-column row instead of a grid card', (
+        tester,
+      ) async {
+        await mockNetworkImagesFor(() async {
+          await _pumpGrid(
+            tester,
+            AppProductGrid(
+              products: const [_shirt],
+              onProductTap: (_) {},
+              layout: AppProductGridLayout.list,
+            ),
+          );
+
+          expect(find.byType(AppProductListRow), findsOneWidget);
+          expect(find.byType(AppProductCard), findsNothing);
+          expect(find.text('Camisa Social Slim'), findsOneWidget);
+          expect(find.text('R\$ 189,90'), findsOneWidget);
+        });
+      });
+
+      testWidgets('shows loadingItemCount list-row skeletons while loading', (
+        tester,
+      ) async {
+        await _pumpGrid(
+          tester,
+          AppProductGrid(
+            products: const [],
+            onProductTap: _noopTap,
+            layout: AppProductGridLayout.list,
+            status: AppProductGridStatus.loading,
+            loadingItemCount: 3,
+          ),
+        );
+
+        expect(find.byType(AppProductListRowSkeleton), findsNWidgets(3));
+      });
+
+      testWidgets('calls onProductTap with the tapped product', (tester) async {
+        AppProductCardData? tapped;
+
+        await mockNetworkImagesFor(() async {
+          await _pumpGrid(
+            tester,
+            AppProductGrid(
+              products: const [_shirt],
+              onProductTap: (product) => tapped = product,
+              layout: AppProductGridLayout.list,
+            ),
+          );
+
+          await tester.tap(find.text('Camisa Social Slim'));
+          await tester.pump();
+
+          expect(tapped?.id, _shirt.id);
+        });
+      });
+    });
   });
 }
 

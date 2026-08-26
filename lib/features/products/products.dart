@@ -2,6 +2,7 @@
 library;
 
 export 'domain/category_cycle_validator.dart';
+export 'domain/entities/catalog_filter.dart';
 export 'domain/entities/category.dart';
 export 'domain/entities/collection.dart';
 export 'domain/entities/commercial_size_grid_draft.dart';
@@ -80,6 +81,7 @@ export 'domain/usecases/update_product_use_case.dart';
 export 'domain/usecases/update_product_variant_use_case.dart';
 export 'domain/usecases/update_season_use_case.dart';
 export 'domain/usecases/update_size_grid_template_use_case.dart';
+export 'domain/value_objects/catalog_filter_key.dart';
 export 'domain/value_objects/collection_status.dart';
 export 'domain/value_objects/commercial_variant_availability.dart';
 export 'domain/value_objects/ean.dart';

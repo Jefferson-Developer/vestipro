@@ -311,6 +311,7 @@ final class _ScriptedProductRepository implements ProductRepository {
     String? companyId,
     String? cursor,
     int limit = 20,
+    CatalogFilter? filter,
   }) async {
     requestedCursors.add(cursor);
     if (delay > Duration.zero) {

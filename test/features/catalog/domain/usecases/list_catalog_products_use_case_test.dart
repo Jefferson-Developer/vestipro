@@ -82,6 +82,7 @@ class _FakeProductRepository implements ProductRepository {
     String? companyId,
     String? cursor,
     int limit = 20,
+    CatalogFilter? filter,
   }) async {
     lastOrganizationId = organizationId;
     lastCompanyId = companyId;

@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/utils/utils.dart';
+import '../../../products/domain/entities/catalog_filter.dart';
 import '../../../products/domain/entities/product_catalog_page.dart';
 import '../../../products/domain/repositories/product_repository.dart';
 
@@ -24,12 +25,14 @@ final class ListCatalogProductsUseCase {
     String? companyId,
     String? cursor,
     int limit = kProductGridPageSize,
+    CatalogFilter? filter,
   }) {
     return _productRepository.listCatalog(
       organizationId: organizationId.trim(),
       companyId: companyId,
       cursor: cursor,
       limit: limit,
+      filter: filter,
     );
   }
 }

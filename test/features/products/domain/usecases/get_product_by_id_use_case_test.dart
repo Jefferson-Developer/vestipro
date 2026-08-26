@@ -95,6 +95,7 @@ class _FakeProductRepository implements ProductRepository {
     String? companyId,
     String? cursor,
     int limit = 20,
+    CatalogFilter? filter,
   }) async {
     return const AppSuccess<ProductCatalogPage>(
       ProductCatalogPage(products: <Product>[], hasMore: false),

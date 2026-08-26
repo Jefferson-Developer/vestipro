@@ -184,7 +184,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-079 — Implementar favoritos](TASK-079-implementar-favoritos.md) — Flutter Senior + Front-end
 - [x] [TASK-080 — Implementar lookbook e campanhas visuais](TASK-080-implementar-lookbook-e-campanhas.md) — Flutter Senior + Front-end
 - [x] [TASK-081 — Implementar compartilhamento de catálogo](TASK-081-implementar-compartilhamento-de-catalogo.md) — Flutter Senior + Front-end
-- [ ] [TASK-082 — Implementar modos de visualização e filtros avançados](TASK-082-implementar-modos-de-visualizacao-e-filtros.md) — Flutter Senior + Front-end
+- [x] [TASK-082 — Implementar modos de visualização e filtros avançados](TASK-082-implementar-modos-de-visualizacao-e-filtros.md) — Flutter Senior + Front-end
 
 ### EPIC-11 — Tabelas de Preço e Condições Comerciais
 - [ ] [TASK-083 — Modelar Price List](TASK-083-modelar-price-list.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 81 / 220 tasks concluídas.
+**Progresso:** 82 / 220 tasks concluídas.

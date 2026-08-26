@@ -32,6 +32,7 @@ class AppRouter {
     this.productFormPageBuilder,
     this.customerPortfolioPageBuilder,
     this.customerDetailPageBuilder,
+    this.catalogBrowsePageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
     AuthorizationGuard? authorizationGuard,
@@ -63,6 +64,18 @@ class AppRouter {
   customerPortfolioPageBuilder;
   final Widget Function(BuildContext context, String orgId, String customerId)?
   customerDetailPageBuilder;
+
+  /// Builds the catalog's filterable browsing screen (TASK-082), given
+  /// `orgId` and the raw `queryParameters` of [CatalogBrowseRoute] — the
+  /// caller decides how to turn those into a `CatalogViewMode`/
+  /// `CatalogFilter`, same "router hands raw params, page owns parsing"
+  /// contract [customerPortfolioPageBuilder] already sets.
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    Map<String, String> queryParameters,
+  )?
+  catalogBrowsePageBuilder;
 
   /// Builds the real login screen (TASK-034). Injected from `VestiProApp`
   /// instead of imported here so `lib/core/navigation/` never depends on a
@@ -108,6 +121,19 @@ class AppRouter {
           state.pathParameters['orgId']!,
           state.uri.queryParameters['companyId'],
         ),
+      ),
+      GoRoute(
+        path: CatalogBrowseRoute.pathPattern,
+        name: CatalogBrowseRoute.name,
+        builder: (context, state) {
+          final builder = catalogBrowsePageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.uri.queryParameters,
+          );
+        },
       ),
       GoRoute(
         path: AboutAppRoute.pathPattern,

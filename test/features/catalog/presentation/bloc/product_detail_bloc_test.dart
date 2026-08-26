@@ -535,6 +535,7 @@ final class _ScriptedProductRepository implements ProductRepository {
     String? companyId,
     String? cursor,
     int limit = 20,
+    CatalogFilter? filter,
   }) => throw UnimplementedError();
 }
 

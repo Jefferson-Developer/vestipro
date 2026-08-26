@@ -95,6 +95,7 @@ class FakeCatalogHomeProductRepository implements ProductRepository {
     String? companyId,
     String? cursor,
     int limit = 20,
+    CatalogFilter? filter,
   }) async {
     return result.fold(
       onSuccess: (products) => AppSuccess<ProductCatalogPage>(
@@ -345,6 +346,7 @@ class InMemoryCatalogProductRepository implements ProductRepository {
     String? companyId,
     String? cursor,
     int limit = 20,
+    CatalogFilter? filter,
   }) async => const AppSuccess<ProductCatalogPage>(
     ProductCatalogPage(products: <Product>[], hasMore: false),
   );

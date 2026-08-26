@@ -119,6 +119,7 @@ class _FakeRepository implements ProductRepository {
     String? companyId,
     String? cursor,
     int limit = 20,
+    CatalogFilter? filter,
   }) async {
     return _result.fold(
       onSuccess: (products) => AppSuccess<ProductCatalogPage>(

@@ -281,6 +281,7 @@ final class _FakeProductRepository implements ProductRepository {
     String? companyId,
     String? cursor,
     int limit = 20,
+    CatalogFilter? filter,
   }) => throw UnimplementedError();
 }
 
@@ -344,6 +345,7 @@ final class _FakeFavoriteRepository implements FavoriteRepository {
     required String userId,
     int offset = 0,
     int limit = 20,
+    CatalogFilter? filter,
   }) async {
     final items = _favoriteIds
         .map(

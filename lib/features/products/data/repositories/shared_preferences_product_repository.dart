@@ -5,6 +5,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
+import '../../domain/entities/catalog_filter.dart';
 import '../../domain/entities/product.dart';
 import '../../domain/entities/product_catalog_page.dart';
 import '../../domain/entities/product_custom_field_value.dart';
@@ -231,10 +232,12 @@ final class SharedPreferencesProductRepository implements ProductRepository {
     String? companyId,
     String? cursor,
     int limit = 20,
+    CatalogFilter? filter,
   }) async {
     try {
       final products = await _load(organizationId);
       final trimmedCompanyId = companyId?.trim();
+      final activeFilter = filter ?? CatalogFilter.empty;
       final eligible =
           products
               .where(
@@ -244,14 +247,22 @@ final class SharedPreferencesProductRepository implements ProductRepository {
                     (trimmedCompanyId == null ||
                         trimmedCompanyId.isEmpty ||
                         product.companyId == null ||
-                        product.companyId == trimmedCompanyId),
+                        product.companyId == trimmedCompanyId) &&
+                    activeFilter.matches(product),
               )
               .toList(growable: true)
             ..sort((a, b) {
-              final createdAtComparison = b.createdAt.compareTo(a.createdAt);
-              return createdAtComparison != 0
-                  ? createdAtComparison
-                  : b.id.compareTo(a.id);
+              // "Lançamento" (TASK-082, `CatalogViewMode.newArrivals`) ranks
+              // by launch date, newest first — the exact same ordering
+              // `listRecentlyLaunched` already uses — instead of the
+              // default `createdAt` ordering every other filter combination
+              // keeps.
+              final comparison = activeFilter.launchOnly
+                  ? (b.launchDate ?? b.createdAt).compareTo(
+                      a.launchDate ?? a.createdAt,
+                    )
+                  : b.createdAt.compareTo(a.createdAt);
+              return comparison != 0 ? comparison : b.id.compareTo(a.id);
             });
 
       final trimmedCursor = cursor?.trim();

@@ -97,12 +97,16 @@ import '../features/catalog/data/repositories/shared_preferences_catalog_campaig
     as _i565;
 import '../features/catalog/data/repositories/shared_preferences_catalog_home_cache_repository.dart'
     as _i26;
+import '../features/catalog/data/repositories/shared_preferences_catalog_preferences_repository.dart'
+    as _i590;
 import '../features/catalog/domain/repositories/catalog_campaign_repository.dart'
     as _i150;
 import '../features/catalog/domain/repositories/catalog_home_cache_repository.dart'
     as _i841;
 import '../features/catalog/domain/repositories/catalog_home_config_repository.dart'
     as _i1072;
+import '../features/catalog/domain/repositories/catalog_preferences_repository.dart'
+    as _i1031;
 import '../features/catalog/domain/usecases/create_campaign_use_case.dart'
     as _i169;
 import '../features/catalog/domain/usecases/delete_campaign_use_case.dart'
@@ -125,12 +129,18 @@ import '../features/catalog/domain/usecases/list_catalog_products_use_case.dart'
     as _i448;
 import '../features/catalog/domain/usecases/load_catalog_home_cache_use_case.dart'
     as _i249;
+import '../features/catalog/domain/usecases/load_catalog_preferences_use_case.dart'
+    as _i700;
 import '../features/catalog/domain/usecases/save_catalog_home_cache_use_case.dart'
     as _i64;
+import '../features/catalog/domain/usecases/save_catalog_preferences_use_case.dart'
+    as _i36;
 import '../features/catalog/domain/usecases/update_campaign_use_case.dart'
     as _i598;
 import '../features/catalog/presentation/bloc/campaign_form_bloc.dart' as _i419;
 import '../features/catalog/presentation/bloc/campaign_list_bloc.dart' as _i59;
+import '../features/catalog/presentation/bloc/catalog_filter_bloc.dart'
+    as _i186;
 import '../features/catalog/presentation/bloc/catalog_home_bloc.dart' as _i420;
 import '../features/catalog/presentation/bloc/lookbook_bloc.dart' as _i630;
 import '../features/catalog/presentation/bloc/product_detail_bloc.dart'
@@ -844,6 +854,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i611.ImageCompressor>(
       () => const _i611.FlutterImageCompressor(),
     );
+    gh.lazySingleton<_i1031.CatalogPreferencesRepository>(
+      () => const _i590.SharedPreferencesCatalogPreferencesRepository(),
+    );
     gh.lazySingleton<_i298.ProductColorRepository>(
       () => const _i173.SharedPreferencesProductColorRepository(),
     );
@@ -877,6 +890,16 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i920.CustomerFormDraftRepositoryImpl(
         dataSource: gh<_i1036.CustomerFormDraftDataSource>(),
         mapper: gh<_i258.CustomerFormDraftMapper>(),
+      ),
+    );
+    gh.factory<_i700.LoadCatalogPreferencesUseCase>(
+      () => _i700.LoadCatalogPreferencesUseCase(
+        gh<_i1031.CatalogPreferencesRepository>(),
+      ),
+    );
+    gh.factory<_i36.SaveCatalogPreferencesUseCase>(
+      () => _i36.SaveCatalogPreferencesUseCase(
+        gh<_i1031.CatalogPreferencesRepository>(),
       ),
     );
     gh.lazySingleton<_i174.SizeGridTemplateRepository>(
@@ -1809,6 +1832,21 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i321.ListPortfolioAssignmentsUseCase>(
       () => _i321.ListPortfolioAssignmentsUseCase(
         gh<_i295.PortfolioAssignmentRepository>(),
+      ),
+    );
+    gh.factory<_i186.CatalogFilterBloc>(
+      () => _i186.CatalogFilterBloc(
+        listCatalogProducts: gh<_i448.ListCatalogProductsUseCase>(),
+        getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
+        listCollections: gh<_i1023.ListCollectionsUseCase>(),
+        listSeasons: gh<_i722.ListSeasonsUseCase>(),
+        listCategories: gh<_i435.ListCategoriesUseCase>(),
+        listProductColors: gh<_i789.ListProductColorsUseCase>(),
+        listSizeGridTemplates: gh<_i646.ListSizeGridTemplatesUseCase>(),
+        loadCatalogPreferences: gh<_i700.LoadCatalogPreferencesUseCase>(),
+        saveCatalogPreferences: gh<_i36.SaveCatalogPreferencesUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+        sessionService: gh<_i885.SessionService>(),
       ),
     );
     gh.factory<_i1030.AssignRoleToUserUseCase>(
