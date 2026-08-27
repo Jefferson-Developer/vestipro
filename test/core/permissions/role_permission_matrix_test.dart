@@ -152,6 +152,38 @@ void main() {
       expect(capabilities.contains(Capability.orderApprove), isFalse);
     });
 
+    test('only OWNER/ADMIN/FINANCE can manage Price Lists (TASK-083); '
+        'SALES_MANAGER/SALES_REP/SALES_ASSISTANT/READ_ONLY never can', () {
+      for (final role in <SystemRoleName>[
+        SystemRoleName.owner,
+        SystemRoleName.admin,
+        SystemRoleName.finance,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.priceListManage),
+          isTrue,
+          reason: '$role must be able to manage price lists.',
+        );
+      }
+
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesManager,
+        SystemRoleName.salesRep,
+        SystemRoleName.salesAssistant,
+        SystemRoleName.readOnly,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.priceListManage),
+          isFalse,
+          reason: '$role must never manage price lists.',
+        );
+      }
+    });
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,

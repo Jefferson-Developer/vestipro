@@ -9,4 +9,5 @@ export 'tables/customer_addresses_table.dart';
 export 'tables/customer_contacts_table.dart';
 export 'tables/customers_table.dart';
 export 'tables/favorites_table.dart';
+export 'tables/price_lists_table.dart';
 export 'tables/product_search_index_table.dart';

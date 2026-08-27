@@ -503,6 +503,20 @@ import '../features/organizations/domain/usecases/update_organization_settings_u
 import '../features/organizations/domain/usecases/update_team_use_case.dart'
     as _i207;
 import '../features/organizations/organizations.dart' as _i265;
+import '../features/pricing/data/mappers/price_list_local_mapper.dart' as _i794;
+import '../features/pricing/data/mappers/price_list_mapper.dart' as _i960;
+import '../features/pricing/data/repositories/drift_price_list_local_store_repository.dart'
+    as _i525;
+import '../features/pricing/data/repositories/shared_preferences_price_list_repository.dart'
+    as _i764;
+import '../features/pricing/domain/repositories/price_list_local_store_repository.dart'
+    as _i661;
+import '../features/pricing/domain/repositories/price_list_repository.dart'
+    as _i455;
+import '../features/pricing/domain/usecases/create_price_list_use_case.dart'
+    as _i581;
+import '../features/pricing/domain/usecases/resolve_applicable_price_lists_use_case.dart'
+    as _i41;
 import '../features/products/data/datasources/drift_product_local_search_index_data_source.dart'
     as _i74;
 import '../features/products/data/datasources/firestore_product_remote_search_data_source.dart'
@@ -822,6 +836,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i1043.RoleMapper>(() => const _i1043.RoleMapper());
     gh.lazySingleton<_i802.TeamMapper>(() => const _i802.TeamMapper());
+    gh.lazySingleton<_i960.PriceListMapper>(
+      () => const _i960.PriceListMapper(),
+    );
     gh.lazySingleton<_i325.ProductFormDraftMapper>(
       () => const _i325.ProductFormDraftMapper(),
     );
@@ -1016,6 +1033,11 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i325.ProductFormDraftMapper>(),
       ),
     );
+    gh.lazySingleton<_i455.PriceListRepository>(
+      () => _i764.SharedPreferencesPriceListRepository(
+        gh<_i960.PriceListMapper>(),
+      ),
+    );
     gh.factory<_i689.CategoryListBloc>(
       () => _i689.CategoryListBloc(
         listCategories: gh<_i435.ListCategoriesUseCase>(),
@@ -1165,6 +1187,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i477.AboutAppSeedModel>(
       () => appInjectionModule.aboutAppSeedModel(gh<_i461.AppEnvironment>()),
     );
+    gh.factory<_i581.CreatePriceListUseCase>(
+      () => _i581.CreatePriceListUseCase(gh<_i455.PriceListRepository>()),
+    );
+    gh.factory<_i41.ResolveApplicablePriceListsUseCase>(
+      () => _i41.ResolveApplicablePriceListsUseCase(
+        gh<_i455.PriceListRepository>(),
+      ),
+    );
     gh.factory<_i975.CreateProductColorUseCase>(
       () => _i975.CreateProductColorUseCase(
         gh<_i298.ProductColorRepository>(),
@@ -1176,6 +1206,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i298.ProductColorRepository>(),
         gh<_i8.ProductColorSimilarityService>(),
       ),
+    );
+    gh.lazySingleton<_i794.PriceListLocalMapper>(
+      () => _i794.PriceListLocalMapper(gh<_i960.PriceListMapper>()),
     );
     gh.factory<_i273.DeleteProductVariantUseCase>(
       () => _i273.DeleteProductVariantUseCase(
@@ -1575,6 +1608,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i176.UserRoleDataSource>(
       () => _i789.CloudFunctionsUserRoleDataSource(
         gh<_i340.CloudFunctionsService>(),
+      ),
+    );
+    gh.lazySingleton<_i661.PriceListLocalStoreRepository>(
+      () => _i525.DriftPriceListLocalStoreRepository(
+        gh<_i658.AppDatabase>(),
+        gh<_i794.PriceListLocalMapper>(),
       ),
     );
     gh.lazySingleton<_i336.InviteAcceptanceDataSource>(

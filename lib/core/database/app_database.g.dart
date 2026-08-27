@@ -6042,6 +6042,1003 @@ class FavoritesTableCompanion extends UpdateCompanion<FavoritesTableData> {
   }
 }
 
+class $PriceListsTableTable extends PriceListsTable
+    with TableInfo<$PriceListsTableTable, PriceListsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PriceListsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currencyMeta = const VerificationMeta(
+    'currency',
+  );
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+    'currency',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _validFromMeta = const VerificationMeta(
+    'validFrom',
+  );
+  @override
+  late final GeneratedColumn<DateTime> validFrom = GeneratedColumn<DateTime>(
+    'valid_from',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _validToMeta = const VerificationMeta(
+    'validTo',
+  );
+  @override
+  late final GeneratedColumn<DateTime> validTo = GeneratedColumn<DateTime>(
+    'valid_to',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scopeMeta = const VerificationMeta('scope');
+  @override
+  late final GeneratedColumn<String> scope = GeneratedColumn<String>(
+    'scope',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _scopeValueMeta = const VerificationMeta(
+    'scopeValue',
+  );
+  @override
+  late final GeneratedColumn<String> scopeValue = GeneratedColumn<String>(
+    'scope_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _priorityMeta = const VerificationMeta(
+    'priority',
+  );
+  @override
+  late final GeneratedColumn<int> priority = GeneratedColumn<int>(
+    'priority',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedByMeta = const VerificationMeta(
+    'updatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
+    'updated_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    companyId,
+    name,
+    currency,
+    validFrom,
+    validTo,
+    status,
+    scope,
+    scopeValue,
+    priority,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'price_lists';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PriceListsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(
+        _currencyMeta,
+        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_currencyMeta);
+    }
+    if (data.containsKey('valid_from')) {
+      context.handle(
+        _validFromMeta,
+        validFrom.isAcceptableOrUnknown(data['valid_from']!, _validFromMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_validFromMeta);
+    }
+    if (data.containsKey('valid_to')) {
+      context.handle(
+        _validToMeta,
+        validTo.isAcceptableOrUnknown(data['valid_to']!, _validToMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('scope')) {
+      context.handle(
+        _scopeMeta,
+        scope.isAcceptableOrUnknown(data['scope']!, _scopeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_scopeMeta);
+    }
+    if (data.containsKey('scope_value')) {
+      context.handle(
+        _scopeValueMeta,
+        scopeValue.isAcceptableOrUnknown(data['scope_value']!, _scopeValueMeta),
+      );
+    }
+    if (data.containsKey('priority')) {
+      context.handle(
+        _priorityMeta,
+        priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('updated_by')) {
+      context.handle(
+        _updatedByMeta,
+        updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedByMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PriceListsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PriceListsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      currency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency'],
+      )!,
+      validFrom: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}valid_from'],
+      )!,
+      validTo: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}valid_to'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      scope: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scope'],
+      )!,
+      scopeValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}scope_value'],
+      ),
+      priority: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}priority'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      updatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_by'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $PriceListsTableTable createAlias(String alias) {
+    return $PriceListsTableTable(attachedDatabase, alias);
+  }
+}
+
+class PriceListsTableData extends DataClass
+    implements Insertable<PriceListsTableData> {
+  final String id;
+  final String organizationId;
+  final String companyId;
+  final String name;
+  final String currency;
+  final DateTime validFrom;
+  final DateTime? validTo;
+  final String status;
+  final String scope;
+  final String? scopeValue;
+  final int priority;
+  final DateTime createdAt;
+  final String createdBy;
+  final DateTime updatedAt;
+  final String updatedBy;
+  final DateTime? deletedAt;
+  final int version;
+  final String syncStatus;
+  const PriceListsTableData({
+    required this.id,
+    required this.organizationId,
+    required this.companyId,
+    required this.name,
+    required this.currency,
+    required this.validFrom,
+    this.validTo,
+    required this.status,
+    required this.scope,
+    this.scopeValue,
+    required this.priority,
+    required this.createdAt,
+    required this.createdBy,
+    required this.updatedAt,
+    required this.updatedBy,
+    this.deletedAt,
+    required this.version,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    map['company_id'] = Variable<String>(companyId);
+    map['name'] = Variable<String>(name);
+    map['currency'] = Variable<String>(currency);
+    map['valid_from'] = Variable<DateTime>(validFrom);
+    if (!nullToAbsent || validTo != null) {
+      map['valid_to'] = Variable<DateTime>(validTo);
+    }
+    map['status'] = Variable<String>(status);
+    map['scope'] = Variable<String>(scope);
+    if (!nullToAbsent || scopeValue != null) {
+      map['scope_value'] = Variable<String>(scopeValue);
+    }
+    map['priority'] = Variable<int>(priority);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_by'] = Variable<String>(createdBy);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_by'] = Variable<String>(updatedBy);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['version'] = Variable<int>(version);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  PriceListsTableCompanion toCompanion(bool nullToAbsent) {
+    return PriceListsTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      companyId: Value(companyId),
+      name: Value(name),
+      currency: Value(currency),
+      validFrom: Value(validFrom),
+      validTo: validTo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(validTo),
+      status: Value(status),
+      scope: Value(scope),
+      scopeValue: scopeValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(scopeValue),
+      priority: Value(priority),
+      createdAt: Value(createdAt),
+      createdBy: Value(createdBy),
+      updatedAt: Value(updatedAt),
+      updatedBy: Value(updatedBy),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      version: Value(version),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory PriceListsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PriceListsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      name: serializer.fromJson<String>(json['name']),
+      currency: serializer.fromJson<String>(json['currency']),
+      validFrom: serializer.fromJson<DateTime>(json['validFrom']),
+      validTo: serializer.fromJson<DateTime?>(json['validTo']),
+      status: serializer.fromJson<String>(json['status']),
+      scope: serializer.fromJson<String>(json['scope']),
+      scopeValue: serializer.fromJson<String?>(json['scopeValue']),
+      priority: serializer.fromJson<int>(json['priority']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedBy: serializer.fromJson<String>(json['updatedBy']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String>(companyId),
+      'name': serializer.toJson<String>(name),
+      'currency': serializer.toJson<String>(currency),
+      'validFrom': serializer.toJson<DateTime>(validFrom),
+      'validTo': serializer.toJson<DateTime?>(validTo),
+      'status': serializer.toJson<String>(status),
+      'scope': serializer.toJson<String>(scope),
+      'scopeValue': serializer.toJson<String?>(scopeValue),
+      'priority': serializer.toJson<int>(priority),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedBy': serializer.toJson<String>(updatedBy),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'version': serializer.toJson<int>(version),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  PriceListsTableData copyWith({
+    String? id,
+    String? organizationId,
+    String? companyId,
+    String? name,
+    String? currency,
+    DateTime? validFrom,
+    Value<DateTime?> validTo = const Value.absent(),
+    String? status,
+    String? scope,
+    Value<String?> scopeValue = const Value.absent(),
+    int? priority,
+    DateTime? createdAt,
+    String? createdBy,
+    DateTime? updatedAt,
+    String? updatedBy,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? version,
+    String? syncStatus,
+  }) => PriceListsTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId ?? this.companyId,
+    name: name ?? this.name,
+    currency: currency ?? this.currency,
+    validFrom: validFrom ?? this.validFrom,
+    validTo: validTo.present ? validTo.value : this.validTo,
+    status: status ?? this.status,
+    scope: scope ?? this.scope,
+    scopeValue: scopeValue.present ? scopeValue.value : this.scopeValue,
+    priority: priority ?? this.priority,
+    createdAt: createdAt ?? this.createdAt,
+    createdBy: createdBy ?? this.createdBy,
+    updatedAt: updatedAt ?? this.updatedAt,
+    updatedBy: updatedBy ?? this.updatedBy,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    version: version ?? this.version,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  PriceListsTableData copyWithCompanion(PriceListsTableCompanion data) {
+    return PriceListsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      name: data.name.present ? data.name.value : this.name,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      validFrom: data.validFrom.present ? data.validFrom.value : this.validFrom,
+      validTo: data.validTo.present ? data.validTo.value : this.validTo,
+      status: data.status.present ? data.status.value : this.status,
+      scope: data.scope.present ? data.scope.value : this.scope,
+      scopeValue: data.scopeValue.present
+          ? data.scopeValue.value
+          : this.scopeValue,
+      priority: data.priority.present ? data.priority.value : this.priority,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      version: data.version.present ? data.version.value : this.version,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PriceListsTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('name: $name, ')
+          ..write('currency: $currency, ')
+          ..write('validFrom: $validFrom, ')
+          ..write('validTo: $validTo, ')
+          ..write('status: $status, ')
+          ..write('scope: $scope, ')
+          ..write('scopeValue: $scopeValue, ')
+          ..write('priority: $priority, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    companyId,
+    name,
+    currency,
+    validFrom,
+    validTo,
+    status,
+    scope,
+    scopeValue,
+    priority,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PriceListsTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.name == this.name &&
+          other.currency == this.currency &&
+          other.validFrom == this.validFrom &&
+          other.validTo == this.validTo &&
+          other.status == this.status &&
+          other.scope == this.scope &&
+          other.scopeValue == this.scopeValue &&
+          other.priority == this.priority &&
+          other.createdAt == this.createdAt &&
+          other.createdBy == this.createdBy &&
+          other.updatedAt == this.updatedAt &&
+          other.updatedBy == this.updatedBy &&
+          other.deletedAt == this.deletedAt &&
+          other.version == this.version &&
+          other.syncStatus == this.syncStatus);
+}
+
+class PriceListsTableCompanion extends UpdateCompanion<PriceListsTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String> companyId;
+  final Value<String> name;
+  final Value<String> currency;
+  final Value<DateTime> validFrom;
+  final Value<DateTime?> validTo;
+  final Value<String> status;
+  final Value<String> scope;
+  final Value<String?> scopeValue;
+  final Value<int> priority;
+  final Value<DateTime> createdAt;
+  final Value<String> createdBy;
+  final Value<DateTime> updatedAt;
+  final Value<String> updatedBy;
+  final Value<DateTime?> deletedAt;
+  final Value<int> version;
+  final Value<String> syncStatus;
+  final Value<int> rowid;
+  const PriceListsTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.validFrom = const Value.absent(),
+    this.validTo = const Value.absent(),
+    this.status = const Value.absent(),
+    this.scope = const Value.absent(),
+    this.scopeValue = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PriceListsTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    required String companyId,
+    required String name,
+    required String currency,
+    required DateTime validFrom,
+    this.validTo = const Value.absent(),
+    required String status,
+    required String scope,
+    this.scopeValue = const Value.absent(),
+    this.priority = const Value.absent(),
+    required DateTime createdAt,
+    required String createdBy,
+    required DateTime updatedAt,
+    required String updatedBy,
+    this.deletedAt = const Value.absent(),
+    required int version,
+    required String syncStatus,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       companyId = Value(companyId),
+       name = Value(name),
+       currency = Value(currency),
+       validFrom = Value(validFrom),
+       status = Value(status),
+       scope = Value(scope),
+       createdAt = Value(createdAt),
+       createdBy = Value(createdBy),
+       updatedAt = Value(updatedAt),
+       updatedBy = Value(updatedBy),
+       version = Value(version),
+       syncStatus = Value(syncStatus);
+  static Insertable<PriceListsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? name,
+    Expression<String>? currency,
+    Expression<DateTime>? validFrom,
+    Expression<DateTime>? validTo,
+    Expression<String>? status,
+    Expression<String>? scope,
+    Expression<String>? scopeValue,
+    Expression<int>? priority,
+    Expression<DateTime>? createdAt,
+    Expression<String>? createdBy,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? updatedBy,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? version,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (name != null) 'name': name,
+      if (currency != null) 'currency': currency,
+      if (validFrom != null) 'valid_from': validFrom,
+      if (validTo != null) 'valid_to': validTo,
+      if (status != null) 'status': status,
+      if (scope != null) 'scope': scope,
+      if (scopeValue != null) 'scope_value': scopeValue,
+      if (priority != null) 'priority': priority,
+      if (createdAt != null) 'created_at': createdAt,
+      if (createdBy != null) 'created_by': createdBy,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (updatedBy != null) 'updated_by': updatedBy,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (version != null) 'version': version,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PriceListsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String>? companyId,
+    Value<String>? name,
+    Value<String>? currency,
+    Value<DateTime>? validFrom,
+    Value<DateTime?>? validTo,
+    Value<String>? status,
+    Value<String>? scope,
+    Value<String?>? scopeValue,
+    Value<int>? priority,
+    Value<DateTime>? createdAt,
+    Value<String>? createdBy,
+    Value<DateTime>? updatedAt,
+    Value<String>? updatedBy,
+    Value<DateTime?>? deletedAt,
+    Value<int>? version,
+    Value<String>? syncStatus,
+    Value<int>? rowid,
+  }) {
+    return PriceListsTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      name: name ?? this.name,
+      currency: currency ?? this.currency,
+      validFrom: validFrom ?? this.validFrom,
+      validTo: validTo ?? this.validTo,
+      status: status ?? this.status,
+      scope: scope ?? this.scope,
+      scopeValue: scopeValue ?? this.scopeValue,
+      priority: priority ?? this.priority,
+      createdAt: createdAt ?? this.createdAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      updatedBy: updatedBy ?? this.updatedBy,
+      deletedAt: deletedAt ?? this.deletedAt,
+      version: version ?? this.version,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (validFrom.present) {
+      map['valid_from'] = Variable<DateTime>(validFrom.value);
+    }
+    if (validTo.present) {
+      map['valid_to'] = Variable<DateTime>(validTo.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (scope.present) {
+      map['scope'] = Variable<String>(scope.value);
+    }
+    if (scopeValue.present) {
+      map['scope_value'] = Variable<String>(scopeValue.value);
+    }
+    if (priority.present) {
+      map['priority'] = Variable<int>(priority.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (updatedBy.present) {
+      map['updated_by'] = Variable<String>(updatedBy.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PriceListsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('name: $name, ')
+          ..write('currency: $currency, ')
+          ..write('validFrom: $validFrom, ')
+          ..write('validTo: $validTo, ')
+          ..write('status: $status, ')
+          ..write('scope: $scope, ')
+          ..write('scopeValue: $scopeValue, ')
+          ..write('priority: $priority, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -6053,6 +7050,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $ProductSearchIndexTableTable productSearchIndexTable =
       $ProductSearchIndexTableTable(this);
   late final $FavoritesTableTable favoritesTable = $FavoritesTableTable(this);
+  late final $PriceListsTableTable priceListsTable = $PriceListsTableTable(
+    this,
+  );
   late final Index idxCustomersOrgCompany = Index(
     'idx_customers_org_company',
     'CREATE INDEX idx_customers_org_company ON customers (organization_id, company_id)',
@@ -6073,6 +7073,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_favorites_org_user',
     'CREATE INDEX idx_favorites_org_user ON favorites (organization_id, user_id)',
   );
+  late final Index idxPriceListsOrgCompany = Index(
+    'idx_price_lists_org_company',
+    'CREATE INDEX idx_price_lists_org_company ON price_lists (organization_id, company_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -6083,11 +7087,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     customerContactsTable,
     productSearchIndexTable,
     favoritesTable,
+    priceListsTable,
     idxCustomersOrgCompany,
     idxCustomerAddressesCustomer,
     idxCustomerContactsCustomer,
     idxProductSearchIndexOrgText,
     idxFavoritesOrgUser,
+    idxPriceListsOrgCompany,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -9277,6 +10283,469 @@ typedef $$FavoritesTableTableProcessedTableManager =
       FavoritesTableData,
       PrefetchHooks Function()
     >;
+typedef $$PriceListsTableTableCreateCompanionBuilder =
+    PriceListsTableCompanion Function({
+      required String id,
+      required String organizationId,
+      required String companyId,
+      required String name,
+      required String currency,
+      required DateTime validFrom,
+      Value<DateTime?> validTo,
+      required String status,
+      required String scope,
+      Value<String?> scopeValue,
+      Value<int> priority,
+      required DateTime createdAt,
+      required String createdBy,
+      required DateTime updatedAt,
+      required String updatedBy,
+      Value<DateTime?> deletedAt,
+      required int version,
+      required String syncStatus,
+      Value<int> rowid,
+    });
+typedef $$PriceListsTableTableUpdateCompanionBuilder =
+    PriceListsTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String> companyId,
+      Value<String> name,
+      Value<String> currency,
+      Value<DateTime> validFrom,
+      Value<DateTime?> validTo,
+      Value<String> status,
+      Value<String> scope,
+      Value<String?> scopeValue,
+      Value<int> priority,
+      Value<DateTime> createdAt,
+      Value<String> createdBy,
+      Value<DateTime> updatedAt,
+      Value<String> updatedBy,
+      Value<DateTime?> deletedAt,
+      Value<int> version,
+      Value<String> syncStatus,
+      Value<int> rowid,
+    });
+
+class $$PriceListsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PriceListsTableTable> {
+  $$PriceListsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get validFrom => $composableBuilder(
+    column: $table.validFrom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get validTo => $composableBuilder(
+    column: $table.validTo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get scope => $composableBuilder(
+    column: $table.scope,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get scopeValue => $composableBuilder(
+    column: $table.scopeValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PriceListsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PriceListsTableTable> {
+  $$PriceListsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get validFrom => $composableBuilder(
+    column: $table.validFrom,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get validTo => $composableBuilder(
+    column: $table.validTo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get scope => $composableBuilder(
+    column: $table.scope,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get scopeValue => $composableBuilder(
+    column: $table.scopeValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PriceListsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PriceListsTableTable> {
+  $$PriceListsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get validFrom =>
+      $composableBuilder(column: $table.validFrom, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get validTo =>
+      $composableBuilder(column: $table.validTo, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get scope =>
+      $composableBuilder(column: $table.scope, builder: (column) => column);
+
+  GeneratedColumn<String> get scopeValue => $composableBuilder(
+    column: $table.scopeValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get priority =>
+      $composableBuilder(column: $table.priority, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedBy =>
+      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$PriceListsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PriceListsTableTable,
+          PriceListsTableData,
+          $$PriceListsTableTableFilterComposer,
+          $$PriceListsTableTableOrderingComposer,
+          $$PriceListsTableTableAnnotationComposer,
+          $$PriceListsTableTableCreateCompanionBuilder,
+          $$PriceListsTableTableUpdateCompanionBuilder,
+          (
+            PriceListsTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $PriceListsTableTable,
+              PriceListsTableData
+            >,
+          ),
+          PriceListsTableData,
+          PrefetchHooks Function()
+        > {
+  $$PriceListsTableTableTableManager(
+    _$AppDatabase db,
+    $PriceListsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PriceListsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$PriceListsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$PriceListsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> currency = const Value.absent(),
+                Value<DateTime> validFrom = const Value.absent(),
+                Value<DateTime?> validTo = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> scope = const Value.absent(),
+                Value<String?> scopeValue = const Value.absent(),
+                Value<int> priority = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> updatedBy = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PriceListsTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                name: name,
+                currency: currency,
+                validFrom: validFrom,
+                validTo: validTo,
+                status: status,
+                scope: scope,
+                scopeValue: scopeValue,
+                priority: priority,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                required String companyId,
+                required String name,
+                required String currency,
+                required DateTime validFrom,
+                Value<DateTime?> validTo = const Value.absent(),
+                required String status,
+                required String scope,
+                Value<String?> scopeValue = const Value.absent(),
+                Value<int> priority = const Value.absent(),
+                required DateTime createdAt,
+                required String createdBy,
+                required DateTime updatedAt,
+                required String updatedBy,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required int version,
+                required String syncStatus,
+                Value<int> rowid = const Value.absent(),
+              }) => PriceListsTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                name: name,
+                currency: currency,
+                validFrom: validFrom,
+                validTo: validTo,
+                status: status,
+                scope: scope,
+                scopeValue: scopeValue,
+                priority: priority,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PriceListsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PriceListsTableTable,
+      PriceListsTableData,
+      $$PriceListsTableTableFilterComposer,
+      $$PriceListsTableTableOrderingComposer,
+      $$PriceListsTableTableAnnotationComposer,
+      $$PriceListsTableTableCreateCompanionBuilder,
+      $$PriceListsTableTableUpdateCompanionBuilder,
+      (
+        PriceListsTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $PriceListsTableTable,
+          PriceListsTableData
+        >,
+      ),
+      PriceListsTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -9297,4 +10766,6 @@ class $AppDatabaseManager {
       );
   $$FavoritesTableTableTableManager get favoritesTable =>
       $$FavoritesTableTableTableManager(_db, _db.favoritesTable);
+  $$PriceListsTableTableTableManager get priceListsTable =>
+      $$PriceListsTableTableTableManager(_db, _db.priceListsTable);
 }

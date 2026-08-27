@@ -4,6 +4,7 @@ import 'tables/customer_addresses_table.dart';
 import 'tables/customer_contacts_table.dart';
 import 'tables/customers_table.dart';
 import 'tables/favorites_table.dart';
+import 'tables/price_lists_table.dart';
 import 'tables/product_search_index_table.dart';
 
 part 'app_database.g.dart';
@@ -33,11 +34,12 @@ class ProductSearchIndexRow {
 ///
 /// TASK-054 seeds this database with the tables needed for the Customer
 /// initial offline load. TASK-069 adds [ProductSearchIndexTable] as a narrow
-/// read index for product search, not yet the full Product sync schema. The
-/// general-purpose local schema for every other offline-capable entity
-/// (price tables, orders, Outbox, ...) is EPIC-14 work and must keep extending
-/// this same [AppDatabase] class/migration chain rather than create a second
-/// local database.
+/// read index for product search, not yet the full Product sync schema.
+/// TASK-083 adds [PriceListsTable] as the offline cache for pricing tables.
+/// The general-purpose local schema for every other offline-capable entity
+/// (orders, Outbox, ...) is EPIC-14 work and must keep extending this same
+/// [AppDatabase] class/migration chain rather than create a second local
+/// database.
 @DriftDatabase(
   tables: [
     CustomersTable,
@@ -45,13 +47,14 @@ class ProductSearchIndexRow {
     CustomerContactsTable,
     ProductSearchIndexTable,
     FavoritesTable,
+    PriceListsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 4;
+  int get schemaVersion => 5;
 
   @override
   MigrationStrategy get migration {
@@ -88,6 +91,9 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 4) {
           await migrator.createTable(favoritesTable);
+        }
+        if (from < 5) {
+          await migrator.createTable(priceListsTable);
         }
       },
       beforeOpen: (details) async {
@@ -376,5 +382,68 @@ class AppDatabase extends _$AppDatabase {
                   row.syncStatus.equals('failed')),
         ))
         .get();
+  }
+
+  /// Replaces the full local Price List set for [organizationId]/
+  /// [companyId] with exactly [priceListRows] in a single transaction — the
+  /// "carga inicial" primitive `PriceListLocalStoreRepository.replaceInitialLoad`
+  /// (TASK-083) needs, mirroring [replaceCustomers].
+  Future<void> replacePriceLists({
+    required String organizationId,
+    required String companyId,
+    required List<PriceListsTableCompanion> priceListRows,
+  }) {
+    return transaction(() async {
+      await (delete(priceListsTable)..where(
+            (row) =>
+                row.organizationId.equals(organizationId) &
+                row.companyId.equals(companyId),
+          ))
+          .go();
+
+      await batch((batch) {
+        batch.insertAll(priceListsTable, priceListRows);
+      });
+    });
+  }
+
+  /// Inserts or updates exactly one Price List row — the incremental-update
+  /// primitive the future sync engine (EPIC-14) uses to keep the local
+  /// cache fresh after the initial load, mirroring [upsertFavorite].
+  Future<void> upsertPriceList(PriceListsTableCompanion row) {
+    return into(priceListsTable).insertOnConflictUpdate(row);
+  }
+
+  /// Every non-soft-deleted Price List currently stored locally for
+  /// [organizationId]/[companyId].
+  Future<List<PriceListsTableData>> getPriceListsForCompany({
+    required String organizationId,
+    required String companyId,
+  }) {
+    return (select(priceListsTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.companyId.equals(companyId) &
+              row.deletedAt.isNull(),
+        ))
+        .get();
+  }
+
+  /// Number of non-soft-deleted Price Lists currently stored locally for
+  /// [organizationId]/[companyId], without materializing every row.
+  Future<int> countPriceListsForCompany({
+    required String organizationId,
+    required String companyId,
+  }) async {
+    final countExpression = priceListsTable.id.count();
+    final query = selectOnly(priceListsTable)
+      ..addColumns([countExpression])
+      ..where(
+        priceListsTable.organizationId.equals(organizationId) &
+            priceListsTable.companyId.equals(companyId) &
+            priceListsTable.deletedAt.isNull(),
+      );
+    final row = await query.getSingle();
+    return row.read(countExpression) ?? 0;
   }
 }

@@ -82,7 +82,7 @@ service cloud.firestore {
             ])
         || (roleName == 'FINANCE' && capabilityCode in [
               'finance.view', 'finance.manage', 'discount.approveAboveLimit',
-              'report.export', 'report.viewSensitive'
+              'report.export', 'report.viewSensitive', 'priceList.manage'
             ]);
     }
 
@@ -299,6 +299,104 @@ service cloud.firestore {
         && unchanged('colorId')
         && unchanged('sizeGridTemplateId')
         && unchanged('sizeId')
+        && unchanged('createdAt')
+        && unchanged('createdBy');
+    }
+
+    // -----------------------------------------------------------------
+    // organizations/{organizationId}/priceLists/{priceListId}  (TASK-083)
+    // -----------------------------------------------------------------
+
+    function validPriceListPayload(organizationId, data) {
+      return data.keys().hasOnly([
+          'organizationId',
+          'companyId',
+          'name',
+          'currency',
+          'validFrom',
+          'validTo',
+          'status',
+          'scope',
+          'scopeValue',
+          'priority',
+          'createdAt',
+          'createdBy',
+          'updatedAt',
+          'updatedBy',
+          'deletedAt',
+          'version',
+          'syncStatus'
+        ])
+        && data.keys().hasAll([
+          'organizationId',
+          'companyId',
+          'name',
+          'currency',
+          'validFrom',
+          'status',
+          'scope',
+          'priority',
+          'createdAt',
+          'createdBy',
+          'updatedAt',
+          'updatedBy',
+          'version',
+          'syncStatus'
+        ])
+        && data.organizationId == organizationId
+        && data.companyId is string
+        && data.companyId.size() > 0
+        && data.name is string
+        && data.name.size() > 0
+        && data.currency is string
+        && data.currency.matches('^[A-Z]{3}$')
+        && data.validFrom is timestamp
+        && (
+          !data.keys().hasAny(['validTo'])
+          || data.validTo == null
+          || (data.validTo is timestamp && data.validTo > data.validFrom)
+        )
+        && data.status in ['draft', 'active', 'expired', 'archived']
+        && data.scope in ['company', 'channel', 'segment']
+        && (
+          (data.scope == 'company'
+            && (!data.keys().hasAny(['scopeValue']) || data.scopeValue == null))
+          || (data.scope != 'company'
+            && data.keys().hasAny(['scopeValue'])
+            && data.scopeValue is string
+            && data.scopeValue.size() > 0)
+        )
+        && data.priority is int
+        && data.createdAt is timestamp
+        && data.createdBy is string
+        && data.createdBy.size() > 0
+        && data.updatedAt is timestamp
+        && data.updatedBy is string
+        && data.updatedBy.size() > 0
+        && data.version is int
+        && data.version >= 1
+        && data.syncStatus in ['pending', 'syncing', 'synced', 'failed', 'conflict'];
+    }
+
+    function canReadPriceList(organizationId) {
+      return isActiveMember(organizationId)
+        && resource.data.organizationId == organizationId;
+    }
+
+    function canCreatePriceList(organizationId) {
+      return hasCapability(organizationId, 'priceList.manage')
+        && validPriceListPayload(organizationId, request.resource.data);
+    }
+
+    // Currency is immutable once a Price List exists (TASK-083 business
+    // rule): changing it always means creating a new Price List, never
+    // editing this one.
+    function canUpdatePriceList(organizationId) {
+      return hasCapability(organizationId, 'priceList.manage')
+        && validPriceListPayload(organizationId, request.resource.data)
+        && unchanged('organizationId')
+        && unchanged('companyId')
+        && unchanged('currency')
         && unchanged('createdAt')
         && unchanged('createdBy');
     }
@@ -624,6 +722,26 @@ service cloud.firestore {
         allow get, list: if canReadProductVariant(organizationId);
         allow create: if canCreateProductVariant(organizationId);
         allow update: if canUpdateProductVariant(organizationId);
+        allow delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/priceLists/{priceListId}  (TASK-083)
+      // -------------------------------------------------------------------
+      //
+      // Read escopado por organização: qualquer membro ativo pode ler as
+      // tabelas de preço da própria organização (um representante precisa
+      // delas para precificar um pedido), nunca de outra organização.
+      // Escrita restrita a quem tem `priceList.manage` — hoje, apenas
+      // OWNER/ADMIN/FINANCE (RolePermissionMatrix) — nunca SALES_REP/
+      // SALES_MANAGER. Nenhum documento de Price List é fisicamente
+      // excluído (soft delete via `deletedAt`, mesmo padrão de
+      // `products`/`customers`).
+
+      match /priceLists/{priceListId} {
+        allow get, list: if canReadPriceList(organizationId);
+        allow create: if canCreatePriceList(organizationId);
+        allow update: if canUpdatePriceList(organizationId);
         allow delete: if false;
       }
 

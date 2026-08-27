@@ -75,6 +75,10 @@ abstract final class RolePermissionMatrix {
     Capability.reportExport,
     Capability.reportViewSensitive,
     Capability.leadView,
+    // TASK-083: Price List management is restricted to OWNER/ADMIN/FINANCE
+    // — OWNER and ADMIN already get it via the full/near-full capability
+    // set above, FINANCE needs it added explicitly here.
+    Capability.priceListManage,
   };
 
   static const Set<Capability> _readOnlyCapabilities = <Capability>{};

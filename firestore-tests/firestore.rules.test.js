@@ -233,6 +233,40 @@ function catalogShareDoc({
   };
 }
 
+function priceListDoc({
+  organizationId,
+  companyId = 'company-a',
+  name = 'Tabela Padrão',
+  currency = 'BRL',
+  validFrom = now(),
+  validTo = null,
+  status = 'active',
+  scope = 'company',
+  scopeValue = null,
+  priority = 0,
+  createdBy = 'owner-a',
+}) {
+  return {
+    organizationId,
+    companyId,
+    name,
+    currency,
+    validFrom,
+    validTo,
+    status,
+    scope,
+    scopeValue,
+    priority,
+    createdAt: now(),
+    createdBy,
+    updatedAt: now(),
+    updatedBy: createdBy,
+    deletedAt: null,
+    version: 1,
+    syncStatus: 'synced',
+  };
+}
+
 function auditLogDoc({ organizationId, actorUserId, action = 'role.changed' }) {
   return {
     organizationId,
@@ -275,11 +309,15 @@ beforeEach(async () => {
     await db.doc(`organizations/${ORG_A}/roles/ADMIN`).set(roleDoc({ organizationId: ORG_A, name: 'ADMIN', isSystemRole: true }));
     await db.doc(`organizations/${ORG_A}/roles/SALES_MANAGER`).set(roleDoc({ organizationId: ORG_A, name: 'SALES_MANAGER', isSystemRole: true }));
     await db.doc(`organizations/${ORG_A}/roles/SALES_REP`).set(roleDoc({ organizationId: ORG_A, name: 'SALES_REP', isSystemRole: true }));
+    await db.doc(`organizations/${ORG_A}/roles/FINANCE`).set(roleDoc({ organizationId: ORG_A, name: 'FINANCE', isSystemRole: true }));
     await db.doc(`organizations/${ORG_A}/members/owner-a`).set(
       membershipDoc({ organizationId: ORG_A, userId: 'owner-a', roleId: 'OWNER', roleName: 'OWNER' }),
     );
     await db.doc(`organizations/${ORG_A}/members/admin-a`).set(
       membershipDoc({ organizationId: ORG_A, userId: 'admin-a', roleId: 'ADMIN', roleName: 'ADMIN' }),
+    );
+    await db.doc(`organizations/${ORG_A}/members/finance-a`).set(
+      membershipDoc({ organizationId: ORG_A, userId: 'finance-a', roleId: 'FINANCE', roleName: 'FINANCE' }),
     );
     await db.doc(`organizations/${ORG_A}/members/manager-a`).set(
       membershipDoc({
@@ -921,6 +959,122 @@ describe('organizations/{organizationId}/catalogShares/{shareId}  (TASK-081 cata
       db.doc(`organizations/${ORG_A}/catalogShares/share-rep-a`).update({ status: 'revoked' }),
     );
     await assertFails(db.doc(`organizations/${ORG_A}/catalogShares/share-rep-a`).delete());
+  });
+});
+
+describe('organizations/{organizationId}/priceLists/{priceListId}  (TASK-083)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/priceLists/price-list-a`)
+        .set(priceListDoc({ organizationId: ORG_A }));
+      await db
+        .doc(`organizations/${ORG_B}/priceLists/price-list-b`)
+        .set(priceListDoc({ organizationId: ORG_B, companyId: 'company-b', createdBy: 'owner-b' }));
+    });
+  });
+
+  test('membro ativo da Org A le a Price List da própria organization', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/priceLists/price-list-a`).get());
+  });
+
+  test('membro da Org A não le a Price List da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/priceLists/price-list-b`).get());
+  });
+
+  test('usuário não autenticado não le nenhuma Price List', async () => {
+    const db = testEnv.unauthenticatedContext().firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/priceLists/price-list-a`).get());
+  });
+
+  test('OWNER/ADMIN/FINANCE (priceList.manage) criam Price List na própria organization', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    await assertSucceeds(
+      ownerDb
+        .doc(`organizations/${ORG_A}/priceLists/price-list-owner`)
+        .set(priceListDoc({ organizationId: ORG_A, createdBy: 'owner-a' })),
+    );
+
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+    await assertSucceeds(
+      adminDb
+        .doc(`organizations/${ORG_A}/priceLists/price-list-admin`)
+        .set(priceListDoc({ organizationId: ORG_A, createdBy: 'admin-a' })),
+    );
+
+    const financeDb = testEnv.authenticatedContext('finance-a').firestore();
+    await assertSucceeds(
+      financeDb
+        .doc(`organizations/${ORG_A}/priceLists/price-list-finance`)
+        .set(priceListDoc({ organizationId: ORG_A, createdBy: 'finance-a' })),
+    );
+  });
+
+  test('SALES_REP e SALES_MANAGER não criam Price List (sem priceList.manage)', async () => {
+    const repDb = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      repDb
+        .doc(`organizations/${ORG_A}/priceLists/price-list-rep`)
+        .set(priceListDoc({ organizationId: ORG_A, createdBy: 'rep-a' })),
+    );
+
+    const managerDb = testEnv.authenticatedContext('manager-a').firestore();
+    await assertFails(
+      managerDb
+        .doc(`organizations/${ORG_A}/priceLists/price-list-manager`)
+        .set(priceListDoc({ organizationId: ORG_A, createdBy: 'manager-a' })),
+    );
+  });
+
+  test('não é possível criar Price List com validTo anterior a validFrom', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    const start = new Date();
+    const before = new Date(start.getTime() - 86400000);
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/priceLists/price-list-invalid-dates`)
+        .set(priceListDoc({ organizationId: ORG_A, validFrom: start, validTo: before })),
+    );
+  });
+
+  test('não é possível criar Price List de escopo channel/segment sem scopeValue', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/priceLists/price-list-missing-scope-value`)
+        .set(priceListDoc({ organizationId: ORG_A, scope: 'channel', scopeValue: null })),
+    );
+  });
+
+  test('FINANCE atualiza uma Price List existente sem alterar a moeda', async () => {
+    const db = testEnv.authenticatedContext('finance-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/priceLists/price-list-a`).update({
+        name: 'Tabela Atualizada',
+        priority: 5,
+        updatedAt: now(),
+        updatedBy: 'finance-a',
+      }),
+    );
+  });
+
+  test('não é possível alterar a moeda de uma Price List existente (imutável)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/priceLists/price-list-a`).update({
+        currency: 'USD',
+        updatedAt: now(),
+        updatedBy: 'owner-a',
+      }),
+    );
+  });
+
+  test('cliente não exclui Price List (soft delete apenas, sem delete físico)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/priceLists/price-list-a`).delete());
   });
 });
 
