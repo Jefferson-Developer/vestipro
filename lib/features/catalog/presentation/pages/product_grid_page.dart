@@ -9,15 +9,6 @@ import '../bloc/product_grid_bloc.dart';
 import '../bloc/product_grid_event.dart';
 import '../bloc/product_grid_state.dart';
 
-/// The catalog's full visual grid (TASK-077, EPIC-10) — a continuously
-/// scrollable, cursor-paginated listing of every active Product, the screen
-/// "ver todos os lançamentos"/busca/coleção/campanha/favoritos link into.
-///
-/// Price is intentionally never shown here: no price-list/pricing-engine
-/// implementation exists yet (EPIC-11), and this screen never fabricates or
-/// caches a price client-side — `AppProductCardData.priceLabel` is simply
-/// left `null`, which `AppProductCard` already renders as "no price row" by
-/// design, exactly like `ProductSearchPage` does today.
 class ProductGridPage extends StatelessWidget {
   const ProductGridPage({
     required this.organizationId,
@@ -35,28 +26,9 @@ class ProductGridPage extends StatelessWidget {
   final String? companyId;
   final String title;
   final ProductGridBloc Function() createBloc;
-
-  /// Called after the tap is logged as `product_viewed` — routing to the
-  /// product detail (TASK-078) is decided by whoever instantiates this page,
-  /// never by the page itself.
   final ValueChanged<Product>? onProductSelected;
-
-  /// Every currently favorited `Product.id` (TASK-079), or `null` to hide
-  /// the favorite button entirely — this page never depends on the
-  /// favorites feature itself, the caller (which already watches
-  /// `FavoriteStatusCubit`) owns that state, same "host decides" contract
-  /// [onProductSelected] already has.
   final Set<String>? favoriteProductIds;
-
-  /// Called when a card's favorite button is tapped — `null` (the default)
-  /// keeps every card exactly as it rendered before TASK-079.
   final void Function(Product product)? onFavoriteToggle;
-
-  /// Called when a card's share button is tapped (TASK-081) — `null` (the
-  /// default) hides the button and keeps every card exactly as it rendered
-  /// before. Opening the actual share sheet (`CatalogShareSheet`) is decided
-  /// by whoever hosts this page, same "host decides" contract
-  /// [onFavoriteToggle]/[onProductSelected] already set.
   final void Function(Product product)? onShareTap;
 
   @override
@@ -152,16 +124,21 @@ class _ProductGridView extends StatelessWidget {
     final principalPhoto = product.principalPhoto;
     final imageUrl = principalPhoto?.thumbnailUrl ?? principalPhoto?.url;
     final availability = state.availabilityByProductId[product.id];
+    final badges = <String>[
+      if (product.tags.isNotEmpty) product.tags.first,
+      if (state.unpricedProductIds.contains(product.id)) 'Sem preço',
+    ];
     return AppProductCardData(
       id: product.id,
       name: product.name,
       brandOrCollection: product.brand,
       imageUrl: imageUrl,
+      priceLabel: state.priceLabelsByProductId[product.id],
       availability: _availabilityFor(availability?.status),
       availabilityLabel: availability == null
           ? null
           : _availabilityLabelFor(availability),
-      badgeLabels: <String>[if (product.tags.isNotEmpty) product.tags.first],
+      badgeLabels: badges,
       isFavorite: favoriteProductIds?.contains(product.id) ?? false,
       onFavoriteTap: onFavoriteToggle == null
           ? null

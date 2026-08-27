@@ -4,6 +4,8 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/analytics/analytics.dart';
 import '../../../../core/utils/utils.dart';
+import '../../../pricing/domain/entities/resolved_variant_price.dart';
+import '../../../pricing/domain/usecases/resolve_price_for_variant_use_case.dart';
 import '../../../products/domain/entities/product.dart';
 import '../../../products/domain/entities/product_color.dart';
 import '../../../products/domain/entities/product_variant.dart';
@@ -19,21 +21,6 @@ import '../../../products/domain/value_objects/product_variant_status.dart';
 import 'product_detail_event.dart';
 import 'product_detail_state.dart';
 
-/// Orchestrates the product detail screen (TASK-078, EPIC-10) — the B2B
-/// purchase experience every catalog surface (grid, busca, favoritos,
-/// compartilhamento) links into.
-///
-/// Product, variants, colors and the size grid template are fetched
-/// concurrently (each use case call starts its Future immediately; only the
-/// final `await` chain is sequential), then availability is resolved once
-/// the variant ids are known — composing one single, internally-consistent
-/// [ProductDetailState] the whole screen renders from, per the task's
-/// "compondo um estado único e consistente" requirement.
-///
-/// There is no price fetch: no price-list/pricing-engine implementation
-/// exists yet (EPIC-11), so [ProductDetailState.isPriceAvailable] is always
-/// `false` and this bloc never calculates or caches one — see that getter's
-/// doc for the precedent this follows.
 @injectable
 final class ProductDetailBloc
     extends Bloc<ProductDetailEvent, ProductDetailState> {
@@ -43,6 +30,7 @@ final class ProductDetailBloc
     required this.listProductColors,
     required this.getSizeGridTemplateById,
     required this.getVariantAvailability,
+    this.resolvePriceForVariant,
     required this.analyticsService,
   }) : super(const ProductDetailState()) {
     on<ProductDetailStarted>(_onStarted, transformer: restartable());
@@ -60,6 +48,7 @@ final class ProductDetailBloc
   final ListProductColorsUseCase listProductColors;
   final GetSizeGridTemplateByIdUseCase getSizeGridTemplateById;
   final GetVariantAvailabilityUseCase getVariantAvailability;
+  final ResolvePriceForVariantUseCase? resolvePriceForVariant;
   final AnalyticsService analyticsService;
 
   Future<void> _onStarted(
@@ -108,10 +97,6 @@ final class ProductDetailBloc
     }
     final product = (productResult as AppSuccess<Product>).value;
 
-    // Every call below starts its Future immediately (Dart Futures are
-    // eager), so these three requests already run concurrently even though
-    // they are awaited one after another — no `Future.wait` needed to keep
-    // a single, easily-testable result type per use case.
     final variantsFuture = listVariantsByProduct(
       organizationId: state.organizationId,
       productId: product.id,
@@ -142,14 +127,17 @@ final class ProductDetailBloc
         ? templateResult.value
         : null;
 
-    var hasWarning =
+    var hasAvailabilityWarning =
         variantsResult is AppFailure<List<ProductVariant>> ||
         colorsResult is AppFailure<List<ProductColor>> ||
         templateResult is AppFailure<SizeGridTemplate>;
 
     final availabilityByVariantId = await _fetchAvailability(variants);
     if (emit.isDone) return;
-    if (availabilityByVariantId == null) hasWarning = true;
+    if (availabilityByVariantId == null) hasAvailabilityWarning = true;
+
+    final priceFetch = await _fetchPrices(product, variants);
+    if (emit.isDone) return;
 
     emit(
       state.copyWith(
@@ -161,7 +149,9 @@ final class ProductDetailBloc
         clearSizeGridTemplate: template == null,
         availabilityByVariantId:
             availabilityByVariantId ?? const <String, VariantAvailability>{},
-        hasAvailabilityWarning: hasWarning,
+        hasAvailabilityWarning: hasAvailabilityWarning,
+        pricesByVariantId: priceFetch.$1,
+        hasPricingWarning: priceFetch.$2,
         selectedColorId: _firstColorId(product, variants),
         clearFailure: true,
       ),
@@ -188,14 +178,43 @@ final class ProductDetailBloc
     return switch (result) {
       AppSuccess<VariantAvailabilitySnapshot>(value: final snapshot) =>
         snapshot.byVariantId,
-      // Availability failing to load never blocks the rest of the screen —
-      // `ProductDetailState.availabilityForVariant` falls back to
-      // `VariantAvailability.fromVariant` (a pure derivation of data
-      // already fetched on the variant itself, not a client-side stock
-      // calculation) while `hasAvailabilityWarning` tells the UI to show
-      // that explicitly instead of a silent "tudo pronta entrega".
       AppFailure<VariantAvailabilitySnapshot>() => null,
     };
+  }
+
+  Future<(Map<String, ResolvedVariantPrice>, bool)> _fetchPrices(
+    Product product,
+    List<ProductVariant> variants,
+  ) async {
+    final companyId = product.companyId?.trim();
+    if (resolvePriceForVariant == null ||
+        companyId == null ||
+        companyId.isEmpty ||
+        variants.isEmpty) {
+      return (const <String, ResolvedVariantPrice>{}, false);
+    }
+
+    final resolved = <String, ResolvedVariantPrice>{};
+    var hasWarning = false;
+    for (final variant in variants) {
+      final result = await resolvePriceForVariant!(
+        organizationId: state.organizationId,
+        companyId: companyId,
+        productId: product.id,
+        variantId: variant.id,
+      );
+      switch (result) {
+        case AppSuccess<ResolvedVariantPrice>(value: final price):
+          resolved[variant.id] = price;
+        case AppFailure<ResolvedVariantPrice>():
+          hasWarning = true;
+      }
+    }
+
+    return (
+      Map<String, ResolvedVariantPrice>.unmodifiable(resolved),
+      hasWarning,
+    );
   }
 
   void _onColorSelected(
@@ -214,8 +233,7 @@ final class ProductDetailBloc
       colorId: event.colorId,
       sizeId: event.sizeId,
     );
-    if (variant == null ||
-        !state.availabilityForVariant(variant).acceptsQuantity) {
+    if (variant == null || !state.canAddVariantToOrder(variant)) {
       return;
     }
 

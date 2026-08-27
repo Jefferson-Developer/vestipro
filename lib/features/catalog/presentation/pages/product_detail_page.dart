@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/design_system/design_system.dart';
+import '../../../pricing/domain/entities/resolved_variant_price.dart';
 import '../../../products/domain/entities/product.dart';
 import '../../../products/domain/entities/product_color.dart';
 import '../../../products/domain/entities/variant_availability.dart';
@@ -11,14 +13,6 @@ import '../bloc/product_detail_event.dart';
 import '../bloc/product_detail_state.dart';
 import '../widgets/product_detail_gallery.dart';
 
-/// Full B2B purchase experience for a single product (TASK-078, EPIC-10):
-/// zoomable gallery synced with the selected color, size grid with
-/// per-variant stock, and a CTA that stays reachable through the whole
-/// scroll, in every breakpoint.
-///
-/// Price is intentionally never shown here — see
-/// `ProductDetailState.isPriceAvailable`'s doc for why, same precedent
-/// `ProductGridPage` already set for the catalog grid.
 class ProductDetailPage extends StatelessWidget {
   const ProductDetailPage({
     required this.organizationId,
@@ -34,36 +28,12 @@ class ProductDetailPage extends StatelessWidget {
 
   final String organizationId;
   final String productId;
-
-  /// Where the viewer came from: `grid`, `search`, `favorites` or `share`
-  /// (TASK-078) — carried into the `product_viewed` analytics event.
   final String origin;
-
   final ProductDetailBloc Function() createBloc;
-
-  /// Called after the sticky CTA tap is logged as `product_added_to_order`
-  /// — handing [lines] off to an actual order draft (EPIC-13) is decided by
-  /// whoever hosts this page, never by the page itself, mirroring how
-  /// `ProductGridPage.onProductSelected` owns navigation instead of the
-  /// grid deciding it.
   final void Function(Product product, List<ProductDetailOrderLine> lines)?
   onAddToOrder;
-
-  /// Whether this product is currently favorited (TASK-079) — same
-  /// "caller owns the favorites state" contract as
-  /// `ProductGridPage.favoriteProductIds`.
   final bool isFavorite;
-
-  /// Shows a favorite button in the app bar when non-`null`; `null` (the
-  /// default) keeps this screen exactly as it rendered before TASK-079.
   final VoidCallback? onFavoriteToggle;
-
-  /// Shows a "Compartilhar" button in the app bar when non-`null` (TASK-081);
-  /// `null` (the default) keeps this screen exactly as it rendered before.
-  /// Opening the actual share sheet (`CatalogShareSheet`) is decided by
-  /// whoever hosts this page, never by the page itself — same "host decides"
-  /// contract [onFavoriteToggle]/[onAddToOrder] already set, so `catalog`
-  /// never depends on the `catalog_share` feature directly.
   final VoidCallback? onSharePressed;
 
   @override
@@ -223,11 +193,17 @@ class _ProductDetailContent extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: AppSpacing.spacing12),
-                const AppStatusBadge(
-                  label: 'Preço sob consulta com o time comercial',
-                  variant: AppStatusBadgeVariant.info,
-                  icon: Icons.sell_outlined,
-                ),
+                _PriceStatusBadge(state: state),
+                if (state.hasPricingWarning) ...<Widget>[
+                  const SizedBox(height: AppSpacing.spacing8),
+                  const AppStatusBadge(
+                    label:
+                        'Não foi possível confirmar todos os preços agora. '
+                        'Exibindo os preços resolvidos localmente.',
+                    variant: AppStatusBadgeVariant.warning,
+                    icon: Icons.sell_outlined,
+                  ),
+                ],
                 if (state.hasAvailabilityWarning) ...<Widget>[
                   const SizedBox(height: AppSpacing.spacing8),
                   const AppStatusBadge(
@@ -314,10 +290,11 @@ class _ProductDetailContent extends StatelessWidget {
       );
       if (variant == null) continue;
       final availability = state.availabilityForVariant(variant);
+      final price = state.priceForVariant(variant);
       cells[size.id] = AppSizeGridCell(
         quantity: state.quantityForVariant(variant),
-        availability: _cellAvailabilityFor(availability.status),
-        availabilityLabel: _availabilityLabelFor(availability),
+        availability: _cellAvailabilityFor(availability.status, price),
+        availabilityLabel: _availabilityLabelFor(availability, price),
       );
     }
 
@@ -367,7 +344,11 @@ class _ProductDetailContent extends StatelessWidget {
 
   AppSizeGridCellAvailability _cellAvailabilityFor(
     VariantAvailabilityStatus status,
+    ResolvedVariantPrice? price,
   ) {
+    if (!(price?.hasPrice ?? false)) {
+      return AppSizeGridCellAvailability.unavailable;
+    }
     return switch (status) {
       VariantAvailabilityStatus.readyStock =>
         AppSizeGridCellAvailability.readyStock,
@@ -378,11 +359,17 @@ class _ProductDetailContent extends StatelessWidget {
     };
   }
 
-  String? _availabilityLabelFor(VariantAvailability availability) {
-    return switch (availability.status) {
+  String _availabilityLabelFor(
+    VariantAvailability availability,
+    ResolvedVariantPrice? price,
+  ) {
+    if (!(price?.hasPrice ?? false)) {
+      return 'Sem preço definido na tabela ativa';
+    }
+    final stockLabel = switch (availability.status) {
       VariantAvailabilityStatus.readyStock =>
         availability.availableQuantity == null
-            ? null
+            ? 'Pronta entrega'
             : 'Pronta entrega: ${availability.availableQuantity}',
       VariantAvailabilityStatus.futureStock =>
         availability.futureAvailableAt == null
@@ -390,6 +377,7 @@ class _ProductDetailContent extends StatelessWidget {
             : 'Estoque futuro ${_formatDate(availability.futureAvailableAt!)}',
       VariantAvailabilityStatus.unavailable => 'Indisponível',
     };
+    return '${_formatPrice(price!.price!)} · $stockLabel';
   }
 
   String _formatDate(DateTime date) {
@@ -398,10 +386,49 @@ class _ProductDetailContent extends StatelessWidget {
     return '$day/$month/${date.year}';
   }
 
+  String _formatPrice(double value) {
+    return NumberFormat.currency(
+      locale: 'pt_BR',
+      symbol: 'R\$',
+      decimalDigits: 2,
+    ).format(value);
+  }
+
   Color _colorFromHex(ProductColor? color) {
     if (color == null) return const Color(0xFFBDBDBD);
     final value = color.hex.value;
     return Color(0xFF000000 | int.parse(value.substring(1), radix: 16));
+  }
+}
+
+class _PriceStatusBadge extends StatelessWidget {
+  const _PriceStatusBadge({required this.state});
+
+  final ProductDetailState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final price = state.lowestResolvedPrice;
+    if (price == null) {
+      return const AppStatusBadge(
+        label: 'Sem preço definido na tabela ativa',
+        variant: AppStatusBadgeVariant.warning,
+        icon: Icons.sell_outlined,
+      );
+    }
+    final formatted = NumberFormat.currency(
+      locale: 'pt_BR',
+      symbol: 'R\$',
+      decimalDigits: 2,
+    ).format(price);
+    final hasVariantException = state.pricesByVariantId.values.any(
+      (item) => item.isVariantException,
+    );
+    return AppStatusBadge(
+      label: hasVariantException ? 'A partir de $formatted' : formatted,
+      variant: AppStatusBadgeVariant.success,
+      icon: Icons.sell_outlined,
+    );
   }
 }
 

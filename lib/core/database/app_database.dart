@@ -4,6 +4,7 @@ import 'tables/customer_addresses_table.dart';
 import 'tables/customer_contacts_table.dart';
 import 'tables/customers_table.dart';
 import 'tables/favorites_table.dart';
+import 'tables/price_list_items_table.dart';
 import 'tables/price_lists_table.dart';
 import 'tables/product_search_index_table.dart';
 
@@ -36,6 +37,8 @@ class ProductSearchIndexRow {
 /// initial offline load. TASK-069 adds [ProductSearchIndexTable] as a narrow
 /// read index for product search, not yet the full Product sync schema.
 /// TASK-083 adds [PriceListsTable] as the offline cache for pricing tables.
+/// TASK-084 extends that cache with [PriceListItemsTable] for resolved base
+/// prices and variant-specific exceptions.
 /// The general-purpose local schema for every other offline-capable entity
 /// (orders, Outbox, ...) is EPIC-14 work and must keep extending this same
 /// [AppDatabase] class/migration chain rather than create a second local
@@ -48,13 +51,14 @@ class ProductSearchIndexRow {
     ProductSearchIndexTable,
     FavoritesTable,
     PriceListsTable,
+    PriceListItemsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 5;
+  int get schemaVersion => 6;
 
   @override
   MigrationStrategy get migration {
@@ -94,6 +98,9 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 5) {
           await migrator.createTable(priceListsTable);
+        }
+        if (from < 6) {
+          await migrator.createTable(priceListItemsTable);
         }
       },
       beforeOpen: (details) async {
@@ -445,5 +452,60 @@ class AppDatabase extends _$AppDatabase {
       );
     final row = await query.getSingle();
     return row.read(countExpression) ?? 0;
+  }
+
+  Future<void> replacePriceListItems({
+    required String organizationId,
+    required String companyId,
+    required String priceListId,
+    required List<PriceListItemsTableCompanion> itemRows,
+  }) {
+    return transaction(() async {
+      await (delete(priceListItemsTable)..where(
+            (row) =>
+                row.organizationId.equals(organizationId) &
+                row.companyId.equals(companyId) &
+                row.priceListId.equals(priceListId),
+          ))
+          .go();
+
+      await batch((batch) {
+        batch.insertAll(priceListItemsTable, itemRows);
+      });
+    });
+  }
+
+  Future<void> upsertPriceListItem(PriceListItemsTableCompanion row) {
+    return into(priceListItemsTable).insertOnConflictUpdate(row);
+  }
+
+  Future<List<PriceListItemsTableData>> getPriceListItemsByPriceList({
+    required String organizationId,
+    required String companyId,
+    required String priceListId,
+  }) {
+    return (select(priceListItemsTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.companyId.equals(companyId) &
+              row.priceListId.equals(priceListId) &
+              row.deletedAt.isNull(),
+        ))
+        .get();
+  }
+
+  Future<List<PriceListItemsTableData>> getPriceListItemsByProduct({
+    required String organizationId,
+    required String companyId,
+    required String productId,
+  }) {
+    return (select(priceListItemsTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.companyId.equals(companyId) &
+              row.productId.equals(productId) &
+              row.deletedAt.isNull(),
+        ))
+        .get();
   }
 }

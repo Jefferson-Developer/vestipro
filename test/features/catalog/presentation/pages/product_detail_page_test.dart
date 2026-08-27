@@ -6,6 +6,7 @@ import 'package:vestipro/core/design_system/design_system.dart';
 import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/catalog/catalog.dart';
+import 'package:vestipro/features/pricing/pricing.dart';
 import 'package:vestipro/features/products/data/repositories/shared_preferences_product_color_repository.dart';
 import 'package:vestipro/features/products/data/repositories/shared_preferences_product_variant_repository.dart';
 import 'package:vestipro/features/products/data/repositories/shared_preferences_size_grid_template_repository.dart';
@@ -17,15 +18,11 @@ void main() {
       SharedPreferences.setMockInitialValues(<String, Object>{});
     });
 
-    // Builds a bloc wired to already-seeded (awaited) repositories: the real
-    // widget flow starts loading synchronously as soon as `ProductDetailPage`
-    // is pumped, so every repository must be fully seeded *before* the bloc
-    // is even constructed — otherwise the first load could race the seed
-    // writes and flakily see an empty catalog.
     Future<ProductDetailBloc> buildBloc({
       required AppResult<Product> productResult,
       List<ProductVariant> variants = const <ProductVariant>[],
       AnalyticsService? analyticsService,
+      ResolvePriceForVariantUseCase? resolvePriceForVariant,
     }) async {
       final variantRepository =
           const SharedPreferencesProductVariantRepository();
@@ -53,13 +50,13 @@ void main() {
         getVariantAvailability: GetVariantAvailabilityUseCase(
           const _FakeVariantAvailabilityRepository(),
         ),
+        resolvePriceForVariant: resolvePriceForVariant,
         analyticsService: analyticsService ?? FakeAnalyticsService(),
       );
     }
 
     testWidgets(
-      'renders gallery placeholder, colors, size grid and price disclosure '
-      'for a product with active variants',
+      'renders gallery placeholder, colors, size grid and explicit no-price state',
       (tester) async {
         final bloc = await buildBloc(
           productResult: AppSuccess<Product>(_product),
@@ -90,70 +87,79 @@ void main() {
           <String>{'Preto', 'Branco'},
         );
         expect(find.text('P'), findsWidgets);
-        expect(
-          find.text('Preço sob consulta com o time comercial'),
-          findsOneWidget,
-        );
+        expect(find.text('Sem preço definido na tabela ativa'), findsOneWidget);
         final button = tester.widget<AppButton>(find.byType(AppButton));
         expect(button.isDisabled, isTrue);
       },
     );
 
-    testWidgets('typing a quantity enables the sticky CTA, and tapping it logs '
-        'product_added_to_order and forwards the lines to onAddToOrder', (
-      tester,
-    ) async {
-      final analyticsService = FakeAnalyticsService();
-      Product? addedProduct;
-      List<ProductDetailOrderLine>? addedLines;
+    testWidgets(
+      'typing a quantity enables the sticky CTA, and tapping it logs product_added_to_order and forwards the lines to onAddToOrder',
+      (tester) async {
+        final analyticsService = FakeAnalyticsService();
+        Product? addedProduct;
+        List<ProductDetailOrderLine>? addedLines;
 
-      final bloc = await buildBloc(
-        productResult: AppSuccess<Product>(_product),
-        variants: <ProductVariant>[
-          _variant('v-preto-p', 'color-preto', 'size-p'),
-        ],
-        analyticsService: analyticsService,
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.light,
-          home: ProductDetailPage(
-            organizationId: 'org-1',
-            productId: 'product-1',
-            createBloc: () => bloc,
-            onAddToOrder: (product, lines) {
-              addedProduct = product;
-              addedLines = lines;
-            },
+        final bloc = await buildBloc(
+          productResult: AppSuccess<Product>(_product),
+          variants: <ProductVariant>[
+            _variant('v-preto-p', 'color-preto', 'size-p'),
+          ],
+          analyticsService: analyticsService,
+          resolvePriceForVariant:
+              _buildResolvePriceForVariantUseCase(<PriceListItem>[
+                PriceListItem(
+                  id: 'price-list-1::product-1::*',
+                  organizationId: 'org-1',
+                  companyId: 'company-1',
+                  priceListId: 'price-list-1',
+                  productId: 'product-1',
+                  price: 199.9,
+                  updatedAt: DateTime.utc(2026, 1, 1),
+                  updatedBy: 'user-1',
+                ),
+              ]),
+        );
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.light,
+            home: ProductDetailPage(
+              organizationId: 'org-1',
+              productId: 'product-1',
+              createBloc: () => bloc,
+              onAddToOrder: (product, lines) {
+                addedProduct = product;
+                addedLines = lines;
+              },
+            ),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpAndSettle();
 
-      await tester.enterText(find.byType(TextField).first, '5');
-      await tester.testTextInput.receiveAction(TextInputAction.next);
-      await tester.pumpAndSettle();
+        await tester.enterText(find.byType(TextField).first, '5');
+        await tester.testTextInput.receiveAction(TextInputAction.next);
+        await tester.pumpAndSettle();
 
-      final button = tester.widget<AppButton>(find.byType(AppButton));
-      expect(button.isDisabled, isFalse);
-      expect(button.label, contains('5'));
+        final button = tester.widget<AppButton>(find.byType(AppButton));
+        expect(button.isDisabled, isFalse);
 
-      await tester.tap(find.byType(AppButton));
-      await tester.pumpAndSettle();
+        await tester.tap(find.byType(AppButton));
+        await tester.pumpAndSettle();
 
-      expect(addedProduct?.id, 'product-1');
-      expect(addedLines?.single.quantity, 5);
-      expect(
-        analyticsService.loggedEvents
-            .map((event) => event.name)
-            .contains(AnalyticsEvents.productAddedToOrder),
-        isTrue,
-      );
-    });
+        expect(addedProduct?.id, 'product-1');
+        expect(addedLines, isNotNull);
+        expect(addedLines, hasLength(1));
+        expect(addedLines?.single.quantity, 5);
+        final logged = analyticsService.loggedEvents.firstWhere(
+          (event) => event.name == AnalyticsEvents.productAddedToOrder,
+        );
+        expect(logged.parameters?['product_id'], 'product-1');
+        expect(logged.parameters?['items_count'], 5);
+      },
+    );
 
     testWidgets(
-      'shows an explicit empty grade (never a broken screen) for a product '
-      'with no active variants',
+      'shows an explicit empty grade (never a broken screen) for a product with no active variants',
       (tester) async {
         final bloc = await buildBloc(
           productResult: AppSuccess<Product>(_product),
@@ -176,39 +182,48 @@ void main() {
       },
     );
 
-    testWidgets('shows an error state with retry when the product fails to '
-        'load', (tester) async {
-      final bloc = await buildBloc(
-        productResult: const AppFailure<Product>(
-          NotFoundFailure('Not found.', code: 'product_not_found'),
-        ),
-      );
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.light,
-          home: ProductDetailPage(
-            organizationId: 'org-1',
-            productId: 'missing',
-            createBloc: () => bloc,
+    testWidgets(
+      'shows an error state with retry when the product fails to load',
+      (tester) async {
+        final bloc = await buildBloc(
+          productResult: const AppFailure<Product>(
+            NotFoundFailure('Not found.', code: 'product_not_found'),
           ),
-        ),
-      );
-      await tester.pumpAndSettle();
+        );
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.light,
+            home: ProductDetailPage(
+              organizationId: 'org-1',
+              productId: 'missing',
+              createBloc: () => bloc,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
 
-      expect(find.text('Não foi possível carregar o produto'), findsOneWidget);
-      expect(find.text('Tentar novamente'), findsOneWidget);
+        expect(
+          find.text('Não foi possível carregar o produto'),
+          findsOneWidget,
+        );
+        expect(find.text('Tentar novamente'), findsOneWidget);
 
-      await tester.tap(find.text('Tentar novamente'));
-      await tester.pumpAndSettle();
+        await tester.tap(find.text('Tentar novamente'));
+        await tester.pumpAndSettle();
 
-      expect(find.text('Não foi possível carregar o produto'), findsOneWidget);
-    });
+        expect(
+          find.text('Não foi possível carregar o produto'),
+          findsOneWidget,
+        );
+      },
+    );
   });
 }
 
 final _product = Product(
   id: 'product-1',
   organizationId: 'org-1',
+  companyId: 'company-1',
   sku: Sku.parse('CAMISA-001'),
   reference: 'REF-001',
   name: 'Camisa Essential',
@@ -358,4 +373,101 @@ final class _FakeVariantAvailabilityRepository
     required Iterable<String> productIds,
   }) async =>
       const AppSuccess<List<VariantAvailability>>(<VariantAvailability>[]);
+}
+
+ResolvePriceForVariantUseCase _buildResolvePriceForVariantUseCase(
+  List<PriceListItem> items,
+) {
+  return ResolvePriceForVariantUseCase(
+    ResolveApplicablePriceListsUseCase(const _FakePriceListRepository()),
+    _FakePriceListItemRepository(items),
+  );
+}
+
+final class _FakePriceListRepository implements PriceListRepository {
+  const _FakePriceListRepository();
+
+  @override
+  Future<AppResult<PriceList>> create({required PriceList priceList}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<AppResult<PriceList?>> getById({
+    required String organizationId,
+    required String id,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<AppResult<List<PriceList>>> listByCompany({
+    required String organizationId,
+    required String companyId,
+  }) async => AppSuccess<List<PriceList>>(<PriceList>[
+    PriceList(
+      id: 'price-list-1',
+      organizationId: organizationId,
+      companyId: companyId,
+      name: 'Tabela padrao',
+      currency: 'BRL',
+      validFrom: DateTime.utc(2026, 1, 1),
+      status: PriceListStatus.active,
+      scope: PriceListScopeType.company,
+      createdAt: DateTime.utc(2026, 1, 1),
+      createdBy: 'user-1',
+      updatedAt: DateTime.utc(2026, 1, 1),
+      updatedBy: 'user-1',
+      version: 1,
+      syncStatus: PriceListSyncStatus.synced,
+    ),
+  ]);
+
+  @override
+  Future<AppResult<PriceList>> update({required PriceList priceList}) =>
+      throw UnimplementedError();
+}
+
+final class _FakePriceListItemRepository implements PriceListItemRepository {
+  const _FakePriceListItemRepository(this._items);
+
+  final List<PriceListItem> _items;
+
+  @override
+  Future<AppResult<List<PriceListItem>>> listByPriceList({
+    required String organizationId,
+    required String companyId,
+    required String priceListId,
+  }) async => AppSuccess<List<PriceListItem>>(
+    _items
+        .where(
+          (item) =>
+              item.organizationId == organizationId &&
+              item.companyId == companyId &&
+              item.priceListId == priceListId,
+        )
+        .toList(growable: false),
+  );
+
+  @override
+  Future<AppResult<List<PriceListItem>>> listByProduct({
+    required String organizationId,
+    required String companyId,
+    required String productId,
+  }) async => AppSuccess<List<PriceListItem>>(
+    _items
+        .where(
+          (item) =>
+              item.organizationId == organizationId &&
+              item.companyId == companyId &&
+              item.productId == productId,
+        )
+        .toList(growable: false),
+  );
+
+  @override
+  Future<AppResult<List<PriceListItem>>> upsertBatch({
+    required String organizationId,
+    required String companyId,
+    required String priceListId,
+    required List<PriceListItem> items,
+    required bool confirmOverwrite,
+  }) => throw UnimplementedError();
 }

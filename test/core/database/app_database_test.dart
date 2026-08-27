@@ -16,7 +16,7 @@ void main() {
     });
 
     test('creates the customer schema on a fresh database', () async {
-      expect(database.schemaVersion, 5);
+      expect(database.schemaVersion, 6);
 
       // Exercises `onCreate`/`beforeOpen` by forcing the connection open.
       await database.customStatement('SELECT 1');
@@ -38,6 +38,7 @@ void main() {
           'product_search_index',
           'favorites',
           'price_lists',
+          'price_list_items',
         ]),
       );
     });

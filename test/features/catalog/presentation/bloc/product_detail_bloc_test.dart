@@ -5,6 +5,7 @@ import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/catalog/catalog.dart';
+import 'package:vestipro/features/pricing/pricing.dart';
 import 'package:vestipro/features/products/data/repositories/shared_preferences_product_color_repository.dart';
 import 'package:vestipro/features/products/data/repositories/shared_preferences_product_variant_repository.dart';
 import 'package:vestipro/features/products/data/repositories/shared_preferences_size_grid_template_repository.dart';
@@ -31,6 +32,7 @@ void main() {
     ProductDetailBloc buildBloc({
       required _ScriptedProductRepository productRepository,
       VariantAvailabilityRepository? availabilityRepository,
+      ResolvePriceForVariantUseCase? resolvePriceForVariant,
     }) {
       return ProductDetailBloc(
         getProductById: GetProductByIdUseCase(productRepository),
@@ -44,6 +46,7 @@ void main() {
         getVariantAvailability: GetVariantAvailabilityUseCase(
           availabilityRepository ?? const _FakeVariantAvailabilityRepository(),
         ),
+        resolvePriceForVariant: resolvePriceForVariant,
         analyticsService: analyticsService,
       );
     }
@@ -205,6 +208,19 @@ void main() {
         productRepository: _ScriptedProductRepository(
           AppSuccess<Product>(_product),
         ),
+        resolvePriceForVariant:
+            _buildResolvePriceForVariantUseCase(<PriceListItem>[
+              PriceListItem(
+                id: 'price-list-1::product-1::*',
+                organizationId: 'org-1',
+                companyId: 'company-1',
+                priceListId: 'price-list-1',
+                productId: 'product-1',
+                price: 199.9,
+                updatedAt: DateTime.utc(2026, 1, 1),
+                updatedBy: 'user-1',
+              ),
+            ]),
       ),
       act: (bloc) => bloc.add(
         const ProductDetailStarted(
@@ -245,6 +261,19 @@ void main() {
         productRepository: _ScriptedProductRepository(
           AppSuccess<Product>(_product),
         ),
+        resolvePriceForVariant:
+            _buildResolvePriceForVariantUseCase(<PriceListItem>[
+              PriceListItem(
+                id: 'price-list-1::product-1::*',
+                organizationId: 'org-1',
+                companyId: 'company-1',
+                priceListId: 'price-list-1',
+                productId: 'product-1',
+                price: 199.9,
+                updatedAt: DateTime.utc(2026, 1, 1),
+                updatedBy: 'user-1',
+              ),
+            ]),
       ),
       act: (bloc) async {
         bloc.add(
@@ -253,7 +282,7 @@ void main() {
             productId: 'product-1',
           ),
         );
-        await Future<void>.delayed(Duration.zero);
+        await Future<void>.delayed(const Duration(milliseconds: 10));
         bloc.add(
           const ProductDetailQuantityChanged(
             colorId: 'color-preto',
@@ -295,6 +324,19 @@ void main() {
         productRepository: _ScriptedProductRepository(
           AppSuccess<Product>(_product),
         ),
+        resolvePriceForVariant:
+            _buildResolvePriceForVariantUseCase(<PriceListItem>[
+              PriceListItem(
+                id: 'price-list-1::product-1::*',
+                organizationId: 'org-1',
+                companyId: 'company-1',
+                priceListId: 'price-list-1',
+                productId: 'product-1',
+                price: 199.9,
+                updatedAt: DateTime.utc(2026, 1, 1),
+                updatedBy: 'user-1',
+              ),
+            ]),
       ),
       act: (bloc) async {
         bloc.add(
@@ -332,6 +374,19 @@ void main() {
         productRepository: _ScriptedProductRepository(
           AppSuccess<Product>(_product),
         ),
+        resolvePriceForVariant:
+            _buildResolvePriceForVariantUseCase(<PriceListItem>[
+              PriceListItem(
+                id: 'price-list-1::product-1::*',
+                organizationId: 'org-1',
+                companyId: 'company-1',
+                priceListId: 'price-list-1',
+                productId: 'product-1',
+                price: 199.9,
+                updatedAt: DateTime.utc(2026, 1, 1),
+                updatedBy: 'user-1',
+              ),
+            ]),
       ),
       act: (bloc) async {
         bloc.add(
@@ -348,9 +403,10 @@ void main() {
             quantity: 3,
           ),
         );
+        await Future<void>.delayed(const Duration(milliseconds: 10));
         bloc.add(const ProductDetailAddToOrderRequested());
       },
-      wait: const Duration(milliseconds: 10),
+      wait: const Duration(milliseconds: 20),
       verify: (_) {
         final logged = analyticsService.loggedEvents.firstWhere(
           (event) => event.name == AnalyticsEvents.productAddedToOrder,
@@ -392,6 +448,7 @@ void main() {
 final _product = Product(
   id: 'product-1',
   organizationId: 'org-1',
+  companyId: 'company-1',
   sku: Sku.parse('CAMISA-001'),
   reference: 'REF-001',
   name: 'Camisa Essential',
@@ -577,4 +634,101 @@ final class _FailingVariantAvailabilityRepository
   }) async => const AppFailure<List<VariantAvailability>>(
     UnexpectedFailure('offline', code: 'availability_unavailable'),
   );
+}
+
+ResolvePriceForVariantUseCase _buildResolvePriceForVariantUseCase(
+  List<PriceListItem> items,
+) {
+  return ResolvePriceForVariantUseCase(
+    ResolveApplicablePriceListsUseCase(const _FakePriceListRepository()),
+    _FakePriceListItemRepository(items),
+  );
+}
+
+final class _FakePriceListRepository implements PriceListRepository {
+  const _FakePriceListRepository();
+
+  @override
+  Future<AppResult<PriceList>> create({required PriceList priceList}) =>
+      throw UnimplementedError();
+
+  @override
+  Future<AppResult<PriceList?>> getById({
+    required String organizationId,
+    required String id,
+  }) => throw UnimplementedError();
+
+  @override
+  Future<AppResult<List<PriceList>>> listByCompany({
+    required String organizationId,
+    required String companyId,
+  }) async => AppSuccess<List<PriceList>>(<PriceList>[
+    PriceList(
+      id: 'price-list-1',
+      organizationId: organizationId,
+      companyId: companyId,
+      name: 'Tabela padrao',
+      currency: 'BRL',
+      validFrom: DateTime.utc(2026, 1, 1),
+      status: PriceListStatus.active,
+      scope: PriceListScopeType.company,
+      createdAt: DateTime.utc(2026, 1, 1),
+      createdBy: 'user-1',
+      updatedAt: DateTime.utc(2026, 1, 1),
+      updatedBy: 'user-1',
+      version: 1,
+      syncStatus: PriceListSyncStatus.synced,
+    ),
+  ]);
+
+  @override
+  Future<AppResult<PriceList>> update({required PriceList priceList}) =>
+      throw UnimplementedError();
+}
+
+final class _FakePriceListItemRepository implements PriceListItemRepository {
+  const _FakePriceListItemRepository(this._items);
+
+  final List<PriceListItem> _items;
+
+  @override
+  Future<AppResult<List<PriceListItem>>> listByPriceList({
+    required String organizationId,
+    required String companyId,
+    required String priceListId,
+  }) async => AppSuccess<List<PriceListItem>>(
+    _items
+        .where(
+          (item) =>
+              item.organizationId == organizationId &&
+              item.companyId == companyId &&
+              item.priceListId == priceListId,
+        )
+        .toList(growable: false),
+  );
+
+  @override
+  Future<AppResult<List<PriceListItem>>> listByProduct({
+    required String organizationId,
+    required String companyId,
+    required String productId,
+  }) async => AppSuccess<List<PriceListItem>>(
+    _items
+        .where(
+          (item) =>
+              item.organizationId == organizationId &&
+              item.companyId == companyId &&
+              item.productId == productId,
+        )
+        .toList(growable: false),
+  );
+
+  @override
+  Future<AppResult<List<PriceListItem>>> upsertBatch({
+    required String organizationId,
+    required String companyId,
+    required String priceListId,
+    required List<PriceListItem> items,
+    required bool confirmOverwrite,
+  }) => throw UnimplementedError();
 }

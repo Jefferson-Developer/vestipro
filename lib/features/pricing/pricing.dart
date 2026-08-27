@@ -2,10 +2,16 @@
 library;
 
 export 'domain/entities/price_list.dart';
+export 'domain/entities/price_list_item.dart';
+export 'domain/entities/resolved_variant_price.dart';
+export 'domain/repositories/price_list_item_local_store_repository.dart';
+export 'domain/repositories/price_list_item_repository.dart';
 export 'domain/repositories/price_list_local_store_repository.dart';
 export 'domain/repositories/price_list_repository.dart';
 export 'domain/usecases/create_price_list_use_case.dart';
 export 'domain/usecases/resolve_applicable_price_lists_use_case.dart';
+export 'domain/usecases/resolve_price_for_variant_use_case.dart';
+export 'domain/usecases/upsert_price_list_items_batch_use_case.dart';
 export 'domain/value_objects/price_list_scope_type.dart';
 export 'domain/value_objects/price_list_status.dart';
 export 'domain/value_objects/price_list_sync_status.dart';

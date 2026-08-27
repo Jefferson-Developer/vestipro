@@ -1,4 +1,5 @@
 import '../../../../core/errors/errors.dart';
+import '../../../pricing/domain/entities/resolved_variant_price.dart';
 import '../../../products/domain/entities/product.dart';
 import '../../../products/domain/entities/product_color.dart';
 import '../../../products/domain/entities/product_media.dart';
@@ -49,6 +50,8 @@ final class ProductDetailState {
     this.quantitiesByVariantId = const <String, int>{},
     this.failure,
     this.hasLoggedViewed = false,
+    this.pricesByVariantId = const <String, ResolvedVariantPrice>{},
+    this.hasPricingWarning = false,
   });
 
   final ProductDetailLoadStatus status;
@@ -72,17 +75,15 @@ final class ProductDetailState {
   final Map<String, int> quantitiesByVariantId;
   final Failure? failure;
   final bool hasLoggedViewed;
+  final Map<String, ResolvedVariantPrice> pricesByVariantId;
+  final bool hasPricingWarning;
 
   bool get isInitialLoading =>
       status == ProductDetailLoadStatus.initial ||
       status == ProductDetailLoadStatus.loading;
 
-  /// Price is never displayed by this screen: no price-list/pricing-engine
-  /// implementation exists yet (EPIC-11, TASK-083/TASK-084) and, per
-  /// TASK-078's own rule, the detail screen never calculates or fabricates
-  /// one on its own — exactly the same intentional gap `ProductGridPage`
-  /// already documents for the catalog grid.
-  bool get isPriceAvailable => false;
+  bool get isPriceAvailable =>
+      pricesByVariantId.values.any((resolved) => resolved.hasPrice);
 
   List<SizeGridSize> get orderedSizes =>
       sizeGridTemplate?.orderedSizes ?? const <SizeGridSize>[];
@@ -131,6 +132,13 @@ final class ProductDetailState {
       availabilityByVariantId[variant.id] ??
       VariantAvailability.fromVariant(variant);
 
+  ResolvedVariantPrice? priceForVariant(ProductVariant variant) =>
+      pricesByVariantId[variant.id];
+
+  bool canAddVariantToOrder(ProductVariant variant) =>
+      availabilityForVariant(variant).acceptsQuantity &&
+      (priceForVariant(variant)?.hasPrice ?? false);
+
   /// Aggregate availability for a whole color, used by the color swatch:
   /// ready stock if any size of that color is ready, else future stock if
   /// any is a future arrival, else unavailable — the same
@@ -153,8 +161,18 @@ final class ProductDetailState {
   }
 
   int quantityForVariant(ProductVariant variant) {
-    if (!availabilityForVariant(variant).acceptsQuantity) return 0;
+    if (!canAddVariantToOrder(variant)) return 0;
     return quantitiesByVariantId[variant.id] ?? 0;
+  }
+
+  double? get lowestResolvedPrice {
+    final prices = pricesByVariantId.values
+        .where((resolved) => resolved.price != null)
+        .map((resolved) => resolved.price!)
+        .toList(growable: false);
+    if (prices.isEmpty) return null;
+    prices.sort();
+    return prices.first;
   }
 
   int get totalQuantity =>
@@ -205,6 +223,8 @@ final class ProductDetailState {
     Failure? failure,
     bool clearFailure = false,
     bool? hasLoggedViewed,
+    Map<String, ResolvedVariantPrice>? pricesByVariantId,
+    bool? hasPricingWarning,
   }) {
     return ProductDetailState(
       status: status ?? this.status,
@@ -226,6 +246,8 @@ final class ProductDetailState {
           quantitiesByVariantId ?? this.quantitiesByVariantId,
       failure: clearFailure ? null : failure ?? this.failure,
       hasLoggedViewed: hasLoggedViewed ?? this.hasLoggedViewed,
+      pricesByVariantId: pricesByVariantId ?? this.pricesByVariantId,
+      hasPricingWarning: hasPricingWarning ?? this.hasPricingWarning,
     );
   }
 }

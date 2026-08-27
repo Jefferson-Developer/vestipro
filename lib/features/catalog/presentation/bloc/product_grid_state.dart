@@ -11,45 +11,29 @@ final class ProductGridState {
     this.companyId,
     this.products = const <Product>[],
     this.availabilityByProductId = const <String, VariantAvailability>{},
+    this.priceLabelsByProductId = const <String, String>{},
+    this.unpricedProductIds = const <String>{},
     this.cursor,
     this.hasMore = false,
     this.isLoadingMore = false,
     this.failure,
     this.hasLoggedViewed = false,
+    this.hasPricingWarning = false,
   });
 
   final ProductGridLoadStatus status;
   final String organizationId;
   final String? companyId;
-
-  /// Every Product page loaded so far, oldest-fetched first — pages are
-  /// always appended, never replacing what a previous page already showed
-  /// (TASK-077: rolling continuously must not duplicate or lose products
-  /// already loaded, including after returning from a detail screen, since
-  /// this state simply survives as long as `ProductGridBloc` is not
-  /// recreated).
   final List<Product> products;
-
   final Map<String, VariantAvailability> availabilityByProductId;
-
-  /// `ProductCatalogPage.nextCursor` of the last page fetched — fed back
-  /// into the next `ProductGridNextPageRequested`. `null` once there is no
-  /// further page ([hasMore] is `false`).
+  final Map<String, String> priceLabelsByProductId;
+  final Set<String> unpricedProductIds;
   final String? cursor;
-
   final bool hasMore;
-
-  /// A next page is in flight — distinct from [status] `loading`, which is
-  /// only the very first, nothing-to-show-yet load.
   final bool isLoadingMore;
-
-  /// Only set when the *first* page failed and there is nothing to show at
-  /// all. A later page failing never sets this — [products] stays exactly
-  /// as it was, per the "erro em página intermediária preservando itens já
-  /// exibidos" requirement.
   final Failure? failure;
-
   final bool hasLoggedViewed;
+  final bool hasPricingWarning;
 
   bool get isInitialLoading =>
       status == ProductGridLoadStatus.initial ||
@@ -61,6 +45,8 @@ final class ProductGridState {
     String? companyId,
     List<Product>? products,
     Map<String, VariantAvailability>? availabilityByProductId,
+    Map<String, String>? priceLabelsByProductId,
+    Set<String>? unpricedProductIds,
     String? cursor,
     bool clearCursor = false,
     bool? hasMore,
@@ -68,6 +54,7 @@ final class ProductGridState {
     Failure? failure,
     bool clearFailure = false,
     bool? hasLoggedViewed,
+    bool? hasPricingWarning,
   }) {
     return ProductGridState(
       status: status ?? this.status,
@@ -76,11 +63,15 @@ final class ProductGridState {
       products: products ?? this.products,
       availabilityByProductId:
           availabilityByProductId ?? this.availabilityByProductId,
+      priceLabelsByProductId:
+          priceLabelsByProductId ?? this.priceLabelsByProductId,
+      unpricedProductIds: unpricedProductIds ?? this.unpricedProductIds,
       cursor: clearCursor ? null : cursor ?? this.cursor,
       hasMore: hasMore ?? this.hasMore,
       isLoadingMore: isLoadingMore ?? this.isLoadingMore,
       failure: clearFailure ? null : failure ?? this.failure,
       hasLoggedViewed: hasLoggedViewed ?? this.hasLoggedViewed,
+      hasPricingWarning: hasPricingWarning ?? this.hasPricingWarning,
     );
   }
 }

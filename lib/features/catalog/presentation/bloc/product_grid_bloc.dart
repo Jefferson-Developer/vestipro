@@ -1,33 +1,30 @@
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:injectable/injectable.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/analytics/analytics.dart';
 import '../../../../core/utils/utils.dart';
+import '../../../pricing/domain/entities/resolved_variant_price.dart';
+import '../../../pricing/domain/usecases/resolve_price_for_variant_use_case.dart';
 import '../../../products/domain/entities/product.dart';
 import '../../../products/domain/entities/product_catalog_page.dart';
+import '../../../products/domain/entities/product_variant.dart';
 import '../../../products/domain/entities/variant_availability.dart';
 import '../../../products/domain/entities/variant_availability_snapshot.dart';
 import '../../../products/domain/usecases/get_variant_availability_use_case.dart';
+import '../../../products/domain/usecases/list_product_variants_by_product_use_case.dart';
 import '../../domain/usecases/list_catalog_products_use_case.dart';
 import 'product_grid_event.dart';
 import 'product_grid_state.dart';
 
-/// Orchestrates the catalog's visual grid (TASK-077) — the cursor-paginated
-/// product listing every catalog surface (home "ver tudo", busca, coleção,
-/// campanha, favoritos) reuses, always rendered through the Design System's
-/// `AppProductGrid`/`AppProductCardData`.
-///
-/// Every page fetched is appended to [ProductGridState.products], never
-/// replacing it, so scrolling never duplicates or loses a product already
-/// shown; the same state also simply survives a push to a detail screen and
-/// back, as long as this bloc instance is not recreated (owned by
-/// `ProductGridPage`'s `BlocProvider`, one level above the pushed route).
 @injectable
 final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
   ProductGridBloc({
     required this.listCatalogProducts,
     required this.getVariantAvailability,
+    this.listVariantsByProduct,
+    this.resolvePriceForVariant,
     required this.analyticsService,
   }) : super(const ProductGridState()) {
     on<ProductGridStarted>(_onStarted, transformer: restartable());
@@ -41,6 +38,8 @@ final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
 
   final ListCatalogProductsUseCase listCatalogProducts;
   final GetVariantAvailabilityUseCase getVariantAvailability;
+  final ListProductVariantsByProductUseCase? listVariantsByProduct;
+  final ResolvePriceForVariantUseCase? resolvePriceForVariant;
   final AnalyticsService analyticsService;
 
   Future<void> _onStarted(
@@ -111,6 +110,7 @@ final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
             ? page.products
             : _mergeProducts(state.products, page.products);
         final availability = await _fetchAvailability(page.products);
+        final pricing = await _fetchPrices(page.products);
         if (emit.isDone) return;
         final mergedAvailability = replace
             ? availability
@@ -118,6 +118,12 @@ final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
                 ...state.availabilityByProductId,
                 ...availability,
               };
+        final mergedPriceLabels = replace
+            ? pricing.$1
+            : <String, String>{...state.priceLabelsByProductId, ...pricing.$1};
+        final mergedUnpriced = replace
+            ? pricing.$2
+            : <String>{...state.unpricedProductIds, ...pricing.$2};
 
         emit(
           state.copyWith(
@@ -126,10 +132,13 @@ final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
                 : ProductGridLoadStatus.success,
             products: mergedProducts,
             availabilityByProductId: mergedAvailability,
+            priceLabelsByProductId: mergedPriceLabels,
+            unpricedProductIds: mergedUnpriced,
             cursor: page.nextCursor,
             clearCursor: page.nextCursor == null,
             hasMore: page.hasMore,
             isLoadingMore: false,
+            hasPricingWarning: pricing.$3,
             clearFailure: true,
           ),
         );
@@ -144,9 +153,6 @@ final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
             ),
           );
         } else {
-          // A later page failing never wipes what is already on screen —
-          // just stop the "carregar mais" spinner so the user can retry by
-          // tapping it again.
           emit(state.copyWith(isLoadingMore: false));
         }
     }
@@ -163,13 +169,86 @@ final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
     return switch (result) {
       AppSuccess<VariantAvailabilitySnapshot>(value: final snapshot) =>
         _availabilityByProductId(products, snapshot),
-      // Availability failing to load never fails the whole grid — a card
-      // with no known availability falls back to `AppProductCardData`'s own
-      // default (ready stock), exactly like `ProductSearchPage` already
-      // does for the same reason.
       AppFailure<VariantAvailabilitySnapshot>() =>
         const <String, VariantAvailability>{},
     };
+  }
+
+  Future<(Map<String, String>, Set<String>, bool)> _fetchPrices(
+    List<Product> products,
+  ) async {
+    if (listVariantsByProduct == null || resolvePriceForVariant == null) {
+      return (const <String, String>{}, const <String>{}, false);
+    }
+
+    final formatter = NumberFormat.currency(
+      locale: 'pt_BR',
+      symbol: 'R\$',
+      decimalDigits: 2,
+    );
+    final labels = <String, String>{};
+    final unpriced = <String>{};
+    var hasWarning = false;
+
+    for (final product in products) {
+      final companyId = product.companyId?.trim();
+      if (companyId == null || companyId.isEmpty) {
+        unpriced.add(product.id);
+        continue;
+      }
+
+      final variantsResult = await listVariantsByProduct!(
+        organizationId: state.organizationId,
+        productId: product.id,
+      );
+      if (variantsResult is AppFailure<List<ProductVariant>>) {
+        hasWarning = true;
+        continue;
+      }
+
+      final activeVariants =
+          (variantsResult as AppSuccess<List<ProductVariant>>).value
+              .where((variant) => variant.isActive)
+              .toList(growable: false);
+      if (activeVariants.isEmpty) {
+        unpriced.add(product.id);
+        continue;
+      }
+
+      final resolved = <ResolvedVariantPrice>[];
+      for (final variant in activeVariants) {
+        final priceResult = await resolvePriceForVariant!(
+          organizationId: state.organizationId,
+          companyId: companyId,
+          productId: product.id,
+          variantId: variant.id,
+        );
+        switch (priceResult) {
+          case AppSuccess<ResolvedVariantPrice>(value: final price):
+            if (price.hasPrice) resolved.add(price);
+          case AppFailure<ResolvedVariantPrice>():
+            hasWarning = true;
+        }
+      }
+
+      if (resolved.isEmpty) {
+        unpriced.add(product.id);
+        continue;
+      }
+
+      final distinctPrices =
+          resolved.map((item) => item.price!).toSet().toList(growable: false)
+            ..sort();
+      labels[product.id] = distinctPrices.length == 1
+          ? formatter.format(distinctPrices.first)
+          : 'A partir de ${formatter.format(distinctPrices.first)}';
+    }
+
+    return (
+      Map<String, String>.unmodifiable(labels),
+      Set<String>.unmodifiable(unpriced),
+      hasWarning,
+    );
   }
 
   Map<String, VariantAvailability> _availabilityByProductId(
@@ -186,10 +265,6 @@ final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
     return result;
   }
 
-  /// Appends [nextPage] to [current], skipping any product id already
-  /// present — defensive de-duplication against a duplicated/concurrent
-  /// page load, on top of `ProductGridNextPageRequested`'s own `droppable`
-  /// transformer and the `isLoadingMore` guard.
   List<Product> _mergeProducts(List<Product> current, List<Product> nextPage) {
     final existingIds = current.map((product) => product.id).toSet();
     final newProducts = nextPage.where(
