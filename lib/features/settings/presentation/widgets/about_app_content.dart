@@ -25,7 +25,7 @@ class AboutAppContent extends StatelessWidget {
   final AboutApp aboutApp;
   final List<AboutAppNote> notes;
   final String query;
-  final bool hasMore; 
+  final bool hasMore;
   final AboutAppDataOrigin dataOrigin;
   final bool isLoadingNextPage;
   final AboutAppSubmissionStatus submissionStatus;

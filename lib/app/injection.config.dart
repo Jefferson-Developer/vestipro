@@ -503,18 +503,28 @@ import '../features/organizations/domain/usecases/update_organization_settings_u
 import '../features/organizations/domain/usecases/update_team_use_case.dart'
     as _i207;
 import '../features/organizations/organizations.dart' as _i265;
+import '../features/pricing/data/mappers/payment_term_local_mapper.dart'
+    as _i162;
 import '../features/pricing/data/mappers/price_list_item_local_mapper.dart'
     as _i959;
 import '../features/pricing/data/mappers/price_list_local_mapper.dart' as _i794;
 import '../features/pricing/data/mappers/price_list_mapper.dart' as _i960;
+import '../features/pricing/data/repositories/drift_payment_term_local_store_repository.dart'
+    as _i629;
 import '../features/pricing/data/repositories/drift_price_list_item_local_store_repository.dart'
     as _i57;
 import '../features/pricing/data/repositories/drift_price_list_local_store_repository.dart'
     as _i525;
+import '../features/pricing/data/repositories/shared_preferences_payment_term_repository.dart'
+    as _i973;
 import '../features/pricing/data/repositories/shared_preferences_price_list_item_repository.dart'
     as _i808;
 import '../features/pricing/data/repositories/shared_preferences_price_list_repository.dart'
     as _i764;
+import '../features/pricing/domain/repositories/payment_term_local_store_repository.dart'
+    as _i512;
+import '../features/pricing/domain/repositories/payment_term_repository.dart'
+    as _i358;
 import '../features/pricing/domain/repositories/price_list_item_local_store_repository.dart'
     as _i155;
 import '../features/pricing/domain/repositories/price_list_item_repository.dart'
@@ -523,14 +533,22 @@ import '../features/pricing/domain/repositories/price_list_local_store_repositor
     as _i661;
 import '../features/pricing/domain/repositories/price_list_repository.dart'
     as _i455;
+import '../features/pricing/domain/usecases/create_payment_term_use_case.dart'
+    as _i881;
 import '../features/pricing/domain/usecases/create_price_list_use_case.dart'
     as _i581;
+import '../features/pricing/domain/usecases/list_active_payment_terms_use_case.dart'
+    as _i1068;
 import '../features/pricing/domain/usecases/resolve_applicable_price_lists_use_case.dart'
     as _i41;
 import '../features/pricing/domain/usecases/resolve_price_for_variant_use_case.dart'
     as _i352;
+import '../features/pricing/domain/usecases/update_payment_term_use_case.dart'
+    as _i932;
 import '../features/pricing/domain/usecases/upsert_price_list_items_batch_use_case.dart'
     as _i914;
+import '../features/pricing/presentation/cubit/payment_terms_cubit.dart'
+    as _i954;
 import '../features/pricing/presentation/cubit/price_list_item_batch_cubit.dart'
     as _i49;
 import '../features/products/data/datasources/drift_product_local_search_index_data_source.dart'
@@ -796,6 +814,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i619.FavoriteLocalMapper>(
       () => const _i619.FavoriteLocalMapper(),
     );
+    gh.factory<_i162.PaymentTermLocalMapper>(
+      () => const _i162.PaymentTermLocalMapper(),
+    );
     gh.lazySingleton<_i461.AppEnvironment>(
       () => appInjectionModule.appEnvironment,
     );
@@ -884,11 +905,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i659.CustomerSegmentDataSource>(
       () => const _i15.SharedPreferencesCustomerSegmentDataSource(),
     );
+    gh.lazySingleton<_i512.PaymentTermLocalStoreRepository>(
+      () => _i629.DriftPaymentTermLocalStoreRepository(
+        gh<_i658.AppDatabase>(),
+        gh<_i162.PaymentTermLocalMapper>(),
+      ),
+    );
     gh.lazySingleton<_i472.LeadRepository>(
       () => _i185.SharedPreferencesLeadRepository(gh<_i265.LeadMapper>()),
     );
     gh.lazySingleton<_i611.ImageCompressor>(
       () => const _i611.FlutterImageCompressor(),
+    );
+    gh.lazySingleton<_i358.PaymentTermRepository>(
+      () => _i973.SharedPreferencesPaymentTermRepository(),
     );
     gh.lazySingleton<_i1031.CatalogPreferencesRepository>(
       () => const _i590.SharedPreferencesCatalogPreferencesRepository(),
@@ -924,6 +954,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i1015.ProductCollectionLinkRepository>(
       () => const _i654.SharedPreferencesProductCollectionLinkRepository(),
+    );
+    gh.factory<_i1068.ListActivePaymentTermsUseCase>(
+      () => _i1068.ListActivePaymentTermsUseCase(
+        gh<_i358.PaymentTermRepository>(),
+      ),
     );
     gh.lazySingleton<_i512.CommercialSizeGridDraftRepository>(
       () => const _i79.SharedPreferencesCommercialSizeGridDraftRepository(),
@@ -2144,6 +2179,18 @@ extension GetItInjectableX on _i174.GetIt {
         thumbnailCompressor: gh<_i209.ImageCompressor>(),
       ),
     );
+    gh.factory<_i881.CreatePaymentTermUseCase>(
+      () => _i881.CreatePaymentTermUseCase(
+        gh<_i358.PaymentTermRepository>(),
+        gh<_i753.AuditLogRepository>(),
+      ),
+    );
+    gh.factory<_i932.UpdatePaymentTermUseCase>(
+      () => _i932.UpdatePaymentTermUseCase(
+        gh<_i358.PaymentTermRepository>(),
+        gh<_i753.AuditLogRepository>(),
+      ),
+    );
     gh.factory<_i318.FavoritesBloc>(
       () => _i318.FavoritesBloc(
         listFavoriteProducts: gh<_i72.ListFavoriteProductsUseCase>(),
@@ -2181,6 +2228,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i817.DeleteTeamUseCase>(
       () => _i817.DeleteTeamUseCase(gh<_i320.TeamRepository>()),
+    );
+    gh.factory<_i954.PaymentTermsCubit>(
+      () => _i954.PaymentTermsCubit(
+        gh<_i358.PaymentTermRepository>(),
+        gh<_i881.CreatePaymentTermUseCase>(),
+        gh<_i932.UpdatePaymentTermUseCase>(),
+      ),
     );
     gh.factory<_i658.AddMemberToTeamUseCase>(
       () => _i658.AddMemberToTeamUseCase(

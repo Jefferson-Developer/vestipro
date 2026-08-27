@@ -4,6 +4,7 @@ import 'tables/customer_addresses_table.dart';
 import 'tables/customer_contacts_table.dart';
 import 'tables/customers_table.dart';
 import 'tables/favorites_table.dart';
+import 'tables/payment_terms_table.dart';
 import 'tables/price_list_items_table.dart';
 import 'tables/price_lists_table.dart';
 import 'tables/product_search_index_table.dart';
@@ -50,6 +51,7 @@ class ProductSearchIndexRow {
     CustomerContactsTable,
     ProductSearchIndexTable,
     FavoritesTable,
+    PaymentTermsTable,
     PriceListsTable,
     PriceListItemsTable,
   ],
@@ -58,7 +60,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 6;
+  int get schemaVersion => 7;
 
   @override
   MigrationStrategy get migration {
@@ -101,6 +103,9 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 6) {
           await migrator.createTable(priceListItemsTable);
+        }
+        if (from < 7) {
+          await migrator.createTable(paymentTermsTable);
         }
       },
       beforeOpen: (details) async {
@@ -507,5 +512,57 @@ class AppDatabase extends _$AppDatabase {
               row.deletedAt.isNull(),
         ))
         .get();
+  }
+
+  Future<void> replacePaymentTerms({
+    required String organizationId,
+    required String companyId,
+    required List<PaymentTermsTableCompanion> paymentTermRows,
+  }) {
+    return transaction(() async {
+      await (delete(paymentTermsTable)..where(
+            (row) =>
+                row.organizationId.equals(organizationId) &
+                row.companyId.equals(companyId),
+          ))
+          .go();
+
+      await batch((batch) {
+        batch.insertAll(paymentTermsTable, paymentTermRows);
+      });
+    });
+  }
+
+  Future<void> upsertPaymentTerm(PaymentTermsTableCompanion row) {
+    return into(paymentTermsTable).insertOnConflictUpdate(row);
+  }
+
+  Future<List<PaymentTermsTableData>> getPaymentTermsForCompany({
+    required String organizationId,
+    required String companyId,
+  }) {
+    return (select(paymentTermsTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.companyId.equals(companyId) &
+              row.deletedAt.isNull(),
+        ))
+        .get();
+  }
+
+  Future<int> countPaymentTermsForCompany({
+    required String organizationId,
+    required String companyId,
+  }) async {
+    final countExpression = paymentTermsTable.id.count();
+    final query = selectOnly(paymentTermsTable)
+      ..addColumns([countExpression])
+      ..where(
+        paymentTermsTable.organizationId.equals(organizationId) &
+            paymentTermsTable.companyId.equals(companyId) &
+            paymentTermsTable.deletedAt.isNull(),
+      );
+    final row = await query.getSingle();
+    return row.read(countExpression) ?? 0;
   }
 }

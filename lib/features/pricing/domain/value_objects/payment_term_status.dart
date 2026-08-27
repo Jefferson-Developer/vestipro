@@ -1,0 +1,1 @@
+enum PaymentTermStatus { active, inactive }

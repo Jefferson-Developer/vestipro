@@ -80,9 +80,7 @@ final class MembershipActiveOrganizationGuard
   @override
   Future<String?> redirect(BuildContext context, GoRouterState state) async {
     final requestedOrgId = state.pathParameters['orgId'];
-    debugPrint(
-      '[DEBUG-GUARD] uri=${state.uri} requestedOrgId=$requestedOrgId',
-    );
+    debugPrint('[DEBUG-GUARD] uri=${state.uri} requestedOrgId=$requestedOrgId');
     // Routes with no `:orgId` segment at all (login, sign-up, onboarding,
     // invite acceptance, forbidden, not-found) are outside this guard's
     // scope by construction — same precedent as `PermissionAuthorizationGuard`
@@ -146,7 +144,9 @@ final class MembershipActiveOrganizationGuard
         return target;
       },
       onFailure: (f) {
-        debugPrint('[DEBUG-GUARD] resolvedResult FAILURE -> ForbiddenRoute: $f');
+        debugPrint(
+          '[DEBUG-GUARD] resolvedResult FAILURE -> ForbiddenRoute: $f',
+        );
         return const ForbiddenRoute().location;
       },
     );

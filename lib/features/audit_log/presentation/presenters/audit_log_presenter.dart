@@ -20,6 +20,9 @@ String auditActionLabel(AuditAction action) {
     AuditAction.organizationSettingsUpdated => 'Configuração alterada',
     AuditAction.productPublished => 'Produto publicado',
     AuditAction.productUpdated => 'Produto alterado',
+    AuditAction.paymentTermCreated => 'Condição criada',
+    AuditAction.paymentTermUpdated => 'Condição alterada',
+    AuditAction.paymentTermDeactivated => 'Condição inativada',
   };
 }
 
@@ -34,6 +37,7 @@ String auditEntityLabel(AuditLogEntry entry) {
     'role' => 'Role',
     'settings' => 'Configuração',
     'product' => 'Produto',
+    'paymentTerm' => 'Condição',
     _ => entry.entityType,
   };
   return '$type ${entry.entityId}';
