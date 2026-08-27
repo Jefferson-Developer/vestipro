@@ -383,6 +383,86 @@ service cloud.firestore {
         && resource.data.organizationId == organizationId;
     }
 
+    function validWarehousePayload(organizationId, data) {
+      return data.keys().hasOnly([
+          'organizationId',
+          'companyId',
+          'branchId',
+          'code',
+          'name',
+          'type',
+          'isActive',
+          'priority',
+          'createdAt',
+          'createdBy',
+          'updatedAt',
+          'updatedBy',
+          'deletedAt',
+          'version',
+          'syncStatus'
+        ])
+        && data.keys().hasAll([
+          'organizationId',
+          'companyId',
+          'code',
+          'name',
+          'type',
+          'isActive',
+          'priority',
+          'createdAt',
+          'createdBy',
+          'updatedAt',
+          'updatedBy',
+          'version',
+          'syncStatus'
+        ])
+        && data.organizationId == organizationId
+        && data.companyId is string
+        && data.companyId.size() > 0
+        && (
+          !data.keys().hasAny(['branchId'])
+          || data.branchId == null
+          || (data.branchId is string && data.branchId.size() > 0)
+        )
+        && data.code is string
+        && data.code.size() > 0
+        && data.name is string
+        && data.name.size() > 0
+        && data.type in [
+          'headquarters',
+          'distributionCenter',
+          'store',
+          'consigned'
+        ]
+        && data.isActive is bool
+        && data.priority is int
+        && data.priority >= 0
+        && data.createdAt is timestamp
+        && data.createdBy is string
+        && data.createdBy.size() > 0
+        && data.updatedAt is timestamp
+        && data.updatedBy is string
+        && data.updatedBy.size() > 0
+        && (
+          !data.keys().hasAny(['deletedAt'])
+          || data.deletedAt == null
+          || data.deletedAt is timestamp
+        )
+        && data.version is int
+        && data.version >= 1
+        && data.syncStatus in ['pending', 'syncing', 'synced', 'failed', 'conflict'];
+    }
+
+    function canReadWarehouse(organizationId) {
+      return isActiveMember(organizationId)
+        && resource.data.organizationId == organizationId;
+    }
+
+    function canWriteWarehouse(organizationId) {
+      return hasCapability(organizationId, 'inventory.adjust')
+        && validWarehousePayload(organizationId, request.resource.data);
+    }
+
     function canCreatePriceList(organizationId) {
       return hasCapability(organizationId, 'priceList.manage')
         && validPriceListPayload(organizationId, request.resource.data);
@@ -742,6 +822,21 @@ service cloud.firestore {
         allow get, list: if canReadPriceList(organizationId);
         allow create: if canCreatePriceList(organizationId);
         allow update: if canUpdatePriceList(organizationId);
+        allow delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/warehouses/{warehouseId}  (TASK-089)
+      // -------------------------------------------------------------------
+
+      match /warehouses/{warehouseId} {
+        allow get, list: if canReadWarehouse(organizationId);
+        allow create: if canWriteWarehouse(organizationId);
+        allow update: if canWriteWarehouse(organizationId)
+          && unchanged('organizationId')
+          && unchanged('companyId')
+          && unchanged('createdAt')
+          && unchanged('createdBy');
         allow delete: if false;
       }
 

@@ -298,6 +298,21 @@ import '../features/favorites/domain/usecases/watch_favorite_product_ids_use_cas
 import '../features/favorites/presentation/bloc/favorites_bloc.dart' as _i318;
 import '../features/favorites/presentation/cubit/favorite_status_cubit.dart'
     as _i249;
+import '../features/inventory/data/datasources/firestore_warehouse_data_source.dart'
+    as _i504;
+import '../features/inventory/data/datasources/warehouse_remote_data_source.dart'
+    as _i80;
+import '../features/inventory/data/mappers/warehouse_local_mapper.dart'
+    as _i172;
+import '../features/inventory/data/mappers/warehouse_mapper.dart' as _i678;
+import '../features/inventory/data/repositories/warehouse_repository_impl.dart'
+    as _i2;
+import '../features/inventory/domain/repositories/warehouse_repository.dart'
+    as _i62;
+import '../features/inventory/domain/usecases/get_active_warehouses_use_case.dart'
+    as _i609;
+import '../features/inventory/domain/usecases/get_warehouses_by_company_use_case.dart'
+    as _i472;
 import '../features/invites/data/datasources/cloud_functions_invite_acceptance_data_source.dart'
     as _i674;
 import '../features/invites/data/datasources/firestore_invite_data_source.dart'
@@ -515,12 +530,18 @@ import '../features/pricing/data/repositories/drift_price_list_item_local_store_
     as _i57;
 import '../features/pricing/data/repositories/drift_price_list_local_store_repository.dart'
     as _i525;
+import '../features/pricing/data/repositories/shared_preferences_discount_policy_repository.dart'
+    as _i684;
 import '../features/pricing/data/repositories/shared_preferences_payment_term_repository.dart'
     as _i973;
 import '../features/pricing/data/repositories/shared_preferences_price_list_item_repository.dart'
     as _i808;
 import '../features/pricing/data/repositories/shared_preferences_price_list_repository.dart'
     as _i764;
+import '../features/pricing/data/repositories/shared_preferences_promotional_campaign_repository.dart'
+    as _i430;
+import '../features/pricing/domain/repositories/discount_policy_repository.dart'
+    as _i31;
 import '../features/pricing/domain/repositories/payment_term_local_store_repository.dart'
     as _i512;
 import '../features/pricing/domain/repositories/payment_term_repository.dart'
@@ -533,24 +554,42 @@ import '../features/pricing/domain/repositories/price_list_local_store_repositor
     as _i661;
 import '../features/pricing/domain/repositories/price_list_repository.dart'
     as _i455;
+import '../features/pricing/domain/repositories/promotional_campaign_repository.dart'
+    as _i211;
+import '../features/pricing/domain/usecases/create_discount_policy_use_case.dart'
+    as _i885;
 import '../features/pricing/domain/usecases/create_payment_term_use_case.dart'
     as _i881;
 import '../features/pricing/domain/usecases/create_price_list_use_case.dart'
     as _i581;
+import '../features/pricing/domain/usecases/create_promotional_campaign_use_case.dart'
+    as _i938;
 import '../features/pricing/domain/usecases/list_active_payment_terms_use_case.dart'
     as _i1068;
+import '../features/pricing/domain/usecases/resolve_applicable_campaigns_use_case.dart'
+    as _i277;
 import '../features/pricing/domain/usecases/resolve_applicable_price_lists_use_case.dart'
     as _i41;
 import '../features/pricing/domain/usecases/resolve_price_for_variant_use_case.dart'
     as _i352;
+import '../features/pricing/domain/usecases/update_discount_policy_use_case.dart'
+    as _i468;
 import '../features/pricing/domain/usecases/update_payment_term_use_case.dart'
     as _i932;
+import '../features/pricing/domain/usecases/update_promotional_campaign_use_case.dart'
+    as _i339;
 import '../features/pricing/domain/usecases/upsert_price_list_items_batch_use_case.dart'
     as _i914;
+import '../features/pricing/domain/usecases/validate_discount_use_case.dart'
+    as _i531;
+import '../features/pricing/presentation/cubit/discount_policy_cubit.dart'
+    as _i98;
 import '../features/pricing/presentation/cubit/payment_terms_cubit.dart'
     as _i954;
 import '../features/pricing/presentation/cubit/price_list_item_batch_cubit.dart'
     as _i49;
+import '../features/pricing/presentation/cubit/promotional_campaign_cubit.dart'
+    as _i75;
 import '../features/products/data/datasources/drift_product_local_search_index_data_source.dart'
     as _i74;
 import '../features/products/data/datasources/firestore_product_remote_search_data_source.dart'
@@ -849,6 +888,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i712.CustomerSegmentMapper>(
       () => const _i712.CustomerSegmentMapper(),
     );
+    gh.lazySingleton<_i678.WarehouseMapper>(
+      () => const _i678.WarehouseMapper(),
+    );
     gh.lazySingleton<_i649.InviteMapper>(() => const _i649.InviteMapper());
     gh.lazySingleton<_i265.LeadMapper>(() => const _i265.LeadMapper());
     gh.lazySingleton<_i477.OnboardingProgressMapper>(
@@ -943,6 +985,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i449.OpportunityMapper>(),
       ),
     );
+    gh.lazySingleton<_i211.PromotionalCampaignRepository>(
+      () => const _i430.SharedPreferencesPromotionalCampaignRepository(),
+    );
     gh.lazySingleton<_i1036.CustomerFormDraftDataSource>(
       () => const _i292.SharedPreferencesCustomerFormDraftDataSource(),
     );
@@ -951,6 +996,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i841.CatalogHomeCacheRepository>(
       () => const _i26.SharedPreferencesCatalogHomeCacheRepository(),
+    );
+    gh.lazySingleton<_i31.DiscountPolicyRepository>(
+      () => const _i684.SharedPreferencesDiscountPolicyRepository(),
     );
     gh.lazySingleton<_i1015.ProductCollectionLinkRepository>(
       () => const _i654.SharedPreferencesProductCollectionLinkRepository(),
@@ -962,6 +1010,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i512.CommercialSizeGridDraftRepository>(
       () => const _i79.SharedPreferencesCommercialSizeGridDraftRepository(),
+    );
+    gh.lazySingleton<_i172.WarehouseLocalMapper>(
+      () => _i172.WarehouseLocalMapper(gh<_i678.WarehouseMapper>()),
     );
     gh.lazySingleton<_i999.CustomerFormDraftRepository>(
       () => _i920.CustomerFormDraftRepositoryImpl(
@@ -1029,6 +1080,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i960.ProductFormDraftDataSource>(
       () => const _i1033.SharedPreferencesProductFormDraftDataSource(),
+    );
+    gh.factory<_i277.ResolveApplicableCampaignsUseCase>(
+      () => _i277.ResolveApplicableCampaignsUseCase(
+        gh<_i211.PromotionalCampaignRepository>(),
+      ),
     );
     gh.lazySingleton<_i626.CollectionRepository>(
       () => const _i717.SharedPreferencesCollectionRepository(),
@@ -1269,6 +1325,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i298.ProductColorRepository>(),
         gh<_i8.ProductColorSimilarityService>(),
       ),
+    );
+    gh.factory<_i531.ValidateDiscountUseCase>(
+      () => _i531.ValidateDiscountUseCase(gh<_i31.DiscountPolicyRepository>()),
     );
     gh.lazySingleton<_i794.PriceListLocalMapper>(
       () => _i794.PriceListLocalMapper(gh<_i960.PriceListMapper>()),
@@ -1676,6 +1735,9 @@ extension GetItInjectableX on _i174.GetIt {
         markLost: gh<_i416.MarkOpportunityLostUseCase>(),
       ),
     );
+    gh.lazySingleton<_i80.WarehouseRemoteDataSource>(
+      () => _i504.FirestoreWarehouseDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i361.MembershipDataSource>(
       () => _i201.FirestoreMembershipDataSource(gh<_i974.FirebaseFirestore>()),
     );
@@ -1737,6 +1799,14 @@ extension GetItInjectableX on _i174.GetIt {
         getCampaign: gh<_i746.GetCampaignUseCase>(),
         listRelatedProducts: gh<_i345.ListCampaignRelatedProductsUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.lazySingleton<_i62.WarehouseRepository>(
+      () => _i2.WarehouseRepositoryImpl(
+        gh<_i80.WarehouseRemoteDataSource>(),
+        gh<_i658.AppDatabase>(),
+        gh<_i678.WarehouseMapper>(),
+        gh<_i172.WarehouseLocalMapper>(),
       ),
     );
     gh.lazySingleton<_i268.OrganizationDataSource>(
@@ -1880,6 +1950,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i309.ProductMapper>(),
       ),
     );
+    gh.factory<_i609.GetActiveWarehousesUseCase>(
+      () => _i609.GetActiveWarehousesUseCase(gh<_i62.WarehouseRepository>()),
+    );
+    gh.factory<_i472.GetWarehousesByCompanyUseCase>(
+      () => _i472.GetWarehousesByCompanyUseCase(gh<_i62.WarehouseRepository>()),
+    );
     gh.factory<_i316.GetCatalogHomeConfigUseCase>(
       () => _i316.GetCatalogHomeConfigUseCase(
         gh<_i1072.CatalogHomeConfigRepository>(),
@@ -2012,6 +2088,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i761.FavoriteRepository>(),
         gh<_i321.ProductRepository>(),
         gh<_i385.GetVariantAvailabilityUseCase>(),
+      ),
+    );
+    gh.factory<_i938.CreatePromotionalCampaignUseCase>(
+      () => _i938.CreatePromotionalCampaignUseCase(
+        gh<_i211.PromotionalCampaignRepository>(),
+        gh<_i753.AuditLogRepository>(),
+      ),
+    );
+    gh.factory<_i339.UpdatePromotionalCampaignUseCase>(
+      () => _i339.UpdatePromotionalCampaignUseCase(
+        gh<_i211.PromotionalCampaignRepository>(),
+        gh<_i753.AuditLogRepository>(),
       ),
     );
     gh.factory<_i335.RemoveMemberFromTeamUseCase>(
@@ -2147,6 +2235,18 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i885.CreateDiscountPolicyUseCase>(
+      () => _i885.CreateDiscountPolicyUseCase(
+        gh<_i31.DiscountPolicyRepository>(),
+        gh<_i753.AuditLogRepository>(),
+      ),
+    );
+    gh.factory<_i468.UpdateDiscountPolicyUseCase>(
+      () => _i468.UpdateDiscountPolicyUseCase(
+        gh<_i31.DiscountPolicyRepository>(),
+        gh<_i753.AuditLogRepository>(),
+      ),
+    );
     gh.factory<_i906.CreateBranchUseCase>(
       () => _i906.CreateBranchUseCase(gh<_i160.BranchRepository>()),
     );
@@ -2168,6 +2268,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i487.WatchFavoriteProductIdsUseCase>(
       () =>
           _i487.WatchFavoriteProductIdsUseCase(gh<_i761.FavoriteRepository>()),
+    );
+    gh.factory<_i98.DiscountPolicyCubit>(
+      () => _i98.DiscountPolicyCubit(
+        gh<_i31.DiscountPolicyRepository>(),
+        gh<_i885.CreateDiscountPolicyUseCase>(),
+        gh<_i468.UpdateDiscountPolicyUseCase>(),
+      ),
     );
     gh.factory<_i968.ProductMediaBloc>(
       () => _i968.ProductMediaBloc(
@@ -2330,6 +2437,13 @@ extension GetItInjectableX on _i174.GetIt {
         createTeam: gh<_i265.CreateTeamUseCase>(),
         updateTeam: gh<_i265.UpdateTeamUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i75.PromotionalCampaignCubit>(
+      () => _i75.PromotionalCampaignCubit(
+        gh<_i211.PromotionalCampaignRepository>(),
+        gh<_i938.CreatePromotionalCampaignUseCase>(),
+        gh<_i339.UpdatePromotionalCampaignUseCase>(),
       ),
     );
     gh.factory<_i193.InviteFormBloc>(

@@ -195,7 +195,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-088 — Implementar motor de precificação server-side](TASK-088-implementar-motor-de-precificacao.md) — Flutter Senior
 
 ### EPIC-12 — Estoque e Disponibilidade
-- [ ] [TASK-089 — Modelar Warehouse](TASK-089-modelar-warehouse.md) — Flutter Senior
+- [x] [TASK-089 — Modelar Warehouse](TASK-089-modelar-warehouse.md) — Flutter Senior
 - [ ] [TASK-090 — Implementar saldo por variante](TASK-090-implementar-saldo-por-variante.md) — Flutter Senior
 - [ ] [TASK-091 — Implementar estoque futuro](TASK-091-implementar-estoque-futuro.md) — Flutter Senior + Front-end
 - [ ] [TASK-092 — Implementar reserva comercial](TASK-092-implementar-reserva-comercial.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 88 / 220 tasks concluídas.
+**Progresso:** 89 / 220 tasks concluídas.

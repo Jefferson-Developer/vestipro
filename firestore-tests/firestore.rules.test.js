@@ -267,6 +267,36 @@ function priceListDoc({
   };
 }
 
+function warehouseDoc({
+  organizationId,
+  companyId = 'company-a',
+  branchId = null,
+  code = 'CD-01',
+  name = 'Centro de Distribuicao',
+  type = 'distributionCenter',
+  isActive = true,
+  priority = 0,
+  createdBy = 'owner-a',
+}) {
+  return {
+    organizationId,
+    companyId,
+    branchId,
+    code,
+    name,
+    type,
+    isActive,
+    priority,
+    createdAt: now(),
+    createdBy,
+    updatedAt: now(),
+    updatedBy: createdBy,
+    deletedAt: null,
+    version: 1,
+    syncStatus: 'synced',
+  };
+}
+
 function auditLogDoc({ organizationId, actorUserId, action = 'role.changed' }) {
   return {
     organizationId,
@@ -289,6 +319,58 @@ beforeAll(async () => {
     firestore: {
       rules: fs.readFileSync(RULES_PATH, 'utf8'),
     },
+  });
+});
+
+describe('organizations/{organizationId}/warehouses/{warehouseId}  (TASK-089)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/warehouses/warehouse-a`)
+        .set(warehouseDoc({ organizationId: ORG_A }));
+      await db
+        .doc(`organizations/${ORG_B}/warehouses/warehouse-b`)
+        .set(
+          warehouseDoc({
+            organizationId: ORG_B,
+            companyId: 'company-b',
+            createdBy: 'owner-b',
+          }),
+        );
+    });
+  });
+
+  test('membro ativo da Org A le warehouse da propria organization', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/warehouses/warehouse-a`).get(),
+    );
+  });
+
+  test('membro da Org A nao le warehouse da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_B}/warehouses/warehouse-b`).get(),
+    );
+  });
+
+  test('OWNER consegue criar warehouse na propria organization', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/warehouses/warehouse-new`).set(
+        warehouseDoc({ organizationId: ORG_A, createdBy: 'owner-a' }),
+      ),
+    );
+  });
+
+  test('SALES_REP nao consegue criar warehouse (sem inventory.adjust)', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/warehouses/warehouse-rep`).set(
+        warehouseDoc({ organizationId: ORG_A, createdBy: 'rep-a' }),
+      ),
+    );
   });
 });
 

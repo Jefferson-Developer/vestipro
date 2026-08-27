@@ -8,6 +8,7 @@ import 'tables/payment_terms_table.dart';
 import 'tables/price_list_items_table.dart';
 import 'tables/price_lists_table.dart';
 import 'tables/product_search_index_table.dart';
+import 'tables/warehouses_table.dart';
 
 part 'app_database.g.dart';
 
@@ -54,13 +55,14 @@ class ProductSearchIndexRow {
     PaymentTermsTable,
     PriceListsTable,
     PriceListItemsTable,
+    WarehousesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 7;
+  int get schemaVersion => 8;
 
   @override
   MigrationStrategy get migration {
@@ -106,6 +108,9 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 7) {
           await migrator.createTable(paymentTermsTable);
+        }
+        if (from < 8) {
+          await migrator.createTable(warehousesTable);
         }
       },
       beforeOpen: (details) async {
@@ -564,5 +569,50 @@ class AppDatabase extends _$AppDatabase {
       );
     final row = await query.getSingle();
     return row.read(countExpression) ?? 0;
+  }
+
+  Future<void> replaceWarehouses({
+    required String organizationId,
+    required String companyId,
+    required List<WarehousesTableCompanion> warehouseRows,
+  }) {
+    return transaction(() async {
+      await (delete(warehousesTable)..where(
+            (row) =>
+                row.organizationId.equals(organizationId) &
+                row.companyId.equals(companyId),
+          ))
+          .go();
+
+      await batch((batch) {
+        batch.insertAll(warehousesTable, warehouseRows);
+      });
+    });
+  }
+
+  Future<void> upsertWarehouse(WarehousesTableCompanion row) {
+    return into(warehousesTable).insertOnConflictUpdate(row);
+  }
+
+  Future<List<WarehousesTableData>> getWarehousesByCompany({
+    required String organizationId,
+    required String companyId,
+    String? branchId,
+  }) {
+    return (select(warehousesTable)
+          ..where((row) {
+            final base =
+                row.organizationId.equals(organizationId) &
+                row.companyId.equals(companyId) &
+                row.deletedAt.isNull();
+            if (branchId == null || branchId.isEmpty) return base;
+            return base &
+                (row.branchId.equals(branchId) | row.branchId.isNull());
+          })
+          ..orderBy([
+            (row) => OrderingTerm.asc(row.priority),
+            (row) => OrderingTerm.asc(row.name),
+          ]))
+        .get();
   }
 }
