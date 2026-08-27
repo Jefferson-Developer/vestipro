@@ -1,0 +1,1 @@
+enum PromotionalDiscountType { percentage, fixedAmount }

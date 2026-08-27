@@ -191,7 +191,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-084 — Implementar preço por produto/variante](TASK-084-implementar-preco-por-produto-variante.md) — Flutter Senior + Front-end
 - [x] [TASK-085 — Implementar condições de pagamento](TASK-085-implementar-condicoes-de-pagamento.md) — Flutter Senior + Front-end
 - [x] [TASK-086 — Implementar políticas de desconto por perfil](TASK-086-implementar-politicas-de-desconto.md) — Flutter Senior + Front-end
-- [ ] [TASK-087 — Implementar campanhas promocionais](TASK-087-implementar-campanhas-promocionais.md) — Flutter Senior + Front-end
+- [x] [TASK-087 — Implementar campanhas promocionais](TASK-087-implementar-campanhas-promocionais.md) — Flutter Senior + Front-end
 - [ ] [TASK-088 — Implementar motor de precificação server-side](TASK-088-implementar-motor-de-precificacao.md) — Flutter Senior
 
 ### EPIC-12 — Estoque e Disponibilidade
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 86 / 220 tasks concluídas.
+**Progresso:** 87 / 220 tasks concluídas.

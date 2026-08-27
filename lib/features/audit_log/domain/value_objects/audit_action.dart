@@ -63,6 +63,9 @@ enum AuditAction {
   discountPolicyCreated,
   discountPolicyUpdated,
   discountPolicyDeactivated,
+  promotionalCampaignCreated,
+  promotionalCampaignUpdated,
+  promotionalCampaignEnded,
 }
 
 extension AuditActionCode on AuditAction {
@@ -97,6 +100,9 @@ extension AuditActionCode on AuditAction {
       AuditAction.discountPolicyCreated => 'discountPolicy.created',
       AuditAction.discountPolicyUpdated => 'discountPolicy.updated',
       AuditAction.discountPolicyDeactivated => 'discountPolicy.deactivated',
+      AuditAction.promotionalCampaignCreated => 'promotionalCampaign.created',
+      AuditAction.promotionalCampaignUpdated => 'promotionalCampaign.updated',
+      AuditAction.promotionalCampaignEnded => 'promotionalCampaign.ended',
     };
   }
 }
