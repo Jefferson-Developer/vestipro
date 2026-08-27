@@ -23,6 +23,9 @@ String auditActionLabel(AuditAction action) {
     AuditAction.paymentTermCreated => 'Condição criada',
     AuditAction.paymentTermUpdated => 'Condição alterada',
     AuditAction.paymentTermDeactivated => 'Condição inativada',
+    AuditAction.discountPolicyCreated => 'Política de desconto criada',
+    AuditAction.discountPolicyUpdated => 'Política de desconto alterada',
+    AuditAction.discountPolicyDeactivated => 'Política de desconto inativada',
   };
 }
 
@@ -38,6 +41,7 @@ String auditEntityLabel(AuditLogEntry entry) {
     'settings' => 'Configuração',
     'product' => 'Produto',
     'paymentTerm' => 'Condição',
+    'discountPolicy' => 'Política de desconto',
     _ => entry.entityType,
   };
   return '$type ${entry.entityId}';

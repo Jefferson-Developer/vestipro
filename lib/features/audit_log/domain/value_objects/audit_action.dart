@@ -60,6 +60,9 @@ enum AuditAction {
   paymentTermCreated,
   paymentTermUpdated,
   paymentTermDeactivated,
+  discountPolicyCreated,
+  discountPolicyUpdated,
+  discountPolicyDeactivated,
 }
 
 extension AuditActionCode on AuditAction {
@@ -91,6 +94,9 @@ extension AuditActionCode on AuditAction {
       AuditAction.paymentTermCreated => 'paymentTerm.created',
       AuditAction.paymentTermUpdated => 'paymentTerm.updated',
       AuditAction.paymentTermDeactivated => 'paymentTerm.deactivated',
+      AuditAction.discountPolicyCreated => 'discountPolicy.created',
+      AuditAction.discountPolicyUpdated => 'discountPolicy.updated',
+      AuditAction.discountPolicyDeactivated => 'discountPolicy.deactivated',
     };
   }
 }
