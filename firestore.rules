@@ -859,6 +859,32 @@ service cloud.firestore {
         allow create, update, delete: if false;
       }
 
+      match /stockAlerts/{alertId} {
+        allow get, list: if hasCapability(organizationId, 'report.viewSensitive')
+          || hasCapability(organizationId, 'inventory.adjust');
+        allow create, update, delete: if false;
+      }
+
+      match /stockAlertRules/{ruleId} {
+        allow get, list: if hasCapability(organizationId, 'inventory.adjust')
+          || hasCapability(organizationId, 'report.viewSensitive');
+        allow create: if hasCapability(organizationId, 'inventory.adjust')
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.minQuantity is int
+          && request.resource.data.minQuantity >= 0
+          && request.resource.data.alertLevel in ['low', 'critical']
+          && request.resource.data.isActive is bool;
+        allow update: if hasCapability(organizationId, 'inventory.adjust')
+          && unchanged('organizationId')
+          && unchanged('createdAt')
+          && unchanged('createdBy');
+        allow delete: if false;
+      }
+
+      match /stockAlertEvents/{eventId} {
+        allow read, write: if false;
+      }
+
       match /stockReservations/{reservationId} {
         allow get, list: if canReadStockReservation(organizationId);
         allow create, update, delete: if false;
