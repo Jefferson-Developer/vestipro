@@ -16,7 +16,7 @@ void main() {
     });
 
     test('creates the customer schema on a fresh database', () async {
-      expect(database.schemaVersion, 8);
+      expect(database.schemaVersion, 9);
 
       // Exercises `onCreate`/`beforeOpen` by forcing the connection open.
       await database.customStatement('SELECT 1');
@@ -40,6 +40,7 @@ void main() {
           'price_lists',
           'price_list_items',
           'payment_terms',
+          'variant_stock_balances',
           'warehouses',
         ]),
       );

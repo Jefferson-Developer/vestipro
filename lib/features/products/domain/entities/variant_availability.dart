@@ -14,6 +14,7 @@ final class VariantAvailability {
     required this.status,
     this.availableQuantity,
     this.futureAvailableAt,
+    this.warehouseQuantities = const <String, int>{},
   });
 
   factory VariantAvailability.fromVariant(ProductVariant variant) {
@@ -42,6 +43,7 @@ final class VariantAvailability {
   final VariantAvailabilityStatus status;
   final int? availableQuantity;
   final DateTime? futureAvailableAt;
+  final Map<String, int> warehouseQuantities;
 
   bool get acceptsQuantity => status != VariantAvailabilityStatus.unavailable;
 

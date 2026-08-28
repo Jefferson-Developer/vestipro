@@ -57,6 +57,7 @@ enum AuditAction {
   /// than `ProductStatus.draft`) changed via `UpdateProductUseCase` — never
   /// recorded for an edit to a still-unpublished draft.
   productUpdated,
+  inventoryBalanceAdjusted,
   paymentTermCreated,
   paymentTermUpdated,
   paymentTermDeactivated,
@@ -94,6 +95,7 @@ extension AuditActionCode on AuditAction {
       AuditAction.organizationSettingsUpdated => 'organization.settingsUpdated',
       AuditAction.productPublished => 'product.published',
       AuditAction.productUpdated => 'product.updated',
+      AuditAction.inventoryBalanceAdjusted => 'inventory.balanceAdjusted',
       AuditAction.paymentTermCreated => 'paymentTerm.created',
       AuditAction.paymentTermUpdated => 'paymentTerm.updated',
       AuditAction.paymentTermDeactivated => 'paymentTerm.deactivated',

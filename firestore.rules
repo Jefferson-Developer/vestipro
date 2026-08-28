@@ -463,6 +463,11 @@ service cloud.firestore {
         && validWarehousePayload(organizationId, request.resource.data);
     }
 
+    function canReadInventoryBalance(organizationId) {
+      return isActiveMember(organizationId)
+        && resource.data.organizationId == organizationId;
+    }
+
     function canCreatePriceList(organizationId) {
       return hasCapability(organizationId, 'priceList.manage')
         && validPriceListPayload(organizationId, request.resource.data);
@@ -838,6 +843,15 @@ service cloud.firestore {
           && unchanged('createdAt')
           && unchanged('createdBy');
         allow delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/inventory/{inventoryId}  (TASK-090)
+      // -------------------------------------------------------------------
+
+      match /inventory/{inventoryId} {
+        allow get, list: if canReadInventoryBalance(organizationId);
+        allow create, update, delete: if false;
       }
 
       // -------------------------------------------------------------------

@@ -16,7 +16,7 @@ void main() {
     });
 
     test('creates warehouses table in schema version 8', () async {
-      expect(database.schemaVersion, 8);
+      expect(database.schemaVersion, 9);
       await database.customStatement('SELECT 1');
 
       final tableNames = await database

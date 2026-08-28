@@ -1,5 +1,3 @@
-import 'package:injectable/injectable.dart';
-
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/product_variant.dart';
@@ -12,7 +10,6 @@ import '../../domain/repositories/variant_availability_repository.dart';
 /// This reads manual availability metadata from [ProductVariant]. TASK-090
 /// can replace this repository with an inventory-balance implementation
 /// while keeping [VariantAvailabilityRepository] and the UI contracts stable.
-@LazySingleton(as: VariantAvailabilityRepository)
 final class ProductVariantAvailabilityRepository
     implements VariantAvailabilityRepository {
   const ProductVariantAvailabilityRepository(this._variants);

@@ -298,19 +298,35 @@ import '../features/favorites/domain/usecases/watch_favorite_product_ids_use_cas
 import '../features/favorites/presentation/bloc/favorites_bloc.dart' as _i318;
 import '../features/favorites/presentation/cubit/favorite_status_cubit.dart'
     as _i249;
+import '../features/inventory/data/datasources/firestore_variant_stock_balance_data_source.dart'
+    as _i185;
 import '../features/inventory/data/datasources/firestore_warehouse_data_source.dart'
     as _i504;
+import '../features/inventory/data/datasources/variant_stock_balance_remote_data_source.dart'
+    as _i180;
 import '../features/inventory/data/datasources/warehouse_remote_data_source.dart'
     as _i80;
+import '../features/inventory/data/mappers/variant_stock_balance_local_mapper.dart'
+    as _i333;
+import '../features/inventory/data/mappers/variant_stock_balance_mapper.dart'
+    as _i617;
 import '../features/inventory/data/mappers/warehouse_local_mapper.dart'
     as _i172;
 import '../features/inventory/data/mappers/warehouse_mapper.dart' as _i678;
+import '../features/inventory/data/repositories/inventory_variant_availability_repository.dart'
+    as _i808;
+import '../features/inventory/data/repositories/variant_stock_balance_repository_impl.dart'
+    as _i682;
 import '../features/inventory/data/repositories/warehouse_repository_impl.dart'
     as _i2;
+import '../features/inventory/domain/repositories/variant_stock_balance_repository.dart'
+    as _i221;
 import '../features/inventory/domain/repositories/warehouse_repository.dart'
     as _i62;
 import '../features/inventory/domain/usecases/get_active_warehouses_use_case.dart'
     as _i609;
+import '../features/inventory/domain/usecases/get_variant_inventory_availability_use_case.dart'
+    as _i1069;
 import '../features/inventory/domain/usecases/get_warehouses_by_company_use_case.dart'
     as _i472;
 import '../features/invites/data/datasources/cloud_functions_invite_acceptance_data_source.dart'
@@ -611,8 +627,6 @@ import '../features/products/data/repositories/product_form_draft_repository_imp
     as _i873;
 import '../features/products/data/repositories/product_search_repository_impl.dart'
     as _i941;
-import '../features/products/data/repositories/product_variant_availability_repository.dart'
-    as _i994;
 import '../features/products/data/repositories/shared_preferences_category_repository.dart'
     as _i597;
 import '../features/products/data/repositories/shared_preferences_collection_repository.dart'
@@ -887,6 +901,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i457.CustomerMapper>(() => const _i457.CustomerMapper());
     gh.lazySingleton<_i712.CustomerSegmentMapper>(
       () => const _i712.CustomerSegmentMapper(),
+    );
+    gh.lazySingleton<_i333.VariantStockBalanceLocalMapper>(
+      () => const _i333.VariantStockBalanceLocalMapper(),
+    );
+    gh.lazySingleton<_i617.VariantStockBalanceMapper>(
+      () => const _i617.VariantStockBalanceMapper(),
     );
     gh.lazySingleton<_i678.WarehouseMapper>(
       () => const _i678.WarehouseMapper(),
@@ -1448,11 +1468,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i385.PipelineStageRepository>(),
       ),
     );
-    gh.lazySingleton<_i766.VariantAvailabilityRepository>(
-      () => _i994.ProductVariantAvailabilityRepository(
-        gh<_i795.ProductVariantRepository>(),
-      ),
-    );
     gh.factory<_i452.AssociateProductWithCollectionUseCase>(
       () => _i452.AssociateProductWithCollectionUseCase(
         gh<_i1015.ProductCollectionLinkRepository>(),
@@ -1685,11 +1700,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i924.RegisterCrmActivityUseCase>(
       () => _i924.RegisterCrmActivityUseCase(gh<_i558.CrmActivityRepository>()),
     );
-    gh.factory<_i385.GetVariantAvailabilityUseCase>(
-      () => _i385.GetVariantAvailabilityUseCase(
-        gh<_i766.VariantAvailabilityRepository>(),
-      ),
-    );
     gh.lazySingleton<_i147.CloudFunctionsService>(
       () => _i147.CloudFunctionsService(
         gh<_i809.FirebaseFunctions>(),
@@ -1828,17 +1838,6 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i87.InviteAcceptanceMapper>(),
       ),
     );
-    gh.factory<_i578.ProductDetailBloc>(
-      () => _i578.ProductDetailBloc(
-        getProductById: gh<_i721.GetProductByIdUseCase>(),
-        listVariantsByProduct: gh<_i530.ListProductVariantsByProductUseCase>(),
-        listProductColors: gh<_i789.ListProductColorsUseCase>(),
-        getSizeGridTemplateById: gh<_i194.GetSizeGridTemplateByIdUseCase>(),
-        getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
-        resolvePriceForVariant: gh<_i352.ResolvePriceForVariantUseCase>(),
-        analyticsService: gh<_i202.AnalyticsService>(),
-      ),
-    );
     gh.lazySingleton<_i923.RoleDataSource>(
       () => _i892.FirestoreRoleDataSource(gh<_i974.FirebaseFirestore>()),
     );
@@ -1849,13 +1848,6 @@ extension GetItInjectableX on _i174.GetIt {
         updateCampaign: gh<_i598.UpdateCampaignUseCase>(),
         listRelatedProducts: gh<_i345.ListCampaignRelatedProductsUseCase>(),
         compressor: gh<_i209.ImageUploadCompressor>(),
-      ),
-    );
-    gh.factory<_i769.CommercialSizeGridBloc>(
-      () => _i769.CommercialSizeGridBloc(
-        getDraft: gh<_i801.GetCommercialSizeGridDraftUseCase>(),
-        saveDraft: gh<_i644.SaveCommercialSizeGridDraftUseCase>(),
-        getAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
       ),
     );
     gh.lazySingleton<_i228.TeamDataSource>(
@@ -1931,18 +1923,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
+    gh.lazySingleton<_i180.VariantStockBalanceRemoteDataSource>(
+      () => _i185.FirestoreVariantStockBalanceDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.lazySingleton<_i668.UserProfileDataSource>(
       () =>
           _i1043.FirestoreUserProfileDataSource(gh<_i974.FirebaseFirestore>()),
-    );
-    gh.factory<_i331.ProductGridBloc>(
-      () => _i331.ProductGridBloc(
-        listCatalogProducts: gh<_i448.ListCatalogProductsUseCase>(),
-        getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
-        listVariantsByProduct: gh<_i530.ListProductVariantsByProductUseCase>(),
-        resolvePriceForVariant: gh<_i352.ResolvePriceForVariantUseCase>(),
-        analyticsService: gh<_i202.AnalyticsService>(),
-      ),
     );
     gh.lazySingleton<_i671.ProductRemoteSearchDataSource>(
       () => _i580.FirestoreProductRemoteSearchDataSource(
@@ -2032,21 +2020,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i295.PortfolioAssignmentRepository>(),
       ),
     );
-    gh.factory<_i186.CatalogFilterBloc>(
-      () => _i186.CatalogFilterBloc(
-        listCatalogProducts: gh<_i448.ListCatalogProductsUseCase>(),
-        getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
-        listCollections: gh<_i1023.ListCollectionsUseCase>(),
-        listSeasons: gh<_i722.ListSeasonsUseCase>(),
-        listCategories: gh<_i435.ListCategoriesUseCase>(),
-        listProductColors: gh<_i789.ListProductColorsUseCase>(),
-        listSizeGridTemplates: gh<_i646.ListSizeGridTemplatesUseCase>(),
-        loadCatalogPreferences: gh<_i700.LoadCatalogPreferencesUseCase>(),
-        saveCatalogPreferences: gh<_i36.SaveCatalogPreferencesUseCase>(),
-        analyticsService: gh<_i202.AnalyticsService>(),
-        sessionService: gh<_i885.SessionService>(),
-      ),
-    );
     gh.factory<_i1030.AssignRoleToUserUseCase>(
       () => _i1030.AssignRoleToUserUseCase(
         gh<_i957.MembershipRepository>(),
@@ -2081,13 +2054,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i485.TeamRepositoryImpl(
         dataSource: gh<_i228.TeamDataSource>(),
         mapper: gh<_i802.TeamMapper>(),
-      ),
-    );
-    gh.factory<_i72.ListFavoriteProductsUseCase>(
-      () => _i72.ListFavoriteProductsUseCase(
-        gh<_i761.FavoriteRepository>(),
-        gh<_i321.ProductRepository>(),
-        gh<_i385.GetVariantAvailabilityUseCase>(),
       ),
     );
     gh.factory<_i938.CreatePromotionalCampaignUseCase>(
@@ -2211,6 +2177,14 @@ extension GetItInjectableX on _i174.GetIt {
         localDataSource: gh<_i42.ProductLocalSearchIndexDataSource>(),
       ),
     );
+    gh.lazySingleton<_i221.VariantStockBalanceRepository>(
+      () => _i682.VariantStockBalanceRepositoryImpl(
+        gh<_i180.VariantStockBalanceRemoteDataSource>(),
+        gh<_i658.AppDatabase>(),
+        gh<_i617.VariantStockBalanceMapper>(),
+        gh<_i333.VariantStockBalanceLocalMapper>(),
+      ),
+    );
     gh.factory<_i620.PreviewCatalogShareUseCase>(
       () => _i620.PreviewCatalogShareUseCase(
         gh<_i344.CatalogShareLookupRepository>(),
@@ -2219,6 +2193,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i298.RegisterCatalogShareOpenUseCase>(
       () => _i298.RegisterCatalogShareOpenUseCase(
         gh<_i344.CatalogShareLookupRepository>(),
+      ),
+    );
+    gh.factory<_i1069.GetVariantInventoryAvailabilityUseCase>(
+      () => _i1069.GetVariantInventoryAvailabilityUseCase(
+        gh<_i221.VariantStockBalanceRepository>(),
       ),
     );
     gh.factory<_i201.ListAuditLogEntriesUseCase>(
@@ -2245,6 +2224,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i468.UpdateDiscountPolicyUseCase(
         gh<_i31.DiscountPolicyRepository>(),
         gh<_i753.AuditLogRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i766.VariantAvailabilityRepository>(
+      () => _i808.InventoryVariantAvailabilityRepository(
+        gh<_i221.VariantStockBalanceRepository>(),
+        gh<_i795.ProductVariantRepository>(),
       ),
     );
     gh.factory<_i906.CreateBranchUseCase>(
@@ -2296,13 +2281,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i932.UpdatePaymentTermUseCase(
         gh<_i358.PaymentTermRepository>(),
         gh<_i753.AuditLogRepository>(),
-      ),
-    );
-    gh.factory<_i318.FavoritesBloc>(
-      () => _i318.FavoritesBloc(
-        listFavoriteProducts: gh<_i72.ListFavoriteProductsUseCase>(),
-        analyticsService: gh<_i202.AnalyticsService>(),
-        sessionService: gh<_i885.SessionService>(),
       ),
     );
     gh.factory<_i198.ProductFormBloc>(
@@ -2431,6 +2409,11 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i385.GetVariantAvailabilityUseCase>(
+      () => _i385.GetVariantAvailabilityUseCase(
+        gh<_i766.VariantAvailabilityRepository>(),
+      ),
+    );
     gh.factory<_i516.TeamFormBloc>(
       () => _i516.TeamFormBloc(
         listOrganizationUsers: gh<_i93.ListOrganizationUsersUseCase>(),
@@ -2452,6 +2435,13 @@ extension GetItInjectableX on _i174.GetIt {
         membershipRepository: gh<_i957.MembershipRepository>(),
         authRepository: gh<_i472.AuthRepository>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i72.ListFavoriteProductsUseCase>(
+      () => _i72.ListFavoriteProductsUseCase(
+        gh<_i761.FavoriteRepository>(),
+        gh<_i321.ProductRepository>(),
+        gh<_i385.GetVariantAvailabilityUseCase>(),
       ),
     );
     gh.factory<_i478.CustomerFormBloc>(
@@ -2494,6 +2484,17 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i578.ProductDetailBloc>(
+      () => _i578.ProductDetailBloc(
+        getProductById: gh<_i721.GetProductByIdUseCase>(),
+        listVariantsByProduct: gh<_i530.ListProductVariantsByProductUseCase>(),
+        listProductColors: gh<_i789.ListProductColorsUseCase>(),
+        getSizeGridTemplateById: gh<_i194.GetSizeGridTemplateByIdUseCase>(),
+        getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
+        resolvePriceForVariant: gh<_i352.ResolvePriceForVariantUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i581.LeadListBloc>(
       () => _i581.LeadListBloc(
         listLeads: gh<_i778.ListLeadsUseCase>(),
@@ -2511,6 +2512,13 @@ extension GetItInjectableX on _i174.GetIt {
         sessionService: gh<_i885.SessionService>(),
       ),
     );
+    gh.factory<_i769.CommercialSizeGridBloc>(
+      () => _i769.CommercialSizeGridBloc(
+        getDraft: gh<_i801.GetCommercialSizeGridDraftUseCase>(),
+        saveDraft: gh<_i644.SaveCommercialSizeGridDraftUseCase>(),
+        getAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
+      ),
+    );
     gh.factory<_i438.PreviewCustomerSegmentCountUseCase>(
       () => _i438.PreviewCustomerSegmentCountUseCase(
         gh<_i576.ListCustomerPortfolioUseCase>(),
@@ -2519,6 +2527,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i522.CustomerPortfolioBloc>(
       () => _i522.CustomerPortfolioBloc(
         listCustomerPortfolio: gh<_i576.ListCustomerPortfolioUseCase>(),
+      ),
+    );
+    gh.factory<_i331.ProductGridBloc>(
+      () => _i331.ProductGridBloc(
+        listCatalogProducts: gh<_i448.ListCatalogProductsUseCase>(),
+        getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
+        listVariantsByProduct: gh<_i530.ListProductVariantsByProductUseCase>(),
+        resolvePriceForVariant: gh<_i352.ResolvePriceForVariantUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i901.CustomerSegmentBloc>(
@@ -2557,6 +2574,13 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i318.FavoritesBloc>(
+      () => _i318.FavoritesBloc(
+        listFavoriteProducts: gh<_i72.ListFavoriteProductsUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+        sessionService: gh<_i885.SessionService>(),
+      ),
+    );
     gh.factory<_i433.AssignPortfolioBloc>(
       () => _i433.AssignPortfolioBloc(
         listOrganizationUsers: gh<_i93.ListOrganizationUsersUseCase>(),
@@ -2576,6 +2600,21 @@ extension GetItInjectableX on _i174.GetIt {
         deactivateUser: gh<_i126.DeactivateUserUseCase>(),
         reactivateUser: gh<_i603.ReactivateUserUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i186.CatalogFilterBloc>(
+      () => _i186.CatalogFilterBloc(
+        listCatalogProducts: gh<_i448.ListCatalogProductsUseCase>(),
+        getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
+        listCollections: gh<_i1023.ListCollectionsUseCase>(),
+        listSeasons: gh<_i722.ListSeasonsUseCase>(),
+        listCategories: gh<_i435.ListCategoriesUseCase>(),
+        listProductColors: gh<_i789.ListProductColorsUseCase>(),
+        listSizeGridTemplates: gh<_i646.ListSizeGridTemplatesUseCase>(),
+        loadCatalogPreferences: gh<_i700.LoadCatalogPreferencesUseCase>(),
+        saveCatalogPreferences: gh<_i36.SaveCatalogPreferencesUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+        sessionService: gh<_i885.SessionService>(),
       ),
     );
     gh.factory<_i593.OnboardingBloc>(

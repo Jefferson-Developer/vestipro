@@ -9522,6 +9522,850 @@ class WarehousesTableCompanion extends UpdateCompanion<WarehousesTableData> {
   }
 }
 
+class $VariantStockBalancesTableTable extends VariantStockBalancesTable
+    with
+        TableInfo<
+          $VariantStockBalancesTableTable,
+          VariantStockBalancesTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $VariantStockBalancesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _productIdMeta = const VerificationMeta(
+    'productId',
+  );
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+    'product_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _variantIdMeta = const VerificationMeta(
+    'variantId',
+  );
+  @override
+  late final GeneratedColumn<String> variantId = GeneratedColumn<String>(
+    'variant_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _warehouseIdMeta = const VerificationMeta(
+    'warehouseId',
+  );
+  @override
+  late final GeneratedColumn<String> warehouseId = GeneratedColumn<String>(
+    'warehouse_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _physicalQuantityMeta = const VerificationMeta(
+    'physicalQuantity',
+  );
+  @override
+  late final GeneratedColumn<int> physicalQuantity = GeneratedColumn<int>(
+    'physical_quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _reservedQuantityMeta = const VerificationMeta(
+    'reservedQuantity',
+  );
+  @override
+  late final GeneratedColumn<int> reservedQuantity = GeneratedColumn<int>(
+    'reserved_quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _blockedQuantityMeta = const VerificationMeta(
+    'blockedQuantity',
+  );
+  @override
+  late final GeneratedColumn<int> blockedQuantity = GeneratedColumn<int>(
+    'blocked_quantity',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedByMeta = const VerificationMeta(
+    'updatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
+    'updated_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _lastSourceMeta = const VerificationMeta(
+    'lastSource',
+  );
+  @override
+  late final GeneratedColumn<String> lastSource = GeneratedColumn<String>(
+    'last_source',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cacheFetchedAtMeta = const VerificationMeta(
+    'cacheFetchedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> cacheFetchedAt =
+      GeneratedColumn<DateTime>(
+        'cache_fetched_at',
+        aliasedName,
+        false,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: true,
+      );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    companyId,
+    productId,
+    variantId,
+    warehouseId,
+    physicalQuantity,
+    reservedQuantity,
+    blockedQuantity,
+    updatedAt,
+    updatedBy,
+    lastSource,
+    version,
+    cacheFetchedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'variant_stock_balances';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<VariantStockBalancesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(
+        _productIdMeta,
+        productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_productIdMeta);
+    }
+    if (data.containsKey('variant_id')) {
+      context.handle(
+        _variantIdMeta,
+        variantId.isAcceptableOrUnknown(data['variant_id']!, _variantIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_variantIdMeta);
+    }
+    if (data.containsKey('warehouse_id')) {
+      context.handle(
+        _warehouseIdMeta,
+        warehouseId.isAcceptableOrUnknown(
+          data['warehouse_id']!,
+          _warehouseIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_warehouseIdMeta);
+    }
+    if (data.containsKey('physical_quantity')) {
+      context.handle(
+        _physicalQuantityMeta,
+        physicalQuantity.isAcceptableOrUnknown(
+          data['physical_quantity']!,
+          _physicalQuantityMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_physicalQuantityMeta);
+    }
+    if (data.containsKey('reserved_quantity')) {
+      context.handle(
+        _reservedQuantityMeta,
+        reservedQuantity.isAcceptableOrUnknown(
+          data['reserved_quantity']!,
+          _reservedQuantityMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_reservedQuantityMeta);
+    }
+    if (data.containsKey('blocked_quantity')) {
+      context.handle(
+        _blockedQuantityMeta,
+        blockedQuantity.isAcceptableOrUnknown(
+          data['blocked_quantity']!,
+          _blockedQuantityMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_blockedQuantityMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('updated_by')) {
+      context.handle(
+        _updatedByMeta,
+        updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedByMeta);
+    }
+    if (data.containsKey('last_source')) {
+      context.handle(
+        _lastSourceMeta,
+        lastSource.isAcceptableOrUnknown(data['last_source']!, _lastSourceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_lastSourceMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('cache_fetched_at')) {
+      context.handle(
+        _cacheFetchedAtMeta,
+        cacheFetchedAt.isAcceptableOrUnknown(
+          data['cache_fetched_at']!,
+          _cacheFetchedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_cacheFetchedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  VariantStockBalancesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return VariantStockBalancesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      productId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_id'],
+      )!,
+      variantId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}variant_id'],
+      )!,
+      warehouseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}warehouse_id'],
+      )!,
+      physicalQuantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}physical_quantity'],
+      )!,
+      reservedQuantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}reserved_quantity'],
+      )!,
+      blockedQuantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}blocked_quantity'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      updatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_by'],
+      )!,
+      lastSource: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}last_source'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      cacheFetchedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}cache_fetched_at'],
+      )!,
+    );
+  }
+
+  @override
+  $VariantStockBalancesTableTable createAlias(String alias) {
+    return $VariantStockBalancesTableTable(attachedDatabase, alias);
+  }
+}
+
+class VariantStockBalancesTableData extends DataClass
+    implements Insertable<VariantStockBalancesTableData> {
+  final String id;
+  final String organizationId;
+  final String companyId;
+  final String productId;
+  final String variantId;
+  final String warehouseId;
+  final int physicalQuantity;
+  final int reservedQuantity;
+  final int blockedQuantity;
+  final DateTime updatedAt;
+  final String updatedBy;
+  final String lastSource;
+  final int version;
+  final DateTime cacheFetchedAt;
+  const VariantStockBalancesTableData({
+    required this.id,
+    required this.organizationId,
+    required this.companyId,
+    required this.productId,
+    required this.variantId,
+    required this.warehouseId,
+    required this.physicalQuantity,
+    required this.reservedQuantity,
+    required this.blockedQuantity,
+    required this.updatedAt,
+    required this.updatedBy,
+    required this.lastSource,
+    required this.version,
+    required this.cacheFetchedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    map['company_id'] = Variable<String>(companyId);
+    map['product_id'] = Variable<String>(productId);
+    map['variant_id'] = Variable<String>(variantId);
+    map['warehouse_id'] = Variable<String>(warehouseId);
+    map['physical_quantity'] = Variable<int>(physicalQuantity);
+    map['reserved_quantity'] = Variable<int>(reservedQuantity);
+    map['blocked_quantity'] = Variable<int>(blockedQuantity);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_by'] = Variable<String>(updatedBy);
+    map['last_source'] = Variable<String>(lastSource);
+    map['version'] = Variable<int>(version);
+    map['cache_fetched_at'] = Variable<DateTime>(cacheFetchedAt);
+    return map;
+  }
+
+  VariantStockBalancesTableCompanion toCompanion(bool nullToAbsent) {
+    return VariantStockBalancesTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      companyId: Value(companyId),
+      productId: Value(productId),
+      variantId: Value(variantId),
+      warehouseId: Value(warehouseId),
+      physicalQuantity: Value(physicalQuantity),
+      reservedQuantity: Value(reservedQuantity),
+      blockedQuantity: Value(blockedQuantity),
+      updatedAt: Value(updatedAt),
+      updatedBy: Value(updatedBy),
+      lastSource: Value(lastSource),
+      version: Value(version),
+      cacheFetchedAt: Value(cacheFetchedAt),
+    );
+  }
+
+  factory VariantStockBalancesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return VariantStockBalancesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      productId: serializer.fromJson<String>(json['productId']),
+      variantId: serializer.fromJson<String>(json['variantId']),
+      warehouseId: serializer.fromJson<String>(json['warehouseId']),
+      physicalQuantity: serializer.fromJson<int>(json['physicalQuantity']),
+      reservedQuantity: serializer.fromJson<int>(json['reservedQuantity']),
+      blockedQuantity: serializer.fromJson<int>(json['blockedQuantity']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedBy: serializer.fromJson<String>(json['updatedBy']),
+      lastSource: serializer.fromJson<String>(json['lastSource']),
+      version: serializer.fromJson<int>(json['version']),
+      cacheFetchedAt: serializer.fromJson<DateTime>(json['cacheFetchedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String>(companyId),
+      'productId': serializer.toJson<String>(productId),
+      'variantId': serializer.toJson<String>(variantId),
+      'warehouseId': serializer.toJson<String>(warehouseId),
+      'physicalQuantity': serializer.toJson<int>(physicalQuantity),
+      'reservedQuantity': serializer.toJson<int>(reservedQuantity),
+      'blockedQuantity': serializer.toJson<int>(blockedQuantity),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedBy': serializer.toJson<String>(updatedBy),
+      'lastSource': serializer.toJson<String>(lastSource),
+      'version': serializer.toJson<int>(version),
+      'cacheFetchedAt': serializer.toJson<DateTime>(cacheFetchedAt),
+    };
+  }
+
+  VariantStockBalancesTableData copyWith({
+    String? id,
+    String? organizationId,
+    String? companyId,
+    String? productId,
+    String? variantId,
+    String? warehouseId,
+    int? physicalQuantity,
+    int? reservedQuantity,
+    int? blockedQuantity,
+    DateTime? updatedAt,
+    String? updatedBy,
+    String? lastSource,
+    int? version,
+    DateTime? cacheFetchedAt,
+  }) => VariantStockBalancesTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId ?? this.companyId,
+    productId: productId ?? this.productId,
+    variantId: variantId ?? this.variantId,
+    warehouseId: warehouseId ?? this.warehouseId,
+    physicalQuantity: physicalQuantity ?? this.physicalQuantity,
+    reservedQuantity: reservedQuantity ?? this.reservedQuantity,
+    blockedQuantity: blockedQuantity ?? this.blockedQuantity,
+    updatedAt: updatedAt ?? this.updatedAt,
+    updatedBy: updatedBy ?? this.updatedBy,
+    lastSource: lastSource ?? this.lastSource,
+    version: version ?? this.version,
+    cacheFetchedAt: cacheFetchedAt ?? this.cacheFetchedAt,
+  );
+  VariantStockBalancesTableData copyWithCompanion(
+    VariantStockBalancesTableCompanion data,
+  ) {
+    return VariantStockBalancesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      variantId: data.variantId.present ? data.variantId.value : this.variantId,
+      warehouseId: data.warehouseId.present
+          ? data.warehouseId.value
+          : this.warehouseId,
+      physicalQuantity: data.physicalQuantity.present
+          ? data.physicalQuantity.value
+          : this.physicalQuantity,
+      reservedQuantity: data.reservedQuantity.present
+          ? data.reservedQuantity.value
+          : this.reservedQuantity,
+      blockedQuantity: data.blockedQuantity.present
+          ? data.blockedQuantity.value
+          : this.blockedQuantity,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      lastSource: data.lastSource.present
+          ? data.lastSource.value
+          : this.lastSource,
+      version: data.version.present ? data.version.value : this.version,
+      cacheFetchedAt: data.cacheFetchedAt.present
+          ? data.cacheFetchedAt.value
+          : this.cacheFetchedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VariantStockBalancesTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('productId: $productId, ')
+          ..write('variantId: $variantId, ')
+          ..write('warehouseId: $warehouseId, ')
+          ..write('physicalQuantity: $physicalQuantity, ')
+          ..write('reservedQuantity: $reservedQuantity, ')
+          ..write('blockedQuantity: $blockedQuantity, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('lastSource: $lastSource, ')
+          ..write('version: $version, ')
+          ..write('cacheFetchedAt: $cacheFetchedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    companyId,
+    productId,
+    variantId,
+    warehouseId,
+    physicalQuantity,
+    reservedQuantity,
+    blockedQuantity,
+    updatedAt,
+    updatedBy,
+    lastSource,
+    version,
+    cacheFetchedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is VariantStockBalancesTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.productId == this.productId &&
+          other.variantId == this.variantId &&
+          other.warehouseId == this.warehouseId &&
+          other.physicalQuantity == this.physicalQuantity &&
+          other.reservedQuantity == this.reservedQuantity &&
+          other.blockedQuantity == this.blockedQuantity &&
+          other.updatedAt == this.updatedAt &&
+          other.updatedBy == this.updatedBy &&
+          other.lastSource == this.lastSource &&
+          other.version == this.version &&
+          other.cacheFetchedAt == this.cacheFetchedAt);
+}
+
+class VariantStockBalancesTableCompanion
+    extends UpdateCompanion<VariantStockBalancesTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String> companyId;
+  final Value<String> productId;
+  final Value<String> variantId;
+  final Value<String> warehouseId;
+  final Value<int> physicalQuantity;
+  final Value<int> reservedQuantity;
+  final Value<int> blockedQuantity;
+  final Value<DateTime> updatedAt;
+  final Value<String> updatedBy;
+  final Value<String> lastSource;
+  final Value<int> version;
+  final Value<DateTime> cacheFetchedAt;
+  final Value<int> rowid;
+  const VariantStockBalancesTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.variantId = const Value.absent(),
+    this.warehouseId = const Value.absent(),
+    this.physicalQuantity = const Value.absent(),
+    this.reservedQuantity = const Value.absent(),
+    this.blockedQuantity = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.lastSource = const Value.absent(),
+    this.version = const Value.absent(),
+    this.cacheFetchedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  VariantStockBalancesTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    required String companyId,
+    required String productId,
+    required String variantId,
+    required String warehouseId,
+    required int physicalQuantity,
+    required int reservedQuantity,
+    required int blockedQuantity,
+    required DateTime updatedAt,
+    required String updatedBy,
+    required String lastSource,
+    required int version,
+    required DateTime cacheFetchedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       companyId = Value(companyId),
+       productId = Value(productId),
+       variantId = Value(variantId),
+       warehouseId = Value(warehouseId),
+       physicalQuantity = Value(physicalQuantity),
+       reservedQuantity = Value(reservedQuantity),
+       blockedQuantity = Value(blockedQuantity),
+       updatedAt = Value(updatedAt),
+       updatedBy = Value(updatedBy),
+       lastSource = Value(lastSource),
+       version = Value(version),
+       cacheFetchedAt = Value(cacheFetchedAt);
+  static Insertable<VariantStockBalancesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? productId,
+    Expression<String>? variantId,
+    Expression<String>? warehouseId,
+    Expression<int>? physicalQuantity,
+    Expression<int>? reservedQuantity,
+    Expression<int>? blockedQuantity,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? updatedBy,
+    Expression<String>? lastSource,
+    Expression<int>? version,
+    Expression<DateTime>? cacheFetchedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (productId != null) 'product_id': productId,
+      if (variantId != null) 'variant_id': variantId,
+      if (warehouseId != null) 'warehouse_id': warehouseId,
+      if (physicalQuantity != null) 'physical_quantity': physicalQuantity,
+      if (reservedQuantity != null) 'reserved_quantity': reservedQuantity,
+      if (blockedQuantity != null) 'blocked_quantity': blockedQuantity,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (updatedBy != null) 'updated_by': updatedBy,
+      if (lastSource != null) 'last_source': lastSource,
+      if (version != null) 'version': version,
+      if (cacheFetchedAt != null) 'cache_fetched_at': cacheFetchedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  VariantStockBalancesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String>? companyId,
+    Value<String>? productId,
+    Value<String>? variantId,
+    Value<String>? warehouseId,
+    Value<int>? physicalQuantity,
+    Value<int>? reservedQuantity,
+    Value<int>? blockedQuantity,
+    Value<DateTime>? updatedAt,
+    Value<String>? updatedBy,
+    Value<String>? lastSource,
+    Value<int>? version,
+    Value<DateTime>? cacheFetchedAt,
+    Value<int>? rowid,
+  }) {
+    return VariantStockBalancesTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      productId: productId ?? this.productId,
+      variantId: variantId ?? this.variantId,
+      warehouseId: warehouseId ?? this.warehouseId,
+      physicalQuantity: physicalQuantity ?? this.physicalQuantity,
+      reservedQuantity: reservedQuantity ?? this.reservedQuantity,
+      blockedQuantity: blockedQuantity ?? this.blockedQuantity,
+      updatedAt: updatedAt ?? this.updatedAt,
+      updatedBy: updatedBy ?? this.updatedBy,
+      lastSource: lastSource ?? this.lastSource,
+      version: version ?? this.version,
+      cacheFetchedAt: cacheFetchedAt ?? this.cacheFetchedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (variantId.present) {
+      map['variant_id'] = Variable<String>(variantId.value);
+    }
+    if (warehouseId.present) {
+      map['warehouse_id'] = Variable<String>(warehouseId.value);
+    }
+    if (physicalQuantity.present) {
+      map['physical_quantity'] = Variable<int>(physicalQuantity.value);
+    }
+    if (reservedQuantity.present) {
+      map['reserved_quantity'] = Variable<int>(reservedQuantity.value);
+    }
+    if (blockedQuantity.present) {
+      map['blocked_quantity'] = Variable<int>(blockedQuantity.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (updatedBy.present) {
+      map['updated_by'] = Variable<String>(updatedBy.value);
+    }
+    if (lastSource.present) {
+      map['last_source'] = Variable<String>(lastSource.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (cacheFetchedAt.present) {
+      map['cache_fetched_at'] = Variable<DateTime>(cacheFetchedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VariantStockBalancesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('productId: $productId, ')
+          ..write('variantId: $variantId, ')
+          ..write('warehouseId: $warehouseId, ')
+          ..write('physicalQuantity: $physicalQuantity, ')
+          ..write('reservedQuantity: $reservedQuantity, ')
+          ..write('blockedQuantity: $blockedQuantity, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('lastSource: $lastSource, ')
+          ..write('version: $version, ')
+          ..write('cacheFetchedAt: $cacheFetchedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -9543,6 +10387,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $WarehousesTableTable warehousesTable = $WarehousesTableTable(
     this,
   );
+  late final $VariantStockBalancesTableTable variantStockBalancesTable =
+      $VariantStockBalancesTableTable(this);
   late final Index idxCustomersOrgCompany = Index(
     'idx_customers_org_company',
     'CREATE INDEX idx_customers_org_company ON customers (organization_id, company_id)',
@@ -9583,6 +10429,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_warehouses_org_company_branch',
     'CREATE INDEX idx_warehouses_org_company_branch ON warehouses (organization_id, company_id, branch_id)',
   );
+  late final Index idxVariantStockBalancesOrgVariant = Index(
+    'idx_variant_stock_balances_org_variant',
+    'CREATE INDEX idx_variant_stock_balances_org_variant ON variant_stock_balances (organization_id, variant_id)',
+  );
+  late final Index idxVariantStockBalancesOrgWarehouse = Index(
+    'idx_variant_stock_balances_org_warehouse',
+    'CREATE INDEX idx_variant_stock_balances_org_warehouse ON variant_stock_balances (organization_id, warehouse_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -9597,6 +10451,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     priceListsTable,
     priceListItemsTable,
     warehousesTable,
+    variantStockBalancesTable,
     idxCustomersOrgCompany,
     idxCustomerAddressesCustomer,
     idxCustomerContactsCustomer,
@@ -9607,6 +10462,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxPriceListItemsOrgCompanyPriceList,
     idxPriceListItemsOrgProduct,
     idxWarehousesOrgCompanyBranch,
+    idxVariantStockBalancesOrgVariant,
+    idxVariantStockBalancesOrgWarehouse,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -14450,6 +15307,410 @@ typedef $$WarehousesTableTableProcessedTableManager =
       WarehousesTableData,
       PrefetchHooks Function()
     >;
+typedef $$VariantStockBalancesTableTableCreateCompanionBuilder =
+    VariantStockBalancesTableCompanion Function({
+      required String id,
+      required String organizationId,
+      required String companyId,
+      required String productId,
+      required String variantId,
+      required String warehouseId,
+      required int physicalQuantity,
+      required int reservedQuantity,
+      required int blockedQuantity,
+      required DateTime updatedAt,
+      required String updatedBy,
+      required String lastSource,
+      required int version,
+      required DateTime cacheFetchedAt,
+      Value<int> rowid,
+    });
+typedef $$VariantStockBalancesTableTableUpdateCompanionBuilder =
+    VariantStockBalancesTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String> companyId,
+      Value<String> productId,
+      Value<String> variantId,
+      Value<String> warehouseId,
+      Value<int> physicalQuantity,
+      Value<int> reservedQuantity,
+      Value<int> blockedQuantity,
+      Value<DateTime> updatedAt,
+      Value<String> updatedBy,
+      Value<String> lastSource,
+      Value<int> version,
+      Value<DateTime> cacheFetchedAt,
+      Value<int> rowid,
+    });
+
+class $$VariantStockBalancesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $VariantStockBalancesTableTable> {
+  $$VariantStockBalancesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get variantId => $composableBuilder(
+    column: $table.variantId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get warehouseId => $composableBuilder(
+    column: $table.warehouseId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get physicalQuantity => $composableBuilder(
+    column: $table.physicalQuantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get reservedQuantity => $composableBuilder(
+    column: $table.reservedQuantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get blockedQuantity => $composableBuilder(
+    column: $table.blockedQuantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get lastSource => $composableBuilder(
+    column: $table.lastSource,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get cacheFetchedAt => $composableBuilder(
+    column: $table.cacheFetchedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$VariantStockBalancesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $VariantStockBalancesTableTable> {
+  $$VariantStockBalancesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get productId => $composableBuilder(
+    column: $table.productId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get variantId => $composableBuilder(
+    column: $table.variantId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get warehouseId => $composableBuilder(
+    column: $table.warehouseId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get physicalQuantity => $composableBuilder(
+    column: $table.physicalQuantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get reservedQuantity => $composableBuilder(
+    column: $table.reservedQuantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get blockedQuantity => $composableBuilder(
+    column: $table.blockedQuantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get lastSource => $composableBuilder(
+    column: $table.lastSource,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get cacheFetchedAt => $composableBuilder(
+    column: $table.cacheFetchedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$VariantStockBalancesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $VariantStockBalancesTableTable> {
+  $$VariantStockBalancesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get productId =>
+      $composableBuilder(column: $table.productId, builder: (column) => column);
+
+  GeneratedColumn<String> get variantId =>
+      $composableBuilder(column: $table.variantId, builder: (column) => column);
+
+  GeneratedColumn<String> get warehouseId => $composableBuilder(
+    column: $table.warehouseId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get physicalQuantity => $composableBuilder(
+    column: $table.physicalQuantity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get reservedQuantity => $composableBuilder(
+    column: $table.reservedQuantity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get blockedQuantity => $composableBuilder(
+    column: $table.blockedQuantity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedBy =>
+      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<String> get lastSource => $composableBuilder(
+    column: $table.lastSource,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get cacheFetchedAt => $composableBuilder(
+    column: $table.cacheFetchedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$VariantStockBalancesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $VariantStockBalancesTableTable,
+          VariantStockBalancesTableData,
+          $$VariantStockBalancesTableTableFilterComposer,
+          $$VariantStockBalancesTableTableOrderingComposer,
+          $$VariantStockBalancesTableTableAnnotationComposer,
+          $$VariantStockBalancesTableTableCreateCompanionBuilder,
+          $$VariantStockBalancesTableTableUpdateCompanionBuilder,
+          (
+            VariantStockBalancesTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $VariantStockBalancesTableTable,
+              VariantStockBalancesTableData
+            >,
+          ),
+          VariantStockBalancesTableData,
+          PrefetchHooks Function()
+        > {
+  $$VariantStockBalancesTableTableTableManager(
+    _$AppDatabase db,
+    $VariantStockBalancesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$VariantStockBalancesTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$VariantStockBalancesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$VariantStockBalancesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> productId = const Value.absent(),
+                Value<String> variantId = const Value.absent(),
+                Value<String> warehouseId = const Value.absent(),
+                Value<int> physicalQuantity = const Value.absent(),
+                Value<int> reservedQuantity = const Value.absent(),
+                Value<int> blockedQuantity = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> updatedBy = const Value.absent(),
+                Value<String> lastSource = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<DateTime> cacheFetchedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => VariantStockBalancesTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                productId: productId,
+                variantId: variantId,
+                warehouseId: warehouseId,
+                physicalQuantity: physicalQuantity,
+                reservedQuantity: reservedQuantity,
+                blockedQuantity: blockedQuantity,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                lastSource: lastSource,
+                version: version,
+                cacheFetchedAt: cacheFetchedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                required String companyId,
+                required String productId,
+                required String variantId,
+                required String warehouseId,
+                required int physicalQuantity,
+                required int reservedQuantity,
+                required int blockedQuantity,
+                required DateTime updatedAt,
+                required String updatedBy,
+                required String lastSource,
+                required int version,
+                required DateTime cacheFetchedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => VariantStockBalancesTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                productId: productId,
+                variantId: variantId,
+                warehouseId: warehouseId,
+                physicalQuantity: physicalQuantity,
+                reservedQuantity: reservedQuantity,
+                blockedQuantity: blockedQuantity,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                lastSource: lastSource,
+                version: version,
+                cacheFetchedAt: cacheFetchedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$VariantStockBalancesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $VariantStockBalancesTableTable,
+      VariantStockBalancesTableData,
+      $$VariantStockBalancesTableTableFilterComposer,
+      $$VariantStockBalancesTableTableOrderingComposer,
+      $$VariantStockBalancesTableTableAnnotationComposer,
+      $$VariantStockBalancesTableTableCreateCompanionBuilder,
+      $$VariantStockBalancesTableTableUpdateCompanionBuilder,
+      (
+        VariantStockBalancesTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $VariantStockBalancesTableTable,
+          VariantStockBalancesTableData
+        >,
+      ),
+      VariantStockBalancesTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -14478,4 +15739,9 @@ class $AppDatabaseManager {
       $$PriceListItemsTableTableTableManager(_db, _db.priceListItemsTable);
   $$WarehousesTableTableTableManager get warehousesTable =>
       $$WarehousesTableTableTableManager(_db, _db.warehousesTable);
+  $$VariantStockBalancesTableTableTableManager get variantStockBalancesTable =>
+      $$VariantStockBalancesTableTableTableManager(
+        _db,
+        _db.variantStockBalancesTable,
+      );
 }

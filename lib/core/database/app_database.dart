@@ -8,6 +8,7 @@ import 'tables/payment_terms_table.dart';
 import 'tables/price_list_items_table.dart';
 import 'tables/price_lists_table.dart';
 import 'tables/product_search_index_table.dart';
+import 'tables/variant_stock_balances_table.dart';
 import 'tables/warehouses_table.dart';
 
 part 'app_database.g.dart';
@@ -56,13 +57,14 @@ class ProductSearchIndexRow {
     PriceListsTable,
     PriceListItemsTable,
     WarehousesTable,
+    VariantStockBalancesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 8;
+  int get schemaVersion => 9;
 
   @override
   MigrationStrategy get migration {
@@ -111,6 +113,9 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 8) {
           await migrator.createTable(warehousesTable);
+        }
+        if (from < 9) {
+          await migrator.createTable(variantStockBalancesTable);
         }
       },
       beforeOpen: (details) async {
@@ -613,6 +618,32 @@ class AppDatabase extends _$AppDatabase {
             (row) => OrderingTerm.asc(row.priority),
             (row) => OrderingTerm.asc(row.name),
           ]))
+        .get();
+  }
+
+  Future<void> upsertVariantStockBalances({
+    required List<VariantStockBalancesTableCompanion> rows,
+  }) {
+    return batch((batch) {
+      batch.insertAllOnConflictUpdate(variantStockBalancesTable, rows);
+    });
+  }
+
+  Future<List<VariantStockBalancesTableData>>
+  getVariantStockBalancesByVariantIds({
+    required String organizationId,
+    required Set<String> variantIds,
+  }) {
+    if (variantIds.isEmpty) {
+      return Future<List<VariantStockBalancesTableData>>.value(
+        const <VariantStockBalancesTableData>[],
+      );
+    }
+    return (select(variantStockBalancesTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.variantId.isIn(variantIds.toList(growable: false)),
+        ))
         .get();
   }
 }
