@@ -17,6 +17,8 @@ final class FeatureFlagRegistry {
   /// own permanent flag — see the retirement process in
   /// `docs/architecture/feature-flags.md`.
   static const String featureInsightsEnabled = 'feature_insights_enabled';
+  static const String featureInventoryReservationsEnabled =
+      'feature_inventory_reservations_enabled';
 
   /// Maximum accepted product video duration (TASK-068), read by
   /// `ProductMediaBloc` and enforced client-side *before* any byte is
@@ -57,6 +59,19 @@ final class FeatureFlagRegistry {
           owner: 'flutter-senior-architect',
           createdAt: DateTime.utc(2026, 8, 22),
           reviewBy: DateTime.utc(2026, 11, 22),
+          type: FeatureFlagValueType.boolean,
+          defaultValue: false,
+        ),
+        FeatureFlagDefinition(
+          key: featureInventoryReservationsEnabled,
+          description:
+              'Habilita a reserva comercial temporaria de estoque para '
+              'pedidos em elaboracao (TASK-092). Valor padrao desligado '
+              'ate estabilizacao do fluxo server-side de expiracao, '
+              'liberacao e consumo.',
+          owner: 'flutter-senior-architect',
+          createdAt: DateTime.utc(2026, 8, 28),
+          reviewBy: DateTime.utc(2026, 11, 28),
           type: FeatureFlagValueType.boolean,
           defaultValue: false,
         ),

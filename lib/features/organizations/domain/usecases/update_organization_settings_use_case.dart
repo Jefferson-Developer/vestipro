@@ -29,6 +29,7 @@ final class UpdateOrganizationSettingsUseCase {
     List<String> customerAddressTypes = const <String>[],
     List<String> customerContactTypes = const <String>[],
     bool allowMultipleCollectionsPerProduct = false,
+    int stockReservationExpiresInMinutes = 15,
   }) async {
     final trimmedId = id.trim();
     final trimmedUpdatedBy = updatedBy.trim();
@@ -59,6 +60,7 @@ final class UpdateOrganizationSettingsUseCase {
         customerAddressTypes: customerAddressTypes,
         customerContactTypes: customerContactTypes,
         allowMultipleCollectionsPerProduct: allowMultipleCollectionsPerProduct,
+        stockReservationExpiresInMinutes: stockReservationExpiresInMinutes,
       );
     } on ValidationException catch (exception) {
       return AppFailure<Organization>(mapAppExceptionToFailure(exception));

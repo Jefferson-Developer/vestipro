@@ -1,6 +1,7 @@
 library;
 
 export 'domain/entities/future_stock_entry.dart';
+export 'domain/entities/stock_reservation.dart';
 export 'domain/entities/warehouse.dart';
 export 'domain/entities/variant_inventory_availability.dart';
 export 'domain/entities/variant_future_stock_summary.dart';
@@ -13,6 +14,7 @@ export 'domain/usecases/get_variant_inventory_availability_use_case.dart';
 export 'domain/usecases/get_variant_future_stock_summary_use_case.dart';
 export 'domain/usecases/get_warehouses_by_company_use_case.dart';
 export 'domain/value_objects/future_stock_source.dart';
+export 'domain/value_objects/stock_reservation_status.dart';
 export 'domain/value_objects/warehouse_type.dart';
 export 'data/dtos/variant_stock_balance_dto.dart';
 export 'data/dtos/warehouse_dto.dart';

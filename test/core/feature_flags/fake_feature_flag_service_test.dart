@@ -34,6 +34,22 @@ void main() {
       );
     });
 
+    test('supports overriding the stock reservation flag', () {
+      final service = FakeFeatureFlagService();
+
+      service.overrideFlag(
+        FeatureFlagRegistry.featureInventoryReservationsEnabled,
+        true,
+      );
+
+      expect(
+        service.isEnabled(
+          FeatureFlagRegistry.featureInventoryReservationsEnabled,
+        ),
+        isTrue,
+      );
+    });
+
     test('reset clears overrides back to the registry default', () {
       final service = FakeFeatureFlagService(
         overrides: {FeatureFlagRegistry.featureInsightsEnabled: true},

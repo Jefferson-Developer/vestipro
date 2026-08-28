@@ -11,6 +11,7 @@ final class OrganizationSettingsDto {
     this.customerAddressTypes = const <String>[],
     this.customerContactTypes = const <String>[],
     this.allowMultipleCollectionsPerProduct = false,
+    this.stockReservationExpiresInMinutes = 15,
   });
 
   factory OrganizationSettingsDto.fromJson(Map<String, dynamic> json) {
@@ -24,12 +25,16 @@ final class OrganizationSettingsDto {
     final rawCustomerContactTypes = json['customerContactTypes'];
     final allowMultipleCollectionsPerProduct =
         json['allowMultipleCollectionsPerProduct'];
+    final stockReservationExpiresInMinutes =
+        json['stockReservationExpiresInMinutes'];
 
     if (currency is! String ||
         country is! String ||
         defaultLanguage is! String ||
         (segment != null && segment is! String) ||
         (maxTeamsPerUser != null && maxTeamsPerUser is! int) ||
+        (stockReservationExpiresInMinutes != null &&
+            stockReservationExpiresInMinutes is! int) ||
         (allowMultipleCollectionsPerProduct != null &&
             allowMultipleCollectionsPerProduct is! bool)) {
       throw const ValidationException(
@@ -49,6 +54,8 @@ final class OrganizationSettingsDto {
       customerContactTypes: _stringListFromJson(rawCustomerContactTypes),
       allowMultipleCollectionsPerProduct:
           allowMultipleCollectionsPerProduct as bool? ?? false,
+      stockReservationExpiresInMinutes:
+          stockReservationExpiresInMinutes as int? ?? 15,
     );
   }
 
@@ -77,6 +84,7 @@ final class OrganizationSettingsDto {
   /// `updateSettings` call must resend `true` to keep it, or it resets to
   /// the `false` default.
   final bool allowMultipleCollectionsPerProduct;
+  final int stockReservationExpiresInMinutes;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -93,6 +101,7 @@ final class OrganizationSettingsDto {
         'customerContactTypes': customerContactTypes,
       if (allowMultipleCollectionsPerProduct)
         'allowMultipleCollectionsPerProduct': true,
+      'stockReservationExpiresInMinutes': stockReservationExpiresInMinutes,
     };
   }
 }

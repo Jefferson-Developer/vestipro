@@ -56,6 +56,7 @@ interface OrganizationSettingsResponse {
   country: string;
   defaultLanguage: string;
   segment?: string;
+  stockReservationExpiresInMinutes: number;
 }
 
 interface OrganizationResponse {
@@ -256,8 +257,19 @@ export const createOrganization = onCall<
       name,
       slug,
       settings: segment
-        ? { currency, country, defaultLanguage, segment }
-        : { currency, country, defaultLanguage },
+        ? {
+            currency,
+            country,
+            defaultLanguage,
+            segment,
+            stockReservationExpiresInMinutes: 15,
+          }
+        : {
+            currency,
+            country,
+            defaultLanguage,
+            stockReservationExpiresInMinutes: 15,
+          },
       status: 'active',
       createdAt: now,
       createdBy: uid,

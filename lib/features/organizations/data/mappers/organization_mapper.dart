@@ -53,6 +53,7 @@ final class OrganizationMapper {
       customerContactTypes: dto.customerContactTypes,
       allowMultipleCollectionsPerProduct:
           dto.allowMultipleCollectionsPerProduct,
+      stockReservationExpiresInMinutes: dto.stockReservationExpiresInMinutes,
     );
   }
 
@@ -68,6 +69,8 @@ final class OrganizationMapper {
       customerContactTypes: settings.customerContactTypes,
       allowMultipleCollectionsPerProduct:
           settings.allowMultipleCollectionsPerProduct,
+      stockReservationExpiresInMinutes:
+          settings.stockReservationExpiresInMinutes,
     );
   }
 

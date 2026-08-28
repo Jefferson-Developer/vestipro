@@ -51,6 +51,11 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     /// `AssociateProductWithCollectionUseCase` replaces any previous
     /// association instead of adding a second one.
     @Default(false) bool allowMultipleCollectionsPerProduct,
+
+    /// Reservation TTL for TASK-092. Server-side stock reservations must
+    /// expire automatically, but the timeout is organization-configurable
+    /// instead of hardcoded in the client.
+    @Default(15) int stockReservationExpiresInMinutes,
   }) = _OrganizationSettings;
 
   /// Builds validated [OrganizationSettings], trimming each value and
@@ -71,6 +76,7 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     List<String> customerAddressTypes = const <String>[],
     List<String> customerContactTypes = const <String>[],
     bool allowMultipleCollectionsPerProduct = false,
+    int stockReservationExpiresInMinutes = 15,
   }) {
     final fieldErrors = <String, String>{};
     final trimmedCurrency = currency.trim();
@@ -104,6 +110,11 @@ abstract class OrganizationSettings with _$OrganizationSettings {
       fieldErrors['maxTeamsPerUser'] =
           'Max teams per user must be greater than zero.';
     }
+    if (stockReservationExpiresInMinutes < 15 ||
+        stockReservationExpiresInMinutes > 60) {
+      fieldErrors['stockReservationExpiresInMinutes'] =
+          'Stock reservation expiration must stay between 15 and 60 minutes.';
+    }
 
     if (fieldErrors.isNotEmpty) {
       throw ValidationException(
@@ -125,6 +136,7 @@ abstract class OrganizationSettings with _$OrganizationSettings {
       customerAddressTypes: normalizedCustomerAddressTypes,
       customerContactTypes: normalizedCustomerContactTypes,
       allowMultipleCollectionsPerProduct: allowMultipleCollectionsPerProduct,
+      stockReservationExpiresInMinutes: stockReservationExpiresInMinutes,
     );
   }
 }

@@ -102,5 +102,35 @@ void main() {
 
       expect(settings.allowMultipleCollectionsPerProduct, isTrue);
     });
+
+    test('defaults stockReservationExpiresInMinutes to 15', () {
+      final settings = OrganizationSettings.validated(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+      );
+
+      expect(settings.stockReservationExpiresInMinutes, 15);
+    });
+
+    test('rejects stockReservationExpiresInMinutes below the safe window', () {
+      expect(
+        () => OrganizationSettings.validated(
+          currency: 'BRL',
+          country: 'BR',
+          defaultLanguage: 'pt-BR',
+          stockReservationExpiresInMinutes: 10,
+        ),
+        throwsA(
+          isA<ValidationException>().having(
+            (exception) => exception.fieldErrors.containsKey(
+              'stockReservationExpiresInMinutes',
+            ),
+            'fieldErrors has stockReservationExpiresInMinutes',
+            isTrue,
+          ),
+        ),
+      );
+    });
   });
 }

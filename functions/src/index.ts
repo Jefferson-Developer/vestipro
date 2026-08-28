@@ -20,6 +20,10 @@ export { registerCatalogShareOpen } from './catalog/register-catalog-share-open'
 export { revokeCatalogShareLink } from './catalog/revoke-catalog-share-link';
 export { calculatePricing } from './pricing';
 export { applyStockBalanceAdjustment } from './inventory/apply-stock-balance-adjustment';
+export { createStockReservation } from './inventory/create-stock-reservation';
+export { releaseStockReservation } from './inventory/release-stock-reservation';
+export { consumeStockReservation } from './inventory/consume-stock-reservation';
+export { expireStockReservations } from './inventory/expire-stock-reservations';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

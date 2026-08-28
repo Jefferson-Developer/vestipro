@@ -468,6 +468,11 @@ service cloud.firestore {
         && resource.data.organizationId == organizationId;
     }
 
+    function canReadStockReservation(organizationId) {
+      return isActiveMember(organizationId)
+        && resource.data.organizationId == organizationId;
+    }
+
     function canCreatePriceList(organizationId) {
       return hasCapability(organizationId, 'priceList.manage')
         && validPriceListPayload(organizationId, request.resource.data);
@@ -851,6 +856,11 @@ service cloud.firestore {
 
       match /inventory/{inventoryId} {
         allow get, list: if canReadInventoryBalance(organizationId);
+        allow create, update, delete: if false;
+      }
+
+      match /stockReservations/{reservationId} {
+        allow get, list: if canReadStockReservation(organizationId);
         allow create, update, delete: if false;
       }
 

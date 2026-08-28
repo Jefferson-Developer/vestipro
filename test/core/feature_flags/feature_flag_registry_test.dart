@@ -30,6 +30,15 @@ void main() {
       expect(definition.defaultValue, isFalse);
     });
 
+    test('exposes the stock reservation flag disabled by default', () {
+      final definition = FeatureFlagRegistry.definitionOf(
+        FeatureFlagRegistry.featureInventoryReservationsEnabled,
+      );
+
+      expect(definition.type, FeatureFlagValueType.boolean);
+      expect(definition.defaultValue, isFalse);
+    });
+
     test('remoteConfigDefaults has one entry per registered flag', () {
       expect(
         FeatureFlagRegistry.remoteConfigDefaults.length,
@@ -38,6 +47,11 @@ void main() {
       expect(
         FeatureFlagRegistry.remoteConfigDefaults[FeatureFlagRegistry
             .featureInsightsEnabled],
+        false,
+      );
+      expect(
+        FeatureFlagRegistry.remoteConfigDefaults[FeatureFlagRegistry
+            .featureInventoryReservationsEnabled],
         false,
       );
     });

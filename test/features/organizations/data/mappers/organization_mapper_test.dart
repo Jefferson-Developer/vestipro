@@ -118,6 +118,21 @@ void main() {
       expect(roundTrippedDto.segment, 'apparel');
     });
 
+    test('settingsToEntity/settingsToDto round-trip reservation ttl', () {
+      const dtoWithReservationTtl = OrganizationSettingsDto(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+        stockReservationExpiresInMinutes: 45,
+      );
+
+      final entity = mapper.settingsToEntity(dtoWithReservationTtl);
+      expect(entity.stockReservationExpiresInMinutes, 45);
+
+      final roundTrippedDto = mapper.settingsToDto(entity);
+      expect(roundTrippedDto.stockReservationExpiresInMinutes, 45);
+    });
+
     test('toDto is the exact inverse of toEntity', () {
       final entity = mapper.toEntity(dto);
       final roundTrippedDto = mapper.toDto(entity);
