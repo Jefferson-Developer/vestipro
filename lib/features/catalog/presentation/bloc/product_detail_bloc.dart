@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:injectable/injectable.dart';
@@ -17,6 +19,7 @@ import '../../../products/domain/usecases/get_size_grid_template_by_id_use_case.
 import '../../../products/domain/usecases/get_variant_availability_use_case.dart';
 import '../../../products/domain/usecases/list_product_colors_use_case.dart';
 import '../../../products/domain/usecases/list_product_variants_by_product_use_case.dart';
+import '../../../products/domain/value_objects/variant_availability_status.dart';
 import '../../../products/domain/value_objects/product_variant_status.dart';
 import 'product_detail_event.dart';
 import 'product_detail_state.dart';
@@ -223,6 +226,20 @@ final class ProductDetailBloc
   ) {
     if (event.colorId == state.selectedColorId) return;
     emit(state.copyWith(selectedColorId: event.colorId));
+    if (state.availabilityForColor(event.colorId) ==
+        VariantAvailabilityStatus.futureStock) {
+      unawaited(
+        analyticsService.logEvent(
+          AnalyticsEvents.futureStockViewed,
+          parameters: <String, Object?>{
+            'organization_id': state.organizationId,
+            'product_id': state.productId,
+            'color_id': event.colorId,
+            'source': 'product_detail_color_selection',
+          },
+        ),
+      );
+    }
   }
 
   void _onQuantityChanged(

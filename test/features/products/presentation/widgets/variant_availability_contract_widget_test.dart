@@ -1,9 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/intl.dart';
+import 'package:intl/date_symbol_data_local.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:vestipro/core/design_system/design_system.dart';
-import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/products/data/repositories/product_variant_availability_repository.dart';
 import 'package:vestipro/features/products/data/repositories/shared_preferences_commercial_size_grid_draft_repository.dart';
 import 'package:vestipro/features/products/data/repositories/shared_preferences_product_variant_repository.dart';
@@ -13,74 +13,95 @@ import '../../../../core/design_system/components/test_pump_app.dart';
 import '../../product_factory.dart';
 
 void main() {
-  testWidgets(
-    'catalog and commercial grid render the same variant availability',
-    (tester) async {
-      SharedPreferences.setMockInitialValues(<String, Object>{});
-      final variantRepository =
-          const SharedPreferencesProductVariantRepository();
-      final availabilityRepository = ProductVariantAvailabilityRepository(
-        variantRepository,
-      );
-      await variantRepository.create(variant: _futureVariant);
+  testWidgets('commercial grid renders future stock in pt-BR', (tester) async {
+    final previousLocale = Intl.defaultLocale;
+    Intl.defaultLocale = 'pt_BR';
+    addTearDown(() => Intl.defaultLocale = previousLocale);
+    await initializeDateFormatting('pt_BR');
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final variantRepository = const SharedPreferencesProductVariantRepository();
+    final availabilityRepository = ProductVariantAvailabilityRepository(
+      variantRepository,
+    );
+    await variantRepository.create(variant: _futureVariant);
 
-      await tester.pumpWidget(
-        MaterialApp(
-          theme: AppTheme.light,
-          home: ProductSearchPage(
-            organizationId: 'org-1',
-            initialQuery: 'camisa',
-            createBloc: () => ProductSearchBloc.testing(
-              searchProducts: SearchProductsUseCase(
-                _FakeProductSearchRepository(products: <Product>[_product]),
-              ),
-              getVariantAvailability: GetVariantAvailabilityUseCase(
-                availabilityRepository,
-              ),
-              debounceDuration: const Duration(milliseconds: 1),
-            ),
-          ),
+    final draftRepository =
+        const SharedPreferencesCommercialSizeGridDraftRepository();
+    final gridBloc = CommercialSizeGridBloc(
+      getDraft: GetCommercialSizeGridDraftUseCase(draftRepository),
+      saveDraft: SaveCommercialSizeGridDraftUseCase(draftRepository),
+      getAvailability: GetVariantAvailabilityUseCase(availabilityRepository),
+    );
+    addTearDown(gridBloc.close);
+
+    await pumpApp(
+      tester,
+      SizedBox(
+        width: 520,
+        child: BlocProvider<CommercialSizeGridBloc>.value(
+          value: gridBloc,
+          child: const CommercialSizeGrid(),
         ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    gridBloc.add(
+      CommercialSizeGridStarted(
+        product: _product,
+        colors: _colors,
+        sizeGridTemplate: _template,
+        variants: <ProductVariant>[_futureVariant],
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(find.text('Estoque futuro 15/09/2026'), findsOneWidget);
+    expect(find.byTooltip('Previsão: 12 un. em 15/09/2026'), findsOneWidget);
+  });
 
-      final draftRepository =
-          const SharedPreferencesCommercialSizeGridDraftRepository();
-      final gridBloc = CommercialSizeGridBloc(
-        getDraft: GetCommercialSizeGridDraftUseCase(draftRepository),
-        saveDraft: SaveCommercialSizeGridDraftUseCase(draftRepository),
-        getAvailability: GetVariantAvailabilityUseCase(availabilityRepository),
-      );
-      addTearDown(gridBloc.close);
+  testWidgets('commercial grid localizes future stock labels in en-US', (
+    tester,
+  ) async {
+    final previousLocale = Intl.defaultLocale;
+    Intl.defaultLocale = 'en_US';
+    addTearDown(() => Intl.defaultLocale = previousLocale);
+    await initializeDateFormatting('en_US');
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+    final variantRepository = const SharedPreferencesProductVariantRepository();
+    final availabilityRepository = ProductVariantAvailabilityRepository(
+      variantRepository,
+    );
+    await variantRepository.create(variant: _futureVariant);
 
-      await pumpApp(
-        tester,
-        SizedBox(
-          width: 520,
-          child: BlocProvider<CommercialSizeGridBloc>.value(
-            value: gridBloc,
-            child: const CommercialSizeGrid(),
-          ),
+    final draftRepository =
+        const SharedPreferencesCommercialSizeGridDraftRepository();
+    final gridBloc = CommercialSizeGridBloc(
+      getDraft: GetCommercialSizeGridDraftUseCase(draftRepository),
+      saveDraft: SaveCommercialSizeGridDraftUseCase(draftRepository),
+      getAvailability: GetVariantAvailabilityUseCase(availabilityRepository),
+    );
+    addTearDown(gridBloc.close);
+
+    await pumpApp(
+      tester,
+      SizedBox(
+        width: 520,
+        child: BlocProvider<CommercialSizeGridBloc>.value(
+          value: gridBloc,
+          child: const CommercialSizeGrid(),
         ),
-      );
-      gridBloc.add(
-        CommercialSizeGridStarted(
-          product: _product,
-          colors: _colors,
-          sizeGridTemplate: _template,
-          variants: <ProductVariant>[_futureVariant],
-        ),
-      );
-      await tester.pumpAndSettle();
+      ),
+    );
+    gridBloc.add(
+      CommercialSizeGridStarted(
+        product: _product,
+        colors: _colors,
+        sizeGridTemplate: _template,
+        variants: <ProductVariant>[_futureVariant],
+      ),
+    );
+    await tester.pumpAndSettle();
 
-      expect(
-        find.bySemanticsLabel('Preto P: Estoque futuro 15/09/2026'),
-        findsOneWidget,
-      );
-    },
-  );
+    expect(find.byTooltip('Previsão: 12 un. em 9/15/2026'), findsOneWidget);
+  });
 }
 
 final _product = buildTestProduct(
@@ -144,25 +165,3 @@ final _futureVariant = ProductVariant(
   version: 1,
   syncStatus: ProductSyncStatus.synced,
 );
-
-final class _FakeProductSearchRepository implements ProductSearchRepository {
-  const _FakeProductSearchRepository({required this.products});
-
-  final List<Product> products;
-
-  @override
-  Future<AppResult<ProductSearchResult>> searchProducts({
-    required String organizationId,
-    required String query,
-    ProductSearchSource source = ProductSearchSource.remote,
-    int limit = 20,
-  }) async {
-    return AppSuccess<ProductSearchResult>(
-      ProductSearchResult(
-        products: products,
-        source: source,
-        normalizedQuery: ProductSearchNormalizer.normalize(query),
-      ),
-    );
-  }
-}

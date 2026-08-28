@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../domain/entities/product_color.dart';
@@ -157,18 +158,27 @@ class _CommercialSizeGridReady extends StatelessWidget {
         availability.availableQuantity == null
             ? null
             : 'Pronta entrega: ${availability.availableQuantity}',
-      VariantAvailabilityStatus.futureStock =>
-        availability.futureAvailableAt == null
-            ? 'Estoque futuro'
-            : 'Estoque futuro ${_formatDate(availability.futureAvailableAt!)}',
+      VariantAvailabilityStatus.futureStock => _futureStockLabel(availability),
       VariantAvailabilityStatus.unavailable => 'Indisponivel',
     };
   }
 
-  String _formatDate(DateTime date) {
-    final day = date.day.toString().padLeft(2, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    return '$day/$month/${date.year}';
+  String _futureStockLabel(VariantAvailability availability) {
+    final quantityLabel = availability.futureAvailableQuantity == null
+        ? 'Estoque futuro'
+        : 'Previsão: ${availability.futureAvailableQuantity} un.';
+    if (availability.futureAvailableAt == null) {
+      return quantityLabel;
+    }
+    final locale = Intl.getCurrentLocale();
+    final formattedDate = DateFormat.yMd(locale).format(
+      DateTime(
+        availability.futureAvailableAt!.year,
+        availability.futureAvailableAt!.month,
+        availability.futureAvailableAt!.day,
+      ),
+    );
+    return '$quantityLabel em $formattedDate';
   }
 
   Color _colorFromHex(String value) {

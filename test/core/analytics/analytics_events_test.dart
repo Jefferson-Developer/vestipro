@@ -40,6 +40,7 @@ void main() {
           'product_updated',
           'product_published',
           'product_media_updated',
+          'future_stock_viewed',
           'catalog_home_viewed',
           'catalog_section_opened',
           'catalog_grid_viewed',

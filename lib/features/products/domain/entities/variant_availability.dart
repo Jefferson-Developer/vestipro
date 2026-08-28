@@ -14,6 +14,8 @@ final class VariantAvailability {
     required this.status,
     this.availableQuantity,
     this.futureAvailableAt,
+    this.futureAvailableQuantity,
+    this.futureSourceLabel,
     this.warehouseQuantities = const <String, int>{},
   });
 
@@ -35,6 +37,14 @@ final class VariantAvailability {
       futureAvailableAt: status == VariantAvailabilityStatus.futureStock
           ? variant.manualFutureAvailableAt?.toUtc()
           : null,
+      futureAvailableQuantity: status == VariantAvailabilityStatus.futureStock
+          ? variant.manualAvailableQuantity
+          : null,
+      futureSourceLabel:
+          status == VariantAvailabilityStatus.futureStock &&
+              variant.manualFutureAvailableAt != null
+          ? 'Previsão manual'
+          : null,
     );
   }
 
@@ -43,6 +53,8 @@ final class VariantAvailability {
   final VariantAvailabilityStatus status;
   final int? availableQuantity;
   final DateTime? futureAvailableAt;
+  final int? futureAvailableQuantity;
+  final String? futureSourceLabel;
   final Map<String, int> warehouseQuantities;
 
   bool get acceptsQuantity => status != VariantAvailabilityStatus.unavailable;

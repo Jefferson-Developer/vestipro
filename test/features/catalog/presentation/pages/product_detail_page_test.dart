@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:intl/date_symbol_data_local.dart';
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/design_system/design_system.dart';
@@ -23,6 +25,7 @@ void main() {
       List<ProductVariant> variants = const <ProductVariant>[],
       AnalyticsService? analyticsService,
       ResolvePriceForVariantUseCase? resolvePriceForVariant,
+      VariantAvailabilityRepository? availabilityRepository,
     }) async {
       final variantRepository =
           const SharedPreferencesProductVariantRepository();
@@ -48,7 +51,7 @@ void main() {
           templateRepository,
         ),
         getVariantAvailability: GetVariantAvailabilityUseCase(
-          const _FakeVariantAvailabilityRepository(),
+          availabilityRepository ?? const _FakeVariantAvailabilityRepository(),
         ),
         resolvePriceForVariant: resolvePriceForVariant,
         analyticsService: analyticsService ?? FakeAnalyticsService(),
@@ -90,6 +93,53 @@ void main() {
         expect(find.text('Sem preço definido na tabela ativa'), findsOneWidget);
         final button = tester.widget<AppButton>(find.byType(AppButton));
         expect(button.isDisabled, isTrue);
+      },
+    );
+
+    testWidgets(
+      'renders a localized future stock badge for the selected color',
+      (tester) async {
+        final previousLocale = Intl.defaultLocale;
+        Intl.defaultLocale = 'pt_BR';
+        addTearDown(() => Intl.defaultLocale = previousLocale);
+        await initializeDateFormatting('pt_BR');
+
+        final bloc = await buildBloc(
+          productResult: AppSuccess<Product>(_product),
+          variants: <ProductVariant>[
+            _variant('v-preto-p', 'color-preto', 'size-p'),
+          ],
+          availabilityRepository: _FakeVariantAvailabilityRepository(
+            byVariantId: <String, VariantAvailability>{
+              'v-preto-p': VariantAvailability(
+                variantId: 'v-preto-p',
+                productId: 'product-1',
+                status: VariantAvailabilityStatus.futureStock,
+                futureAvailableAt: DateTime.utc(2026, 9, 15),
+                futureAvailableQuantity: 24,
+                futureSourceLabel: 'Compra',
+              ),
+            },
+          ),
+        );
+        await tester.pumpWidget(
+          MaterialApp(
+            theme: AppTheme.light,
+            home: ProductDetailPage(
+              organizationId: 'org-1',
+              productId: 'product-1',
+              createBloc: () => bloc,
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.bySemanticsLabel(
+            RegExp(r'Previsão: 24 un\. em 15/09/2026: warning'),
+          ),
+          findsOneWidget,
+        );
       },
     );
 
@@ -358,14 +408,22 @@ final class _ScriptedProductRepository implements ProductRepository {
 
 final class _FakeVariantAvailabilityRepository
     implements VariantAvailabilityRepository {
-  const _FakeVariantAvailabilityRepository();
+  const _FakeVariantAvailabilityRepository({
+    this.byVariantId = const <String, VariantAvailability>{},
+  });
+
+  final Map<String, VariantAvailability> byVariantId;
 
   @override
   Future<AppResult<List<VariantAvailability>>> listByVariantIds({
     required String organizationId,
     required Iterable<String> variantIds,
-  }) async =>
-      const AppSuccess<List<VariantAvailability>>(<VariantAvailability>[]);
+  }) async => AppSuccess<List<VariantAvailability>>(
+    variantIds
+        .map((id) => byVariantId[id])
+        .whereType<VariantAvailability>()
+        .toList(growable: false),
+  );
 
   @override
   Future<AppResult<List<VariantAvailability>>> listByProductIds({

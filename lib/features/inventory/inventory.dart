@@ -1,18 +1,24 @@
 library;
 
+export 'domain/entities/future_stock_entry.dart';
 export 'domain/entities/warehouse.dart';
 export 'domain/entities/variant_inventory_availability.dart';
+export 'domain/entities/variant_future_stock_summary.dart';
 export 'domain/entities/variant_stock_balance.dart';
+export 'domain/repositories/future_stock_repository.dart';
 export 'domain/repositories/warehouse_repository.dart';
 export 'domain/repositories/variant_stock_balance_repository.dart';
 export 'domain/usecases/get_active_warehouses_use_case.dart';
 export 'domain/usecases/get_variant_inventory_availability_use_case.dart';
+export 'domain/usecases/get_variant_future_stock_summary_use_case.dart';
 export 'domain/usecases/get_warehouses_by_company_use_case.dart';
+export 'domain/value_objects/future_stock_source.dart';
 export 'domain/value_objects/warehouse_type.dart';
 export 'data/dtos/variant_stock_balance_dto.dart';
 export 'data/dtos/warehouse_dto.dart';
 export 'data/mappers/variant_stock_balance_local_mapper.dart';
 export 'data/mappers/variant_stock_balance_mapper.dart';
+export 'data/repositories/product_variant_future_stock_repository.dart';
 export 'data/mappers/warehouse_mapper.dart';
 export 'data/mappers/warehouse_local_mapper.dart';
 export 'data/repositories/inventory_variant_availability_repository.dart';

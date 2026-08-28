@@ -49,6 +49,7 @@ final class AnalyticsEvents {
   static const String productUpdated = 'product_updated';
   static const String productPublished = 'product_published';
   static const String productMediaUpdated = 'product_media_updated';
+  static const String futureStockViewed = 'future_stock_viewed';
   static const String catalogHomeViewed = 'catalog_home_viewed';
   static const String catalogSectionOpened = 'catalog_section_opened';
   static const String catalogGridViewed = 'catalog_grid_viewed';
@@ -97,6 +98,7 @@ final class AnalyticsEvents {
     productUpdated,
     productPublished,
     productMediaUpdated,
+    futureStockViewed,
     catalogHomeViewed,
     catalogSectionOpened,
     catalogGridViewed,

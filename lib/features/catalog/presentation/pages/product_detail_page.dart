@@ -240,6 +240,15 @@ class _ProductDetailContent extends StatelessWidget {
                     color: colors.onSurface,
                   ),
                 ),
+                if (_selectedFutureAvailability(state) case final availability?)
+                  Padding(
+                    padding: const EdgeInsets.only(top: AppSpacing.spacing8),
+                    child: AppStatusBadge(
+                      label: _futureStockBadgeLabel(availability),
+                      variant: AppStatusBadgeVariant.warning,
+                      icon: Icons.schedule_outlined,
+                    ),
+                  ),
                 const SizedBox(height: AppSpacing.spacing8),
                 _buildSizeGrid(context, bloc, state),
               ],
@@ -371,19 +380,40 @@ class _ProductDetailContent extends StatelessWidget {
         availability.availableQuantity == null
             ? 'Pronta entrega'
             : 'Pronta entrega: ${availability.availableQuantity}',
-      VariantAvailabilityStatus.futureStock =>
-        availability.futureAvailableAt == null
-            ? 'Estoque futuro'
-            : 'Estoque futuro ${_formatDate(availability.futureAvailableAt!)}',
+      VariantAvailabilityStatus.futureStock => _futureStockBadgeLabel(
+        availability,
+      ),
       VariantAvailabilityStatus.unavailable => 'Indisponível',
     };
     return '${_formatPrice(price!.price!)} · $stockLabel';
   }
 
+  VariantAvailability? _selectedFutureAvailability(ProductDetailState state) {
+    final selectedColorId = state.selectedColorId;
+    if (selectedColorId == null) return null;
+    for (final variant in state.variantsForColor(selectedColorId)) {
+      final availability = state.availabilityForVariant(variant);
+      if (availability.status == VariantAvailabilityStatus.futureStock) {
+        return availability;
+      }
+    }
+    return null;
+  }
+
+  String _futureStockBadgeLabel(VariantAvailability availability) {
+    final quantityLabel = availability.futureAvailableQuantity == null
+        ? 'Previsão de estoque'
+        : 'Previsão: ${availability.futureAvailableQuantity} un.';
+    if (availability.futureAvailableAt == null) {
+      return quantityLabel;
+    }
+    return '$quantityLabel em ${_formatDate(availability.futureAvailableAt!)}';
+  }
+
   String _formatDate(DateTime date) {
-    final day = date.day.toString().padLeft(2, '0');
-    final month = date.month.toString().padLeft(2, '0');
-    return '$day/$month/${date.year}';
+    return DateFormat.yMd(
+      Intl.getCurrentLocale(),
+    ).format(DateTime(date.year, date.month, date.day));
   }
 
   String _formatPrice(double value) {
