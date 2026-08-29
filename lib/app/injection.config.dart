@@ -298,14 +298,25 @@ import '../features/favorites/domain/usecases/watch_favorite_product_ids_use_cas
 import '../features/favorites/presentation/bloc/favorites_bloc.dart' as _i318;
 import '../features/favorites/presentation/cubit/favorite_status_cubit.dart'
     as _i249;
+import '../features/inventory/data/datasources/firestore_stock_alert_data_source.dart'
+    as _i8;
+import '../features/inventory/data/datasources/firestore_stock_turnover_data_source.dart'
+    as _i605;
 import '../features/inventory/data/datasources/firestore_variant_stock_balance_data_source.dart'
     as _i185;
 import '../features/inventory/data/datasources/firestore_warehouse_data_source.dart'
     as _i504;
+import '../features/inventory/data/datasources/stock_alert_data_source.dart'
+    as _i240;
+import '../features/inventory/data/datasources/stock_turnover_data_source.dart'
+    as _i135;
 import '../features/inventory/data/datasources/variant_stock_balance_remote_data_source.dart'
     as _i180;
 import '../features/inventory/data/datasources/warehouse_remote_data_source.dart'
     as _i80;
+import '../features/inventory/data/mappers/stock_alert_mapper.dart' as _i655;
+import '../features/inventory/data/mappers/stock_turnover_metric_snapshot_mapper.dart'
+    as _i422;
 import '../features/inventory/data/mappers/variant_stock_balance_local_mapper.dart'
     as _i333;
 import '../features/inventory/data/mappers/variant_stock_balance_mapper.dart'
@@ -317,24 +328,36 @@ import '../features/inventory/data/repositories/inventory_variant_availability_r
     as _i808;
 import '../features/inventory/data/repositories/product_variant_future_stock_repository.dart'
     as _i1008;
+import '../features/inventory/data/repositories/stock_alert_repository_impl.dart'
+    as _i711;
+import '../features/inventory/data/repositories/stock_turnover_repository_impl.dart'
+    as _i80;
 import '../features/inventory/data/repositories/variant_stock_balance_repository_impl.dart'
     as _i682;
 import '../features/inventory/data/repositories/warehouse_repository_impl.dart'
     as _i2;
 import '../features/inventory/domain/repositories/future_stock_repository.dart'
     as _i639;
+import '../features/inventory/domain/repositories/stock_alert_repository.dart'
+    as _i896;
+import '../features/inventory/domain/repositories/stock_turnover_repository.dart'
+    as _i503;
 import '../features/inventory/domain/repositories/variant_stock_balance_repository.dart'
     as _i221;
 import '../features/inventory/domain/repositories/warehouse_repository.dart'
     as _i62;
 import '../features/inventory/domain/usecases/get_active_warehouses_use_case.dart'
     as _i609;
+import '../features/inventory/domain/usecases/get_stock_turnover_metrics_use_case.dart'
+    as _i722;
 import '../features/inventory/domain/usecases/get_variant_future_stock_summary_use_case.dart'
     as _i349;
 import '../features/inventory/domain/usecases/get_variant_inventory_availability_use_case.dart'
     as _i1069;
 import '../features/inventory/domain/usecases/get_warehouses_by_company_use_case.dart'
     as _i472;
+import '../features/inventory/domain/usecases/list_stock_alerts_use_case.dart'
+    as _i684;
 import '../features/invites/data/datasources/cloud_functions_invite_acceptance_data_source.dart'
     as _i674;
 import '../features/invites/data/datasources/firestore_invite_data_source.dart'
@@ -907,6 +930,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i457.CustomerMapper>(() => const _i457.CustomerMapper());
     gh.lazySingleton<_i712.CustomerSegmentMapper>(
       () => const _i712.CustomerSegmentMapper(),
+    );
+    gh.lazySingleton<_i655.StockAlertMapper>(
+      () => const _i655.StockAlertMapper(),
+    );
+    gh.lazySingleton<_i422.StockTurnoverMetricSnapshotMapper>(
+      () => const _i422.StockTurnoverMetricSnapshotMapper(),
     );
     gh.lazySingleton<_i333.VariantStockBalanceLocalMapper>(
       () => const _i333.VariantStockBalanceLocalMapper(),
@@ -1779,6 +1808,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i794.PriceListLocalMapper>(),
       ),
     );
+    gh.lazySingleton<_i135.StockTurnoverDataSource>(
+      () =>
+          _i605.FirestoreStockTurnoverDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i336.InviteAcceptanceDataSource>(
       () => _i674.CloudFunctionsInviteAcceptanceDataSource(
         gh<_i340.CloudFunctionsService>(),
@@ -1882,6 +1915,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
+    gh.lazySingleton<_i240.StockAlertDataSource>(
+      () => _i8.FirestoreStockAlertDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i979.CatalogShareLookupDataSource>(
       () => _i354.CloudFunctionsCatalogShareLookupDataSource(
         gh<_i340.CloudFunctionsService>(),
@@ -1934,6 +1970,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
+    gh.lazySingleton<_i896.StockAlertRepository>(
+      () => _i711.StockAlertRepositoryImpl(
+        dataSource: gh<_i240.StockAlertDataSource>(),
+        mapper: gh<_i655.StockAlertMapper>(),
+      ),
+    );
     gh.lazySingleton<_i180.VariantStockBalanceRemoteDataSource>(
       () => _i185.FirestoreVariantStockBalanceDataSource(
         gh<_i974.FirebaseFirestore>(),
@@ -1947,6 +1989,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i580.FirestoreProductRemoteSearchDataSource(
         gh<_i974.FirebaseFirestore>(),
         gh<_i309.ProductMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i503.StockTurnoverRepository>(
+      () => _i80.StockTurnoverRepositoryImpl(
+        dataSource: gh<_i135.StockTurnoverDataSource>(),
+        mapper: gh<_i422.StockTurnoverMetricSnapshotMapper>(),
       ),
     );
     gh.factory<_i609.GetActiveWarehousesUseCase>(
@@ -2083,6 +2131,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i335.RemoveMemberFromTeamUseCase(
         gh<_i320.TeamRepository>(),
         gh<_i957.MembershipRepository>(),
+      ),
+    );
+    gh.factory<_i684.ListStockAlertsUseCase>(
+      () => _i684.ListStockAlertsUseCase(
+        gh<_i896.StockAlertRepository>(),
+        gh<_i47.PermissionService>(),
       ),
     );
     gh.lazySingleton<_i756.OrganizationRepository>(
@@ -2235,6 +2289,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i468.UpdateDiscountPolicyUseCase(
         gh<_i31.DiscountPolicyRepository>(),
         gh<_i753.AuditLogRepository>(),
+      ),
+    );
+    gh.factory<_i722.GetStockTurnoverMetricsUseCase>(
+      () => _i722.GetStockTurnoverMetricsUseCase(
+        gh<_i503.StockTurnoverRepository>(),
       ),
     );
     gh.factory<_i906.CreateBranchUseCase>(

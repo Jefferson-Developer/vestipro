@@ -885,6 +885,16 @@ service cloud.firestore {
         allow read, write: if false;
       }
 
+      match /stockTurnoverDailyFacts/{factId} {
+        allow read, write: if false;
+      }
+
+      match /stockTurnoverMetrics/{metricId} {
+        allow get, list: if hasCapability(organizationId, 'report.viewSensitive')
+          || hasCapability(organizationId, 'inventory.adjust');
+        allow create, update, delete: if false;
+      }
+
       match /stockReservations/{reservationId} {
         allow get, list: if canReadStockReservation(organizationId);
         allow create, update, delete: if false;
