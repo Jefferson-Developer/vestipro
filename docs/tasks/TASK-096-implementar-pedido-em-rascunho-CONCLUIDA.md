@@ -180,7 +180,7 @@ Não realizado — não autorizado nesta conversa.
 
 ## Hash do commit
 
-Ver `git log -1 --oneline` no momento da resposta final.
+`70e4ba5` — feat(orders): implement order draft creation flow
 
 ## Branch
 
