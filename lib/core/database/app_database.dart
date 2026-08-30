@@ -4,6 +4,8 @@ import 'tables/customer_addresses_table.dart';
 import 'tables/customer_contacts_table.dart';
 import 'tables/customers_table.dart';
 import 'tables/favorites_table.dart';
+import 'tables/order_items_table.dart';
+import 'tables/orders_table.dart';
 import 'tables/payment_terms_table.dart';
 import 'tables/price_list_items_table.dart';
 import 'tables/price_lists_table.dart';
@@ -34,6 +36,15 @@ class ProductSearchIndexRow {
   final ProductSearchIndexTableData product;
 }
 
+/// Result of a join between an order row and its item rows (`OrderItemsTable`),
+/// already ordered by [OrderItemsTable.position].
+class OrderWithItemsRow {
+  const OrderWithItemsRow({required this.order, required this.items});
+
+  final OrdersTableData order;
+  final List<OrderItemsTableData> items;
+}
+
 /// VestiPro local (offline) database.
 ///
 /// TASK-054 seeds this database with the tables needed for the Customer
@@ -42,10 +53,11 @@ class ProductSearchIndexRow {
 /// TASK-083 adds [PriceListsTable] as the offline cache for pricing tables.
 /// TASK-084 extends that cache with [PriceListItemsTable] for resolved base
 /// prices and variant-specific exceptions.
-/// The general-purpose local schema for every other offline-capable entity
-/// (orders, Outbox, ...) is EPIC-14 work and must keep extending this same
-/// [AppDatabase] class/migration chain rather than create a second local
-/// database.
+/// TASK-095 adds [OrdersTable]/[OrderItemsTable] as the base structural
+/// offline cache for the `Order`/`OrderItem` aggregate (EPIC-13) — no
+/// submission/sync-engine behavior yet, that is EPIC-14 (Outbox) work, which
+/// must keep extending this same [AppDatabase] class/migration chain rather
+/// than create a second local database.
 @DriftDatabase(
   tables: [
     CustomersTable,
@@ -58,13 +70,15 @@ class ProductSearchIndexRow {
     PriceListItemsTable,
     WarehousesTable,
     VariantStockBalancesTable,
+    OrdersTable,
+    OrderItemsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 9;
+  int get schemaVersion => 10;
 
   @override
   MigrationStrategy get migration {
@@ -116,6 +130,10 @@ class AppDatabase extends _$AppDatabase {
         }
         if (from < 9) {
           await migrator.createTable(variantStockBalancesTable);
+        }
+        if (from < 10) {
+          await migrator.createTable(ordersTable);
+          await migrator.createTable(orderItemsTable);
         }
       },
       beforeOpen: (details) async {
@@ -645,5 +663,113 @@ class AppDatabase extends _$AppDatabase {
               row.variantId.isIn(variantIds.toList(growable: false)),
         ))
         .get();
+  }
+
+  /// Replaces the full local Order set for [organizationId]/[companyId] with
+  /// exactly [orderRows]/[itemRows] in a single transaction, mirroring
+  /// [replaceCustomers]. Deleting matching rows from [OrdersTable] cascades
+  /// to their item rows (`ON DELETE CASCADE`), so this method does not need
+  /// to delete from [OrderItemsTable] directly.
+  Future<void> replaceOrders({
+    required String organizationId,
+    required String companyId,
+    required List<OrdersTableCompanion> orderRows,
+    required List<OrderItemsTableCompanion> itemRows,
+  }) {
+    return transaction(() async {
+      await (delete(ordersTable)..where(
+            (row) =>
+                row.organizationId.equals(organizationId) &
+                row.companyId.equals(companyId),
+          ))
+          .go();
+
+      await batch((batch) {
+        batch.insertAll(ordersTable, orderRows);
+        batch.insertAll(orderItemsTable, itemRows);
+      });
+    });
+  }
+
+  /// Inserts or updates exactly one Order row — the incremental-update
+  /// primitive the future sync engine (EPIC-14) uses to keep the local cache
+  /// fresh after the initial load, mirroring [upsertPriceList]. Callers must
+  /// pair this with [replaceOrderItems] for the same order id so its item
+  /// rows stay consistent with the new order row.
+  Future<void> upsertOrder(OrdersTableCompanion row) {
+    return into(ordersTable).insertOnConflictUpdate(row);
+  }
+
+  /// Replaces every item row for [orderId] with exactly [itemRows] in a
+  /// single transaction — the sibling primitive to [upsertOrder] for an
+  /// order's item list, since items are a full child collection rather than
+  /// something upserted one row at a time from the client.
+  Future<void> replaceOrderItems({
+    required String orderId,
+    required List<OrderItemsTableCompanion> itemRows,
+  }) {
+    return transaction(() async {
+      await (delete(
+        orderItemsTable,
+      )..where((row) => row.orderId.equals(orderId))).go();
+
+      await batch((batch) {
+        batch.insertAll(orderItemsTable, itemRows);
+      });
+    });
+  }
+
+  /// Every non-soft-deleted Order currently stored locally for
+  /// [organizationId]/[companyId], each paired with its ordered item rows.
+  Future<List<OrderWithItemsRow>> getOrdersForCompany({
+    required String organizationId,
+    required String companyId,
+  }) async {
+    final orderRows =
+        await (select(ordersTable)..where(
+              (row) =>
+                  row.organizationId.equals(organizationId) &
+                  row.companyId.equals(companyId) &
+                  row.deletedAt.isNull(),
+            ))
+            .get();
+
+    final results = <OrderWithItemsRow>[];
+    for (final orderRow in orderRows) {
+      final itemRows =
+          await (select(orderItemsTable)
+                ..where((row) => row.orderId.equals(orderRow.id))
+                ..orderBy([(row) => OrderingTerm.asc(row.position)]))
+              .get();
+      results.add(OrderWithItemsRow(order: orderRow, items: itemRows));
+    }
+    return results;
+  }
+
+  /// A single locally stored Order (with its ordered item rows) by [id],
+  /// scoped to [organizationId]/[companyId], or null if not found/soft
+  /// deleted.
+  Future<OrderWithItemsRow?> getOrderById({
+    required String organizationId,
+    required String companyId,
+    required String id,
+  }) async {
+    final orderRow =
+        await (select(ordersTable)..where(
+              (row) =>
+                  row.organizationId.equals(organizationId) &
+                  row.companyId.equals(companyId) &
+                  row.id.equals(id) &
+                  row.deletedAt.isNull(),
+            ))
+            .getSingleOrNull();
+    if (orderRow == null) return null;
+
+    final itemRows =
+        await (select(orderItemsTable)
+              ..where((row) => row.orderId.equals(id))
+              ..orderBy([(row) => OrderingTerm.asc(row.position)]))
+            .get();
+    return OrderWithItemsRow(order: orderRow, items: itemRows);
   }
 }

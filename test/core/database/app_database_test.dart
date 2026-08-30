@@ -16,7 +16,7 @@ void main() {
     });
 
     test('creates the customer schema on a fresh database', () async {
-      expect(database.schemaVersion, 9);
+      expect(database.schemaVersion, 10);
 
       // Exercises `onCreate`/`beforeOpen` by forcing the connection open.
       await database.customStatement('SELECT 1');
@@ -42,8 +42,47 @@ void main() {
           'payment_terms',
           'variant_stock_balances',
           'warehouses',
+          'orders',
+          'order_items',
         ]),
       );
+    });
+
+    test('cascades order deletion to its item rows, scoped to org/company '
+        '(TASK-095)', () async {
+      await database.replaceOrders(
+        organizationId: 'org-1',
+        companyId: 'company-1',
+        orderRows: <OrdersTableCompanion>[_orderRow(id: 'order-1')],
+        itemRows: <OrderItemsTableCompanion>[
+          _orderItemRow(id: 'item-1', orderId: 'order-1'),
+        ],
+      );
+
+      final beforeItems = await database.select(database.orderItemsTable).get();
+      expect(beforeItems, hasLength(1));
+
+      final loaded = await database.getOrdersForCompany(
+        organizationId: 'org-1',
+        companyId: 'company-1',
+      );
+      expect(loaded, hasLength(1));
+      expect(loaded.single.items, hasLength(1));
+
+      // A second replace for the same org/company with an empty set must
+      // remove the previous order row and, via `ON DELETE CASCADE`, its
+      // item rows too.
+      await database.replaceOrders(
+        organizationId: 'org-1',
+        companyId: 'company-1',
+        orderRows: const <OrdersTableCompanion>[],
+        itemRows: const <OrderItemsTableCompanion>[],
+      );
+
+      final afterOrders = await database.select(database.ordersTable).get();
+      final afterItems = await database.select(database.orderItemsTable).get();
+      expect(afterOrders, isEmpty);
+      expect(afterItems, isEmpty);
     });
 
     test(
@@ -233,5 +272,56 @@ CustomerContactsTableCompanion _contactRow({
     typeLabel: 'Comercial',
     name: 'Contato',
     phone: const Value('47999999999'),
+  );
+}
+
+OrdersTableCompanion _orderRow({
+  required String id,
+  String organizationId = 'org-1',
+  String companyId = 'company-1',
+}) {
+  final now = DateTime.utc(2026, 1, 1);
+  const addressJson =
+      '{"street":"Rua das Colecoes","city":"Blumenau",'
+      '"state":"SC","zipCode":"89010100","country":"BR"}';
+  return OrdersTableCompanion.insert(
+    id: id,
+    organizationId: organizationId,
+    companyId: companyId,
+    branchId: 'branch-1',
+    customerId: 'customer-1',
+    sellerId: 'seller-1',
+    deliveryAddressJson: addressJson,
+    billingAddressJson: addressJson,
+    priceListId: 'price-list-1',
+    paymentTermId: 'payment-term-1',
+    status: 'draft',
+    createdAt: now,
+    createdBy: 'user-1',
+    updatedAt: now,
+    updatedBy: 'user-1',
+    version: 1,
+    syncStatus: 'pending',
+  );
+}
+
+OrderItemsTableCompanion _orderItemRow({
+  required String id,
+  required String orderId,
+  String organizationId = 'org-1',
+  String companyId = 'company-1',
+  int position = 0,
+}) {
+  return OrderItemsTableCompanion.insert(
+    id: id,
+    orderId: orderId,
+    organizationId: organizationId,
+    companyId: companyId,
+    variantId: 'variant-1',
+    productId: 'product-1',
+    quantity: 2,
+    unitPrice: 100,
+    subtotal: 200,
+    position: Value(position),
   );
 }

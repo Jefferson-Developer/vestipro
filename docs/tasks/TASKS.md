@@ -203,7 +203,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-094 — Implementar indicadores de giro de estoque](TASK-094-implementar-indicadores-de-giro-de-estoque.md) — Flutter Senior
 
 ### EPIC-13 — Pedidos
-- [ ] [TASK-095 — Modelar Order e OrderItem](TASK-095-modelar-order-e-order-item.md) — Flutter Senior
+- [x] [TASK-095 — Modelar Order e OrderItem](TASK-095-modelar-order-e-order-item.md) — Flutter Senior
 - [ ] [TASK-096 — Implementar pedido em rascunho](TASK-096-implementar-pedido-em-rascunho.md) — Flutter Senior + Front-end
 - [ ] [TASK-097 — Implementar adição de produtos ao pedido via catálogo](TASK-097-implementar-adicao-de-produtos-ao-pedido.md) — Flutter Senior + Front-end
 - [ ] [TASK-098 — Implementar tela de grade no pedido](TASK-098-implementar-tela-de-grade-no-pedido.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 94 / 220 tasks concluídas.
+**Progresso:** 95 / 220 tasks concluídas.

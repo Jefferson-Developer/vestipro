@@ -469,6 +469,10 @@ import '../features/opportunities/presentation/bloc/pipeline_stage_admin_bloc.da
     as _i31;
 import '../features/opportunities/presentation/bloc/sales_pipeline_bloc.dart'
     as _i339;
+import '../features/orders/data/mappers/order_local_mapper.dart' as _i431;
+import '../features/orders/data/mappers/order_mapper.dart' as _i169;
+import '../features/orders/domain/services/order_status_transition_validator.dart'
+    as _i753;
 import '../features/organizations/data/datasources/branch_data_source.dart'
     as _i526;
 import '../features/organizations/data/datasources/company_data_source.dart'
@@ -960,6 +964,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i772.PipelineStageMapper>(
       () => const _i772.PipelineStageMapper(),
     );
+    gh.lazySingleton<_i169.OrderMapper>(() => const _i169.OrderMapper());
+    gh.lazySingleton<_i753.OrderStatusTransitionValidator>(
+      () => const _i753.OrderStatusTransitionValidator(),
+    );
     gh.lazySingleton<_i964.BranchMapper>(() => const _i964.BranchMapper());
     gh.lazySingleton<_i642.CompanyMapper>(() => const _i642.CompanyMapper());
     gh.lazySingleton<_i714.MembershipMapper>(
@@ -1102,6 +1110,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i101.PriceListItemRepository>(
       () => const _i808.SharedPreferencesPriceListItemRepository(),
+    );
+    gh.lazySingleton<_i431.OrderLocalMapper>(
+      () => _i431.OrderLocalMapper(gh<_i169.OrderMapper>()),
     );
     gh.lazySingleton<_i795.ProductVariantRepository>(
       () => const _i912.SharedPreferencesProductVariantRepository(),
