@@ -82,3 +82,24 @@ final class OrderDraftItemRemoved extends OrderDraftEvent {
 
   final String itemId;
 }
+
+/// The seller typed a quantity directly on a product's color x size grid
+/// (`OrderItemsGrid`, TASK-098). When [variantId] already matches an item on
+/// the draft, this behaves exactly like [OrderDraftItemQuantityChanged]
+/// (matched by variant instead of item id) — including the same "0 means
+/// gone" convention. When it does not, a brand new `OrderItem` is created
+/// once a price is freshly resolved for that variant (the same pricing
+/// engine already used to add products via the catalog, TASK-097/TASK-088),
+/// never a guessed or copied price from a sibling color/size. Triggers the
+/// same debounced autosave as [OrderDraftNotesChanged].
+final class OrderDraftItemVariantQuantityChanged extends OrderDraftEvent {
+  const OrderDraftItemVariantQuantityChanged({
+    required this.productId,
+    required this.variantId,
+    required this.quantity,
+  });
+
+  final String productId;
+  final String variantId;
+  final int quantity;
+}

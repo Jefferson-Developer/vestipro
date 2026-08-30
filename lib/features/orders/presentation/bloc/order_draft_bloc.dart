@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
+import 'package:collection/collection.dart';
 // `injectable` also exports an `Order` annotation (unrelated to this
 // feature's `Order` entity) — hidden here to avoid an ambiguous import, same
 // precedent `OrderLocalMapper` already follows.
@@ -9,10 +10,14 @@ import 'package:injectable/injectable.dart' hide Order;
 import 'package:uuid/uuid.dart';
 
 import '../../../../core/analytics/analytics.dart';
+import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
+import '../../../pricing/domain/entities/resolved_variant_price.dart';
+import '../../../pricing/domain/usecases/resolve_price_for_variant_use_case.dart';
 import '../../../products/domain/entities/product.dart';
 import '../../../products/domain/usecases/get_product_by_id_use_case.dart';
 import '../../domain/entities/order.dart';
+import '../../domain/entities/order_item.dart';
 import '../../domain/services/order_item_editor.dart';
 import '../../domain/usecases/get_order_draft_use_case.dart';
 import '../../domain/usecases/save_order_draft_use_case.dart';
@@ -40,6 +45,7 @@ final class OrderDraftBloc extends Bloc<OrderDraftEvent, OrderDraftState> {
     required this.saveOrderDraft,
     required this.analyticsService,
     this.getProductById,
+    this.resolvePriceForVariant,
   }) : super(const OrderDraftState()) {
     on<OrderDraftStarted>(_onStarted, transformer: restartable());
     on<OrderDraftCustomerSelected>(
@@ -52,6 +58,10 @@ final class OrderDraftBloc extends Bloc<OrderDraftEvent, OrderDraftState> {
       transformer: sequential(),
     );
     on<OrderDraftItemRemoved>(_onItemRemoved, transformer: sequential());
+    on<OrderDraftItemVariantQuantityChanged>(
+      _onItemVariantQuantityChanged,
+      transformer: sequential(),
+    );
     on<OrderDraftAutoSaved>(_onAutoSaved, transformer: sequential());
     on<OrderDraftAutoSaveRetried>(_onAutoSaveRetried, transformer: droppable());
   }
@@ -71,6 +81,15 @@ final class OrderDraftBloc extends Bloc<OrderDraftEvent, OrderDraftState> {
   /// read-only lookup that degrades to raw ids instead of ever blocking the
   /// draft screen when it is not wired.
   final GetProductByIdUseCase? getProductById;
+
+  /// Resolves the price of a variant not yet on the draft when a grid cell
+  /// is filled for the first time (`OrderItemsGrid`, TASK-098) — the exact
+  /// same pricing engine already used to add products via the catalog
+  /// (TASK-097/TASK-088), never a guessed or copied price. Optional, same
+  /// precedent [getProductById] already sets: a missing dependency simply
+  /// keeps the grid read-only for brand new variants instead of ever
+  /// blocking the draft screen.
+  final ResolvePriceForVariantUseCase? resolvePriceForVariant;
 
   final Uuid _uuid = const Uuid();
   Timer? _autoSaveTimer;
@@ -254,6 +273,106 @@ final class OrderDraftBloc extends Bloc<OrderDraftEvent, OrderDraftState> {
       ),
     );
     _scheduleAutoSave();
+  }
+
+  /// Handles a color x size grid cell edit (`OrderItemsGrid`, TASK-098).
+  /// [event.variantId] matching an item already on the draft updates its
+  /// quantity exactly like [_onItemQuantityChanged] (matched by variant
+  /// instead of item id, same "0 means gone" convention). A variant not yet
+  /// on the draft only ever gets a brand new item once its price is freshly
+  /// resolved through [resolvePriceForVariant] — a quantity of zero for a
+  /// variant not on the draft is simply a no-op (there is nothing to
+  /// remove), and a variant whose price cannot be resolved never gets a
+  /// guessed or zero price silently: the failure is surfaced through
+  /// [OrderDraftState.failure] instead.
+  Future<void> _onItemVariantQuantityChanged(
+    OrderDraftItemVariantQuantityChanged event,
+    Emitter<OrderDraftState> emit,
+  ) async {
+    final order = state.order;
+    if (order == null) return;
+
+    final existing = order.items.firstWhereOrNull(
+      (item) => item.variantId == event.variantId,
+    );
+    if (existing != null) {
+      final updatedItems = OrderItemEditor.withUpdatedQuantity(
+        order.items,
+        itemId: existing.id,
+        quantity: event.quantity,
+      );
+      emit(
+        state.copyWith(
+          order: order.copyWith(items: updatedItems),
+          saveStatus: OrderDraftSaveStatus.idle,
+          clearFailure: true,
+        ),
+      );
+      _scheduleAutoSave();
+      return;
+    }
+
+    if (event.quantity <= 0) return;
+
+    final resolvePriceForVariant = this.resolvePriceForVariant;
+    if (resolvePriceForVariant == null) return;
+
+    final priceResult = await resolvePriceForVariant(
+      organizationId: order.organizationId,
+      companyId: order.companyId,
+      productId: event.productId,
+      variantId: event.variantId,
+    );
+    if (emit.isDone) return;
+    switch (priceResult) {
+      case AppSuccess<ResolvedVariantPrice>(value: final resolved):
+        if (!resolved.hasPrice) {
+          emit(
+            state.copyWith(
+              failure: const ValidationFailure(
+                'Não há preço disponível para esta variante.',
+                code: 'order_draft_variant_price_unavailable',
+              ),
+            ),
+          );
+          return;
+        }
+        final price = resolved.price!;
+        final newItem = OrderItem(
+          id: _uuid.v4(),
+          variantId: event.variantId,
+          productId: event.productId,
+          quantity: event.quantity,
+          unitPrice: price,
+          subtotal: event.quantity * price,
+        );
+        final updatedItems = OrderItemEditor.withAddedItems(
+          order.items,
+          <OrderItem>[newItem],
+        );
+        emit(
+          state.copyWith(
+            order: order.copyWith(items: updatedItems),
+            saveStatus: OrderDraftSaveStatus.idle,
+            clearFailure: true,
+          ),
+        );
+        _scheduleAutoSave();
+        await analyticsService.logEvent(
+          AnalyticsEvents.productAddedToOrder,
+          parameters: <String, Object?>{
+            'organization_id': order.organizationId,
+            'company_id': order.companyId,
+            'order_id': order.id,
+            'product_id': event.productId,
+            'variant_id': event.variantId,
+            'quantity': event.quantity,
+            'source': 'order_items_grid',
+          },
+        );
+      case AppFailure<ResolvedVariantPrice>(failure: final failure):
+        emit(state.copyWith(failure: failure));
+    }
   }
 
   /// Fetches the display-only `Product` behind every item's `productId` not

@@ -6,11 +6,14 @@ import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
 import '../../../customers/customers.dart';
+import '../../../products/domain/entities/product.dart';
 import '../../domain/entities/order.dart';
 import '../../domain/entities/order_item.dart';
 import '../bloc/order_draft_bloc.dart';
 import '../bloc/order_draft_event.dart';
 import '../bloc/order_draft_state.dart';
+import '../bloc/order_items_grid_cubit.dart';
+import '../widgets/order_items_grid.dart';
 
 /// "Novo pedido" screen (EPIC-13, TASK-096/TASK-097): seller picks a customer
 /// from their carteira, the resulting `Order` draft is created and persisted
@@ -26,6 +29,7 @@ class OrderDraftPage extends StatelessWidget {
     required this.permissionService,
     required this.createBloc,
     required this.createCustomerPortfolioBloc,
+    required this.createOrderItemsGridCubit,
     this.draftId,
     this.onContinueToProducts,
     super.key,
@@ -37,6 +41,13 @@ class OrderDraftPage extends StatelessWidget {
   final PermissionService permissionService;
   final OrderDraftBloc Function() createBloc;
   final CustomerPortfolioBloc Function() createCustomerPortfolioBloc;
+
+  /// Builds one `OrderItemsGridCubit` per product card shown on the items
+  /// list (TASK-098) — a fresh instance every time, mirroring
+  /// `createBloc`/`createCustomerPortfolioBloc`'s own factory-per-use
+  /// convention, since each product's color/size grid needs its own
+  /// independent load lifecycle.
+  final OrderItemsGridCubit Function() createOrderItemsGridCubit;
 
   /// When provided, resumes that exact draft instead of starting from the
   /// customer-picker step.
@@ -76,6 +87,7 @@ class OrderDraftPage extends StatelessWidget {
             sellerId: sellerId,
             permissionService: permissionService,
             createCustomerPortfolioBloc: createCustomerPortfolioBloc,
+            createOrderItemsGridCubit: createOrderItemsGridCubit,
             onContinueToProducts: onContinueToProducts,
           ),
         );
@@ -91,6 +103,7 @@ class _OrderDraftView extends StatelessWidget {
     required this.sellerId,
     required this.permissionService,
     required this.createCustomerPortfolioBloc,
+    required this.createOrderItemsGridCubit,
     this.onContinueToProducts,
   });
 
@@ -99,6 +112,7 @@ class _OrderDraftView extends StatelessWidget {
   final String sellerId;
   final PermissionService permissionService;
   final CustomerPortfolioBloc Function() createCustomerPortfolioBloc;
+  final OrderItemsGridCubit Function() createOrderItemsGridCubit;
   final Future<void> Function(Order order)? onContinueToProducts;
 
   @override
@@ -166,6 +180,8 @@ class _OrderDraftView extends StatelessWidget {
       case OrderDraftLoadStatus.ready:
         return _OrderDraftSummary(
           state: state,
+          organizationId: organizationId,
+          createOrderItemsGridCubit: createOrderItemsGridCubit,
           onContinueToProducts: onContinueToProducts,
         );
       case OrderDraftLoadStatus.awaitingCustomer:
@@ -176,9 +192,16 @@ class _OrderDraftView extends StatelessWidget {
 }
 
 class _OrderDraftSummary extends StatefulWidget {
-  const _OrderDraftSummary({required this.state, this.onContinueToProducts});
+  const _OrderDraftSummary({
+    required this.state,
+    required this.organizationId,
+    required this.createOrderItemsGridCubit,
+    this.onContinueToProducts,
+  });
 
   final OrderDraftState state;
+  final String organizationId;
+  final OrderItemsGridCubit Function() createOrderItemsGridCubit;
   final Future<void> Function(Order order)? onContinueToProducts;
 
   @override
@@ -273,7 +296,11 @@ class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
                 : () => _continueToProducts(context, order),
           ),
           const SizedBox(height: AppSpacing.spacing24),
-          _OrderItemsSection(state: widget.state),
+          _OrderItemsSection(
+            state: widget.state,
+            organizationId: widget.organizationId,
+            createOrderItemsGridCubit: widget.createOrderItemsGridCubit,
+          ),
         ],
       ),
     );
@@ -299,15 +326,28 @@ class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
   }
 }
 
-/// "Itens do pedido" (TASK-097): every `OrderItem` already on the draft,
-/// editable in place (quantity stepper, remove) with the running
-/// `Order.itemsSubtotal` always visible — a provisional, items-only
+/// "Itens do pedido" (TASK-097/TASK-098): every `OrderItem` already on the
+/// draft, grouped by product and shown as a color x size grid
+/// (`OrderItemsGrid`) whenever the product itself has already been resolved
+/// (`OrderDraftState.productsById`) — every cell filled or edited there
+/// generates or updates the matching `OrderItem` straight on
+/// `OrderDraftBloc` (TASK-098). A product not yet resolved (e.g. right after
+/// coming back from the catalog, before `_resolveProductNames` finishes)
+/// falls back to the plain quantity-stepper row TASK-097 already shipped,
+/// never blocking the list on that lookup. The running
+/// `Order.itemsSubtotal` stays always visible — a provisional, items-only
 /// subtotal, never the order's final total (that is the commercial
 /// summary's own job, TASK-099).
 class _OrderItemsSection extends StatelessWidget {
-  const _OrderItemsSection({required this.state});
+  const _OrderItemsSection({
+    required this.state,
+    required this.organizationId,
+    required this.createOrderItemsGridCubit,
+  });
 
   final OrderDraftState state;
+  final String organizationId;
+  final OrderItemsGridCubit Function() createOrderItemsGridCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -315,6 +355,10 @@ class _OrderItemsSection extends StatelessWidget {
     if (order == null) return const SizedBox.shrink();
     final colors = context.colors;
     final items = order.items;
+    final itemsByProduct = <String, List<OrderItem>>{};
+    for (final item in items) {
+      itemsByProduct.putIfAbsent(item.productId, () => <OrderItem>[]).add(item);
+    }
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,10 +374,13 @@ class _OrderItemsSection extends StatelessWidget {
                 'catálogo.',
           )
         else ...<Widget>[
-          for (final item in items) ...<Widget>[
-            _OrderItemRow(
-              item: item,
-              productName: state.productNameFor(item.productId),
+          for (final entry in itemsByProduct.entries) ...<Widget>[
+            _OrderProductItemsCard(
+              productId: entry.key,
+              items: entry.value,
+              product: state.productsById[entry.key],
+              organizationId: organizationId,
+              createOrderItemsGridCubit: createOrderItemsGridCubit,
             ),
             const SizedBox(height: AppSpacing.spacing8),
           ],
@@ -363,6 +410,66 @@ class _OrderItemsSection extends StatelessWidget {
           ),
         ],
       ],
+    );
+  }
+}
+
+/// One product's card inside the items list (TASK-098): renders the
+/// color x size grid (`OrderItemsGrid`) once [product] is resolved, or the
+/// plain per-item rows (TASK-097) while it is not.
+class _OrderProductItemsCard extends StatelessWidget {
+  const _OrderProductItemsCard({
+    required this.productId,
+    required this.items,
+    required this.product,
+    required this.organizationId,
+    required this.createOrderItemsGridCubit,
+  });
+
+  final String productId;
+  final List<OrderItem> items;
+  final Product? product;
+  final String organizationId;
+  final OrderItemsGridCubit Function() createOrderItemsGridCubit;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final resolvedProduct = product;
+
+    return Container(
+      key: ValueKey('order_item_product_$productId'),
+      padding: const EdgeInsets.all(AppSpacing.spacing12),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.radius8),
+        border: Border.all(color: colors.outline.withValues(alpha: 0.22)),
+      ),
+      child: resolvedProduct == null
+          ? Column(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: <Widget>[
+                for (final item in items) ...<Widget>[
+                  _OrderItemRow(item: item, productName: productId),
+                  const SizedBox(height: AppSpacing.spacing8),
+                ],
+              ],
+            )
+          : OrderItemsGrid(
+              key: ValueKey('order_items_grid_$productId'),
+              organizationId: organizationId,
+              product: resolvedProduct,
+              items: items,
+              createCubit: createOrderItemsGridCubit,
+              onQuantityChanged: (variantId, quantity) =>
+                  context.read<OrderDraftBloc>().add(
+                    OrderDraftItemVariantQuantityChanged(
+                      productId: productId,
+                      variantId: variantId,
+                      quantity: quantity,
+                    ),
+                  ),
+            ),
     );
   }
 }

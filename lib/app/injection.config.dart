@@ -493,6 +493,8 @@ import '../features/orders/domain/usecases/start_order_draft_for_customer_use_ca
 import '../features/orders/presentation/bloc/order_draft_bloc.dart' as _i287;
 import '../features/orders/presentation/bloc/order_items_counter_cubit.dart'
     as _i244;
+import '../features/orders/presentation/bloc/order_items_grid_cubit.dart'
+    as _i197;
 import '../features/orders/presentation/bloc/order_product_addition_cubit.dart'
     as _i15;
 import '../features/organizations/data/datasources/branch_data_source.dart'
@@ -2767,14 +2769,12 @@ extension GetItInjectableX on _i174.GetIt {
         sessionService: gh<_i885.SessionService>(),
       ),
     );
-    gh.factory<_i287.OrderDraftBloc>(
-      () => _i287.OrderDraftBloc(
-        getOrderDraft: gh<_i485.GetOrderDraftUseCase>(),
-        startOrderDraftForCustomer:
-            gh<_i168.StartOrderDraftForCustomerUseCase>(),
-        saveOrderDraft: gh<_i1.SaveOrderDraftUseCase>(),
-        analyticsService: gh<_i202.AnalyticsService>(),
-        getProductById: gh<_i721.GetProductByIdUseCase>(),
+    gh.factory<_i197.OrderItemsGridCubit>(
+      () => _i197.OrderItemsGridCubit(
+        listVariantsByProduct: gh<_i530.ListProductVariantsByProductUseCase>(),
+        listProductColors: gh<_i789.ListProductColorsUseCase>(),
+        getSizeGridTemplateById: gh<_i194.GetSizeGridTemplateByIdUseCase>(),
+        getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
       ),
     );
     gh.factory<_i186.CatalogFilterBloc>(
@@ -2790,6 +2790,17 @@ extension GetItInjectableX on _i174.GetIt {
         saveCatalogPreferences: gh<_i36.SaveCatalogPreferencesUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
         sessionService: gh<_i885.SessionService>(),
+      ),
+    );
+    gh.factory<_i287.OrderDraftBloc>(
+      () => _i287.OrderDraftBloc(
+        getOrderDraft: gh<_i485.GetOrderDraftUseCase>(),
+        startOrderDraftForCustomer:
+            gh<_i168.StartOrderDraftForCustomerUseCase>(),
+        saveOrderDraft: gh<_i1.SaveOrderDraftUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+        getProductById: gh<_i721.GetProductByIdUseCase>(),
+        resolvePriceForVariant: gh<_i352.ResolvePriceForVariantUseCase>(),
       ),
     );
     return this;

@@ -10,8 +10,21 @@ import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/customers/customers.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
 import 'package:vestipro/features/orders/orders.dart';
+import 'package:vestipro/features/products/products.dart';
 
 class _MockMembershipRepository extends Mock implements MembershipRepository {}
+
+class _MockProductVariantRepository extends Mock
+    implements ProductVariantRepository {}
+
+class _MockProductColorRepository extends Mock
+    implements ProductColorRepository {}
+
+class _MockSizeGridTemplateRepository extends Mock
+    implements SizeGridTemplateRepository {}
+
+class _MockVariantAvailabilityRepository extends Mock
+    implements VariantAvailabilityRepository {}
 
 void main() {
   group('OrderDraftPage', () {
@@ -187,6 +200,20 @@ Future<void> _pumpPage(
         ),
         createCustomerPortfolioBloc: () =>
             CustomerPortfolioBloc(listCustomerPortfolio: portfolioUseCase),
+        createOrderItemsGridCubit: () => OrderItemsGridCubit(
+          listVariantsByProduct: ListProductVariantsByProductUseCase(
+            _MockProductVariantRepository(),
+          ),
+          listProductColors: ListProductColorsUseCase(
+            _MockProductColorRepository(),
+          ),
+          getSizeGridTemplateById: GetSizeGridTemplateByIdUseCase(
+            _MockSizeGridTemplateRepository(),
+          ),
+          getVariantAvailability: GetVariantAvailabilityUseCase(
+            _MockVariantAvailabilityRepository(),
+          ),
+        ),
       ),
     ),
   );
