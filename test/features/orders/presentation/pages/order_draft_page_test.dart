@@ -26,6 +26,11 @@ class _MockSizeGridTemplateRepository extends Mock
 class _MockVariantAvailabilityRepository extends Mock
     implements VariantAvailabilityRepository {}
 
+class _MockCustomerRepository extends Mock implements CustomerRepository {}
+
+class _MockOrderPricingRepository extends Mock
+    implements OrderPricingRepository {}
+
 void main() {
   group('OrderDraftPage', () {
     late _MockMembershipRepository membershipRepository;
@@ -212,6 +217,12 @@ Future<void> _pumpPage(
           ),
           getVariantAvailability: GetVariantAvailabilityUseCase(
             _MockVariantAvailabilityRepository(),
+          ),
+        ),
+        createOrderPricingSummaryCubit: () => OrderPricingSummaryCubit(
+          GetOrderPricingSummaryUseCase(
+            _MockOrderPricingRepository(),
+            GetCustomerByIdUseCase(_MockCustomerRepository()),
           ),
         ),
       ),

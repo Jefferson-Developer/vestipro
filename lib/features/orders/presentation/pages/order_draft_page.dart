@@ -13,14 +13,20 @@ import '../bloc/order_draft_bloc.dart';
 import '../bloc/order_draft_event.dart';
 import '../bloc/order_draft_state.dart';
 import '../bloc/order_items_grid_cubit.dart';
+import '../bloc/order_pricing_summary_cubit.dart';
 import '../widgets/order_items_grid.dart';
+import '../widgets/order_pricing_summary_section.dart';
 
-/// "Novo pedido" screen (EPIC-13, TASK-096/TASK-097): seller picks a customer
-/// from their carteira, the resulting `Order` draft is created and persisted
-/// 100% offline; every further edit (notes, item quantity/removal) autosaves
-/// with a visible pending/saving/saved/failed indicator — never silently —
-/// and totals recompute in real time from `Order.itemsSubtotal` as items
-/// added from the catalog (TASK-097) come and go.
+/// "Novo pedido" screen (EPIC-13, TASK-096/TASK-097/TASK-099): seller picks a
+/// customer from their carteira, the resulting `Order` draft is created and
+/// persisted 100% offline; every further edit (notes, item quantity/removal)
+/// autosaves with a visible pending/saving/saved/failed indicator — never
+/// silently. The items list still shows a provisional, items-only
+/// `Order.itemsSubtotal` as items added from the catalog (TASK-097) come and
+/// go, but the official subtotal/desconto/acréscimo/frete/total is the
+/// commercial summary card (`OrderPricingSummarySection`, TASK-099), always
+/// sourced from the server-side pricing engine (TASK-088), never recomputed
+/// here.
 class OrderDraftPage extends StatelessWidget {
   const OrderDraftPage({
     required this.organizationId,
@@ -30,6 +36,7 @@ class OrderDraftPage extends StatelessWidget {
     required this.createBloc,
     required this.createCustomerPortfolioBloc,
     required this.createOrderItemsGridCubit,
+    required this.createOrderPricingSummaryCubit,
     this.draftId,
     this.onContinueToProducts,
     super.key,
@@ -48,6 +55,11 @@ class OrderDraftPage extends StatelessWidget {
   /// convention, since each product's color/size grid needs its own
   /// independent load lifecycle.
   final OrderItemsGridCubit Function() createOrderItemsGridCubit;
+
+  /// Builds the single `OrderPricingSummaryCubit` behind the commercial
+  /// summary card (TASK-099) — one fresh instance per `OrderDraftPage`
+  /// build, same factory-per-use convention as [createOrderItemsGridCubit].
+  final OrderPricingSummaryCubit Function() createOrderPricingSummaryCubit;
 
   /// When provided, resumes that exact draft instead of starting from the
   /// customer-picker step.
@@ -88,6 +100,7 @@ class OrderDraftPage extends StatelessWidget {
             permissionService: permissionService,
             createCustomerPortfolioBloc: createCustomerPortfolioBloc,
             createOrderItemsGridCubit: createOrderItemsGridCubit,
+            createOrderPricingSummaryCubit: createOrderPricingSummaryCubit,
             onContinueToProducts: onContinueToProducts,
           ),
         );
@@ -104,6 +117,7 @@ class _OrderDraftView extends StatelessWidget {
     required this.permissionService,
     required this.createCustomerPortfolioBloc,
     required this.createOrderItemsGridCubit,
+    required this.createOrderPricingSummaryCubit,
     this.onContinueToProducts,
   });
 
@@ -113,6 +127,7 @@ class _OrderDraftView extends StatelessWidget {
   final PermissionService permissionService;
   final CustomerPortfolioBloc Function() createCustomerPortfolioBloc;
   final OrderItemsGridCubit Function() createOrderItemsGridCubit;
+  final OrderPricingSummaryCubit Function() createOrderPricingSummaryCubit;
   final Future<void> Function(Order order)? onContinueToProducts;
 
   @override
@@ -182,6 +197,7 @@ class _OrderDraftView extends StatelessWidget {
           state: state,
           organizationId: organizationId,
           createOrderItemsGridCubit: createOrderItemsGridCubit,
+          createOrderPricingSummaryCubit: createOrderPricingSummaryCubit,
           onContinueToProducts: onContinueToProducts,
         );
       case OrderDraftLoadStatus.awaitingCustomer:
@@ -196,12 +212,14 @@ class _OrderDraftSummary extends StatefulWidget {
     required this.state,
     required this.organizationId,
     required this.createOrderItemsGridCubit,
+    required this.createOrderPricingSummaryCubit,
     this.onContinueToProducts,
   });
 
   final OrderDraftState state;
   final String organizationId;
   final OrderItemsGridCubit Function() createOrderItemsGridCubit;
+  final OrderPricingSummaryCubit Function() createOrderPricingSummaryCubit;
   final Future<void> Function(Order order)? onContinueToProducts;
 
   @override
@@ -301,6 +319,14 @@ class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
             organizationId: widget.organizationId,
             createOrderItemsGridCubit: widget.createOrderItemsGridCubit,
           ),
+          if (order.items.isNotEmpty) ...<Widget>[
+            const SizedBox(height: AppSpacing.spacing16),
+            OrderPricingSummarySection(
+              key: ValueKey('order_pricing_summary_${order.id}'),
+              order: order,
+              createCubit: widget.createOrderPricingSummaryCubit,
+            ),
+          ],
         ],
       ),
     );

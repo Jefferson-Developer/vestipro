@@ -2,7 +2,8 @@
 /// screens from (buttons, inputs, selection, chips, badges, feedback states,
 /// overlays — modals, bottom sheets, snackbars, tooltips and the
 /// destructive confirmation dialog — data presentation — administrative
-/// tables, KPI cards, management charts and pagination — catalog/grade
+/// tables, KPI cards, commercial summary cards, management charts and
+/// pagination — catalog/grade
 /// components — product grid, color × size grade and quantity stepper — and
 /// navigation — the multi-step wizard progress indicator).
 /// Every component here consumes tokens from
@@ -16,6 +17,7 @@ library;
 export 'badges/app_status_badge.dart';
 export 'buttons/app_button.dart';
 export 'buttons/app_icon_button.dart';
+export 'cards/app_commercial_summary_card.dart';
 export 'cards/app_kpi_card.dart';
 export 'catalog/app_color_swatch_selector.dart';
 export 'catalog/app_product_carousel.dart';

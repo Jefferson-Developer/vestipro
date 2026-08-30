@@ -207,7 +207,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-096 — Implementar pedido em rascunho](TASK-096-implementar-pedido-em-rascunho.md) — Flutter Senior + Front-end
 - [x] [TASK-097 — Implementar adição de produtos ao pedido via catálogo](TASK-097-implementar-adicao-de-produtos-ao-pedido.md) — Flutter Senior + Front-end
 - [x] [TASK-098 — Implementar tela de grade no pedido](TASK-098-implementar-tela-de-grade-no-pedido.md) — Flutter Senior + Front-end
-- [ ] [TASK-099 — Implementar resumo comercial do pedido](TASK-099-implementar-resumo-comercial-do-pedido.md) — Flutter Senior + Front-end
+- [x] [TASK-099 — Implementar resumo comercial do pedido](TASK-099-implementar-resumo-comercial-do-pedido.md) — Flutter Senior + Front-end
 - [ ] [TASK-100 — Implementar validações antes do envio](TASK-100-implementar-validacoes-antes-do-envio.md) — Flutter Senior + Front-end
 - [ ] [TASK-101 — Implementar submissão do pedido](TASK-101-implementar-submissao-do-pedido.md) — Flutter Senior
 - [ ] [TASK-102 — Implementar listagem e acompanhamento de pedidos](TASK-102-implementar-listagem-de-pedidos.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 98 / 220 tasks concluídas.
+**Progresso:** 99 / 220 tasks concluídas.

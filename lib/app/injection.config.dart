@@ -470,12 +470,21 @@ import '../features/opportunities/presentation/bloc/pipeline_stage_admin_bloc.da
     as _i31;
 import '../features/opportunities/presentation/bloc/sales_pipeline_bloc.dart'
     as _i339;
+import '../features/orders/data/datasources/cloud_functions_order_pricing_data_source.dart'
+    as _i708;
+import '../features/orders/data/datasources/order_pricing_data_source.dart'
+    as _i492;
 import '../features/orders/data/mappers/order_local_mapper.dart' as _i431;
 import '../features/orders/data/mappers/order_mapper.dart' as _i169;
+import '../features/orders/data/mappers/order_pricing_mapper.dart' as _i730;
 import '../features/orders/data/repositories/drift_order_draft_repository.dart'
     as _i247;
+import '../features/orders/data/repositories/order_pricing_repository_impl.dart'
+    as _i258;
 import '../features/orders/domain/repositories/order_draft_repository.dart'
     as _i81;
+import '../features/orders/domain/repositories/order_pricing_repository.dart'
+    as _i183;
 import '../features/orders/domain/services/order_status_transition_validator.dart'
     as _i753;
 import '../features/orders/domain/usecases/add_items_to_order_draft_use_case.dart'
@@ -484,6 +493,8 @@ import '../features/orders/domain/usecases/ensure_customer_in_seller_portfolio_u
     as _i583;
 import '../features/orders/domain/usecases/get_order_draft_use_case.dart'
     as _i485;
+import '../features/orders/domain/usecases/get_order_pricing_summary_use_case.dart'
+    as _i305;
 import '../features/orders/domain/usecases/resolve_order_draft_defaults_use_case.dart'
     as _i530;
 import '../features/orders/domain/usecases/save_order_draft_use_case.dart'
@@ -495,6 +506,8 @@ import '../features/orders/presentation/bloc/order_items_counter_cubit.dart'
     as _i244;
 import '../features/orders/presentation/bloc/order_items_grid_cubit.dart'
     as _i197;
+import '../features/orders/presentation/bloc/order_pricing_summary_cubit.dart'
+    as _i765;
 import '../features/orders/presentation/bloc/order_product_addition_cubit.dart'
     as _i15;
 import '../features/organizations/data/datasources/branch_data_source.dart'
@@ -924,6 +937,9 @@ extension GetItInjectableX on _i174.GetIt {
     final appInjectionModule = _$AppInjectionModule();
     gh.factory<_i619.FavoriteLocalMapper>(
       () => const _i619.FavoriteLocalMapper(),
+    );
+    gh.factory<_i730.OrderPricingMapper>(
+      () => const _i730.OrderPricingMapper(),
     );
     gh.factory<_i162.PaymentTermLocalMapper>(
       () => const _i162.PaymentTermLocalMapper(),
@@ -1953,6 +1969,11 @@ extension GetItInjectableX on _i174.GetIt {
         compressor: gh<_i209.ImageUploadCompressor>(),
       ),
     );
+    gh.lazySingleton<_i492.OrderPricingDataSource>(
+      () => _i708.CloudFunctionsOrderPricingDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i228.TeamDataSource>(
       () => _i23.FirestoreTeamDataSource(gh<_i974.FirebaseFirestore>()),
     );
@@ -2186,6 +2207,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i753.AuditLogRepository>(),
       ),
     );
+    gh.lazySingleton<_i183.OrderPricingRepository>(
+      () => _i258.OrderPricingRepositoryImpl(
+        dataSource: gh<_i492.OrderPricingDataSource>(),
+        mapper: gh<_i730.OrderPricingMapper>(),
+      ),
+    );
     gh.factory<_i335.RemoveMemberFromTeamUseCase>(
       () => _i335.RemoveMemberFromTeamUseCase(
         gh<_i320.TeamRepository>(),
@@ -2413,6 +2440,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i445.ListActivePaymentTermsUseCase>(),
       ),
     );
+    gh.factory<_i305.GetOrderPricingSummaryUseCase>(
+      () => _i305.GetOrderPricingSummaryUseCase(
+        gh<_i183.OrderPricingRepository>(),
+        gh<_i356.GetCustomerByIdUseCase>(),
+      ),
+    );
     gh.factory<_i198.ProductFormBloc>(
       () => _i198.ProductFormBloc(
         getDraft: gh<_i1021.GetProductFormDraftUseCase>(),
@@ -2443,6 +2476,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i817.DeleteTeamUseCase>(
       () => _i817.DeleteTeamUseCase(gh<_i320.TeamRepository>()),
+    );
+    gh.factory<_i765.OrderPricingSummaryCubit>(
+      () => _i765.OrderPricingSummaryCubit(
+        gh<_i305.GetOrderPricingSummaryUseCase>(),
+      ),
     );
     gh.factory<_i954.PaymentTermsCubit>(
       () => _i954.PaymentTermsCubit(
