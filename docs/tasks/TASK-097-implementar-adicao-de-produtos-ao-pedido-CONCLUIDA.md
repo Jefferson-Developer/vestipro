@@ -190,7 +190,7 @@ Não realizado nesta rodada (proibido explicitamente pelo escopo da tarefa).
 
 ## Hash do commit
 
-Ver `git log -1 --oneline` após o commit.
+`b37fe49` — `feat(orders): implement adding products to order draft from catalog`
 
 ## Branch
 
