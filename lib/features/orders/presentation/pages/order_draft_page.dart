@@ -1,19 +1,23 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
+import 'package:intl/intl.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
 import '../../../customers/customers.dart';
 import '../../domain/entities/order.dart';
+import '../../domain/entities/order_item.dart';
 import '../bloc/order_draft_bloc.dart';
 import '../bloc/order_draft_event.dart';
 import '../bloc/order_draft_state.dart';
 
-/// "Novo pedido" screen (EPIC-13, TASK-096): seller picks a customer from
-/// their carteira, the resulting `Order` draft is created and persisted
-/// 100% offline, and every further edit (notes today) autosaves with a
-/// visible pending/saving/saved/failed indicator — never silently.
+/// "Novo pedido" screen (EPIC-13, TASK-096/TASK-097): seller picks a customer
+/// from their carteira, the resulting `Order` draft is created and persisted
+/// 100% offline; every further edit (notes, item quantity/removal) autosaves
+/// with a visible pending/saving/saved/failed indicator — never silently —
+/// and totals recompute in real time from `Order.itemsSubtotal` as items
+/// added from the catalog (TASK-097) come and go.
 class OrderDraftPage extends StatelessWidget {
   const OrderDraftPage({
     required this.organizationId,
@@ -39,10 +43,13 @@ class OrderDraftPage extends StatelessWidget {
   final String? draftId;
 
   /// Called once the seller taps "Adicionar produtos" with the ready
-  /// `Order` draft. Left optional (like `CustomerPortfolioPage`'s own
-  /// `onCustomerSelected`) so this screen already works end to end before
-  /// the product-catalog step (TASK-097, EPIC-13) exists to wire it to.
-  final void Function(Order order)? onContinueToProducts;
+  /// `Order` draft — expected to navigate to the catalog/product-picking
+  /// flow (TASK-097, EPIC-13) and resolve only once the seller comes back
+  /// here. Items added while away are persisted directly to the same local
+  /// draft (`AddItemsToOrderDraftUseCase`), not through this bloc's
+  /// in-memory state, so as soon as the returned future completes this page
+  /// re-dispatches `OrderDraftStarted` to reload them.
+  final Future<void> Function(Order order)? onContinueToProducts;
 
   @override
   Widget build(BuildContext context) {
@@ -92,7 +99,7 @@ class _OrderDraftView extends StatelessWidget {
   final String sellerId;
   final PermissionService permissionService;
   final CustomerPortfolioBloc Function() createCustomerPortfolioBloc;
-  final void Function(Order order)? onContinueToProducts;
+  final Future<void> Function(Order order)? onContinueToProducts;
 
   @override
   Widget build(BuildContext context) {
@@ -172,7 +179,7 @@ class _OrderDraftSummary extends StatefulWidget {
   const _OrderDraftSummary({required this.state, this.onContinueToProducts});
 
   final OrderDraftState state;
-  final void Function(Order order)? onContinueToProducts;
+  final Future<void> Function(Order order)? onContinueToProducts;
 
   @override
   State<_OrderDraftSummary> createState() => _OrderDraftSummaryState();
@@ -263,12 +270,173 @@ class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
             leadingIcon: Icons.add_shopping_cart_outlined,
             onPressed: widget.onContinueToProducts == null
                 ? null
-                : () => widget.onContinueToProducts!(order),
+                : () => _continueToProducts(context, order),
+          ),
+          const SizedBox(height: AppSpacing.spacing24),
+          _OrderItemsSection(state: widget.state),
+        ],
+      ),
+    );
+  }
+
+  /// Awaits the catalog/product-picking flow (TASK-097) and reloads the
+  /// draft once the seller comes back — items added there were persisted
+  /// directly to the local draft (`AddItemsToOrderDraftUseCase`), not
+  /// through this screen's own `OrderDraftBloc` instance, so a plain reload
+  /// (same as resuming an existing draft) is what actually shows them.
+  Future<void> _continueToProducts(BuildContext context, Order order) async {
+    final bloc = context.read<OrderDraftBloc>();
+    await widget.onContinueToProducts!(order);
+    if (!context.mounted) return;
+    bloc.add(
+      OrderDraftStarted(
+        organizationId: widget.state.organizationId,
+        companyId: widget.state.companyId,
+        sellerId: widget.state.sellerId,
+        draftId: order.id,
+      ),
+    );
+  }
+}
+
+/// "Itens do pedido" (TASK-097): every `OrderItem` already on the draft,
+/// editable in place (quantity stepper, remove) with the running
+/// `Order.itemsSubtotal` always visible — a provisional, items-only
+/// subtotal, never the order's final total (that is the commercial
+/// summary's own job, TASK-099).
+class _OrderItemsSection extends StatelessWidget {
+  const _OrderItemsSection({required this.state});
+
+  final OrderDraftState state;
+
+  @override
+  Widget build(BuildContext context) {
+    final order = state.order;
+    if (order == null) return const SizedBox.shrink();
+    final colors = context.colors;
+    final items = order.items;
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text('Itens do pedido', style: AppTypography.titleLarge),
+        const SizedBox(height: AppSpacing.spacing8),
+        if (items.isEmpty)
+          const AppEmptyState(
+            icon: Icons.shopping_bag_outlined,
+            title: 'Nenhum produto adicionado ainda',
+            description:
+                'Toque em "Adicionar produtos" para escolher variantes no '
+                'catálogo.',
+          )
+        else ...<Widget>[
+          for (final item in items) ...<Widget>[
+            _OrderItemRow(
+              item: item,
+              productName: state.productNameFor(item.productId),
+            ),
+            const SizedBox(height: AppSpacing.spacing8),
+          ],
+          const SizedBox(height: AppSpacing.spacing8),
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(
+                  'Subtotal dos itens',
+                  style: AppTypography.titleMedium.copyWith(
+                    color: colors.onSurface,
+                  ),
+                ),
+              ),
+              Text(
+                _formatCurrency(order.itemsSubtotal),
+                style: AppTypography.titleMedium.copyWith(
+                  color: colors.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.spacing4),
+          Text(
+            'Total oficial exibido no resumo comercial do pedido.',
+            style: AppTypography.bodySmall.copyWith(color: colors.outline),
+          ),
+        ],
+      ],
+    );
+  }
+}
+
+class _OrderItemRow extends StatelessWidget {
+  const _OrderItemRow({required this.item, required this.productName});
+
+  final OrderItem item;
+  final String productName;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.spacing12),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.radius8),
+        border: Border.all(color: colors.outline.withValues(alpha: 0.22)),
+      ),
+      child: Row(
+        children: <Widget>[
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: <Widget>[
+                Text(
+                  productName,
+                  style: AppTypography.bodyLarge.copyWith(
+                    color: colors.onSurface,
+                  ),
+                ),
+                const SizedBox(height: AppSpacing.spacing4),
+                Text(
+                  '${_formatCurrency(item.unitPrice)} · un.  ·  '
+                  'Subtotal: ${_formatCurrency(item.subtotal)}',
+                  style: AppTypography.bodySmall.copyWith(
+                    color: colors.outline,
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: AppSpacing.spacing8),
+          AppQuantityStepper(
+            quantity: item.quantity,
+            minQuantity: 0,
+            semanticLabel: 'Quantidade de $productName',
+            onChanged: (quantity) => context.read<OrderDraftBloc>().add(
+              OrderDraftItemQuantityChanged(
+                itemId: item.id,
+                quantity: quantity,
+              ),
+            ),
+          ),
+          AppIconButton(
+            icon: Icons.delete_outline,
+            semanticLabel: 'Remover $productName do pedido',
+            onPressed: () => context.read<OrderDraftBloc>().add(
+              OrderDraftItemRemoved(item.id),
+            ),
           ),
         ],
       ),
     );
   }
+}
+
+String _formatCurrency(double value) {
+  return NumberFormat.currency(
+    locale: 'pt_BR',
+    symbol: 'R\$',
+    decimalDigits: 2,
+  ).format(value);
 }
 
 class _SummaryRow extends StatelessWidget {

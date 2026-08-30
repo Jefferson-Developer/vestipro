@@ -242,6 +242,40 @@ class VestiProApp extends StatelessWidget {
                 createCustomerPortfolioBloc: () =>
                     getIt<CustomerPortfolioBloc>(),
                 draftId: queryParameters['draftId'],
+                onContinueToProducts: (order) async {
+                  await context.push(
+                    OrderProductCatalogRoute(
+                      orgId: orgId,
+                      companyId: companyId,
+                      draftId: order.id,
+                    ).location,
+                  );
+                },
+              ),
+          orderProductCatalogPageBuilder:
+              (context, orgId, companyId, draftId) => OrderProductCatalogPage(
+                organizationId: orgId,
+                companyId: companyId,
+                draftId: draftId,
+                createCatalogFilterBloc: () => getIt<CatalogFilterBloc>(),
+                createItemsCounterCubit: () => getIt<OrderItemsCounterCubit>(),
+              ),
+          orderProductDetailPageBuilder:
+              (
+                context,
+                orgId,
+                companyId,
+                draftId,
+                productId,
+                queryParameters,
+              ) => OrderProductAdditionPage(
+                organizationId: orgId,
+                companyId: companyId,
+                draftId: draftId,
+                productId: productId,
+                origin: queryParameters['origin'] ?? 'grid',
+                createProductDetailBloc: () => getIt<ProductDetailBloc>(),
+                createAdditionCubit: () => getIt<OrderProductAdditionCubit>(),
               ),
           catalogBrowsePageBuilder: (context, orgId, queryParameters) =>
               CatalogFilterPage(

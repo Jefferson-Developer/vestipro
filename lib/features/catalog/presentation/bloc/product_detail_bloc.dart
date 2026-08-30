@@ -287,6 +287,10 @@ final class ProductDetailBloc
             .map((line) => line.variant.colorId)
             .toSet()
             .length,
+        // Origin surface (catálogo/busca/favoritos) this addition came from
+        // — same `source` parameter/precedent `product_viewed` already logs
+        // from this same [ProductDetailState.origin].
+        'source': state.origin,
       },
     );
   }

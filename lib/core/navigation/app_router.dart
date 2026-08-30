@@ -34,6 +34,8 @@ class AppRouter {
     this.customerDetailPageBuilder,
     this.catalogBrowsePageBuilder,
     this.orderDraftPageBuilder,
+    this.orderProductCatalogPageBuilder,
+    this.orderProductDetailPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
     AuthorizationGuard? authorizationGuard,
@@ -78,6 +80,30 @@ class AppRouter {
     Map<String, String> queryParameters,
   )?
   orderDraftPageBuilder;
+
+  /// Builds the catalog screen scoped to an in-progress `Order` draft
+  /// (TASK-097), given `orgId`/`companyId`/`draftId` from
+  /// [OrderProductCatalogRoute].
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    String draftId,
+  )?
+  orderProductCatalogPageBuilder;
+
+  /// Builds the product detail screen scoped to the same in-progress `Order`
+  /// draft (TASK-097), given `orgId`/`companyId`/`draftId`/`productId` and
+  /// the raw `queryParameters` of [OrderProductDetailRoute] (`origin`).
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    String draftId,
+    String productId,
+    Map<String, String> queryParameters,
+  )?
+  orderProductDetailPageBuilder;
 
   /// Builds the catalog's filterable browsing screen (TASK-082), given
   /// `orgId` and the raw `queryParameters` of [CatalogBrowseRoute] — the
@@ -229,6 +255,46 @@ class AppRouter {
             context,
             state.pathParameters['orgId']!,
             state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: OrderProductCatalogRoute.pathPattern,
+        name: OrderProductCatalogRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.orderCreate,
+        ),
+        builder: (context, state) {
+          final builder = orderProductCatalogPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.pathParameters['draftId']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: OrderProductDetailRoute.pathPattern,
+        name: OrderProductDetailRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.orderCreate,
+        ),
+        builder: (context, state) {
+          final builder = orderProductDetailPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.pathParameters['draftId']!,
+            state.pathParameters['productId']!,
             state.uri.queryParameters,
           );
         },

@@ -216,6 +216,70 @@ final class OrderDraftRoute extends AppRoute {
   }
 }
 
+/// Catalog browsing screen scoped to an in-progress `Order` draft
+/// (TASK-097, EPIC-13) — the "Adicionar produtos" destination from
+/// [OrderDraftRoute]. Protected in [AppRouter] by `order.create`, same
+/// capability [OrderDraftRoute] itself requires: this route only exists to
+/// add items to a draft the seller is already authorized to edit.
+final class OrderProductCatalogRoute extends AppRoute {
+  const OrderProductCatalogRoute({
+    required this.orgId,
+    required this.companyId,
+    required this.draftId,
+  });
+
+  final String orgId;
+  final String companyId;
+  final String draftId;
+
+  static const name = 'orderProductCatalog';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/orders/:draftId/products';
+
+  @override
+  String get location =>
+      '/org/$orgId/companies/$companyId/orders/$draftId/products';
+}
+
+/// Product detail screen scoped to the same in-progress `Order` draft
+/// (TASK-097, EPIC-13) — reached from [OrderProductCatalogRoute] when the
+/// seller taps a product; confirming a variant/quantity selection here
+/// persists the resulting items straight to [draftId]. Protected in
+/// [AppRouter] by the same `order.create` capability.
+final class OrderProductDetailRoute extends AppRoute {
+  const OrderProductDetailRoute({
+    required this.orgId,
+    required this.companyId,
+    required this.draftId,
+    required this.productId,
+    this.origin = 'grid',
+  });
+
+  final String orgId;
+  final String companyId;
+  final String draftId;
+  final String productId;
+
+  /// Surface the seller tapped the product from (`grid`, `search`,
+  /// `favorites`) — carried through into `product_added_to_order`'s own
+  /// `source` parameter via `ProductDetailPage.origin`.
+  final String origin;
+
+  static const name = 'orderProductDetail';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/orders/:draftId/products/:productId';
+
+  @override
+  String get location {
+    final path =
+        '/org/$orgId/companies/$companyId/orders/$draftId/products/$productId';
+    return Uri(
+      path: path,
+      queryParameters: <String, String>{'origin': origin},
+    ).toString();
+  }
+}
+
 /// Customer 360 detail route (TASK-052), scoped by Organization and protected
 /// in [AppRouter] by `customer.view`.
 final class CustomerDetailRoute extends AppRoute {

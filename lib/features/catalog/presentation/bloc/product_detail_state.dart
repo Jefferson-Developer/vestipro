@@ -25,13 +25,22 @@ final class ProductDetailColorOption {
 
 /// One line of the "adicionar ao pedido" request: a variant with a typed
 /// quantity greater than zero. Carries the full [ProductVariant] (not just
-/// an id) so the hosting page's EPIC-13 integration has everything it needs
-/// without a second lookup.
+/// an id) and the already-resolved [unitPrice] — the exact price the seller
+/// was shown for this variant against the active tabela de preço at the
+/// moment of the tap (`ResolvedVariantPrice.price`, never a flattened/
+/// recalculated one) — so the hosting page's EPIC-13 integration has
+/// everything it needs to build an `OrderItem` without a second, possibly
+/// racy price lookup.
 final class ProductDetailOrderLine {
-  const ProductDetailOrderLine({required this.variant, required this.quantity});
+  const ProductDetailOrderLine({
+    required this.variant,
+    required this.quantity,
+    required this.unitPrice,
+  });
 
   final ProductVariant variant;
   final int quantity;
+  final double unitPrice;
 }
 
 final class ProductDetailState {
@@ -184,6 +193,10 @@ final class ProductDetailState {
         ProductDetailOrderLine(
           variant: variant,
           quantity: quantityForVariant(variant),
+          // Safe: `quantityForVariant` only returns > 0 when
+          // `canAddVariantToOrder` already confirmed `priceForVariant(...)`
+          // has a resolved price.
+          unitPrice: priceForVariant(variant)!.price!,
         ),
   ];
 

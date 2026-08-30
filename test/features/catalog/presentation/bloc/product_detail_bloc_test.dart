@@ -413,6 +413,7 @@ void main() {
         );
         expect(logged.parameters?['product_id'], 'product-1');
         expect(logged.parameters?['items_count'], 3);
+        expect(logged.parameters?['source'], 'grid');
       },
     );
 

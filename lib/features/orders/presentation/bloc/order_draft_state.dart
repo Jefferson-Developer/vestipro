@@ -1,4 +1,5 @@
 import '../../../../core/errors/errors.dart';
+import '../../../products/domain/entities/product.dart';
 import '../../domain/entities/order.dart';
 import '../../domain/entities/order_draft_defaults.dart';
 
@@ -37,6 +38,7 @@ final class OrderDraftState {
     this.defaults,
     this.saveStatus = OrderDraftSaveStatus.idle,
     this.failure,
+    this.productsById = const <String, Product>{},
   });
 
   final OrderDraftLoadStatus loadStatus;
@@ -54,11 +56,23 @@ final class OrderDraftState {
   final OrderDraftSaveStatus saveStatus;
   final Failure? failure;
 
+  /// Display-only cache of the `Product` behind each `OrderItem.productId`
+  /// currently on [order] (TASK-097's items list) — never authoritative for
+  /// price/availability/business rules, just a name to show instead of a raw
+  /// id. Missing an entry (fetch failed, or not resolved yet) falls back to
+  /// the raw id in the UI, never blocking the items list itself.
+  final Map<String, Product> productsById;
+
   bool get isLoading => loadStatus == OrderDraftLoadStatus.loading;
 
   bool get isReady => loadStatus == OrderDraftLoadStatus.ready && order != null;
 
   bool get isSaving => saveStatus == OrderDraftSaveStatus.saving;
+
+  /// Display name for [productId], falling back to the raw id when it was
+  /// not resolved (see [productsById]'s own doc).
+  String productNameFor(String productId) =>
+      productsById[productId]?.name ?? productId;
 
   OrderDraftState copyWith({
     OrderDraftLoadStatus? loadStatus,
@@ -71,6 +85,7 @@ final class OrderDraftState {
     OrderDraftSaveStatus? saveStatus,
     Failure? failure,
     bool clearFailure = false,
+    Map<String, Product>? productsById,
   }) {
     return OrderDraftState(
       loadStatus: loadStatus ?? this.loadStatus,
@@ -81,6 +96,7 @@ final class OrderDraftState {
       defaults: clearDefaults ? null : (defaults ?? this.defaults),
       saveStatus: saveStatus ?? this.saveStatus,
       failure: clearFailure ? null : (failure ?? this.failure),
+      productsById: productsById ?? this.productsById,
     );
   }
 }

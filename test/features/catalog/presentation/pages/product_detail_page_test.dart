@@ -200,6 +200,7 @@ void main() {
         expect(addedLines, isNotNull);
         expect(addedLines, hasLength(1));
         expect(addedLines?.single.quantity, 5);
+        expect(addedLines?.single.unitPrice, 199.9);
         final logged = analyticsService.loggedEvents.firstWhere(
           (event) => event.name == AnalyticsEvents.productAddedToOrder,
         );

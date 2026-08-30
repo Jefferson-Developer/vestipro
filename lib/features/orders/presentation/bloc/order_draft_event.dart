@@ -58,3 +58,27 @@ final class OrderDraftAutoSaved extends OrderDraftEvent {
 final class OrderDraftAutoSaveRetried extends OrderDraftEvent {
   const OrderDraftAutoSaveRetried();
 }
+
+/// The seller changed a typed quantity for an item already on the draft
+/// (TASK-097), directly from the items list — e.g. via `AppQuantityStepper`.
+/// [quantity] of zero or less removes the line, same "0 means gone"
+/// convention `ProductDetailQuantityChanged` already sets. Triggers the same
+/// debounced autosave as [OrderDraftNotesChanged].
+final class OrderDraftItemQuantityChanged extends OrderDraftEvent {
+  const OrderDraftItemQuantityChanged({
+    required this.itemId,
+    required this.quantity,
+  });
+
+  final String itemId;
+  final int quantity;
+}
+
+/// The seller removed an item already on the draft (TASK-097) directly from
+/// the items list. Triggers the same debounced autosave as
+/// [OrderDraftNotesChanged].
+final class OrderDraftItemRemoved extends OrderDraftEvent {
+  const OrderDraftItemRemoved(this.itemId);
+
+  final String itemId;
+}

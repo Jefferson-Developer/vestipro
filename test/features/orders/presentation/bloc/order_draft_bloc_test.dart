@@ -325,6 +325,150 @@ void main() {
         ),
       ],
     );
+    blocTest<OrderDraftBloc, OrderDraftState>(
+      'updates the quantity of an item already on the draft in memory and '
+      'debounces its autosave',
+      build: () => OrderDraftBloc(
+        getOrderDraft: _FakeGetOrderDraftUseCase(
+          const AppSuccess<Order?>(null),
+        ),
+        startOrderDraftForCustomer: _FakeStartOrderDraftForCustomerUseCase(
+          AppSuccess<Order>(_order(now)),
+        ),
+        saveOrderDraft: _FakeSaveOrderDraftUseCase(<AppResult<void>>[
+          const AppSuccess<void>(null),
+        ]),
+        analyticsService: FakeAnalyticsService(),
+      ),
+      seed: () => OrderDraftState(
+        loadStatus: OrderDraftLoadStatus.ready,
+        organizationId: 'org-1',
+        companyId: 'company-1',
+        sellerId: 'seller-1',
+        order: _order(now),
+        saveStatus: OrderDraftSaveStatus.saved,
+      ),
+      act: (bloc) => bloc.add(
+        const OrderDraftItemQuantityChanged(itemId: 'item-1', quantity: 3),
+      ),
+      wait: OrderDraftBloc.autoSaveDebounce * 2,
+      expect: () => <Object>[
+        isA<OrderDraftState>()
+            .having(
+              (state) => state.order?.items.single.quantity,
+              'item quantity',
+              3,
+            )
+            .having(
+              (state) => state.order?.items.single.subtotal,
+              'item subtotal',
+              30,
+            )
+            .having(
+              (state) => state.saveStatus,
+              'saveStatus',
+              OrderDraftSaveStatus.idle,
+            ),
+        isA<OrderDraftState>().having(
+          (state) => state.saveStatus,
+          'saveStatus',
+          OrderDraftSaveStatus.saving,
+        ),
+        isA<OrderDraftState>().having(
+          (state) => state.saveStatus,
+          'saveStatus',
+          OrderDraftSaveStatus.saved,
+        ),
+      ],
+    );
+
+    blocTest<OrderDraftBloc, OrderDraftState>(
+      'removes an item from the draft in memory when its quantity is set to zero',
+      build: () => OrderDraftBloc(
+        getOrderDraft: _FakeGetOrderDraftUseCase(
+          const AppSuccess<Order?>(null),
+        ),
+        startOrderDraftForCustomer: _FakeStartOrderDraftForCustomerUseCase(
+          AppSuccess<Order>(_order(now)),
+        ),
+        saveOrderDraft: _FakeSaveOrderDraftUseCase(<AppResult<void>>[
+          const AppSuccess<void>(null),
+        ]),
+        analyticsService: FakeAnalyticsService(),
+      ),
+      seed: () => OrderDraftState(
+        loadStatus: OrderDraftLoadStatus.ready,
+        organizationId: 'org-1',
+        companyId: 'company-1',
+        sellerId: 'seller-1',
+        order: _order(now),
+        saveStatus: OrderDraftSaveStatus.saved,
+      ),
+      act: (bloc) => bloc.add(
+        const OrderDraftItemQuantityChanged(itemId: 'item-1', quantity: 0),
+      ),
+      wait: OrderDraftBloc.autoSaveDebounce * 2,
+      expect: () => <Object>[
+        isA<OrderDraftState>().having(
+          (state) => state.order?.items,
+          'items',
+          isEmpty,
+        ),
+        isA<OrderDraftState>().having(
+          (state) => state.saveStatus,
+          'saveStatus',
+          OrderDraftSaveStatus.saving,
+        ),
+        isA<OrderDraftState>().having(
+          (state) => state.saveStatus,
+          'saveStatus',
+          OrderDraftSaveStatus.saved,
+        ),
+      ],
+    );
+
+    blocTest<OrderDraftBloc, OrderDraftState>(
+      'removes an item from the draft in memory and persists the change',
+      build: () => OrderDraftBloc(
+        getOrderDraft: _FakeGetOrderDraftUseCase(
+          const AppSuccess<Order?>(null),
+        ),
+        startOrderDraftForCustomer: _FakeStartOrderDraftForCustomerUseCase(
+          AppSuccess<Order>(_order(now)),
+        ),
+        saveOrderDraft: _FakeSaveOrderDraftUseCase(<AppResult<void>>[
+          const AppSuccess<void>(null),
+        ]),
+        analyticsService: FakeAnalyticsService(),
+      ),
+      seed: () => OrderDraftState(
+        loadStatus: OrderDraftLoadStatus.ready,
+        organizationId: 'org-1',
+        companyId: 'company-1',
+        sellerId: 'seller-1',
+        order: _order(now),
+        saveStatus: OrderDraftSaveStatus.saved,
+      ),
+      act: (bloc) => bloc.add(const OrderDraftItemRemoved('item-1')),
+      wait: OrderDraftBloc.autoSaveDebounce * 2,
+      expect: () => <Object>[
+        isA<OrderDraftState>().having(
+          (state) => state.order?.items,
+          'items',
+          isEmpty,
+        ),
+        isA<OrderDraftState>().having(
+          (state) => state.saveStatus,
+          'saveStatus',
+          OrderDraftSaveStatus.saving,
+        ),
+        isA<OrderDraftState>().having(
+          (state) => state.saveStatus,
+          'saveStatus',
+          OrderDraftSaveStatus.saved,
+        ),
+      ],
+    );
   });
 }
 
@@ -350,6 +494,16 @@ Order _order(DateTime now) {
     ),
     priceListId: 'price-list-1',
     paymentTermId: 'term-1',
+    items: const <OrderItem>[
+      OrderItem(
+        id: 'item-1',
+        variantId: 'variant-1',
+        productId: 'product-1',
+        quantity: 2,
+        unitPrice: 10,
+        subtotal: 20,
+      ),
+    ],
     status: OrderStatus.draft,
     statusHistory: <OrderStatusHistoryEntry>[
       OrderStatusHistoryEntry(

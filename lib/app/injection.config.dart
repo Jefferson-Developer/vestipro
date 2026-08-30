@@ -478,6 +478,8 @@ import '../features/orders/domain/repositories/order_draft_repository.dart'
     as _i81;
 import '../features/orders/domain/services/order_status_transition_validator.dart'
     as _i753;
+import '../features/orders/domain/usecases/add_items_to_order_draft_use_case.dart'
+    as _i720;
 import '../features/orders/domain/usecases/ensure_customer_in_seller_portfolio_use_case.dart'
     as _i583;
 import '../features/orders/domain/usecases/get_order_draft_use_case.dart'
@@ -489,6 +491,10 @@ import '../features/orders/domain/usecases/save_order_draft_use_case.dart'
 import '../features/orders/domain/usecases/start_order_draft_for_customer_use_case.dart'
     as _i168;
 import '../features/orders/presentation/bloc/order_draft_bloc.dart' as _i287;
+import '../features/orders/presentation/bloc/order_items_counter_cubit.dart'
+    as _i244;
+import '../features/orders/presentation/bloc/order_product_addition_cubit.dart'
+    as _i15;
 import '../features/organizations/data/datasources/branch_data_source.dart'
     as _i526;
 import '../features/organizations/data/datasources/company_data_source.dart'
@@ -1444,6 +1450,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i932.AnalyticsService>(
       () => _i569.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
     );
+    gh.factory<_i720.AddItemsToOrderDraftUseCase>(
+      () => _i720.AddItemsToOrderDraftUseCase(gh<_i81.OrderDraftRepository>()),
+    );
     gh.factory<_i485.GetOrderDraftUseCase>(
       () => _i485.GetOrderDraftUseCase(gh<_i81.OrderDraftRepository>()),
     );
@@ -1585,6 +1594,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => appInjectionModule.firebaseFunctions(
         gh<_i461.AppEnvironment>(),
         gh<_i56.FirebaseAppCheck>(),
+      ),
+    );
+    gh.factory<_i15.OrderProductAdditionCubit>(
+      () => _i15.OrderProductAdditionCubit(
+        gh<_i720.AddItemsToOrderDraftUseCase>(),
       ),
     );
     gh.factory<_i751.GenerateProductVariantsUseCase>(
@@ -1874,6 +1888,9 @@ extension GetItInjectableX on _i174.GetIt {
         sendPasswordResetEmail: gh<_i820.SendPasswordResetEmailUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
+    );
+    gh.factory<_i244.OrderItemsCounterCubit>(
+      () => _i244.OrderItemsCounterCubit(gh<_i485.GetOrderDraftUseCase>()),
     );
     gh.lazySingleton<_i904.StorageDataSource>(
       () => _i833.FirebaseStorageDataSource(gh<_i457.FirebaseStorage>()),
@@ -2750,6 +2767,16 @@ extension GetItInjectableX on _i174.GetIt {
         sessionService: gh<_i885.SessionService>(),
       ),
     );
+    gh.factory<_i287.OrderDraftBloc>(
+      () => _i287.OrderDraftBloc(
+        getOrderDraft: gh<_i485.GetOrderDraftUseCase>(),
+        startOrderDraftForCustomer:
+            gh<_i168.StartOrderDraftForCustomerUseCase>(),
+        saveOrderDraft: gh<_i1.SaveOrderDraftUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+        getProductById: gh<_i721.GetProductByIdUseCase>(),
+      ),
+    );
     gh.factory<_i186.CatalogFilterBloc>(
       () => _i186.CatalogFilterBloc(
         listCatalogProducts: gh<_i448.ListCatalogProductsUseCase>(),
@@ -2763,15 +2790,6 @@ extension GetItInjectableX on _i174.GetIt {
         saveCatalogPreferences: gh<_i36.SaveCatalogPreferencesUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
         sessionService: gh<_i885.SessionService>(),
-      ),
-    );
-    gh.factory<_i287.OrderDraftBloc>(
-      () => _i287.OrderDraftBloc(
-        getOrderDraft: gh<_i485.GetOrderDraftUseCase>(),
-        startOrderDraftForCustomer:
-            gh<_i168.StartOrderDraftForCustomerUseCase>(),
-        saveOrderDraft: gh<_i1.SaveOrderDraftUseCase>(),
-        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     return this;

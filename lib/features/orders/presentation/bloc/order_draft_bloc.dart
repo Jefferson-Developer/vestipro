@@ -10,7 +10,10 @@ import 'package:uuid/uuid.dart';
 
 import '../../../../core/analytics/analytics.dart';
 import '../../../../core/utils/utils.dart';
+import '../../../products/domain/entities/product.dart';
+import '../../../products/domain/usecases/get_product_by_id_use_case.dart';
 import '../../domain/entities/order.dart';
+import '../../domain/services/order_item_editor.dart';
 import '../../domain/usecases/get_order_draft_use_case.dart';
 import '../../domain/usecases/save_order_draft_use_case.dart';
 import '../../domain/usecases/start_order_draft_for_customer_use_case.dart';
@@ -36,6 +39,7 @@ final class OrderDraftBloc extends Bloc<OrderDraftEvent, OrderDraftState> {
     required this.startOrderDraftForCustomer,
     required this.saveOrderDraft,
     required this.analyticsService,
+    this.getProductById,
   }) : super(const OrderDraftState()) {
     on<OrderDraftStarted>(_onStarted, transformer: restartable());
     on<OrderDraftCustomerSelected>(
@@ -43,6 +47,11 @@ final class OrderDraftBloc extends Bloc<OrderDraftEvent, OrderDraftState> {
       transformer: droppable(),
     );
     on<OrderDraftNotesChanged>(_onNotesChanged, transformer: sequential());
+    on<OrderDraftItemQuantityChanged>(
+      _onItemQuantityChanged,
+      transformer: sequential(),
+    );
+    on<OrderDraftItemRemoved>(_onItemRemoved, transformer: sequential());
     on<OrderDraftAutoSaved>(_onAutoSaved, transformer: sequential());
     on<OrderDraftAutoSaveRetried>(_onAutoSaveRetried, transformer: droppable());
   }
@@ -55,6 +64,13 @@ final class OrderDraftBloc extends Bloc<OrderDraftEvent, OrderDraftState> {
   final StartOrderDraftForCustomerUseCase startOrderDraftForCustomer;
   final SaveOrderDraftUseCase saveOrderDraft;
   final AnalyticsService analyticsService;
+
+  /// Resolves the display-only `Product` name behind each item's
+  /// denormalized `productId` (TASK-097's items list) — optional, mirroring
+  /// `ProductDetailBloc.resolvePriceForVariant`'s own precedent for a
+  /// read-only lookup that degrades to raw ids instead of ever blocking the
+  /// draft screen when it is not wired.
+  final GetProductByIdUseCase? getProductById;
 
   final Uuid _uuid = const Uuid();
   Timer? _autoSaveTimer;
@@ -111,6 +127,7 @@ final class OrderDraftBloc extends Bloc<OrderDraftEvent, OrderDraftState> {
             clearFailure: true,
           ),
         );
+        await _resolveProductNames(emit, order);
       case AppFailure<Order?>(failure: final failure):
         emit(
           state.copyWith(
@@ -189,6 +206,88 @@ final class OrderDraftBloc extends Bloc<OrderDraftEvent, OrderDraftState> {
       ),
     );
     _scheduleAutoSave();
+  }
+
+  /// Edits the quantity of an item already on the draft, straight from the
+  /// items list (TASK-097) — a quantity of zero or less removes the line,
+  /// same convention [OrderItemEditor.withUpdatedQuantity] documents.
+  void _onItemQuantityChanged(
+    OrderDraftItemQuantityChanged event,
+    Emitter<OrderDraftState> emit,
+  ) {
+    final order = state.order;
+    if (order == null) return;
+
+    final updatedItems = OrderItemEditor.withUpdatedQuantity(
+      order.items,
+      itemId: event.itemId,
+      quantity: event.quantity,
+    );
+    emit(
+      state.copyWith(
+        order: order.copyWith(items: updatedItems),
+        saveStatus: OrderDraftSaveStatus.idle,
+        clearFailure: true,
+      ),
+    );
+    _scheduleAutoSave();
+  }
+
+  /// Removes an item already on the draft, straight from the items list
+  /// (TASK-097).
+  void _onItemRemoved(
+    OrderDraftItemRemoved event,
+    Emitter<OrderDraftState> emit,
+  ) {
+    final order = state.order;
+    if (order == null) return;
+
+    final updatedItems = OrderItemEditor.withRemovedItem(
+      order.items,
+      itemId: event.itemId,
+    );
+    emit(
+      state.copyWith(
+        order: order.copyWith(items: updatedItems),
+        saveStatus: OrderDraftSaveStatus.idle,
+        clearFailure: true,
+      ),
+    );
+    _scheduleAutoSave();
+  }
+
+  /// Fetches the display-only `Product` behind every item's `productId` not
+  /// already cached in [OrderDraftState.productsById] (TASK-097's items
+  /// list) — a read-only lookup that never blocks or fails the draft screen:
+  /// a product that fails to resolve simply keeps showing its raw id (see
+  /// `OrderDraftState.productNameFor`).
+  Future<void> _resolveProductNames(
+    Emitter<OrderDraftState> emit,
+    Order order,
+  ) async {
+    final getProductById = this.getProductById;
+    if (getProductById == null || order.items.isEmpty) return;
+
+    final missingProductIds = <String>{
+      for (final item in order.items)
+        if (!state.productsById.containsKey(item.productId)) item.productId,
+    };
+    if (missingProductIds.isEmpty) return;
+
+    final resolved = Map<String, Product>.of(state.productsById);
+    for (final productId in missingProductIds) {
+      final result = await getProductById(
+        organizationId: order.organizationId,
+        id: productId,
+      );
+      if (result case AppSuccess<Product>(value: final product)) {
+        resolved[productId] = product;
+      }
+    }
+    if (emit.isDone) return;
+    emit(
+      state.copyWith(productsById: Map<String, Product>.unmodifiable(resolved)),
+    );
   }
 
   void _scheduleAutoSave() {
