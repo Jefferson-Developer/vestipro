@@ -27,6 +27,7 @@ import '../features/catalog_share/catalog_share.dart';
 import '../features/invites/invites.dart';
 import '../features/onboarding/onboarding.dart';
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
+import '../features/orders/orders.dart';
 import '../features/organizations/organizations.dart';
 import '../features/products/products.dart';
 import '../features/settings/presentation/bloc/about_app_bloc.dart';
@@ -231,6 +232,17 @@ class VestiProApp extends StatelessWidget {
                       ).location,
                     ),
                   ),
+          orderDraftPageBuilder: (context, orgId, companyId, queryParameters) =>
+              OrderDraftPage(
+                organizationId: orgId,
+                companyId: companyId,
+                sellerId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                permissionService: getIt<PermissionService>(),
+                createBloc: () => getIt<OrderDraftBloc>(),
+                createCustomerPortfolioBloc: () =>
+                    getIt<CustomerPortfolioBloc>(),
+                draftId: queryParameters['draftId'],
+              ),
           catalogBrowsePageBuilder: (context, orgId, queryParameters) =>
               CatalogFilterPage(
                 organizationId: orgId,

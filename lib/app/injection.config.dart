@@ -210,6 +210,7 @@ import '../features/crm/domain/usecases/register_crm_activity_use_case.dart'
 import '../features/crm/domain/usecases/reschedule_crm_task_use_case.dart'
     as _i711;
 import '../features/crm/presentation/bloc/crm_task_list_bloc.dart' as _i634;
+import '../features/customers/customers.dart' as _i909;
 import '../features/customers/data/datasources/customer_form_draft_data_source.dart'
     as _i1036;
 import '../features/customers/data/datasources/customer_segment_data_source.dart'
@@ -471,8 +472,23 @@ import '../features/opportunities/presentation/bloc/sales_pipeline_bloc.dart'
     as _i339;
 import '../features/orders/data/mappers/order_local_mapper.dart' as _i431;
 import '../features/orders/data/mappers/order_mapper.dart' as _i169;
+import '../features/orders/data/repositories/drift_order_draft_repository.dart'
+    as _i247;
+import '../features/orders/domain/repositories/order_draft_repository.dart'
+    as _i81;
 import '../features/orders/domain/services/order_status_transition_validator.dart'
     as _i753;
+import '../features/orders/domain/usecases/ensure_customer_in_seller_portfolio_use_case.dart'
+    as _i583;
+import '../features/orders/domain/usecases/get_order_draft_use_case.dart'
+    as _i485;
+import '../features/orders/domain/usecases/resolve_order_draft_defaults_use_case.dart'
+    as _i530;
+import '../features/orders/domain/usecases/save_order_draft_use_case.dart'
+    as _i1;
+import '../features/orders/domain/usecases/start_order_draft_for_customer_use_case.dart'
+    as _i168;
+import '../features/orders/presentation/bloc/order_draft_bloc.dart' as _i287;
 import '../features/organizations/data/datasources/branch_data_source.dart'
     as _i526;
 import '../features/organizations/data/datasources/company_data_source.dart'
@@ -639,6 +655,7 @@ import '../features/pricing/presentation/cubit/price_list_item_batch_cubit.dart'
     as _i49;
 import '../features/pricing/presentation/cubit/promotional_campaign_cubit.dart'
     as _i75;
+import '../features/pricing/pricing.dart' as _i445;
 import '../features/products/data/datasources/drift_product_local_search_index_data_source.dart'
     as _i74;
 import '../features/products/data/datasources/firestore_product_remote_search_data_source.dart'
@@ -1140,6 +1157,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i795.ProductVariantRepository>(),
       ),
     );
+    gh.lazySingleton<_i81.OrderDraftRepository>(
+      () => _i247.DriftOrderDraftRepository(
+        gh<_i658.AppDatabase>(),
+        gh<_i431.OrderLocalMapper>(),
+      ),
+    );
     gh.lazySingleton<_i725.CustomerLocalMapper>(
       () => _i725.CustomerLocalMapper(gh<_i457.CustomerMapper>()),
     );
@@ -1420,6 +1443,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i932.AnalyticsService>(
       () => _i569.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
+    );
+    gh.factory<_i485.GetOrderDraftUseCase>(
+      () => _i485.GetOrderDraftUseCase(gh<_i81.OrderDraftRepository>()),
+    );
+    gh.factory<_i1.SaveOrderDraftUseCase>(
+      () => _i1.SaveOrderDraftUseCase(gh<_i81.OrderDraftRepository>()),
     );
     gh.lazySingleton<_i385.PipelineStageRepository>(
       () => _i319.SharedPreferencesPipelineStageRepository(
@@ -2358,6 +2387,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i753.AuditLogRepository>(),
       ),
     );
+    gh.factory<_i530.ResolveOrderDraftDefaultsUseCase>(
+      () => _i530.ResolveOrderDraftDefaultsUseCase(
+        gh<_i265.ListBranchesByCompanyUseCase>(),
+        gh<_i445.ResolveApplicablePriceListsUseCase>(),
+        gh<_i445.ListActivePaymentTermsUseCase>(),
+      ),
+    );
     gh.factory<_i198.ProductFormBloc>(
       () => _i198.ProductFormBloc(
         getDraft: gh<_i1021.GetProductFormDraftUseCase>(),
@@ -2638,6 +2674,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i639.FutureStockRepository>(),
       ),
     );
+    gh.factory<_i583.EnsureCustomerInSellerPortfolioUseCase>(
+      () => _i583.EnsureCustomerInSellerPortfolioUseCase(
+        gh<_i220.PortfolioVisibilityService>(),
+        gh<_i220.PortfolioAssignmentRepository>(),
+      ),
+    );
     gh.factory<_i385.GetVariantAvailabilityUseCase>(
       () => _i385.GetVariantAvailabilityUseCase(
         gh<_i766.VariantAvailabilityRepository>(),
@@ -2693,6 +2735,14 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i168.StartOrderDraftForCustomerUseCase>(
+      () => _i168.StartOrderDraftForCustomerUseCase(
+        gh<_i583.EnsureCustomerInSellerPortfolioUseCase>(),
+        gh<_i909.GetCustomerByIdUseCase>(),
+        gh<_i530.ResolveOrderDraftDefaultsUseCase>(),
+        gh<_i81.OrderDraftRepository>(),
+      ),
+    );
     gh.factory<_i318.FavoritesBloc>(
       () => _i318.FavoritesBloc(
         listFavoriteProducts: gh<_i72.ListFavoriteProductsUseCase>(),
@@ -2713,6 +2763,15 @@ extension GetItInjectableX on _i174.GetIt {
         saveCatalogPreferences: gh<_i36.SaveCatalogPreferencesUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
         sessionService: gh<_i885.SessionService>(),
+      ),
+    );
+    gh.factory<_i287.OrderDraftBloc>(
+      () => _i287.OrderDraftBloc(
+        getOrderDraft: gh<_i485.GetOrderDraftUseCase>(),
+        startOrderDraftForCustomer:
+            gh<_i168.StartOrderDraftForCustomerUseCase>(),
+        saveOrderDraft: gh<_i1.SaveOrderDraftUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     return this;

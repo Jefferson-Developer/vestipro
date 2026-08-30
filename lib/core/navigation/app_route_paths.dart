@@ -183,6 +183,39 @@ final class CustomerPortfolioRoute extends AppRoute {
   }
 }
 
+/// "Novo pedido" (order draft) route (TASK-096, EPIC-13), scoped by
+/// Organization and Company. Protected in [AppRouter] by `order.create`.
+///
+/// [draftId] is carried as a query parameter (not a path segment) so a
+/// brand-new draft (no id yet — the seller has not picked a customer) and a
+/// resumed one share the same route, same precedent
+/// [CustomerPortfolioRoute] already sets for optional list state.
+final class OrderDraftRoute extends AppRoute {
+  const OrderDraftRoute({
+    required this.orgId,
+    required this.companyId,
+    this.draftId,
+  });
+
+  final String orgId;
+  final String companyId;
+  final String? draftId;
+
+  static const name = 'orderDraft';
+  static const pathPattern = '/org/:orgId/companies/:companyId/orders/new';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/companies/$companyId/orders/new';
+    final id = draftId?.trim();
+    if (id == null || id.isEmpty) return path;
+    return Uri(
+      path: path,
+      queryParameters: <String, String>{'draftId': id},
+    ).toString();
+  }
+}
+
 /// Customer 360 detail route (TASK-052), scoped by Organization and protected
 /// in [AppRouter] by `customer.view`.
 final class CustomerDetailRoute extends AppRoute {

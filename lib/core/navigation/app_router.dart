@@ -33,6 +33,7 @@ class AppRouter {
     this.customerPortfolioPageBuilder,
     this.customerDetailPageBuilder,
     this.catalogBrowsePageBuilder,
+    this.orderDraftPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
     AuthorizationGuard? authorizationGuard,
@@ -64,6 +65,19 @@ class AppRouter {
   customerPortfolioPageBuilder;
   final Widget Function(BuildContext context, String orgId, String customerId)?
   customerDetailPageBuilder;
+
+  /// Builds the "novo pedido" screen (TASK-096), given `orgId`/`companyId`
+  /// and the raw `queryParameters` of [OrderDraftRoute] — the caller decides
+  /// how to turn `draftId` into the resume flow, same "router hands raw
+  /// params, page owns parsing" contract [customerPortfolioPageBuilder]
+  /// already sets.
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  orderDraftPageBuilder;
 
   /// Builds the catalog's filterable browsing screen (TASK-082), given
   /// `orgId` and the raw `queryParameters` of [CatalogBrowseRoute] — the
@@ -197,6 +211,25 @@ class AppRouter {
             context,
             state.pathParameters['orgId']!,
             state.pathParameters['customerId']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: OrderDraftRoute.pathPattern,
+        name: OrderDraftRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.orderCreate,
+        ),
+        builder: (context, state) {
+          final builder = orderDraftPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
           );
         },
       ),
