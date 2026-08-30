@@ -200,7 +200,7 @@ Realizado nesta rodada (ver hash abaixo).
 Não autorizado nesta rodada.
 
 ## Hash do commit
-Ver saída de `git log -1` após o commit.
+`11b644c`
 
 ## Branch
 `main`
