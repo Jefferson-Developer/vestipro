@@ -31,6 +31,7 @@ import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import '../features/orders/orders.dart';
 import '../features/organizations/organizations.dart';
 import '../features/products/products.dart';
+import '../core/sync/sync.dart';
 import '../features/settings/presentation/bloc/about_app_bloc.dart';
 import '../features/settings/settings.dart';
 import '../features/users/users.dart';
@@ -343,6 +344,24 @@ class VestiProApp extends StatelessWidget {
                 origin: queryParameters['origin'] ?? 'grid',
                 createProductDetailBloc: () => getIt<ProductDetailBloc>(),
                 createAdditionCubit: () => getIt<OrderProductAdditionCubit>(),
+              ),
+          conflictListPageBuilder: (context, orgId) => ConflictListPage(
+            organizationId: orgId,
+            createCubit: () => getIt<ConflictListCubit>(),
+            onConflictSelected: (conflict) => context.go(
+              ConflictDetailRoute(
+                orgId: orgId,
+                conflictId: conflict.id,
+              ).location,
+            ),
+          ),
+          conflictDetailPageBuilder: (context, orgId, conflictId) =>
+              ConflictDetailPage(
+                conflictId: conflictId,
+                resolvedBy: getIt<AuthRepository>().currentUser?.uid ?? '',
+                createCubit: () => getIt<ConflictResolutionCubit>(),
+                onResolved: (_) =>
+                    context.go(ConflictListRoute(orgId: orgId).location),
               ),
           catalogBrowsePageBuilder: (context, orgId, queryParameters) =>
               CatalogFilterPage(

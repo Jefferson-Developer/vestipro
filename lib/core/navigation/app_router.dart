@@ -39,6 +39,8 @@ class AppRouter {
     this.orderDraftPageBuilder,
     this.orderProductCatalogPageBuilder,
     this.orderProductDetailPageBuilder,
+    this.conflictListPageBuilder,
+    this.conflictDetailPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
     AuthorizationGuard? authorizationGuard,
@@ -134,6 +136,16 @@ class AppRouter {
     Map<String, String> queryParameters,
   )?
   orderProductDetailPageBuilder;
+
+  /// Builds the pending-conflicts list screen (TASK-111), given `orgId` from
+  /// [ConflictListRoute].
+  final Widget Function(BuildContext context, String orgId)?
+  conflictListPageBuilder;
+
+  /// Builds the conflict comparison/resolution screen (TASK-111), given
+  /// `orgId`/`conflictId` from [ConflictDetailRoute].
+  final Widget Function(BuildContext context, String orgId, String conflictId)?
+  conflictDetailPageBuilder;
 
   /// Builds the catalog's filterable browsing screen (TASK-082), given
   /// `orgId` and the raw `queryParameters` of [CatalogBrowseRoute] — the
@@ -382,6 +394,28 @@ class AppRouter {
             state.pathParameters['draftId']!,
             state.pathParameters['productId']!,
             state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: ConflictListRoute.pathPattern,
+        name: ConflictListRoute.name,
+        builder: (context, state) {
+          final builder = conflictListPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(context, state.pathParameters['orgId']!);
+        },
+      ),
+      GoRoute(
+        path: ConflictDetailRoute.pathPattern,
+        name: ConflictDetailRoute.name,
+        builder: (context, state) {
+          final builder = conflictDetailPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['conflictId']!,
           );
         },
       ),

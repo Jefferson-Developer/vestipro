@@ -140,6 +140,30 @@ final class DriftOutboxRepository implements OutboxRepository {
   }
 
   @override
+  Future<AppResult<void>> requeue({
+    required String id,
+    required Map<String, dynamic> payload,
+    required DateTime attemptedAt,
+  }) async {
+    try {
+      await _database.requeueOutboxOperation(
+        id: id,
+        payload: jsonEncode(payload),
+        attemptedAt: attemptedAt,
+      );
+      return const AppSuccess<void>(null);
+    } catch (exception) {
+      return AppFailure<void>(
+        UnexpectedFailure(
+          'Unexpected error requeuing Outbox operation.',
+          code: 'outbox_requeue_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
+  @override
   Future<AppResult<List<OutboxOperation>>> listByStatus({
     required String organizationId,
     required List<OutboxStatus> statuses,

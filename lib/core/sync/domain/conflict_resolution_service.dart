@@ -1,6 +1,8 @@
 import 'package:injectable/injectable.dart';
 import 'package:uuid/uuid.dart';
 
+import '../../errors/errors.dart';
+import '../../utils/utils.dart';
 import 'conflict_field_merge.dart';
 import 'conflict_policy_catalog.dart';
 import 'entities/conflict_audit_entry.dart';
@@ -333,6 +335,7 @@ final class ConflictResolutionService {
     Set<String> discardedFields = const <String>{},
     Set<String> conflictingFields = const <String>{},
     String? conflictRecordId,
+    String actor = systemActor,
   }) {
     return _conflictAuditLogRepository.record(
       ConflictAuditEntry(
@@ -343,13 +346,84 @@ final class ConflictResolutionService {
         entityId: entityId,
         policy: policy,
         outcome: outcome,
-        actor: systemActor,
+        actor: actor,
         performedAt: performedAt,
         discardedFields: discardedFields.toList(growable: false),
         conflictingFields: conflictingFields.toList(growable: false),
         conflictRecordId: conflictRecordId,
       ),
     );
+  }
+
+  /// Applies a human's explicit decision for a previously blocked
+  /// [record] (TASK-111: "Manter minha versão" / "Usar versão do servidor" /
+  /// "Mesclar campo a campo") — the single entry point every conflict
+  /// screen/Cubit must call, so a resolution is never applied to the
+  /// Outbox/[ConflictRecord] without also being audited, same centralization
+  /// rule as [resolve] itself.
+  ///
+  /// [resolvedData] is the full corrected snapshot the caller decided on —
+  /// [record.localSnapshot] for "manter local", [record.remoteSnapshot] for
+  /// "usar remota", or a caller-computed field-by-field merge. This method
+  /// never inspects/validates *which* fields [resolvedData] kept from which
+  /// side: that choice is the UI's own responsibility (with
+  /// [record.conflictingFields] telling it exactly what was in dispute), and
+  /// is recorded for audit only as [record.conflictingFields] on the
+  /// resulting [ConflictAuditEntry], not field-by-field provenance.
+  ///
+  /// Fails with [AppFailure] — without touching the Outbox/audit log —
+  /// when [record] is not currently [ConflictRecordStatus.conflict], so a
+  /// double submission (e.g. a duplicate tap before the UI updates) can
+  /// never resolve/requeue the same operation twice.
+  Future<AppResult<ConflictRecord>> resolveManually({
+    required ConflictRecord record,
+    required Map<String, Object?> resolvedData,
+    required String resolvedBy,
+    DateTime? now,
+  }) async {
+    if (record.status != ConflictRecordStatus.conflict) {
+      return AppFailure<ConflictRecord>(
+        ConflictFailure(
+          'Este conflito já foi resolvido anteriormente.',
+          code: 'conflict_record_already_resolved',
+        ),
+      );
+    }
+
+    final resolvedNow = now ?? DateTime.now().toUtc();
+
+    final resolveResult = await _conflictRecordRepository.resolve(
+      id: record.id,
+      resolvedBy: resolvedBy,
+      resolvedAt: resolvedNow,
+    );
+    if (resolveResult case AppFailure<ConflictRecord>()) {
+      return resolveResult;
+    }
+
+    final requeueResult = await _outboxRepository.requeue(
+      id: record.outboxOperationId,
+      payload: resolvedData,
+      attemptedAt: resolvedNow,
+    );
+    if (requeueResult case AppFailure<void>(:final failure)) {
+      return AppFailure<ConflictRecord>(failure);
+    }
+
+    await _audit(
+      organizationId: record.organizationId,
+      companyId: record.companyId,
+      entityType: record.entityType,
+      entityId: record.entityId,
+      policy: record.policy,
+      outcome: ConflictAuditOutcome.resolvedManual,
+      performedAt: resolvedNow,
+      conflictingFields: record.conflictingFields.toSet(),
+      conflictRecordId: record.id,
+      actor: resolvedBy,
+    );
+
+    return resolveResult;
   }
 
   /// Business fields present in either [local]/[remote] whose values differ

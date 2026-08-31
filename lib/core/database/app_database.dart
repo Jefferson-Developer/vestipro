@@ -1313,6 +1313,26 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  /// Moves the Outbox row [id] from `conflict` back to `pending`, replacing
+  /// its [payload] with the corrected data a human just chose (TASK-111) and
+  /// clearing its previous error/attempt count — the sync engine (TASK-109)
+  /// then retries it exactly like a brand-new operation.
+  Future<void> requeueOutboxOperation({
+    required String id,
+    required String payload,
+    required DateTime attemptedAt,
+  }) {
+    return (update(outboxTable)..where((row) => row.id.equals(id))).write(
+      OutboxTableCompanion(
+        status: const Value('pending'),
+        payload: Value(payload),
+        attemptCount: const Value(0),
+        lastError: const Value(null),
+        lastAttemptAt: Value(attemptedAt),
+      ),
+    );
+  }
+
   /// A single Outbox row by [id], or `null` if it no longer exists.
   Future<OutboxTableData?> getOutboxOperationById(String id) {
     return (select(
@@ -1514,6 +1534,30 @@ class AppDatabase extends _$AppDatabase {
     return (select(
       conflictRecordsTable,
     )..where((row) => row.id.equals(id))).getSingleOrNull();
+  }
+
+  /// Marks conflict record [id] `status = 'resolved'`, recording
+  /// [resolvedAt]/[resolvedBy] (TASK-111) — the row is kept, never removed,
+  /// so it stays visible in a future resolved-conflicts history.
+  Future<ConflictRecordsTableData> resolveConflictRecord({
+    required String id,
+    required String resolvedBy,
+    required DateTime resolvedAt,
+  }) {
+    return transaction(() async {
+      await (update(
+        conflictRecordsTable,
+      )..where((row) => row.id.equals(id))).write(
+        ConflictRecordsTableCompanion(
+          status: const Value('resolved'),
+          resolvedAt: Value(resolvedAt),
+          resolvedBy: Value(resolvedBy),
+        ),
+      );
+      return (select(
+        conflictRecordsTable,
+      )..where((row) => row.id.equals(id))).getSingle();
+    });
   }
 
   /// Appends a new conflict resolution audit entry — never updated/removed

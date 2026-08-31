@@ -85,6 +85,30 @@ final class DriftConflictRecordRepository implements ConflictRecordRepository {
     }
   }
 
+  @override
+  Future<AppResult<ConflictRecord>> resolve({
+    required String id,
+    required String resolvedBy,
+    required DateTime resolvedAt,
+  }) async {
+    try {
+      final row = await _database.resolveConflictRecord(
+        id: id,
+        resolvedBy: resolvedBy,
+        resolvedAt: resolvedAt,
+      );
+      return AppSuccess<ConflictRecord>(_toEntity(row));
+    } catch (exception) {
+      return AppFailure<ConflictRecord>(
+        UnexpectedFailure(
+          'Unexpected error resolving conflict record.',
+          code: 'conflict_record_resolve_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
   ConflictRecord _toEntity(ConflictRecordsTableData row) {
     final entityType = OutboxEntityTypeCode.fromCode(row.entityType);
     if (entityType == null) {

@@ -221,7 +221,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-108 — Implementar Outbox](TASK-108-implementar-outbox.md) — Flutter Senior
 - [x] [TASK-109 — Implementar motor de sincronização incremental](TASK-109-implementar-motor-de-sincronizacao.md) — Flutter Senior
 - [x] [TASK-110 — Implementar resolução de conflitos](TASK-110-implementar-resolucao-de-conflitos.md) — Flutter Senior
-- [ ] [TASK-111 — Implementar tela de conflito](TASK-111-implementar-tela-de-conflito.md) — Flutter Senior + Front-end
+- [x] [TASK-111 — Implementar tela de conflito](TASK-111-implementar-tela-de-conflito.md) — Flutter Senior + Front-end
 - [ ] [TASK-112 — Implementar central de sincronização](TASK-112-implementar-central-de-sincronizacao.md) — Flutter Senior + Front-end
 - [ ] [TASK-113 — Implementar indicador de conectividade](TASK-113-implementar-indicador-de-conectividade.md) — Flutter Senior + Front-end
 
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 110 / 220 tasks concluídas.
+**Progresso:** 111 / 220 tasks concluídas.

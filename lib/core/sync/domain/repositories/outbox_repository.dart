@@ -65,6 +65,23 @@ abstract interface class OutboxRepository {
     required DateTime attemptedAt,
   });
 
+  /// Moves operation [id] from `conflict` back to `pending`, replacing its
+  /// [payload] with the corrected data a human just chose (TASK-111's
+  /// "Manter minha versão"/"Usar versão do servidor"/"Mesclar campo a campo"
+  /// actions) and clearing its previous error/attempt count so it is
+  /// retried by the sync engine (TASK-109) exactly like a brand-new
+  /// operation — never counted against the original attempt/backoff that
+  /// led to the conflict in the first place.
+  ///
+  /// Only [ConflictResolutionService.resolveManually] calls this — no
+  /// repository/handler/UI may requeue an Outbox operation with data that
+  /// was not the outcome of an explicit, audited conflict resolution.
+  Future<AppResult<void>> requeue({
+    required String id,
+    required Map<String, dynamic> payload,
+    required DateTime attemptedAt,
+  });
+
   /// Every operation for [organizationId] whose status is one of [statuses],
   /// oldest-enqueued first.
   Future<AppResult<List<OutboxOperation>>> listByStatus({

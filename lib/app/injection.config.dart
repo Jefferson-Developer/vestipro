@@ -88,6 +88,9 @@ import '../core/sync/domain/sync_pull_source.dart' as _i417;
 import '../core/sync/domain/sync_push_handler.dart' as _i17;
 import '../core/sync/domain/sync_retry_policy.dart' as _i158;
 import '../core/sync/domain/sync_scheduler.dart' as _i970;
+import '../core/sync/presentation/cubit/conflict_list_cubit.dart' as _i189;
+import '../core/sync/presentation/cubit/conflict_resolution_cubit.dart'
+    as _i717;
 import '../core/sync/presentation/cubit/outbox_watcher_cubit.dart' as _i866;
 import '../features/audit_log/data/datasources/audit_log_data_source.dart'
     as _i432;
@@ -1585,6 +1588,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i8.ProductColorSimilarityService>(),
       ),
     );
+    gh.factory<_i189.ConflictListCubit>(
+      () => _i189.ConflictListCubit(gh<_i814.ConflictRecordRepository>()),
+    );
     gh.factory<_i531.ValidateDiscountUseCase>(
       () => _i531.ValidateDiscountUseCase(gh<_i31.DiscountPolicyRepository>()),
     );
@@ -2142,6 +2148,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i103.LoadInitialPriceListOfflineDataUseCase(
         gh<_i455.PriceListRepository>(),
         gh<_i661.PriceListLocalStoreRepository>(),
+      ),
+    );
+    gh.factory<_i717.ConflictResolutionCubit>(
+      () => _i717.ConflictResolutionCubit(
+        gh<_i814.ConflictRecordRepository>(),
+        gh<_i746.ConflictResolutionService>(),
       ),
     );
     gh.lazySingleton<_i492.OrderPricingDataSource>(

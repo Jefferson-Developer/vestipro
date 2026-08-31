@@ -349,6 +349,39 @@ final class OrderProductDetailRoute extends AppRoute {
   }
 }
 
+/// Lista de conflitos de sincronização pendentes (TASK-111, EPIC-14),
+/// scoped by Organization only — a [ConflictRecord] carries `companyId` as
+/// optional metadata, never as a required scope, so this route (unlike
+/// [OrderListRoute]/[CustomerPortfolioRoute]) is not nested under
+/// `companies/:companyId`.
+final class ConflictListRoute extends AppRoute {
+  const ConflictListRoute({required this.orgId});
+
+  final String orgId;
+
+  static const name = 'conflictList';
+  static const pathPattern = '/org/:orgId/sync/conflicts';
+
+  @override
+  String get location => '/org/$orgId/sync/conflicts';
+}
+
+/// Conflict detail/resolution route (TASK-111, EPIC-14) — the "Resolver"
+/// destination from [ConflictListRoute], scoped by Organization and the
+/// individual `ConflictRecord.id`.
+final class ConflictDetailRoute extends AppRoute {
+  const ConflictDetailRoute({required this.orgId, required this.conflictId});
+
+  final String orgId;
+  final String conflictId;
+
+  static const name = 'conflictDetail';
+  static const pathPattern = '/org/:orgId/sync/conflicts/:conflictId';
+
+  @override
+  String get location => '/org/$orgId/sync/conflicts/$conflictId';
+}
+
 /// Customer 360 detail route (TASK-052), scoped by Organization and protected
 /// in [AppRouter] by `customer.view`.
 final class CustomerDetailRoute extends AppRoute {
