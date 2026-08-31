@@ -487,6 +487,8 @@ import '../features/orders/domain/repositories/order_pricing_repository.dart'
     as _i183;
 import '../features/orders/domain/services/order_status_transition_validator.dart'
     as _i753;
+import '../features/orders/domain/services/order_submission_validator.dart'
+    as _i745;
 import '../features/orders/domain/usecases/add_items_to_order_draft_use_case.dart'
     as _i720;
 import '../features/orders/domain/usecases/ensure_customer_in_seller_portfolio_use_case.dart'
@@ -495,6 +497,8 @@ import '../features/orders/domain/usecases/get_order_draft_use_case.dart'
     as _i485;
 import '../features/orders/domain/usecases/get_order_pricing_summary_use_case.dart'
     as _i305;
+import '../features/orders/domain/usecases/get_order_submission_context_use_case.dart'
+    as _i1025;
 import '../features/orders/domain/usecases/resolve_order_draft_defaults_use_case.dart'
     as _i530;
 import '../features/orders/domain/usecases/save_order_draft_use_case.dart'
@@ -510,6 +514,8 @@ import '../features/orders/presentation/bloc/order_pricing_summary_cubit.dart'
     as _i765;
 import '../features/orders/presentation/bloc/order_product_addition_cubit.dart'
     as _i15;
+import '../features/orders/presentation/bloc/order_submission_validation_cubit.dart'
+    as _i753;
 import '../features/organizations/data/datasources/branch_data_source.dart'
     as _i526;
 import '../features/organizations/data/datasources/company_data_source.dart'
@@ -1008,6 +1014,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i169.OrderMapper>(() => const _i169.OrderMapper());
     gh.lazySingleton<_i753.OrderStatusTransitionValidator>(
       () => const _i753.OrderStatusTransitionValidator(),
+    );
+    gh.lazySingleton<_i745.OrderSubmissionValidator>(
+      () => const _i745.OrderSubmissionValidator(),
     );
     gh.lazySingleton<_i964.BranchMapper>(() => const _i964.BranchMapper());
     gh.lazySingleton<_i642.CompanyMapper>(() => const _i642.CompanyMapper());
@@ -2783,6 +2792,14 @@ extension GetItInjectableX on _i174.GetIt {
         getAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
       ),
     );
+    gh.factory<_i1025.GetOrderSubmissionContextUseCase>(
+      () => _i1025.GetOrderSubmissionContextUseCase(
+        gh<_i356.GetCustomerByIdUseCase>(),
+        gh<_i455.PriceListRepository>(),
+        gh<_i358.PaymentTermRepository>(),
+        gh<_i385.GetVariantAvailabilityUseCase>(),
+      ),
+    );
     gh.factory<_i331.ProductGridBloc>(
       () => _i331.ProductGridBloc(
         listCatalogProducts: gh<_i448.ListCatalogProductsUseCase>(),
@@ -2828,6 +2845,12 @@ extension GetItInjectableX on _i174.GetIt {
         saveCatalogPreferences: gh<_i36.SaveCatalogPreferencesUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
         sessionService: gh<_i885.SessionService>(),
+      ),
+    );
+    gh.factory<_i753.OrderSubmissionValidationCubit>(
+      () => _i753.OrderSubmissionValidationCubit(
+        gh<_i1025.GetOrderSubmissionContextUseCase>(),
+        gh<_i745.OrderSubmissionValidator>(),
       ),
     );
     gh.factory<_i287.OrderDraftBloc>(

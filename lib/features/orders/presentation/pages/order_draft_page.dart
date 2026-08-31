@@ -1,3 +1,5 @@
+import 'dart:async' show Timer, unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
@@ -9,13 +11,19 @@ import '../../../customers/customers.dart';
 import '../../../products/domain/entities/product.dart';
 import '../../domain/entities/order.dart';
 import '../../domain/entities/order_item.dart';
+import '../../domain/entities/order_pricing_summary.dart';
+import '../../domain/entities/order_submission_issue.dart';
 import '../bloc/order_draft_bloc.dart';
 import '../bloc/order_draft_event.dart';
 import '../bloc/order_draft_state.dart';
 import '../bloc/order_items_grid_cubit.dart';
 import '../bloc/order_pricing_summary_cubit.dart';
+import '../bloc/order_pricing_summary_state.dart';
+import '../bloc/order_submission_validation_cubit.dart';
+import '../bloc/order_submission_validation_state.dart';
 import '../widgets/order_items_grid.dart';
 import '../widgets/order_pricing_summary_section.dart';
+import '../widgets/order_submission_pendencies_panel.dart';
 
 /// "Novo pedido" screen (EPIC-13, TASK-096/TASK-097/TASK-099): seller picks a
 /// customer from their carteira, the resulting `Order` draft is created and
@@ -37,8 +45,10 @@ class OrderDraftPage extends StatelessWidget {
     required this.createCustomerPortfolioBloc,
     required this.createOrderItemsGridCubit,
     required this.createOrderPricingSummaryCubit,
+    required this.createOrderSubmissionValidationCubit,
     this.draftId,
     this.onContinueToProducts,
+    this.onSubmitOrder,
     super.key,
   });
 
@@ -61,6 +71,13 @@ class OrderDraftPage extends StatelessWidget {
   /// build, same factory-per-use convention as [createOrderItemsGridCubit].
   final OrderPricingSummaryCubit Function() createOrderPricingSummaryCubit;
 
+  /// Builds the single `OrderSubmissionValidationCubit` behind the
+  /// "Antes de enviar, resolva:" pendencies panel and the "Enviar pedido"
+  /// CTA gating (TASK-100) — one fresh instance per `OrderDraftPage` build,
+  /// same factory-per-use convention as [createOrderPricingSummaryCubit].
+  final OrderSubmissionValidationCubit Function()
+  createOrderSubmissionValidationCubit;
+
   /// When provided, resumes that exact draft instead of starting from the
   /// customer-picker step.
   final String? draftId;
@@ -73,6 +90,16 @@ class OrderDraftPage extends StatelessWidget {
   /// in-memory state, so as soon as the returned future completes this page
   /// re-dispatches `OrderDraftStarted` to reload them.
   final Future<void> Function(Order order)? onContinueToProducts;
+
+  /// Called once the seller taps "Enviar pedido" with the ready `Order`
+  /// draft — only ever enabled once `OrderSubmissionValidationCubit` reports
+  /// no blocking pendency left (TASK-100). The actual submission (idempotent
+  /// Cloud Function, unique order number, status trail) is TASK-101's own
+  /// scope: leaving this `null` here (e.g. before TASK-101 wires it) simply
+  /// keeps "Enviar pedido" disabled regardless of validation, same
+  /// `null`-means-"not wired yet" precedent [onContinueToProducts] already
+  /// sets for this screen.
+  final Future<void> Function(Order order)? onSubmitOrder;
 
   @override
   Widget build(BuildContext context) {
@@ -101,7 +128,10 @@ class OrderDraftPage extends StatelessWidget {
             createCustomerPortfolioBloc: createCustomerPortfolioBloc,
             createOrderItemsGridCubit: createOrderItemsGridCubit,
             createOrderPricingSummaryCubit: createOrderPricingSummaryCubit,
+            createOrderSubmissionValidationCubit:
+                createOrderSubmissionValidationCubit,
             onContinueToProducts: onContinueToProducts,
+            onSubmitOrder: onSubmitOrder,
           ),
         );
       },
@@ -118,7 +148,9 @@ class _OrderDraftView extends StatelessWidget {
     required this.createCustomerPortfolioBloc,
     required this.createOrderItemsGridCubit,
     required this.createOrderPricingSummaryCubit,
+    required this.createOrderSubmissionValidationCubit,
     this.onContinueToProducts,
+    this.onSubmitOrder,
   });
 
   final String organizationId;
@@ -128,7 +160,10 @@ class _OrderDraftView extends StatelessWidget {
   final CustomerPortfolioBloc Function() createCustomerPortfolioBloc;
   final OrderItemsGridCubit Function() createOrderItemsGridCubit;
   final OrderPricingSummaryCubit Function() createOrderPricingSummaryCubit;
+  final OrderSubmissionValidationCubit Function()
+  createOrderSubmissionValidationCubit;
   final Future<void> Function(Order order)? onContinueToProducts;
+  final Future<void> Function(Order order)? onSubmitOrder;
 
   @override
   Widget build(BuildContext context) {
@@ -198,7 +233,10 @@ class _OrderDraftView extends StatelessWidget {
           organizationId: organizationId,
           createOrderItemsGridCubit: createOrderItemsGridCubit,
           createOrderPricingSummaryCubit: createOrderPricingSummaryCubit,
+          createOrderSubmissionValidationCubit:
+              createOrderSubmissionValidationCubit,
           onContinueToProducts: onContinueToProducts,
+          onSubmitOrder: onSubmitOrder,
         );
       case OrderDraftLoadStatus.awaitingCustomer:
         // Handled by `_OrderDraftView.build` itself before reaching here.
@@ -213,21 +251,48 @@ class _OrderDraftSummary extends StatefulWidget {
     required this.organizationId,
     required this.createOrderItemsGridCubit,
     required this.createOrderPricingSummaryCubit,
+    required this.createOrderSubmissionValidationCubit,
     this.onContinueToProducts,
+    this.onSubmitOrder,
   });
 
   final OrderDraftState state;
   final String organizationId;
   final OrderItemsGridCubit Function() createOrderItemsGridCubit;
   final OrderPricingSummaryCubit Function() createOrderPricingSummaryCubit;
+  final OrderSubmissionValidationCubit Function()
+  createOrderSubmissionValidationCubit;
   final Future<void> Function(Order order)? onContinueToProducts;
+  final Future<void> Function(Order order)? onSubmitOrder;
 
   @override
   State<_OrderDraftSummary> createState() => _OrderDraftSummaryState();
 }
 
 class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
+  /// How long a validation re-evaluation waits before running, mirroring
+  /// `OrderPricingSummarySection._recalculateDebounce`'s own token-based
+  /// debounce — a seller typing through several grid cells in a row
+  /// re-evaluates pendencies once, not once per keystroke.
+  static const _validationDebounce = Duration(milliseconds: 500);
+
   late final TextEditingController _notesController;
+  late final OrderSubmissionValidationCubit _submissionValidationCubit;
+  Timer? _validationDebounceTimer;
+
+  /// The last `OrderPricingSummary` `OrderPricingSummarySection` resolved for
+  /// this draft (`null` while recalculating/offline/unresolved) — reused for
+  /// [_submissionValidationCubit]'s own desconto/permissão checks instead of
+  /// triggering a second `calculatePricing` call for the same draft (see
+  /// `OrderPricingSummarySection.onStateChanged`'s own docs).
+  OrderPricingSummary? _lastPricingSummary;
+
+  /// Lets a pendency in the panel scroll the seller straight to the part of
+  /// the order that needs the fix (TASK-100's own "leva diretamente ao ponto
+  /// do pedido" requirement) instead of only naming it in text.
+  final GlobalKey _orderSummaryCardKey = GlobalKey();
+  final GlobalKey _itemsSectionKey = GlobalKey();
+  final GlobalKey _pricingSummaryKey = GlobalKey();
 
   @override
   void initState() {
@@ -235,6 +300,8 @@ class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
     _notesController = TextEditingController(
       text: widget.state.order?.notes ?? '',
     );
+    _submissionValidationCubit = widget.createOrderSubmissionValidationCubit();
+    _scheduleValidation();
   }
 
   @override
@@ -244,10 +311,77 @@ class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
     if (_notesController.text != notes) {
       _notesController.text = notes;
     }
+    final previousOrder = oldWidget.state.order;
+    final currentOrder = widget.state.order;
+    if (currentOrder != null &&
+        _validationRelevantFieldsChanged(previousOrder, currentOrder)) {
+      _scheduleValidation();
+    }
+  }
+
+  bool _validationRelevantFieldsChanged(Order? previous, Order current) {
+    if (previous == null) return true;
+    if (previous.customerId != current.customerId ||
+        previous.priceListId != current.priceListId ||
+        previous.paymentTermId != current.paymentTermId ||
+        previous.items.length != current.items.length) {
+      return true;
+    }
+    for (var index = 0; index < current.items.length; index++) {
+      final previousItem = previous.items[index];
+      final currentItem = current.items[index];
+      if (previousItem.variantId != currentItem.variantId ||
+          previousItem.quantity != currentItem.quantity) {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  void _scheduleValidation() {
+    _validationDebounceTimer?.cancel();
+    _validationDebounceTimer = Timer(_validationDebounce, () {
+      final order = widget.state.order;
+      if (order == null) return;
+      unawaited(
+        _submissionValidationCubit.evaluate(
+          order: order,
+          pricingSummary: _lastPricingSummary,
+          productNamesById: <String, String>{
+            for (final entry in widget.state.productsById.entries)
+              entry.key: entry.value.name,
+          },
+        ),
+      );
+    });
+  }
+
+  void _onPricingSummaryStateChanged(OrderPricingSummaryState state) {
+    _lastPricingSummary = state.summary;
+    _scheduleValidation();
+  }
+
+  void _scrollToTarget(OrderSubmissionIssueTarget target) {
+    final key = switch (target) {
+      OrderSubmissionIssueTarget.orderSummary => _orderSummaryCardKey,
+      OrderSubmissionIssueTarget.items => _itemsSectionKey,
+      OrderSubmissionIssueTarget.pricingSummary => _pricingSummaryKey,
+    };
+    final targetContext = key.currentContext;
+    if (targetContext == null) return;
+    unawaited(
+      Scrollable.ensureVisible(
+        targetContext,
+        duration: const Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
+      ),
+    );
   }
 
   @override
   void dispose() {
+    _validationDebounceTimer?.cancel();
+    unawaited(_submissionValidationCubit.close());
     _notesController.dispose();
     super.dispose();
   }
@@ -259,75 +393,104 @@ class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
     final defaults = widget.state.defaults;
     final colors = context.colors;
 
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppSpacing.spacing16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.stretch,
-        children: <Widget>[
-          Text('Resumo do pedido', style: AppTypography.titleLarge),
-          const SizedBox(height: AppSpacing.spacing16),
-          Container(
-            padding: const EdgeInsets.all(AppSpacing.spacing16),
-            decoration: BoxDecoration(
-              color: colors.surface,
-              borderRadius: BorderRadius.circular(AppRadius.radius8),
-              border: Border.all(color: colors.outline.withValues(alpha: 0.22)),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: <Widget>[
-                _SummaryRow(label: 'Cliente', value: order.customerId),
-                _SummaryRow(
-                  label: 'Unidade',
-                  value: defaults?.branch.name ?? order.branchId,
-                ),
-                _SummaryRow(
-                  label: 'Tabela de preço',
-                  value: defaults?.priceList.name ?? order.priceListId,
-                ),
-                _SummaryRow(
-                  label: 'Condição de pagamento',
-                  value: defaults?.paymentTerm.name ?? order.paymentTermId,
-                ),
-              ],
-            ),
-          ),
-          const SizedBox(height: AppSpacing.spacing16),
-          AppTextField(
-            controller: _notesController,
-            label: 'Observação',
-            hintText: 'Observações do pedido (opcional)',
-            semanticLabel: 'Observação do pedido',
-            maxLines: 3,
-            onChanged: (value) => context.read<OrderDraftBloc>().add(
-              OrderDraftNotesChanged(value),
-            ),
-          ),
-          const SizedBox(height: AppSpacing.spacing8),
-          _AutoSaveIndicator(state: widget.state),
-          const SizedBox(height: AppSpacing.spacing24),
-          AppButton(
-            label: 'Adicionar produtos',
-            leadingIcon: Icons.add_shopping_cart_outlined,
-            onPressed: widget.onContinueToProducts == null
-                ? null
-                : () => _continueToProducts(context, order),
-          ),
-          const SizedBox(height: AppSpacing.spacing24),
-          _OrderItemsSection(
-            state: widget.state,
-            organizationId: widget.organizationId,
-            createOrderItemsGridCubit: widget.createOrderItemsGridCubit,
-          ),
-          if (order.items.isNotEmpty) ...<Widget>[
+    return BlocProvider<OrderSubmissionValidationCubit>.value(
+      value: _submissionValidationCubit,
+      child: SingleChildScrollView(
+        padding: const EdgeInsets.all(AppSpacing.spacing16),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.stretch,
+          children: <Widget>[
+            Text('Resumo do pedido', style: AppTypography.titleLarge),
             const SizedBox(height: AppSpacing.spacing16),
-            OrderPricingSummarySection(
-              key: ValueKey('order_pricing_summary_${order.id}'),
-              order: order,
-              createCubit: widget.createOrderPricingSummaryCubit,
+            Container(
+              key: _orderSummaryCardKey,
+              padding: const EdgeInsets.all(AppSpacing.spacing16),
+              decoration: BoxDecoration(
+                color: colors.surface,
+                borderRadius: BorderRadius.circular(AppRadius.radius8),
+                border: Border.all(
+                  color: colors.outline.withValues(alpha: 0.22),
+                ),
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: <Widget>[
+                  _SummaryRow(label: 'Cliente', value: order.customerId),
+                  _SummaryRow(
+                    label: 'Unidade',
+                    value: defaults?.branch.name ?? order.branchId,
+                  ),
+                  _SummaryRow(
+                    label: 'Tabela de preço',
+                    value: defaults?.priceList.name ?? order.priceListId,
+                  ),
+                  _SummaryRow(
+                    label: 'Condição de pagamento',
+                    value: defaults?.paymentTerm.name ?? order.paymentTermId,
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: AppSpacing.spacing16),
+            AppTextField(
+              controller: _notesController,
+              label: 'Observação',
+              hintText: 'Observações do pedido (opcional)',
+              semanticLabel: 'Observação do pedido',
+              maxLines: 3,
+              onChanged: (value) => context.read<OrderDraftBloc>().add(
+                OrderDraftNotesChanged(value),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.spacing8),
+            _AutoSaveIndicator(state: widget.state),
+            const SizedBox(height: AppSpacing.spacing24),
+            AppButton(
+              label: 'Adicionar produtos',
+              leadingIcon: Icons.add_shopping_cart_outlined,
+              onPressed: widget.onContinueToProducts == null
+                  ? null
+                  : () => _continueToProducts(context, order),
+            ),
+            const SizedBox(height: AppSpacing.spacing24),
+            _OrderItemsSection(
+              key: _itemsSectionKey,
+              state: widget.state,
+              organizationId: widget.organizationId,
+              createOrderItemsGridCubit: widget.createOrderItemsGridCubit,
+            ),
+            if (order.items.isNotEmpty) ...<Widget>[
+              const SizedBox(height: AppSpacing.spacing16),
+              Container(
+                key: _pricingSummaryKey,
+                child: OrderPricingSummarySection(
+                  key: ValueKey('order_pricing_summary_${order.id}'),
+                  order: order,
+                  createCubit: widget.createOrderPricingSummaryCubit,
+                  onStateChanged: _onPricingSummaryStateChanged,
+                ),
+              ),
+            ],
+            const SizedBox(height: AppSpacing.spacing16),
+            OrderSubmissionPendenciesPanel(
+              onIssueTap: (issue) => _scrollToTarget(issue.target),
+            ),
+            const SizedBox(height: AppSpacing.spacing16),
+            BlocBuilder<
+              OrderSubmissionValidationCubit,
+              OrderSubmissionValidationState
+            >(
+              builder: (context, validationState) => AppButton(
+                label: 'Enviar pedido',
+                leadingIcon: Icons.send_outlined,
+                onPressed:
+                    validationState.canSubmit && widget.onSubmitOrder != null
+                    ? () => widget.onSubmitOrder!(order)
+                    : null,
+              ),
             ),
           ],
-        ],
+        ),
       ),
     );
   }
@@ -369,6 +532,7 @@ class _OrderItemsSection extends StatelessWidget {
     required this.state,
     required this.organizationId,
     required this.createOrderItemsGridCubit,
+    super.key,
   });
 
   final OrderDraftState state;

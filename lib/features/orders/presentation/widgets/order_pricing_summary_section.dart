@@ -24,11 +24,21 @@ class OrderPricingSummarySection extends StatefulWidget {
   const OrderPricingSummarySection({
     required this.order,
     required this.createCubit,
+    this.onStateChanged,
     super.key,
   });
 
   final Order order;
   final OrderPricingSummaryCubit Function() createCubit;
+
+  /// Notified with every `OrderPricingSummaryState` this section's own cubit
+  /// emits — lets a sibling (`OrderSubmissionValidationCubit`, TASK-100)
+  /// reuse the already-resolved `OrderPricingSummary` for its own desconto/
+  /// permissão checks instead of triggering a second `calculatePricing` call
+  /// for the exact same draft. Purely an outward notification: this section
+  /// still owns/creates its own cubit instance exactly as before, no
+  /// behavior here changes when [onStateChanged] is left unset.
+  final void Function(OrderPricingSummaryState state)? onStateChanged;
 
   @override
   State<OrderPricingSummarySection> createState() =>
@@ -94,7 +104,8 @@ class _OrderPricingSummarySectionState
   Widget build(BuildContext context) {
     return BlocProvider<OrderPricingSummaryCubit>.value(
       value: _cubit,
-      child: BlocBuilder<OrderPricingSummaryCubit, OrderPricingSummaryState>(
+      child: BlocConsumer<OrderPricingSummaryCubit, OrderPricingSummaryState>(
+        listener: (context, state) => widget.onStateChanged?.call(state),
         builder: (context, state) =>
             _OrderPricingSummaryCardContent(state: state),
       ),

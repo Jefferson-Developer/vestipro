@@ -244,6 +244,8 @@ class VestiProApp extends StatelessWidget {
                 createOrderItemsGridCubit: () => getIt<OrderItemsGridCubit>(),
                 createOrderPricingSummaryCubit: () =>
                     getIt<OrderPricingSummaryCubit>(),
+                createOrderSubmissionValidationCubit: () =>
+                    getIt<OrderSubmissionValidationCubit>(),
                 draftId: queryParameters['draftId'],
                 onContinueToProducts: (order) async {
                   await context.push(

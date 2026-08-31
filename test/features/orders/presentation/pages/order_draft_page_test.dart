@@ -10,6 +10,7 @@ import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/customers/customers.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
 import 'package:vestipro/features/orders/orders.dart';
+import 'package:vestipro/features/pricing/pricing.dart';
 import 'package:vestipro/features/products/products.dart';
 
 class _MockMembershipRepository extends Mock implements MembershipRepository {}
@@ -30,6 +31,11 @@ class _MockCustomerRepository extends Mock implements CustomerRepository {}
 
 class _MockOrderPricingRepository extends Mock
     implements OrderPricingRepository {}
+
+class _MockPriceListRepository extends Mock implements PriceListRepository {}
+
+class _MockPaymentTermRepository extends Mock
+    implements PaymentTermRepository {}
 
 void main() {
   group('OrderDraftPage', () {
@@ -183,6 +189,34 @@ Future<void> _pumpPage(
   required _FakeListCustomerPortfolioUseCase portfolioUseCase,
   _FakeStartOrderDraftForCustomerUseCase? startOrderDraftForCustomer,
 }) {
+  // `OrderSubmissionValidationCubit` (TASK-100) evaluates as soon as the
+  // draft screen becomes ready, regardless of whether the test cares about
+  // its pendencies panel — every repository it reaches through
+  // `GetOrderSubmissionContextUseCase` must be stubbed so that debounced,
+  // best-effort evaluation never throws while these otherwise-unrelated
+  // tests settle.
+  final submissionCustomerRepository = _MockCustomerRepository();
+  when(
+    () => submissionCustomerRepository.getById(
+      organizationId: any(named: 'organizationId'),
+      id: any(named: 'id'),
+    ),
+  ).thenAnswer((_) async => AppSuccess<Customer>(_customer));
+  final priceListRepository = _MockPriceListRepository();
+  when(
+    () => priceListRepository.getById(
+      organizationId: any(named: 'organizationId'),
+      id: any(named: 'id'),
+    ),
+  ).thenAnswer((_) async => AppSuccess<PriceList?>(_priceList));
+  final paymentTermRepository = _MockPaymentTermRepository();
+  when(
+    () => paymentTermRepository.getById(
+      organizationId: any(named: 'organizationId'),
+      id: any(named: 'id'),
+    ),
+  ).thenAnswer((_) async => AppSuccess<PaymentTerm?>(_paymentTerm));
+
   return tester.pumpWidget(
     MaterialApp(
       theme: AppTheme.light,
@@ -225,6 +259,18 @@ Future<void> _pumpPage(
             GetCustomerByIdUseCase(_MockCustomerRepository()),
           ),
         ),
+        createOrderSubmissionValidationCubit: () =>
+            OrderSubmissionValidationCubit(
+              GetOrderSubmissionContextUseCase(
+                GetCustomerByIdUseCase(submissionCustomerRepository),
+                priceListRepository,
+                paymentTermRepository,
+                GetVariantAvailabilityUseCase(
+                  _MockVariantAvailabilityRepository(),
+                ),
+              ),
+              const OrderSubmissionValidator(),
+            ),
       ),
     ),
   );
@@ -267,6 +313,41 @@ final _customer = Customer(
   updatedBy: 'rep-1',
   version: 1,
   syncStatus: CustomerSyncStatus.pending,
+);
+
+final _priceList = PriceList(
+  id: 'price-list-1',
+  organizationId: 'org-1',
+  companyId: 'company-1',
+  name: 'Tabela padrão',
+  currency: 'BRL',
+  validFrom: DateTime.utc(2020, 1, 1),
+  status: PriceListStatus.active,
+  scope: PriceListScopeType.company,
+  createdAt: DateTime.utc(2026, 1, 1),
+  createdBy: 'rep-1',
+  updatedAt: DateTime.utc(2026, 1, 1),
+  updatedBy: 'rep-1',
+  version: 1,
+  syncStatus: PriceListSyncStatus.synced,
+);
+
+final _paymentTerm = PaymentTerm(
+  id: 'term-1',
+  organizationId: 'org-1',
+  companyId: 'company-1',
+  name: 'À vista',
+  installments: const <PaymentInstallment>[
+    PaymentInstallment(percentage: 100, dueInDays: 0),
+  ],
+  averageTermDays: 0,
+  status: PaymentTermStatus.active,
+  createdAt: DateTime.utc(2026, 1, 1),
+  createdBy: 'rep-1',
+  updatedAt: DateTime.utc(2026, 1, 1),
+  updatedBy: 'rep-1',
+  version: 1,
+  syncStatus: PaymentTermSyncStatus.synced,
 );
 
 Order _order() {
