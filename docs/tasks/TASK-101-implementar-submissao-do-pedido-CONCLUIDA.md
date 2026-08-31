@@ -254,14 +254,14 @@ em um teste de outra task não tocado aqui). Nenhum erro/warning.
 - `flutter test` completo: 2109/2109 aprovados.
 
 ## Commit
-Pendente (rodado a seguir, único commit para implementação + documentação +
-atualização de `TASKS.md`, conforme instruído).
+`feat(orders): implement order submission flow` — implementação, documentação de
+conclusão e atualização de `TASKS.md` no mesmo commit, conforme instruído.
 
 ## Push
 Não realizado — autorização desta rodada é apenas para commit local.
 
 ## Hash do commit
-A preencher após o commit.
+122f84f
 
 ## Branch
 main
