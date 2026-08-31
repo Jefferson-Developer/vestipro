@@ -205,7 +205,7 @@ arquivo não tocado nesta task).
 
 ## Commit
 
-Pendente — a ser criado na etapa de commit desta task.
+`feat(orders): implement pre-submit order validations`
 
 ## Push
 
@@ -213,7 +213,7 @@ Não realizado (instrução explícita: apenas commit local nesta rodada).
 
 ## Hash do commit
 
-Pendente — preenchido após o commit.
+`841d968` — `feat(orders): implement pre-submit order validations`
 
 ## Branch
 
