@@ -232,6 +232,18 @@ final class _InMemoryOrderListRepository implements OrderListRepository {
       OrderListPageResult(orders: List<Order>.of(orders), hasMore: false),
     );
   }
+
+  @override
+  Future<AppResult<Order?>> getById({
+    required String organizationId,
+    required String companyId,
+    required String id,
+  }) async {
+    for (final order in orders) {
+      if (order.id == id) return AppSuccess<Order?>(order);
+    }
+    return const AppSuccess<Order?>(null);
+  }
 }
 
 final class _InMemoryOrderApprovalRepository

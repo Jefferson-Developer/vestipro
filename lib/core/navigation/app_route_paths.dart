@@ -203,6 +203,30 @@ final class OrderApprovalQueueRoute extends AppRoute {
   String get location => '/org/$orgId/companies/$companyId/orders/approvals';
 }
 
+/// Pedido history/detail route (TASK-104), scoped by Organization and
+/// Company — the "Ver histórico" destination from [OrderListRoute]. Protected
+/// in [AppRouter] by `order.view`, the same capability [OrderListRoute]
+/// itself requires.
+final class OrderHistoryRoute extends AppRoute {
+  const OrderHistoryRoute({
+    required this.orgId,
+    required this.companyId,
+    required this.orderId,
+  });
+
+  final String orgId;
+  final String companyId;
+  final String orderId;
+
+  static const name = 'orderHistory';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/orders/:orderId/history';
+
+  @override
+  String get location =>
+      '/org/$orgId/companies/$companyId/orders/$orderId/history';
+}
+
 /// Customer portfolio list route (TASK-051), scoped by Organization and
 /// Company. Search and filters are carried as query parameters so Flutter Web
 /// reloads/share links preserve the list state.

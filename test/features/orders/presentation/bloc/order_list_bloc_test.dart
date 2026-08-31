@@ -334,6 +334,15 @@ final class _FakeOrderListRepository implements OrderListRepository {
     _callIndex = (_callIndex + 1).clamp(0, _responses.length - 1);
     return response;
   }
+
+  @override
+  Future<AppResult<Order?>> getById({
+    required String organizationId,
+    required String companyId,
+    required String id,
+  }) async {
+    return const AppSuccess<Order?>(null);
+  }
 }
 
 final class _FakeOrderDraftRepository implements OrderDraftRepository {

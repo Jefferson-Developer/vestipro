@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart' hide Order;
 
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
+import '../../domain/entities/order.dart';
 import '../../domain/entities/order_list_filters.dart';
 import '../../domain/entities/order_list_page_result.dart';
 import '../../domain/repositories/order_list_repository.dart';
@@ -63,6 +64,34 @@ final class OrderListRepositoryImpl implements OrderListRepository {
         UnexpectedFailure(
           'Unexpected error listing orders.',
           code: 'order_list_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<AppResult<Order?>> getById({
+    required String organizationId,
+    required String companyId,
+    required String id,
+  }) async {
+    try {
+      final dto = await dataSource.getById(
+        organizationId: organizationId,
+        id: id,
+      );
+      if (dto == null || dto.companyId != companyId || dto.deletedAt != null) {
+        return const AppSuccess<Order?>(null);
+      }
+      return AppSuccess<Order?>(mapper.toEntity(dto));
+    } on AppException catch (exception) {
+      return AppFailure<Order?>(mapAppExceptionToFailure(exception));
+    } catch (exception) {
+      return AppFailure<Order?>(
+        UnexpectedFailure(
+          'Unexpected error fetching order.',
+          code: 'order_get_by_id_unexpected',
           cause: exception,
         ),
       );

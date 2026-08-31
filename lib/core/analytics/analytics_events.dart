@@ -30,6 +30,8 @@ final class AnalyticsEvents {
   static const String orderSyncFailed = 'order_sync_failed';
   static const String orderApproved = 'order_approved';
   static const String orderRejected = 'order_rejected';
+  static const String orderHistoryViewed = 'order_history_viewed';
+  static const String orderDuplicated = 'order_duplicated';
   static const String crmActivityCreated = 'crm_activity_created';
   static const String crmFollowupCompleted = 'crm_followup_completed';
   static const String insightOpened = 'insight_opened';
@@ -81,6 +83,8 @@ final class AnalyticsEvents {
     orderSyncFailed,
     orderApproved,
     orderRejected,
+    orderHistoryViewed,
+    orderDuplicated,
     crmActivityCreated,
     crmFollowupCompleted,
     insightOpened,

@@ -57,6 +57,14 @@ abstract class Order with _$Order {
     // bonus/gift), intentionally not a closed enum: `tasks.md` seção 9 does
     // not fix its possible values, same precedent as `Customer.classification`.
     String? orderType,
+    // "Repetir pedido" (TASK-104): set only on a draft created by
+    // `DuplicateOrderUseCase`, purely informative ("duplicado de #12345") —
+    // never inherits the source order's [status] or [statusHistory], and is
+    // never revalidated/enforced as a business rule anywhere. `submitOrder`
+    // (TASK-101) does not persist these two fields server-side, so they only
+    // ever exist on the local, not-yet-submitted draft.
+    String? duplicatedFromOrderId,
+    String? duplicatedFromOrderNumber,
     @Default(<OrderItem>[]) List<OrderItem> items,
     @Default(0) double discountAmount,
     @Default(0) double surchargeAmount,

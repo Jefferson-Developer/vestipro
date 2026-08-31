@@ -35,6 +35,7 @@ class AppRouter {
     this.catalogBrowsePageBuilder,
     this.orderListPageBuilder,
     this.orderApprovalQueuePageBuilder,
+    this.orderHistoryPageBuilder,
     this.orderDraftPageBuilder,
     this.orderProductCatalogPageBuilder,
     this.orderProductDetailPageBuilder,
@@ -86,6 +87,16 @@ class AppRouter {
   /// `orgId`/`companyId` from [OrderApprovalQueueRoute].
   final Widget Function(BuildContext context, String orgId, String companyId)?
   orderApprovalQueuePageBuilder;
+
+  /// Builds the pedido history/detail screen (TASK-104), given
+  /// `orgId`/`companyId`/`orderId` from [OrderHistoryRoute].
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    String orderId,
+  )?
+  orderHistoryPageBuilder;
 
   /// Builds the "novo pedido" screen (TASK-096), given `orgId`/`companyId`
   /// and the raw `queryParameters` of [OrderDraftRoute] — the caller decides
@@ -256,6 +267,25 @@ class AppRouter {
             context,
             state.pathParameters['orgId']!,
             state.pathParameters['companyId']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: OrderHistoryRoute.pathPattern,
+        name: OrderHistoryRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.orderView,
+        ),
+        builder: (context, state) {
+          final builder = orderHistoryPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.pathParameters['orderId']!,
           );
         },
       ),

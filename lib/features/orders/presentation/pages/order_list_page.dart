@@ -36,6 +36,7 @@ class OrderListPage extends StatelessWidget {
     this.initialSearchQuery = '',
     this.initialFilters = OrderListFilters.empty,
     this.onOrderDraftSelected,
+    this.onOrderHistorySelected,
     this.onUrlStateChanged,
     super.key,
   });
@@ -53,6 +54,11 @@ class OrderListPage extends StatelessWidget {
   /// (TASK-096's `OrderDraftRoute`, resumed by [Order.id]), never a
   /// bespoke edit screen of its own.
   final ValueChanged<Order>? onOrderDraftSelected;
+
+  /// Called when the "Ver histórico" row action is tapped for a pedido
+  /// already on the server (TASK-104) — always navigates to
+  /// `OrderHistoryRoute`, never a bespoke inline view of its own.
+  final ValueChanged<Order>? onOrderHistorySelected;
 
   /// Called whenever the effective search/filters change, so the host can
   /// mirror them into the URL (Flutter Web deep link) — same contract
@@ -78,6 +84,7 @@ class OrderListPage extends StatelessWidget {
           initialSearchQuery: initialSearchQuery,
           initialFilters: initialFilters,
           onOrderDraftSelected: onOrderDraftSelected,
+          onOrderHistorySelected: onOrderHistorySelected,
           onUrlStateChanged: onUrlStateChanged,
         );
       },
@@ -95,6 +102,7 @@ class _OrderListPermissionsGate extends StatefulWidget {
     required this.initialSearchQuery,
     required this.initialFilters,
     this.onOrderDraftSelected,
+    this.onOrderHistorySelected,
     this.onUrlStateChanged,
   });
 
@@ -106,6 +114,7 @@ class _OrderListPermissionsGate extends StatefulWidget {
   final String initialSearchQuery;
   final OrderListFilters initialFilters;
   final ValueChanged<Order>? onOrderDraftSelected;
+  final ValueChanged<Order>? onOrderHistorySelected;
   final void Function(String searchQuery, OrderListFilters filters)?
   onUrlStateChanged;
 
@@ -152,6 +161,7 @@ class _OrderListPermissionsGateState extends State<_OrderListPermissionsGate> {
           child: _OrderListScaffold(
             canFilterByOtherSellers: canFilterByOtherSellers,
             onOrderDraftSelected: widget.onOrderDraftSelected,
+            onOrderHistorySelected: widget.onOrderHistorySelected,
             onUrlStateChanged: widget.onUrlStateChanged,
           ),
         );
@@ -164,11 +174,13 @@ class _OrderListScaffold extends StatelessWidget {
   const _OrderListScaffold({
     required this.canFilterByOtherSellers,
     this.onOrderDraftSelected,
+    this.onOrderHistorySelected,
     this.onUrlStateChanged,
   });
 
   final bool canFilterByOtherSellers;
   final ValueChanged<Order>? onOrderDraftSelected;
+  final ValueChanged<Order>? onOrderHistorySelected;
   final void Function(String searchQuery, OrderListFilters filters)?
   onUrlStateChanged;
 
@@ -194,6 +206,7 @@ class _OrderListScaffold extends StatelessWidget {
               content: _OrderListContent(
                 state: state,
                 onOrderDraftSelected: onOrderDraftSelected,
+                onOrderHistorySelected: onOrderHistorySelected,
               ),
             ),
           );
@@ -204,10 +217,15 @@ class _OrderListScaffold extends StatelessWidget {
 }
 
 class _OrderListContent extends StatefulWidget {
-  const _OrderListContent({required this.state, this.onOrderDraftSelected});
+  const _OrderListContent({
+    required this.state,
+    this.onOrderDraftSelected,
+    this.onOrderHistorySelected,
+  });
 
   final OrderListState state;
   final ValueChanged<Order>? onOrderDraftSelected;
+  final ValueChanged<Order>? onOrderHistorySelected;
 
   @override
   State<_OrderListContent> createState() => _OrderListContentState();
@@ -265,7 +283,7 @@ class _OrderListContentState extends State<_OrderListContent> {
                     AppDataColumn(
                       label: 'Status',
                       cellBuilder: (context, order) =>
-                          _OrderStatusBadge(status: order.status),
+                          OrderStatusBadge(status: order.status),
                     ),
                     AppDataColumn(
                       label: 'Data',
@@ -279,6 +297,15 @@ class _OrderListContentState extends State<_OrderListContent> {
                           Text('${order.itemCount}'),
                     ),
                   ],
+                  rowActions: widget.onOrderHistorySelected == null
+                      ? const <AppDataTableAction<Order>>[]
+                      : <AppDataTableAction<Order>>[
+                          AppDataTableAction<Order>(
+                            icon: Icons.history_outlined,
+                            semanticLabel: 'Ver histórico do pedido',
+                            onPressed: widget.onOrderHistorySelected!,
+                          ),
+                        ],
                 ),
                 if (state.loadStatus == OrderListLoadStatus.ready) ...[
                   const SizedBox(height: AppSpacing.spacing8),
@@ -405,7 +432,7 @@ class _LocalPendingOrderRow extends StatelessWidget {
                   spacing: AppSpacing.spacing8,
                   runSpacing: AppSpacing.spacing8,
                   children: <Widget>[
-                    _OrderStatusBadge(status: order.status),
+                    OrderStatusBadge(status: order.status),
                     _OrderSyncStatusBadge(syncStatus: order.syncStatus),
                   ],
                 ),
@@ -424,8 +451,11 @@ class _LocalPendingOrderRow extends StatelessWidget {
   }
 }
 
-class _OrderStatusBadge extends StatelessWidget {
-  const _OrderStatusBadge({required this.status});
+/// Public (not `_`-private) so `OrderStatusHistoryTimeline` (TASK-104) can
+/// render the exact same status badge this listing already uses, instead of
+/// a second status->label/variant/icon mapping.
+class OrderStatusBadge extends StatelessWidget {
+  const OrderStatusBadge({required this.status, super.key});
 
   final OrderStatus status;
 
@@ -433,8 +463,8 @@ class _OrderStatusBadge extends StatelessWidget {
   Widget build(BuildContext context) {
     return AppStatusBadge(
       label: orderStatusLabel(status),
-      variant: _orderStatusVariant(status),
-      icon: _orderStatusIcon(status),
+      variant: orderStatusVariant(status),
+      icon: orderStatusIcon(status),
     );
   }
 }
@@ -736,7 +766,7 @@ String orderStatusLabel(OrderStatus status) {
   };
 }
 
-AppStatusBadgeVariant _orderStatusVariant(OrderStatus status) {
+AppStatusBadgeVariant orderStatusVariant(OrderStatus status) {
   return switch (status) {
     OrderStatus.draft ||
     OrderStatus.pendingSync => AppStatusBadgeVariant.neutral,
@@ -753,7 +783,7 @@ AppStatusBadgeVariant _orderStatusVariant(OrderStatus status) {
   };
 }
 
-IconData _orderStatusIcon(OrderStatus status) {
+IconData orderStatusIcon(OrderStatus status) {
   return switch (status) {
     OrderStatus.draft => Icons.edit_note_outlined,
     OrderStatus.pendingSync => Icons.cloud_upload_outlined,

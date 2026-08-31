@@ -1,4 +1,5 @@
 import '../../../../core/utils/utils.dart';
+import '../entities/order.dart';
 import '../entities/order_list_filters.dart';
 import '../entities/order_list_page_result.dart';
 
@@ -20,5 +21,19 @@ abstract interface class OrderListRepository {
     int limit = 20,
     DateTime? before,
     OrderListFilters filters = OrderListFilters.empty,
+  });
+
+  /// The single `Order` [id] of [organizationId]/[companyId], or `null` when
+  /// it does not exist, belongs to a different company or is soft-deleted
+  /// (TASK-104's history/duplication flows, both of which need a fresh,
+  /// single-document read rather than paging through
+  /// [listPageByCompany] looking for one id). `firestore.rules`'
+  /// `canReadOrder` independently re-checks the same per-document
+  /// visibility this already applies to a `get`, exactly like it does for
+  /// every page [listPageByCompany] fetches.
+  Future<AppResult<Order?>> getById({
+    required String organizationId,
+    required String companyId,
+    required String id,
   });
 }

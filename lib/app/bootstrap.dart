@@ -251,6 +251,13 @@ class VestiProApp extends StatelessWidget {
                     draftId: order.id,
                   ).location,
                 ),
+                onOrderHistorySelected: (order) => context.go(
+                  OrderHistoryRoute(
+                    orgId: orgId,
+                    companyId: companyId,
+                    orderId: order.id,
+                  ).location,
+                ),
                 onUrlStateChanged: (searchQuery, filters) => context.go(
                   OrderListRoute(
                     orgId: orgId,
@@ -268,6 +275,23 @@ class VestiProApp extends StatelessWidget {
                 userId: getIt<AuthRepository>().currentUser?.uid ?? '',
                 permissionService: getIt<PermissionService>(),
                 createBloc: () => getIt<OrderApprovalQueueBloc>(),
+              ),
+          orderHistoryPageBuilder: (context, orgId, companyId, orderId) =>
+              OrderHistoryPage(
+                organizationId: orgId,
+                companyId: companyId,
+                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                orderId: orderId,
+                permissionService: getIt<PermissionService>(),
+                createBloc: () => getIt<OrderHistoryBloc>(),
+                createDuplicationCubit: () => getIt<OrderDuplicationCubit>(),
+                onDuplicated: (order) => context.go(
+                  OrderDraftRoute(
+                    orgId: orgId,
+                    companyId: companyId,
+                    draftId: order.id,
+                  ).location,
+                ),
               ),
           orderDraftPageBuilder: (context, orgId, companyId, queryParameters) =>
               OrderDraftPage(

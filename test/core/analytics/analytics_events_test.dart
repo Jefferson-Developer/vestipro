@@ -21,6 +21,8 @@ void main() {
           'order_sync_failed',
           'order_approved',
           'order_rejected',
+          'order_history_viewed',
+          'order_duplicated',
           'crm_activity_created',
           'crm_followup_completed',
           'insight_opened',

@@ -39,6 +39,12 @@ class OrdersTable extends Table {
   TextColumn get carrierId => text().nullable()();
   TextColumn get collectionId => text().nullable()();
   TextColumn get orderType => text().nullable()();
+  // "Repetir pedido" (TASK-104) informative reference back to the source
+  // order this draft was duplicated from — never enforced as a business
+  // rule, never sent to `submitOrder` (see `Order.duplicatedFromOrderId`'s
+  // own docs).
+  TextColumn get duplicatedFromOrderId => text().nullable()();
+  TextColumn get duplicatedFromOrderNumber => text().nullable()();
   RealColumn get discountAmount => real().withDefault(const Constant(0))();
   RealColumn get surchargeAmount => real().withDefault(const Constant(0))();
   RealColumn get shippingAmount => real().withDefault(const Constant(0))();

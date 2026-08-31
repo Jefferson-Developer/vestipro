@@ -1,3 +1,4 @@
+import '../dtos/order_dto.dart';
 import '../dtos/order_list_page_dto.dart';
 
 /// Data access contract for the paginated `organizations/{organizationId}/
@@ -24,5 +25,12 @@ abstract interface class OrderListDataSource {
     String? customerId,
     String? orderNumber,
     Set<String> sellerIds = const <String>{},
+  });
+
+  /// Single-document read of one Order (TASK-104's history/duplication
+  /// flows), `null` when it does not exist.
+  Future<OrderDto?> getById({
+    required String organizationId,
+    required String id,
   });
 }

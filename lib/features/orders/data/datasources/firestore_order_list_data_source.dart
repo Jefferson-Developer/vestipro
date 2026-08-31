@@ -88,4 +88,12 @@ final class FirestoreOrderListDataSource implements OrderListDataSource {
     );
     return OrderListPageDto(items: page.items, hasMore: page.hasMore);
   }
+
+  @override
+  Future<OrderDto?> getById({
+    required String organizationId,
+    required String id,
+  }) {
+    return _collection.getById(organizationId: organizationId, id: id);
+  }
 }

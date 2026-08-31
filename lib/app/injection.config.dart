@@ -522,8 +522,12 @@ import '../features/orders/domain/usecases/add_items_to_order_draft_use_case.dar
     as _i720;
 import '../features/orders/domain/usecases/decide_order_approval_use_case.dart'
     as _i828;
+import '../features/orders/domain/usecases/duplicate_order_use_case.dart'
+    as _i315;
 import '../features/orders/domain/usecases/ensure_customer_in_seller_portfolio_use_case.dart'
     as _i583;
+import '../features/orders/domain/usecases/get_order_by_id_use_case.dart'
+    as _i1062;
 import '../features/orders/domain/usecases/get_order_draft_use_case.dart'
     as _i485;
 import '../features/orders/domain/usecases/get_order_pricing_summary_use_case.dart'
@@ -543,6 +547,9 @@ import '../features/orders/domain/usecases/submit_order_use_case.dart' as _i856;
 import '../features/orders/presentation/bloc/order_approval_queue_bloc.dart'
     as _i339;
 import '../features/orders/presentation/bloc/order_draft_bloc.dart' as _i287;
+import '../features/orders/presentation/bloc/order_duplication_cubit.dart'
+    as _i21;
+import '../features/orders/presentation/bloc/order_history_bloc.dart' as _i125;
 import '../features/orders/presentation/bloc/order_items_counter_cubit.dart'
     as _i244;
 import '../features/orders/presentation/bloc/order_items_grid_cubit.dart'
@@ -2726,6 +2733,13 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i1062.GetOrderByIdUseCase>(
+      () => _i1062.GetOrderByIdUseCase(
+        gh<_i1051.OrderListRepository>(),
+        gh<_i63.OrderVisibilityService>(),
+        gh<_i47.PermissionService>(),
+      ),
+    );
     gh.factory<_i144.ListOrdersUseCase>(
       () => _i144.ListOrdersUseCase(
         gh<_i1051.OrderListRepository>(),
@@ -2830,6 +2844,12 @@ extension GetItInjectableX on _i174.GetIt {
         listCommercialTeams: gh<_i986.ListCommercialTeamsUseCase>(),
         listPortfolioAssignments: gh<_i321.ListPortfolioAssignmentsUseCase>(),
         assignPortfolio: gh<_i636.AssignPortfolioUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i125.OrderHistoryBloc>(
+      () => _i125.OrderHistoryBloc(
+        getOrderById: gh<_i1062.GetOrderByIdUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
@@ -2979,6 +2999,23 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
         getProductById: gh<_i721.GetProductByIdUseCase>(),
         resolvePriceForVariant: gh<_i352.ResolvePriceForVariantUseCase>(),
+      ),
+    );
+    gh.factory<_i315.DuplicateOrderUseCase>(
+      () => _i315.DuplicateOrderUseCase(
+        gh<_i1062.GetOrderByIdUseCase>(),
+        gh<_i168.StartOrderDraftForCustomerUseCase>(),
+        gh<_i81.OrderDraftRepository>(),
+        gh<_i720.AddItemsToOrderDraftUseCase>(),
+        gh<_i795.ProductVariantRepository>(),
+        gh<_i385.GetVariantAvailabilityUseCase>(),
+        gh<_i352.ResolvePriceForVariantUseCase>(),
+      ),
+    );
+    gh.factory<_i21.OrderDuplicationCubit>(
+      () => _i21.OrderDuplicationCubit(
+        gh<_i315.DuplicateOrderUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     return this;

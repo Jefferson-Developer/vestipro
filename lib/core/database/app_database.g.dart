@@ -10524,6 +10524,28 @@ class $OrdersTableTable extends OrdersTable
     type: DriftSqlType.string,
     requiredDuringInsert: false,
   );
+  static const VerificationMeta _duplicatedFromOrderIdMeta =
+      const VerificationMeta('duplicatedFromOrderId');
+  @override
+  late final GeneratedColumn<String> duplicatedFromOrderId =
+      GeneratedColumn<String>(
+        'duplicated_from_order_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _duplicatedFromOrderNumberMeta =
+      const VerificationMeta('duplicatedFromOrderNumber');
+  @override
+  late final GeneratedColumn<String> duplicatedFromOrderNumber =
+      GeneratedColumn<String>(
+        'duplicated_from_order_number',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _discountAmountMeta = const VerificationMeta(
     'discountAmount',
   );
@@ -10738,6 +10760,8 @@ class $OrdersTableTable extends OrdersTable
     carrierId,
     collectionId,
     orderType,
+    duplicatedFromOrderId,
+    duplicatedFromOrderNumber,
     discountAmount,
     surchargeAmount,
     shippingAmount,
@@ -10889,6 +10913,24 @@ class $OrdersTableTable extends OrdersTable
       context.handle(
         _orderTypeMeta,
         orderType.isAcceptableOrUnknown(data['order_type']!, _orderTypeMeta),
+      );
+    }
+    if (data.containsKey('duplicated_from_order_id')) {
+      context.handle(
+        _duplicatedFromOrderIdMeta,
+        duplicatedFromOrderId.isAcceptableOrUnknown(
+          data['duplicated_from_order_id']!,
+          _duplicatedFromOrderIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('duplicated_from_order_number')) {
+      context.handle(
+        _duplicatedFromOrderNumberMeta,
+        duplicatedFromOrderNumber.isAcceptableOrUnknown(
+          data['duplicated_from_order_number']!,
+          _duplicatedFromOrderNumberMeta,
+        ),
       );
     }
     if (data.containsKey('discount_amount')) {
@@ -11096,6 +11138,14 @@ class $OrdersTableTable extends OrdersTable
         DriftSqlType.string,
         data['${effectivePrefix}order_type'],
       ),
+      duplicatedFromOrderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}duplicated_from_order_id'],
+      ),
+      duplicatedFromOrderNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}duplicated_from_order_number'],
+      ),
       discountAmount: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}discount_amount'],
@@ -11192,6 +11242,8 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
   final String? carrierId;
   final String? collectionId;
   final String? orderType;
+  final String? duplicatedFromOrderId;
+  final String? duplicatedFromOrderNumber;
   final double discountAmount;
   final double surchargeAmount;
   final double shippingAmount;
@@ -11225,6 +11277,8 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     this.carrierId,
     this.collectionId,
     this.orderType,
+    this.duplicatedFromOrderId,
+    this.duplicatedFromOrderNumber,
     required this.discountAmount,
     required this.surchargeAmount,
     required this.shippingAmount,
@@ -11268,6 +11322,14 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     }
     if (!nullToAbsent || orderType != null) {
       map['order_type'] = Variable<String>(orderType);
+    }
+    if (!nullToAbsent || duplicatedFromOrderId != null) {
+      map['duplicated_from_order_id'] = Variable<String>(duplicatedFromOrderId);
+    }
+    if (!nullToAbsent || duplicatedFromOrderNumber != null) {
+      map['duplicated_from_order_number'] = Variable<String>(
+        duplicatedFromOrderNumber,
+      );
     }
     map['discount_amount'] = Variable<double>(discountAmount);
     map['surcharge_amount'] = Variable<double>(surchargeAmount);
@@ -11330,6 +11392,13 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
       orderType: orderType == null && nullToAbsent
           ? const Value.absent()
           : Value(orderType),
+      duplicatedFromOrderId: duplicatedFromOrderId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(duplicatedFromOrderId),
+      duplicatedFromOrderNumber:
+          duplicatedFromOrderNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(duplicatedFromOrderNumber),
       discountAmount: Value(discountAmount),
       surchargeAmount: Value(surchargeAmount),
       shippingAmount: Value(shippingAmount),
@@ -11391,6 +11460,12 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
       carrierId: serializer.fromJson<String?>(json['carrierId']),
       collectionId: serializer.fromJson<String?>(json['collectionId']),
       orderType: serializer.fromJson<String?>(json['orderType']),
+      duplicatedFromOrderId: serializer.fromJson<String?>(
+        json['duplicatedFromOrderId'],
+      ),
+      duplicatedFromOrderNumber: serializer.fromJson<String?>(
+        json['duplicatedFromOrderNumber'],
+      ),
       discountAmount: serializer.fromJson<double>(json['discountAmount']),
       surchargeAmount: serializer.fromJson<double>(json['surchargeAmount']),
       shippingAmount: serializer.fromJson<double>(json['shippingAmount']),
@@ -11433,6 +11508,12 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
       'carrierId': serializer.toJson<String?>(carrierId),
       'collectionId': serializer.toJson<String?>(collectionId),
       'orderType': serializer.toJson<String?>(orderType),
+      'duplicatedFromOrderId': serializer.toJson<String?>(
+        duplicatedFromOrderId,
+      ),
+      'duplicatedFromOrderNumber': serializer.toJson<String?>(
+        duplicatedFromOrderNumber,
+      ),
       'discountAmount': serializer.toJson<double>(discountAmount),
       'surchargeAmount': serializer.toJson<double>(surchargeAmount),
       'shippingAmount': serializer.toJson<double>(shippingAmount),
@@ -11469,6 +11550,8 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     Value<String?> carrierId = const Value.absent(),
     Value<String?> collectionId = const Value.absent(),
     Value<String?> orderType = const Value.absent(),
+    Value<String?> duplicatedFromOrderId = const Value.absent(),
+    Value<String?> duplicatedFromOrderNumber = const Value.absent(),
     double? discountAmount,
     double? surchargeAmount,
     double? shippingAmount,
@@ -11502,6 +11585,12 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     carrierId: carrierId.present ? carrierId.value : this.carrierId,
     collectionId: collectionId.present ? collectionId.value : this.collectionId,
     orderType: orderType.present ? orderType.value : this.orderType,
+    duplicatedFromOrderId: duplicatedFromOrderId.present
+        ? duplicatedFromOrderId.value
+        : this.duplicatedFromOrderId,
+    duplicatedFromOrderNumber: duplicatedFromOrderNumber.present
+        ? duplicatedFromOrderNumber.value
+        : this.duplicatedFromOrderNumber,
     discountAmount: discountAmount ?? this.discountAmount,
     surchargeAmount: surchargeAmount ?? this.surchargeAmount,
     shippingAmount: shippingAmount ?? this.shippingAmount,
@@ -11559,6 +11648,12 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
           ? data.collectionId.value
           : this.collectionId,
       orderType: data.orderType.present ? data.orderType.value : this.orderType,
+      duplicatedFromOrderId: data.duplicatedFromOrderId.present
+          ? data.duplicatedFromOrderId.value
+          : this.duplicatedFromOrderId,
+      duplicatedFromOrderNumber: data.duplicatedFromOrderNumber.present
+          ? data.duplicatedFromOrderNumber.value
+          : this.duplicatedFromOrderNumber,
       discountAmount: data.discountAmount.present
           ? data.discountAmount.value
           : this.discountAmount,
@@ -11615,6 +11710,8 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
           ..write('carrierId: $carrierId, ')
           ..write('collectionId: $collectionId, ')
           ..write('orderType: $orderType, ')
+          ..write('duplicatedFromOrderId: $duplicatedFromOrderId, ')
+          ..write('duplicatedFromOrderNumber: $duplicatedFromOrderNumber, ')
           ..write('discountAmount: $discountAmount, ')
           ..write('surchargeAmount: $surchargeAmount, ')
           ..write('shippingAmount: $shippingAmount, ')
@@ -11653,6 +11750,8 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     carrierId,
     collectionId,
     orderType,
+    duplicatedFromOrderId,
+    duplicatedFromOrderNumber,
     discountAmount,
     surchargeAmount,
     shippingAmount,
@@ -11690,6 +11789,8 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
           other.carrierId == this.carrierId &&
           other.collectionId == this.collectionId &&
           other.orderType == this.orderType &&
+          other.duplicatedFromOrderId == this.duplicatedFromOrderId &&
+          other.duplicatedFromOrderNumber == this.duplicatedFromOrderNumber &&
           other.discountAmount == this.discountAmount &&
           other.surchargeAmount == this.surchargeAmount &&
           other.shippingAmount == this.shippingAmount &&
@@ -11725,6 +11826,8 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
   final Value<String?> carrierId;
   final Value<String?> collectionId;
   final Value<String?> orderType;
+  final Value<String?> duplicatedFromOrderId;
+  final Value<String?> duplicatedFromOrderNumber;
   final Value<double> discountAmount;
   final Value<double> surchargeAmount;
   final Value<double> shippingAmount;
@@ -11759,6 +11862,8 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     this.carrierId = const Value.absent(),
     this.collectionId = const Value.absent(),
     this.orderType = const Value.absent(),
+    this.duplicatedFromOrderId = const Value.absent(),
+    this.duplicatedFromOrderNumber = const Value.absent(),
     this.discountAmount = const Value.absent(),
     this.surchargeAmount = const Value.absent(),
     this.shippingAmount = const Value.absent(),
@@ -11794,6 +11899,8 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     this.carrierId = const Value.absent(),
     this.collectionId = const Value.absent(),
     this.orderType = const Value.absent(),
+    this.duplicatedFromOrderId = const Value.absent(),
+    this.duplicatedFromOrderNumber = const Value.absent(),
     this.discountAmount = const Value.absent(),
     this.surchargeAmount = const Value.absent(),
     this.shippingAmount = const Value.absent(),
@@ -11845,6 +11952,8 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     Expression<String>? carrierId,
     Expression<String>? collectionId,
     Expression<String>? orderType,
+    Expression<String>? duplicatedFromOrderId,
+    Expression<String>? duplicatedFromOrderNumber,
     Expression<double>? discountAmount,
     Expression<double>? surchargeAmount,
     Expression<double>? shippingAmount,
@@ -11882,6 +11991,10 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
       if (carrierId != null) 'carrier_id': carrierId,
       if (collectionId != null) 'collection_id': collectionId,
       if (orderType != null) 'order_type': orderType,
+      if (duplicatedFromOrderId != null)
+        'duplicated_from_order_id': duplicatedFromOrderId,
+      if (duplicatedFromOrderNumber != null)
+        'duplicated_from_order_number': duplicatedFromOrderNumber,
       if (discountAmount != null) 'discount_amount': discountAmount,
       if (surchargeAmount != null) 'surcharge_amount': surchargeAmount,
       if (shippingAmount != null) 'shipping_amount': shippingAmount,
@@ -11920,6 +12033,8 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     Value<String?>? carrierId,
     Value<String?>? collectionId,
     Value<String?>? orderType,
+    Value<String?>? duplicatedFromOrderId,
+    Value<String?>? duplicatedFromOrderNumber,
     Value<double>? discountAmount,
     Value<double>? surchargeAmount,
     Value<double>? shippingAmount,
@@ -11955,6 +12070,10 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
       carrierId: carrierId ?? this.carrierId,
       collectionId: collectionId ?? this.collectionId,
       orderType: orderType ?? this.orderType,
+      duplicatedFromOrderId:
+          duplicatedFromOrderId ?? this.duplicatedFromOrderId,
+      duplicatedFromOrderNumber:
+          duplicatedFromOrderNumber ?? this.duplicatedFromOrderNumber,
       discountAmount: discountAmount ?? this.discountAmount,
       surchargeAmount: surchargeAmount ?? this.surchargeAmount,
       shippingAmount: shippingAmount ?? this.shippingAmount,
@@ -12023,6 +12142,16 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     }
     if (orderType.present) {
       map['order_type'] = Variable<String>(orderType.value);
+    }
+    if (duplicatedFromOrderId.present) {
+      map['duplicated_from_order_id'] = Variable<String>(
+        duplicatedFromOrderId.value,
+      );
+    }
+    if (duplicatedFromOrderNumber.present) {
+      map['duplicated_from_order_number'] = Variable<String>(
+        duplicatedFromOrderNumber.value,
+      );
     }
     if (discountAmount.present) {
       map['discount_amount'] = Variable<double>(discountAmount.value);
@@ -12101,6 +12230,8 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
           ..write('carrierId: $carrierId, ')
           ..write('collectionId: $collectionId, ')
           ..write('orderType: $orderType, ')
+          ..write('duplicatedFromOrderId: $duplicatedFromOrderId, ')
+          ..write('duplicatedFromOrderNumber: $duplicatedFromOrderNumber, ')
           ..write('discountAmount: $discountAmount, ')
           ..write('surchargeAmount: $surchargeAmount, ')
           ..write('shippingAmount: $shippingAmount, ')
@@ -18236,6 +18367,8 @@ typedef $$OrdersTableTableCreateCompanionBuilder =
       Value<String?> carrierId,
       Value<String?> collectionId,
       Value<String?> orderType,
+      Value<String?> duplicatedFromOrderId,
+      Value<String?> duplicatedFromOrderNumber,
       Value<double> discountAmount,
       Value<double> surchargeAmount,
       Value<double> shippingAmount,
@@ -18272,6 +18405,8 @@ typedef $$OrdersTableTableUpdateCompanionBuilder =
       Value<String?> carrierId,
       Value<String?> collectionId,
       Value<String?> orderType,
+      Value<String?> duplicatedFromOrderId,
+      Value<String?> duplicatedFromOrderNumber,
       Value<double> discountAmount,
       Value<double> surchargeAmount,
       Value<double> shippingAmount,
@@ -18394,6 +18529,16 @@ class $$OrdersTableTableFilterComposer
 
   ColumnFilters<String> get orderType => $composableBuilder(
     column: $table.orderType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get duplicatedFromOrderId => $composableBuilder(
+    column: $table.duplicatedFromOrderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get duplicatedFromOrderNumber => $composableBuilder(
+    column: $table.duplicatedFromOrderNumber,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -18592,6 +18737,16 @@ class $$OrdersTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get duplicatedFromOrderId => $composableBuilder(
+    column: $table.duplicatedFromOrderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get duplicatedFromOrderNumber => $composableBuilder(
+    column: $table.duplicatedFromOrderNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<double> get discountAmount => $composableBuilder(
     column: $table.discountAmount,
     builder: (column) => ColumnOrderings(column),
@@ -18750,6 +18905,16 @@ class $$OrdersTableTableAnnotationComposer
   GeneratedColumn<String> get orderType =>
       $composableBuilder(column: $table.orderType, builder: (column) => column);
 
+  GeneratedColumn<String> get duplicatedFromOrderId => $composableBuilder(
+    column: $table.duplicatedFromOrderId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get duplicatedFromOrderNumber => $composableBuilder(
+    column: $table.duplicatedFromOrderNumber,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<double> get discountAmount => $composableBuilder(
     column: $table.discountAmount,
     builder: (column) => column,
@@ -18890,6 +19055,8 @@ class $$OrdersTableTableTableManager
                 Value<String?> carrierId = const Value.absent(),
                 Value<String?> collectionId = const Value.absent(),
                 Value<String?> orderType = const Value.absent(),
+                Value<String?> duplicatedFromOrderId = const Value.absent(),
+                Value<String?> duplicatedFromOrderNumber = const Value.absent(),
                 Value<double> discountAmount = const Value.absent(),
                 Value<double> surchargeAmount = const Value.absent(),
                 Value<double> shippingAmount = const Value.absent(),
@@ -18924,6 +19091,8 @@ class $$OrdersTableTableTableManager
                 carrierId: carrierId,
                 collectionId: collectionId,
                 orderType: orderType,
+                duplicatedFromOrderId: duplicatedFromOrderId,
+                duplicatedFromOrderNumber: duplicatedFromOrderNumber,
                 discountAmount: discountAmount,
                 surchargeAmount: surchargeAmount,
                 shippingAmount: shippingAmount,
@@ -18960,6 +19129,8 @@ class $$OrdersTableTableTableManager
                 Value<String?> carrierId = const Value.absent(),
                 Value<String?> collectionId = const Value.absent(),
                 Value<String?> orderType = const Value.absent(),
+                Value<String?> duplicatedFromOrderId = const Value.absent(),
+                Value<String?> duplicatedFromOrderNumber = const Value.absent(),
                 Value<double> discountAmount = const Value.absent(),
                 Value<double> surchargeAmount = const Value.absent(),
                 Value<double> shippingAmount = const Value.absent(),
@@ -18994,6 +19165,8 @@ class $$OrdersTableTableTableManager
                 carrierId: carrierId,
                 collectionId: collectionId,
                 orderType: orderType,
+                duplicatedFromOrderId: duplicatedFromOrderId,
+                duplicatedFromOrderNumber: duplicatedFromOrderNumber,
                 discountAmount: discountAmount,
                 surchargeAmount: surchargeAmount,
                 shippingAmount: shippingAmount,
