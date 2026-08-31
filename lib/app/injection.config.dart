@@ -64,6 +64,9 @@ import '../core/storage/image_compressor.dart' as _i611;
 import '../core/storage/image_upload_compressor.dart' as _i620;
 import '../core/storage/storage.dart' as _i209;
 import '../core/storage/storage_data_source.dart' as _i904;
+import '../core/sync/data/repositories/drift_outbox_repository.dart' as _i170;
+import '../core/sync/domain/repositories/outbox_repository.dart' as _i234;
+import '../core/sync/presentation/cubit/outbox_watcher_cubit.dart' as _i866;
 import '../features/audit_log/data/datasources/audit_log_data_source.dart'
     as _i432;
 import '../features/audit_log/data/datasources/firestore_audit_log_data_source.dart'
@@ -1421,6 +1424,9 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i712.CustomerSegmentMapper>(),
       ),
     );
+    gh.lazySingleton<_i234.OutboxRepository>(
+      () => _i170.DriftOutboxRepository(gh<_i658.AppDatabase>()),
+    );
     gh.factory<_i789.ListProductColorsUseCase>(
       () => _i789.ListProductColorsUseCase(gh<_i298.ProductColorRepository>()),
     );
@@ -1793,6 +1799,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i461.AppEnvironment>(),
         gh<_i465.AppClientMetadataProvider>(),
       ),
+    );
+    gh.factory<_i866.OutboxWatcherCubit>(
+      () => _i866.OutboxWatcherCubit(gh<_i234.OutboxRepository>()),
     );
     gh.factory<_i427.CreateCustomerUseCase>(
       () => _i427.CreateCustomerUseCase(gh<_i857.CustomerRepository>()),

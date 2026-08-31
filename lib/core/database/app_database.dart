@@ -9,6 +9,7 @@ import 'tables/favorites_table.dart';
 import 'tables/offline_package_load_status_table.dart';
 import 'tables/order_items_table.dart';
 import 'tables/orders_table.dart';
+import 'tables/outbox_table.dart';
 import 'tables/payment_terms_table.dart';
 import 'tables/price_list_items_table.dart';
 import 'tables/price_lists_table.dart';
@@ -68,6 +69,10 @@ class OrderWithItemsRow {
 /// TASK-107 adds [OfflinePackageLoadStatusTable], the per-entity "carga
 /// completa"/"carga incompleta" marker `DownloadOfflinePackageUseCase` reads
 /// and writes around every entity it downloads.
+/// TASK-108 adds [OutboxTable], the Outbox Pattern queue of offline write
+/// operations pending synchronization (EPIC-14) — the sync engine
+/// (TASK-109) and Central de Sincronização (TASK-112) read/drain this same
+/// table rather than a second local database.
 @DriftDatabase(
   tables: [
     CustomersTable,
@@ -89,13 +94,14 @@ class OrderWithItemsRow {
     CampaignsTable,
     TargetsTable,
     OfflinePackageLoadStatusTable,
+    OutboxTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 14;
+  int get schemaVersion => 15;
 
   @override
   MigrationStrategy get migration {
@@ -180,6 +186,11 @@ class AppDatabase extends _$AppDatabase {
           // TASK-107: marcador de status ("carga completa"/"carga
           // incompleta") por entidade do pacote de carga offline.
           await migrator.createTable(offlinePackageLoadStatusTable);
+        }
+        if (from < 15) {
+          // TASK-108: fila local (Outbox) de operações offline pendentes de
+          // sincronização.
+          await migrator.createTable(outboxTable);
         }
       },
       beforeOpen: (details) async {
@@ -1145,4 +1156,231 @@ class AppDatabase extends _$AppDatabase {
         ))
         .get();
   }
+
+  // ---------------------------------------------------------------------
+  // Outbox (TASK-108, EPIC-14) — see [OutboxTable] docs.
+  // ---------------------------------------------------------------------
+
+  /// Enqueues a new `pending` Outbox operation identified by [id] (its
+  /// `clientOperationId`), or returns the already-persisted row unchanged if
+  /// [id] was already enqueued before — this is what makes `enqueue` safe to
+  /// call more than once for the same logical operation (e.g. the app
+  /// crashing/restarting right after this call, before the caller's own
+  /// outer transaction — see below — is known to have committed).
+  ///
+  /// Runs inside its own [transaction], so the id lookup, the
+  /// [sequenceNumber] computation and the insert always happen atomically
+  /// relative to each other. Callers that need the enqueue and their own
+  /// local write (e.g. persisting an order draft) to succeed or fail
+  /// together must wrap both calls in one outer `database.transaction(...)`
+  /// block themselves — Drift nests this inner transaction as a savepoint of
+  /// that outer one rather than opening a second, independent transaction.
+  Future<OutboxTableData> enqueueOutboxOperation({
+    required String id,
+    required String organizationId,
+    String? companyId,
+    required String entityType,
+    required String entityId,
+    required String operationType,
+    required String payload,
+    required DateTime createdAt,
+    required String createdBy,
+  }) {
+    return transaction(() async {
+      final existing = await (select(
+        outboxTable,
+      )..where((row) => row.id.equals(id))).getSingleOrNull();
+      if (existing != null) return existing;
+
+      final maxSequenceExpression = outboxTable.sequenceNumber.max();
+      final maxSequenceQuery = selectOnly(outboxTable)
+        ..addColumns([maxSequenceExpression]);
+      final maxSequenceRow = await maxSequenceQuery.getSingle();
+      final nextSequence =
+          (maxSequenceRow.read(maxSequenceExpression) ?? 0) + 1;
+
+      await into(outboxTable).insert(
+        OutboxTableCompanion.insert(
+          id: id,
+          organizationId: organizationId,
+          companyId: Value(companyId),
+          entityType: entityType,
+          entityId: entityId,
+          operationType: operationType,
+          payload: payload,
+          status: const Value('pending'),
+          attemptCount: const Value(0),
+          createdAt: createdAt,
+          createdBy: createdBy,
+          sequenceNumber: nextSequence,
+        ),
+      );
+
+      return (select(
+        outboxTable,
+      )..where((row) => row.id.equals(id))).getSingle();
+    });
+  }
+
+  /// Moves the Outbox row [id] to `syncing`, bumping [attemptCount] and
+  /// recording [attemptedAt] — a no-op if [id] no longer exists (e.g. it was
+  /// already dropped after a confirmed sync elsewhere).
+  Future<void> markOutboxSyncing({
+    required String id,
+    required DateTime attemptedAt,
+  }) {
+    return transaction(() async {
+      final row = await (select(
+        outboxTable,
+      )..where((r) => r.id.equals(id))).getSingleOrNull();
+      if (row == null) return;
+
+      await (update(outboxTable)..where((r) => r.id.equals(id))).write(
+        OutboxTableCompanion(
+          status: const Value('syncing'),
+          attemptCount: Value(row.attemptCount + 1),
+          lastAttemptAt: Value(attemptedAt),
+        ),
+      );
+    });
+  }
+
+  /// Moves the Outbox row [id] to `synced` — the sync engine (TASK-109)
+  /// calls this only after the backend has confirmed the operation, never
+  /// speculatively.
+  Future<void> markOutboxSynced({required String id}) {
+    return (update(outboxTable)..where((row) => row.id.equals(id))).write(
+      const OutboxTableCompanion(status: Value('synced')),
+    );
+  }
+
+  /// Moves the Outbox row [id] to `failed`, recording [error] and
+  /// [attemptedAt] — the row is kept, never removed, so the retry policy
+  /// (TASK-109) and failure UI (TASK-112) can act on it.
+  Future<void> markOutboxFailed({
+    required String id,
+    required String error,
+    required DateTime attemptedAt,
+  }) {
+    return (update(outboxTable)..where((row) => row.id.equals(id))).write(
+      OutboxTableCompanion(
+        status: const Value('failed'),
+        lastError: Value(error),
+        lastAttemptAt: Value(attemptedAt),
+      ),
+    );
+  }
+
+  /// Moves the Outbox row [id] to `conflict`, recording [error] and
+  /// [attemptedAt] — reserved for a remote rejection that requires manual
+  /// resolution (TASK-110/TASK-112) rather than a plain retry.
+  Future<void> markOutboxConflict({
+    required String id,
+    required String error,
+    required DateTime attemptedAt,
+  }) {
+    return (update(outboxTable)..where((row) => row.id.equals(id))).write(
+      OutboxTableCompanion(
+        status: const Value('conflict'),
+        lastError: Value(error),
+        lastAttemptAt: Value(attemptedAt),
+      ),
+    );
+  }
+
+  /// A single Outbox row by [id], or `null` if it no longer exists.
+  Future<OutboxTableData?> getOutboxOperationById(String id) {
+    return (select(
+      outboxTable,
+    )..where((row) => row.id.equals(id))).getSingleOrNull();
+  }
+
+  /// Every Outbox row for [organizationId] whose `status` is one of
+  /// [statuses], oldest-enqueued first ([OutboxTable.sequenceNumber]) — the
+  /// order the sync engine (TASK-109) must process them in.
+  Future<List<OutboxTableData>> getOutboxOperationsByStatus({
+    required String organizationId,
+    required List<String> statuses,
+  }) {
+    return (select(outboxTable)
+          ..where(
+            (row) =>
+                row.organizationId.equals(organizationId) &
+                row.status.isIn(statuses),
+          )
+          ..orderBy([(row) => OrderingTerm.asc(row.sequenceNumber)]))
+        .get();
+  }
+
+  /// Every Outbox row for [organizationId]/[entityType]/[entityId], oldest
+  /// first — every operation ever enqueued for one specific entity, in the
+  /// exact order they must be replayed (e.g. never an `update` before the
+  /// `create` it depends on).
+  Future<List<OutboxTableData>> getOutboxOperationsByEntity({
+    required String organizationId,
+    required String entityType,
+    required String entityId,
+  }) {
+    return (select(outboxTable)
+          ..where(
+            (row) =>
+                row.organizationId.equals(organizationId) &
+                row.entityType.equals(entityType) &
+                row.entityId.equals(entityId),
+          )
+          ..orderBy([(row) => OrderingTerm.asc(row.sequenceNumber)]))
+        .get();
+  }
+
+  /// Reactive count of Outbox rows per status for [organizationId] — what
+  /// the Central de Sincronização (TASK-112) watches to show pending/failed
+  /// work in real time, re-emitting on every local Outbox write in scope,
+  /// mirroring [watchFavoriteProductIds].
+  Stream<OutboxStatusCounts> watchOutboxStatusCounts({
+    required String organizationId,
+  }) {
+    final query = select(outboxTable)
+      ..where((row) => row.organizationId.equals(organizationId));
+    return query.watch().map((rows) {
+      var pending = 0;
+      var syncing = 0;
+      var failed = 0;
+      var conflict = 0;
+      for (final row in rows) {
+        switch (row.status) {
+          case 'pending':
+            pending++;
+          case 'syncing':
+            syncing++;
+          case 'failed':
+            failed++;
+          case 'conflict':
+            conflict++;
+        }
+      }
+      return OutboxStatusCounts(
+        pending: pending,
+        syncing: syncing,
+        failed: failed,
+        conflict: conflict,
+      );
+    });
+  }
+}
+
+/// Result row of [AppDatabase.watchOutboxStatusCounts] — how many
+/// [OutboxTable] rows for a scope currently sit in each non-terminal status
+/// (`synced` rows are intentionally not counted here, they are not "work").
+class OutboxStatusCounts {
+  const OutboxStatusCounts({
+    required this.pending,
+    required this.syncing,
+    required this.failed,
+    required this.conflict,
+  });
+
+  final int pending;
+  final int syncing;
+  final int failed;
+  final int conflict;
 }

@@ -1,0 +1,87 @@
+import '../../../utils/utils.dart';
+import '../entities/outbox_entity_type.dart';
+import '../entities/outbox_operation.dart';
+import '../entities/outbox_operation_type.dart';
+import '../entities/outbox_status.dart';
+import '../entities/outbox_summary.dart';
+
+/// Domain contract for the local Outbox queue (TASK-108, EPIC-14 — seção
+/// 5.4 de `tasks.md`).
+///
+/// This task only models and implements the Outbox structure itself — the
+/// engine that actually drains it against Firestore/Functions is TASK-109.
+abstract interface class OutboxRepository {
+  /// Enqueues a new `pending` operation, or returns the already-persisted
+  /// one unchanged if [id] was already enqueued before.
+  ///
+  /// [id] is the operation's `clientOperationId`: callers must generate it
+  /// once — when the operation is first attempted — and pass that exact
+  /// same value on every retry of that same logical operation (e.g. the app
+  /// crashing/restarting mid-write) for this method to stay idempotent,
+  /// never creating a duplicate row for what is really one offline write.
+  ///
+  /// Callers whose local mutation (e.g. persisting an order draft) must
+  /// never be persisted without its matching Outbox row, or vice versa, are
+  /// expected to call this from within their own Drift transaction that
+  /// also performs that local write.
+  Future<AppResult<OutboxOperation>> enqueue({
+    required String id,
+    required String organizationId,
+    String? companyId,
+    required OutboxEntityType entityType,
+    required String entityId,
+    required OutboxOperationType operationType,
+    required Map<String, dynamic> payload,
+    required DateTime createdAt,
+    required String createdBy,
+  });
+
+  /// Moves operation [id] to `syncing`, bumping its attempt count — called
+  /// by the sync engine (TASK-109) right before it sends the operation to
+  /// the backend.
+  Future<AppResult<void>> markSyncing({
+    required String id,
+    required DateTime attemptedAt,
+  });
+
+  /// Moves operation [id] to `synced` — only after the backend has
+  /// confirmed it.
+  Future<AppResult<void>> markSynced({required String id});
+
+  /// Moves operation [id] to `failed`, recording [error] — the row is kept
+  /// for a future retry, never removed.
+  Future<AppResult<void>> markFailed({
+    required String id,
+    required String error,
+    required DateTime attemptedAt,
+  });
+
+  /// Moves operation [id] to `conflict`, recording [error] — reserved for a
+  /// remote rejection that needs manual resolution rather than a plain
+  /// retry.
+  Future<AppResult<void>> markConflict({
+    required String id,
+    required String error,
+    required DateTime attemptedAt,
+  });
+
+  /// Every operation for [organizationId] whose status is one of [statuses],
+  /// oldest-enqueued first.
+  Future<AppResult<List<OutboxOperation>>> listByStatus({
+    required String organizationId,
+    required List<OutboxStatus> statuses,
+  });
+
+  /// Every operation ever enqueued for one specific
+  /// [organizationId]/[entityType]/[entityId], oldest first — the exact
+  /// order they must be replayed in.
+  Future<AppResult<List<OutboxOperation>>> listByEntity({
+    required String organizationId,
+    required OutboxEntityType entityType,
+    required String entityId,
+  });
+
+  /// Reactive count of pending/syncing/failed/conflict operations for
+  /// [organizationId] — what [OutboxWatcherCubit] (TASK-112) observes.
+  Stream<OutboxSummary> watchSummary({required String organizationId});
+}
