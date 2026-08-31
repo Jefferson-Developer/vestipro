@@ -211,7 +211,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-100 — Implementar validações antes do envio](TASK-100-implementar-validacoes-antes-do-envio.md) — Flutter Senior + Front-end
 - [x] [TASK-101 — Implementar submissão do pedido](TASK-101-implementar-submissao-do-pedido.md) — Flutter Senior
 - [x] [TASK-102 — Implementar listagem e acompanhamento de pedidos](TASK-102-implementar-listagem-de-pedidos.md) — Flutter Senior + Front-end
-- [ ] [TASK-103 — Implementar aprovação de pedidos](TASK-103-implementar-aprovacao-de-pedidos.md) — Flutter Senior + Front-end
+- [x] [TASK-103 — Implementar aprovação de pedidos](TASK-103-implementar-aprovacao-de-pedidos.md) — Flutter Senior + Front-end
 - [ ] [TASK-104 — Implementar histórico e duplicação de pedido](TASK-104-implementar-historico-e-duplicacao-de-pedido.md) — Flutter Senior + Front-end
 
 ### EPIC-14 — Offline e Sincronização
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 102 / 220 tasks concluídas.
+**Progresso:** 103 / 220 tasks concluídas.

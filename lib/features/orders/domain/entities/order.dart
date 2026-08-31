@@ -91,4 +91,19 @@ abstract class Order with _$Order {
   }
 
   int get itemCount => items.length;
+
+  /// The "motivo do encaminhamento" (TASK-103) this order was routed to
+  /// [OrderStatus.underReview] for — the `reason` of the last
+  /// [OrderStatusHistoryEntry] whose [OrderStatusHistoryEntry.newStatus] is
+  /// [OrderStatus.underReview], written by `submitOrder` itself the moment
+  /// the pricing engine flags a desconto/condição above the seller's own
+  /// policy. `null` for an order that never needed approval (submitted
+  /// straight to [OrderStatus.submitted]) — never re-derived from raw
+  /// pricing internals a second time on the client.
+  String? get approvalReason {
+    for (final entry in statusHistory.reversed) {
+      if (entry.newStatus == OrderStatus.underReview) return entry.reason;
+    }
+    return null;
+  }
 }

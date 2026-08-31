@@ -261,6 +261,14 @@ class VestiProApp extends StatelessWidget {
                   ).location,
                 ),
               ),
+          orderApprovalQueuePageBuilder: (context, orgId, companyId) =>
+              OrderApprovalQueuePage(
+                organizationId: orgId,
+                companyId: companyId,
+                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                permissionService: getIt<PermissionService>(),
+                createBloc: () => getIt<OrderApprovalQueueBloc>(),
+              ),
           orderDraftPageBuilder: (context, orgId, companyId, queryParameters) =>
               OrderDraftPage(
                 organizationId: orgId,

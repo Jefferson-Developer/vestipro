@@ -470,30 +470,40 @@ import '../features/opportunities/presentation/bloc/pipeline_stage_admin_bloc.da
     as _i31;
 import '../features/opportunities/presentation/bloc/sales_pipeline_bloc.dart'
     as _i339;
+import '../features/orders/data/datasources/cloud_functions_order_approval_data_source.dart'
+    as _i725;
 import '../features/orders/data/datasources/cloud_functions_order_pricing_data_source.dart'
     as _i708;
 import '../features/orders/data/datasources/cloud_functions_order_submission_data_source.dart'
     as _i1058;
 import '../features/orders/data/datasources/firestore_order_list_data_source.dart'
     as _i937;
+import '../features/orders/data/datasources/order_approval_data_source.dart'
+    as _i1039;
 import '../features/orders/data/datasources/order_list_data_source.dart'
     as _i726;
 import '../features/orders/data/datasources/order_pricing_data_source.dart'
     as _i492;
 import '../features/orders/data/datasources/order_submission_data_source.dart'
     as _i1068;
+import '../features/orders/data/mappers/order_approval_decision_mapper.dart'
+    as _i447;
 import '../features/orders/data/mappers/order_local_mapper.dart' as _i431;
 import '../features/orders/data/mappers/order_mapper.dart' as _i169;
 import '../features/orders/data/mappers/order_pricing_mapper.dart' as _i730;
 import '../features/orders/data/mappers/order_submission_mapper.dart' as _i1062;
 import '../features/orders/data/repositories/drift_order_draft_repository.dart'
     as _i247;
+import '../features/orders/data/repositories/order_approval_repository_impl.dart'
+    as _i455;
 import '../features/orders/data/repositories/order_list_repository_impl.dart'
     as _i67;
 import '../features/orders/data/repositories/order_pricing_repository_impl.dart'
     as _i258;
 import '../features/orders/data/repositories/order_submission_repository_impl.dart'
     as _i167;
+import '../features/orders/domain/repositories/order_approval_repository.dart'
+    as _i592;
 import '../features/orders/domain/repositories/order_draft_repository.dart'
     as _i81;
 import '../features/orders/domain/repositories/order_list_repository.dart'
@@ -510,6 +520,8 @@ import '../features/orders/domain/services/order_visibility_service.dart'
     as _i63;
 import '../features/orders/domain/usecases/add_items_to_order_draft_use_case.dart'
     as _i720;
+import '../features/orders/domain/usecases/decide_order_approval_use_case.dart'
+    as _i828;
 import '../features/orders/domain/usecases/ensure_customer_in_seller_portfolio_use_case.dart'
     as _i583;
 import '../features/orders/domain/usecases/get_order_draft_use_case.dart'
@@ -528,6 +540,8 @@ import '../features/orders/domain/usecases/save_order_draft_use_case.dart'
 import '../features/orders/domain/usecases/start_order_draft_for_customer_use_case.dart'
     as _i168;
 import '../features/orders/domain/usecases/submit_order_use_case.dart' as _i856;
+import '../features/orders/presentation/bloc/order_approval_queue_bloc.dart'
+    as _i339;
 import '../features/orders/presentation/bloc/order_draft_bloc.dart' as _i287;
 import '../features/orders/presentation/bloc/order_items_counter_cubit.dart'
     as _i244;
@@ -1190,6 +1204,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i795.ProductVariantRepository>(
       () => const _i912.SharedPreferencesProductVariantRepository(),
+    );
+    gh.factory<_i447.OrderApprovalDecisionMapper>(
+      () => _i447.OrderApprovalDecisionMapper(gh<_i169.OrderMapper>()),
     );
     gh.factory<_i1062.OrderSubmissionMapper>(
       () => _i1062.OrderSubmissionMapper(gh<_i169.OrderMapper>()),
@@ -1947,6 +1964,11 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.lazySingleton<_i1039.OrderApprovalDataSource>(
+      () => _i725.CloudFunctionsOrderApprovalDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.factory<_i244.OrderItemsCounterCubit>(
       () => _i244.OrderItemsCounterCubit(gh<_i485.GetOrderDraftUseCase>()),
     );
@@ -2187,6 +2209,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i986.SeasonListBloc(
         listSeasons: gh<_i722.ListSeasonsUseCase>(),
         deleteSeason: gh<_i389.DeleteSeasonUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i592.OrderApprovalRepository>(
+      () => _i455.OrderApprovalRepositoryImpl(
+        dataSource: gh<_i1039.OrderApprovalDataSource>(),
+        mapper: gh<_i447.OrderApprovalDecisionMapper>(),
       ),
     );
     gh.lazySingleton<_i761.FavoriteRepository>(
@@ -2475,6 +2503,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i31.DiscountPolicyRepository>(),
         gh<_i885.CreateDiscountPolicyUseCase>(),
         gh<_i468.UpdateDiscountPolicyUseCase>(),
+      ),
+    );
+    gh.factory<_i828.DecideOrderApprovalUseCase>(
+      () => _i828.DecideOrderApprovalUseCase(
+        gh<_i592.OrderApprovalRepository>(),
+        gh<_i47.PermissionService>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i968.ProductMediaBloc>(
@@ -2820,6 +2855,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i583.EnsureCustomerInSellerPortfolioUseCase(
         gh<_i220.PortfolioVisibilityService>(),
         gh<_i220.PortfolioAssignmentRepository>(),
+      ),
+    );
+    gh.factory<_i339.OrderApprovalQueueBloc>(
+      () => _i339.OrderApprovalQueueBloc(
+        listOrders: gh<_i144.ListOrdersUseCase>(),
+        decideOrderApproval: gh<_i828.DecideOrderApprovalUseCase>(),
       ),
     );
     gh.factory<_i385.GetVariantAvailabilityUseCase>(

@@ -149,6 +149,30 @@ async function seedPaymentTerm(
     });
 }
 
+async function seedDiscountPolicy(
+  organizationId: string,
+  policyId: string,
+  overrides: {
+    role?: string;
+    maxDiscountPercent?: number;
+    requiresApprovalAbovePercent?: number;
+    status?: string;
+  } = {},
+): Promise<void> {
+  await db
+    .collection('organizations')
+    .doc(organizationId)
+    .collection('discountPolicies')
+    .doc(policyId)
+    .set({
+      role: overrides.role ?? 'SALES_REP',
+      maxDiscountPercent: overrides.maxDiscountPercent ?? 15,
+      requiresApprovalAbovePercent: overrides.requiresApprovalAbovePercent ?? 10,
+      priceListIds: [],
+      status: overrides.status ?? 'active',
+    });
+}
+
 async function seedInventoryBalance(
   organizationId: string,
   companyId: string,
@@ -443,6 +467,117 @@ describe('submitOrder', () => {
     ).rejects.toMatchObject({
       code: 'permission-denied',
     });
+  });
+
+  it('submits straight to "submitted" when the manual discount stays within the profile policy (TASK-103)', async () => {
+    await seedHappyPath();
+    await seedDiscountPolicy('org-1', 'policy-1');
+    const wrapped = testEnv.wrap(submitOrder);
+
+    const result = (await wrapped(
+      buildRequest(
+        baseRequest({
+          items: [
+            {
+              id: 'item-1',
+              productId: 'product-1',
+              variantId: 'variant-1',
+              quantity: 2,
+              manualDiscountPercent: 5,
+            },
+          ],
+        }),
+        authFor('rep-1'),
+      ),
+    )) as SubmitOrderResponse;
+
+    expect(result.status).toBe('submitted');
+
+    const orderSnapshot = await db
+      .collection('organizations')
+      .doc('org-1')
+      .collection('orders')
+      .doc('order-1')
+      .get();
+    expect(orderSnapshot.data()?.status).toBe('submitted');
+    expect(orderSnapshot.data()?.pricingApprovalRequired).toBe(false);
+    expect(orderSnapshot.data()?.statusHistory[0]).toMatchObject({
+      newStatus: 'submitted',
+      reason: null,
+    });
+  });
+
+  it('routes to "under_review" instead of "submitted" when the manual discount exceeds the profile policy threshold (TASK-103)', async () => {
+    await seedHappyPath();
+    await seedDiscountPolicy('org-1', 'policy-1');
+    const wrapped = testEnv.wrap(submitOrder);
+
+    const result = (await wrapped(
+      buildRequest(
+        baseRequest({
+          items: [
+            {
+              id: 'item-1',
+              productId: 'product-1',
+              variantId: 'variant-1',
+              quantity: 2,
+              manualDiscountPercent: 12,
+            },
+          ],
+        }),
+        authFor('rep-1'),
+      ),
+    )) as SubmitOrderResponse;
+
+    expect(result.status).toBe('under_review');
+
+    const orderSnapshot = await db
+      .collection('organizations')
+      .doc('org-1')
+      .collection('orders')
+      .doc('order-1')
+      .get();
+    const orderData = orderSnapshot.data();
+    expect(orderData?.status).toBe('under_review');
+    expect(orderData?.pricingApprovalRequired).toBe(true);
+    expect(orderData?.statusHistory).toHaveLength(1);
+    expect(orderData?.statusHistory[0].newStatus).toBe('under_review');
+    expect(orderData?.statusHistory[0].reason).toEqual(
+      expect.stringContaining('12.00%'),
+    );
+  });
+
+  it('rejects submission when the manual discount exceeds even the policy maximum', async () => {
+    await seedHappyPath();
+    await seedDiscountPolicy('org-1', 'policy-1');
+    const wrapped = testEnv.wrap(submitOrder);
+
+    await expect(
+      wrapped(
+        buildRequest(
+          baseRequest({
+            items: [
+              {
+                id: 'item-1',
+                productId: 'product-1',
+                variantId: 'variant-1',
+                quantity: 2,
+                manualDiscountPercent: 50,
+              },
+            ],
+          }),
+          authFor('rep-1'),
+        ),
+      ),
+    ).rejects.toMatchObject({ code: 'failed-precondition' });
+
+    const orderSnapshot = await db
+      .collection('organizations')
+      .doc('org-1')
+      .collection('orders')
+      .doc('order-1')
+      .get();
+    expect(orderSnapshot.exists).toBe(false);
   });
 
   it('proceeds without an inventory movement when the variant has no tracked stock balance', async () => {

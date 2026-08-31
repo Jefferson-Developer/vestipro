@@ -81,6 +81,15 @@ export interface SubmitOrderItemInput {
    * in without another Cloud Function change.
    */
   reservationId?: string;
+  /**
+   * Manual discount percent the seller applied to this line, revalidated
+   * here (TASK-103) against the caller's own `DiscountPolicy` — mirrors
+   * `calculatePricing`'s own `PricingEngineItemInput.manualDiscountPercent`
+   * (TASK-088), just not carried through the draft/pricing-preview screens
+   * yet (no manual-discount input UI exists as of this task). Defaults to
+   * `0` (no manual discount) when omitted, same as `calculatePricing`.
+   */
+  manualDiscountPercent?: number;
 }
 
 export interface SubmitOrderRequest extends RequestWithMeta {
@@ -159,6 +168,7 @@ interface NormalizedItem {
   collectionId?: string;
   categoryId?: string;
   reservationId?: string;
+  manualDiscountPercent: number;
 }
 
 /**
@@ -323,7 +333,7 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
         quantity: item.quantity,
         collectionId: item.collectionId,
         categoryId: item.categoryId,
-        manualDiscountPercent: 0,
+        manualDiscountPercent: item.manualDiscountPercent,
       }));
       const pricing: PricingEngineOutput = calculatePricingEngine({
         selectedPriceList,
@@ -363,6 +373,15 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
         buildResponseItem(items[index]!, item),
       );
 
+      // TASK-103: a pedido whose discount/condition exceeds the seller's own
+      // policy (`pricing.approvalRequired`, TASK-088's engine) never reaches
+      // `submitted` directly — it is routed to `underReview` instead, with
+      // the very first `statusHistory` entry already carrying *why*
+      // (`buildApprovalReason`), so the approval queue (`decideOrderApproval`)
+      // never has to reverse-engineer the reason from raw pricing internals.
+      const initialStatus = pricing.approvalRequired ? 'under_review' : 'submitted';
+      const approvalReason = pricing.approvalRequired ? buildApprovalReason(pricing) : null;
+
       const orderData: DocumentData = {
         organizationId,
         companyId,
@@ -393,14 +412,14 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
         taxAmount: null,
         notes: notes ?? null,
         attachmentUrls,
-        status: 'submitted',
+        status: initialStatus,
         statusHistory: [
           {
             previousStatus: null,
-            newStatus: 'submitted',
+            newStatus: initialStatus,
             changedAt: now,
             actorId: uid,
-            reason: null,
+            reason: approvalReason,
           },
         ],
         approvedBy: null,
@@ -507,8 +526,20 @@ function requireItems(value: SubmitOrderItemInput[] | undefined): NormalizedItem
       collectionId: optionalString(item.collectionId),
       categoryId: optionalString(item.categoryId),
       reservationId: optionalString(item.reservationId),
+      manualDiscountPercent: requireValidManualDiscountPercent(
+        item.manualDiscountPercent,
+        `items[${index}].manualDiscountPercent`,
+      ),
     };
   });
+}
+
+function requireValidManualDiscountPercent(value: number | undefined, field: string): number {
+  if (value === undefined) return 0;
+  if (typeof value !== 'number' || Number.isNaN(value) || value < 0 || value > 100) {
+    throw new HttpsError('invalid-argument', `${field} must stay between 0 and 100.`);
+  }
+  return value;
 }
 
 /** Mirrors `PriceList.isApplicableAt` (`lib/features/pricing/domain/entities/price_list.dart`)
@@ -692,6 +723,27 @@ function buildResponseItem(
     discountAmount: roundCurrency(pricingItem.lineSubtotal - pricingItem.lineTotal),
     subtotal: pricingItem.lineTotal,
   };
+}
+
+/**
+ * Human-readable "motivo do encaminhamento" (TASK-103) — which exact rule a
+ * pedido routed to `underReview` exceeded, straight from the pricing
+ * engine's own `approvalRequest` (never re-derived from raw discount policy
+ * documents a second time). Picks the first flagged line only: this task's
+ * approval queue shows one reason per pedido, not a per-item breakdown.
+ */
+function buildApprovalReason(pricing: PricingEngineOutput): string {
+  const flagged = pricing.items.find((item) => item.validationStatus === 'requires_approval');
+  if (!flagged?.approvalRequest) {
+    return 'Desconto ou condição comercial aplicada excede o limite do perfil do vendedor.';
+  }
+  const { requestedDiscountPercent, approvalThresholdPercent, maxDiscountPercent } =
+    flagged.approvalRequest;
+  return (
+    `Desconto manual de ${requestedDiscountPercent.toFixed(2)}% excede o limite de ` +
+    `${approvalThresholdPercent.toFixed(2)}% permitido sem aprovação para o perfil do ` +
+    `vendedor (máximo ${maxDiscountPercent.toFixed(2)}%).`
+  );
 }
 
 function formatOrderNumber(sequence: number): string {

@@ -26,7 +26,7 @@ export { consumeStockReservation } from './inventory/consume-stock-reservation';
 export { expireStockReservations } from './inventory/expire-stock-reservations';
 export { syncStockAlerts } from './inventory/sync-stock-alerts';
 export { recomputeStockTurnoverMetrics } from './inventory/recompute-stock-turnover-metrics';
-export { submitOrder } from './orders';
+export { submitOrder, decideOrderApproval } from './orders';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

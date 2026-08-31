@@ -185,6 +185,24 @@ final class OrderListRoute extends AppRoute {
   }
 }
 
+/// Fila de aprovação de pedidos route (TASK-103), scoped by Organization and
+/// Company. Protected in [AppRouter] by `order.approve` — granted today to
+/// exactly OWNER/ADMIN/SALES_MANAGER (`RolePermissionMatrix`), the same
+/// approvers `OrderListRoute`'s own "vendedor" filter is gated on.
+final class OrderApprovalQueueRoute extends AppRoute {
+  const OrderApprovalQueueRoute({required this.orgId, required this.companyId});
+
+  final String orgId;
+  final String companyId;
+
+  static const name = 'orderApprovalQueue';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/orders/approvals';
+
+  @override
+  String get location => '/org/$orgId/companies/$companyId/orders/approvals';
+}
+
 /// Customer portfolio list route (TASK-051), scoped by Organization and
 /// Company. Search and filters are carried as query parameters so Flutter Web
 /// reloads/share links preserve the list state.

@@ -34,6 +34,7 @@ class AppRouter {
     this.customerDetailPageBuilder,
     this.catalogBrowsePageBuilder,
     this.orderListPageBuilder,
+    this.orderApprovalQueuePageBuilder,
     this.orderDraftPageBuilder,
     this.orderProductCatalogPageBuilder,
     this.orderProductDetailPageBuilder,
@@ -80,6 +81,11 @@ class AppRouter {
     Map<String, String> queryParameters,
   )?
   orderListPageBuilder;
+
+  /// Builds the fila de aprovação de pedidos screen (TASK-103), given
+  /// `orgId`/`companyId` from [OrderApprovalQueueRoute].
+  final Widget Function(BuildContext context, String orgId, String companyId)?
+  orderApprovalQueuePageBuilder;
 
   /// Builds the "novo pedido" screen (TASK-096), given `orgId`/`companyId`
   /// and the raw `queryParameters` of [OrderDraftRoute] — the caller decides
@@ -232,6 +238,24 @@ class AppRouter {
             state.pathParameters['orgId']!,
             state.pathParameters['companyId']!,
             state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: OrderApprovalQueueRoute.pathPattern,
+        name: OrderApprovalQueueRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.orderApprove,
+        ),
+        builder: (context, state) {
+          final builder = orderApprovalQueuePageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
           );
         },
       ),
