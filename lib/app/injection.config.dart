@@ -474,6 +474,10 @@ import '../features/orders/data/datasources/cloud_functions_order_pricing_data_s
     as _i708;
 import '../features/orders/data/datasources/cloud_functions_order_submission_data_source.dart'
     as _i1058;
+import '../features/orders/data/datasources/firestore_order_list_data_source.dart'
+    as _i937;
+import '../features/orders/data/datasources/order_list_data_source.dart'
+    as _i726;
 import '../features/orders/data/datasources/order_pricing_data_source.dart'
     as _i492;
 import '../features/orders/data/datasources/order_submission_data_source.dart'
@@ -484,12 +488,16 @@ import '../features/orders/data/mappers/order_pricing_mapper.dart' as _i730;
 import '../features/orders/data/mappers/order_submission_mapper.dart' as _i1062;
 import '../features/orders/data/repositories/drift_order_draft_repository.dart'
     as _i247;
+import '../features/orders/data/repositories/order_list_repository_impl.dart'
+    as _i67;
 import '../features/orders/data/repositories/order_pricing_repository_impl.dart'
     as _i258;
 import '../features/orders/data/repositories/order_submission_repository_impl.dart'
     as _i167;
 import '../features/orders/domain/repositories/order_draft_repository.dart'
     as _i81;
+import '../features/orders/domain/repositories/order_list_repository.dart'
+    as _i1051;
 import '../features/orders/domain/repositories/order_pricing_repository.dart'
     as _i183;
 import '../features/orders/domain/repositories/order_submission_repository.dart'
@@ -498,6 +506,8 @@ import '../features/orders/domain/services/order_status_transition_validator.dar
     as _i753;
 import '../features/orders/domain/services/order_submission_validator.dart'
     as _i745;
+import '../features/orders/domain/services/order_visibility_service.dart'
+    as _i63;
 import '../features/orders/domain/usecases/add_items_to_order_draft_use_case.dart'
     as _i720;
 import '../features/orders/domain/usecases/ensure_customer_in_seller_portfolio_use_case.dart'
@@ -508,6 +518,9 @@ import '../features/orders/domain/usecases/get_order_pricing_summary_use_case.da
     as _i305;
 import '../features/orders/domain/usecases/get_order_submission_context_use_case.dart'
     as _i1025;
+import '../features/orders/domain/usecases/list_local_pending_orders_use_case.dart'
+    as _i233;
+import '../features/orders/domain/usecases/list_orders_use_case.dart' as _i144;
 import '../features/orders/domain/usecases/resolve_order_draft_defaults_use_case.dart'
     as _i530;
 import '../features/orders/domain/usecases/save_order_draft_use_case.dart'
@@ -520,6 +533,7 @@ import '../features/orders/presentation/bloc/order_items_counter_cubit.dart'
     as _i244;
 import '../features/orders/presentation/bloc/order_items_grid_cubit.dart'
     as _i197;
+import '../features/orders/presentation/bloc/order_list_bloc.dart' as _i424;
 import '../features/orders/presentation/bloc/order_pricing_summary_cubit.dart'
     as _i765;
 import '../features/orders/presentation/bloc/order_product_addition_cubit.dart'
@@ -1496,6 +1510,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i485.GetOrderDraftUseCase>(
       () => _i485.GetOrderDraftUseCase(gh<_i81.OrderDraftRepository>()),
     );
+    gh.factory<_i233.ListLocalPendingOrdersUseCase>(
+      () =>
+          _i233.ListLocalPendingOrdersUseCase(gh<_i81.OrderDraftRepository>()),
+    );
     gh.factory<_i1.SaveOrderDraftUseCase>(
       () => _i1.SaveOrderDraftUseCase(gh<_i81.OrderDraftRepository>()),
     );
@@ -1973,6 +1991,9 @@ extension GetItInjectableX on _i174.GetIt {
         updateCollection: gh<_i779.UpdateCollectionUseCase>(),
       ),
     );
+    gh.lazySingleton<_i726.OrderListDataSource>(
+      () => _i937.FirestoreOrderListDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i999.InviteAcceptanceRepository>(
       () => _i371.InviteAcceptanceRepositoryImpl(
         dataSource: gh<_i336.InviteAcceptanceDataSource>(),
@@ -2102,6 +2123,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i80.StockTurnoverRepositoryImpl(
         dataSource: gh<_i135.StockTurnoverDataSource>(),
         mapper: gh<_i422.StockTurnoverMetricSnapshotMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i1051.OrderListRepository>(
+      () => _i67.OrderListRepositoryImpl(
+        dataSource: gh<_i726.OrderListDataSource>(),
+        mapper: gh<_i169.OrderMapper>(),
       ),
     );
     gh.factory<_i609.GetActiveWarehousesUseCase>(
@@ -2616,6 +2643,12 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i63.OrderVisibilityService>(
+      () => _i63.OrderVisibilityService(
+        gh<_i220.PortfolioVisibilityService>(),
+        gh<_i265.TeamRepository>(),
+      ),
+    );
     gh.factory<_i516.TeamFormBloc>(
       () => _i516.TeamFormBloc(
         listOrganizationUsers: gh<_i93.ListOrganizationUsersUseCase>(),
@@ -2658,6 +2691,13 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i144.ListOrdersUseCase>(
+      () => _i144.ListOrdersUseCase(
+        gh<_i1051.OrderListRepository>(),
+        gh<_i63.OrderVisibilityService>(),
+        gh<_i47.PermissionService>(),
+      ),
+    );
     gh.factory<_i576.ListCustomerPortfolioUseCase>(
       () => _i576.ListCustomerPortfolioUseCase(
         gh<_i857.CustomerRepository>(),
@@ -2695,6 +2735,12 @@ extension GetItInjectableX on _i174.GetIt {
         removeFavoriteProduct: gh<_i214.RemoveFavoriteProductUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
         sessionService: gh<_i885.SessionService>(),
+      ),
+    );
+    gh.factory<_i424.OrderListBloc>(
+      () => _i424.OrderListBloc(
+        listOrders: gh<_i144.ListOrdersUseCase>(),
+        listLocalPendingOrders: gh<_i233.ListLocalPendingOrdersUseCase>(),
       ),
     );
     gh.factory<_i438.PreviewCustomerSegmentCountUseCase>(

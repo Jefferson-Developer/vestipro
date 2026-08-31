@@ -74,4 +74,28 @@ final class DriftOrderDraftRepository implements OrderDraftRepository {
       );
     }
   }
+
+  @override
+  Future<AppResult<List<Order>>> getLocalOrdersForCompany({
+    required String organizationId,
+    required String companyId,
+  }) async {
+    try {
+      final rows = await _database.getOrdersForCompany(
+        organizationId: organizationId,
+        companyId: companyId,
+      );
+      return AppSuccess<List<Order>>(
+        rows.map(_mapper.fromRow).toList(growable: false),
+      );
+    } catch (exception) {
+      return AppFailure<List<Order>>(
+        UnexpectedFailure(
+          'Unexpected error loading local orders.',
+          code: 'order_local_list_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
 }

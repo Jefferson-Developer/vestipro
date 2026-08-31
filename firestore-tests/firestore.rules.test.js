@@ -297,6 +297,44 @@ function warehouseDoc({
   };
 }
 
+function orderDoc({
+  organizationId,
+  companyId = 'company-a',
+  sellerId,
+  status = 'submitted',
+  deletedAt = null,
+}) {
+  return {
+    organizationId,
+    companyId,
+    branchId: 'branch-a',
+    customerId: 'customer-a',
+    sellerId,
+    orderNumber: '000001',
+    deliveryAddress: { street: 'Rua A', city: 'Jaraguá do Sul', state: 'SC', zipCode: '89250-000', country: 'BR' },
+    billingAddress: { street: 'Rua A', city: 'Jaraguá do Sul', state: 'SC', zipCode: '89250-000', country: 'BR' },
+    priceListId: 'price-list-a',
+    paymentTermId: 'payment-term-a',
+    items: [],
+    discountAmount: 0,
+    surchargeAmount: 0,
+    shippingAmount: 0,
+    taxAmount: null,
+    status,
+    statusHistory: [],
+    approvedBy: null,
+    approvedAt: null,
+    rejectionReason: null,
+    deletedAt,
+    version: 1,
+    createdAt: now(),
+    createdBy: sellerId,
+    updatedAt: now(),
+    updatedBy: sellerId,
+    syncStatus: 'synced',
+  };
+}
+
 function auditLogDoc({ organizationId, actorUserId, action = 'role.changed' }) {
   return {
     organizationId,
@@ -862,6 +900,86 @@ describe('organizations/{organizationId}/customers/{customerId}  (TASK-045 visib
   test('membro da Org A não lê clientes da Org B', async () => {
     const db = testEnv.authenticatedContext('owner-a').firestore();
     await assertFails(db.doc(`organizations/${ORG_B}/customers/customer-other-tenant`).get());
+  });
+});
+
+describe('organizations/{organizationId}/orders/{orderId}  (TASK-102 visibility contract)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/orders/order-rep-a`)
+        .set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/orders/order-rep-b`)
+        .set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-b' }));
+      await db
+        .doc(`organizations/${ORG_B}/orders/order-other-tenant`)
+        .set(orderDoc({ organizationId: ORG_B, companyId: 'company-b', sellerId: 'owner-b' }));
+    });
+  });
+
+  test('SALES_REP lê o próprio pedido', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/orders/order-rep-a`).get());
+  });
+
+  test('SALES_REP não lê pedido de outro vendedor mesmo manipulando a query', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/orders/order-rep-b`).get());
+    await assertFails(
+      db
+        .collection(`organizations/${ORG_A}/orders`)
+        .where('sellerId', '==', 'rep-b')
+        .where('deletedAt', '==', null)
+        .get(),
+    );
+  });
+
+  test('SALES_REP consegue executar a query contratada por sellerId', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      db
+        .collection(`organizations/${ORG_A}/orders`)
+        .where('sellerId', '==', 'rep-a')
+        .where('deletedAt', '==', null)
+        .get(),
+    );
+  });
+
+  test('SALES_MANAGER lê pedido do vendedor da própria equipe, mas não de outra equipe', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/orders/order-rep-a`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/orders/order-rep-b`).get());
+  });
+
+  test('ADMIN e OWNER leem todos os pedidos da própria organization', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+
+    await assertSucceeds(ownerDb.collection(`organizations/${ORG_A}/orders`).get());
+    await assertSucceeds(adminDb.collection(`organizations/${ORG_A}/orders`).get());
+  });
+
+  test('FINANCE não lê pedidos (sem order.view)', async () => {
+    const db = testEnv.authenticatedContext('finance-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/orders/order-rep-a`).get());
+  });
+
+  test('membro da Org A não lê pedidos da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/orders/order-other-tenant`).get());
+  });
+
+  test('ninguém escreve pedido pelo cliente, nem OWNER — submitOrder (Admin SDK) é o único caminho', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/orders/order-new`).set(orderDoc({ organizationId: ORG_A, sellerId: 'owner-a' })),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/orders/order-rep-a`).update({ status: 'approved' }),
+    );
+    await assertFails(db.doc(`organizations/${ORG_A}/orders/order-rep-a`).delete());
   });
 });
 

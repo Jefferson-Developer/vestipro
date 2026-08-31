@@ -78,7 +78,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 10;
+  int get schemaVersion => 11;
 
   @override
   MigrationStrategy get migration {
@@ -134,6 +134,9 @@ class AppDatabase extends _$AppDatabase {
         if (from < 10) {
           await migrator.createTable(ordersTable);
           await migrator.createTable(orderItemsTable);
+        }
+        if (from < 11) {
+          await migrator.addColumn(ordersTable, ordersTable.orderNumber);
         }
       },
       beforeOpen: (details) async {

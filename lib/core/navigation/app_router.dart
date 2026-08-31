@@ -33,6 +33,7 @@ class AppRouter {
     this.customerPortfolioPageBuilder,
     this.customerDetailPageBuilder,
     this.catalogBrowsePageBuilder,
+    this.orderListPageBuilder,
     this.orderDraftPageBuilder,
     this.orderProductCatalogPageBuilder,
     this.orderProductDetailPageBuilder,
@@ -67,6 +68,18 @@ class AppRouter {
   customerPortfolioPageBuilder;
   final Widget Function(BuildContext context, String orgId, String customerId)?
   customerDetailPageBuilder;
+
+  /// Builds the pedidos listing/tracking screen (TASK-102), given
+  /// `orgId`/`companyId` and the raw `queryParameters` of [OrderListRoute] —
+  /// same "router hands raw params, page owns parsing" contract
+  /// [customerPortfolioPageBuilder] already sets.
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  orderListPageBuilder;
 
   /// Builds the "novo pedido" screen (TASK-096), given `orgId`/`companyId`
   /// and the raw `queryParameters` of [OrderDraftRoute] — the caller decides
@@ -202,6 +215,25 @@ class AppRouter {
         ),
         builder: (context, state) =>
             userManagementPageBuilder(context, state.pathParameters['orgId']!),
+      ),
+      GoRoute(
+        path: OrderListRoute.pathPattern,
+        name: OrderListRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.orderView,
+        ),
+        builder: (context, state) {
+          final builder = orderListPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
       ),
       GoRoute(
         path: CustomerPortfolioRoute.pathPattern,

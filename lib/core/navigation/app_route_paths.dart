@@ -158,6 +158,33 @@ final class ProductFormRoute extends AppRoute {
   String get location => '/org/$orgId/companies/$companyId/products/new';
 }
 
+/// Pedidos listing/tracking route (TASK-102), scoped by Organization and
+/// Company. Search and filters are carried as query parameters so Flutter Web
+/// reloads/share links preserve the list state, same precedent
+/// [CustomerPortfolioRoute] already sets. Protected in [AppRouter] by
+/// `order.view`.
+final class OrderListRoute extends AppRoute {
+  const OrderListRoute({
+    required this.orgId,
+    required this.companyId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String companyId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'orderList';
+  static const pathPattern = '/org/:orgId/companies/:companyId/orders';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/companies/$companyId/orders';
+    if (queryParameters.isEmpty) return path;
+    return Uri(path: path, queryParameters: queryParameters).toString();
+  }
+}
+
 /// Customer portfolio list route (TASK-051), scoped by Organization and
 /// Company. Search and filters are carried as query parameters so Flutter Web
 /// reloads/share links preserve the list state.

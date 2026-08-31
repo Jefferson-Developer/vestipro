@@ -28,6 +28,10 @@ class OrdersTable extends Table {
   TextColumn get branchId => text()();
   TextColumn get customerId => text()();
   TextColumn get sellerId => text()();
+  // The definitive `orderNumber` `submitOrder` (TASK-101) generates
+  // server-side — `null` for a local `draft`/`pendingSync` order that has
+  // never reached the backend (TASK-102).
+  TextColumn get orderNumber => text().nullable()();
   TextColumn get deliveryAddressJson => text()();
   TextColumn get billingAddressJson => text()();
   TextColumn get priceListId => text()();

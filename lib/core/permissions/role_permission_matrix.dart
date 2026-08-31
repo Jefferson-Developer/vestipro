@@ -43,6 +43,7 @@ abstract final class RolePermissionMatrix {
     Capability.opportunityManage,
     Capability.pipelineStageManage,
     Capability.orderCreate,
+    Capability.orderView,
     Capability.orderApprove,
     Capability.discountApproveAboveLimit,
     Capability.teamManage,
@@ -60,6 +61,7 @@ abstract final class RolePermissionMatrix {
     Capability.opportunityView,
     Capability.opportunityManage,
     Capability.orderCreate,
+    Capability.orderView,
   };
 
   static const Set<Capability> _salesAssistantCapabilities = <Capability>{

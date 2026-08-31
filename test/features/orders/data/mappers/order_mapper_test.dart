@@ -52,6 +52,7 @@ void main() {
         branchId: 'branch-1',
         customerId: 'customer-1',
         sellerId: 'seller-1',
+        orderNumber: '000123',
         deliveryAddress: address(city: 'Blumenau'),
         billingAddress: address(city: 'Gaspar'),
         priceListId: 'price-list-1',

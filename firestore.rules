@@ -71,11 +71,11 @@ service cloud.firestore {
         || (roleName == 'ADMIN' && capabilityCode != 'organization.transferOwnership')
         || (roleName == 'SALES_MANAGER' && capabilityCode in [
               'customer.create', 'customer.update', 'customer.delete',
-              'order.create', 'order.approve', 'discount.approveAboveLimit',
+              'order.create', 'order.view', 'order.approve', 'discount.approveAboveLimit',
               'team.manage', 'report.export', 'report.viewSensitive'
             ])
         || (roleName == 'SALES_REP' && capabilityCode in [
-              'customer.create', 'customer.update', 'order.create'
+              'customer.create', 'customer.update', 'order.create', 'order.view'
             ])
         || (roleName == 'SALES_ASSISTANT' && capabilityCode in [
               'customer.create', 'customer.update'
@@ -176,6 +176,52 @@ service cloud.firestore {
               && resource.data.primarySalesRepId == request.auth.uid
             )
           )
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // organizations/{organizationId}/orders/{orderId} (TASK-102)
+    // -----------------------------------------------------------------------
+
+    // Mirrors `validCustomerVisibilityPayload`: every field a client query or
+    // this rule itself needs to decide visibility must already be on the
+    // Order document written by `submitOrder` (TASK-101) — never inferred.
+    function validOrderVisibilityPayload(organizationId) {
+      return resource.data.keys().hasAll([
+          'organizationId',
+          'companyId',
+          'sellerId',
+          'deletedAt'
+        ])
+        && resource.data.organizationId == organizationId
+        && resource.data.companyId is string
+        && resource.data.companyId.size() > 0
+        && resource.data.sellerId is string
+        && resource.data.sellerId.size() > 0
+        && resource.data.deletedAt == null;
+    }
+
+    // A SALES_MANAGER may read an Order when its own seller belongs to one of
+    // the manager's teams — re-derived from that seller's real Membership
+    // (never from a client-supplied list), the same one extra `get()` per
+    // document `managerCanReadCustomer` already costs for its own team
+    // lookup. There is no denormalized `teamId` on Order (unlike Customer):
+    // one seller can belong to more than one team, so this compares the full
+    // `teamIds` array instead of a single field.
+    function managerCanReadOrder(organizationId) {
+      return isSalesManager(organizationId)
+        && exists(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId))
+        && requesterTeamIds(organizationId).hasAny(
+            get(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId)).data.teamIds
+          );
+    }
+
+    function canReadOrder(organizationId) {
+      return validOrderVisibilityPayload(organizationId)
+        && (
+          isOwnerOrAdmin(organizationId)
+          || (isSalesRep(organizationId) && resource.data.sellerId == request.auth.uid)
+          || managerCanReadOrder(organizationId)
         );
     }
 
@@ -723,6 +769,20 @@ service cloud.firestore {
         allow list: if canListCustomers(organizationId);
 
         // Customer creation/editing belongs to TASK-048/TASK-049/TASK-051.
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/orders/{orderId}
+      // (TASK-102 visibility contract for the pedidos listing/tracking
+      // screen — writes remain the exclusive concern of the `submitOrder`
+      // Cloud Function, TASK-101, which uses the Admin SDK and so bypasses
+      // these Rules entirely.)
+      // -------------------------------------------------------------------
+
+      match /orders/{orderId} {
+        allow get, list: if canReadOrder(organizationId);
+
         allow create, update, delete: if false;
       }
 

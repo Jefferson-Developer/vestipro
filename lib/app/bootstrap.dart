@@ -233,6 +233,34 @@ class VestiProApp extends StatelessWidget {
                       ).location,
                     ),
                   ),
+          orderListPageBuilder: (context, orgId, companyId, queryParameters) =>
+              OrderListPage(
+                organizationId: orgId,
+                companyId: companyId,
+                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                permissionService: getIt<PermissionService>(),
+                createBloc: () => getIt<OrderListBloc>(),
+                initialSearchQuery: queryParameters['q'] ?? '',
+                initialFilters: OrderListFilters.fromQueryParameters(
+                  queryParameters,
+                ),
+                onOrderDraftSelected: (order) => context.go(
+                  OrderDraftRoute(
+                    orgId: orgId,
+                    companyId: companyId,
+                    draftId: order.id,
+                  ).location,
+                ),
+                onUrlStateChanged: (searchQuery, filters) => context.go(
+                  OrderListRoute(
+                    orgId: orgId,
+                    companyId: companyId,
+                    queryParameters: filters.toQueryParameters(
+                      search: searchQuery,
+                    ),
+                  ).location,
+                ),
+              ),
           orderDraftPageBuilder: (context, orgId, companyId, queryParameters) =>
               OrderDraftPage(
                 organizationId: orgId,
@@ -370,6 +398,7 @@ Future<void> _submitOrder(BuildContext context, Order order) async {
       final updatedOrder = order.copyWith(
         status: submission.status,
         syncStatus: OrderSyncStatus.synced,
+        orderNumber: submission.orderNumber,
         discountAmount: submission.discountAmount,
         surchargeAmount: submission.surchargeAmount,
         shippingAmount: submission.shippingAmount,

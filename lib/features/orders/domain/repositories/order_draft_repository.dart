@@ -27,4 +27,15 @@ abstract interface class OrderDraftRepository {
     required String companyId,
     required String id,
   });
+
+  /// Every non-deleted `Order` currently cached on this device for
+  /// [organizationId]/[companyId] — drafts, orders pending sync and orders
+  /// already reconciled locally after a successful submission alike
+  /// (TASK-102's "pedidos listing" reads this to surface the ones that only
+  /// exist on this device, i.e. `syncStatus != synced`, alongside the
+  /// server's own paginated result). Never contacts the network.
+  Future<AppResult<List<Order>>> getLocalOrdersForCompany({
+    required String organizationId,
+    required String companyId,
+  });
 }

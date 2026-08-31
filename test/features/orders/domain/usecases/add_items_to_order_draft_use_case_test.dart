@@ -210,4 +210,12 @@ final class _FakeOrderDraftRepository implements OrderDraftRepository {
     savedOrders.add(order);
     return saveResult;
   }
+
+  @override
+  Future<AppResult<List<Order>>> getLocalOrdersForCompany({
+    required String organizationId,
+    required String companyId,
+  }) async {
+    return const AppSuccess<List<Order>>(<Order>[]);
+  }
 }

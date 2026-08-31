@@ -10436,6 +10436,17 @@ class $OrdersTableTable extends OrdersTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _orderNumberMeta = const VerificationMeta(
+    'orderNumber',
+  );
+  @override
+  late final GeneratedColumn<String> orderNumber = GeneratedColumn<String>(
+    'order_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
   static const VerificationMeta _deliveryAddressJsonMeta =
       const VerificationMeta('deliveryAddressJson');
   @override
@@ -10719,6 +10730,7 @@ class $OrdersTableTable extends OrdersTable
     branchId,
     customerId,
     sellerId,
+    orderNumber,
     deliveryAddressJson,
     billingAddressJson,
     priceListId,
@@ -10804,6 +10816,15 @@ class $OrdersTableTable extends OrdersTable
       );
     } else if (isInserting) {
       context.missing(_sellerIdMeta);
+    }
+    if (data.containsKey('order_number')) {
+      context.handle(
+        _orderNumberMeta,
+        orderNumber.isAcceptableOrUnknown(
+          data['order_number']!,
+          _orderNumberMeta,
+        ),
+      );
     }
     if (data.containsKey('delivery_address_json')) {
       context.handle(
@@ -11043,6 +11064,10 @@ class $OrdersTableTable extends OrdersTable
         DriftSqlType.string,
         data['${effectivePrefix}seller_id'],
       )!,
+      orderNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_number'],
+      ),
       deliveryAddressJson: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}delivery_address_json'],
@@ -11159,6 +11184,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
   final String branchId;
   final String customerId;
   final String sellerId;
+  final String? orderNumber;
   final String deliveryAddressJson;
   final String billingAddressJson;
   final String priceListId;
@@ -11191,6 +11217,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     required this.branchId,
     required this.customerId,
     required this.sellerId,
+    this.orderNumber,
     required this.deliveryAddressJson,
     required this.billingAddressJson,
     required this.priceListId,
@@ -11226,6 +11253,9 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     map['branch_id'] = Variable<String>(branchId);
     map['customer_id'] = Variable<String>(customerId);
     map['seller_id'] = Variable<String>(sellerId);
+    if (!nullToAbsent || orderNumber != null) {
+      map['order_number'] = Variable<String>(orderNumber);
+    }
     map['delivery_address_json'] = Variable<String>(deliveryAddressJson);
     map['billing_address_json'] = Variable<String>(billingAddressJson);
     map['price_list_id'] = Variable<String>(priceListId);
@@ -11284,6 +11314,9 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
       branchId: Value(branchId),
       customerId: Value(customerId),
       sellerId: Value(sellerId),
+      orderNumber: orderNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(orderNumber),
       deliveryAddressJson: Value(deliveryAddressJson),
       billingAddressJson: Value(billingAddressJson),
       priceListId: Value(priceListId),
@@ -11346,6 +11379,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
       branchId: serializer.fromJson<String>(json['branchId']),
       customerId: serializer.fromJson<String>(json['customerId']),
       sellerId: serializer.fromJson<String>(json['sellerId']),
+      orderNumber: serializer.fromJson<String?>(json['orderNumber']),
       deliveryAddressJson: serializer.fromJson<String>(
         json['deliveryAddressJson'],
       ),
@@ -11391,6 +11425,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
       'branchId': serializer.toJson<String>(branchId),
       'customerId': serializer.toJson<String>(customerId),
       'sellerId': serializer.toJson<String>(sellerId),
+      'orderNumber': serializer.toJson<String?>(orderNumber),
       'deliveryAddressJson': serializer.toJson<String>(deliveryAddressJson),
       'billingAddressJson': serializer.toJson<String>(billingAddressJson),
       'priceListId': serializer.toJson<String>(priceListId),
@@ -11426,6 +11461,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     String? branchId,
     String? customerId,
     String? sellerId,
+    Value<String?> orderNumber = const Value.absent(),
     String? deliveryAddressJson,
     String? billingAddressJson,
     String? priceListId,
@@ -11458,6 +11494,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     branchId: branchId ?? this.branchId,
     customerId: customerId ?? this.customerId,
     sellerId: sellerId ?? this.sellerId,
+    orderNumber: orderNumber.present ? orderNumber.value : this.orderNumber,
     deliveryAddressJson: deliveryAddressJson ?? this.deliveryAddressJson,
     billingAddressJson: billingAddressJson ?? this.billingAddressJson,
     priceListId: priceListId ?? this.priceListId,
@@ -11502,6 +11539,9 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
           ? data.customerId.value
           : this.customerId,
       sellerId: data.sellerId.present ? data.sellerId.value : this.sellerId,
+      orderNumber: data.orderNumber.present
+          ? data.orderNumber.value
+          : this.orderNumber,
       deliveryAddressJson: data.deliveryAddressJson.present
           ? data.deliveryAddressJson.value
           : this.deliveryAddressJson,
@@ -11567,6 +11607,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
           ..write('branchId: $branchId, ')
           ..write('customerId: $customerId, ')
           ..write('sellerId: $sellerId, ')
+          ..write('orderNumber: $orderNumber, ')
           ..write('deliveryAddressJson: $deliveryAddressJson, ')
           ..write('billingAddressJson: $billingAddressJson, ')
           ..write('priceListId: $priceListId, ')
@@ -11604,6 +11645,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     branchId,
     customerId,
     sellerId,
+    orderNumber,
     deliveryAddressJson,
     billingAddressJson,
     priceListId,
@@ -11640,6 +11682,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
           other.branchId == this.branchId &&
           other.customerId == this.customerId &&
           other.sellerId == this.sellerId &&
+          other.orderNumber == this.orderNumber &&
           other.deliveryAddressJson == this.deliveryAddressJson &&
           other.billingAddressJson == this.billingAddressJson &&
           other.priceListId == this.priceListId &&
@@ -11674,6 +11717,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
   final Value<String> branchId;
   final Value<String> customerId;
   final Value<String> sellerId;
+  final Value<String?> orderNumber;
   final Value<String> deliveryAddressJson;
   final Value<String> billingAddressJson;
   final Value<String> priceListId;
@@ -11707,6 +11751,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     this.branchId = const Value.absent(),
     this.customerId = const Value.absent(),
     this.sellerId = const Value.absent(),
+    this.orderNumber = const Value.absent(),
     this.deliveryAddressJson = const Value.absent(),
     this.billingAddressJson = const Value.absent(),
     this.priceListId = const Value.absent(),
@@ -11741,6 +11786,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     required String branchId,
     required String customerId,
     required String sellerId,
+    this.orderNumber = const Value.absent(),
     required String deliveryAddressJson,
     required String billingAddressJson,
     required String priceListId,
@@ -11791,6 +11837,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     Expression<String>? branchId,
     Expression<String>? customerId,
     Expression<String>? sellerId,
+    Expression<String>? orderNumber,
     Expression<String>? deliveryAddressJson,
     Expression<String>? billingAddressJson,
     Expression<String>? priceListId,
@@ -11825,6 +11872,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
       if (branchId != null) 'branch_id': branchId,
       if (customerId != null) 'customer_id': customerId,
       if (sellerId != null) 'seller_id': sellerId,
+      if (orderNumber != null) 'order_number': orderNumber,
       if (deliveryAddressJson != null)
         'delivery_address_json': deliveryAddressJson,
       if (billingAddressJson != null)
@@ -11864,6 +11912,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     Value<String>? branchId,
     Value<String>? customerId,
     Value<String>? sellerId,
+    Value<String?>? orderNumber,
     Value<String>? deliveryAddressJson,
     Value<String>? billingAddressJson,
     Value<String>? priceListId,
@@ -11898,6 +11947,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
       branchId: branchId ?? this.branchId,
       customerId: customerId ?? this.customerId,
       sellerId: sellerId ?? this.sellerId,
+      orderNumber: orderNumber ?? this.orderNumber,
       deliveryAddressJson: deliveryAddressJson ?? this.deliveryAddressJson,
       billingAddressJson: billingAddressJson ?? this.billingAddressJson,
       priceListId: priceListId ?? this.priceListId,
@@ -11947,6 +11997,9 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     }
     if (sellerId.present) {
       map['seller_id'] = Variable<String>(sellerId.value);
+    }
+    if (orderNumber.present) {
+      map['order_number'] = Variable<String>(orderNumber.value);
     }
     if (deliveryAddressJson.present) {
       map['delivery_address_json'] = Variable<String>(
@@ -12040,6 +12093,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
           ..write('branchId: $branchId, ')
           ..write('customerId: $customerId, ')
           ..write('sellerId: $sellerId, ')
+          ..write('orderNumber: $orderNumber, ')
           ..write('deliveryAddressJson: $deliveryAddressJson, ')
           ..write('billingAddressJson: $billingAddressJson, ')
           ..write('priceListId: $priceListId, ')
@@ -18174,6 +18228,7 @@ typedef $$OrdersTableTableCreateCompanionBuilder =
       required String branchId,
       required String customerId,
       required String sellerId,
+      Value<String?> orderNumber,
       required String deliveryAddressJson,
       required String billingAddressJson,
       required String priceListId,
@@ -18209,6 +18264,7 @@ typedef $$OrdersTableTableUpdateCompanionBuilder =
       Value<String> branchId,
       Value<String> customerId,
       Value<String> sellerId,
+      Value<String?> orderNumber,
       Value<String> deliveryAddressJson,
       Value<String> billingAddressJson,
       Value<String> priceListId,
@@ -18298,6 +18354,11 @@ class $$OrdersTableTableFilterComposer
 
   ColumnFilters<String> get sellerId => $composableBuilder(
     column: $table.sellerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orderNumber => $composableBuilder(
+    column: $table.orderNumber,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -18491,6 +18552,11 @@ class $$OrdersTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get orderNumber => $composableBuilder(
+    column: $table.orderNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get deliveryAddressJson => $composableBuilder(
     column: $table.deliveryAddressJson,
     builder: (column) => ColumnOrderings(column),
@@ -18647,6 +18713,11 @@ class $$OrdersTableTableAnnotationComposer
 
   GeneratedColumn<String> get sellerId =>
       $composableBuilder(column: $table.sellerId, builder: (column) => column);
+
+  GeneratedColumn<String> get orderNumber => $composableBuilder(
+    column: $table.orderNumber,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<String> get deliveryAddressJson => $composableBuilder(
     column: $table.deliveryAddressJson,
@@ -18811,6 +18882,7 @@ class $$OrdersTableTableTableManager
                 Value<String> branchId = const Value.absent(),
                 Value<String> customerId = const Value.absent(),
                 Value<String> sellerId = const Value.absent(),
+                Value<String?> orderNumber = const Value.absent(),
                 Value<String> deliveryAddressJson = const Value.absent(),
                 Value<String> billingAddressJson = const Value.absent(),
                 Value<String> priceListId = const Value.absent(),
@@ -18844,6 +18916,7 @@ class $$OrdersTableTableTableManager
                 branchId: branchId,
                 customerId: customerId,
                 sellerId: sellerId,
+                orderNumber: orderNumber,
                 deliveryAddressJson: deliveryAddressJson,
                 billingAddressJson: billingAddressJson,
                 priceListId: priceListId,
@@ -18879,6 +18952,7 @@ class $$OrdersTableTableTableManager
                 required String branchId,
                 required String customerId,
                 required String sellerId,
+                Value<String?> orderNumber = const Value.absent(),
                 required String deliveryAddressJson,
                 required String billingAddressJson,
                 required String priceListId,
@@ -18912,6 +18986,7 @@ class $$OrdersTableTableTableManager
                 branchId: branchId,
                 customerId: customerId,
                 sellerId: sellerId,
+                orderNumber: orderNumber,
                 deliveryAddressJson: deliveryAddressJson,
                 billingAddressJson: billingAddressJson,
                 priceListId: priceListId,

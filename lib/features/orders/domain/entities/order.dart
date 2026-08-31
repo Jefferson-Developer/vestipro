@@ -38,6 +38,13 @@ abstract class Order with _$Order {
     required String branchId,
     required String customerId,
     required String sellerId,
+    // The definitive, sequential order number `submitOrder` (TASK-101)
+    // generates server-side — `null` until this `Order` has actually been
+    // submitted (a `draft`/`pendingSync` order never has one). Read-only from
+    // the client's perspective: nothing in this codebase other than
+    // `_submitOrder` (`app/bootstrap.dart`), reconciling a successful
+    // `OrderSubmissionResult`, may ever set it.
+    String? orderNumber,
     required OrderAddress deliveryAddress,
     required OrderAddress billingAddress,
     required String priceListId,

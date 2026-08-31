@@ -79,6 +79,36 @@ void main() {
       );
     });
 
+    test('SALES_REP and SALES_MANAGER can view orders (TASK-102), but '
+        'SALES_ASSISTANT/FINANCE/READ_ONLY cannot', () {
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesRep,
+        SystemRoleName.salesManager,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.orderView),
+          isTrue,
+          reason: '$role must see the pedidos listing.',
+        );
+      }
+
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesAssistant,
+        SystemRoleName.finance,
+        SystemRoleName.readOnly,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.orderView),
+          isFalse,
+          reason: '$role must never see the pedidos listing.',
+        );
+      }
+    });
+
     test(
       'SALES_ASSISTANT can only create/update customers and create leads',
       () {

@@ -708,6 +708,14 @@ final class _FakeOrderDraftRepository implements OrderDraftRepository {
   }) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<AppResult<List<Order>>> getLocalOrdersForCompany({
+    required String organizationId,
+    required String companyId,
+  }) {
+    throw UnimplementedError();
+  }
 }
 
 final class _FakeCustomerRepository implements CustomerRepository {

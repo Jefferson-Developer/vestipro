@@ -21,6 +21,7 @@ final class OrderDto {
     required this.branchId,
     required this.customerId,
     required this.sellerId,
+    this.orderNumber,
     required this.deliveryAddress,
     required this.billingAddress,
     required this.priceListId,
@@ -55,6 +56,7 @@ final class OrderDto {
     final branchId = json['branchId'];
     final customerId = json['customerId'];
     final sellerId = json['sellerId'];
+    final orderNumber = json['orderNumber'];
     final deliveryAddress = json['deliveryAddress'];
     final billingAddress = json['billingAddress'];
     final priceListId = json['priceListId'];
@@ -91,6 +93,7 @@ final class OrderDto {
         billingAddress is! Map<String, dynamic> ||
         priceListId is! String ||
         paymentTermId is! String ||
+        (orderNumber != null && orderNumber is! String) ||
         (carrierId != null && carrierId is! String) ||
         (collectionId != null && collectionId is! String) ||
         (orderType != null && orderType is! String) ||
@@ -123,6 +126,7 @@ final class OrderDto {
       branchId: branchId,
       customerId: customerId,
       sellerId: sellerId,
+      orderNumber: orderNumber as String?,
       deliveryAddress: OrderAddressDto.fromJson(deliveryAddress),
       billingAddress: OrderAddressDto.fromJson(billingAddress),
       priceListId: priceListId,
@@ -158,6 +162,7 @@ final class OrderDto {
   final String branchId;
   final String customerId;
   final String sellerId;
+  final String? orderNumber;
   final OrderAddressDto deliveryAddress;
   final OrderAddressDto billingAddress;
   final String priceListId;
@@ -192,6 +197,7 @@ final class OrderDto {
       'branchId': branchId,
       'customerId': customerId,
       'sellerId': sellerId,
+      'orderNumber': orderNumber,
       'deliveryAddress': deliveryAddress.toJson(),
       'billingAddress': billingAddress.toJson(),
       'priceListId': priceListId,
