@@ -209,21 +209,29 @@ export const calculatePricing = onCall<
   return response;
 });
 
-function requireNonEmptyString(value: unknown, field: string): string {
+/**
+ * Exported (alongside the rest of this file's request-shaping helpers below)
+ * so `submitOrder` (TASK-101, `functions/src/orders/submit-order.ts`) can
+ * reuse the exact same Price List/Payment Term/campaign loading and
+ * validation logic when it revalidates pricing at submission time — never a
+ * second, independently-drifting reimplementation of the same rules
+ * (`AGENTS.md`'s "não duplicar... regra já existente").
+ */
+export function requireNonEmptyString(value: unknown, field: string): string {
   if (typeof value !== 'string' || value.trim().length === 0) {
     throw new HttpsError('invalid-argument', `${field} is required.`);
   }
   return value.trim();
 }
 
-function normalizeCurrency(value: unknown, field: string): number {
+export function normalizeCurrency(value: unknown, field: string): number {
   if (typeof value !== 'number' || Number.isNaN(value) || value < 0) {
     throw new HttpsError('invalid-argument', `${field} must be zero or greater.`);
   }
   return Math.round((value + Number.EPSILON) * 100) / 100;
 }
 
-function normalizeItem(item: PricingEngineItemInput, index: number): PricingEngineItemInput {
+export function normalizeItem(item: PricingEngineItemInput, index: number): PricingEngineItemInput {
   if (typeof item !== 'object' || item === null) {
     throw new HttpsError('invalid-argument', `items[${index}] is invalid.`);
   }
@@ -302,13 +310,13 @@ async function persistIdempotentResponse(
   }
 }
 
-function optionalString(value: unknown): string | undefined {
+export function optionalString(value: unknown): string | undefined {
   if (typeof value !== 'string') return undefined;
   const trimmed = value.trim();
   return trimmed.length === 0 ? undefined : trimmed;
 }
 
-function mapPriceList(id: string, data: FirebaseFirestore.DocumentData | undefined): PricingEnginePriceList {
+export function mapPriceList(id: string, data: FirebaseFirestore.DocumentData | undefined): PricingEnginePriceList {
   if (!data) throw new HttpsError('failed-precondition', 'Price list payload missing.');
   return {
     id,
@@ -320,13 +328,13 @@ function mapPriceList(id: string, data: FirebaseFirestore.DocumentData | undefin
   };
 }
 
-function ensureActivePriceList(priceList: PricingEnginePriceList): void {
+export function ensureActivePriceList(priceList: PricingEnginePriceList): void {
   if (priceList.status !== 'active') {
     throw new HttpsError('failed-precondition', 'Price list is not active.');
   }
 }
 
-function mapPaymentTerm(
+export function mapPaymentTerm(
   id: string,
   data: FirebaseFirestore.DocumentData | undefined,
 ): PricingEnginePaymentTerm {
@@ -343,7 +351,7 @@ function mapPaymentTerm(
   };
 }
 
-function ensureValidPaymentTerm(paymentTerm: PricingEnginePaymentTerm, priceListId: string): void {
+export function ensureValidPaymentTerm(paymentTerm: PricingEnginePaymentTerm, priceListId: string): void {
   if (paymentTerm.status !== 'active') {
     throw new HttpsError('failed-precondition', 'Payment term is not active.');
   }
@@ -355,7 +363,7 @@ function ensureValidPaymentTerm(paymentTerm: PricingEnginePaymentTerm, priceList
   }
 }
 
-function mapPriceListItem(data: FirebaseFirestore.DocumentData): PricingEnginePriceListItem {
+export function mapPriceListItem(data: FirebaseFirestore.DocumentData): PricingEnginePriceListItem {
   return {
     productId: requireNonEmptyString(data.productId, 'productId'),
     variantId: optionalString(data.variantId),
@@ -364,7 +372,7 @@ function mapPriceListItem(data: FirebaseFirestore.DocumentData): PricingEnginePr
   };
 }
 
-function mapDiscountPolicy(
+export function mapDiscountPolicy(
   id: string,
   data: FirebaseFirestore.DocumentData,
 ): PricingEngineDiscountPolicy {
@@ -384,7 +392,7 @@ function mapDiscountPolicy(
   };
 }
 
-function mapCampaign(
+export function mapCampaign(
   id: string,
   data: FirebaseFirestore.DocumentData,
 ): PricingEngineCampaign {
@@ -412,7 +420,7 @@ function mapCampaign(
   };
 }
 
-function ensureCompanyScope(
+export function ensureCompanyScope(
   companyId: string,
   entityName: string,
   scopedEntity: { companyId?: string },
@@ -434,7 +442,7 @@ function isAlreadyExistsError(error: unknown): boolean {
   );
 }
 
-function serializeDate(value: unknown): string {
+export function serializeDate(value: unknown): string {
   if (value instanceof Timestamp) {
     return value.toDate().toISOString();
   }

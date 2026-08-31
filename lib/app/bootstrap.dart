@@ -16,6 +16,7 @@ import '../core/feature_flags/feature_flags.dart';
 import '../core/navigation/navigation.dart';
 import '../core/permissions/permissions.dart';
 import '../core/services/services.dart';
+import '../core/utils/utils.dart';
 import '../features/authentication/authentication.dart';
 import '../features/authentication/presentation/bloc/forgot_password_bloc.dart';
 import '../features/authentication/presentation/bloc/login_bloc.dart';
@@ -256,6 +257,7 @@ class VestiProApp extends StatelessWidget {
                     ).location,
                   );
                 },
+                onSubmitOrder: (order) => _submitOrder(context, order),
               ),
           orderProductCatalogPageBuilder:
               (context, orgId, companyId, draftId) => OrderProductCatalogPage(
@@ -340,6 +342,68 @@ class VestiProApp extends StatelessWidget {
       themeMode: ThemeMode.system,
       routerConfig: appRouter.router,
     );
+  }
+}
+
+/// Handles "Enviar pedido" (EPIC-13, TASK-101): submits [order] through the
+/// idempotent `submitOrder` Cloud Function — the only place a definitive
+/// `orderNumber`, price/estoque revalidation and the `submitted` transition
+/// are decided — then reconciles the local offline draft with whatever the
+/// server actually persisted (`status`/`syncStatus`/the new
+/// `OrderStatusHistoryEntry`), so the seller's own device never keeps
+/// showing a stale `draft`/`pendingSync` copy once the order has truly
+/// reached the backend. The outcome is always surfaced through a
+/// [SnackBar] — success or failure — never silently, matching every other
+/// autosave/failure surface already on `OrderDraftPage`.
+///
+/// Navigates back to [CatalogHomeRoute] on success: EPIC-13 has no order
+/// list/confirmation screen yet (TASK-102's own scope), so the catalog home
+/// is simply the closest existing "there is nothing else to do here"
+/// destination — a later task can replace this with a proper order detail/
+/// confirmation route without touching anything else in this flow.
+Future<void> _submitOrder(BuildContext context, Order order) async {
+  final result = await getIt<SubmitOrderUseCase>()(order: order);
+  if (!context.mounted) return;
+
+  switch (result) {
+    case AppSuccess<OrderSubmissionResult>(value: final submission):
+      final updatedOrder = order.copyWith(
+        status: submission.status,
+        syncStatus: OrderSyncStatus.synced,
+        discountAmount: submission.discountAmount,
+        surchargeAmount: submission.surchargeAmount,
+        shippingAmount: submission.shippingAmount,
+        statusHistory: <OrderStatusHistoryEntry>[
+          ...order.statusHistory,
+          OrderStatusHistoryEntry(
+            previousStatus: order.status,
+            newStatus: submission.status,
+            changedAt: submission.submittedAt,
+            actorId: order.sellerId,
+          ),
+        ],
+        updatedAt: submission.submittedAt,
+        version: order.version + 1,
+      );
+      await getIt<SaveOrderDraftUseCase>()(order: updatedOrder);
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(
+            'Pedido ${submission.orderNumber} enviado com sucesso.',
+          ),
+        ),
+      );
+      context.go(
+        CatalogHomeRoute(
+          orgId: order.organizationId,
+          companyId: order.companyId,
+        ).location,
+      );
+    case AppFailure<OrderSubmissionResult>(failure: final failure):
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(SnackBar(content: Text(failure.message)));
   }
 }
 

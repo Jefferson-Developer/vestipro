@@ -26,12 +26,12 @@ export { consumeStockReservation } from './inventory/consume-stock-reservation';
 export { expireStockReservations } from './inventory/expire-stock-reservations';
 export { syncStockAlerts } from './inventory/sync-stock-alerts';
 export { recomputeStockTurnoverMetrics } from './inventory/recompute-stock-turnover-metrics';
+export { submitOrder } from './orders';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é
 // importado aqui até ter uma função real para exportar.
 // - src/auth/     (ex.: TASK-029 — RBAC)
 // - src/pricing/  (ex.: TASK-088 — motor de precificação server-side)
-// - src/orders/   (ex.: TASK-101 — submissão do pedido)
 // - src/insights/ (ex.: TASK-121 — engine base de insights)
 // - src/admin/    (ex.: TASK-033 — auditoria administrativa)

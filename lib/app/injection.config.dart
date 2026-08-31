@@ -472,19 +472,28 @@ import '../features/opportunities/presentation/bloc/sales_pipeline_bloc.dart'
     as _i339;
 import '../features/orders/data/datasources/cloud_functions_order_pricing_data_source.dart'
     as _i708;
+import '../features/orders/data/datasources/cloud_functions_order_submission_data_source.dart'
+    as _i1058;
 import '../features/orders/data/datasources/order_pricing_data_source.dart'
     as _i492;
+import '../features/orders/data/datasources/order_submission_data_source.dart'
+    as _i1068;
 import '../features/orders/data/mappers/order_local_mapper.dart' as _i431;
 import '../features/orders/data/mappers/order_mapper.dart' as _i169;
 import '../features/orders/data/mappers/order_pricing_mapper.dart' as _i730;
+import '../features/orders/data/mappers/order_submission_mapper.dart' as _i1062;
 import '../features/orders/data/repositories/drift_order_draft_repository.dart'
     as _i247;
 import '../features/orders/data/repositories/order_pricing_repository_impl.dart'
     as _i258;
+import '../features/orders/data/repositories/order_submission_repository_impl.dart'
+    as _i167;
 import '../features/orders/domain/repositories/order_draft_repository.dart'
     as _i81;
 import '../features/orders/domain/repositories/order_pricing_repository.dart'
     as _i183;
+import '../features/orders/domain/repositories/order_submission_repository.dart'
+    as _i202;
 import '../features/orders/domain/services/order_status_transition_validator.dart'
     as _i753;
 import '../features/orders/domain/services/order_submission_validator.dart'
@@ -505,6 +514,7 @@ import '../features/orders/domain/usecases/save_order_draft_use_case.dart'
     as _i1;
 import '../features/orders/domain/usecases/start_order_draft_for_customer_use_case.dart'
     as _i168;
+import '../features/orders/domain/usecases/submit_order_use_case.dart' as _i856;
 import '../features/orders/presentation/bloc/order_draft_bloc.dart' as _i287;
 import '../features/orders/presentation/bloc/order_items_counter_cubit.dart'
     as _i244;
@@ -1166,6 +1176,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i795.ProductVariantRepository>(
       () => const _i912.SharedPreferencesProductVariantRepository(),
+    );
+    gh.factory<_i1062.OrderSubmissionMapper>(
+      () => _i1062.OrderSubmissionMapper(gh<_i169.OrderMapper>()),
     );
     gh.lazySingleton<_i150.CatalogCampaignRepository>(
       () => const _i565.SharedPreferencesCatalogCampaignRepository(),
@@ -1966,6 +1979,11 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i87.InviteAcceptanceMapper>(),
       ),
     );
+    gh.lazySingleton<_i1068.OrderSubmissionDataSource>(
+      () => _i1058.CloudFunctionsOrderSubmissionDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i923.RoleDataSource>(
       () => _i892.FirestoreRoleDataSource(gh<_i974.FirebaseFirestore>()),
     );
@@ -2163,6 +2181,12 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i958.UserRoleUpdateResultMapper>(),
       ),
     );
+    gh.lazySingleton<_i202.OrderSubmissionRepository>(
+      () => _i167.OrderSubmissionRepositoryImpl(
+        dataSource: gh<_i1068.OrderSubmissionDataSource>(),
+        mapper: gh<_i1062.OrderSubmissionMapper>(),
+      ),
+    );
     gh.factory<_i321.ListPortfolioAssignmentsUseCase>(
       () => _i321.ListPortfolioAssignmentsUseCase(
         gh<_i295.PortfolioAssignmentRepository>(),
@@ -2172,6 +2196,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1030.AssignRoleToUserUseCase(
         gh<_i957.MembershipRepository>(),
         gh<_i753.AuditLogRepository>(),
+      ),
+    );
+    gh.factory<_i856.SubmitOrderUseCase>(
+      () => _i856.SubmitOrderUseCase(
+        gh<_i202.OrderSubmissionRepository>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i559.AcceptInviteUseCase>(
