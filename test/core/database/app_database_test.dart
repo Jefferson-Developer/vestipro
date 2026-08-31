@@ -16,7 +16,7 @@ void main() {
     });
 
     test('creates the customer schema on a fresh database', () async {
-      expect(database.schemaVersion, 12);
+      expect(database.schemaVersion, 13);
 
       // Exercises `onCreate`/`beforeOpen` by forcing the connection open.
       await database.customStatement('SELECT 1');

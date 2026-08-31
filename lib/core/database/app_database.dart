@@ -1,5 +1,7 @@
 import 'package:drift/drift.dart';
 
+import 'tables/campaigns_table.dart';
+import 'tables/colors_table.dart';
 import 'tables/customer_addresses_table.dart';
 import 'tables/customer_contacts_table.dart';
 import 'tables/customers_table.dart';
@@ -10,6 +12,10 @@ import 'tables/payment_terms_table.dart';
 import 'tables/price_list_items_table.dart';
 import 'tables/price_lists_table.dart';
 import 'tables/product_search_index_table.dart';
+import 'tables/product_variants_table.dart';
+import 'tables/products_table.dart';
+import 'tables/size_grids_table.dart';
+import 'tables/targets_table.dart';
 import 'tables/variant_stock_balances_table.dart';
 import 'tables/warehouses_table.dart';
 
@@ -72,13 +78,19 @@ class OrderWithItemsRow {
     VariantStockBalancesTable,
     OrdersTable,
     OrderItemsTable,
+    ColorsTable,
+    SizeGridsTable,
+    ProductsTable,
+    ProductVariantsTable,
+    CampaignsTable,
+    TargetsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 12;
+  int get schemaVersion => 13;
 
   @override
   MigrationStrategy get migration {
@@ -147,6 +159,17 @@ class AppDatabase extends _$AppDatabase {
             ordersTable,
             ordersTable.duplicatedFromOrderNumber,
           );
+        }
+        if (from < 13) {
+          // TASK-106: schema local Drift completo para a carga offline
+          // (seção 5.1 de tasks.md) — cores, grades, produtos, variantes,
+          // campanhas e o placeholder estrutural de metas (TASK-114).
+          await migrator.createTable(colorsTable);
+          await migrator.createTable(sizeGridsTable);
+          await migrator.createTable(productsTable);
+          await migrator.createTable(productVariantsTable);
+          await migrator.createTable(campaignsTable);
+          await migrator.createTable(targetsTable);
         }
       },
       beforeOpen: (details) async {
@@ -784,5 +807,267 @@ class AppDatabase extends _$AppDatabase {
               ..orderBy([(row) => OrderingTerm.asc(row.position)]))
             .get();
     return OrderWithItemsRow(order: orderRow, items: itemRows);
+  }
+
+  // ---------------------------------------------------------------------
+  // TASK-106 — Colors ("cores", tasks.md seção 5.1)
+  // ---------------------------------------------------------------------
+
+  /// Replaces the full local Color palette for [organizationId] with exactly
+  /// [colorRows] in a single transaction, mirroring [replacePriceLists].
+  Future<void> replaceColors({
+    required String organizationId,
+    required List<ColorsTableCompanion> colorRows,
+  }) {
+    return transaction(() async {
+      await (delete(
+        colorsTable,
+      )..where((row) => row.organizationId.equals(organizationId))).go();
+
+      await batch((batch) {
+        batch.insertAll(colorsTable, colorRows);
+      });
+    });
+  }
+
+  /// Inserts or updates exactly one Color row — the incremental-update
+  /// primitive the future sync engine (EPIC-14) uses, mirroring
+  /// [upsertPriceList].
+  Future<void> upsertColor(ColorsTableCompanion row) {
+    return into(colorsTable).insertOnConflictUpdate(row);
+  }
+
+  /// Every non-soft-deleted Color currently stored locally for
+  /// [organizationId].
+  Future<List<ColorsTableData>> getColorsForOrganization({
+    required String organizationId,
+  }) {
+    return (select(colorsTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.deletedAt.isNull(),
+        ))
+        .get();
+  }
+
+  // ---------------------------------------------------------------------
+  // TASK-106 — Size grids ("grades", tasks.md seção 5.1)
+  // ---------------------------------------------------------------------
+
+  /// Replaces the full local Size Grid template set for [organizationId]
+  /// with exactly [sizeGridRows] in a single transaction, mirroring
+  /// [replaceColors].
+  Future<void> replaceSizeGrids({
+    required String organizationId,
+    required List<SizeGridsTableCompanion> sizeGridRows,
+  }) {
+    return transaction(() async {
+      await (delete(
+        sizeGridsTable,
+      )..where((row) => row.organizationId.equals(organizationId))).go();
+
+      await batch((batch) {
+        batch.insertAll(sizeGridsTable, sizeGridRows);
+      });
+    });
+  }
+
+  /// Inserts or updates exactly one Size Grid template row.
+  Future<void> upsertSizeGrid(SizeGridsTableCompanion row) {
+    return into(sizeGridsTable).insertOnConflictUpdate(row);
+  }
+
+  /// Every non-soft-deleted Size Grid template currently stored locally for
+  /// [organizationId].
+  Future<List<SizeGridsTableData>> getSizeGridsForOrganization({
+    required String organizationId,
+  }) {
+    return (select(sizeGridsTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.deletedAt.isNull(),
+        ))
+        .get();
+  }
+
+  // ---------------------------------------------------------------------
+  // TASK-106 — Products & variants ("produtos"/"variantes", tasks.md
+  // seção 5.1) — canonical offline cache, distinct from
+  // [ProductSearchIndexTable] (TASK-069, search-only projection).
+  // ---------------------------------------------------------------------
+
+  /// Replaces the full local Product set for [organizationId]/[companyId]
+  /// with exactly [productRows] in a single transaction, mirroring
+  /// [replaceCustomers]. Deleting matching rows from [ProductsTable] cascades
+  /// to their variant rows (`ON DELETE CASCADE`), so callers must re-supply
+  /// every still-valid variant via [replaceProductVariants] for each product
+  /// id in the same load.
+  Future<void> replaceProducts({
+    required String organizationId,
+    String? companyId,
+    required List<ProductsTableCompanion> productRows,
+  }) {
+    return transaction(() async {
+      await (delete(productsTable)..where((row) {
+            final base = row.organizationId.equals(organizationId);
+            if (companyId == null) return base;
+            return base & row.companyId.equals(companyId);
+          }))
+          .go();
+
+      await batch((batch) {
+        batch.insertAll(productsTable, productRows);
+      });
+    });
+  }
+
+  /// Inserts or updates exactly one Product row.
+  Future<void> upsertProduct(ProductsTableCompanion row) {
+    return into(productsTable).insertOnConflictUpdate(row);
+  }
+
+  /// Every non-soft-deleted Product currently stored locally for
+  /// [organizationId]/[companyId].
+  Future<List<ProductsTableData>> getProductsForCompany({
+    required String organizationId,
+    String? companyId,
+  }) {
+    return (select(productsTable)..where((row) {
+          final base =
+              row.organizationId.equals(organizationId) &
+              row.deletedAt.isNull();
+          if (companyId == null) return base;
+          return base & row.companyId.equals(companyId);
+        }))
+        .get();
+  }
+
+  /// Replaces every variant row for [productId] with exactly [variantRows]
+  /// in a single transaction — the sibling primitive to [replaceProducts]
+  /// for a product's variant list, mirroring [replaceOrderItems].
+  Future<void> replaceProductVariants({
+    required String productId,
+    required List<ProductVariantsTableCompanion> variantRows,
+  }) {
+    return transaction(() async {
+      await (delete(
+        productVariantsTable,
+      )..where((row) => row.productId.equals(productId))).go();
+
+      await batch((batch) {
+        batch.insertAll(productVariantsTable, variantRows);
+      });
+    });
+  }
+
+  /// Inserts or updates exactly one Product Variant row.
+  Future<void> upsertProductVariant(ProductVariantsTableCompanion row) {
+    return into(productVariantsTable).insertOnConflictUpdate(row);
+  }
+
+  /// Every Variant currently stored locally for [productId] — there is no
+  /// `deletedAt` filter here because `ProductVariant` has no tombstone field
+  /// (see [ProductVariantsTable] docs); a discontinued variant is expressed
+  /// through its `status` column instead.
+  Future<List<ProductVariantsTableData>> getProductVariantsByProduct({
+    required String productId,
+  }) {
+    return (select(
+      productVariantsTable,
+    )..where((row) => row.productId.equals(productId))).get();
+  }
+
+  // ---------------------------------------------------------------------
+  // TASK-106 — Campaigns ("campanhas", tasks.md seção 5.1)
+  // ---------------------------------------------------------------------
+
+  /// Replaces the full local Campaign set for [organizationId]/[companyId]
+  /// with exactly [campaignRows] in a single transaction, mirroring
+  /// [replacePriceLists].
+  Future<void> replaceCampaigns({
+    required String organizationId,
+    required String companyId,
+    required List<CampaignsTableCompanion> campaignRows,
+  }) {
+    return transaction(() async {
+      await (delete(campaignsTable)..where(
+            (row) =>
+                row.organizationId.equals(organizationId) &
+                row.companyId.equals(companyId),
+          ))
+          .go();
+
+      await batch((batch) {
+        batch.insertAll(campaignsTable, campaignRows);
+      });
+    });
+  }
+
+  /// Inserts or updates exactly one Campaign row.
+  Future<void> upsertCampaign(CampaignsTableCompanion row) {
+    return into(campaignsTable).insertOnConflictUpdate(row);
+  }
+
+  /// Every non-soft-deleted Campaign currently stored locally for
+  /// [organizationId]/[companyId].
+  Future<List<CampaignsTableData>> getCampaignsForCompany({
+    required String organizationId,
+    required String companyId,
+  }) {
+    return (select(campaignsTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.companyId.equals(companyId) &
+              row.deletedAt.isNull(),
+        ))
+        .get();
+  }
+
+  // ---------------------------------------------------------------------
+  // TASK-106 — Targets ("metas", tasks.md seção 5.1) — structural
+  // placeholder ahead of TASK-114's full Target domain model, see
+  // [TargetsTable] docs.
+  // ---------------------------------------------------------------------
+
+  /// Replaces the full local Target set for [organizationId]/[companyId]
+  /// with exactly [targetRows] in a single transaction, mirroring
+  /// [replacePriceLists].
+  Future<void> replaceTargets({
+    required String organizationId,
+    required String companyId,
+    required List<TargetsTableCompanion> targetRows,
+  }) {
+    return transaction(() async {
+      await (delete(targetsTable)..where(
+            (row) =>
+                row.organizationId.equals(organizationId) &
+                row.companyId.equals(companyId),
+          ))
+          .go();
+
+      await batch((batch) {
+        batch.insertAll(targetsTable, targetRows);
+      });
+    });
+  }
+
+  /// Inserts or updates exactly one Target row.
+  Future<void> upsertTarget(TargetsTableCompanion row) {
+    return into(targetsTable).insertOnConflictUpdate(row);
+  }
+
+  /// Every non-soft-deleted Target currently stored locally for
+  /// [organizationId]/[companyId].
+  Future<List<TargetsTableData>> getTargetsForCompany({
+    required String organizationId,
+    required String companyId,
+  }) {
+    return (select(targetsTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.companyId.equals(companyId) &
+              row.deletedAt.isNull(),
+        ))
+        .get();
   }
 }

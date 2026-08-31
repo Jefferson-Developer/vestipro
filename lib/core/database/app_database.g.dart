@@ -12973,6 +12973,6824 @@ class OrderItemsTableCompanion extends UpdateCompanion<OrderItemsTableData> {
   }
 }
 
+class $ColorsTableTable extends ColorsTable
+    with TableInfo<$ColorsTableTable, ColorsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ColorsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _codeMeta = const VerificationMeta('code');
+  @override
+  late final GeneratedColumn<String> code = GeneratedColumn<String>(
+    'code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _hexMeta = const VerificationMeta('hex');
+  @override
+  late final GeneratedColumn<String> hex = GeneratedColumn<String>(
+    'hex',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _mainImageUrlMeta = const VerificationMeta(
+    'mainImageUrl',
+  );
+  @override
+  late final GeneratedColumn<String> mainImageUrl = GeneratedColumn<String>(
+    'main_image_url',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _additionalImageUrlsJsonMeta =
+      const VerificationMeta('additionalImageUrlsJson');
+  @override
+  late final GeneratedColumn<String> additionalImageUrlsJson =
+      GeneratedColumn<String>(
+        'additional_image_urls_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      );
+  static const VerificationMeta _eansJsonMeta = const VerificationMeta(
+    'eansJson',
+  );
+  @override
+  late final GeneratedColumn<String> eansJson = GeneratedColumn<String>(
+    'eans_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedByMeta = const VerificationMeta(
+    'updatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
+    'updated_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    code,
+    name,
+    hex,
+    mainImageUrl,
+    additionalImageUrlsJson,
+    eansJson,
+    status,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'colors';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ColorsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('code')) {
+      context.handle(
+        _codeMeta,
+        code.isAcceptableOrUnknown(data['code']!, _codeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_codeMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('hex')) {
+      context.handle(
+        _hexMeta,
+        hex.isAcceptableOrUnknown(data['hex']!, _hexMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_hexMeta);
+    }
+    if (data.containsKey('main_image_url')) {
+      context.handle(
+        _mainImageUrlMeta,
+        mainImageUrl.isAcceptableOrUnknown(
+          data['main_image_url']!,
+          _mainImageUrlMeta,
+        ),
+      );
+    }
+    if (data.containsKey('additional_image_urls_json')) {
+      context.handle(
+        _additionalImageUrlsJsonMeta,
+        additionalImageUrlsJson.isAcceptableOrUnknown(
+          data['additional_image_urls_json']!,
+          _additionalImageUrlsJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('eans_json')) {
+      context.handle(
+        _eansJsonMeta,
+        eansJson.isAcceptableOrUnknown(data['eans_json']!, _eansJsonMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('updated_by')) {
+      context.handle(
+        _updatedByMeta,
+        updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedByMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ColorsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ColorsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      code: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}code'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      hex: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}hex'],
+      )!,
+      mainImageUrl: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}main_image_url'],
+      ),
+      additionalImageUrlsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}additional_image_urls_json'],
+      )!,
+      eansJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}eans_json'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      updatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_by'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $ColorsTableTable createAlias(String alias) {
+    return $ColorsTableTable(attachedDatabase, alias);
+  }
+}
+
+class ColorsTableData extends DataClass implements Insertable<ColorsTableData> {
+  final String id;
+  final String organizationId;
+  final String code;
+  final String name;
+  final String hex;
+  final String? mainImageUrl;
+  final String additionalImageUrlsJson;
+  final String eansJson;
+  final String status;
+  final DateTime createdAt;
+  final String createdBy;
+  final DateTime updatedAt;
+  final String updatedBy;
+  final DateTime? deletedAt;
+  final int version;
+  final String syncStatus;
+  const ColorsTableData({
+    required this.id,
+    required this.organizationId,
+    required this.code,
+    required this.name,
+    required this.hex,
+    this.mainImageUrl,
+    required this.additionalImageUrlsJson,
+    required this.eansJson,
+    required this.status,
+    required this.createdAt,
+    required this.createdBy,
+    required this.updatedAt,
+    required this.updatedBy,
+    this.deletedAt,
+    required this.version,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    map['code'] = Variable<String>(code);
+    map['name'] = Variable<String>(name);
+    map['hex'] = Variable<String>(hex);
+    if (!nullToAbsent || mainImageUrl != null) {
+      map['main_image_url'] = Variable<String>(mainImageUrl);
+    }
+    map['additional_image_urls_json'] = Variable<String>(
+      additionalImageUrlsJson,
+    );
+    map['eans_json'] = Variable<String>(eansJson);
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_by'] = Variable<String>(createdBy);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_by'] = Variable<String>(updatedBy);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['version'] = Variable<int>(version);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  ColorsTableCompanion toCompanion(bool nullToAbsent) {
+    return ColorsTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      code: Value(code),
+      name: Value(name),
+      hex: Value(hex),
+      mainImageUrl: mainImageUrl == null && nullToAbsent
+          ? const Value.absent()
+          : Value(mainImageUrl),
+      additionalImageUrlsJson: Value(additionalImageUrlsJson),
+      eansJson: Value(eansJson),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      createdBy: Value(createdBy),
+      updatedAt: Value(updatedAt),
+      updatedBy: Value(updatedBy),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      version: Value(version),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory ColorsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ColorsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      code: serializer.fromJson<String>(json['code']),
+      name: serializer.fromJson<String>(json['name']),
+      hex: serializer.fromJson<String>(json['hex']),
+      mainImageUrl: serializer.fromJson<String?>(json['mainImageUrl']),
+      additionalImageUrlsJson: serializer.fromJson<String>(
+        json['additionalImageUrlsJson'],
+      ),
+      eansJson: serializer.fromJson<String>(json['eansJson']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedBy: serializer.fromJson<String>(json['updatedBy']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'code': serializer.toJson<String>(code),
+      'name': serializer.toJson<String>(name),
+      'hex': serializer.toJson<String>(hex),
+      'mainImageUrl': serializer.toJson<String?>(mainImageUrl),
+      'additionalImageUrlsJson': serializer.toJson<String>(
+        additionalImageUrlsJson,
+      ),
+      'eansJson': serializer.toJson<String>(eansJson),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedBy': serializer.toJson<String>(updatedBy),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'version': serializer.toJson<int>(version),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  ColorsTableData copyWith({
+    String? id,
+    String? organizationId,
+    String? code,
+    String? name,
+    String? hex,
+    Value<String?> mainImageUrl = const Value.absent(),
+    String? additionalImageUrlsJson,
+    String? eansJson,
+    String? status,
+    DateTime? createdAt,
+    String? createdBy,
+    DateTime? updatedAt,
+    String? updatedBy,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? version,
+    String? syncStatus,
+  }) => ColorsTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    code: code ?? this.code,
+    name: name ?? this.name,
+    hex: hex ?? this.hex,
+    mainImageUrl: mainImageUrl.present ? mainImageUrl.value : this.mainImageUrl,
+    additionalImageUrlsJson:
+        additionalImageUrlsJson ?? this.additionalImageUrlsJson,
+    eansJson: eansJson ?? this.eansJson,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    createdBy: createdBy ?? this.createdBy,
+    updatedAt: updatedAt ?? this.updatedAt,
+    updatedBy: updatedBy ?? this.updatedBy,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    version: version ?? this.version,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  ColorsTableData copyWithCompanion(ColorsTableCompanion data) {
+    return ColorsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      code: data.code.present ? data.code.value : this.code,
+      name: data.name.present ? data.name.value : this.name,
+      hex: data.hex.present ? data.hex.value : this.hex,
+      mainImageUrl: data.mainImageUrl.present
+          ? data.mainImageUrl.value
+          : this.mainImageUrl,
+      additionalImageUrlsJson: data.additionalImageUrlsJson.present
+          ? data.additionalImageUrlsJson.value
+          : this.additionalImageUrlsJson,
+      eansJson: data.eansJson.present ? data.eansJson.value : this.eansJson,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      version: data.version.present ? data.version.value : this.version,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ColorsTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('code: $code, ')
+          ..write('name: $name, ')
+          ..write('hex: $hex, ')
+          ..write('mainImageUrl: $mainImageUrl, ')
+          ..write('additionalImageUrlsJson: $additionalImageUrlsJson, ')
+          ..write('eansJson: $eansJson, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    code,
+    name,
+    hex,
+    mainImageUrl,
+    additionalImageUrlsJson,
+    eansJson,
+    status,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ColorsTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.code == this.code &&
+          other.name == this.name &&
+          other.hex == this.hex &&
+          other.mainImageUrl == this.mainImageUrl &&
+          other.additionalImageUrlsJson == this.additionalImageUrlsJson &&
+          other.eansJson == this.eansJson &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.createdBy == this.createdBy &&
+          other.updatedAt == this.updatedAt &&
+          other.updatedBy == this.updatedBy &&
+          other.deletedAt == this.deletedAt &&
+          other.version == this.version &&
+          other.syncStatus == this.syncStatus);
+}
+
+class ColorsTableCompanion extends UpdateCompanion<ColorsTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String> code;
+  final Value<String> name;
+  final Value<String> hex;
+  final Value<String?> mainImageUrl;
+  final Value<String> additionalImageUrlsJson;
+  final Value<String> eansJson;
+  final Value<String> status;
+  final Value<DateTime> createdAt;
+  final Value<String> createdBy;
+  final Value<DateTime> updatedAt;
+  final Value<String> updatedBy;
+  final Value<DateTime?> deletedAt;
+  final Value<int> version;
+  final Value<String> syncStatus;
+  final Value<int> rowid;
+  const ColorsTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.code = const Value.absent(),
+    this.name = const Value.absent(),
+    this.hex = const Value.absent(),
+    this.mainImageUrl = const Value.absent(),
+    this.additionalImageUrlsJson = const Value.absent(),
+    this.eansJson = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ColorsTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    required String code,
+    required String name,
+    required String hex,
+    this.mainImageUrl = const Value.absent(),
+    this.additionalImageUrlsJson = const Value.absent(),
+    this.eansJson = const Value.absent(),
+    required String status,
+    required DateTime createdAt,
+    required String createdBy,
+    required DateTime updatedAt,
+    required String updatedBy,
+    this.deletedAt = const Value.absent(),
+    required int version,
+    required String syncStatus,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       code = Value(code),
+       name = Value(name),
+       hex = Value(hex),
+       status = Value(status),
+       createdAt = Value(createdAt),
+       createdBy = Value(createdBy),
+       updatedAt = Value(updatedAt),
+       updatedBy = Value(updatedBy),
+       version = Value(version),
+       syncStatus = Value(syncStatus);
+  static Insertable<ColorsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? code,
+    Expression<String>? name,
+    Expression<String>? hex,
+    Expression<String>? mainImageUrl,
+    Expression<String>? additionalImageUrlsJson,
+    Expression<String>? eansJson,
+    Expression<String>? status,
+    Expression<DateTime>? createdAt,
+    Expression<String>? createdBy,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? updatedBy,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? version,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (code != null) 'code': code,
+      if (name != null) 'name': name,
+      if (hex != null) 'hex': hex,
+      if (mainImageUrl != null) 'main_image_url': mainImageUrl,
+      if (additionalImageUrlsJson != null)
+        'additional_image_urls_json': additionalImageUrlsJson,
+      if (eansJson != null) 'eans_json': eansJson,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (createdBy != null) 'created_by': createdBy,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (updatedBy != null) 'updated_by': updatedBy,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (version != null) 'version': version,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ColorsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String>? code,
+    Value<String>? name,
+    Value<String>? hex,
+    Value<String?>? mainImageUrl,
+    Value<String>? additionalImageUrlsJson,
+    Value<String>? eansJson,
+    Value<String>? status,
+    Value<DateTime>? createdAt,
+    Value<String>? createdBy,
+    Value<DateTime>? updatedAt,
+    Value<String>? updatedBy,
+    Value<DateTime?>? deletedAt,
+    Value<int>? version,
+    Value<String>? syncStatus,
+    Value<int>? rowid,
+  }) {
+    return ColorsTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      code: code ?? this.code,
+      name: name ?? this.name,
+      hex: hex ?? this.hex,
+      mainImageUrl: mainImageUrl ?? this.mainImageUrl,
+      additionalImageUrlsJson:
+          additionalImageUrlsJson ?? this.additionalImageUrlsJson,
+      eansJson: eansJson ?? this.eansJson,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      updatedBy: updatedBy ?? this.updatedBy,
+      deletedAt: deletedAt ?? this.deletedAt,
+      version: version ?? this.version,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (code.present) {
+      map['code'] = Variable<String>(code.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (hex.present) {
+      map['hex'] = Variable<String>(hex.value);
+    }
+    if (mainImageUrl.present) {
+      map['main_image_url'] = Variable<String>(mainImageUrl.value);
+    }
+    if (additionalImageUrlsJson.present) {
+      map['additional_image_urls_json'] = Variable<String>(
+        additionalImageUrlsJson.value,
+      );
+    }
+    if (eansJson.present) {
+      map['eans_json'] = Variable<String>(eansJson.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (updatedBy.present) {
+      map['updated_by'] = Variable<String>(updatedBy.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ColorsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('code: $code, ')
+          ..write('name: $name, ')
+          ..write('hex: $hex, ')
+          ..write('mainImageUrl: $mainImageUrl, ')
+          ..write('additionalImageUrlsJson: $additionalImageUrlsJson, ')
+          ..write('eansJson: $eansJson, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $SizeGridsTableTable extends SizeGridsTable
+    with TableInfo<$SizeGridsTableTable, SizeGridsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SizeGridsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sizesJsonMeta = const VerificationMeta(
+    'sizesJson',
+  );
+  @override
+  late final GeneratedColumn<String> sizesJson = GeneratedColumn<String>(
+    'sizes_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedByMeta = const VerificationMeta(
+    'updatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
+    'updated_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    name,
+    sizesJson,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'size_grids';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SizeGridsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('sizes_json')) {
+      context.handle(
+        _sizesJsonMeta,
+        sizesJson.isAcceptableOrUnknown(data['sizes_json']!, _sizesJsonMeta),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('updated_by')) {
+      context.handle(
+        _updatedByMeta,
+        updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedByMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  SizeGridsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SizeGridsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      sizesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sizes_json'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      updatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_by'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $SizeGridsTableTable createAlias(String alias) {
+    return $SizeGridsTableTable(attachedDatabase, alias);
+  }
+}
+
+class SizeGridsTableData extends DataClass
+    implements Insertable<SizeGridsTableData> {
+  final String id;
+  final String organizationId;
+  final String name;
+  final String sizesJson;
+  final DateTime createdAt;
+  final String createdBy;
+  final DateTime updatedAt;
+  final String updatedBy;
+  final DateTime? deletedAt;
+  final int version;
+  final String syncStatus;
+  const SizeGridsTableData({
+    required this.id,
+    required this.organizationId,
+    required this.name,
+    required this.sizesJson,
+    required this.createdAt,
+    required this.createdBy,
+    required this.updatedAt,
+    required this.updatedBy,
+    this.deletedAt,
+    required this.version,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    map['name'] = Variable<String>(name);
+    map['sizes_json'] = Variable<String>(sizesJson);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_by'] = Variable<String>(createdBy);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_by'] = Variable<String>(updatedBy);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['version'] = Variable<int>(version);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  SizeGridsTableCompanion toCompanion(bool nullToAbsent) {
+    return SizeGridsTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      name: Value(name),
+      sizesJson: Value(sizesJson),
+      createdAt: Value(createdAt),
+      createdBy: Value(createdBy),
+      updatedAt: Value(updatedAt),
+      updatedBy: Value(updatedBy),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      version: Value(version),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory SizeGridsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SizeGridsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      name: serializer.fromJson<String>(json['name']),
+      sizesJson: serializer.fromJson<String>(json['sizesJson']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedBy: serializer.fromJson<String>(json['updatedBy']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'name': serializer.toJson<String>(name),
+      'sizesJson': serializer.toJson<String>(sizesJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedBy': serializer.toJson<String>(updatedBy),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'version': serializer.toJson<int>(version),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  SizeGridsTableData copyWith({
+    String? id,
+    String? organizationId,
+    String? name,
+    String? sizesJson,
+    DateTime? createdAt,
+    String? createdBy,
+    DateTime? updatedAt,
+    String? updatedBy,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? version,
+    String? syncStatus,
+  }) => SizeGridsTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    name: name ?? this.name,
+    sizesJson: sizesJson ?? this.sizesJson,
+    createdAt: createdAt ?? this.createdAt,
+    createdBy: createdBy ?? this.createdBy,
+    updatedAt: updatedAt ?? this.updatedAt,
+    updatedBy: updatedBy ?? this.updatedBy,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    version: version ?? this.version,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  SizeGridsTableData copyWithCompanion(SizeGridsTableCompanion data) {
+    return SizeGridsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      name: data.name.present ? data.name.value : this.name,
+      sizesJson: data.sizesJson.present ? data.sizesJson.value : this.sizesJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      version: data.version.present ? data.version.value : this.version,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SizeGridsTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('name: $name, ')
+          ..write('sizesJson: $sizesJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    name,
+    sizesJson,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SizeGridsTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.name == this.name &&
+          other.sizesJson == this.sizesJson &&
+          other.createdAt == this.createdAt &&
+          other.createdBy == this.createdBy &&
+          other.updatedAt == this.updatedAt &&
+          other.updatedBy == this.updatedBy &&
+          other.deletedAt == this.deletedAt &&
+          other.version == this.version &&
+          other.syncStatus == this.syncStatus);
+}
+
+class SizeGridsTableCompanion extends UpdateCompanion<SizeGridsTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String> name;
+  final Value<String> sizesJson;
+  final Value<DateTime> createdAt;
+  final Value<String> createdBy;
+  final Value<DateTime> updatedAt;
+  final Value<String> updatedBy;
+  final Value<DateTime?> deletedAt;
+  final Value<int> version;
+  final Value<String> syncStatus;
+  final Value<int> rowid;
+  const SizeGridsTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.sizesJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SizeGridsTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    required String name,
+    this.sizesJson = const Value.absent(),
+    required DateTime createdAt,
+    required String createdBy,
+    required DateTime updatedAt,
+    required String updatedBy,
+    this.deletedAt = const Value.absent(),
+    required int version,
+    required String syncStatus,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       name = Value(name),
+       createdAt = Value(createdAt),
+       createdBy = Value(createdBy),
+       updatedAt = Value(updatedAt),
+       updatedBy = Value(updatedBy),
+       version = Value(version),
+       syncStatus = Value(syncStatus);
+  static Insertable<SizeGridsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? name,
+    Expression<String>? sizesJson,
+    Expression<DateTime>? createdAt,
+    Expression<String>? createdBy,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? updatedBy,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? version,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (name != null) 'name': name,
+      if (sizesJson != null) 'sizes_json': sizesJson,
+      if (createdAt != null) 'created_at': createdAt,
+      if (createdBy != null) 'created_by': createdBy,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (updatedBy != null) 'updated_by': updatedBy,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (version != null) 'version': version,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SizeGridsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String>? name,
+    Value<String>? sizesJson,
+    Value<DateTime>? createdAt,
+    Value<String>? createdBy,
+    Value<DateTime>? updatedAt,
+    Value<String>? updatedBy,
+    Value<DateTime?>? deletedAt,
+    Value<int>? version,
+    Value<String>? syncStatus,
+    Value<int>? rowid,
+  }) {
+    return SizeGridsTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      name: name ?? this.name,
+      sizesJson: sizesJson ?? this.sizesJson,
+      createdAt: createdAt ?? this.createdAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      updatedBy: updatedBy ?? this.updatedBy,
+      deletedAt: deletedAt ?? this.deletedAt,
+      version: version ?? this.version,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (sizesJson.present) {
+      map['sizes_json'] = Variable<String>(sizesJson.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (updatedBy.present) {
+      map['updated_by'] = Variable<String>(updatedBy.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SizeGridsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('name: $name, ')
+          ..write('sizesJson: $sizesJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ProductsTableTable extends ProductsTable
+    with TableInfo<$ProductsTableTable, ProductsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProductsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _skuMeta = const VerificationMeta('sku');
+  @override
+  late final GeneratedColumn<String> sku = GeneratedColumn<String>(
+    'sku',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _referenceMeta = const VerificationMeta(
+    'reference',
+  );
+  @override
+  late final GeneratedColumn<String> reference = GeneratedColumn<String>(
+    'reference',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _shortDescriptionMeta = const VerificationMeta(
+    'shortDescription',
+  );
+  @override
+  late final GeneratedColumn<String> shortDescription = GeneratedColumn<String>(
+    'short_description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fullDescriptionMeta = const VerificationMeta(
+    'fullDescription',
+  );
+  @override
+  late final GeneratedColumn<String> fullDescription = GeneratedColumn<String>(
+    'full_description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _brandMeta = const VerificationMeta('brand');
+  @override
+  late final GeneratedColumn<String> brand = GeneratedColumn<String>(
+    'brand',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _collectionIdMeta = const VerificationMeta(
+    'collectionId',
+  );
+  @override
+  late final GeneratedColumn<String> collectionId = GeneratedColumn<String>(
+    'collection_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _seasonIdMeta = const VerificationMeta(
+    'seasonId',
+  );
+  @override
+  late final GeneratedColumn<String> seasonId = GeneratedColumn<String>(
+    'season_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _lineMeta = const VerificationMeta('line');
+  @override
+  late final GeneratedColumn<String> line = GeneratedColumn<String>(
+    'line',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _categoryIdMeta = const VerificationMeta(
+    'categoryId',
+  );
+  @override
+  late final GeneratedColumn<String> categoryId = GeneratedColumn<String>(
+    'category_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _subcategoryIdMeta = const VerificationMeta(
+    'subcategoryId',
+  );
+  @override
+  late final GeneratedColumn<String> subcategoryId = GeneratedColumn<String>(
+    'subcategory_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _genderMeta = const VerificationMeta('gender');
+  @override
+  late final GeneratedColumn<String> gender = GeneratedColumn<String>(
+    'gender',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _targetAudienceMeta = const VerificationMeta(
+    'targetAudience',
+  );
+  @override
+  late final GeneratedColumn<String> targetAudience = GeneratedColumn<String>(
+    'target_audience',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _fabricMeta = const VerificationMeta('fabric');
+  @override
+  late final GeneratedColumn<String> fabric = GeneratedColumn<String>(
+    'fabric',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _compositionMeta = const VerificationMeta(
+    'composition',
+  );
+  @override
+  late final GeneratedColumn<String> composition = GeneratedColumn<String>(
+    'composition',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _supplierIdMeta = const VerificationMeta(
+    'supplierId',
+  );
+  @override
+  late final GeneratedColumn<String> supplierId = GeneratedColumn<String>(
+    'supplier_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ncmMeta = const VerificationMeta('ncm');
+  @override
+  late final GeneratedColumn<String> ncm = GeneratedColumn<String>(
+    'ncm',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _eanMeta = const VerificationMeta('ean');
+  @override
+  late final GeneratedColumn<String> ean = GeneratedColumn<String>(
+    'ean',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _tagsJsonMeta = const VerificationMeta(
+    'tagsJson',
+  );
+  @override
+  late final GeneratedColumn<String> tagsJson = GeneratedColumn<String>(
+    'tags_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _colorIdsJsonMeta = const VerificationMeta(
+    'colorIdsJson',
+  );
+  @override
+  late final GeneratedColumn<String> colorIdsJson = GeneratedColumn<String>(
+    'color_ids_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _sizeGridTemplateIdMeta =
+      const VerificationMeta('sizeGridTemplateId');
+  @override
+  late final GeneratedColumn<String> sizeGridTemplateId =
+      GeneratedColumn<String>(
+        'size_grid_template_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _launchDateMeta = const VerificationMeta(
+    'launchDate',
+  );
+  @override
+  late final GeneratedColumn<DateTime> launchDate = GeneratedColumn<DateTime>(
+    'launch_date',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _seoTitleMeta = const VerificationMeta(
+    'seoTitle',
+  );
+  @override
+  late final GeneratedColumn<String> seoTitle = GeneratedColumn<String>(
+    'seo_title',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _seoDescriptionMeta = const VerificationMeta(
+    'seoDescription',
+  );
+  @override
+  late final GeneratedColumn<String> seoDescription = GeneratedColumn<String>(
+    'seo_description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _seoSlugMeta = const VerificationMeta(
+    'seoSlug',
+  );
+  @override
+  late final GeneratedColumn<String> seoSlug = GeneratedColumn<String>(
+    'seo_slug',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _mediaJsonMeta = const VerificationMeta(
+    'mediaJson',
+  );
+  @override
+  late final GeneratedColumn<String> mediaJson = GeneratedColumn<String>(
+    'media_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _customFieldValuesJsonMeta =
+      const VerificationMeta('customFieldValuesJson');
+  @override
+  late final GeneratedColumn<String> customFieldValuesJson =
+      GeneratedColumn<String>(
+        'custom_field_values_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedByMeta = const VerificationMeta(
+    'updatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
+    'updated_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    companyId,
+    sku,
+    reference,
+    name,
+    shortDescription,
+    fullDescription,
+    brand,
+    collectionId,
+    seasonId,
+    line,
+    categoryId,
+    subcategoryId,
+    gender,
+    targetAudience,
+    fabric,
+    composition,
+    supplierId,
+    ncm,
+    ean,
+    tagsJson,
+    colorIdsJson,
+    sizeGridTemplateId,
+    status,
+    launchDate,
+    seoTitle,
+    seoDescription,
+    seoSlug,
+    mediaJson,
+    customFieldValuesJson,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'products';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProductsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    }
+    if (data.containsKey('sku')) {
+      context.handle(
+        _skuMeta,
+        sku.isAcceptableOrUnknown(data['sku']!, _skuMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_skuMeta);
+    }
+    if (data.containsKey('reference')) {
+      context.handle(
+        _referenceMeta,
+        reference.isAcceptableOrUnknown(data['reference']!, _referenceMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_referenceMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('short_description')) {
+      context.handle(
+        _shortDescriptionMeta,
+        shortDescription.isAcceptableOrUnknown(
+          data['short_description']!,
+          _shortDescriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('full_description')) {
+      context.handle(
+        _fullDescriptionMeta,
+        fullDescription.isAcceptableOrUnknown(
+          data['full_description']!,
+          _fullDescriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('brand')) {
+      context.handle(
+        _brandMeta,
+        brand.isAcceptableOrUnknown(data['brand']!, _brandMeta),
+      );
+    }
+    if (data.containsKey('collection_id')) {
+      context.handle(
+        _collectionIdMeta,
+        collectionId.isAcceptableOrUnknown(
+          data['collection_id']!,
+          _collectionIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('season_id')) {
+      context.handle(
+        _seasonIdMeta,
+        seasonId.isAcceptableOrUnknown(data['season_id']!, _seasonIdMeta),
+      );
+    }
+    if (data.containsKey('line')) {
+      context.handle(
+        _lineMeta,
+        line.isAcceptableOrUnknown(data['line']!, _lineMeta),
+      );
+    }
+    if (data.containsKey('category_id')) {
+      context.handle(
+        _categoryIdMeta,
+        categoryId.isAcceptableOrUnknown(data['category_id']!, _categoryIdMeta),
+      );
+    }
+    if (data.containsKey('subcategory_id')) {
+      context.handle(
+        _subcategoryIdMeta,
+        subcategoryId.isAcceptableOrUnknown(
+          data['subcategory_id']!,
+          _subcategoryIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('gender')) {
+      context.handle(
+        _genderMeta,
+        gender.isAcceptableOrUnknown(data['gender']!, _genderMeta),
+      );
+    }
+    if (data.containsKey('target_audience')) {
+      context.handle(
+        _targetAudienceMeta,
+        targetAudience.isAcceptableOrUnknown(
+          data['target_audience']!,
+          _targetAudienceMeta,
+        ),
+      );
+    }
+    if (data.containsKey('fabric')) {
+      context.handle(
+        _fabricMeta,
+        fabric.isAcceptableOrUnknown(data['fabric']!, _fabricMeta),
+      );
+    }
+    if (data.containsKey('composition')) {
+      context.handle(
+        _compositionMeta,
+        composition.isAcceptableOrUnknown(
+          data['composition']!,
+          _compositionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('supplier_id')) {
+      context.handle(
+        _supplierIdMeta,
+        supplierId.isAcceptableOrUnknown(data['supplier_id']!, _supplierIdMeta),
+      );
+    }
+    if (data.containsKey('ncm')) {
+      context.handle(
+        _ncmMeta,
+        ncm.isAcceptableOrUnknown(data['ncm']!, _ncmMeta),
+      );
+    }
+    if (data.containsKey('ean')) {
+      context.handle(
+        _eanMeta,
+        ean.isAcceptableOrUnknown(data['ean']!, _eanMeta),
+      );
+    }
+    if (data.containsKey('tags_json')) {
+      context.handle(
+        _tagsJsonMeta,
+        tagsJson.isAcceptableOrUnknown(data['tags_json']!, _tagsJsonMeta),
+      );
+    }
+    if (data.containsKey('color_ids_json')) {
+      context.handle(
+        _colorIdsJsonMeta,
+        colorIdsJson.isAcceptableOrUnknown(
+          data['color_ids_json']!,
+          _colorIdsJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('size_grid_template_id')) {
+      context.handle(
+        _sizeGridTemplateIdMeta,
+        sizeGridTemplateId.isAcceptableOrUnknown(
+          data['size_grid_template_id']!,
+          _sizeGridTemplateIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('launch_date')) {
+      context.handle(
+        _launchDateMeta,
+        launchDate.isAcceptableOrUnknown(data['launch_date']!, _launchDateMeta),
+      );
+    }
+    if (data.containsKey('seo_title')) {
+      context.handle(
+        _seoTitleMeta,
+        seoTitle.isAcceptableOrUnknown(data['seo_title']!, _seoTitleMeta),
+      );
+    }
+    if (data.containsKey('seo_description')) {
+      context.handle(
+        _seoDescriptionMeta,
+        seoDescription.isAcceptableOrUnknown(
+          data['seo_description']!,
+          _seoDescriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('seo_slug')) {
+      context.handle(
+        _seoSlugMeta,
+        seoSlug.isAcceptableOrUnknown(data['seo_slug']!, _seoSlugMeta),
+      );
+    }
+    if (data.containsKey('media_json')) {
+      context.handle(
+        _mediaJsonMeta,
+        mediaJson.isAcceptableOrUnknown(data['media_json']!, _mediaJsonMeta),
+      );
+    }
+    if (data.containsKey('custom_field_values_json')) {
+      context.handle(
+        _customFieldValuesJsonMeta,
+        customFieldValuesJson.isAcceptableOrUnknown(
+          data['custom_field_values_json']!,
+          _customFieldValuesJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('updated_by')) {
+      context.handle(
+        _updatedByMeta,
+        updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedByMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ProductsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProductsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      ),
+      sku: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sku'],
+      )!,
+      reference: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}reference'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      shortDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}short_description'],
+      ),
+      fullDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}full_description'],
+      ),
+      brand: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}brand'],
+      ),
+      collectionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collection_id'],
+      ),
+      seasonId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}season_id'],
+      ),
+      line: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}line'],
+      ),
+      categoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_id'],
+      ),
+      subcategoryId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}subcategory_id'],
+      ),
+      gender: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}gender'],
+      ),
+      targetAudience: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}target_audience'],
+      ),
+      fabric: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}fabric'],
+      ),
+      composition: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}composition'],
+      ),
+      supplierId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}supplier_id'],
+      ),
+      ncm: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ncm'],
+      ),
+      ean: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ean'],
+      ),
+      tagsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}tags_json'],
+      )!,
+      colorIdsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color_ids_json'],
+      )!,
+      sizeGridTemplateId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}size_grid_template_id'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      launchDate: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}launch_date'],
+      ),
+      seoTitle: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seo_title'],
+      ),
+      seoDescription: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seo_description'],
+      ),
+      seoSlug: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}seo_slug'],
+      ),
+      mediaJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}media_json'],
+      )!,
+      customFieldValuesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}custom_field_values_json'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      updatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_by'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $ProductsTableTable createAlias(String alias) {
+    return $ProductsTableTable(attachedDatabase, alias);
+  }
+}
+
+class ProductsTableData extends DataClass
+    implements Insertable<ProductsTableData> {
+  final String id;
+  final String organizationId;
+  final String? companyId;
+  final String sku;
+  final String reference;
+  final String name;
+  final String? shortDescription;
+  final String? fullDescription;
+  final String? brand;
+  final String? collectionId;
+  final String? seasonId;
+  final String? line;
+  final String? categoryId;
+  final String? subcategoryId;
+  final String? gender;
+  final String? targetAudience;
+  final String? fabric;
+  final String? composition;
+  final String? supplierId;
+  final String? ncm;
+  final String? ean;
+  final String tagsJson;
+  final String colorIdsJson;
+  final String? sizeGridTemplateId;
+  final String status;
+  final DateTime? launchDate;
+  final String? seoTitle;
+  final String? seoDescription;
+  final String? seoSlug;
+  final String mediaJson;
+  final String customFieldValuesJson;
+  final DateTime createdAt;
+  final String createdBy;
+  final DateTime updatedAt;
+  final String updatedBy;
+  final DateTime? deletedAt;
+  final int version;
+  final String syncStatus;
+  const ProductsTableData({
+    required this.id,
+    required this.organizationId,
+    this.companyId,
+    required this.sku,
+    required this.reference,
+    required this.name,
+    this.shortDescription,
+    this.fullDescription,
+    this.brand,
+    this.collectionId,
+    this.seasonId,
+    this.line,
+    this.categoryId,
+    this.subcategoryId,
+    this.gender,
+    this.targetAudience,
+    this.fabric,
+    this.composition,
+    this.supplierId,
+    this.ncm,
+    this.ean,
+    required this.tagsJson,
+    required this.colorIdsJson,
+    this.sizeGridTemplateId,
+    required this.status,
+    this.launchDate,
+    this.seoTitle,
+    this.seoDescription,
+    this.seoSlug,
+    required this.mediaJson,
+    required this.customFieldValuesJson,
+    required this.createdAt,
+    required this.createdBy,
+    required this.updatedAt,
+    required this.updatedBy,
+    this.deletedAt,
+    required this.version,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    if (!nullToAbsent || companyId != null) {
+      map['company_id'] = Variable<String>(companyId);
+    }
+    map['sku'] = Variable<String>(sku);
+    map['reference'] = Variable<String>(reference);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || shortDescription != null) {
+      map['short_description'] = Variable<String>(shortDescription);
+    }
+    if (!nullToAbsent || fullDescription != null) {
+      map['full_description'] = Variable<String>(fullDescription);
+    }
+    if (!nullToAbsent || brand != null) {
+      map['brand'] = Variable<String>(brand);
+    }
+    if (!nullToAbsent || collectionId != null) {
+      map['collection_id'] = Variable<String>(collectionId);
+    }
+    if (!nullToAbsent || seasonId != null) {
+      map['season_id'] = Variable<String>(seasonId);
+    }
+    if (!nullToAbsent || line != null) {
+      map['line'] = Variable<String>(line);
+    }
+    if (!nullToAbsent || categoryId != null) {
+      map['category_id'] = Variable<String>(categoryId);
+    }
+    if (!nullToAbsent || subcategoryId != null) {
+      map['subcategory_id'] = Variable<String>(subcategoryId);
+    }
+    if (!nullToAbsent || gender != null) {
+      map['gender'] = Variable<String>(gender);
+    }
+    if (!nullToAbsent || targetAudience != null) {
+      map['target_audience'] = Variable<String>(targetAudience);
+    }
+    if (!nullToAbsent || fabric != null) {
+      map['fabric'] = Variable<String>(fabric);
+    }
+    if (!nullToAbsent || composition != null) {
+      map['composition'] = Variable<String>(composition);
+    }
+    if (!nullToAbsent || supplierId != null) {
+      map['supplier_id'] = Variable<String>(supplierId);
+    }
+    if (!nullToAbsent || ncm != null) {
+      map['ncm'] = Variable<String>(ncm);
+    }
+    if (!nullToAbsent || ean != null) {
+      map['ean'] = Variable<String>(ean);
+    }
+    map['tags_json'] = Variable<String>(tagsJson);
+    map['color_ids_json'] = Variable<String>(colorIdsJson);
+    if (!nullToAbsent || sizeGridTemplateId != null) {
+      map['size_grid_template_id'] = Variable<String>(sizeGridTemplateId);
+    }
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || launchDate != null) {
+      map['launch_date'] = Variable<DateTime>(launchDate);
+    }
+    if (!nullToAbsent || seoTitle != null) {
+      map['seo_title'] = Variable<String>(seoTitle);
+    }
+    if (!nullToAbsent || seoDescription != null) {
+      map['seo_description'] = Variable<String>(seoDescription);
+    }
+    if (!nullToAbsent || seoSlug != null) {
+      map['seo_slug'] = Variable<String>(seoSlug);
+    }
+    map['media_json'] = Variable<String>(mediaJson);
+    map['custom_field_values_json'] = Variable<String>(customFieldValuesJson);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_by'] = Variable<String>(createdBy);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_by'] = Variable<String>(updatedBy);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['version'] = Variable<int>(version);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  ProductsTableCompanion toCompanion(bool nullToAbsent) {
+    return ProductsTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      companyId: companyId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(companyId),
+      sku: Value(sku),
+      reference: Value(reference),
+      name: Value(name),
+      shortDescription: shortDescription == null && nullToAbsent
+          ? const Value.absent()
+          : Value(shortDescription),
+      fullDescription: fullDescription == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fullDescription),
+      brand: brand == null && nullToAbsent
+          ? const Value.absent()
+          : Value(brand),
+      collectionId: collectionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(collectionId),
+      seasonId: seasonId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seasonId),
+      line: line == null && nullToAbsent ? const Value.absent() : Value(line),
+      categoryId: categoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(categoryId),
+      subcategoryId: subcategoryId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(subcategoryId),
+      gender: gender == null && nullToAbsent
+          ? const Value.absent()
+          : Value(gender),
+      targetAudience: targetAudience == null && nullToAbsent
+          ? const Value.absent()
+          : Value(targetAudience),
+      fabric: fabric == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fabric),
+      composition: composition == null && nullToAbsent
+          ? const Value.absent()
+          : Value(composition),
+      supplierId: supplierId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supplierId),
+      ncm: ncm == null && nullToAbsent ? const Value.absent() : Value(ncm),
+      ean: ean == null && nullToAbsent ? const Value.absent() : Value(ean),
+      tagsJson: Value(tagsJson),
+      colorIdsJson: Value(colorIdsJson),
+      sizeGridTemplateId: sizeGridTemplateId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(sizeGridTemplateId),
+      status: Value(status),
+      launchDate: launchDate == null && nullToAbsent
+          ? const Value.absent()
+          : Value(launchDate),
+      seoTitle: seoTitle == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seoTitle),
+      seoDescription: seoDescription == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seoDescription),
+      seoSlug: seoSlug == null && nullToAbsent
+          ? const Value.absent()
+          : Value(seoSlug),
+      mediaJson: Value(mediaJson),
+      customFieldValuesJson: Value(customFieldValuesJson),
+      createdAt: Value(createdAt),
+      createdBy: Value(createdBy),
+      updatedAt: Value(updatedAt),
+      updatedBy: Value(updatedBy),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      version: Value(version),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory ProductsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProductsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String?>(json['companyId']),
+      sku: serializer.fromJson<String>(json['sku']),
+      reference: serializer.fromJson<String>(json['reference']),
+      name: serializer.fromJson<String>(json['name']),
+      shortDescription: serializer.fromJson<String?>(json['shortDescription']),
+      fullDescription: serializer.fromJson<String?>(json['fullDescription']),
+      brand: serializer.fromJson<String?>(json['brand']),
+      collectionId: serializer.fromJson<String?>(json['collectionId']),
+      seasonId: serializer.fromJson<String?>(json['seasonId']),
+      line: serializer.fromJson<String?>(json['line']),
+      categoryId: serializer.fromJson<String?>(json['categoryId']),
+      subcategoryId: serializer.fromJson<String?>(json['subcategoryId']),
+      gender: serializer.fromJson<String?>(json['gender']),
+      targetAudience: serializer.fromJson<String?>(json['targetAudience']),
+      fabric: serializer.fromJson<String?>(json['fabric']),
+      composition: serializer.fromJson<String?>(json['composition']),
+      supplierId: serializer.fromJson<String?>(json['supplierId']),
+      ncm: serializer.fromJson<String?>(json['ncm']),
+      ean: serializer.fromJson<String?>(json['ean']),
+      tagsJson: serializer.fromJson<String>(json['tagsJson']),
+      colorIdsJson: serializer.fromJson<String>(json['colorIdsJson']),
+      sizeGridTemplateId: serializer.fromJson<String?>(
+        json['sizeGridTemplateId'],
+      ),
+      status: serializer.fromJson<String>(json['status']),
+      launchDate: serializer.fromJson<DateTime?>(json['launchDate']),
+      seoTitle: serializer.fromJson<String?>(json['seoTitle']),
+      seoDescription: serializer.fromJson<String?>(json['seoDescription']),
+      seoSlug: serializer.fromJson<String?>(json['seoSlug']),
+      mediaJson: serializer.fromJson<String>(json['mediaJson']),
+      customFieldValuesJson: serializer.fromJson<String>(
+        json['customFieldValuesJson'],
+      ),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedBy: serializer.fromJson<String>(json['updatedBy']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String?>(companyId),
+      'sku': serializer.toJson<String>(sku),
+      'reference': serializer.toJson<String>(reference),
+      'name': serializer.toJson<String>(name),
+      'shortDescription': serializer.toJson<String?>(shortDescription),
+      'fullDescription': serializer.toJson<String?>(fullDescription),
+      'brand': serializer.toJson<String?>(brand),
+      'collectionId': serializer.toJson<String?>(collectionId),
+      'seasonId': serializer.toJson<String?>(seasonId),
+      'line': serializer.toJson<String?>(line),
+      'categoryId': serializer.toJson<String?>(categoryId),
+      'subcategoryId': serializer.toJson<String?>(subcategoryId),
+      'gender': serializer.toJson<String?>(gender),
+      'targetAudience': serializer.toJson<String?>(targetAudience),
+      'fabric': serializer.toJson<String?>(fabric),
+      'composition': serializer.toJson<String?>(composition),
+      'supplierId': serializer.toJson<String?>(supplierId),
+      'ncm': serializer.toJson<String?>(ncm),
+      'ean': serializer.toJson<String?>(ean),
+      'tagsJson': serializer.toJson<String>(tagsJson),
+      'colorIdsJson': serializer.toJson<String>(colorIdsJson),
+      'sizeGridTemplateId': serializer.toJson<String?>(sizeGridTemplateId),
+      'status': serializer.toJson<String>(status),
+      'launchDate': serializer.toJson<DateTime?>(launchDate),
+      'seoTitle': serializer.toJson<String?>(seoTitle),
+      'seoDescription': serializer.toJson<String?>(seoDescription),
+      'seoSlug': serializer.toJson<String?>(seoSlug),
+      'mediaJson': serializer.toJson<String>(mediaJson),
+      'customFieldValuesJson': serializer.toJson<String>(customFieldValuesJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedBy': serializer.toJson<String>(updatedBy),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'version': serializer.toJson<int>(version),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  ProductsTableData copyWith({
+    String? id,
+    String? organizationId,
+    Value<String?> companyId = const Value.absent(),
+    String? sku,
+    String? reference,
+    String? name,
+    Value<String?> shortDescription = const Value.absent(),
+    Value<String?> fullDescription = const Value.absent(),
+    Value<String?> brand = const Value.absent(),
+    Value<String?> collectionId = const Value.absent(),
+    Value<String?> seasonId = const Value.absent(),
+    Value<String?> line = const Value.absent(),
+    Value<String?> categoryId = const Value.absent(),
+    Value<String?> subcategoryId = const Value.absent(),
+    Value<String?> gender = const Value.absent(),
+    Value<String?> targetAudience = const Value.absent(),
+    Value<String?> fabric = const Value.absent(),
+    Value<String?> composition = const Value.absent(),
+    Value<String?> supplierId = const Value.absent(),
+    Value<String?> ncm = const Value.absent(),
+    Value<String?> ean = const Value.absent(),
+    String? tagsJson,
+    String? colorIdsJson,
+    Value<String?> sizeGridTemplateId = const Value.absent(),
+    String? status,
+    Value<DateTime?> launchDate = const Value.absent(),
+    Value<String?> seoTitle = const Value.absent(),
+    Value<String?> seoDescription = const Value.absent(),
+    Value<String?> seoSlug = const Value.absent(),
+    String? mediaJson,
+    String? customFieldValuesJson,
+    DateTime? createdAt,
+    String? createdBy,
+    DateTime? updatedAt,
+    String? updatedBy,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? version,
+    String? syncStatus,
+  }) => ProductsTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId.present ? companyId.value : this.companyId,
+    sku: sku ?? this.sku,
+    reference: reference ?? this.reference,
+    name: name ?? this.name,
+    shortDescription: shortDescription.present
+        ? shortDescription.value
+        : this.shortDescription,
+    fullDescription: fullDescription.present
+        ? fullDescription.value
+        : this.fullDescription,
+    brand: brand.present ? brand.value : this.brand,
+    collectionId: collectionId.present ? collectionId.value : this.collectionId,
+    seasonId: seasonId.present ? seasonId.value : this.seasonId,
+    line: line.present ? line.value : this.line,
+    categoryId: categoryId.present ? categoryId.value : this.categoryId,
+    subcategoryId: subcategoryId.present
+        ? subcategoryId.value
+        : this.subcategoryId,
+    gender: gender.present ? gender.value : this.gender,
+    targetAudience: targetAudience.present
+        ? targetAudience.value
+        : this.targetAudience,
+    fabric: fabric.present ? fabric.value : this.fabric,
+    composition: composition.present ? composition.value : this.composition,
+    supplierId: supplierId.present ? supplierId.value : this.supplierId,
+    ncm: ncm.present ? ncm.value : this.ncm,
+    ean: ean.present ? ean.value : this.ean,
+    tagsJson: tagsJson ?? this.tagsJson,
+    colorIdsJson: colorIdsJson ?? this.colorIdsJson,
+    sizeGridTemplateId: sizeGridTemplateId.present
+        ? sizeGridTemplateId.value
+        : this.sizeGridTemplateId,
+    status: status ?? this.status,
+    launchDate: launchDate.present ? launchDate.value : this.launchDate,
+    seoTitle: seoTitle.present ? seoTitle.value : this.seoTitle,
+    seoDescription: seoDescription.present
+        ? seoDescription.value
+        : this.seoDescription,
+    seoSlug: seoSlug.present ? seoSlug.value : this.seoSlug,
+    mediaJson: mediaJson ?? this.mediaJson,
+    customFieldValuesJson: customFieldValuesJson ?? this.customFieldValuesJson,
+    createdAt: createdAt ?? this.createdAt,
+    createdBy: createdBy ?? this.createdBy,
+    updatedAt: updatedAt ?? this.updatedAt,
+    updatedBy: updatedBy ?? this.updatedBy,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    version: version ?? this.version,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  ProductsTableData copyWithCompanion(ProductsTableCompanion data) {
+    return ProductsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      sku: data.sku.present ? data.sku.value : this.sku,
+      reference: data.reference.present ? data.reference.value : this.reference,
+      name: data.name.present ? data.name.value : this.name,
+      shortDescription: data.shortDescription.present
+          ? data.shortDescription.value
+          : this.shortDescription,
+      fullDescription: data.fullDescription.present
+          ? data.fullDescription.value
+          : this.fullDescription,
+      brand: data.brand.present ? data.brand.value : this.brand,
+      collectionId: data.collectionId.present
+          ? data.collectionId.value
+          : this.collectionId,
+      seasonId: data.seasonId.present ? data.seasonId.value : this.seasonId,
+      line: data.line.present ? data.line.value : this.line,
+      categoryId: data.categoryId.present
+          ? data.categoryId.value
+          : this.categoryId,
+      subcategoryId: data.subcategoryId.present
+          ? data.subcategoryId.value
+          : this.subcategoryId,
+      gender: data.gender.present ? data.gender.value : this.gender,
+      targetAudience: data.targetAudience.present
+          ? data.targetAudience.value
+          : this.targetAudience,
+      fabric: data.fabric.present ? data.fabric.value : this.fabric,
+      composition: data.composition.present
+          ? data.composition.value
+          : this.composition,
+      supplierId: data.supplierId.present
+          ? data.supplierId.value
+          : this.supplierId,
+      ncm: data.ncm.present ? data.ncm.value : this.ncm,
+      ean: data.ean.present ? data.ean.value : this.ean,
+      tagsJson: data.tagsJson.present ? data.tagsJson.value : this.tagsJson,
+      colorIdsJson: data.colorIdsJson.present
+          ? data.colorIdsJson.value
+          : this.colorIdsJson,
+      sizeGridTemplateId: data.sizeGridTemplateId.present
+          ? data.sizeGridTemplateId.value
+          : this.sizeGridTemplateId,
+      status: data.status.present ? data.status.value : this.status,
+      launchDate: data.launchDate.present
+          ? data.launchDate.value
+          : this.launchDate,
+      seoTitle: data.seoTitle.present ? data.seoTitle.value : this.seoTitle,
+      seoDescription: data.seoDescription.present
+          ? data.seoDescription.value
+          : this.seoDescription,
+      seoSlug: data.seoSlug.present ? data.seoSlug.value : this.seoSlug,
+      mediaJson: data.mediaJson.present ? data.mediaJson.value : this.mediaJson,
+      customFieldValuesJson: data.customFieldValuesJson.present
+          ? data.customFieldValuesJson.value
+          : this.customFieldValuesJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      version: data.version.present ? data.version.value : this.version,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProductsTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('sku: $sku, ')
+          ..write('reference: $reference, ')
+          ..write('name: $name, ')
+          ..write('shortDescription: $shortDescription, ')
+          ..write('fullDescription: $fullDescription, ')
+          ..write('brand: $brand, ')
+          ..write('collectionId: $collectionId, ')
+          ..write('seasonId: $seasonId, ')
+          ..write('line: $line, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('subcategoryId: $subcategoryId, ')
+          ..write('gender: $gender, ')
+          ..write('targetAudience: $targetAudience, ')
+          ..write('fabric: $fabric, ')
+          ..write('composition: $composition, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('ncm: $ncm, ')
+          ..write('ean: $ean, ')
+          ..write('tagsJson: $tagsJson, ')
+          ..write('colorIdsJson: $colorIdsJson, ')
+          ..write('sizeGridTemplateId: $sizeGridTemplateId, ')
+          ..write('status: $status, ')
+          ..write('launchDate: $launchDate, ')
+          ..write('seoTitle: $seoTitle, ')
+          ..write('seoDescription: $seoDescription, ')
+          ..write('seoSlug: $seoSlug, ')
+          ..write('mediaJson: $mediaJson, ')
+          ..write('customFieldValuesJson: $customFieldValuesJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    organizationId,
+    companyId,
+    sku,
+    reference,
+    name,
+    shortDescription,
+    fullDescription,
+    brand,
+    collectionId,
+    seasonId,
+    line,
+    categoryId,
+    subcategoryId,
+    gender,
+    targetAudience,
+    fabric,
+    composition,
+    supplierId,
+    ncm,
+    ean,
+    tagsJson,
+    colorIdsJson,
+    sizeGridTemplateId,
+    status,
+    launchDate,
+    seoTitle,
+    seoDescription,
+    seoSlug,
+    mediaJson,
+    customFieldValuesJson,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProductsTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.sku == this.sku &&
+          other.reference == this.reference &&
+          other.name == this.name &&
+          other.shortDescription == this.shortDescription &&
+          other.fullDescription == this.fullDescription &&
+          other.brand == this.brand &&
+          other.collectionId == this.collectionId &&
+          other.seasonId == this.seasonId &&
+          other.line == this.line &&
+          other.categoryId == this.categoryId &&
+          other.subcategoryId == this.subcategoryId &&
+          other.gender == this.gender &&
+          other.targetAudience == this.targetAudience &&
+          other.fabric == this.fabric &&
+          other.composition == this.composition &&
+          other.supplierId == this.supplierId &&
+          other.ncm == this.ncm &&
+          other.ean == this.ean &&
+          other.tagsJson == this.tagsJson &&
+          other.colorIdsJson == this.colorIdsJson &&
+          other.sizeGridTemplateId == this.sizeGridTemplateId &&
+          other.status == this.status &&
+          other.launchDate == this.launchDate &&
+          other.seoTitle == this.seoTitle &&
+          other.seoDescription == this.seoDescription &&
+          other.seoSlug == this.seoSlug &&
+          other.mediaJson == this.mediaJson &&
+          other.customFieldValuesJson == this.customFieldValuesJson &&
+          other.createdAt == this.createdAt &&
+          other.createdBy == this.createdBy &&
+          other.updatedAt == this.updatedAt &&
+          other.updatedBy == this.updatedBy &&
+          other.deletedAt == this.deletedAt &&
+          other.version == this.version &&
+          other.syncStatus == this.syncStatus);
+}
+
+class ProductsTableCompanion extends UpdateCompanion<ProductsTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String?> companyId;
+  final Value<String> sku;
+  final Value<String> reference;
+  final Value<String> name;
+  final Value<String?> shortDescription;
+  final Value<String?> fullDescription;
+  final Value<String?> brand;
+  final Value<String?> collectionId;
+  final Value<String?> seasonId;
+  final Value<String?> line;
+  final Value<String?> categoryId;
+  final Value<String?> subcategoryId;
+  final Value<String?> gender;
+  final Value<String?> targetAudience;
+  final Value<String?> fabric;
+  final Value<String?> composition;
+  final Value<String?> supplierId;
+  final Value<String?> ncm;
+  final Value<String?> ean;
+  final Value<String> tagsJson;
+  final Value<String> colorIdsJson;
+  final Value<String?> sizeGridTemplateId;
+  final Value<String> status;
+  final Value<DateTime?> launchDate;
+  final Value<String?> seoTitle;
+  final Value<String?> seoDescription;
+  final Value<String?> seoSlug;
+  final Value<String> mediaJson;
+  final Value<String> customFieldValuesJson;
+  final Value<DateTime> createdAt;
+  final Value<String> createdBy;
+  final Value<DateTime> updatedAt;
+  final Value<String> updatedBy;
+  final Value<DateTime?> deletedAt;
+  final Value<int> version;
+  final Value<String> syncStatus;
+  final Value<int> rowid;
+  const ProductsTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.sku = const Value.absent(),
+    this.reference = const Value.absent(),
+    this.name = const Value.absent(),
+    this.shortDescription = const Value.absent(),
+    this.fullDescription = const Value.absent(),
+    this.brand = const Value.absent(),
+    this.collectionId = const Value.absent(),
+    this.seasonId = const Value.absent(),
+    this.line = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.subcategoryId = const Value.absent(),
+    this.gender = const Value.absent(),
+    this.targetAudience = const Value.absent(),
+    this.fabric = const Value.absent(),
+    this.composition = const Value.absent(),
+    this.supplierId = const Value.absent(),
+    this.ncm = const Value.absent(),
+    this.ean = const Value.absent(),
+    this.tagsJson = const Value.absent(),
+    this.colorIdsJson = const Value.absent(),
+    this.sizeGridTemplateId = const Value.absent(),
+    this.status = const Value.absent(),
+    this.launchDate = const Value.absent(),
+    this.seoTitle = const Value.absent(),
+    this.seoDescription = const Value.absent(),
+    this.seoSlug = const Value.absent(),
+    this.mediaJson = const Value.absent(),
+    this.customFieldValuesJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ProductsTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    this.companyId = const Value.absent(),
+    required String sku,
+    required String reference,
+    required String name,
+    this.shortDescription = const Value.absent(),
+    this.fullDescription = const Value.absent(),
+    this.brand = const Value.absent(),
+    this.collectionId = const Value.absent(),
+    this.seasonId = const Value.absent(),
+    this.line = const Value.absent(),
+    this.categoryId = const Value.absent(),
+    this.subcategoryId = const Value.absent(),
+    this.gender = const Value.absent(),
+    this.targetAudience = const Value.absent(),
+    this.fabric = const Value.absent(),
+    this.composition = const Value.absent(),
+    this.supplierId = const Value.absent(),
+    this.ncm = const Value.absent(),
+    this.ean = const Value.absent(),
+    this.tagsJson = const Value.absent(),
+    this.colorIdsJson = const Value.absent(),
+    this.sizeGridTemplateId = const Value.absent(),
+    required String status,
+    this.launchDate = const Value.absent(),
+    this.seoTitle = const Value.absent(),
+    this.seoDescription = const Value.absent(),
+    this.seoSlug = const Value.absent(),
+    this.mediaJson = const Value.absent(),
+    this.customFieldValuesJson = const Value.absent(),
+    required DateTime createdAt,
+    required String createdBy,
+    required DateTime updatedAt,
+    required String updatedBy,
+    this.deletedAt = const Value.absent(),
+    required int version,
+    required String syncStatus,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       sku = Value(sku),
+       reference = Value(reference),
+       name = Value(name),
+       status = Value(status),
+       createdAt = Value(createdAt),
+       createdBy = Value(createdBy),
+       updatedAt = Value(updatedAt),
+       updatedBy = Value(updatedBy),
+       version = Value(version),
+       syncStatus = Value(syncStatus);
+  static Insertable<ProductsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? sku,
+    Expression<String>? reference,
+    Expression<String>? name,
+    Expression<String>? shortDescription,
+    Expression<String>? fullDescription,
+    Expression<String>? brand,
+    Expression<String>? collectionId,
+    Expression<String>? seasonId,
+    Expression<String>? line,
+    Expression<String>? categoryId,
+    Expression<String>? subcategoryId,
+    Expression<String>? gender,
+    Expression<String>? targetAudience,
+    Expression<String>? fabric,
+    Expression<String>? composition,
+    Expression<String>? supplierId,
+    Expression<String>? ncm,
+    Expression<String>? ean,
+    Expression<String>? tagsJson,
+    Expression<String>? colorIdsJson,
+    Expression<String>? sizeGridTemplateId,
+    Expression<String>? status,
+    Expression<DateTime>? launchDate,
+    Expression<String>? seoTitle,
+    Expression<String>? seoDescription,
+    Expression<String>? seoSlug,
+    Expression<String>? mediaJson,
+    Expression<String>? customFieldValuesJson,
+    Expression<DateTime>? createdAt,
+    Expression<String>? createdBy,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? updatedBy,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? version,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (sku != null) 'sku': sku,
+      if (reference != null) 'reference': reference,
+      if (name != null) 'name': name,
+      if (shortDescription != null) 'short_description': shortDescription,
+      if (fullDescription != null) 'full_description': fullDescription,
+      if (brand != null) 'brand': brand,
+      if (collectionId != null) 'collection_id': collectionId,
+      if (seasonId != null) 'season_id': seasonId,
+      if (line != null) 'line': line,
+      if (categoryId != null) 'category_id': categoryId,
+      if (subcategoryId != null) 'subcategory_id': subcategoryId,
+      if (gender != null) 'gender': gender,
+      if (targetAudience != null) 'target_audience': targetAudience,
+      if (fabric != null) 'fabric': fabric,
+      if (composition != null) 'composition': composition,
+      if (supplierId != null) 'supplier_id': supplierId,
+      if (ncm != null) 'ncm': ncm,
+      if (ean != null) 'ean': ean,
+      if (tagsJson != null) 'tags_json': tagsJson,
+      if (colorIdsJson != null) 'color_ids_json': colorIdsJson,
+      if (sizeGridTemplateId != null)
+        'size_grid_template_id': sizeGridTemplateId,
+      if (status != null) 'status': status,
+      if (launchDate != null) 'launch_date': launchDate,
+      if (seoTitle != null) 'seo_title': seoTitle,
+      if (seoDescription != null) 'seo_description': seoDescription,
+      if (seoSlug != null) 'seo_slug': seoSlug,
+      if (mediaJson != null) 'media_json': mediaJson,
+      if (customFieldValuesJson != null)
+        'custom_field_values_json': customFieldValuesJson,
+      if (createdAt != null) 'created_at': createdAt,
+      if (createdBy != null) 'created_by': createdBy,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (updatedBy != null) 'updated_by': updatedBy,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (version != null) 'version': version,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ProductsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String?>? companyId,
+    Value<String>? sku,
+    Value<String>? reference,
+    Value<String>? name,
+    Value<String?>? shortDescription,
+    Value<String?>? fullDescription,
+    Value<String?>? brand,
+    Value<String?>? collectionId,
+    Value<String?>? seasonId,
+    Value<String?>? line,
+    Value<String?>? categoryId,
+    Value<String?>? subcategoryId,
+    Value<String?>? gender,
+    Value<String?>? targetAudience,
+    Value<String?>? fabric,
+    Value<String?>? composition,
+    Value<String?>? supplierId,
+    Value<String?>? ncm,
+    Value<String?>? ean,
+    Value<String>? tagsJson,
+    Value<String>? colorIdsJson,
+    Value<String?>? sizeGridTemplateId,
+    Value<String>? status,
+    Value<DateTime?>? launchDate,
+    Value<String?>? seoTitle,
+    Value<String?>? seoDescription,
+    Value<String?>? seoSlug,
+    Value<String>? mediaJson,
+    Value<String>? customFieldValuesJson,
+    Value<DateTime>? createdAt,
+    Value<String>? createdBy,
+    Value<DateTime>? updatedAt,
+    Value<String>? updatedBy,
+    Value<DateTime?>? deletedAt,
+    Value<int>? version,
+    Value<String>? syncStatus,
+    Value<int>? rowid,
+  }) {
+    return ProductsTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      sku: sku ?? this.sku,
+      reference: reference ?? this.reference,
+      name: name ?? this.name,
+      shortDescription: shortDescription ?? this.shortDescription,
+      fullDescription: fullDescription ?? this.fullDescription,
+      brand: brand ?? this.brand,
+      collectionId: collectionId ?? this.collectionId,
+      seasonId: seasonId ?? this.seasonId,
+      line: line ?? this.line,
+      categoryId: categoryId ?? this.categoryId,
+      subcategoryId: subcategoryId ?? this.subcategoryId,
+      gender: gender ?? this.gender,
+      targetAudience: targetAudience ?? this.targetAudience,
+      fabric: fabric ?? this.fabric,
+      composition: composition ?? this.composition,
+      supplierId: supplierId ?? this.supplierId,
+      ncm: ncm ?? this.ncm,
+      ean: ean ?? this.ean,
+      tagsJson: tagsJson ?? this.tagsJson,
+      colorIdsJson: colorIdsJson ?? this.colorIdsJson,
+      sizeGridTemplateId: sizeGridTemplateId ?? this.sizeGridTemplateId,
+      status: status ?? this.status,
+      launchDate: launchDate ?? this.launchDate,
+      seoTitle: seoTitle ?? this.seoTitle,
+      seoDescription: seoDescription ?? this.seoDescription,
+      seoSlug: seoSlug ?? this.seoSlug,
+      mediaJson: mediaJson ?? this.mediaJson,
+      customFieldValuesJson:
+          customFieldValuesJson ?? this.customFieldValuesJson,
+      createdAt: createdAt ?? this.createdAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      updatedBy: updatedBy ?? this.updatedBy,
+      deletedAt: deletedAt ?? this.deletedAt,
+      version: version ?? this.version,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (sku.present) {
+      map['sku'] = Variable<String>(sku.value);
+    }
+    if (reference.present) {
+      map['reference'] = Variable<String>(reference.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (shortDescription.present) {
+      map['short_description'] = Variable<String>(shortDescription.value);
+    }
+    if (fullDescription.present) {
+      map['full_description'] = Variable<String>(fullDescription.value);
+    }
+    if (brand.present) {
+      map['brand'] = Variable<String>(brand.value);
+    }
+    if (collectionId.present) {
+      map['collection_id'] = Variable<String>(collectionId.value);
+    }
+    if (seasonId.present) {
+      map['season_id'] = Variable<String>(seasonId.value);
+    }
+    if (line.present) {
+      map['line'] = Variable<String>(line.value);
+    }
+    if (categoryId.present) {
+      map['category_id'] = Variable<String>(categoryId.value);
+    }
+    if (subcategoryId.present) {
+      map['subcategory_id'] = Variable<String>(subcategoryId.value);
+    }
+    if (gender.present) {
+      map['gender'] = Variable<String>(gender.value);
+    }
+    if (targetAudience.present) {
+      map['target_audience'] = Variable<String>(targetAudience.value);
+    }
+    if (fabric.present) {
+      map['fabric'] = Variable<String>(fabric.value);
+    }
+    if (composition.present) {
+      map['composition'] = Variable<String>(composition.value);
+    }
+    if (supplierId.present) {
+      map['supplier_id'] = Variable<String>(supplierId.value);
+    }
+    if (ncm.present) {
+      map['ncm'] = Variable<String>(ncm.value);
+    }
+    if (ean.present) {
+      map['ean'] = Variable<String>(ean.value);
+    }
+    if (tagsJson.present) {
+      map['tags_json'] = Variable<String>(tagsJson.value);
+    }
+    if (colorIdsJson.present) {
+      map['color_ids_json'] = Variable<String>(colorIdsJson.value);
+    }
+    if (sizeGridTemplateId.present) {
+      map['size_grid_template_id'] = Variable<String>(sizeGridTemplateId.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (launchDate.present) {
+      map['launch_date'] = Variable<DateTime>(launchDate.value);
+    }
+    if (seoTitle.present) {
+      map['seo_title'] = Variable<String>(seoTitle.value);
+    }
+    if (seoDescription.present) {
+      map['seo_description'] = Variable<String>(seoDescription.value);
+    }
+    if (seoSlug.present) {
+      map['seo_slug'] = Variable<String>(seoSlug.value);
+    }
+    if (mediaJson.present) {
+      map['media_json'] = Variable<String>(mediaJson.value);
+    }
+    if (customFieldValuesJson.present) {
+      map['custom_field_values_json'] = Variable<String>(
+        customFieldValuesJson.value,
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (updatedBy.present) {
+      map['updated_by'] = Variable<String>(updatedBy.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProductsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('sku: $sku, ')
+          ..write('reference: $reference, ')
+          ..write('name: $name, ')
+          ..write('shortDescription: $shortDescription, ')
+          ..write('fullDescription: $fullDescription, ')
+          ..write('brand: $brand, ')
+          ..write('collectionId: $collectionId, ')
+          ..write('seasonId: $seasonId, ')
+          ..write('line: $line, ')
+          ..write('categoryId: $categoryId, ')
+          ..write('subcategoryId: $subcategoryId, ')
+          ..write('gender: $gender, ')
+          ..write('targetAudience: $targetAudience, ')
+          ..write('fabric: $fabric, ')
+          ..write('composition: $composition, ')
+          ..write('supplierId: $supplierId, ')
+          ..write('ncm: $ncm, ')
+          ..write('ean: $ean, ')
+          ..write('tagsJson: $tagsJson, ')
+          ..write('colorIdsJson: $colorIdsJson, ')
+          ..write('sizeGridTemplateId: $sizeGridTemplateId, ')
+          ..write('status: $status, ')
+          ..write('launchDate: $launchDate, ')
+          ..write('seoTitle: $seoTitle, ')
+          ..write('seoDescription: $seoDescription, ')
+          ..write('seoSlug: $seoSlug, ')
+          ..write('mediaJson: $mediaJson, ')
+          ..write('customFieldValuesJson: $customFieldValuesJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ProductVariantsTableTable extends ProductVariantsTable
+    with TableInfo<$ProductVariantsTableTable, ProductVariantsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ProductVariantsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _productIdMeta = const VerificationMeta(
+    'productId',
+  );
+  @override
+  late final GeneratedColumn<String> productId = GeneratedColumn<String>(
+    'product_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'REFERENCES products (id) ON DELETE CASCADE',
+    ),
+  );
+  static const VerificationMeta _colorIdMeta = const VerificationMeta(
+    'colorId',
+  );
+  @override
+  late final GeneratedColumn<String> colorId = GeneratedColumn<String>(
+    'color_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _sizeGridTemplateIdMeta =
+      const VerificationMeta('sizeGridTemplateId');
+  @override
+  late final GeneratedColumn<String> sizeGridTemplateId =
+      GeneratedColumn<String>(
+        'size_grid_template_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _sizeIdMeta = const VerificationMeta('sizeId');
+  @override
+  late final GeneratedColumn<String> sizeId = GeneratedColumn<String>(
+    'size_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _skuMeta = const VerificationMeta('sku');
+  @override
+  late final GeneratedColumn<String> sku = GeneratedColumn<String>(
+    'sku',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _eanMeta = const VerificationMeta('ean');
+  @override
+  late final GeneratedColumn<String> ean = GeneratedColumn<String>(
+    'ean',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _manualAvailabilityStatusMeta =
+      const VerificationMeta('manualAvailabilityStatus');
+  @override
+  late final GeneratedColumn<String> manualAvailabilityStatus =
+      GeneratedColumn<String>(
+        'manual_availability_status',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _manualAvailableQuantityMeta =
+      const VerificationMeta('manualAvailableQuantity');
+  @override
+  late final GeneratedColumn<int> manualAvailableQuantity =
+      GeneratedColumn<int>(
+        'manual_available_quantity',
+        aliasedName,
+        true,
+        type: DriftSqlType.int,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _manualFutureAvailableAtMeta =
+      const VerificationMeta('manualFutureAvailableAt');
+  @override
+  late final GeneratedColumn<DateTime> manualFutureAvailableAt =
+      GeneratedColumn<DateTime>(
+        'manual_future_available_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedByMeta = const VerificationMeta(
+    'updatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
+    'updated_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    productId,
+    colorId,
+    sizeGridTemplateId,
+    sizeId,
+    sku,
+    ean,
+    manualAvailabilityStatus,
+    manualAvailableQuantity,
+    manualFutureAvailableAt,
+    status,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    version,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'product_variants';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ProductVariantsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('product_id')) {
+      context.handle(
+        _productIdMeta,
+        productId.isAcceptableOrUnknown(data['product_id']!, _productIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_productIdMeta);
+    }
+    if (data.containsKey('color_id')) {
+      context.handle(
+        _colorIdMeta,
+        colorId.isAcceptableOrUnknown(data['color_id']!, _colorIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_colorIdMeta);
+    }
+    if (data.containsKey('size_grid_template_id')) {
+      context.handle(
+        _sizeGridTemplateIdMeta,
+        sizeGridTemplateId.isAcceptableOrUnknown(
+          data['size_grid_template_id']!,
+          _sizeGridTemplateIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_sizeGridTemplateIdMeta);
+    }
+    if (data.containsKey('size_id')) {
+      context.handle(
+        _sizeIdMeta,
+        sizeId.isAcceptableOrUnknown(data['size_id']!, _sizeIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_sizeIdMeta);
+    }
+    if (data.containsKey('sku')) {
+      context.handle(
+        _skuMeta,
+        sku.isAcceptableOrUnknown(data['sku']!, _skuMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_skuMeta);
+    }
+    if (data.containsKey('ean')) {
+      context.handle(
+        _eanMeta,
+        ean.isAcceptableOrUnknown(data['ean']!, _eanMeta),
+      );
+    }
+    if (data.containsKey('manual_availability_status')) {
+      context.handle(
+        _manualAvailabilityStatusMeta,
+        manualAvailabilityStatus.isAcceptableOrUnknown(
+          data['manual_availability_status']!,
+          _manualAvailabilityStatusMeta,
+        ),
+      );
+    }
+    if (data.containsKey('manual_available_quantity')) {
+      context.handle(
+        _manualAvailableQuantityMeta,
+        manualAvailableQuantity.isAcceptableOrUnknown(
+          data['manual_available_quantity']!,
+          _manualAvailableQuantityMeta,
+        ),
+      );
+    }
+    if (data.containsKey('manual_future_available_at')) {
+      context.handle(
+        _manualFutureAvailableAtMeta,
+        manualFutureAvailableAt.isAcceptableOrUnknown(
+          data['manual_future_available_at']!,
+          _manualFutureAvailableAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('updated_by')) {
+      context.handle(
+        _updatedByMeta,
+        updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedByMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ProductVariantsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ProductVariantsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      productId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_id'],
+      )!,
+      colorId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}color_id'],
+      )!,
+      sizeGridTemplateId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}size_grid_template_id'],
+      )!,
+      sizeId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}size_id'],
+      )!,
+      sku: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sku'],
+      )!,
+      ean: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ean'],
+      ),
+      manualAvailabilityStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}manual_availability_status'],
+      ),
+      manualAvailableQuantity: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}manual_available_quantity'],
+      ),
+      manualFutureAvailableAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}manual_future_available_at'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      updatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_by'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $ProductVariantsTableTable createAlias(String alias) {
+    return $ProductVariantsTableTable(attachedDatabase, alias);
+  }
+}
+
+class ProductVariantsTableData extends DataClass
+    implements Insertable<ProductVariantsTableData> {
+  final String id;
+  final String organizationId;
+  final String productId;
+  final String colorId;
+  final String sizeGridTemplateId;
+  final String sizeId;
+  final String sku;
+  final String? ean;
+  final String? manualAvailabilityStatus;
+  final int? manualAvailableQuantity;
+  final DateTime? manualFutureAvailableAt;
+  final String status;
+  final DateTime createdAt;
+  final String createdBy;
+  final DateTime updatedAt;
+  final String updatedBy;
+  final int version;
+  final String syncStatus;
+  const ProductVariantsTableData({
+    required this.id,
+    required this.organizationId,
+    required this.productId,
+    required this.colorId,
+    required this.sizeGridTemplateId,
+    required this.sizeId,
+    required this.sku,
+    this.ean,
+    this.manualAvailabilityStatus,
+    this.manualAvailableQuantity,
+    this.manualFutureAvailableAt,
+    required this.status,
+    required this.createdAt,
+    required this.createdBy,
+    required this.updatedAt,
+    required this.updatedBy,
+    required this.version,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    map['product_id'] = Variable<String>(productId);
+    map['color_id'] = Variable<String>(colorId);
+    map['size_grid_template_id'] = Variable<String>(sizeGridTemplateId);
+    map['size_id'] = Variable<String>(sizeId);
+    map['sku'] = Variable<String>(sku);
+    if (!nullToAbsent || ean != null) {
+      map['ean'] = Variable<String>(ean);
+    }
+    if (!nullToAbsent || manualAvailabilityStatus != null) {
+      map['manual_availability_status'] = Variable<String>(
+        manualAvailabilityStatus,
+      );
+    }
+    if (!nullToAbsent || manualAvailableQuantity != null) {
+      map['manual_available_quantity'] = Variable<int>(manualAvailableQuantity);
+    }
+    if (!nullToAbsent || manualFutureAvailableAt != null) {
+      map['manual_future_available_at'] = Variable<DateTime>(
+        manualFutureAvailableAt,
+      );
+    }
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_by'] = Variable<String>(createdBy);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_by'] = Variable<String>(updatedBy);
+    map['version'] = Variable<int>(version);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  ProductVariantsTableCompanion toCompanion(bool nullToAbsent) {
+    return ProductVariantsTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      productId: Value(productId),
+      colorId: Value(colorId),
+      sizeGridTemplateId: Value(sizeGridTemplateId),
+      sizeId: Value(sizeId),
+      sku: Value(sku),
+      ean: ean == null && nullToAbsent ? const Value.absent() : Value(ean),
+      manualAvailabilityStatus: manualAvailabilityStatus == null && nullToAbsent
+          ? const Value.absent()
+          : Value(manualAvailabilityStatus),
+      manualAvailableQuantity: manualAvailableQuantity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(manualAvailableQuantity),
+      manualFutureAvailableAt: manualFutureAvailableAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(manualFutureAvailableAt),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      createdBy: Value(createdBy),
+      updatedAt: Value(updatedAt),
+      updatedBy: Value(updatedBy),
+      version: Value(version),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory ProductVariantsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ProductVariantsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      productId: serializer.fromJson<String>(json['productId']),
+      colorId: serializer.fromJson<String>(json['colorId']),
+      sizeGridTemplateId: serializer.fromJson<String>(
+        json['sizeGridTemplateId'],
+      ),
+      sizeId: serializer.fromJson<String>(json['sizeId']),
+      sku: serializer.fromJson<String>(json['sku']),
+      ean: serializer.fromJson<String?>(json['ean']),
+      manualAvailabilityStatus: serializer.fromJson<String?>(
+        json['manualAvailabilityStatus'],
+      ),
+      manualAvailableQuantity: serializer.fromJson<int?>(
+        json['manualAvailableQuantity'],
+      ),
+      manualFutureAvailableAt: serializer.fromJson<DateTime?>(
+        json['manualFutureAvailableAt'],
+      ),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedBy: serializer.fromJson<String>(json['updatedBy']),
+      version: serializer.fromJson<int>(json['version']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'productId': serializer.toJson<String>(productId),
+      'colorId': serializer.toJson<String>(colorId),
+      'sizeGridTemplateId': serializer.toJson<String>(sizeGridTemplateId),
+      'sizeId': serializer.toJson<String>(sizeId),
+      'sku': serializer.toJson<String>(sku),
+      'ean': serializer.toJson<String?>(ean),
+      'manualAvailabilityStatus': serializer.toJson<String?>(
+        manualAvailabilityStatus,
+      ),
+      'manualAvailableQuantity': serializer.toJson<int?>(
+        manualAvailableQuantity,
+      ),
+      'manualFutureAvailableAt': serializer.toJson<DateTime?>(
+        manualFutureAvailableAt,
+      ),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedBy': serializer.toJson<String>(updatedBy),
+      'version': serializer.toJson<int>(version),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  ProductVariantsTableData copyWith({
+    String? id,
+    String? organizationId,
+    String? productId,
+    String? colorId,
+    String? sizeGridTemplateId,
+    String? sizeId,
+    String? sku,
+    Value<String?> ean = const Value.absent(),
+    Value<String?> manualAvailabilityStatus = const Value.absent(),
+    Value<int?> manualAvailableQuantity = const Value.absent(),
+    Value<DateTime?> manualFutureAvailableAt = const Value.absent(),
+    String? status,
+    DateTime? createdAt,
+    String? createdBy,
+    DateTime? updatedAt,
+    String? updatedBy,
+    int? version,
+    String? syncStatus,
+  }) => ProductVariantsTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    productId: productId ?? this.productId,
+    colorId: colorId ?? this.colorId,
+    sizeGridTemplateId: sizeGridTemplateId ?? this.sizeGridTemplateId,
+    sizeId: sizeId ?? this.sizeId,
+    sku: sku ?? this.sku,
+    ean: ean.present ? ean.value : this.ean,
+    manualAvailabilityStatus: manualAvailabilityStatus.present
+        ? manualAvailabilityStatus.value
+        : this.manualAvailabilityStatus,
+    manualAvailableQuantity: manualAvailableQuantity.present
+        ? manualAvailableQuantity.value
+        : this.manualAvailableQuantity,
+    manualFutureAvailableAt: manualFutureAvailableAt.present
+        ? manualFutureAvailableAt.value
+        : this.manualFutureAvailableAt,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    createdBy: createdBy ?? this.createdBy,
+    updatedAt: updatedAt ?? this.updatedAt,
+    updatedBy: updatedBy ?? this.updatedBy,
+    version: version ?? this.version,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  ProductVariantsTableData copyWithCompanion(
+    ProductVariantsTableCompanion data,
+  ) {
+    return ProductVariantsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      productId: data.productId.present ? data.productId.value : this.productId,
+      colorId: data.colorId.present ? data.colorId.value : this.colorId,
+      sizeGridTemplateId: data.sizeGridTemplateId.present
+          ? data.sizeGridTemplateId.value
+          : this.sizeGridTemplateId,
+      sizeId: data.sizeId.present ? data.sizeId.value : this.sizeId,
+      sku: data.sku.present ? data.sku.value : this.sku,
+      ean: data.ean.present ? data.ean.value : this.ean,
+      manualAvailabilityStatus: data.manualAvailabilityStatus.present
+          ? data.manualAvailabilityStatus.value
+          : this.manualAvailabilityStatus,
+      manualAvailableQuantity: data.manualAvailableQuantity.present
+          ? data.manualAvailableQuantity.value
+          : this.manualAvailableQuantity,
+      manualFutureAvailableAt: data.manualFutureAvailableAt.present
+          ? data.manualFutureAvailableAt.value
+          : this.manualFutureAvailableAt,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      version: data.version.present ? data.version.value : this.version,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProductVariantsTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('productId: $productId, ')
+          ..write('colorId: $colorId, ')
+          ..write('sizeGridTemplateId: $sizeGridTemplateId, ')
+          ..write('sizeId: $sizeId, ')
+          ..write('sku: $sku, ')
+          ..write('ean: $ean, ')
+          ..write('manualAvailabilityStatus: $manualAvailabilityStatus, ')
+          ..write('manualAvailableQuantity: $manualAvailableQuantity, ')
+          ..write('manualFutureAvailableAt: $manualFutureAvailableAt, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    productId,
+    colorId,
+    sizeGridTemplateId,
+    sizeId,
+    sku,
+    ean,
+    manualAvailabilityStatus,
+    manualAvailableQuantity,
+    manualFutureAvailableAt,
+    status,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    version,
+    syncStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ProductVariantsTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.productId == this.productId &&
+          other.colorId == this.colorId &&
+          other.sizeGridTemplateId == this.sizeGridTemplateId &&
+          other.sizeId == this.sizeId &&
+          other.sku == this.sku &&
+          other.ean == this.ean &&
+          other.manualAvailabilityStatus == this.manualAvailabilityStatus &&
+          other.manualAvailableQuantity == this.manualAvailableQuantity &&
+          other.manualFutureAvailableAt == this.manualFutureAvailableAt &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.createdBy == this.createdBy &&
+          other.updatedAt == this.updatedAt &&
+          other.updatedBy == this.updatedBy &&
+          other.version == this.version &&
+          other.syncStatus == this.syncStatus);
+}
+
+class ProductVariantsTableCompanion
+    extends UpdateCompanion<ProductVariantsTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String> productId;
+  final Value<String> colorId;
+  final Value<String> sizeGridTemplateId;
+  final Value<String> sizeId;
+  final Value<String> sku;
+  final Value<String?> ean;
+  final Value<String?> manualAvailabilityStatus;
+  final Value<int?> manualAvailableQuantity;
+  final Value<DateTime?> manualFutureAvailableAt;
+  final Value<String> status;
+  final Value<DateTime> createdAt;
+  final Value<String> createdBy;
+  final Value<DateTime> updatedAt;
+  final Value<String> updatedBy;
+  final Value<int> version;
+  final Value<String> syncStatus;
+  final Value<int> rowid;
+  const ProductVariantsTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.productId = const Value.absent(),
+    this.colorId = const Value.absent(),
+    this.sizeGridTemplateId = const Value.absent(),
+    this.sizeId = const Value.absent(),
+    this.sku = const Value.absent(),
+    this.ean = const Value.absent(),
+    this.manualAvailabilityStatus = const Value.absent(),
+    this.manualAvailableQuantity = const Value.absent(),
+    this.manualFutureAvailableAt = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.version = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ProductVariantsTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    required String productId,
+    required String colorId,
+    required String sizeGridTemplateId,
+    required String sizeId,
+    required String sku,
+    this.ean = const Value.absent(),
+    this.manualAvailabilityStatus = const Value.absent(),
+    this.manualAvailableQuantity = const Value.absent(),
+    this.manualFutureAvailableAt = const Value.absent(),
+    required String status,
+    required DateTime createdAt,
+    required String createdBy,
+    required DateTime updatedAt,
+    required String updatedBy,
+    required int version,
+    required String syncStatus,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       productId = Value(productId),
+       colorId = Value(colorId),
+       sizeGridTemplateId = Value(sizeGridTemplateId),
+       sizeId = Value(sizeId),
+       sku = Value(sku),
+       status = Value(status),
+       createdAt = Value(createdAt),
+       createdBy = Value(createdBy),
+       updatedAt = Value(updatedAt),
+       updatedBy = Value(updatedBy),
+       version = Value(version),
+       syncStatus = Value(syncStatus);
+  static Insertable<ProductVariantsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? productId,
+    Expression<String>? colorId,
+    Expression<String>? sizeGridTemplateId,
+    Expression<String>? sizeId,
+    Expression<String>? sku,
+    Expression<String>? ean,
+    Expression<String>? manualAvailabilityStatus,
+    Expression<int>? manualAvailableQuantity,
+    Expression<DateTime>? manualFutureAvailableAt,
+    Expression<String>? status,
+    Expression<DateTime>? createdAt,
+    Expression<String>? createdBy,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? updatedBy,
+    Expression<int>? version,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (productId != null) 'product_id': productId,
+      if (colorId != null) 'color_id': colorId,
+      if (sizeGridTemplateId != null)
+        'size_grid_template_id': sizeGridTemplateId,
+      if (sizeId != null) 'size_id': sizeId,
+      if (sku != null) 'sku': sku,
+      if (ean != null) 'ean': ean,
+      if (manualAvailabilityStatus != null)
+        'manual_availability_status': manualAvailabilityStatus,
+      if (manualAvailableQuantity != null)
+        'manual_available_quantity': manualAvailableQuantity,
+      if (manualFutureAvailableAt != null)
+        'manual_future_available_at': manualFutureAvailableAt,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (createdBy != null) 'created_by': createdBy,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (updatedBy != null) 'updated_by': updatedBy,
+      if (version != null) 'version': version,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ProductVariantsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String>? productId,
+    Value<String>? colorId,
+    Value<String>? sizeGridTemplateId,
+    Value<String>? sizeId,
+    Value<String>? sku,
+    Value<String?>? ean,
+    Value<String?>? manualAvailabilityStatus,
+    Value<int?>? manualAvailableQuantity,
+    Value<DateTime?>? manualFutureAvailableAt,
+    Value<String>? status,
+    Value<DateTime>? createdAt,
+    Value<String>? createdBy,
+    Value<DateTime>? updatedAt,
+    Value<String>? updatedBy,
+    Value<int>? version,
+    Value<String>? syncStatus,
+    Value<int>? rowid,
+  }) {
+    return ProductVariantsTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      productId: productId ?? this.productId,
+      colorId: colorId ?? this.colorId,
+      sizeGridTemplateId: sizeGridTemplateId ?? this.sizeGridTemplateId,
+      sizeId: sizeId ?? this.sizeId,
+      sku: sku ?? this.sku,
+      ean: ean ?? this.ean,
+      manualAvailabilityStatus:
+          manualAvailabilityStatus ?? this.manualAvailabilityStatus,
+      manualAvailableQuantity:
+          manualAvailableQuantity ?? this.manualAvailableQuantity,
+      manualFutureAvailableAt:
+          manualFutureAvailableAt ?? this.manualFutureAvailableAt,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      updatedBy: updatedBy ?? this.updatedBy,
+      version: version ?? this.version,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (productId.present) {
+      map['product_id'] = Variable<String>(productId.value);
+    }
+    if (colorId.present) {
+      map['color_id'] = Variable<String>(colorId.value);
+    }
+    if (sizeGridTemplateId.present) {
+      map['size_grid_template_id'] = Variable<String>(sizeGridTemplateId.value);
+    }
+    if (sizeId.present) {
+      map['size_id'] = Variable<String>(sizeId.value);
+    }
+    if (sku.present) {
+      map['sku'] = Variable<String>(sku.value);
+    }
+    if (ean.present) {
+      map['ean'] = Variable<String>(ean.value);
+    }
+    if (manualAvailabilityStatus.present) {
+      map['manual_availability_status'] = Variable<String>(
+        manualAvailabilityStatus.value,
+      );
+    }
+    if (manualAvailableQuantity.present) {
+      map['manual_available_quantity'] = Variable<int>(
+        manualAvailableQuantity.value,
+      );
+    }
+    if (manualFutureAvailableAt.present) {
+      map['manual_future_available_at'] = Variable<DateTime>(
+        manualFutureAvailableAt.value,
+      );
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (updatedBy.present) {
+      map['updated_by'] = Variable<String>(updatedBy.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ProductVariantsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('productId: $productId, ')
+          ..write('colorId: $colorId, ')
+          ..write('sizeGridTemplateId: $sizeGridTemplateId, ')
+          ..write('sizeId: $sizeId, ')
+          ..write('sku: $sku, ')
+          ..write('ean: $ean, ')
+          ..write('manualAvailabilityStatus: $manualAvailabilityStatus, ')
+          ..write('manualAvailableQuantity: $manualAvailableQuantity, ')
+          ..write('manualFutureAvailableAt: $manualFutureAvailableAt, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $CampaignsTableTable extends CampaignsTable
+    with TableInfo<$CampaignsTableTable, CampaignsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CampaignsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _validFromMeta = const VerificationMeta(
+    'validFrom',
+  );
+  @override
+  late final GeneratedColumn<DateTime> validFrom = GeneratedColumn<DateTime>(
+    'valid_from',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _validToMeta = const VerificationMeta(
+    'validTo',
+  );
+  @override
+  late final GeneratedColumn<DateTime> validTo = GeneratedColumn<DateTime>(
+    'valid_to',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _customerSegmentMeta = const VerificationMeta(
+    'customerSegment',
+  );
+  @override
+  late final GeneratedColumn<String> customerSegment = GeneratedColumn<String>(
+    'customer_segment',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _productIdsJsonMeta = const VerificationMeta(
+    'productIdsJson',
+  );
+  @override
+  late final GeneratedColumn<String> productIdsJson = GeneratedColumn<String>(
+    'product_ids_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _collectionIdsJsonMeta = const VerificationMeta(
+    'collectionIdsJson',
+  );
+  @override
+  late final GeneratedColumn<String> collectionIdsJson =
+      GeneratedColumn<String>(
+        'collection_ids_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      );
+  static const VerificationMeta _categoryIdsJsonMeta = const VerificationMeta(
+    'categoryIdsJson',
+  );
+  @override
+  late final GeneratedColumn<String> categoryIdsJson = GeneratedColumn<String>(
+    'category_ids_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _discountTypeMeta = const VerificationMeta(
+    'discountType',
+  );
+  @override
+  late final GeneratedColumn<String> discountType = GeneratedColumn<String>(
+    'discount_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _discountValueMeta = const VerificationMeta(
+    'discountValue',
+  );
+  @override
+  late final GeneratedColumn<double> discountValue = GeneratedColumn<double>(
+    'discount_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stackableWithOtherCampaignsMeta =
+      const VerificationMeta('stackableWithOtherCampaigns');
+  @override
+  late final GeneratedColumn<bool> stackableWithOtherCampaigns =
+      GeneratedColumn<bool>(
+        'stackable_with_other_campaigns',
+        aliasedName,
+        false,
+        type: DriftSqlType.bool,
+        requiredDuringInsert: true,
+        defaultConstraints: GeneratedColumn.constraintIsAlways(
+          'CHECK ("stackable_with_other_campaigns" IN (0, 1))',
+        ),
+      );
+  static const VerificationMeta _priorityMeta = const VerificationMeta(
+    'priority',
+  );
+  @override
+  late final GeneratedColumn<int> priority = GeneratedColumn<int>(
+    'priority',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedByMeta = const VerificationMeta(
+    'updatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
+    'updated_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    companyId,
+    name,
+    validFrom,
+    validTo,
+    customerSegment,
+    productIdsJson,
+    collectionIdsJson,
+    categoryIdsJson,
+    discountType,
+    discountValue,
+    stackableWithOtherCampaigns,
+    priority,
+    status,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'campaigns';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CampaignsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('valid_from')) {
+      context.handle(
+        _validFromMeta,
+        validFrom.isAcceptableOrUnknown(data['valid_from']!, _validFromMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_validFromMeta);
+    }
+    if (data.containsKey('valid_to')) {
+      context.handle(
+        _validToMeta,
+        validTo.isAcceptableOrUnknown(data['valid_to']!, _validToMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_validToMeta);
+    }
+    if (data.containsKey('customer_segment')) {
+      context.handle(
+        _customerSegmentMeta,
+        customerSegment.isAcceptableOrUnknown(
+          data['customer_segment']!,
+          _customerSegmentMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_customerSegmentMeta);
+    }
+    if (data.containsKey('product_ids_json')) {
+      context.handle(
+        _productIdsJsonMeta,
+        productIdsJson.isAcceptableOrUnknown(
+          data['product_ids_json']!,
+          _productIdsJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('collection_ids_json')) {
+      context.handle(
+        _collectionIdsJsonMeta,
+        collectionIdsJson.isAcceptableOrUnknown(
+          data['collection_ids_json']!,
+          _collectionIdsJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('category_ids_json')) {
+      context.handle(
+        _categoryIdsJsonMeta,
+        categoryIdsJson.isAcceptableOrUnknown(
+          data['category_ids_json']!,
+          _categoryIdsJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('discount_type')) {
+      context.handle(
+        _discountTypeMeta,
+        discountType.isAcceptableOrUnknown(
+          data['discount_type']!,
+          _discountTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_discountTypeMeta);
+    }
+    if (data.containsKey('discount_value')) {
+      context.handle(
+        _discountValueMeta,
+        discountValue.isAcceptableOrUnknown(
+          data['discount_value']!,
+          _discountValueMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_discountValueMeta);
+    }
+    if (data.containsKey('stackable_with_other_campaigns')) {
+      context.handle(
+        _stackableWithOtherCampaignsMeta,
+        stackableWithOtherCampaigns.isAcceptableOrUnknown(
+          data['stackable_with_other_campaigns']!,
+          _stackableWithOtherCampaignsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_stackableWithOtherCampaignsMeta);
+    }
+    if (data.containsKey('priority')) {
+      context.handle(
+        _priorityMeta,
+        priority.isAcceptableOrUnknown(data['priority']!, _priorityMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('updated_by')) {
+      context.handle(
+        _updatedByMeta,
+        updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedByMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CampaignsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CampaignsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      validFrom: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}valid_from'],
+      )!,
+      validTo: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}valid_to'],
+      )!,
+      customerSegment: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}customer_segment'],
+      )!,
+      productIdsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}product_ids_json'],
+      )!,
+      collectionIdsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collection_ids_json'],
+      )!,
+      categoryIdsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}category_ids_json'],
+      )!,
+      discountType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}discount_type'],
+      )!,
+      discountValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}discount_value'],
+      )!,
+      stackableWithOtherCampaigns: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}stackable_with_other_campaigns'],
+      )!,
+      priority: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}priority'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      updatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_by'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $CampaignsTableTable createAlias(String alias) {
+    return $CampaignsTableTable(attachedDatabase, alias);
+  }
+}
+
+class CampaignsTableData extends DataClass
+    implements Insertable<CampaignsTableData> {
+  final String id;
+  final String organizationId;
+  final String companyId;
+  final String name;
+  final DateTime validFrom;
+  final DateTime validTo;
+  final String customerSegment;
+  final String productIdsJson;
+  final String collectionIdsJson;
+  final String categoryIdsJson;
+  final String discountType;
+  final double discountValue;
+  final bool stackableWithOtherCampaigns;
+  final int priority;
+  final String status;
+  final DateTime createdAt;
+  final String createdBy;
+  final DateTime updatedAt;
+  final String updatedBy;
+  final DateTime? deletedAt;
+  final int version;
+  final String syncStatus;
+  const CampaignsTableData({
+    required this.id,
+    required this.organizationId,
+    required this.companyId,
+    required this.name,
+    required this.validFrom,
+    required this.validTo,
+    required this.customerSegment,
+    required this.productIdsJson,
+    required this.collectionIdsJson,
+    required this.categoryIdsJson,
+    required this.discountType,
+    required this.discountValue,
+    required this.stackableWithOtherCampaigns,
+    required this.priority,
+    required this.status,
+    required this.createdAt,
+    required this.createdBy,
+    required this.updatedAt,
+    required this.updatedBy,
+    this.deletedAt,
+    required this.version,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    map['company_id'] = Variable<String>(companyId);
+    map['name'] = Variable<String>(name);
+    map['valid_from'] = Variable<DateTime>(validFrom);
+    map['valid_to'] = Variable<DateTime>(validTo);
+    map['customer_segment'] = Variable<String>(customerSegment);
+    map['product_ids_json'] = Variable<String>(productIdsJson);
+    map['collection_ids_json'] = Variable<String>(collectionIdsJson);
+    map['category_ids_json'] = Variable<String>(categoryIdsJson);
+    map['discount_type'] = Variable<String>(discountType);
+    map['discount_value'] = Variable<double>(discountValue);
+    map['stackable_with_other_campaigns'] = Variable<bool>(
+      stackableWithOtherCampaigns,
+    );
+    map['priority'] = Variable<int>(priority);
+    map['status'] = Variable<String>(status);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_by'] = Variable<String>(createdBy);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_by'] = Variable<String>(updatedBy);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['version'] = Variable<int>(version);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  CampaignsTableCompanion toCompanion(bool nullToAbsent) {
+    return CampaignsTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      companyId: Value(companyId),
+      name: Value(name),
+      validFrom: Value(validFrom),
+      validTo: Value(validTo),
+      customerSegment: Value(customerSegment),
+      productIdsJson: Value(productIdsJson),
+      collectionIdsJson: Value(collectionIdsJson),
+      categoryIdsJson: Value(categoryIdsJson),
+      discountType: Value(discountType),
+      discountValue: Value(discountValue),
+      stackableWithOtherCampaigns: Value(stackableWithOtherCampaigns),
+      priority: Value(priority),
+      status: Value(status),
+      createdAt: Value(createdAt),
+      createdBy: Value(createdBy),
+      updatedAt: Value(updatedAt),
+      updatedBy: Value(updatedBy),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      version: Value(version),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory CampaignsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CampaignsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      name: serializer.fromJson<String>(json['name']),
+      validFrom: serializer.fromJson<DateTime>(json['validFrom']),
+      validTo: serializer.fromJson<DateTime>(json['validTo']),
+      customerSegment: serializer.fromJson<String>(json['customerSegment']),
+      productIdsJson: serializer.fromJson<String>(json['productIdsJson']),
+      collectionIdsJson: serializer.fromJson<String>(json['collectionIdsJson']),
+      categoryIdsJson: serializer.fromJson<String>(json['categoryIdsJson']),
+      discountType: serializer.fromJson<String>(json['discountType']),
+      discountValue: serializer.fromJson<double>(json['discountValue']),
+      stackableWithOtherCampaigns: serializer.fromJson<bool>(
+        json['stackableWithOtherCampaigns'],
+      ),
+      priority: serializer.fromJson<int>(json['priority']),
+      status: serializer.fromJson<String>(json['status']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedBy: serializer.fromJson<String>(json['updatedBy']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String>(companyId),
+      'name': serializer.toJson<String>(name),
+      'validFrom': serializer.toJson<DateTime>(validFrom),
+      'validTo': serializer.toJson<DateTime>(validTo),
+      'customerSegment': serializer.toJson<String>(customerSegment),
+      'productIdsJson': serializer.toJson<String>(productIdsJson),
+      'collectionIdsJson': serializer.toJson<String>(collectionIdsJson),
+      'categoryIdsJson': serializer.toJson<String>(categoryIdsJson),
+      'discountType': serializer.toJson<String>(discountType),
+      'discountValue': serializer.toJson<double>(discountValue),
+      'stackableWithOtherCampaigns': serializer.toJson<bool>(
+        stackableWithOtherCampaigns,
+      ),
+      'priority': serializer.toJson<int>(priority),
+      'status': serializer.toJson<String>(status),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedBy': serializer.toJson<String>(updatedBy),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'version': serializer.toJson<int>(version),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  CampaignsTableData copyWith({
+    String? id,
+    String? organizationId,
+    String? companyId,
+    String? name,
+    DateTime? validFrom,
+    DateTime? validTo,
+    String? customerSegment,
+    String? productIdsJson,
+    String? collectionIdsJson,
+    String? categoryIdsJson,
+    String? discountType,
+    double? discountValue,
+    bool? stackableWithOtherCampaigns,
+    int? priority,
+    String? status,
+    DateTime? createdAt,
+    String? createdBy,
+    DateTime? updatedAt,
+    String? updatedBy,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? version,
+    String? syncStatus,
+  }) => CampaignsTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId ?? this.companyId,
+    name: name ?? this.name,
+    validFrom: validFrom ?? this.validFrom,
+    validTo: validTo ?? this.validTo,
+    customerSegment: customerSegment ?? this.customerSegment,
+    productIdsJson: productIdsJson ?? this.productIdsJson,
+    collectionIdsJson: collectionIdsJson ?? this.collectionIdsJson,
+    categoryIdsJson: categoryIdsJson ?? this.categoryIdsJson,
+    discountType: discountType ?? this.discountType,
+    discountValue: discountValue ?? this.discountValue,
+    stackableWithOtherCampaigns:
+        stackableWithOtherCampaigns ?? this.stackableWithOtherCampaigns,
+    priority: priority ?? this.priority,
+    status: status ?? this.status,
+    createdAt: createdAt ?? this.createdAt,
+    createdBy: createdBy ?? this.createdBy,
+    updatedAt: updatedAt ?? this.updatedAt,
+    updatedBy: updatedBy ?? this.updatedBy,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    version: version ?? this.version,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  CampaignsTableData copyWithCompanion(CampaignsTableCompanion data) {
+    return CampaignsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      name: data.name.present ? data.name.value : this.name,
+      validFrom: data.validFrom.present ? data.validFrom.value : this.validFrom,
+      validTo: data.validTo.present ? data.validTo.value : this.validTo,
+      customerSegment: data.customerSegment.present
+          ? data.customerSegment.value
+          : this.customerSegment,
+      productIdsJson: data.productIdsJson.present
+          ? data.productIdsJson.value
+          : this.productIdsJson,
+      collectionIdsJson: data.collectionIdsJson.present
+          ? data.collectionIdsJson.value
+          : this.collectionIdsJson,
+      categoryIdsJson: data.categoryIdsJson.present
+          ? data.categoryIdsJson.value
+          : this.categoryIdsJson,
+      discountType: data.discountType.present
+          ? data.discountType.value
+          : this.discountType,
+      discountValue: data.discountValue.present
+          ? data.discountValue.value
+          : this.discountValue,
+      stackableWithOtherCampaigns: data.stackableWithOtherCampaigns.present
+          ? data.stackableWithOtherCampaigns.value
+          : this.stackableWithOtherCampaigns,
+      priority: data.priority.present ? data.priority.value : this.priority,
+      status: data.status.present ? data.status.value : this.status,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      version: data.version.present ? data.version.value : this.version,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CampaignsTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('name: $name, ')
+          ..write('validFrom: $validFrom, ')
+          ..write('validTo: $validTo, ')
+          ..write('customerSegment: $customerSegment, ')
+          ..write('productIdsJson: $productIdsJson, ')
+          ..write('collectionIdsJson: $collectionIdsJson, ')
+          ..write('categoryIdsJson: $categoryIdsJson, ')
+          ..write('discountType: $discountType, ')
+          ..write('discountValue: $discountValue, ')
+          ..write('stackableWithOtherCampaigns: $stackableWithOtherCampaigns, ')
+          ..write('priority: $priority, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    organizationId,
+    companyId,
+    name,
+    validFrom,
+    validTo,
+    customerSegment,
+    productIdsJson,
+    collectionIdsJson,
+    categoryIdsJson,
+    discountType,
+    discountValue,
+    stackableWithOtherCampaigns,
+    priority,
+    status,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CampaignsTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.name == this.name &&
+          other.validFrom == this.validFrom &&
+          other.validTo == this.validTo &&
+          other.customerSegment == this.customerSegment &&
+          other.productIdsJson == this.productIdsJson &&
+          other.collectionIdsJson == this.collectionIdsJson &&
+          other.categoryIdsJson == this.categoryIdsJson &&
+          other.discountType == this.discountType &&
+          other.discountValue == this.discountValue &&
+          other.stackableWithOtherCampaigns ==
+              this.stackableWithOtherCampaigns &&
+          other.priority == this.priority &&
+          other.status == this.status &&
+          other.createdAt == this.createdAt &&
+          other.createdBy == this.createdBy &&
+          other.updatedAt == this.updatedAt &&
+          other.updatedBy == this.updatedBy &&
+          other.deletedAt == this.deletedAt &&
+          other.version == this.version &&
+          other.syncStatus == this.syncStatus);
+}
+
+class CampaignsTableCompanion extends UpdateCompanion<CampaignsTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String> companyId;
+  final Value<String> name;
+  final Value<DateTime> validFrom;
+  final Value<DateTime> validTo;
+  final Value<String> customerSegment;
+  final Value<String> productIdsJson;
+  final Value<String> collectionIdsJson;
+  final Value<String> categoryIdsJson;
+  final Value<String> discountType;
+  final Value<double> discountValue;
+  final Value<bool> stackableWithOtherCampaigns;
+  final Value<int> priority;
+  final Value<String> status;
+  final Value<DateTime> createdAt;
+  final Value<String> createdBy;
+  final Value<DateTime> updatedAt;
+  final Value<String> updatedBy;
+  final Value<DateTime?> deletedAt;
+  final Value<int> version;
+  final Value<String> syncStatus;
+  final Value<int> rowid;
+  const CampaignsTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.name = const Value.absent(),
+    this.validFrom = const Value.absent(),
+    this.validTo = const Value.absent(),
+    this.customerSegment = const Value.absent(),
+    this.productIdsJson = const Value.absent(),
+    this.collectionIdsJson = const Value.absent(),
+    this.categoryIdsJson = const Value.absent(),
+    this.discountType = const Value.absent(),
+    this.discountValue = const Value.absent(),
+    this.stackableWithOtherCampaigns = const Value.absent(),
+    this.priority = const Value.absent(),
+    this.status = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CampaignsTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    required String companyId,
+    required String name,
+    required DateTime validFrom,
+    required DateTime validTo,
+    required String customerSegment,
+    this.productIdsJson = const Value.absent(),
+    this.collectionIdsJson = const Value.absent(),
+    this.categoryIdsJson = const Value.absent(),
+    required String discountType,
+    required double discountValue,
+    required bool stackableWithOtherCampaigns,
+    this.priority = const Value.absent(),
+    required String status,
+    required DateTime createdAt,
+    required String createdBy,
+    required DateTime updatedAt,
+    required String updatedBy,
+    this.deletedAt = const Value.absent(),
+    required int version,
+    required String syncStatus,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       companyId = Value(companyId),
+       name = Value(name),
+       validFrom = Value(validFrom),
+       validTo = Value(validTo),
+       customerSegment = Value(customerSegment),
+       discountType = Value(discountType),
+       discountValue = Value(discountValue),
+       stackableWithOtherCampaigns = Value(stackableWithOtherCampaigns),
+       status = Value(status),
+       createdAt = Value(createdAt),
+       createdBy = Value(createdBy),
+       updatedAt = Value(updatedAt),
+       updatedBy = Value(updatedBy),
+       version = Value(version),
+       syncStatus = Value(syncStatus);
+  static Insertable<CampaignsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? name,
+    Expression<DateTime>? validFrom,
+    Expression<DateTime>? validTo,
+    Expression<String>? customerSegment,
+    Expression<String>? productIdsJson,
+    Expression<String>? collectionIdsJson,
+    Expression<String>? categoryIdsJson,
+    Expression<String>? discountType,
+    Expression<double>? discountValue,
+    Expression<bool>? stackableWithOtherCampaigns,
+    Expression<int>? priority,
+    Expression<String>? status,
+    Expression<DateTime>? createdAt,
+    Expression<String>? createdBy,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? updatedBy,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? version,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (name != null) 'name': name,
+      if (validFrom != null) 'valid_from': validFrom,
+      if (validTo != null) 'valid_to': validTo,
+      if (customerSegment != null) 'customer_segment': customerSegment,
+      if (productIdsJson != null) 'product_ids_json': productIdsJson,
+      if (collectionIdsJson != null) 'collection_ids_json': collectionIdsJson,
+      if (categoryIdsJson != null) 'category_ids_json': categoryIdsJson,
+      if (discountType != null) 'discount_type': discountType,
+      if (discountValue != null) 'discount_value': discountValue,
+      if (stackableWithOtherCampaigns != null)
+        'stackable_with_other_campaigns': stackableWithOtherCampaigns,
+      if (priority != null) 'priority': priority,
+      if (status != null) 'status': status,
+      if (createdAt != null) 'created_at': createdAt,
+      if (createdBy != null) 'created_by': createdBy,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (updatedBy != null) 'updated_by': updatedBy,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (version != null) 'version': version,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CampaignsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String>? companyId,
+    Value<String>? name,
+    Value<DateTime>? validFrom,
+    Value<DateTime>? validTo,
+    Value<String>? customerSegment,
+    Value<String>? productIdsJson,
+    Value<String>? collectionIdsJson,
+    Value<String>? categoryIdsJson,
+    Value<String>? discountType,
+    Value<double>? discountValue,
+    Value<bool>? stackableWithOtherCampaigns,
+    Value<int>? priority,
+    Value<String>? status,
+    Value<DateTime>? createdAt,
+    Value<String>? createdBy,
+    Value<DateTime>? updatedAt,
+    Value<String>? updatedBy,
+    Value<DateTime?>? deletedAt,
+    Value<int>? version,
+    Value<String>? syncStatus,
+    Value<int>? rowid,
+  }) {
+    return CampaignsTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      name: name ?? this.name,
+      validFrom: validFrom ?? this.validFrom,
+      validTo: validTo ?? this.validTo,
+      customerSegment: customerSegment ?? this.customerSegment,
+      productIdsJson: productIdsJson ?? this.productIdsJson,
+      collectionIdsJson: collectionIdsJson ?? this.collectionIdsJson,
+      categoryIdsJson: categoryIdsJson ?? this.categoryIdsJson,
+      discountType: discountType ?? this.discountType,
+      discountValue: discountValue ?? this.discountValue,
+      stackableWithOtherCampaigns:
+          stackableWithOtherCampaigns ?? this.stackableWithOtherCampaigns,
+      priority: priority ?? this.priority,
+      status: status ?? this.status,
+      createdAt: createdAt ?? this.createdAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      updatedBy: updatedBy ?? this.updatedBy,
+      deletedAt: deletedAt ?? this.deletedAt,
+      version: version ?? this.version,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (validFrom.present) {
+      map['valid_from'] = Variable<DateTime>(validFrom.value);
+    }
+    if (validTo.present) {
+      map['valid_to'] = Variable<DateTime>(validTo.value);
+    }
+    if (customerSegment.present) {
+      map['customer_segment'] = Variable<String>(customerSegment.value);
+    }
+    if (productIdsJson.present) {
+      map['product_ids_json'] = Variable<String>(productIdsJson.value);
+    }
+    if (collectionIdsJson.present) {
+      map['collection_ids_json'] = Variable<String>(collectionIdsJson.value);
+    }
+    if (categoryIdsJson.present) {
+      map['category_ids_json'] = Variable<String>(categoryIdsJson.value);
+    }
+    if (discountType.present) {
+      map['discount_type'] = Variable<String>(discountType.value);
+    }
+    if (discountValue.present) {
+      map['discount_value'] = Variable<double>(discountValue.value);
+    }
+    if (stackableWithOtherCampaigns.present) {
+      map['stackable_with_other_campaigns'] = Variable<bool>(
+        stackableWithOtherCampaigns.value,
+      );
+    }
+    if (priority.present) {
+      map['priority'] = Variable<int>(priority.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (updatedBy.present) {
+      map['updated_by'] = Variable<String>(updatedBy.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CampaignsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('name: $name, ')
+          ..write('validFrom: $validFrom, ')
+          ..write('validTo: $validTo, ')
+          ..write('customerSegment: $customerSegment, ')
+          ..write('productIdsJson: $productIdsJson, ')
+          ..write('collectionIdsJson: $collectionIdsJson, ')
+          ..write('categoryIdsJson: $categoryIdsJson, ')
+          ..write('discountType: $discountType, ')
+          ..write('discountValue: $discountValue, ')
+          ..write('stackableWithOtherCampaigns: $stackableWithOtherCampaigns, ')
+          ..write('priority: $priority, ')
+          ..write('status: $status, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $TargetsTableTable extends TargetsTable
+    with TableInfo<$TargetsTableTable, TargetsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $TargetsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
+    'ownerId',
+  );
+  @override
+  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
+    'owner_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _periodStartMeta = const VerificationMeta(
+    'periodStart',
+  );
+  @override
+  late final GeneratedColumn<DateTime> periodStart = GeneratedColumn<DateTime>(
+    'period_start',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _periodEndMeta = const VerificationMeta(
+    'periodEnd',
+  );
+  @override
+  late final GeneratedColumn<DateTime> periodEnd = GeneratedColumn<DateTime>(
+    'period_end',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _metricMeta = const VerificationMeta('metric');
+  @override
+  late final GeneratedColumn<String> metric = GeneratedColumn<String>(
+    'metric',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _targetValueMeta = const VerificationMeta(
+    'targetValue',
+  );
+  @override
+  late final GeneratedColumn<double> targetValue = GeneratedColumn<double>(
+    'target_value',
+    aliasedName,
+    false,
+    type: DriftSqlType.double,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _achievedValueCacheMeta =
+      const VerificationMeta('achievedValueCache');
+  @override
+  late final GeneratedColumn<double> achievedValueCache =
+      GeneratedColumn<double>(
+        'achieved_value_cache',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedByMeta = const VerificationMeta(
+    'updatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
+    'updated_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    companyId,
+    ownerId,
+    periodStart,
+    periodEnd,
+    metric,
+    targetValue,
+    achievedValueCache,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'targets';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<TargetsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('owner_id')) {
+      context.handle(
+        _ownerIdMeta,
+        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_ownerIdMeta);
+    }
+    if (data.containsKey('period_start')) {
+      context.handle(
+        _periodStartMeta,
+        periodStart.isAcceptableOrUnknown(
+          data['period_start']!,
+          _periodStartMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_periodStartMeta);
+    }
+    if (data.containsKey('period_end')) {
+      context.handle(
+        _periodEndMeta,
+        periodEnd.isAcceptableOrUnknown(data['period_end']!, _periodEndMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_periodEndMeta);
+    }
+    if (data.containsKey('metric')) {
+      context.handle(
+        _metricMeta,
+        metric.isAcceptableOrUnknown(data['metric']!, _metricMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_metricMeta);
+    }
+    if (data.containsKey('target_value')) {
+      context.handle(
+        _targetValueMeta,
+        targetValue.isAcceptableOrUnknown(
+          data['target_value']!,
+          _targetValueMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_targetValueMeta);
+    }
+    if (data.containsKey('achieved_value_cache')) {
+      context.handle(
+        _achievedValueCacheMeta,
+        achievedValueCache.isAcceptableOrUnknown(
+          data['achieved_value_cache']!,
+          _achievedValueCacheMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('updated_by')) {
+      context.handle(
+        _updatedByMeta,
+        updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedByMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  TargetsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return TargetsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      ownerId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}owner_id'],
+      )!,
+      periodStart: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}period_start'],
+      )!,
+      periodEnd: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}period_end'],
+      )!,
+      metric: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}metric'],
+      )!,
+      targetValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}target_value'],
+      )!,
+      achievedValueCache: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}achieved_value_cache'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      updatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_by'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $TargetsTableTable createAlias(String alias) {
+    return $TargetsTableTable(attachedDatabase, alias);
+  }
+}
+
+class TargetsTableData extends DataClass
+    implements Insertable<TargetsTableData> {
+  final String id;
+  final String organizationId;
+  final String companyId;
+  final String ownerId;
+  final DateTime periodStart;
+  final DateTime periodEnd;
+  final String metric;
+  final double targetValue;
+  final double? achievedValueCache;
+  final DateTime createdAt;
+  final String createdBy;
+  final DateTime updatedAt;
+  final String updatedBy;
+  final DateTime? deletedAt;
+  final int version;
+  final String syncStatus;
+  const TargetsTableData({
+    required this.id,
+    required this.organizationId,
+    required this.companyId,
+    required this.ownerId,
+    required this.periodStart,
+    required this.periodEnd,
+    required this.metric,
+    required this.targetValue,
+    this.achievedValueCache,
+    required this.createdAt,
+    required this.createdBy,
+    required this.updatedAt,
+    required this.updatedBy,
+    this.deletedAt,
+    required this.version,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    map['company_id'] = Variable<String>(companyId);
+    map['owner_id'] = Variable<String>(ownerId);
+    map['period_start'] = Variable<DateTime>(periodStart);
+    map['period_end'] = Variable<DateTime>(periodEnd);
+    map['metric'] = Variable<String>(metric);
+    map['target_value'] = Variable<double>(targetValue);
+    if (!nullToAbsent || achievedValueCache != null) {
+      map['achieved_value_cache'] = Variable<double>(achievedValueCache);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_by'] = Variable<String>(createdBy);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_by'] = Variable<String>(updatedBy);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    map['version'] = Variable<int>(version);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  TargetsTableCompanion toCompanion(bool nullToAbsent) {
+    return TargetsTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      companyId: Value(companyId),
+      ownerId: Value(ownerId),
+      periodStart: Value(periodStart),
+      periodEnd: Value(periodEnd),
+      metric: Value(metric),
+      targetValue: Value(targetValue),
+      achievedValueCache: achievedValueCache == null && nullToAbsent
+          ? const Value.absent()
+          : Value(achievedValueCache),
+      createdAt: Value(createdAt),
+      createdBy: Value(createdBy),
+      updatedAt: Value(updatedAt),
+      updatedBy: Value(updatedBy),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      version: Value(version),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory TargetsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return TargetsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      ownerId: serializer.fromJson<String>(json['ownerId']),
+      periodStart: serializer.fromJson<DateTime>(json['periodStart']),
+      periodEnd: serializer.fromJson<DateTime>(json['periodEnd']),
+      metric: serializer.fromJson<String>(json['metric']),
+      targetValue: serializer.fromJson<double>(json['targetValue']),
+      achievedValueCache: serializer.fromJson<double?>(
+        json['achievedValueCache'],
+      ),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedBy: serializer.fromJson<String>(json['updatedBy']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      version: serializer.fromJson<int>(json['version']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String>(companyId),
+      'ownerId': serializer.toJson<String>(ownerId),
+      'periodStart': serializer.toJson<DateTime>(periodStart),
+      'periodEnd': serializer.toJson<DateTime>(periodEnd),
+      'metric': serializer.toJson<String>(metric),
+      'targetValue': serializer.toJson<double>(targetValue),
+      'achievedValueCache': serializer.toJson<double?>(achievedValueCache),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedBy': serializer.toJson<String>(updatedBy),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'version': serializer.toJson<int>(version),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  TargetsTableData copyWith({
+    String? id,
+    String? organizationId,
+    String? companyId,
+    String? ownerId,
+    DateTime? periodStart,
+    DateTime? periodEnd,
+    String? metric,
+    double? targetValue,
+    Value<double?> achievedValueCache = const Value.absent(),
+    DateTime? createdAt,
+    String? createdBy,
+    DateTime? updatedAt,
+    String? updatedBy,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    int? version,
+    String? syncStatus,
+  }) => TargetsTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId ?? this.companyId,
+    ownerId: ownerId ?? this.ownerId,
+    periodStart: periodStart ?? this.periodStart,
+    periodEnd: periodEnd ?? this.periodEnd,
+    metric: metric ?? this.metric,
+    targetValue: targetValue ?? this.targetValue,
+    achievedValueCache: achievedValueCache.present
+        ? achievedValueCache.value
+        : this.achievedValueCache,
+    createdAt: createdAt ?? this.createdAt,
+    createdBy: createdBy ?? this.createdBy,
+    updatedAt: updatedAt ?? this.updatedAt,
+    updatedBy: updatedBy ?? this.updatedBy,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    version: version ?? this.version,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  TargetsTableData copyWithCompanion(TargetsTableCompanion data) {
+    return TargetsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      periodStart: data.periodStart.present
+          ? data.periodStart.value
+          : this.periodStart,
+      periodEnd: data.periodEnd.present ? data.periodEnd.value : this.periodEnd,
+      metric: data.metric.present ? data.metric.value : this.metric,
+      targetValue: data.targetValue.present
+          ? data.targetValue.value
+          : this.targetValue,
+      achievedValueCache: data.achievedValueCache.present
+          ? data.achievedValueCache.value
+          : this.achievedValueCache,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      version: data.version.present ? data.version.value : this.version,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TargetsTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('periodStart: $periodStart, ')
+          ..write('periodEnd: $periodEnd, ')
+          ..write('metric: $metric, ')
+          ..write('targetValue: $targetValue, ')
+          ..write('achievedValueCache: $achievedValueCache, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    companyId,
+    ownerId,
+    periodStart,
+    periodEnd,
+    metric,
+    targetValue,
+    achievedValueCache,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    version,
+    syncStatus,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is TargetsTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.ownerId == this.ownerId &&
+          other.periodStart == this.periodStart &&
+          other.periodEnd == this.periodEnd &&
+          other.metric == this.metric &&
+          other.targetValue == this.targetValue &&
+          other.achievedValueCache == this.achievedValueCache &&
+          other.createdAt == this.createdAt &&
+          other.createdBy == this.createdBy &&
+          other.updatedAt == this.updatedAt &&
+          other.updatedBy == this.updatedBy &&
+          other.deletedAt == this.deletedAt &&
+          other.version == this.version &&
+          other.syncStatus == this.syncStatus);
+}
+
+class TargetsTableCompanion extends UpdateCompanion<TargetsTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String> companyId;
+  final Value<String> ownerId;
+  final Value<DateTime> periodStart;
+  final Value<DateTime> periodEnd;
+  final Value<String> metric;
+  final Value<double> targetValue;
+  final Value<double?> achievedValueCache;
+  final Value<DateTime> createdAt;
+  final Value<String> createdBy;
+  final Value<DateTime> updatedAt;
+  final Value<String> updatedBy;
+  final Value<DateTime?> deletedAt;
+  final Value<int> version;
+  final Value<String> syncStatus;
+  final Value<int> rowid;
+  const TargetsTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.ownerId = const Value.absent(),
+    this.periodStart = const Value.absent(),
+    this.periodEnd = const Value.absent(),
+    this.metric = const Value.absent(),
+    this.targetValue = const Value.absent(),
+    this.achievedValueCache = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.version = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  TargetsTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    required String companyId,
+    required String ownerId,
+    required DateTime periodStart,
+    required DateTime periodEnd,
+    required String metric,
+    required double targetValue,
+    this.achievedValueCache = const Value.absent(),
+    required DateTime createdAt,
+    required String createdBy,
+    required DateTime updatedAt,
+    required String updatedBy,
+    this.deletedAt = const Value.absent(),
+    required int version,
+    required String syncStatus,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       companyId = Value(companyId),
+       ownerId = Value(ownerId),
+       periodStart = Value(periodStart),
+       periodEnd = Value(periodEnd),
+       metric = Value(metric),
+       targetValue = Value(targetValue),
+       createdAt = Value(createdAt),
+       createdBy = Value(createdBy),
+       updatedAt = Value(updatedAt),
+       updatedBy = Value(updatedBy),
+       version = Value(version),
+       syncStatus = Value(syncStatus);
+  static Insertable<TargetsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? ownerId,
+    Expression<DateTime>? periodStart,
+    Expression<DateTime>? periodEnd,
+    Expression<String>? metric,
+    Expression<double>? targetValue,
+    Expression<double>? achievedValueCache,
+    Expression<DateTime>? createdAt,
+    Expression<String>? createdBy,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? updatedBy,
+    Expression<DateTime>? deletedAt,
+    Expression<int>? version,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (ownerId != null) 'owner_id': ownerId,
+      if (periodStart != null) 'period_start': periodStart,
+      if (periodEnd != null) 'period_end': periodEnd,
+      if (metric != null) 'metric': metric,
+      if (targetValue != null) 'target_value': targetValue,
+      if (achievedValueCache != null)
+        'achieved_value_cache': achievedValueCache,
+      if (createdAt != null) 'created_at': createdAt,
+      if (createdBy != null) 'created_by': createdBy,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (updatedBy != null) 'updated_by': updatedBy,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (version != null) 'version': version,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  TargetsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String>? companyId,
+    Value<String>? ownerId,
+    Value<DateTime>? periodStart,
+    Value<DateTime>? periodEnd,
+    Value<String>? metric,
+    Value<double>? targetValue,
+    Value<double?>? achievedValueCache,
+    Value<DateTime>? createdAt,
+    Value<String>? createdBy,
+    Value<DateTime>? updatedAt,
+    Value<String>? updatedBy,
+    Value<DateTime?>? deletedAt,
+    Value<int>? version,
+    Value<String>? syncStatus,
+    Value<int>? rowid,
+  }) {
+    return TargetsTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      ownerId: ownerId ?? this.ownerId,
+      periodStart: periodStart ?? this.periodStart,
+      periodEnd: periodEnd ?? this.periodEnd,
+      metric: metric ?? this.metric,
+      targetValue: targetValue ?? this.targetValue,
+      achievedValueCache: achievedValueCache ?? this.achievedValueCache,
+      createdAt: createdAt ?? this.createdAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      updatedBy: updatedBy ?? this.updatedBy,
+      deletedAt: deletedAt ?? this.deletedAt,
+      version: version ?? this.version,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (ownerId.present) {
+      map['owner_id'] = Variable<String>(ownerId.value);
+    }
+    if (periodStart.present) {
+      map['period_start'] = Variable<DateTime>(periodStart.value);
+    }
+    if (periodEnd.present) {
+      map['period_end'] = Variable<DateTime>(periodEnd.value);
+    }
+    if (metric.present) {
+      map['metric'] = Variable<String>(metric.value);
+    }
+    if (targetValue.present) {
+      map['target_value'] = Variable<double>(targetValue.value);
+    }
+    if (achievedValueCache.present) {
+      map['achieved_value_cache'] = Variable<double>(achievedValueCache.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (updatedBy.present) {
+      map['updated_by'] = Variable<String>(updatedBy.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('TargetsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('ownerId: $ownerId, ')
+          ..write('periodStart: $periodStart, ')
+          ..write('periodEnd: $periodEnd, ')
+          ..write('metric: $metric, ')
+          ..write('targetValue: $targetValue, ')
+          ..write('achievedValueCache: $achievedValueCache, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -13000,6 +19818,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $OrderItemsTableTable orderItemsTable = $OrderItemsTableTable(
     this,
   );
+  late final $ColorsTableTable colorsTable = $ColorsTableTable(this);
+  late final $SizeGridsTableTable sizeGridsTable = $SizeGridsTableTable(this);
+  late final $ProductsTableTable productsTable = $ProductsTableTable(this);
+  late final $ProductVariantsTableTable productVariantsTable =
+      $ProductVariantsTableTable(this);
+  late final $CampaignsTableTable campaignsTable = $CampaignsTableTable(this);
+  late final $TargetsTableTable targetsTable = $TargetsTableTable(this);
   late final Index idxCustomersOrgCompany = Index(
     'idx_customers_org_company',
     'CREATE INDEX idx_customers_org_company ON customers (organization_id, company_id)',
@@ -13064,6 +19889,46 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_order_items_org_company',
     'CREATE INDEX idx_order_items_org_company ON order_items (organization_id, company_id)',
   );
+  late final Index idxColorsOrg = Index(
+    'idx_colors_org',
+    'CREATE INDEX idx_colors_org ON colors (organization_id)',
+  );
+  late final Index idxSizeGridsOrg = Index(
+    'idx_size_grids_org',
+    'CREATE INDEX idx_size_grids_org ON size_grids (organization_id)',
+  );
+  late final Index idxProductsOrgCompany = Index(
+    'idx_products_org_company',
+    'CREATE INDEX idx_products_org_company ON products (organization_id, company_id)',
+  );
+  late final Index idxProductsOrgSku = Index(
+    'idx_products_org_sku',
+    'CREATE INDEX idx_products_org_sku ON products (organization_id, sku)',
+  );
+  late final Index idxProductVariantsProduct = Index(
+    'idx_product_variants_product',
+    'CREATE INDEX idx_product_variants_product ON product_variants (product_id)',
+  );
+  late final Index idxProductVariantsOrgColor = Index(
+    'idx_product_variants_org_color',
+    'CREATE INDEX idx_product_variants_org_color ON product_variants (organization_id, color_id)',
+  );
+  late final Index idxCampaignsOrgCompany = Index(
+    'idx_campaigns_org_company',
+    'CREATE INDEX idx_campaigns_org_company ON campaigns (organization_id, company_id)',
+  );
+  late final Index idxCampaignsOrgStatus = Index(
+    'idx_campaigns_org_status',
+    'CREATE INDEX idx_campaigns_org_status ON campaigns (organization_id, status)',
+  );
+  late final Index idxTargetsOrgCompany = Index(
+    'idx_targets_org_company',
+    'CREATE INDEX idx_targets_org_company ON targets (organization_id, company_id)',
+  );
+  late final Index idxTargetsOrgOwnerPeriod = Index(
+    'idx_targets_org_owner_period',
+    'CREATE INDEX idx_targets_org_owner_period ON targets (organization_id, owner_id, period_start)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -13081,6 +19946,12 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     variantStockBalancesTable,
     ordersTable,
     orderItemsTable,
+    colorsTable,
+    sizeGridsTable,
+    productsTable,
+    productVariantsTable,
+    campaignsTable,
+    targetsTable,
     idxCustomersOrgCompany,
     idxCustomerAddressesCustomer,
     idxCustomerContactsCustomer,
@@ -13097,6 +19968,16 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxOrdersCustomer,
     idxOrderItemsOrder,
     idxOrderItemsOrgCompany,
+    idxColorsOrg,
+    idxSizeGridsOrg,
+    idxProductsOrgCompany,
+    idxProductsOrgSku,
+    idxProductVariantsProduct,
+    idxProductVariantsOrgColor,
+    idxCampaignsOrgCompany,
+    idxCampaignsOrgStatus,
+    idxTargetsOrgCompany,
+    idxTargetsOrgOwnerPeriod,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -13120,6 +20001,13 @@ abstract class _$AppDatabase extends GeneratedDatabase {
         limitUpdateKind: UpdateKind.delete,
       ),
       result: [TableUpdate('order_items', kind: UpdateKind.delete)],
+    ),
+    WritePropagation(
+      on: TableUpdateQuery.onTableName(
+        'products',
+        limitUpdateKind: UpdateKind.delete,
+      ),
+      result: [TableUpdate('product_variants', kind: UpdateKind.delete)],
     ),
   ]);
 }
@@ -19714,6 +26602,3282 @@ typedef $$OrderItemsTableTableProcessedTableManager =
       OrderItemsTableData,
       PrefetchHooks Function({bool orderId})
     >;
+typedef $$ColorsTableTableCreateCompanionBuilder =
+    ColorsTableCompanion Function({
+      required String id,
+      required String organizationId,
+      required String code,
+      required String name,
+      required String hex,
+      Value<String?> mainImageUrl,
+      Value<String> additionalImageUrlsJson,
+      Value<String> eansJson,
+      required String status,
+      required DateTime createdAt,
+      required String createdBy,
+      required DateTime updatedAt,
+      required String updatedBy,
+      Value<DateTime?> deletedAt,
+      required int version,
+      required String syncStatus,
+      Value<int> rowid,
+    });
+typedef $$ColorsTableTableUpdateCompanionBuilder =
+    ColorsTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String> code,
+      Value<String> name,
+      Value<String> hex,
+      Value<String?> mainImageUrl,
+      Value<String> additionalImageUrlsJson,
+      Value<String> eansJson,
+      Value<String> status,
+      Value<DateTime> createdAt,
+      Value<String> createdBy,
+      Value<DateTime> updatedAt,
+      Value<String> updatedBy,
+      Value<DateTime?> deletedAt,
+      Value<int> version,
+      Value<String> syncStatus,
+      Value<int> rowid,
+    });
+
+class $$ColorsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ColorsTableTable> {
+  $$ColorsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get hex => $composableBuilder(
+    column: $table.hex,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mainImageUrl => $composableBuilder(
+    column: $table.mainImageUrl,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get additionalImageUrlsJson => $composableBuilder(
+    column: $table.additionalImageUrlsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get eansJson => $composableBuilder(
+    column: $table.eansJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ColorsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ColorsTableTable> {
+  $$ColorsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get code => $composableBuilder(
+    column: $table.code,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get hex => $composableBuilder(
+    column: $table.hex,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mainImageUrl => $composableBuilder(
+    column: $table.mainImageUrl,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get additionalImageUrlsJson => $composableBuilder(
+    column: $table.additionalImageUrlsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get eansJson => $composableBuilder(
+    column: $table.eansJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ColorsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ColorsTableTable> {
+  $$ColorsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get code =>
+      $composableBuilder(column: $table.code, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get hex =>
+      $composableBuilder(column: $table.hex, builder: (column) => column);
+
+  GeneratedColumn<String> get mainImageUrl => $composableBuilder(
+    column: $table.mainImageUrl,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get additionalImageUrlsJson => $composableBuilder(
+    column: $table.additionalImageUrlsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get eansJson =>
+      $composableBuilder(column: $table.eansJson, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedBy =>
+      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$ColorsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ColorsTableTable,
+          ColorsTableData,
+          $$ColorsTableTableFilterComposer,
+          $$ColorsTableTableOrderingComposer,
+          $$ColorsTableTableAnnotationComposer,
+          $$ColorsTableTableCreateCompanionBuilder,
+          $$ColorsTableTableUpdateCompanionBuilder,
+          (
+            ColorsTableData,
+            BaseReferences<_$AppDatabase, $ColorsTableTable, ColorsTableData>,
+          ),
+          ColorsTableData,
+          PrefetchHooks Function()
+        > {
+  $$ColorsTableTableTableManager(_$AppDatabase db, $ColorsTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ColorsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ColorsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ColorsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String> code = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> hex = const Value.absent(),
+                Value<String?> mainImageUrl = const Value.absent(),
+                Value<String> additionalImageUrlsJson = const Value.absent(),
+                Value<String> eansJson = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> updatedBy = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ColorsTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                code: code,
+                name: name,
+                hex: hex,
+                mainImageUrl: mainImageUrl,
+                additionalImageUrlsJson: additionalImageUrlsJson,
+                eansJson: eansJson,
+                status: status,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                required String code,
+                required String name,
+                required String hex,
+                Value<String?> mainImageUrl = const Value.absent(),
+                Value<String> additionalImageUrlsJson = const Value.absent(),
+                Value<String> eansJson = const Value.absent(),
+                required String status,
+                required DateTime createdAt,
+                required String createdBy,
+                required DateTime updatedAt,
+                required String updatedBy,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required int version,
+                required String syncStatus,
+                Value<int> rowid = const Value.absent(),
+              }) => ColorsTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                code: code,
+                name: name,
+                hex: hex,
+                mainImageUrl: mainImageUrl,
+                additionalImageUrlsJson: additionalImageUrlsJson,
+                eansJson: eansJson,
+                status: status,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ColorsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ColorsTableTable,
+      ColorsTableData,
+      $$ColorsTableTableFilterComposer,
+      $$ColorsTableTableOrderingComposer,
+      $$ColorsTableTableAnnotationComposer,
+      $$ColorsTableTableCreateCompanionBuilder,
+      $$ColorsTableTableUpdateCompanionBuilder,
+      (
+        ColorsTableData,
+        BaseReferences<_$AppDatabase, $ColorsTableTable, ColorsTableData>,
+      ),
+      ColorsTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$SizeGridsTableTableCreateCompanionBuilder =
+    SizeGridsTableCompanion Function({
+      required String id,
+      required String organizationId,
+      required String name,
+      Value<String> sizesJson,
+      required DateTime createdAt,
+      required String createdBy,
+      required DateTime updatedAt,
+      required String updatedBy,
+      Value<DateTime?> deletedAt,
+      required int version,
+      required String syncStatus,
+      Value<int> rowid,
+    });
+typedef $$SizeGridsTableTableUpdateCompanionBuilder =
+    SizeGridsTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String> name,
+      Value<String> sizesJson,
+      Value<DateTime> createdAt,
+      Value<String> createdBy,
+      Value<DateTime> updatedAt,
+      Value<String> updatedBy,
+      Value<DateTime?> deletedAt,
+      Value<int> version,
+      Value<String> syncStatus,
+      Value<int> rowid,
+    });
+
+class $$SizeGridsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SizeGridsTableTable> {
+  $$SizeGridsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sizesJson => $composableBuilder(
+    column: $table.sizesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SizeGridsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SizeGridsTableTable> {
+  $$SizeGridsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sizesJson => $composableBuilder(
+    column: $table.sizesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SizeGridsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SizeGridsTableTable> {
+  $$SizeGridsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get sizesJson =>
+      $composableBuilder(column: $table.sizesJson, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedBy =>
+      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$SizeGridsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SizeGridsTableTable,
+          SizeGridsTableData,
+          $$SizeGridsTableTableFilterComposer,
+          $$SizeGridsTableTableOrderingComposer,
+          $$SizeGridsTableTableAnnotationComposer,
+          $$SizeGridsTableTableCreateCompanionBuilder,
+          $$SizeGridsTableTableUpdateCompanionBuilder,
+          (
+            SizeGridsTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $SizeGridsTableTable,
+              SizeGridsTableData
+            >,
+          ),
+          SizeGridsTableData,
+          PrefetchHooks Function()
+        > {
+  $$SizeGridsTableTableTableManager(
+    _$AppDatabase db,
+    $SizeGridsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SizeGridsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SizeGridsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SizeGridsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String> sizesJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> updatedBy = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SizeGridsTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                name: name,
+                sizesJson: sizesJson,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                required String name,
+                Value<String> sizesJson = const Value.absent(),
+                required DateTime createdAt,
+                required String createdBy,
+                required DateTime updatedAt,
+                required String updatedBy,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required int version,
+                required String syncStatus,
+                Value<int> rowid = const Value.absent(),
+              }) => SizeGridsTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                name: name,
+                sizesJson: sizesJson,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SizeGridsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SizeGridsTableTable,
+      SizeGridsTableData,
+      $$SizeGridsTableTableFilterComposer,
+      $$SizeGridsTableTableOrderingComposer,
+      $$SizeGridsTableTableAnnotationComposer,
+      $$SizeGridsTableTableCreateCompanionBuilder,
+      $$SizeGridsTableTableUpdateCompanionBuilder,
+      (
+        SizeGridsTableData,
+        BaseReferences<_$AppDatabase, $SizeGridsTableTable, SizeGridsTableData>,
+      ),
+      SizeGridsTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$ProductsTableTableCreateCompanionBuilder =
+    ProductsTableCompanion Function({
+      required String id,
+      required String organizationId,
+      Value<String?> companyId,
+      required String sku,
+      required String reference,
+      required String name,
+      Value<String?> shortDescription,
+      Value<String?> fullDescription,
+      Value<String?> brand,
+      Value<String?> collectionId,
+      Value<String?> seasonId,
+      Value<String?> line,
+      Value<String?> categoryId,
+      Value<String?> subcategoryId,
+      Value<String?> gender,
+      Value<String?> targetAudience,
+      Value<String?> fabric,
+      Value<String?> composition,
+      Value<String?> supplierId,
+      Value<String?> ncm,
+      Value<String?> ean,
+      Value<String> tagsJson,
+      Value<String> colorIdsJson,
+      Value<String?> sizeGridTemplateId,
+      required String status,
+      Value<DateTime?> launchDate,
+      Value<String?> seoTitle,
+      Value<String?> seoDescription,
+      Value<String?> seoSlug,
+      Value<String> mediaJson,
+      Value<String> customFieldValuesJson,
+      required DateTime createdAt,
+      required String createdBy,
+      required DateTime updatedAt,
+      required String updatedBy,
+      Value<DateTime?> deletedAt,
+      required int version,
+      required String syncStatus,
+      Value<int> rowid,
+    });
+typedef $$ProductsTableTableUpdateCompanionBuilder =
+    ProductsTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String?> companyId,
+      Value<String> sku,
+      Value<String> reference,
+      Value<String> name,
+      Value<String?> shortDescription,
+      Value<String?> fullDescription,
+      Value<String?> brand,
+      Value<String?> collectionId,
+      Value<String?> seasonId,
+      Value<String?> line,
+      Value<String?> categoryId,
+      Value<String?> subcategoryId,
+      Value<String?> gender,
+      Value<String?> targetAudience,
+      Value<String?> fabric,
+      Value<String?> composition,
+      Value<String?> supplierId,
+      Value<String?> ncm,
+      Value<String?> ean,
+      Value<String> tagsJson,
+      Value<String> colorIdsJson,
+      Value<String?> sizeGridTemplateId,
+      Value<String> status,
+      Value<DateTime?> launchDate,
+      Value<String?> seoTitle,
+      Value<String?> seoDescription,
+      Value<String?> seoSlug,
+      Value<String> mediaJson,
+      Value<String> customFieldValuesJson,
+      Value<DateTime> createdAt,
+      Value<String> createdBy,
+      Value<DateTime> updatedAt,
+      Value<String> updatedBy,
+      Value<DateTime?> deletedAt,
+      Value<int> version,
+      Value<String> syncStatus,
+      Value<int> rowid,
+    });
+
+final class $$ProductsTableTableReferences
+    extends
+        BaseReferences<_$AppDatabase, $ProductsTableTable, ProductsTableData> {
+  $$ProductsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static MultiTypedResultKey<
+    $ProductVariantsTableTable,
+    List<ProductVariantsTableData>
+  >
+  _productVariantsTableRefsTable(_$AppDatabase db) =>
+      MultiTypedResultKey.fromTable(
+        db.productVariantsTable,
+        aliasName: 'products__id__product_variants__product_id',
+      );
+
+  $$ProductVariantsTableTableProcessedTableManager
+  get productVariantsTableRefs {
+    final manager = $$ProductVariantsTableTableTableManager(
+      $_db,
+      $_db.productVariantsTable,
+    ).filter((f) => f.productId.id.sqlEquals($_itemColumn<String>('id')!));
+
+    final cache = $_typedResult.readTableOrNull(
+      _productVariantsTableRefsTable($_db),
+    );
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: cache),
+    );
+  }
+}
+
+class $$ProductsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ProductsTableTable> {
+  $$ProductsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sku => $composableBuilder(
+    column: $table.sku,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get shortDescription => $composableBuilder(
+    column: $table.shortDescription,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fullDescription => $composableBuilder(
+    column: $table.fullDescription,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get brand => $composableBuilder(
+    column: $table.brand,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get collectionId => $composableBuilder(
+    column: $table.collectionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seasonId => $composableBuilder(
+    column: $table.seasonId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get line => $composableBuilder(
+    column: $table.line,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get subcategoryId => $composableBuilder(
+    column: $table.subcategoryId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get gender => $composableBuilder(
+    column: $table.gender,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get targetAudience => $composableBuilder(
+    column: $table.targetAudience,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get fabric => $composableBuilder(
+    column: $table.fabric,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get composition => $composableBuilder(
+    column: $table.composition,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ncm => $composableBuilder(
+    column: $table.ncm,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ean => $composableBuilder(
+    column: $table.ean,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get tagsJson => $composableBuilder(
+    column: $table.tagsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get colorIdsJson => $composableBuilder(
+    column: $table.colorIdsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sizeGridTemplateId => $composableBuilder(
+    column: $table.sizeGridTemplateId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get launchDate => $composableBuilder(
+    column: $table.launchDate,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seoTitle => $composableBuilder(
+    column: $table.seoTitle,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seoDescription => $composableBuilder(
+    column: $table.seoDescription,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get seoSlug => $composableBuilder(
+    column: $table.seoSlug,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get mediaJson => $composableBuilder(
+    column: $table.mediaJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customFieldValuesJson => $composableBuilder(
+    column: $table.customFieldValuesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  Expression<bool> productVariantsTableRefs(
+    Expression<bool> Function($$ProductVariantsTableTableFilterComposer f) f,
+  ) {
+    final $$ProductVariantsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.id,
+      referencedTable: $db.productVariantsTable,
+      getReferencedColumn: (t) => t.productId,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProductVariantsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.productVariantsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return f(composer);
+  }
+}
+
+class $$ProductsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProductsTableTable> {
+  $$ProductsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sku => $composableBuilder(
+    column: $table.sku,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get reference => $composableBuilder(
+    column: $table.reference,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get shortDescription => $composableBuilder(
+    column: $table.shortDescription,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fullDescription => $composableBuilder(
+    column: $table.fullDescription,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get brand => $composableBuilder(
+    column: $table.brand,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get collectionId => $composableBuilder(
+    column: $table.collectionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seasonId => $composableBuilder(
+    column: $table.seasonId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get line => $composableBuilder(
+    column: $table.line,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get subcategoryId => $composableBuilder(
+    column: $table.subcategoryId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get gender => $composableBuilder(
+    column: $table.gender,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get targetAudience => $composableBuilder(
+    column: $table.targetAudience,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get fabric => $composableBuilder(
+    column: $table.fabric,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get composition => $composableBuilder(
+    column: $table.composition,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ncm => $composableBuilder(
+    column: $table.ncm,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ean => $composableBuilder(
+    column: $table.ean,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get tagsJson => $composableBuilder(
+    column: $table.tagsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get colorIdsJson => $composableBuilder(
+    column: $table.colorIdsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sizeGridTemplateId => $composableBuilder(
+    column: $table.sizeGridTemplateId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get launchDate => $composableBuilder(
+    column: $table.launchDate,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seoTitle => $composableBuilder(
+    column: $table.seoTitle,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seoDescription => $composableBuilder(
+    column: $table.seoDescription,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get seoSlug => $composableBuilder(
+    column: $table.seoSlug,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get mediaJson => $composableBuilder(
+    column: $table.mediaJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customFieldValuesJson => $composableBuilder(
+    column: $table.customFieldValuesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ProductsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProductsTableTable> {
+  $$ProductsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get sku =>
+      $composableBuilder(column: $table.sku, builder: (column) => column);
+
+  GeneratedColumn<String> get reference =>
+      $composableBuilder(column: $table.reference, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get shortDescription => $composableBuilder(
+    column: $table.shortDescription,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fullDescription => $composableBuilder(
+    column: $table.fullDescription,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get brand =>
+      $composableBuilder(column: $table.brand, builder: (column) => column);
+
+  GeneratedColumn<String> get collectionId => $composableBuilder(
+    column: $table.collectionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get seasonId =>
+      $composableBuilder(column: $table.seasonId, builder: (column) => column);
+
+  GeneratedColumn<String> get line =>
+      $composableBuilder(column: $table.line, builder: (column) => column);
+
+  GeneratedColumn<String> get categoryId => $composableBuilder(
+    column: $table.categoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get subcategoryId => $composableBuilder(
+    column: $table.subcategoryId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get gender =>
+      $composableBuilder(column: $table.gender, builder: (column) => column);
+
+  GeneratedColumn<String> get targetAudience => $composableBuilder(
+    column: $table.targetAudience,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get fabric =>
+      $composableBuilder(column: $table.fabric, builder: (column) => column);
+
+  GeneratedColumn<String> get composition => $composableBuilder(
+    column: $table.composition,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get supplierId => $composableBuilder(
+    column: $table.supplierId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ncm =>
+      $composableBuilder(column: $table.ncm, builder: (column) => column);
+
+  GeneratedColumn<String> get ean =>
+      $composableBuilder(column: $table.ean, builder: (column) => column);
+
+  GeneratedColumn<String> get tagsJson =>
+      $composableBuilder(column: $table.tagsJson, builder: (column) => column);
+
+  GeneratedColumn<String> get colorIdsJson => $composableBuilder(
+    column: $table.colorIdsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sizeGridTemplateId => $composableBuilder(
+    column: $table.sizeGridTemplateId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get launchDate => $composableBuilder(
+    column: $table.launchDate,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get seoTitle =>
+      $composableBuilder(column: $table.seoTitle, builder: (column) => column);
+
+  GeneratedColumn<String> get seoDescription => $composableBuilder(
+    column: $table.seoDescription,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get seoSlug =>
+      $composableBuilder(column: $table.seoSlug, builder: (column) => column);
+
+  GeneratedColumn<String> get mediaJson =>
+      $composableBuilder(column: $table.mediaJson, builder: (column) => column);
+
+  GeneratedColumn<String> get customFieldValuesJson => $composableBuilder(
+    column: $table.customFieldValuesJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedBy =>
+      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  Expression<T> productVariantsTableRefs<T extends Object>(
+    Expression<T> Function($$ProductVariantsTableTableAnnotationComposer a) f,
+  ) {
+    final $$ProductVariantsTableTableAnnotationComposer composer =
+        $composerBuilder(
+          composer: this,
+          getCurrentColumn: (t) => t.id,
+          referencedTable: $db.productVariantsTable,
+          getReferencedColumn: (t) => t.productId,
+          builder:
+              (
+                joinBuilder, {
+                $addJoinBuilderToRootComposer,
+                $removeJoinBuilderFromRootComposer,
+              }) => $$ProductVariantsTableTableAnnotationComposer(
+                $db: $db,
+                $table: $db.productVariantsTable,
+                $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+                joinBuilder: joinBuilder,
+                $removeJoinBuilderFromRootComposer:
+                    $removeJoinBuilderFromRootComposer,
+              ),
+        );
+    return f(composer);
+  }
+}
+
+class $$ProductsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProductsTableTable,
+          ProductsTableData,
+          $$ProductsTableTableFilterComposer,
+          $$ProductsTableTableOrderingComposer,
+          $$ProductsTableTableAnnotationComposer,
+          $$ProductsTableTableCreateCompanionBuilder,
+          $$ProductsTableTableUpdateCompanionBuilder,
+          (ProductsTableData, $$ProductsTableTableReferences),
+          ProductsTableData,
+          PrefetchHooks Function({bool productVariantsTableRefs})
+        > {
+  $$ProductsTableTableTableManager(_$AppDatabase db, $ProductsTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProductsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ProductsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$ProductsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String?> companyId = const Value.absent(),
+                Value<String> sku = const Value.absent(),
+                Value<String> reference = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> shortDescription = const Value.absent(),
+                Value<String?> fullDescription = const Value.absent(),
+                Value<String?> brand = const Value.absent(),
+                Value<String?> collectionId = const Value.absent(),
+                Value<String?> seasonId = const Value.absent(),
+                Value<String?> line = const Value.absent(),
+                Value<String?> categoryId = const Value.absent(),
+                Value<String?> subcategoryId = const Value.absent(),
+                Value<String?> gender = const Value.absent(),
+                Value<String?> targetAudience = const Value.absent(),
+                Value<String?> fabric = const Value.absent(),
+                Value<String?> composition = const Value.absent(),
+                Value<String?> supplierId = const Value.absent(),
+                Value<String?> ncm = const Value.absent(),
+                Value<String?> ean = const Value.absent(),
+                Value<String> tagsJson = const Value.absent(),
+                Value<String> colorIdsJson = const Value.absent(),
+                Value<String?> sizeGridTemplateId = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime?> launchDate = const Value.absent(),
+                Value<String?> seoTitle = const Value.absent(),
+                Value<String?> seoDescription = const Value.absent(),
+                Value<String?> seoSlug = const Value.absent(),
+                Value<String> mediaJson = const Value.absent(),
+                Value<String> customFieldValuesJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> updatedBy = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProductsTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                sku: sku,
+                reference: reference,
+                name: name,
+                shortDescription: shortDescription,
+                fullDescription: fullDescription,
+                brand: brand,
+                collectionId: collectionId,
+                seasonId: seasonId,
+                line: line,
+                categoryId: categoryId,
+                subcategoryId: subcategoryId,
+                gender: gender,
+                targetAudience: targetAudience,
+                fabric: fabric,
+                composition: composition,
+                supplierId: supplierId,
+                ncm: ncm,
+                ean: ean,
+                tagsJson: tagsJson,
+                colorIdsJson: colorIdsJson,
+                sizeGridTemplateId: sizeGridTemplateId,
+                status: status,
+                launchDate: launchDate,
+                seoTitle: seoTitle,
+                seoDescription: seoDescription,
+                seoSlug: seoSlug,
+                mediaJson: mediaJson,
+                customFieldValuesJson: customFieldValuesJson,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                Value<String?> companyId = const Value.absent(),
+                required String sku,
+                required String reference,
+                required String name,
+                Value<String?> shortDescription = const Value.absent(),
+                Value<String?> fullDescription = const Value.absent(),
+                Value<String?> brand = const Value.absent(),
+                Value<String?> collectionId = const Value.absent(),
+                Value<String?> seasonId = const Value.absent(),
+                Value<String?> line = const Value.absent(),
+                Value<String?> categoryId = const Value.absent(),
+                Value<String?> subcategoryId = const Value.absent(),
+                Value<String?> gender = const Value.absent(),
+                Value<String?> targetAudience = const Value.absent(),
+                Value<String?> fabric = const Value.absent(),
+                Value<String?> composition = const Value.absent(),
+                Value<String?> supplierId = const Value.absent(),
+                Value<String?> ncm = const Value.absent(),
+                Value<String?> ean = const Value.absent(),
+                Value<String> tagsJson = const Value.absent(),
+                Value<String> colorIdsJson = const Value.absent(),
+                Value<String?> sizeGridTemplateId = const Value.absent(),
+                required String status,
+                Value<DateTime?> launchDate = const Value.absent(),
+                Value<String?> seoTitle = const Value.absent(),
+                Value<String?> seoDescription = const Value.absent(),
+                Value<String?> seoSlug = const Value.absent(),
+                Value<String> mediaJson = const Value.absent(),
+                Value<String> customFieldValuesJson = const Value.absent(),
+                required DateTime createdAt,
+                required String createdBy,
+                required DateTime updatedAt,
+                required String updatedBy,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required int version,
+                required String syncStatus,
+                Value<int> rowid = const Value.absent(),
+              }) => ProductsTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                sku: sku,
+                reference: reference,
+                name: name,
+                shortDescription: shortDescription,
+                fullDescription: fullDescription,
+                brand: brand,
+                collectionId: collectionId,
+                seasonId: seasonId,
+                line: line,
+                categoryId: categoryId,
+                subcategoryId: subcategoryId,
+                gender: gender,
+                targetAudience: targetAudience,
+                fabric: fabric,
+                composition: composition,
+                supplierId: supplierId,
+                ncm: ncm,
+                ean: ean,
+                tagsJson: tagsJson,
+                colorIdsJson: colorIdsJson,
+                sizeGridTemplateId: sizeGridTemplateId,
+                status: status,
+                launchDate: launchDate,
+                seoTitle: seoTitle,
+                seoDescription: seoDescription,
+                seoSlug: seoSlug,
+                mediaJson: mediaJson,
+                customFieldValuesJson: customFieldValuesJson,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ProductsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({productVariantsTableRefs = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [
+                if (productVariantsTableRefs) db.productVariantsTable,
+              ],
+              addJoins: null,
+              getPrefetchedDataCallback: (items) async {
+                return [
+                  if (productVariantsTableRefs)
+                    await $_getPrefetchedData<
+                      ProductsTableData,
+                      $ProductsTableTable,
+                      ProductVariantsTableData
+                    >(
+                      currentTable: table,
+                      referencedTable: $$ProductsTableTableReferences
+                          ._productVariantsTableRefsTable(db),
+                      managerFromTypedResult: (p0) =>
+                          $$ProductsTableTableReferences(
+                            db,
+                            table,
+                            p0,
+                          ).productVariantsTableRefs,
+                      referencedItemsForCurrentItem: (item, referencedItems) =>
+                          referencedItems.where((e) => e.productId == item.id),
+                      typedResults: items,
+                    ),
+                ];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ProductsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProductsTableTable,
+      ProductsTableData,
+      $$ProductsTableTableFilterComposer,
+      $$ProductsTableTableOrderingComposer,
+      $$ProductsTableTableAnnotationComposer,
+      $$ProductsTableTableCreateCompanionBuilder,
+      $$ProductsTableTableUpdateCompanionBuilder,
+      (ProductsTableData, $$ProductsTableTableReferences),
+      ProductsTableData,
+      PrefetchHooks Function({bool productVariantsTableRefs})
+    >;
+typedef $$ProductVariantsTableTableCreateCompanionBuilder =
+    ProductVariantsTableCompanion Function({
+      required String id,
+      required String organizationId,
+      required String productId,
+      required String colorId,
+      required String sizeGridTemplateId,
+      required String sizeId,
+      required String sku,
+      Value<String?> ean,
+      Value<String?> manualAvailabilityStatus,
+      Value<int?> manualAvailableQuantity,
+      Value<DateTime?> manualFutureAvailableAt,
+      required String status,
+      required DateTime createdAt,
+      required String createdBy,
+      required DateTime updatedAt,
+      required String updatedBy,
+      required int version,
+      required String syncStatus,
+      Value<int> rowid,
+    });
+typedef $$ProductVariantsTableTableUpdateCompanionBuilder =
+    ProductVariantsTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String> productId,
+      Value<String> colorId,
+      Value<String> sizeGridTemplateId,
+      Value<String> sizeId,
+      Value<String> sku,
+      Value<String?> ean,
+      Value<String?> manualAvailabilityStatus,
+      Value<int?> manualAvailableQuantity,
+      Value<DateTime?> manualFutureAvailableAt,
+      Value<String> status,
+      Value<DateTime> createdAt,
+      Value<String> createdBy,
+      Value<DateTime> updatedAt,
+      Value<String> updatedBy,
+      Value<int> version,
+      Value<String> syncStatus,
+      Value<int> rowid,
+    });
+
+final class $$ProductVariantsTableTableReferences
+    extends
+        BaseReferences<
+          _$AppDatabase,
+          $ProductVariantsTableTable,
+          ProductVariantsTableData
+        > {
+  $$ProductVariantsTableTableReferences(
+    super.$_db,
+    super.$_table,
+    super.$_typedResult,
+  );
+
+  static $ProductsTableTable _productIdTable(_$AppDatabase db) => db
+      .productsTable
+      .createAlias('product_variants__product_id__products__id');
+
+  $$ProductsTableTableProcessedTableManager get productId {
+    final $_column = $_itemColumn<String>('product_id')!;
+
+    final manager = $$ProductsTableTableTableManager(
+      $_db,
+      $_db.productsTable,
+    ).filter((f) => f.id.sqlEquals($_column));
+    final item = $_typedResult.readTableOrNull(_productIdTable($_db));
+    if (item == null) return manager;
+    return ProcessedTableManager(
+      manager.$state.copyWith(prefetchedData: [item]),
+    );
+  }
+}
+
+class $$ProductVariantsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ProductVariantsTableTable> {
+  $$ProductVariantsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get colorId => $composableBuilder(
+    column: $table.colorId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sizeGridTemplateId => $composableBuilder(
+    column: $table.sizeGridTemplateId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sizeId => $composableBuilder(
+    column: $table.sizeId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get sku => $composableBuilder(
+    column: $table.sku,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ean => $composableBuilder(
+    column: $table.ean,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get manualAvailabilityStatus => $composableBuilder(
+    column: $table.manualAvailabilityStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get manualAvailableQuantity => $composableBuilder(
+    column: $table.manualAvailableQuantity,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get manualFutureAvailableAt => $composableBuilder(
+    column: $table.manualFutureAvailableAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  $$ProductsTableTableFilterComposer get productId {
+    final $$ProductsTableTableFilterComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.productId,
+      referencedTable: $db.productsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProductsTableTableFilterComposer(
+            $db: $db,
+            $table: $db.productsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ProductVariantsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ProductVariantsTableTable> {
+  $$ProductVariantsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get colorId => $composableBuilder(
+    column: $table.colorId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sizeGridTemplateId => $composableBuilder(
+    column: $table.sizeGridTemplateId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sizeId => $composableBuilder(
+    column: $table.sizeId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get sku => $composableBuilder(
+    column: $table.sku,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ean => $composableBuilder(
+    column: $table.ean,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get manualAvailabilityStatus => $composableBuilder(
+    column: $table.manualAvailabilityStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get manualAvailableQuantity => $composableBuilder(
+    column: $table.manualAvailableQuantity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get manualFutureAvailableAt => $composableBuilder(
+    column: $table.manualFutureAvailableAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  $$ProductsTableTableOrderingComposer get productId {
+    final $$ProductsTableTableOrderingComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.productId,
+      referencedTable: $db.productsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProductsTableTableOrderingComposer(
+            $db: $db,
+            $table: $db.productsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ProductVariantsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ProductVariantsTableTable> {
+  $$ProductVariantsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get colorId =>
+      $composableBuilder(column: $table.colorId, builder: (column) => column);
+
+  GeneratedColumn<String> get sizeGridTemplateId => $composableBuilder(
+    column: $table.sizeGridTemplateId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get sizeId =>
+      $composableBuilder(column: $table.sizeId, builder: (column) => column);
+
+  GeneratedColumn<String> get sku =>
+      $composableBuilder(column: $table.sku, builder: (column) => column);
+
+  GeneratedColumn<String> get ean =>
+      $composableBuilder(column: $table.ean, builder: (column) => column);
+
+  GeneratedColumn<String> get manualAvailabilityStatus => $composableBuilder(
+    column: $table.manualAvailabilityStatus,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get manualAvailableQuantity => $composableBuilder(
+    column: $table.manualAvailableQuantity,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get manualFutureAvailableAt => $composableBuilder(
+    column: $table.manualFutureAvailableAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedBy =>
+      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+
+  $$ProductsTableTableAnnotationComposer get productId {
+    final $$ProductsTableTableAnnotationComposer composer = $composerBuilder(
+      composer: this,
+      getCurrentColumn: (t) => t.productId,
+      referencedTable: $db.productsTable,
+      getReferencedColumn: (t) => t.id,
+      builder:
+          (
+            joinBuilder, {
+            $addJoinBuilderToRootComposer,
+            $removeJoinBuilderFromRootComposer,
+          }) => $$ProductsTableTableAnnotationComposer(
+            $db: $db,
+            $table: $db.productsTable,
+            $addJoinBuilderToRootComposer: $addJoinBuilderToRootComposer,
+            joinBuilder: joinBuilder,
+            $removeJoinBuilderFromRootComposer:
+                $removeJoinBuilderFromRootComposer,
+          ),
+    );
+    return composer;
+  }
+}
+
+class $$ProductVariantsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ProductVariantsTableTable,
+          ProductVariantsTableData,
+          $$ProductVariantsTableTableFilterComposer,
+          $$ProductVariantsTableTableOrderingComposer,
+          $$ProductVariantsTableTableAnnotationComposer,
+          $$ProductVariantsTableTableCreateCompanionBuilder,
+          $$ProductVariantsTableTableUpdateCompanionBuilder,
+          (ProductVariantsTableData, $$ProductVariantsTableTableReferences),
+          ProductVariantsTableData,
+          PrefetchHooks Function({bool productId})
+        > {
+  $$ProductVariantsTableTableTableManager(
+    _$AppDatabase db,
+    $ProductVariantsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ProductVariantsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ProductVariantsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ProductVariantsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String> productId = const Value.absent(),
+                Value<String> colorId = const Value.absent(),
+                Value<String> sizeGridTemplateId = const Value.absent(),
+                Value<String> sizeId = const Value.absent(),
+                Value<String> sku = const Value.absent(),
+                Value<String?> ean = const Value.absent(),
+                Value<String?> manualAvailabilityStatus = const Value.absent(),
+                Value<int?> manualAvailableQuantity = const Value.absent(),
+                Value<DateTime?> manualFutureAvailableAt = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> updatedBy = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ProductVariantsTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                productId: productId,
+                colorId: colorId,
+                sizeGridTemplateId: sizeGridTemplateId,
+                sizeId: sizeId,
+                sku: sku,
+                ean: ean,
+                manualAvailabilityStatus: manualAvailabilityStatus,
+                manualAvailableQuantity: manualAvailableQuantity,
+                manualFutureAvailableAt: manualFutureAvailableAt,
+                status: status,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                required String productId,
+                required String colorId,
+                required String sizeGridTemplateId,
+                required String sizeId,
+                required String sku,
+                Value<String?> ean = const Value.absent(),
+                Value<String?> manualAvailabilityStatus = const Value.absent(),
+                Value<int?> manualAvailableQuantity = const Value.absent(),
+                Value<DateTime?> manualFutureAvailableAt = const Value.absent(),
+                required String status,
+                required DateTime createdAt,
+                required String createdBy,
+                required DateTime updatedAt,
+                required String updatedBy,
+                required int version,
+                required String syncStatus,
+                Value<int> rowid = const Value.absent(),
+              }) => ProductVariantsTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                productId: productId,
+                colorId: colorId,
+                sizeGridTemplateId: sizeGridTemplateId,
+                sizeId: sizeId,
+                sku: sku,
+                ean: ean,
+                manualAvailabilityStatus: manualAvailabilityStatus,
+                manualAvailableQuantity: manualAvailableQuantity,
+                manualFutureAvailableAt: manualFutureAvailableAt,
+                status: status,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map(
+                (e) => (
+                  e.readTable(table),
+                  $$ProductVariantsTableTableReferences(db, table, e),
+                ),
+              )
+              .toList(),
+          prefetchHooksCallback: ({productId = false}) {
+            return PrefetchHooks(
+              db: db,
+              explicitlyWatchedTables: [],
+              addJoins:
+                  <
+                    T extends TableManagerState<
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic,
+                      dynamic
+                    >
+                  >(state) {
+                    if (productId) {
+                      state =
+                          state.withJoin(
+                                currentTable: table,
+                                currentColumn: table.productId,
+                                referencedTable:
+                                    $$ProductVariantsTableTableReferences
+                                        ._productIdTable(db),
+                                referencedColumn:
+                                    $$ProductVariantsTableTableReferences
+                                        ._productIdTable(db)
+                                        .id,
+                              )
+                              as T;
+                    }
+
+                    return state;
+                  },
+              getPrefetchedDataCallback: (items) async {
+                return [];
+              },
+            );
+          },
+        ),
+      );
+}
+
+typedef $$ProductVariantsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ProductVariantsTableTable,
+      ProductVariantsTableData,
+      $$ProductVariantsTableTableFilterComposer,
+      $$ProductVariantsTableTableOrderingComposer,
+      $$ProductVariantsTableTableAnnotationComposer,
+      $$ProductVariantsTableTableCreateCompanionBuilder,
+      $$ProductVariantsTableTableUpdateCompanionBuilder,
+      (ProductVariantsTableData, $$ProductVariantsTableTableReferences),
+      ProductVariantsTableData,
+      PrefetchHooks Function({bool productId})
+    >;
+typedef $$CampaignsTableTableCreateCompanionBuilder =
+    CampaignsTableCompanion Function({
+      required String id,
+      required String organizationId,
+      required String companyId,
+      required String name,
+      required DateTime validFrom,
+      required DateTime validTo,
+      required String customerSegment,
+      Value<String> productIdsJson,
+      Value<String> collectionIdsJson,
+      Value<String> categoryIdsJson,
+      required String discountType,
+      required double discountValue,
+      required bool stackableWithOtherCampaigns,
+      Value<int> priority,
+      required String status,
+      required DateTime createdAt,
+      required String createdBy,
+      required DateTime updatedAt,
+      required String updatedBy,
+      Value<DateTime?> deletedAt,
+      required int version,
+      required String syncStatus,
+      Value<int> rowid,
+    });
+typedef $$CampaignsTableTableUpdateCompanionBuilder =
+    CampaignsTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String> companyId,
+      Value<String> name,
+      Value<DateTime> validFrom,
+      Value<DateTime> validTo,
+      Value<String> customerSegment,
+      Value<String> productIdsJson,
+      Value<String> collectionIdsJson,
+      Value<String> categoryIdsJson,
+      Value<String> discountType,
+      Value<double> discountValue,
+      Value<bool> stackableWithOtherCampaigns,
+      Value<int> priority,
+      Value<String> status,
+      Value<DateTime> createdAt,
+      Value<String> createdBy,
+      Value<DateTime> updatedAt,
+      Value<String> updatedBy,
+      Value<DateTime?> deletedAt,
+      Value<int> version,
+      Value<String> syncStatus,
+      Value<int> rowid,
+    });
+
+class $$CampaignsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $CampaignsTableTable> {
+  $$CampaignsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get validFrom => $composableBuilder(
+    column: $table.validFrom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get validTo => $composableBuilder(
+    column: $table.validTo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customerSegment => $composableBuilder(
+    column: $table.customerSegment,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get productIdsJson => $composableBuilder(
+    column: $table.productIdsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get collectionIdsJson => $composableBuilder(
+    column: $table.collectionIdsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get categoryIdsJson => $composableBuilder(
+    column: $table.categoryIdsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get discountType => $composableBuilder(
+    column: $table.discountType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get discountValue => $composableBuilder(
+    column: $table.discountValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get stackableWithOtherCampaigns => $composableBuilder(
+    column: $table.stackableWithOtherCampaigns,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CampaignsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $CampaignsTableTable> {
+  $$CampaignsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get validFrom => $composableBuilder(
+    column: $table.validFrom,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get validTo => $composableBuilder(
+    column: $table.validTo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customerSegment => $composableBuilder(
+    column: $table.customerSegment,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get productIdsJson => $composableBuilder(
+    column: $table.productIdsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get collectionIdsJson => $composableBuilder(
+    column: $table.collectionIdsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get categoryIdsJson => $composableBuilder(
+    column: $table.categoryIdsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get discountType => $composableBuilder(
+    column: $table.discountType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get discountValue => $composableBuilder(
+    column: $table.discountValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get stackableWithOtherCampaigns => $composableBuilder(
+    column: $table.stackableWithOtherCampaigns,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get priority => $composableBuilder(
+    column: $table.priority,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CampaignsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CampaignsTableTable> {
+  $$CampaignsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get validFrom =>
+      $composableBuilder(column: $table.validFrom, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get validTo =>
+      $composableBuilder(column: $table.validTo, builder: (column) => column);
+
+  GeneratedColumn<String> get customerSegment => $composableBuilder(
+    column: $table.customerSegment,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get productIdsJson => $composableBuilder(
+    column: $table.productIdsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get collectionIdsJson => $composableBuilder(
+    column: $table.collectionIdsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get categoryIdsJson => $composableBuilder(
+    column: $table.categoryIdsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get discountType => $composableBuilder(
+    column: $table.discountType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get discountValue => $composableBuilder(
+    column: $table.discountValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get stackableWithOtherCampaigns => $composableBuilder(
+    column: $table.stackableWithOtherCampaigns,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get priority =>
+      $composableBuilder(column: $table.priority, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedBy =>
+      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$CampaignsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CampaignsTableTable,
+          CampaignsTableData,
+          $$CampaignsTableTableFilterComposer,
+          $$CampaignsTableTableOrderingComposer,
+          $$CampaignsTableTableAnnotationComposer,
+          $$CampaignsTableTableCreateCompanionBuilder,
+          $$CampaignsTableTableUpdateCompanionBuilder,
+          (
+            CampaignsTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $CampaignsTableTable,
+              CampaignsTableData
+            >,
+          ),
+          CampaignsTableData,
+          PrefetchHooks Function()
+        > {
+  $$CampaignsTableTableTableManager(
+    _$AppDatabase db,
+    $CampaignsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CampaignsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CampaignsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$CampaignsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<DateTime> validFrom = const Value.absent(),
+                Value<DateTime> validTo = const Value.absent(),
+                Value<String> customerSegment = const Value.absent(),
+                Value<String> productIdsJson = const Value.absent(),
+                Value<String> collectionIdsJson = const Value.absent(),
+                Value<String> categoryIdsJson = const Value.absent(),
+                Value<String> discountType = const Value.absent(),
+                Value<double> discountValue = const Value.absent(),
+                Value<bool> stackableWithOtherCampaigns = const Value.absent(),
+                Value<int> priority = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> updatedBy = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CampaignsTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                name: name,
+                validFrom: validFrom,
+                validTo: validTo,
+                customerSegment: customerSegment,
+                productIdsJson: productIdsJson,
+                collectionIdsJson: collectionIdsJson,
+                categoryIdsJson: categoryIdsJson,
+                discountType: discountType,
+                discountValue: discountValue,
+                stackableWithOtherCampaigns: stackableWithOtherCampaigns,
+                priority: priority,
+                status: status,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                required String companyId,
+                required String name,
+                required DateTime validFrom,
+                required DateTime validTo,
+                required String customerSegment,
+                Value<String> productIdsJson = const Value.absent(),
+                Value<String> collectionIdsJson = const Value.absent(),
+                Value<String> categoryIdsJson = const Value.absent(),
+                required String discountType,
+                required double discountValue,
+                required bool stackableWithOtherCampaigns,
+                Value<int> priority = const Value.absent(),
+                required String status,
+                required DateTime createdAt,
+                required String createdBy,
+                required DateTime updatedAt,
+                required String updatedBy,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required int version,
+                required String syncStatus,
+                Value<int> rowid = const Value.absent(),
+              }) => CampaignsTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                name: name,
+                validFrom: validFrom,
+                validTo: validTo,
+                customerSegment: customerSegment,
+                productIdsJson: productIdsJson,
+                collectionIdsJson: collectionIdsJson,
+                categoryIdsJson: categoryIdsJson,
+                discountType: discountType,
+                discountValue: discountValue,
+                stackableWithOtherCampaigns: stackableWithOtherCampaigns,
+                priority: priority,
+                status: status,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CampaignsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CampaignsTableTable,
+      CampaignsTableData,
+      $$CampaignsTableTableFilterComposer,
+      $$CampaignsTableTableOrderingComposer,
+      $$CampaignsTableTableAnnotationComposer,
+      $$CampaignsTableTableCreateCompanionBuilder,
+      $$CampaignsTableTableUpdateCompanionBuilder,
+      (
+        CampaignsTableData,
+        BaseReferences<_$AppDatabase, $CampaignsTableTable, CampaignsTableData>,
+      ),
+      CampaignsTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$TargetsTableTableCreateCompanionBuilder =
+    TargetsTableCompanion Function({
+      required String id,
+      required String organizationId,
+      required String companyId,
+      required String ownerId,
+      required DateTime periodStart,
+      required DateTime periodEnd,
+      required String metric,
+      required double targetValue,
+      Value<double?> achievedValueCache,
+      required DateTime createdAt,
+      required String createdBy,
+      required DateTime updatedAt,
+      required String updatedBy,
+      Value<DateTime?> deletedAt,
+      required int version,
+      required String syncStatus,
+      Value<int> rowid,
+    });
+typedef $$TargetsTableTableUpdateCompanionBuilder =
+    TargetsTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String> companyId,
+      Value<String> ownerId,
+      Value<DateTime> periodStart,
+      Value<DateTime> periodEnd,
+      Value<String> metric,
+      Value<double> targetValue,
+      Value<double?> achievedValueCache,
+      Value<DateTime> createdAt,
+      Value<String> createdBy,
+      Value<DateTime> updatedAt,
+      Value<String> updatedBy,
+      Value<DateTime?> deletedAt,
+      Value<int> version,
+      Value<String> syncStatus,
+      Value<int> rowid,
+    });
+
+class $$TargetsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $TargetsTableTable> {
+  $$TargetsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get periodStart => $composableBuilder(
+    column: $table.periodStart,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get periodEnd => $composableBuilder(
+    column: $table.periodEnd,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get metric => $composableBuilder(
+    column: $table.metric,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get targetValue => $composableBuilder(
+    column: $table.targetValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get achievedValueCache => $composableBuilder(
+    column: $table.achievedValueCache,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$TargetsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $TargetsTableTable> {
+  $$TargetsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ownerId => $composableBuilder(
+    column: $table.ownerId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get periodStart => $composableBuilder(
+    column: $table.periodStart,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get periodEnd => $composableBuilder(
+    column: $table.periodEnd,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get metric => $composableBuilder(
+    column: $table.metric,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get targetValue => $composableBuilder(
+    column: $table.targetValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get achievedValueCache => $composableBuilder(
+    column: $table.achievedValueCache,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$TargetsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $TargetsTableTable> {
+  $$TargetsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get ownerId =>
+      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get periodStart => $composableBuilder(
+    column: $table.periodStart,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get periodEnd =>
+      $composableBuilder(column: $table.periodEnd, builder: (column) => column);
+
+  GeneratedColumn<String> get metric =>
+      $composableBuilder(column: $table.metric, builder: (column) => column);
+
+  GeneratedColumn<double> get targetValue => $composableBuilder(
+    column: $table.targetValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get achievedValueCache => $composableBuilder(
+    column: $table.achievedValueCache,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedBy =>
+      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$TargetsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $TargetsTableTable,
+          TargetsTableData,
+          $$TargetsTableTableFilterComposer,
+          $$TargetsTableTableOrderingComposer,
+          $$TargetsTableTableAnnotationComposer,
+          $$TargetsTableTableCreateCompanionBuilder,
+          $$TargetsTableTableUpdateCompanionBuilder,
+          (
+            TargetsTableData,
+            BaseReferences<_$AppDatabase, $TargetsTableTable, TargetsTableData>,
+          ),
+          TargetsTableData,
+          PrefetchHooks Function()
+        > {
+  $$TargetsTableTableTableManager(_$AppDatabase db, $TargetsTableTable table)
+    : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$TargetsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$TargetsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$TargetsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> ownerId = const Value.absent(),
+                Value<DateTime> periodStart = const Value.absent(),
+                Value<DateTime> periodEnd = const Value.absent(),
+                Value<String> metric = const Value.absent(),
+                Value<double> targetValue = const Value.absent(),
+                Value<double?> achievedValueCache = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> updatedBy = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => TargetsTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                ownerId: ownerId,
+                periodStart: periodStart,
+                periodEnd: periodEnd,
+                metric: metric,
+                targetValue: targetValue,
+                achievedValueCache: achievedValueCache,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                required String companyId,
+                required String ownerId,
+                required DateTime periodStart,
+                required DateTime periodEnd,
+                required String metric,
+                required double targetValue,
+                Value<double?> achievedValueCache = const Value.absent(),
+                required DateTime createdAt,
+                required String createdBy,
+                required DateTime updatedAt,
+                required String updatedBy,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                required int version,
+                required String syncStatus,
+                Value<int> rowid = const Value.absent(),
+              }) => TargetsTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                ownerId: ownerId,
+                periodStart: periodStart,
+                periodEnd: periodEnd,
+                metric: metric,
+                targetValue: targetValue,
+                achievedValueCache: achievedValueCache,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$TargetsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $TargetsTableTable,
+      TargetsTableData,
+      $$TargetsTableTableFilterComposer,
+      $$TargetsTableTableOrderingComposer,
+      $$TargetsTableTableAnnotationComposer,
+      $$TargetsTableTableCreateCompanionBuilder,
+      $$TargetsTableTableUpdateCompanionBuilder,
+      (
+        TargetsTableData,
+        BaseReferences<_$AppDatabase, $TargetsTableTable, TargetsTableData>,
+      ),
+      TargetsTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -19751,4 +29915,16 @@ class $AppDatabaseManager {
       $$OrdersTableTableTableManager(_db, _db.ordersTable);
   $$OrderItemsTableTableTableManager get orderItemsTable =>
       $$OrderItemsTableTableTableManager(_db, _db.orderItemsTable);
+  $$ColorsTableTableTableManager get colorsTable =>
+      $$ColorsTableTableTableManager(_db, _db.colorsTable);
+  $$SizeGridsTableTableTableManager get sizeGridsTable =>
+      $$SizeGridsTableTableTableManager(_db, _db.sizeGridsTable);
+  $$ProductsTableTableTableManager get productsTable =>
+      $$ProductsTableTableTableManager(_db, _db.productsTable);
+  $$ProductVariantsTableTableTableManager get productVariantsTable =>
+      $$ProductVariantsTableTableTableManager(_db, _db.productVariantsTable);
+  $$CampaignsTableTableTableManager get campaignsTable =>
+      $$CampaignsTableTableTableManager(_db, _db.campaignsTable);
+  $$TargetsTableTableTableManager get targetsTable =>
+      $$TargetsTableTableTableManager(_db, _db.targetsTable);
 }
