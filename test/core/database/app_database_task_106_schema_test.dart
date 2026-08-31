@@ -36,7 +36,7 @@ void main() {
 
     test('creates every TASK-106 offline-load table with the current schema '
         'version', () async {
-      expect(database.schemaVersion, 13);
+      expect(database.schemaVersion, 14);
       await database.customStatement('SELECT 1');
 
       final tableNames = await database

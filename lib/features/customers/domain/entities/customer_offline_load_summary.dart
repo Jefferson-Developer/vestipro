@@ -4,6 +4,7 @@ final class CustomerOfflineLoadSummary {
     required this.downloadedCount,
     required this.truncated,
     required this.loadedAt,
+    this.cancelled = false,
   });
 
   /// How many customers were written to the local store.
@@ -16,6 +17,12 @@ final class CustomerOfflineLoadSummary {
   final bool truncated;
 
   final DateTime loadedAt;
+
+  /// `true` when a caller-supplied `OfflinePackageCancellationToken`
+  /// (TASK-107) was observed cancelled mid-fetch — [downloadedCount] is
+  /// always `0` in that case because the local replace was never attempted,
+  /// not because nothing was fetched.
+  final bool cancelled;
 
   static final empty = CustomerOfflineLoadSummary(
     downloadedCount: 0,

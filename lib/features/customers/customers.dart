@@ -16,6 +16,7 @@ export 'domain/repositories/customer_form_draft_repository.dart';
 export 'domain/repositories/customer_local_store_repository.dart';
 export 'domain/repositories/customer_repository.dart';
 export 'domain/repositories/customer_segment_repository.dart';
+export 'domain/services/customer_offline_package_entity_loader.dart';
 export 'domain/services/customer_scoring_service.dart';
 export 'domain/usecases/clear_customer_form_draft_use_case.dart';
 export 'domain/usecases/create_customer_segment_use_case.dart';

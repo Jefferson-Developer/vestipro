@@ -19791,6 +19791,516 @@ class TargetsTableCompanion extends UpdateCompanion<TargetsTableData> {
   }
 }
 
+class $OfflinePackageLoadStatusTableTable extends OfflinePackageLoadStatusTable
+    with
+        TableInfo<
+          $OfflinePackageLoadStatusTableTable,
+          OfflinePackageLoadStatusTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $OfflinePackageLoadStatusTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityKindMeta = const VerificationMeta(
+    'entityKind',
+  );
+  @override
+  late final GeneratedColumn<String> entityKind = GeneratedColumn<String>(
+    'entity_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _isCompleteMeta = const VerificationMeta(
+    'isComplete',
+  );
+  @override
+  late final GeneratedColumn<bool> isComplete = GeneratedColumn<bool>(
+    'is_complete',
+    aliasedName,
+    false,
+    type: DriftSqlType.bool,
+    requiredDuringInsert: false,
+    defaultConstraints: GeneratedColumn.constraintIsAlways(
+      'CHECK ("is_complete" IN (0, 1))',
+    ),
+    defaultValue: const Constant(false),
+  );
+  static const VerificationMeta _lastCompletedAtMeta = const VerificationMeta(
+    'lastCompletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> lastCompletedAt =
+      GeneratedColumn<DateTime>(
+        'last_completed_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _recordCountMeta = const VerificationMeta(
+    'recordCount',
+  );
+  @override
+  late final GeneratedColumn<int> recordCount = GeneratedColumn<int>(
+    'record_count',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+    defaultValue: const Constant(0),
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    organizationId,
+    companyId,
+    entityKind,
+    isComplete,
+    lastCompletedAt,
+    recordCount,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'offline_package_load_status';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<OfflinePackageLoadStatusTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('entity_kind')) {
+      context.handle(
+        _entityKindMeta,
+        entityKind.isAcceptableOrUnknown(data['entity_kind']!, _entityKindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityKindMeta);
+    }
+    if (data.containsKey('is_complete')) {
+      context.handle(
+        _isCompleteMeta,
+        isComplete.isAcceptableOrUnknown(data['is_complete']!, _isCompleteMeta),
+      );
+    }
+    if (data.containsKey('last_completed_at')) {
+      context.handle(
+        _lastCompletedAtMeta,
+        lastCompletedAt.isAcceptableOrUnknown(
+          data['last_completed_at']!,
+          _lastCompletedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('record_count')) {
+      context.handle(
+        _recordCountMeta,
+        recordCount.isAcceptableOrUnknown(
+          data['record_count']!,
+          _recordCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {
+    organizationId,
+    companyId,
+    entityKind,
+  };
+  @override
+  OfflinePackageLoadStatusTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OfflinePackageLoadStatusTableData(
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      entityKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_kind'],
+      )!,
+      isComplete: attachedDatabase.typeMapping.read(
+        DriftSqlType.bool,
+        data['${effectivePrefix}is_complete'],
+      )!,
+      lastCompletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}last_completed_at'],
+      ),
+      recordCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}record_count'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $OfflinePackageLoadStatusTableTable createAlias(String alias) {
+    return $OfflinePackageLoadStatusTableTable(attachedDatabase, alias);
+  }
+}
+
+class OfflinePackageLoadStatusTableData extends DataClass
+    implements Insertable<OfflinePackageLoadStatusTableData> {
+  final String organizationId;
+  final String companyId;
+
+  /// Stable identifier of an [OfflinePackageEntityKind] value (e.g.
+  /// `'customers'`) — stored as text rather than an int index so a future
+  /// enum reordering can never silently change what an existing row means.
+  final String entityKind;
+  final bool isComplete;
+  final DateTime? lastCompletedAt;
+  final int recordCount;
+  final DateTime updatedAt;
+  const OfflinePackageLoadStatusTableData({
+    required this.organizationId,
+    required this.companyId,
+    required this.entityKind,
+    required this.isComplete,
+    this.lastCompletedAt,
+    required this.recordCount,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['organization_id'] = Variable<String>(organizationId);
+    map['company_id'] = Variable<String>(companyId);
+    map['entity_kind'] = Variable<String>(entityKind);
+    map['is_complete'] = Variable<bool>(isComplete);
+    if (!nullToAbsent || lastCompletedAt != null) {
+      map['last_completed_at'] = Variable<DateTime>(lastCompletedAt);
+    }
+    map['record_count'] = Variable<int>(recordCount);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  OfflinePackageLoadStatusTableCompanion toCompanion(bool nullToAbsent) {
+    return OfflinePackageLoadStatusTableCompanion(
+      organizationId: Value(organizationId),
+      companyId: Value(companyId),
+      entityKind: Value(entityKind),
+      isComplete: Value(isComplete),
+      lastCompletedAt: lastCompletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(lastCompletedAt),
+      recordCount: Value(recordCount),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory OfflinePackageLoadStatusTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return OfflinePackageLoadStatusTableData(
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      entityKind: serializer.fromJson<String>(json['entityKind']),
+      isComplete: serializer.fromJson<bool>(json['isComplete']),
+      lastCompletedAt: serializer.fromJson<DateTime?>(json['lastCompletedAt']),
+      recordCount: serializer.fromJson<int>(json['recordCount']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String>(companyId),
+      'entityKind': serializer.toJson<String>(entityKind),
+      'isComplete': serializer.toJson<bool>(isComplete),
+      'lastCompletedAt': serializer.toJson<DateTime?>(lastCompletedAt),
+      'recordCount': serializer.toJson<int>(recordCount),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  OfflinePackageLoadStatusTableData copyWith({
+    String? organizationId,
+    String? companyId,
+    String? entityKind,
+    bool? isComplete,
+    Value<DateTime?> lastCompletedAt = const Value.absent(),
+    int? recordCount,
+    DateTime? updatedAt,
+  }) => OfflinePackageLoadStatusTableData(
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId ?? this.companyId,
+    entityKind: entityKind ?? this.entityKind,
+    isComplete: isComplete ?? this.isComplete,
+    lastCompletedAt: lastCompletedAt.present
+        ? lastCompletedAt.value
+        : this.lastCompletedAt,
+    recordCount: recordCount ?? this.recordCount,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  OfflinePackageLoadStatusTableData copyWithCompanion(
+    OfflinePackageLoadStatusTableCompanion data,
+  ) {
+    return OfflinePackageLoadStatusTableData(
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      entityKind: data.entityKind.present
+          ? data.entityKind.value
+          : this.entityKind,
+      isComplete: data.isComplete.present
+          ? data.isComplete.value
+          : this.isComplete,
+      lastCompletedAt: data.lastCompletedAt.present
+          ? data.lastCompletedAt.value
+          : this.lastCompletedAt,
+      recordCount: data.recordCount.present
+          ? data.recordCount.value
+          : this.recordCount,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OfflinePackageLoadStatusTableData(')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('entityKind: $entityKind, ')
+          ..write('isComplete: $isComplete, ')
+          ..write('lastCompletedAt: $lastCompletedAt, ')
+          ..write('recordCount: $recordCount, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    organizationId,
+    companyId,
+    entityKind,
+    isComplete,
+    lastCompletedAt,
+    recordCount,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OfflinePackageLoadStatusTableData &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.entityKind == this.entityKind &&
+          other.isComplete == this.isComplete &&
+          other.lastCompletedAt == this.lastCompletedAt &&
+          other.recordCount == this.recordCount &&
+          other.updatedAt == this.updatedAt);
+}
+
+class OfflinePackageLoadStatusTableCompanion
+    extends UpdateCompanion<OfflinePackageLoadStatusTableData> {
+  final Value<String> organizationId;
+  final Value<String> companyId;
+  final Value<String> entityKind;
+  final Value<bool> isComplete;
+  final Value<DateTime?> lastCompletedAt;
+  final Value<int> recordCount;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const OfflinePackageLoadStatusTableCompanion({
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.entityKind = const Value.absent(),
+    this.isComplete = const Value.absent(),
+    this.lastCompletedAt = const Value.absent(),
+    this.recordCount = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  OfflinePackageLoadStatusTableCompanion.insert({
+    required String organizationId,
+    required String companyId,
+    required String entityKind,
+    this.isComplete = const Value.absent(),
+    this.lastCompletedAt = const Value.absent(),
+    this.recordCount = const Value.absent(),
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : organizationId = Value(organizationId),
+       companyId = Value(companyId),
+       entityKind = Value(entityKind),
+       updatedAt = Value(updatedAt);
+  static Insertable<OfflinePackageLoadStatusTableData> custom({
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? entityKind,
+    Expression<bool>? isComplete,
+    Expression<DateTime>? lastCompletedAt,
+    Expression<int>? recordCount,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (entityKind != null) 'entity_kind': entityKind,
+      if (isComplete != null) 'is_complete': isComplete,
+      if (lastCompletedAt != null) 'last_completed_at': lastCompletedAt,
+      if (recordCount != null) 'record_count': recordCount,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  OfflinePackageLoadStatusTableCompanion copyWith({
+    Value<String>? organizationId,
+    Value<String>? companyId,
+    Value<String>? entityKind,
+    Value<bool>? isComplete,
+    Value<DateTime?>? lastCompletedAt,
+    Value<int>? recordCount,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return OfflinePackageLoadStatusTableCompanion(
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      entityKind: entityKind ?? this.entityKind,
+      isComplete: isComplete ?? this.isComplete,
+      lastCompletedAt: lastCompletedAt ?? this.lastCompletedAt,
+      recordCount: recordCount ?? this.recordCount,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (entityKind.present) {
+      map['entity_kind'] = Variable<String>(entityKind.value);
+    }
+    if (isComplete.present) {
+      map['is_complete'] = Variable<bool>(isComplete.value);
+    }
+    if (lastCompletedAt.present) {
+      map['last_completed_at'] = Variable<DateTime>(lastCompletedAt.value);
+    }
+    if (recordCount.present) {
+      map['record_count'] = Variable<int>(recordCount.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OfflinePackageLoadStatusTableCompanion(')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('entityKind: $entityKind, ')
+          ..write('isComplete: $isComplete, ')
+          ..write('lastCompletedAt: $lastCompletedAt, ')
+          ..write('recordCount: $recordCount, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -19825,6 +20335,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ProductVariantsTableTable(this);
   late final $CampaignsTableTable campaignsTable = $CampaignsTableTable(this);
   late final $TargetsTableTable targetsTable = $TargetsTableTable(this);
+  late final $OfflinePackageLoadStatusTableTable offlinePackageLoadStatusTable =
+      $OfflinePackageLoadStatusTableTable(this);
   late final Index idxCustomersOrgCompany = Index(
     'idx_customers_org_company',
     'CREATE INDEX idx_customers_org_company ON customers (organization_id, company_id)',
@@ -19929,6 +20441,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_targets_org_owner_period',
     'CREATE INDEX idx_targets_org_owner_period ON targets (organization_id, owner_id, period_start)',
   );
+  late final Index idxOfflinePackageLoadStatusScope = Index(
+    'idx_offline_package_load_status_scope',
+    'CREATE INDEX idx_offline_package_load_status_scope ON offline_package_load_status (organization_id, company_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -19952,6 +20468,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     productVariantsTable,
     campaignsTable,
     targetsTable,
+    offlinePackageLoadStatusTable,
     idxCustomersOrgCompany,
     idxCustomerAddressesCustomer,
     idxCustomerContactsCustomer,
@@ -19978,6 +20495,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxCampaignsOrgStatus,
     idxTargetsOrgCompany,
     idxTargetsOrgOwnerPeriod,
+    idxOfflinePackageLoadStatusScope,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -29878,6 +30396,273 @@ typedef $$TargetsTableTableProcessedTableManager =
       TargetsTableData,
       PrefetchHooks Function()
     >;
+typedef $$OfflinePackageLoadStatusTableTableCreateCompanionBuilder =
+    OfflinePackageLoadStatusTableCompanion Function({
+      required String organizationId,
+      required String companyId,
+      required String entityKind,
+      Value<bool> isComplete,
+      Value<DateTime?> lastCompletedAt,
+      Value<int> recordCount,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$OfflinePackageLoadStatusTableTableUpdateCompanionBuilder =
+    OfflinePackageLoadStatusTableCompanion Function({
+      Value<String> organizationId,
+      Value<String> companyId,
+      Value<String> entityKind,
+      Value<bool> isComplete,
+      Value<DateTime?> lastCompletedAt,
+      Value<int> recordCount,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$OfflinePackageLoadStatusTableTableFilterComposer
+    extends Composer<_$AppDatabase, $OfflinePackageLoadStatusTableTable> {
+  $$OfflinePackageLoadStatusTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityKind => $composableBuilder(
+    column: $table.entityKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<bool> get isComplete => $composableBuilder(
+    column: $table.isComplete,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get lastCompletedAt => $composableBuilder(
+    column: $table.lastCompletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get recordCount => $composableBuilder(
+    column: $table.recordCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$OfflinePackageLoadStatusTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $OfflinePackageLoadStatusTableTable> {
+  $$OfflinePackageLoadStatusTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityKind => $composableBuilder(
+    column: $table.entityKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<bool> get isComplete => $composableBuilder(
+    column: $table.isComplete,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get lastCompletedAt => $composableBuilder(
+    column: $table.lastCompletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get recordCount => $composableBuilder(
+    column: $table.recordCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$OfflinePackageLoadStatusTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OfflinePackageLoadStatusTableTable> {
+  $$OfflinePackageLoadStatusTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get entityKind => $composableBuilder(
+    column: $table.entityKind,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<bool> get isComplete => $composableBuilder(
+    column: $table.isComplete,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get lastCompletedAt => $composableBuilder(
+    column: $table.lastCompletedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get recordCount => $composableBuilder(
+    column: $table.recordCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$OfflinePackageLoadStatusTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OfflinePackageLoadStatusTableTable,
+          OfflinePackageLoadStatusTableData,
+          $$OfflinePackageLoadStatusTableTableFilterComposer,
+          $$OfflinePackageLoadStatusTableTableOrderingComposer,
+          $$OfflinePackageLoadStatusTableTableAnnotationComposer,
+          $$OfflinePackageLoadStatusTableTableCreateCompanionBuilder,
+          $$OfflinePackageLoadStatusTableTableUpdateCompanionBuilder,
+          (
+            OfflinePackageLoadStatusTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $OfflinePackageLoadStatusTableTable,
+              OfflinePackageLoadStatusTableData
+            >,
+          ),
+          OfflinePackageLoadStatusTableData,
+          PrefetchHooks Function()
+        > {
+  $$OfflinePackageLoadStatusTableTableTableManager(
+    _$AppDatabase db,
+    $OfflinePackageLoadStatusTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OfflinePackageLoadStatusTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$OfflinePackageLoadStatusTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$OfflinePackageLoadStatusTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> organizationId = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> entityKind = const Value.absent(),
+                Value<bool> isComplete = const Value.absent(),
+                Value<DateTime?> lastCompletedAt = const Value.absent(),
+                Value<int> recordCount = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => OfflinePackageLoadStatusTableCompanion(
+                organizationId: organizationId,
+                companyId: companyId,
+                entityKind: entityKind,
+                isComplete: isComplete,
+                lastCompletedAt: lastCompletedAt,
+                recordCount: recordCount,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String organizationId,
+                required String companyId,
+                required String entityKind,
+                Value<bool> isComplete = const Value.absent(),
+                Value<DateTime?> lastCompletedAt = const Value.absent(),
+                Value<int> recordCount = const Value.absent(),
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => OfflinePackageLoadStatusTableCompanion.insert(
+                organizationId: organizationId,
+                companyId: companyId,
+                entityKind: entityKind,
+                isComplete: isComplete,
+                lastCompletedAt: lastCompletedAt,
+                recordCount: recordCount,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$OfflinePackageLoadStatusTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OfflinePackageLoadStatusTableTable,
+      OfflinePackageLoadStatusTableData,
+      $$OfflinePackageLoadStatusTableTableFilterComposer,
+      $$OfflinePackageLoadStatusTableTableOrderingComposer,
+      $$OfflinePackageLoadStatusTableTableAnnotationComposer,
+      $$OfflinePackageLoadStatusTableTableCreateCompanionBuilder,
+      $$OfflinePackageLoadStatusTableTableUpdateCompanionBuilder,
+      (
+        OfflinePackageLoadStatusTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $OfflinePackageLoadStatusTableTable,
+          OfflinePackageLoadStatusTableData
+        >,
+      ),
+      OfflinePackageLoadStatusTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -29927,4 +30712,10 @@ class $AppDatabaseManager {
       $$CampaignsTableTableTableManager(_db, _db.campaignsTable);
   $$TargetsTableTableTableManager get targetsTable =>
       $$TargetsTableTableTableManager(_db, _db.targetsTable);
+  $$OfflinePackageLoadStatusTableTableTableManager
+  get offlinePackageLoadStatusTable =>
+      $$OfflinePackageLoadStatusTableTableTableManager(
+        _db,
+        _db.offlinePackageLoadStatusTable,
+      );
 }

@@ -1,5 +1,6 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vestipro/core/errors/errors.dart';
+import 'package:vestipro/core/offline/offline.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/customers/customers.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
@@ -198,6 +199,46 @@ void main() {
       expect(summary.downloadedCount, 4);
       expect(summary.truncated, isTrue);
       expect(localStore.replaceCalls.single.customers, hasLength(4));
+    });
+
+    test('a cancellation observed between pages (TASK-107) never replaces the '
+        'local store and reports downloadedCount 0', () async {
+      final customers = List<Customer>.generate(6, _customer);
+      final customerRepository = _FakePaginatedCustomerRepository(customers);
+      final localStore = _FakeCustomerLocalStoreRepository();
+      final useCase = _buildUseCase(
+        customerRepository: customerRepository,
+        localStore: localStore,
+        membershipRepository: _FakeMembershipRepository(
+          _membership(roleName: 'OWNER', userId: 'owner-1'),
+        ),
+      );
+      final token = OfflinePackageCancellationToken();
+      final pagesFetched = <int>[];
+
+      final result = await useCase(
+        organizationId: 'org-1',
+        companyId: 'company-1',
+        userId: 'owner-1',
+        pageSize: 2,
+        cancellationToken: token,
+        onPageFetched: (count) {
+          pagesFetched.add(count);
+          // Cancel right after the first page finishes fetching.
+          if (count >= 2) {
+            token.cancel();
+          }
+        },
+      );
+
+      expect(result, isA<AppSuccess<CustomerOfflineLoadSummary>>());
+      final summary = (result as AppSuccess<CustomerOfflineLoadSummary>).value;
+      expect(summary.cancelled, isTrue);
+      expect(summary.downloadedCount, 0);
+      expect(pagesFetched, <int>[2]);
+      // Only the first page was fetched; the second/third never ran.
+      expect(customerRepository.calls, hasLength(1));
+      expect(localStore.replaceCalls, isEmpty);
     });
   });
 }

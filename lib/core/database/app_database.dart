@@ -6,6 +6,7 @@ import 'tables/customer_addresses_table.dart';
 import 'tables/customer_contacts_table.dart';
 import 'tables/customers_table.dart';
 import 'tables/favorites_table.dart';
+import 'tables/offline_package_load_status_table.dart';
 import 'tables/order_items_table.dart';
 import 'tables/orders_table.dart';
 import 'tables/payment_terms_table.dart';
@@ -64,6 +65,9 @@ class OrderWithItemsRow {
 /// submission/sync-engine behavior yet, that is EPIC-14 (Outbox) work, which
 /// must keep extending this same [AppDatabase] class/migration chain rather
 /// than create a second local database.
+/// TASK-107 adds [OfflinePackageLoadStatusTable], the per-entity "carga
+/// completa"/"carga incompleta" marker `DownloadOfflinePackageUseCase` reads
+/// and writes around every entity it downloads.
 @DriftDatabase(
   tables: [
     CustomersTable,
@@ -84,13 +88,14 @@ class OrderWithItemsRow {
     ProductVariantsTable,
     CampaignsTable,
     TargetsTable,
+    OfflinePackageLoadStatusTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 13;
+  int get schemaVersion => 14;
 
   @override
   MigrationStrategy get migration {
@@ -170,6 +175,11 @@ class AppDatabase extends _$AppDatabase {
           await migrator.createTable(productVariantsTable);
           await migrator.createTable(campaignsTable);
           await migrator.createTable(targetsTable);
+        }
+        if (from < 14) {
+          // TASK-107: marcador de status ("carga completa"/"carga
+          // incompleta") por entidade do pacote de carga offline.
+          await migrator.createTable(offlinePackageLoadStatusTable);
         }
       },
       beforeOpen: (details) async {
@@ -1067,6 +1077,71 @@ class AppDatabase extends _$AppDatabase {
               row.organizationId.equals(organizationId) &
               row.companyId.equals(companyId) &
               row.deletedAt.isNull(),
+        ))
+        .get();
+  }
+
+  // ---------------------------------------------------------------------
+  // Offline package load status (TASK-107)
+  // ---------------------------------------------------------------------
+
+  /// Marks [entityKind] as incomplete for [organizationId]/[companyId] —
+  /// `DownloadOfflinePackageUseCase` calls this immediately before it starts
+  /// downloading that entity, so a crash, dropped connection or
+  /// cancellation between this call and [markOfflinePackageEntityComplete]
+  /// always leaves the entity flagged as not trustworthy, even though
+  /// whatever that entity's table held from a previous successful load is
+  /// left untouched.
+  Future<void> markOfflinePackageEntityIncomplete({
+    required String organizationId,
+    required String companyId,
+    required String entityKind,
+    required DateTime now,
+  }) {
+    return into(offlinePackageLoadStatusTable).insertOnConflictUpdate(
+      OfflinePackageLoadStatusTableCompanion.insert(
+        organizationId: organizationId,
+        companyId: companyId,
+        entityKind: entityKind,
+        isComplete: const Value(false),
+        updatedAt: now,
+      ),
+    );
+  }
+
+  /// Marks [entityKind] as completed for [organizationId]/[companyId] after
+  /// its local replace transaction has actually committed, recording
+  /// [recordCount] and [now] as the last successful full load.
+  Future<void> markOfflinePackageEntityComplete({
+    required String organizationId,
+    required String companyId,
+    required String entityKind,
+    required int recordCount,
+    required DateTime now,
+  }) {
+    return into(offlinePackageLoadStatusTable).insertOnConflictUpdate(
+      OfflinePackageLoadStatusTableCompanion.insert(
+        organizationId: organizationId,
+        companyId: companyId,
+        entityKind: entityKind,
+        isComplete: const Value(true),
+        lastCompletedAt: Value(now),
+        recordCount: Value(recordCount),
+        updatedAt: now,
+      ),
+    );
+  }
+
+  /// Every offline package status row for [organizationId]/[companyId], one
+  /// per entity that has ever started downloading.
+  Future<List<OfflinePackageLoadStatusTableData>> getOfflinePackageStatuses({
+    required String organizationId,
+    required String companyId,
+  }) {
+    return (select(offlinePackageLoadStatusTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.companyId.equals(companyId),
         ))
         .get();
   }

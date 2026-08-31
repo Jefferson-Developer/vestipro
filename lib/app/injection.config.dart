@@ -45,6 +45,14 @@ import '../core/feature_flags/firebase_feature_flag_service.dart' as _i845;
 import '../core/functions/app_client_metadata.dart' as _i465;
 import '../core/functions/cloud_functions_service.dart' as _i147;
 import '../core/functions/functions.dart' as _i340;
+import '../core/offline/data/repositories/drift_offline_package_status_repository.dart'
+    as _i963;
+import '../core/offline/domain/download_offline_package_use_case.dart' as _i109;
+import '../core/offline/domain/offline_package_entity_loader.dart' as _i84;
+import '../core/offline/domain/repositories/offline_package_status_repository.dart'
+    as _i799;
+import '../core/offline/presentation/cubit/offline_package_download_cubit.dart'
+    as _i74;
 import '../core/performance/firebase_performance_monitor.dart' as _i387;
 import '../core/performance/performance_monitor.dart' as _i1008;
 import '../core/permissions/permission_service.dart' as _i315;
@@ -241,6 +249,8 @@ import '../features/customers/domain/repositories/customer_repository.dart'
     as _i857;
 import '../features/customers/domain/repositories/customer_segment_repository.dart'
     as _i748;
+import '../features/customers/domain/services/customer_offline_package_entity_loader.dart'
+    as _i325;
 import '../features/customers/domain/usecases/clear_customer_form_draft_use_case.dart'
     as _i551;
 import '../features/customers/domain/usecases/create_customer_segment_use_case.dart'
@@ -693,6 +703,10 @@ import '../features/pricing/domain/repositories/price_list_repository.dart'
     as _i455;
 import '../features/pricing/domain/repositories/promotional_campaign_repository.dart'
     as _i211;
+import '../features/pricing/domain/services/payment_term_offline_package_entity_loader.dart'
+    as _i898;
+import '../features/pricing/domain/services/price_list_offline_package_entity_loader.dart'
+    as _i1044;
 import '../features/pricing/domain/usecases/create_discount_policy_use_case.dart'
     as _i885;
 import '../features/pricing/domain/usecases/create_payment_term_use_case.dart'
@@ -703,6 +717,10 @@ import '../features/pricing/domain/usecases/create_promotional_campaign_use_case
     as _i938;
 import '../features/pricing/domain/usecases/list_active_payment_terms_use_case.dart'
     as _i1068;
+import '../features/pricing/domain/usecases/load_initial_payment_term_offline_data_use_case.dart'
+    as _i595;
+import '../features/pricing/domain/usecases/load_initial_price_list_offline_data_use_case.dart'
+    as _i103;
 import '../features/pricing/domain/usecases/resolve_applicable_campaigns_use_case.dart'
     as _i277;
 import '../features/pricing/domain/usecases/resolve_applicable_price_lists_use_case.dart'
@@ -973,6 +991,7 @@ import '../features/users/presentation/bloc/user_list_bloc.dart' as _i244;
 import '../features/users/presentation/bloc/user_role_edit_bloc.dart' as _i698;
 import '../features/users/users.dart' as _i220;
 import 'injection_module.dart' as _i212;
+import 'offline_package_loaders_module.dart' as _i418;
 
 const String _dev = 'dev';
 const String _staging = 'staging';
@@ -986,6 +1005,7 @@ extension GetItInjectableX on _i174.GetIt {
   }) {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final appInjectionModule = _$AppInjectionModule();
+    final offlinePackageLoadersModule = _$OfflinePackageLoadersModule();
     gh.factory<_i619.FavoriteLocalMapper>(
       () => const _i619.FavoriteLocalMapper(),
     );
@@ -1122,6 +1142,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i1031.CatalogPreferencesRepository>(
       () => const _i590.SharedPreferencesCatalogPreferencesRepository(),
+    );
+    gh.factory<_i595.LoadInitialPaymentTermOfflineDataUseCase>(
+      () => _i595.LoadInitialPaymentTermOfflineDataUseCase(
+        gh<_i358.PaymentTermRepository>(),
+        gh<_i512.PaymentTermLocalStoreRepository>(),
+      ),
     );
     gh.lazySingleton<_i298.ProductColorRepository>(
       () => const _i173.SharedPreferencesProductColorRepository(),
@@ -1430,6 +1456,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i620.ImageUploadCompressor>(
       () =>
           _i620.ImageUploadCompressor(compressor: gh<_i611.ImageCompressor>()),
+    );
+    gh.lazySingleton<_i799.OfflinePackageStatusRepository>(
+      () => _i963.DriftOfflinePackageStatusRepository(gh<_i658.AppDatabase>()),
     );
     gh.factory<_i551.ClearCustomerFormDraftUseCase>(
       () => _i551.ClearCustomerFormDraftUseCase(
@@ -2046,6 +2075,12 @@ extension GetItInjectableX on _i174.GetIt {
         compressor: gh<_i209.ImageUploadCompressor>(),
       ),
     );
+    gh.factory<_i103.LoadInitialPriceListOfflineDataUseCase>(
+      () => _i103.LoadInitialPriceListOfflineDataUseCase(
+        gh<_i455.PriceListRepository>(),
+        gh<_i661.PriceListLocalStoreRepository>(),
+      ),
+    );
     gh.lazySingleton<_i492.OrderPricingDataSource>(
       () => _i708.CloudFunctionsOrderPricingDataSource(
         gh<_i340.CloudFunctionsService>(),
@@ -2146,6 +2181,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i580.FirestoreProductRemoteSearchDataSource(
         gh<_i974.FirebaseFirestore>(),
         gh<_i309.ProductMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i1044.PriceListOfflinePackageEntityLoader>(
+      () => _i1044.PriceListOfflinePackageEntityLoader(
+        gh<_i103.LoadInitialPriceListOfflineDataUseCase>(),
+        gh<_i661.PriceListLocalStoreRepository>(),
+        gh<_i315.PermissionService>(),
       ),
     );
     gh.lazySingleton<_i503.StockTurnoverRepository>(
@@ -2359,6 +2401,13 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i825.GetCustomerFormConfigUseCase>(
       () => _i825.GetCustomerFormConfigUseCase(
         gh<_i756.OrganizationRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i898.PaymentTermOfflinePackageEntityLoader>(
+      () => _i898.PaymentTermOfflinePackageEntityLoader(
+        gh<_i595.LoadInitialPaymentTermOfflineDataUseCase>(),
+        gh<_i512.PaymentTermLocalStoreRepository>(),
+        gh<_i315.PermissionService>(),
       ),
     );
     gh.factory<_i421.RecordAuditLogUseCase>(
@@ -2747,6 +2796,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i47.PermissionService>(),
       ),
     );
+    gh.lazySingleton<_i325.CustomerOfflinePackageEntityLoader>(
+      () => _i325.CustomerOfflinePackageEntityLoader(
+        gh<_i977.LoadInitialCustomerOfflineDataUseCase>(),
+        gh<_i361.CustomerLocalStoreRepository>(),
+      ),
+    );
     gh.factory<_i576.ListCustomerPortfolioUseCase>(
       () => _i576.ListCustomerPortfolioUseCase(
         gh<_i857.CustomerRepository>(),
@@ -2877,6 +2932,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i220.PortfolioAssignmentRepository>(),
       ),
     );
+    gh.lazySingleton<List<_i84.OfflinePackageEntityLoader>>(
+      () => offlinePackageLoadersModule.offlinePackageEntityLoaders(
+        gh<_i325.CustomerOfflinePackageEntityLoader>(),
+        gh<_i1044.PriceListOfflinePackageEntityLoader>(),
+        gh<_i898.PaymentTermOfflinePackageEntityLoader>(),
+      ),
+    );
     gh.factory<_i339.OrderApprovalQueueBloc>(
       () => _i339.OrderApprovalQueueBloc(
         listOrders: gh<_i144.ListOrdersUseCase>(),
@@ -2920,6 +2982,12 @@ extension GetItInjectableX on _i174.GetIt {
         getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
         resolvePriceForVariant: gh<_i352.ResolvePriceForVariantUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i109.DownloadOfflinePackageUseCase>(
+      () => _i109.DownloadOfflinePackageUseCase(
+        gh<List<_i84.OfflinePackageEntityLoader>>(),
+        gh<_i799.OfflinePackageStatusRepository>(),
       ),
     );
     gh.factory<_i769.CommercialSizeGridBloc>(
@@ -2967,6 +3035,11 @@ extension GetItInjectableX on _i174.GetIt {
         listProductColors: gh<_i789.ListProductColorsUseCase>(),
         getSizeGridTemplateById: gh<_i194.GetSizeGridTemplateByIdUseCase>(),
         getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
+      ),
+    );
+    gh.factory<_i74.OfflinePackageDownloadCubit>(
+      () => _i74.OfflinePackageDownloadCubit(
+        gh<_i109.DownloadOfflinePackageUseCase>(),
       ),
     );
     gh.factory<_i186.CatalogFilterBloc>(
@@ -3023,3 +3096,5 @@ extension GetItInjectableX on _i174.GetIt {
 }
 
 class _$AppInjectionModule extends _i212.AppInjectionModule {}
+
+class _$OfflinePackageLoadersModule extends _i418.OfflinePackageLoadersModule {}

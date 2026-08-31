@@ -1,6 +1,7 @@
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/errors/errors.dart';
+import '../../../../core/offline/domain/offline_package_cancellation_token.dart';
 import '../../../../core/utils/utils.dart';
 import '../../../users/users.dart';
 import '../entities/customer.dart';
@@ -47,6 +48,8 @@ class LoadInitialCustomerOfflineDataUseCase {
     required String userId,
     int pageSize = _defaultPageSize,
     int maxCustomers = _defaultMaxCustomers,
+    OfflinePackageCancellationToken? cancellationToken,
+    void Function(int recordsFetchedSoFar)? onPageFetched,
     DateTime? now,
   }) async {
     final normalizedOrganizationId = organizationId.trim();
@@ -145,6 +148,22 @@ class LoadInitialCustomerOfflineDataUseCase {
       final page =
           (pageResult as AppSuccess<CustomerPortfolioPageResult>).value;
       collected.addAll(page.customers);
+      onPageFetched?.call(collected.length);
+
+      if (cancellationToken?.isCancelled ?? false) {
+        // TASK-107: a cancellation observed between page fetches (lots)
+        // must never trigger the final local replace below — whatever was
+        // fetched so far into `collected` is simply discarded, and the
+        // local store keeps whatever it held from the last successful load.
+        return AppSuccess<CustomerOfflineLoadSummary>(
+          CustomerOfflineLoadSummary(
+            downloadedCount: 0,
+            truncated: false,
+            loadedAt: resolvedNow,
+            cancelled: true,
+          ),
+        );
+      }
 
       if (collected.length >= maxCustomers) {
         truncated = page.hasMore || collected.length > maxCustomers;
