@@ -1333,6 +1333,34 @@ class AppDatabase extends _$AppDatabase {
     );
   }
 
+  /// Moves the Outbox row [id] back to `pending` if — and only if — it is
+  /// currently `failed`, recording [requestedAt] as its last-attempt marker
+  /// without touching [payload]/`attemptCount`/`lastError` (TASK-112's
+  /// manual "Tentar novamente" action).
+  ///
+  /// Landing on `pending` — never straight back to `syncing` — means the
+  /// next `SyncEngine.runPush` pass always attempts it unconditionally, the
+  /// same way it attempts a brand-new operation: both `SyncRetryPolicy`
+  /// checks (`hasAttemptsLeft`/`isDueForRetry`) only ever run against a
+  /// `failed` row, so this deliberately bypasses an exhausted retry budget
+  /// or a backoff window still in effect — exactly the point of a human
+  /// explicitly asking for another attempt right now. A no-op if [id] is
+  /// currently `conflict` (must go through `ConflictResolutionService`
+  /// instead) or no longer exists.
+  Future<void> retryOutboxOperation({
+    required String id,
+    required DateTime requestedAt,
+  }) {
+    return (update(
+      outboxTable,
+    )..where((row) => row.id.equals(id) & row.status.equals('failed'))).write(
+      OutboxTableCompanion(
+        status: const Value('pending'),
+        lastAttemptAt: Value(requestedAt),
+      ),
+    );
+  }
+
   /// A single Outbox row by [id], or `null` if it no longer exists.
   Future<OutboxTableData?> getOutboxOperationById(String id) {
     return (select(

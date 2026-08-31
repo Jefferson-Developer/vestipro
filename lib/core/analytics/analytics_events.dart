@@ -76,6 +76,15 @@ final class AnalyticsEvents {
   /// `applied`/`skipped`/`rejected_cross_tenant`/`duration_ms` parameters.
   static const String syncPullCompleted = 'sync_pull_completed';
 
+  /// Logged when a user opens the Central de Sincronização (TASK-112,
+  /// EPIC-14).
+  static const String syncCenterOpened = 'sync_center_opened';
+
+  /// Logged when a user triggers a manual retry from the Central de
+  /// Sincronização (TASK-112, EPIC-14) — "Sincronizar agora", "Tentar
+  /// novamente" (individual) or "Tentar novamente todos" (em lote).
+  static const String syncManualRetryTriggered = 'sync_manual_retry_triggered';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -130,5 +139,7 @@ final class AnalyticsEvents {
     catalogShareOpened,
     syncPushCompleted,
     syncPullCompleted,
+    syncCenterOpened,
+    syncManualRetryTriggered,
   ];
 }

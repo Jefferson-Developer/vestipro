@@ -92,6 +92,7 @@ import '../core/sync/presentation/cubit/conflict_list_cubit.dart' as _i189;
 import '../core/sync/presentation/cubit/conflict_resolution_cubit.dart'
     as _i717;
 import '../core/sync/presentation/cubit/outbox_watcher_cubit.dart' as _i866;
+import '../core/sync/presentation/cubit/sync_center_cubit.dart' as _i542;
 import '../features/audit_log/data/datasources/audit_log_data_source.dart'
     as _i432;
 import '../features/audit_log/data/datasources/firestore_audit_log_data_source.dart'
@@ -2434,6 +2435,17 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i339.UpdatePromotionalCampaignUseCase(
         gh<_i211.PromotionalCampaignRepository>(),
         gh<_i753.AuditLogRepository>(),
+      ),
+    );
+    gh.factory<_i542.SyncCenterCubit>(
+      () => _i542.SyncCenterCubit(
+        gh<_i234.OutboxRepository>(),
+        gh<_i814.ConflictRecordRepository>(),
+        gh<_i799.OfflinePackageStatusRepository>(),
+        gh<_i610.ConnectivityService>(),
+        gh<_i292.SyncEngine>(),
+        gh<_i202.AnalyticsService>(),
+        gh<_i113.CrashReporter>(),
       ),
     );
     gh.lazySingleton<_i183.OrderPricingRepository>(

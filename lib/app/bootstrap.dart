@@ -363,6 +363,13 @@ class VestiProApp extends StatelessWidget {
                 onResolved: (_) =>
                     context.go(ConflictListRoute(orgId: orgId).location),
               ),
+          syncCenterPageBuilder: (context, orgId, companyId) => SyncCenterPage(
+            organizationId: orgId,
+            companyId: companyId,
+            createCubit: () => getIt<SyncCenterCubit>(),
+            onOpenConflicts: () =>
+                context.go(ConflictListRoute(orgId: orgId).location),
+          ),
           catalogBrowsePageBuilder: (context, orgId, queryParameters) =>
               CatalogFilterPage(
                 organizationId: orgId,

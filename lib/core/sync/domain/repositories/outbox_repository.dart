@@ -82,6 +82,20 @@ abstract interface class OutboxRepository {
     required DateTime attemptedAt,
   });
 
+  /// Moves operation [id] from `failed` back to `pending`, recording
+  /// [requestedAt] as its last-attempt marker without touching its payload —
+  /// the Central de Sincronização's (TASK-112) "Tentar novamente"/"Tentar
+  /// novamente todos" actions, deliberately bypassing `SyncRetryPolicy`'s
+  /// backoff window and exhausted-attempts gate (both only ever checked
+  /// against a `failed` row) since a human just explicitly asked for another
+  /// attempt right now. A no-op when [id] is currently `conflict` — those
+  /// only ever leave that status through [ConflictResolutionService], never
+  /// this method.
+  Future<AppResult<void>> retryFailed({
+    required String id,
+    required DateTime requestedAt,
+  });
+
   /// Every operation for [organizationId] whose status is one of [statuses],
   /// oldest-enqueued first.
   Future<AppResult<List<OutboxOperation>>> listByStatus({

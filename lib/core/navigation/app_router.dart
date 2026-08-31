@@ -41,6 +41,7 @@ class AppRouter {
     this.orderProductDetailPageBuilder,
     this.conflictListPageBuilder,
     this.conflictDetailPageBuilder,
+    this.syncCenterPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
     AuthorizationGuard? authorizationGuard,
@@ -146,6 +147,11 @@ class AppRouter {
   /// `orgId`/`conflictId` from [ConflictDetailRoute].
   final Widget Function(BuildContext context, String orgId, String conflictId)?
   conflictDetailPageBuilder;
+
+  /// Builds the Central de Sincronização screen (TASK-112), given
+  /// `orgId`/`companyId` from [SyncCenterRoute].
+  final Widget Function(BuildContext context, String orgId, String companyId)?
+  syncCenterPageBuilder;
 
   /// Builds the catalog's filterable browsing screen (TASK-082), given
   /// `orgId` and the raw `queryParameters` of [CatalogBrowseRoute] — the
@@ -416,6 +422,19 @@ class AppRouter {
             context,
             state.pathParameters['orgId']!,
             state.pathParameters['conflictId']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: SyncCenterRoute.pathPattern,
+        name: SyncCenterRoute.name,
+        builder: (context, state) {
+          final builder = syncCenterPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
           );
         },
       ),

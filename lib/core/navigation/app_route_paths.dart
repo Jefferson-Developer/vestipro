@@ -382,6 +382,25 @@ final class ConflictDetailRoute extends AppRoute {
   String get location => '/org/$orgId/sync/conflicts/$conflictId';
 }
 
+/// Central de Sincronização (TASK-112, EPIC-14): transparency dashboard over
+/// Outbox pendencies (TASK-108), sync failures (TASK-109) with manual retry,
+/// and the shortcut into [ConflictListRoute] for open conflicts — scoped by
+/// Organization *and* Company because it also renders the TASK-107 "última
+/// carga completa" marker per entity, itself an Organization+Company scope
+/// (`OfflinePackageStatusRepository`), unlike [ConflictListRoute].
+final class SyncCenterRoute extends AppRoute {
+  const SyncCenterRoute({required this.orgId, required this.companyId});
+
+  final String orgId;
+  final String companyId;
+
+  static const name = 'syncCenter';
+  static const pathPattern = '/org/:orgId/companies/:companyId/sync';
+
+  @override
+  String get location => '/org/$orgId/companies/$companyId/sync';
+}
+
 /// Customer 360 detail route (TASK-052), scoped by Organization and protected
 /// in [AppRouter] by `customer.view`.
 final class CustomerDetailRoute extends AppRoute {
