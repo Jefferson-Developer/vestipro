@@ -2,6 +2,8 @@ import 'package:drift/drift.dart';
 
 import 'tables/campaigns_table.dart';
 import 'tables/colors_table.dart';
+import 'tables/conflict_audit_log_table.dart';
+import 'tables/conflict_records_table.dart';
 import 'tables/customer_addresses_table.dart';
 import 'tables/customer_contacts_table.dart';
 import 'tables/customers_table.dart';
@@ -78,6 +80,10 @@ class OrderWithItemsRow {
 /// bookmark `SyncEngine.runPull` reads/writes so a sync cycle only fetches
 /// what changed since the last one instead of the whole remote collection
 /// again.
+/// TASK-110 adds [ConflictRecordsTable] (a conflict `ConflictResolutionService`
+/// could not resolve automatically, kept for TASK-111's manual resolution
+/// screen) and [ConflictAuditLogTable] (the local, append-only audit trail
+/// of every conflict resolution decision, automatic or manual).
 @DriftDatabase(
   tables: [
     CustomersTable,
@@ -101,13 +107,15 @@ class OrderWithItemsRow {
     OfflinePackageLoadStatusTable,
     OutboxTable,
     SyncCursorsTable,
+    ConflictRecordsTable,
+    ConflictAuditLogTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 16;
+  int get schemaVersion => 17;
 
   @override
   MigrationStrategy get migration {
@@ -202,6 +210,12 @@ class AppDatabase extends _$AppDatabase {
           // TASK-109: bookmark de cursor por entidade para o pull
           // incremental do motor de sincronização.
           await migrator.createTable(syncCursorsTable);
+        }
+        if (from < 17) {
+          // TASK-110: registros de conflito pendentes de resolução manual e
+          // trilha de auditoria local de toda resolução de conflito.
+          await migrator.createTable(conflictRecordsTable);
+          await migrator.createTable(conflictAuditLogTable);
         }
       },
       beforeOpen: (details) async {
@@ -1419,6 +1433,136 @@ class AppDatabase extends _$AppDatabase {
               row.entityKind.equals(entityKind),
         ))
         .getSingleOrNull();
+  }
+
+  // ---------------------------------------------------------------------
+  // Conflict resolution (TASK-110, EPIC-14) — see [ConflictRecordsTable]/
+  // [ConflictAuditLogTable] docs.
+  // ---------------------------------------------------------------------
+
+  /// Persists a new conflict record, or returns the already-open
+  /// (`status == 'conflict'`) one for the same [outboxOperationId] unchanged
+  /// if one already exists — idempotent against
+  /// `ConflictResolutionService.resolve` being called again for an entity
+  /// whose Outbox operation is already blocked, so a repeated sync attempt
+  /// on an unresolved conflict never creates a second, duplicate record for
+  /// it.
+  Future<ConflictRecordsTableData> insertConflictRecord({
+    required String id,
+    required String organizationId,
+    String? companyId,
+    required String entityType,
+    required String entityId,
+    required String outboxOperationId,
+    required String policy,
+    required String localSnapshot,
+    required String remoteSnapshot,
+    required String conflictingFields,
+    required DateTime detectedAt,
+  }) {
+    return transaction(() async {
+      final existing =
+          await (select(conflictRecordsTable)..where(
+                (row) =>
+                    row.outboxOperationId.equals(outboxOperationId) &
+                    row.status.equals('conflict'),
+              ))
+              .getSingleOrNull();
+      if (existing != null) return existing;
+
+      await into(conflictRecordsTable).insert(
+        ConflictRecordsTableCompanion.insert(
+          id: id,
+          organizationId: organizationId,
+          companyId: Value(companyId),
+          entityType: entityType,
+          entityId: entityId,
+          outboxOperationId: outboxOperationId,
+          policy: policy,
+          localSnapshot: localSnapshot,
+          remoteSnapshot: remoteSnapshot,
+          conflictingFields: conflictingFields,
+          status: const Value('conflict'),
+          detectedAt: detectedAt,
+        ),
+      );
+
+      return (select(
+        conflictRecordsTable,
+      )..where((row) => row.id.equals(id))).getSingle();
+    });
+  }
+
+  /// Every open (`status == 'conflict'`) record for [organizationId],
+  /// oldest-detected first — the priority order TASK-111's list screen
+  /// consumes them in.
+  Future<List<ConflictRecordsTableData>> getOpenConflictRecords({
+    required String organizationId,
+  }) {
+    return (select(conflictRecordsTable)
+          ..where(
+            (row) =>
+                row.organizationId.equals(organizationId) &
+                row.status.equals('conflict'),
+          )
+          ..orderBy([(row) => OrderingTerm.asc(row.detectedAt)]))
+        .get();
+  }
+
+  /// A single conflict record by [id], or `null` if it does not exist.
+  Future<ConflictRecordsTableData?> getConflictRecordById(String id) {
+    return (select(
+      conflictRecordsTable,
+    )..where((row) => row.id.equals(id))).getSingleOrNull();
+  }
+
+  /// Appends a new conflict resolution audit entry — never updated/removed
+  /// afterwards, same "permanent history" rule as the centralized
+  /// `AuditLogEntry`.
+  Future<ConflictAuditLogTableData> insertConflictAuditEntry({
+    required String id,
+    required String organizationId,
+    String? companyId,
+    required String entityType,
+    required String entityId,
+    required String policy,
+    required String outcome,
+    required String actor,
+    required DateTime performedAt,
+    required String discardedFields,
+    required String conflictingFields,
+    String? conflictRecordId,
+  }) async {
+    await into(conflictAuditLogTable).insert(
+      ConflictAuditLogTableCompanion.insert(
+        id: id,
+        organizationId: organizationId,
+        companyId: Value(companyId),
+        entityType: entityType,
+        entityId: entityId,
+        policy: policy,
+        outcome: outcome,
+        actor: actor,
+        performedAt: performedAt,
+        discardedFields: Value(discardedFields),
+        conflictingFields: Value(conflictingFields),
+        conflictRecordId: Value(conflictRecordId),
+      ),
+    );
+    return (select(
+      conflictAuditLogTable,
+    )..where((row) => row.id.equals(id))).getSingle();
+  }
+
+  /// Every conflict resolution audit entry for [organizationId], most
+  /// recent first.
+  Future<List<ConflictAuditLogTableData>> getConflictAuditLog({
+    required String organizationId,
+  }) {
+    return (select(conflictAuditLogTable)
+          ..where((row) => row.organizationId.equals(organizationId))
+          ..orderBy([(row) => OrderingTerm.desc(row.performedAt)]))
+        .get();
   }
 }
 

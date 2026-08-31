@@ -21537,6 +21537,1613 @@ class SyncCursorsTableCompanion extends UpdateCompanion<SyncCursorsTableData> {
   }
 }
 
+class $ConflictRecordsTableTable extends ConflictRecordsTable
+    with TableInfo<$ConflictRecordsTableTable, ConflictRecordsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ConflictRecordsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _entityTypeMeta = const VerificationMeta(
+    'entityType',
+  );
+  @override
+  late final GeneratedColumn<String> entityType = GeneratedColumn<String>(
+    'entity_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityIdMeta = const VerificationMeta(
+    'entityId',
+  );
+  @override
+  late final GeneratedColumn<String> entityId = GeneratedColumn<String>(
+    'entity_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _outboxOperationIdMeta = const VerificationMeta(
+    'outboxOperationId',
+  );
+  @override
+  late final GeneratedColumn<String> outboxOperationId =
+      GeneratedColumn<String>(
+        'outbox_operation_id',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _policyMeta = const VerificationMeta('policy');
+  @override
+  late final GeneratedColumn<String> policy = GeneratedColumn<String>(
+    'policy',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _localSnapshotMeta = const VerificationMeta(
+    'localSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> localSnapshot = GeneratedColumn<String>(
+    'local_snapshot',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _remoteSnapshotMeta = const VerificationMeta(
+    'remoteSnapshot',
+  );
+  @override
+  late final GeneratedColumn<String> remoteSnapshot = GeneratedColumn<String>(
+    'remote_snapshot',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _conflictingFieldsMeta = const VerificationMeta(
+    'conflictingFields',
+  );
+  @override
+  late final GeneratedColumn<String> conflictingFields =
+      GeneratedColumn<String>(
+        'conflicting_fields',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('conflict'),
+  );
+  static const VerificationMeta _detectedAtMeta = const VerificationMeta(
+    'detectedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> detectedAt = GeneratedColumn<DateTime>(
+    'detected_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _resolvedAtMeta = const VerificationMeta(
+    'resolvedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> resolvedAt = GeneratedColumn<DateTime>(
+    'resolved_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _resolvedByMeta = const VerificationMeta(
+    'resolvedBy',
+  );
+  @override
+  late final GeneratedColumn<String> resolvedBy = GeneratedColumn<String>(
+    'resolved_by',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    companyId,
+    entityType,
+    entityId,
+    outboxOperationId,
+    policy,
+    localSnapshot,
+    remoteSnapshot,
+    conflictingFields,
+    status,
+    detectedAt,
+    resolvedAt,
+    resolvedBy,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'conflict_records';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ConflictRecordsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    }
+    if (data.containsKey('entity_type')) {
+      context.handle(
+        _entityTypeMeta,
+        entityType.isAcceptableOrUnknown(data['entity_type']!, _entityTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityTypeMeta);
+    }
+    if (data.containsKey('entity_id')) {
+      context.handle(
+        _entityIdMeta,
+        entityId.isAcceptableOrUnknown(data['entity_id']!, _entityIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityIdMeta);
+    }
+    if (data.containsKey('outbox_operation_id')) {
+      context.handle(
+        _outboxOperationIdMeta,
+        outboxOperationId.isAcceptableOrUnknown(
+          data['outbox_operation_id']!,
+          _outboxOperationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_outboxOperationIdMeta);
+    }
+    if (data.containsKey('policy')) {
+      context.handle(
+        _policyMeta,
+        policy.isAcceptableOrUnknown(data['policy']!, _policyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_policyMeta);
+    }
+    if (data.containsKey('local_snapshot')) {
+      context.handle(
+        _localSnapshotMeta,
+        localSnapshot.isAcceptableOrUnknown(
+          data['local_snapshot']!,
+          _localSnapshotMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_localSnapshotMeta);
+    }
+    if (data.containsKey('remote_snapshot')) {
+      context.handle(
+        _remoteSnapshotMeta,
+        remoteSnapshot.isAcceptableOrUnknown(
+          data['remote_snapshot']!,
+          _remoteSnapshotMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_remoteSnapshotMeta);
+    }
+    if (data.containsKey('conflicting_fields')) {
+      context.handle(
+        _conflictingFieldsMeta,
+        conflictingFields.isAcceptableOrUnknown(
+          data['conflicting_fields']!,
+          _conflictingFieldsMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_conflictingFieldsMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    }
+    if (data.containsKey('detected_at')) {
+      context.handle(
+        _detectedAtMeta,
+        detectedAt.isAcceptableOrUnknown(data['detected_at']!, _detectedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_detectedAtMeta);
+    }
+    if (data.containsKey('resolved_at')) {
+      context.handle(
+        _resolvedAtMeta,
+        resolvedAt.isAcceptableOrUnknown(data['resolved_at']!, _resolvedAtMeta),
+      );
+    }
+    if (data.containsKey('resolved_by')) {
+      context.handle(
+        _resolvedByMeta,
+        resolvedBy.isAcceptableOrUnknown(data['resolved_by']!, _resolvedByMeta),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ConflictRecordsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ConflictRecordsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      ),
+      entityType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_type'],
+      )!,
+      entityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_id'],
+      )!,
+      outboxOperationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}outbox_operation_id'],
+      )!,
+      policy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}policy'],
+      )!,
+      localSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}local_snapshot'],
+      )!,
+      remoteSnapshot: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_snapshot'],
+      )!,
+      conflictingFields: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conflicting_fields'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      detectedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}detected_at'],
+      )!,
+      resolvedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}resolved_at'],
+      ),
+      resolvedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}resolved_by'],
+      ),
+    );
+  }
+
+  @override
+  $ConflictRecordsTableTable createAlias(String alias) {
+    return $ConflictRecordsTableTable(attachedDatabase, alias);
+  }
+}
+
+class ConflictRecordsTableData extends DataClass
+    implements Insertable<ConflictRecordsTableData> {
+  final String id;
+  final String organizationId;
+  final String? companyId;
+
+  /// Stable identifier of an `OutboxEntityType` value.
+  final String entityType;
+  final String entityId;
+
+  /// The `OutboxOperation.clientOperationId` this conflict blocks.
+  final String outboxOperationId;
+
+  /// Stable identifier of a `ConflictPolicy` value.
+  final String policy;
+
+  /// JSON-encoded full local snapshot at detection time.
+  final String localSnapshot;
+
+  /// JSON-encoded full remote snapshot at detection time.
+  final String remoteSnapshot;
+
+  /// JSON-encoded list of the business fields that actually diverge.
+  final String conflictingFields;
+
+  /// Stable identifier of a `ConflictRecordStatus` value: `'conflict'` or
+  /// `'resolved'`.
+  final String status;
+  final DateTime detectedAt;
+  final DateTime? resolvedAt;
+  final String? resolvedBy;
+  const ConflictRecordsTableData({
+    required this.id,
+    required this.organizationId,
+    this.companyId,
+    required this.entityType,
+    required this.entityId,
+    required this.outboxOperationId,
+    required this.policy,
+    required this.localSnapshot,
+    required this.remoteSnapshot,
+    required this.conflictingFields,
+    required this.status,
+    required this.detectedAt,
+    this.resolvedAt,
+    this.resolvedBy,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    if (!nullToAbsent || companyId != null) {
+      map['company_id'] = Variable<String>(companyId);
+    }
+    map['entity_type'] = Variable<String>(entityType);
+    map['entity_id'] = Variable<String>(entityId);
+    map['outbox_operation_id'] = Variable<String>(outboxOperationId);
+    map['policy'] = Variable<String>(policy);
+    map['local_snapshot'] = Variable<String>(localSnapshot);
+    map['remote_snapshot'] = Variable<String>(remoteSnapshot);
+    map['conflicting_fields'] = Variable<String>(conflictingFields);
+    map['status'] = Variable<String>(status);
+    map['detected_at'] = Variable<DateTime>(detectedAt);
+    if (!nullToAbsent || resolvedAt != null) {
+      map['resolved_at'] = Variable<DateTime>(resolvedAt);
+    }
+    if (!nullToAbsent || resolvedBy != null) {
+      map['resolved_by'] = Variable<String>(resolvedBy);
+    }
+    return map;
+  }
+
+  ConflictRecordsTableCompanion toCompanion(bool nullToAbsent) {
+    return ConflictRecordsTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      companyId: companyId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(companyId),
+      entityType: Value(entityType),
+      entityId: Value(entityId),
+      outboxOperationId: Value(outboxOperationId),
+      policy: Value(policy),
+      localSnapshot: Value(localSnapshot),
+      remoteSnapshot: Value(remoteSnapshot),
+      conflictingFields: Value(conflictingFields),
+      status: Value(status),
+      detectedAt: Value(detectedAt),
+      resolvedAt: resolvedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resolvedAt),
+      resolvedBy: resolvedBy == null && nullToAbsent
+          ? const Value.absent()
+          : Value(resolvedBy),
+    );
+  }
+
+  factory ConflictRecordsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ConflictRecordsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String?>(json['companyId']),
+      entityType: serializer.fromJson<String>(json['entityType']),
+      entityId: serializer.fromJson<String>(json['entityId']),
+      outboxOperationId: serializer.fromJson<String>(json['outboxOperationId']),
+      policy: serializer.fromJson<String>(json['policy']),
+      localSnapshot: serializer.fromJson<String>(json['localSnapshot']),
+      remoteSnapshot: serializer.fromJson<String>(json['remoteSnapshot']),
+      conflictingFields: serializer.fromJson<String>(json['conflictingFields']),
+      status: serializer.fromJson<String>(json['status']),
+      detectedAt: serializer.fromJson<DateTime>(json['detectedAt']),
+      resolvedAt: serializer.fromJson<DateTime?>(json['resolvedAt']),
+      resolvedBy: serializer.fromJson<String?>(json['resolvedBy']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String?>(companyId),
+      'entityType': serializer.toJson<String>(entityType),
+      'entityId': serializer.toJson<String>(entityId),
+      'outboxOperationId': serializer.toJson<String>(outboxOperationId),
+      'policy': serializer.toJson<String>(policy),
+      'localSnapshot': serializer.toJson<String>(localSnapshot),
+      'remoteSnapshot': serializer.toJson<String>(remoteSnapshot),
+      'conflictingFields': serializer.toJson<String>(conflictingFields),
+      'status': serializer.toJson<String>(status),
+      'detectedAt': serializer.toJson<DateTime>(detectedAt),
+      'resolvedAt': serializer.toJson<DateTime?>(resolvedAt),
+      'resolvedBy': serializer.toJson<String?>(resolvedBy),
+    };
+  }
+
+  ConflictRecordsTableData copyWith({
+    String? id,
+    String? organizationId,
+    Value<String?> companyId = const Value.absent(),
+    String? entityType,
+    String? entityId,
+    String? outboxOperationId,
+    String? policy,
+    String? localSnapshot,
+    String? remoteSnapshot,
+    String? conflictingFields,
+    String? status,
+    DateTime? detectedAt,
+    Value<DateTime?> resolvedAt = const Value.absent(),
+    Value<String?> resolvedBy = const Value.absent(),
+  }) => ConflictRecordsTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId.present ? companyId.value : this.companyId,
+    entityType: entityType ?? this.entityType,
+    entityId: entityId ?? this.entityId,
+    outboxOperationId: outboxOperationId ?? this.outboxOperationId,
+    policy: policy ?? this.policy,
+    localSnapshot: localSnapshot ?? this.localSnapshot,
+    remoteSnapshot: remoteSnapshot ?? this.remoteSnapshot,
+    conflictingFields: conflictingFields ?? this.conflictingFields,
+    status: status ?? this.status,
+    detectedAt: detectedAt ?? this.detectedAt,
+    resolvedAt: resolvedAt.present ? resolvedAt.value : this.resolvedAt,
+    resolvedBy: resolvedBy.present ? resolvedBy.value : this.resolvedBy,
+  );
+  ConflictRecordsTableData copyWithCompanion(
+    ConflictRecordsTableCompanion data,
+  ) {
+    return ConflictRecordsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      entityType: data.entityType.present
+          ? data.entityType.value
+          : this.entityType,
+      entityId: data.entityId.present ? data.entityId.value : this.entityId,
+      outboxOperationId: data.outboxOperationId.present
+          ? data.outboxOperationId.value
+          : this.outboxOperationId,
+      policy: data.policy.present ? data.policy.value : this.policy,
+      localSnapshot: data.localSnapshot.present
+          ? data.localSnapshot.value
+          : this.localSnapshot,
+      remoteSnapshot: data.remoteSnapshot.present
+          ? data.remoteSnapshot.value
+          : this.remoteSnapshot,
+      conflictingFields: data.conflictingFields.present
+          ? data.conflictingFields.value
+          : this.conflictingFields,
+      status: data.status.present ? data.status.value : this.status,
+      detectedAt: data.detectedAt.present
+          ? data.detectedAt.value
+          : this.detectedAt,
+      resolvedAt: data.resolvedAt.present
+          ? data.resolvedAt.value
+          : this.resolvedAt,
+      resolvedBy: data.resolvedBy.present
+          ? data.resolvedBy.value
+          : this.resolvedBy,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ConflictRecordsTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityId: $entityId, ')
+          ..write('outboxOperationId: $outboxOperationId, ')
+          ..write('policy: $policy, ')
+          ..write('localSnapshot: $localSnapshot, ')
+          ..write('remoteSnapshot: $remoteSnapshot, ')
+          ..write('conflictingFields: $conflictingFields, ')
+          ..write('status: $status, ')
+          ..write('detectedAt: $detectedAt, ')
+          ..write('resolvedAt: $resolvedAt, ')
+          ..write('resolvedBy: $resolvedBy')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    companyId,
+    entityType,
+    entityId,
+    outboxOperationId,
+    policy,
+    localSnapshot,
+    remoteSnapshot,
+    conflictingFields,
+    status,
+    detectedAt,
+    resolvedAt,
+    resolvedBy,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ConflictRecordsTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.entityType == this.entityType &&
+          other.entityId == this.entityId &&
+          other.outboxOperationId == this.outboxOperationId &&
+          other.policy == this.policy &&
+          other.localSnapshot == this.localSnapshot &&
+          other.remoteSnapshot == this.remoteSnapshot &&
+          other.conflictingFields == this.conflictingFields &&
+          other.status == this.status &&
+          other.detectedAt == this.detectedAt &&
+          other.resolvedAt == this.resolvedAt &&
+          other.resolvedBy == this.resolvedBy);
+}
+
+class ConflictRecordsTableCompanion
+    extends UpdateCompanion<ConflictRecordsTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String?> companyId;
+  final Value<String> entityType;
+  final Value<String> entityId;
+  final Value<String> outboxOperationId;
+  final Value<String> policy;
+  final Value<String> localSnapshot;
+  final Value<String> remoteSnapshot;
+  final Value<String> conflictingFields;
+  final Value<String> status;
+  final Value<DateTime> detectedAt;
+  final Value<DateTime?> resolvedAt;
+  final Value<String?> resolvedBy;
+  final Value<int> rowid;
+  const ConflictRecordsTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.entityType = const Value.absent(),
+    this.entityId = const Value.absent(),
+    this.outboxOperationId = const Value.absent(),
+    this.policy = const Value.absent(),
+    this.localSnapshot = const Value.absent(),
+    this.remoteSnapshot = const Value.absent(),
+    this.conflictingFields = const Value.absent(),
+    this.status = const Value.absent(),
+    this.detectedAt = const Value.absent(),
+    this.resolvedAt = const Value.absent(),
+    this.resolvedBy = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ConflictRecordsTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    this.companyId = const Value.absent(),
+    required String entityType,
+    required String entityId,
+    required String outboxOperationId,
+    required String policy,
+    required String localSnapshot,
+    required String remoteSnapshot,
+    required String conflictingFields,
+    this.status = const Value.absent(),
+    required DateTime detectedAt,
+    this.resolvedAt = const Value.absent(),
+    this.resolvedBy = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       entityType = Value(entityType),
+       entityId = Value(entityId),
+       outboxOperationId = Value(outboxOperationId),
+       policy = Value(policy),
+       localSnapshot = Value(localSnapshot),
+       remoteSnapshot = Value(remoteSnapshot),
+       conflictingFields = Value(conflictingFields),
+       detectedAt = Value(detectedAt);
+  static Insertable<ConflictRecordsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? entityType,
+    Expression<String>? entityId,
+    Expression<String>? outboxOperationId,
+    Expression<String>? policy,
+    Expression<String>? localSnapshot,
+    Expression<String>? remoteSnapshot,
+    Expression<String>? conflictingFields,
+    Expression<String>? status,
+    Expression<DateTime>? detectedAt,
+    Expression<DateTime>? resolvedAt,
+    Expression<String>? resolvedBy,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (entityType != null) 'entity_type': entityType,
+      if (entityId != null) 'entity_id': entityId,
+      if (outboxOperationId != null) 'outbox_operation_id': outboxOperationId,
+      if (policy != null) 'policy': policy,
+      if (localSnapshot != null) 'local_snapshot': localSnapshot,
+      if (remoteSnapshot != null) 'remote_snapshot': remoteSnapshot,
+      if (conflictingFields != null) 'conflicting_fields': conflictingFields,
+      if (status != null) 'status': status,
+      if (detectedAt != null) 'detected_at': detectedAt,
+      if (resolvedAt != null) 'resolved_at': resolvedAt,
+      if (resolvedBy != null) 'resolved_by': resolvedBy,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ConflictRecordsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String?>? companyId,
+    Value<String>? entityType,
+    Value<String>? entityId,
+    Value<String>? outboxOperationId,
+    Value<String>? policy,
+    Value<String>? localSnapshot,
+    Value<String>? remoteSnapshot,
+    Value<String>? conflictingFields,
+    Value<String>? status,
+    Value<DateTime>? detectedAt,
+    Value<DateTime?>? resolvedAt,
+    Value<String?>? resolvedBy,
+    Value<int>? rowid,
+  }) {
+    return ConflictRecordsTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      entityType: entityType ?? this.entityType,
+      entityId: entityId ?? this.entityId,
+      outboxOperationId: outboxOperationId ?? this.outboxOperationId,
+      policy: policy ?? this.policy,
+      localSnapshot: localSnapshot ?? this.localSnapshot,
+      remoteSnapshot: remoteSnapshot ?? this.remoteSnapshot,
+      conflictingFields: conflictingFields ?? this.conflictingFields,
+      status: status ?? this.status,
+      detectedAt: detectedAt ?? this.detectedAt,
+      resolvedAt: resolvedAt ?? this.resolvedAt,
+      resolvedBy: resolvedBy ?? this.resolvedBy,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (entityType.present) {
+      map['entity_type'] = Variable<String>(entityType.value);
+    }
+    if (entityId.present) {
+      map['entity_id'] = Variable<String>(entityId.value);
+    }
+    if (outboxOperationId.present) {
+      map['outbox_operation_id'] = Variable<String>(outboxOperationId.value);
+    }
+    if (policy.present) {
+      map['policy'] = Variable<String>(policy.value);
+    }
+    if (localSnapshot.present) {
+      map['local_snapshot'] = Variable<String>(localSnapshot.value);
+    }
+    if (remoteSnapshot.present) {
+      map['remote_snapshot'] = Variable<String>(remoteSnapshot.value);
+    }
+    if (conflictingFields.present) {
+      map['conflicting_fields'] = Variable<String>(conflictingFields.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (detectedAt.present) {
+      map['detected_at'] = Variable<DateTime>(detectedAt.value);
+    }
+    if (resolvedAt.present) {
+      map['resolved_at'] = Variable<DateTime>(resolvedAt.value);
+    }
+    if (resolvedBy.present) {
+      map['resolved_by'] = Variable<String>(resolvedBy.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ConflictRecordsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityId: $entityId, ')
+          ..write('outboxOperationId: $outboxOperationId, ')
+          ..write('policy: $policy, ')
+          ..write('localSnapshot: $localSnapshot, ')
+          ..write('remoteSnapshot: $remoteSnapshot, ')
+          ..write('conflictingFields: $conflictingFields, ')
+          ..write('status: $status, ')
+          ..write('detectedAt: $detectedAt, ')
+          ..write('resolvedAt: $resolvedAt, ')
+          ..write('resolvedBy: $resolvedBy, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
+class $ConflictAuditLogTableTable extends ConflictAuditLogTable
+    with TableInfo<$ConflictAuditLogTableTable, ConflictAuditLogTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $ConflictAuditLogTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _entityTypeMeta = const VerificationMeta(
+    'entityType',
+  );
+  @override
+  late final GeneratedColumn<String> entityType = GeneratedColumn<String>(
+    'entity_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityIdMeta = const VerificationMeta(
+    'entityId',
+  );
+  @override
+  late final GeneratedColumn<String> entityId = GeneratedColumn<String>(
+    'entity_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _policyMeta = const VerificationMeta('policy');
+  @override
+  late final GeneratedColumn<String> policy = GeneratedColumn<String>(
+    'policy',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _outcomeMeta = const VerificationMeta(
+    'outcome',
+  );
+  @override
+  late final GeneratedColumn<String> outcome = GeneratedColumn<String>(
+    'outcome',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _actorMeta = const VerificationMeta('actor');
+  @override
+  late final GeneratedColumn<String> actor = GeneratedColumn<String>(
+    'actor',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _performedAtMeta = const VerificationMeta(
+    'performedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> performedAt = GeneratedColumn<DateTime>(
+    'performed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _discardedFieldsMeta = const VerificationMeta(
+    'discardedFields',
+  );
+  @override
+  late final GeneratedColumn<String> discardedFields = GeneratedColumn<String>(
+    'discarded_fields',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _conflictingFieldsMeta = const VerificationMeta(
+    'conflictingFields',
+  );
+  @override
+  late final GeneratedColumn<String> conflictingFields =
+      GeneratedColumn<String>(
+        'conflicting_fields',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      );
+  static const VerificationMeta _conflictRecordIdMeta = const VerificationMeta(
+    'conflictRecordId',
+  );
+  @override
+  late final GeneratedColumn<String> conflictRecordId = GeneratedColumn<String>(
+    'conflict_record_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    companyId,
+    entityType,
+    entityId,
+    policy,
+    outcome,
+    actor,
+    performedAt,
+    discardedFields,
+    conflictingFields,
+    conflictRecordId,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'conflict_audit_log';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<ConflictAuditLogTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    }
+    if (data.containsKey('entity_type')) {
+      context.handle(
+        _entityTypeMeta,
+        entityType.isAcceptableOrUnknown(data['entity_type']!, _entityTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityTypeMeta);
+    }
+    if (data.containsKey('entity_id')) {
+      context.handle(
+        _entityIdMeta,
+        entityId.isAcceptableOrUnknown(data['entity_id']!, _entityIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityIdMeta);
+    }
+    if (data.containsKey('policy')) {
+      context.handle(
+        _policyMeta,
+        policy.isAcceptableOrUnknown(data['policy']!, _policyMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_policyMeta);
+    }
+    if (data.containsKey('outcome')) {
+      context.handle(
+        _outcomeMeta,
+        outcome.isAcceptableOrUnknown(data['outcome']!, _outcomeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_outcomeMeta);
+    }
+    if (data.containsKey('actor')) {
+      context.handle(
+        _actorMeta,
+        actor.isAcceptableOrUnknown(data['actor']!, _actorMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_actorMeta);
+    }
+    if (data.containsKey('performed_at')) {
+      context.handle(
+        _performedAtMeta,
+        performedAt.isAcceptableOrUnknown(
+          data['performed_at']!,
+          _performedAtMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_performedAtMeta);
+    }
+    if (data.containsKey('discarded_fields')) {
+      context.handle(
+        _discardedFieldsMeta,
+        discardedFields.isAcceptableOrUnknown(
+          data['discarded_fields']!,
+          _discardedFieldsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('conflicting_fields')) {
+      context.handle(
+        _conflictingFieldsMeta,
+        conflictingFields.isAcceptableOrUnknown(
+          data['conflicting_fields']!,
+          _conflictingFieldsMeta,
+        ),
+      );
+    }
+    if (data.containsKey('conflict_record_id')) {
+      context.handle(
+        _conflictRecordIdMeta,
+        conflictRecordId.isAcceptableOrUnknown(
+          data['conflict_record_id']!,
+          _conflictRecordIdMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  ConflictAuditLogTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return ConflictAuditLogTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      ),
+      entityType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_type'],
+      )!,
+      entityId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_id'],
+      )!,
+      policy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}policy'],
+      )!,
+      outcome: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}outcome'],
+      )!,
+      actor: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}actor'],
+      )!,
+      performedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}performed_at'],
+      )!,
+      discardedFields: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}discarded_fields'],
+      )!,
+      conflictingFields: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conflicting_fields'],
+      )!,
+      conflictRecordId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}conflict_record_id'],
+      ),
+    );
+  }
+
+  @override
+  $ConflictAuditLogTableTable createAlias(String alias) {
+    return $ConflictAuditLogTableTable(attachedDatabase, alias);
+  }
+}
+
+class ConflictAuditLogTableData extends DataClass
+    implements Insertable<ConflictAuditLogTableData> {
+  final String id;
+  final String organizationId;
+  final String? companyId;
+
+  /// Stable identifier of an `OutboxEntityType` value.
+  final String entityType;
+  final String entityId;
+
+  /// Stable identifier of a `ConflictPolicy` value.
+  final String policy;
+
+  /// Stable identifier of a `ConflictAuditOutcome` value.
+  final String outcome;
+
+  /// `'system:sync-engine'` for an automatic resolution, or the resolving
+  /// user's id for a manual one (TASK-111).
+  final String actor;
+  final DateTime performedAt;
+
+  /// JSON-encoded list of fields whose losing-side value was discarded
+  /// (last-write-wins outcomes only) — `'[]'` otherwise.
+  final String discardedFields;
+
+  /// JSON-encoded list of fields that could not be merged automatically —
+  /// `'[]'` outside a blocked/resolved-manual outcome.
+  final String conflictingFields;
+
+  /// The related `ConflictRecordsTable.id`, when [outcome] is
+  /// `blocked_manual`/`resolved_manual`.
+  final String? conflictRecordId;
+  const ConflictAuditLogTableData({
+    required this.id,
+    required this.organizationId,
+    this.companyId,
+    required this.entityType,
+    required this.entityId,
+    required this.policy,
+    required this.outcome,
+    required this.actor,
+    required this.performedAt,
+    required this.discardedFields,
+    required this.conflictingFields,
+    this.conflictRecordId,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    if (!nullToAbsent || companyId != null) {
+      map['company_id'] = Variable<String>(companyId);
+    }
+    map['entity_type'] = Variable<String>(entityType);
+    map['entity_id'] = Variable<String>(entityId);
+    map['policy'] = Variable<String>(policy);
+    map['outcome'] = Variable<String>(outcome);
+    map['actor'] = Variable<String>(actor);
+    map['performed_at'] = Variable<DateTime>(performedAt);
+    map['discarded_fields'] = Variable<String>(discardedFields);
+    map['conflicting_fields'] = Variable<String>(conflictingFields);
+    if (!nullToAbsent || conflictRecordId != null) {
+      map['conflict_record_id'] = Variable<String>(conflictRecordId);
+    }
+    return map;
+  }
+
+  ConflictAuditLogTableCompanion toCompanion(bool nullToAbsent) {
+    return ConflictAuditLogTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      companyId: companyId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(companyId),
+      entityType: Value(entityType),
+      entityId: Value(entityId),
+      policy: Value(policy),
+      outcome: Value(outcome),
+      actor: Value(actor),
+      performedAt: Value(performedAt),
+      discardedFields: Value(discardedFields),
+      conflictingFields: Value(conflictingFields),
+      conflictRecordId: conflictRecordId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(conflictRecordId),
+    );
+  }
+
+  factory ConflictAuditLogTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return ConflictAuditLogTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String?>(json['companyId']),
+      entityType: serializer.fromJson<String>(json['entityType']),
+      entityId: serializer.fromJson<String>(json['entityId']),
+      policy: serializer.fromJson<String>(json['policy']),
+      outcome: serializer.fromJson<String>(json['outcome']),
+      actor: serializer.fromJson<String>(json['actor']),
+      performedAt: serializer.fromJson<DateTime>(json['performedAt']),
+      discardedFields: serializer.fromJson<String>(json['discardedFields']),
+      conflictingFields: serializer.fromJson<String>(json['conflictingFields']),
+      conflictRecordId: serializer.fromJson<String?>(json['conflictRecordId']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String?>(companyId),
+      'entityType': serializer.toJson<String>(entityType),
+      'entityId': serializer.toJson<String>(entityId),
+      'policy': serializer.toJson<String>(policy),
+      'outcome': serializer.toJson<String>(outcome),
+      'actor': serializer.toJson<String>(actor),
+      'performedAt': serializer.toJson<DateTime>(performedAt),
+      'discardedFields': serializer.toJson<String>(discardedFields),
+      'conflictingFields': serializer.toJson<String>(conflictingFields),
+      'conflictRecordId': serializer.toJson<String?>(conflictRecordId),
+    };
+  }
+
+  ConflictAuditLogTableData copyWith({
+    String? id,
+    String? organizationId,
+    Value<String?> companyId = const Value.absent(),
+    String? entityType,
+    String? entityId,
+    String? policy,
+    String? outcome,
+    String? actor,
+    DateTime? performedAt,
+    String? discardedFields,
+    String? conflictingFields,
+    Value<String?> conflictRecordId = const Value.absent(),
+  }) => ConflictAuditLogTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId.present ? companyId.value : this.companyId,
+    entityType: entityType ?? this.entityType,
+    entityId: entityId ?? this.entityId,
+    policy: policy ?? this.policy,
+    outcome: outcome ?? this.outcome,
+    actor: actor ?? this.actor,
+    performedAt: performedAt ?? this.performedAt,
+    discardedFields: discardedFields ?? this.discardedFields,
+    conflictingFields: conflictingFields ?? this.conflictingFields,
+    conflictRecordId: conflictRecordId.present
+        ? conflictRecordId.value
+        : this.conflictRecordId,
+  );
+  ConflictAuditLogTableData copyWithCompanion(
+    ConflictAuditLogTableCompanion data,
+  ) {
+    return ConflictAuditLogTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      entityType: data.entityType.present
+          ? data.entityType.value
+          : this.entityType,
+      entityId: data.entityId.present ? data.entityId.value : this.entityId,
+      policy: data.policy.present ? data.policy.value : this.policy,
+      outcome: data.outcome.present ? data.outcome.value : this.outcome,
+      actor: data.actor.present ? data.actor.value : this.actor,
+      performedAt: data.performedAt.present
+          ? data.performedAt.value
+          : this.performedAt,
+      discardedFields: data.discardedFields.present
+          ? data.discardedFields.value
+          : this.discardedFields,
+      conflictingFields: data.conflictingFields.present
+          ? data.conflictingFields.value
+          : this.conflictingFields,
+      conflictRecordId: data.conflictRecordId.present
+          ? data.conflictRecordId.value
+          : this.conflictRecordId,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ConflictAuditLogTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityId: $entityId, ')
+          ..write('policy: $policy, ')
+          ..write('outcome: $outcome, ')
+          ..write('actor: $actor, ')
+          ..write('performedAt: $performedAt, ')
+          ..write('discardedFields: $discardedFields, ')
+          ..write('conflictingFields: $conflictingFields, ')
+          ..write('conflictRecordId: $conflictRecordId')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    companyId,
+    entityType,
+    entityId,
+    policy,
+    outcome,
+    actor,
+    performedAt,
+    discardedFields,
+    conflictingFields,
+    conflictRecordId,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is ConflictAuditLogTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.entityType == this.entityType &&
+          other.entityId == this.entityId &&
+          other.policy == this.policy &&
+          other.outcome == this.outcome &&
+          other.actor == this.actor &&
+          other.performedAt == this.performedAt &&
+          other.discardedFields == this.discardedFields &&
+          other.conflictingFields == this.conflictingFields &&
+          other.conflictRecordId == this.conflictRecordId);
+}
+
+class ConflictAuditLogTableCompanion
+    extends UpdateCompanion<ConflictAuditLogTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String?> companyId;
+  final Value<String> entityType;
+  final Value<String> entityId;
+  final Value<String> policy;
+  final Value<String> outcome;
+  final Value<String> actor;
+  final Value<DateTime> performedAt;
+  final Value<String> discardedFields;
+  final Value<String> conflictingFields;
+  final Value<String?> conflictRecordId;
+  final Value<int> rowid;
+  const ConflictAuditLogTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.entityType = const Value.absent(),
+    this.entityId = const Value.absent(),
+    this.policy = const Value.absent(),
+    this.outcome = const Value.absent(),
+    this.actor = const Value.absent(),
+    this.performedAt = const Value.absent(),
+    this.discardedFields = const Value.absent(),
+    this.conflictingFields = const Value.absent(),
+    this.conflictRecordId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  ConflictAuditLogTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    this.companyId = const Value.absent(),
+    required String entityType,
+    required String entityId,
+    required String policy,
+    required String outcome,
+    required String actor,
+    required DateTime performedAt,
+    this.discardedFields = const Value.absent(),
+    this.conflictingFields = const Value.absent(),
+    this.conflictRecordId = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       entityType = Value(entityType),
+       entityId = Value(entityId),
+       policy = Value(policy),
+       outcome = Value(outcome),
+       actor = Value(actor),
+       performedAt = Value(performedAt);
+  static Insertable<ConflictAuditLogTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? entityType,
+    Expression<String>? entityId,
+    Expression<String>? policy,
+    Expression<String>? outcome,
+    Expression<String>? actor,
+    Expression<DateTime>? performedAt,
+    Expression<String>? discardedFields,
+    Expression<String>? conflictingFields,
+    Expression<String>? conflictRecordId,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (entityType != null) 'entity_type': entityType,
+      if (entityId != null) 'entity_id': entityId,
+      if (policy != null) 'policy': policy,
+      if (outcome != null) 'outcome': outcome,
+      if (actor != null) 'actor': actor,
+      if (performedAt != null) 'performed_at': performedAt,
+      if (discardedFields != null) 'discarded_fields': discardedFields,
+      if (conflictingFields != null) 'conflicting_fields': conflictingFields,
+      if (conflictRecordId != null) 'conflict_record_id': conflictRecordId,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  ConflictAuditLogTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String?>? companyId,
+    Value<String>? entityType,
+    Value<String>? entityId,
+    Value<String>? policy,
+    Value<String>? outcome,
+    Value<String>? actor,
+    Value<DateTime>? performedAt,
+    Value<String>? discardedFields,
+    Value<String>? conflictingFields,
+    Value<String?>? conflictRecordId,
+    Value<int>? rowid,
+  }) {
+    return ConflictAuditLogTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      entityType: entityType ?? this.entityType,
+      entityId: entityId ?? this.entityId,
+      policy: policy ?? this.policy,
+      outcome: outcome ?? this.outcome,
+      actor: actor ?? this.actor,
+      performedAt: performedAt ?? this.performedAt,
+      discardedFields: discardedFields ?? this.discardedFields,
+      conflictingFields: conflictingFields ?? this.conflictingFields,
+      conflictRecordId: conflictRecordId ?? this.conflictRecordId,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (entityType.present) {
+      map['entity_type'] = Variable<String>(entityType.value);
+    }
+    if (entityId.present) {
+      map['entity_id'] = Variable<String>(entityId.value);
+    }
+    if (policy.present) {
+      map['policy'] = Variable<String>(policy.value);
+    }
+    if (outcome.present) {
+      map['outcome'] = Variable<String>(outcome.value);
+    }
+    if (actor.present) {
+      map['actor'] = Variable<String>(actor.value);
+    }
+    if (performedAt.present) {
+      map['performed_at'] = Variable<DateTime>(performedAt.value);
+    }
+    if (discardedFields.present) {
+      map['discarded_fields'] = Variable<String>(discardedFields.value);
+    }
+    if (conflictingFields.present) {
+      map['conflicting_fields'] = Variable<String>(conflictingFields.value);
+    }
+    if (conflictRecordId.present) {
+      map['conflict_record_id'] = Variable<String>(conflictRecordId.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('ConflictAuditLogTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('entityType: $entityType, ')
+          ..write('entityId: $entityId, ')
+          ..write('policy: $policy, ')
+          ..write('outcome: $outcome, ')
+          ..write('actor: $actor, ')
+          ..write('performedAt: $performedAt, ')
+          ..write('discardedFields: $discardedFields, ')
+          ..write('conflictingFields: $conflictingFields, ')
+          ..write('conflictRecordId: $conflictRecordId, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -21577,6 +23184,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $SyncCursorsTableTable syncCursorsTable = $SyncCursorsTableTable(
     this,
   );
+  late final $ConflictRecordsTableTable conflictRecordsTable =
+      $ConflictRecordsTableTable(this);
+  late final $ConflictAuditLogTableTable conflictAuditLogTable =
+      $ConflictAuditLogTableTable(this);
   late final Index idxCustomersOrgCompany = Index(
     'idx_customers_org_company',
     'CREATE INDEX idx_customers_org_company ON customers (organization_id, company_id)',
@@ -21693,6 +23304,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_outbox_entity',
     'CREATE INDEX idx_outbox_entity ON outbox (organization_id, entity_type, entity_id, sequence_number)',
   );
+  late final Index idxConflictRecordsScopeStatus = Index(
+    'idx_conflict_records_scope_status',
+    'CREATE INDEX idx_conflict_records_scope_status ON conflict_records (organization_id, status)',
+  );
+  late final Index idxConflictAuditLogScope = Index(
+    'idx_conflict_audit_log_scope',
+    'CREATE INDEX idx_conflict_audit_log_scope ON conflict_audit_log (organization_id, performed_at)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -21719,6 +23338,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     offlinePackageLoadStatusTable,
     outboxTable,
     syncCursorsTable,
+    conflictRecordsTable,
+    conflictAuditLogTable,
     idxCustomersOrgCompany,
     idxCustomerAddressesCustomer,
     idxCustomerContactsCustomer,
@@ -21748,6 +23369,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxOfflinePackageLoadStatusScope,
     idxOutboxScopeStatus,
     idxOutboxEntity,
+    idxConflictRecordsScopeStatus,
+    idxConflictAuditLogScope,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -32514,6 +34137,775 @@ typedef $$SyncCursorsTableTableProcessedTableManager =
       SyncCursorsTableData,
       PrefetchHooks Function()
     >;
+typedef $$ConflictRecordsTableTableCreateCompanionBuilder =
+    ConflictRecordsTableCompanion Function({
+      required String id,
+      required String organizationId,
+      Value<String?> companyId,
+      required String entityType,
+      required String entityId,
+      required String outboxOperationId,
+      required String policy,
+      required String localSnapshot,
+      required String remoteSnapshot,
+      required String conflictingFields,
+      Value<String> status,
+      required DateTime detectedAt,
+      Value<DateTime?> resolvedAt,
+      Value<String?> resolvedBy,
+      Value<int> rowid,
+    });
+typedef $$ConflictRecordsTableTableUpdateCompanionBuilder =
+    ConflictRecordsTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String?> companyId,
+      Value<String> entityType,
+      Value<String> entityId,
+      Value<String> outboxOperationId,
+      Value<String> policy,
+      Value<String> localSnapshot,
+      Value<String> remoteSnapshot,
+      Value<String> conflictingFields,
+      Value<String> status,
+      Value<DateTime> detectedAt,
+      Value<DateTime?> resolvedAt,
+      Value<String?> resolvedBy,
+      Value<int> rowid,
+    });
+
+class $$ConflictRecordsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ConflictRecordsTableTable> {
+  $$ConflictRecordsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get outboxOperationId => $composableBuilder(
+    column: $table.outboxOperationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get policy => $composableBuilder(
+    column: $table.policy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get localSnapshot => $composableBuilder(
+    column: $table.localSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteSnapshot => $composableBuilder(
+    column: $table.remoteSnapshot,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get conflictingFields => $composableBuilder(
+    column: $table.conflictingFields,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get detectedAt => $composableBuilder(
+    column: $table.detectedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get resolvedAt => $composableBuilder(
+    column: $table.resolvedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get resolvedBy => $composableBuilder(
+    column: $table.resolvedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ConflictRecordsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ConflictRecordsTableTable> {
+  $$ConflictRecordsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get outboxOperationId => $composableBuilder(
+    column: $table.outboxOperationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get policy => $composableBuilder(
+    column: $table.policy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get localSnapshot => $composableBuilder(
+    column: $table.localSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteSnapshot => $composableBuilder(
+    column: $table.remoteSnapshot,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get conflictingFields => $composableBuilder(
+    column: $table.conflictingFields,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get detectedAt => $composableBuilder(
+    column: $table.detectedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get resolvedAt => $composableBuilder(
+    column: $table.resolvedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get resolvedBy => $composableBuilder(
+    column: $table.resolvedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ConflictRecordsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ConflictRecordsTableTable> {
+  $$ConflictRecordsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get entityId =>
+      $composableBuilder(column: $table.entityId, builder: (column) => column);
+
+  GeneratedColumn<String> get outboxOperationId => $composableBuilder(
+    column: $table.outboxOperationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get policy =>
+      $composableBuilder(column: $table.policy, builder: (column) => column);
+
+  GeneratedColumn<String> get localSnapshot => $composableBuilder(
+    column: $table.localSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get remoteSnapshot => $composableBuilder(
+    column: $table.remoteSnapshot,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get conflictingFields => $composableBuilder(
+    column: $table.conflictingFields,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get detectedAt => $composableBuilder(
+    column: $table.detectedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get resolvedAt => $composableBuilder(
+    column: $table.resolvedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get resolvedBy => $composableBuilder(
+    column: $table.resolvedBy,
+    builder: (column) => column,
+  );
+}
+
+class $$ConflictRecordsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ConflictRecordsTableTable,
+          ConflictRecordsTableData,
+          $$ConflictRecordsTableTableFilterComposer,
+          $$ConflictRecordsTableTableOrderingComposer,
+          $$ConflictRecordsTableTableAnnotationComposer,
+          $$ConflictRecordsTableTableCreateCompanionBuilder,
+          $$ConflictRecordsTableTableUpdateCompanionBuilder,
+          (
+            ConflictRecordsTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $ConflictRecordsTableTable,
+              ConflictRecordsTableData
+            >,
+          ),
+          ConflictRecordsTableData,
+          PrefetchHooks Function()
+        > {
+  $$ConflictRecordsTableTableTableManager(
+    _$AppDatabase db,
+    $ConflictRecordsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ConflictRecordsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$ConflictRecordsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ConflictRecordsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String?> companyId = const Value.absent(),
+                Value<String> entityType = const Value.absent(),
+                Value<String> entityId = const Value.absent(),
+                Value<String> outboxOperationId = const Value.absent(),
+                Value<String> policy = const Value.absent(),
+                Value<String> localSnapshot = const Value.absent(),
+                Value<String> remoteSnapshot = const Value.absent(),
+                Value<String> conflictingFields = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime> detectedAt = const Value.absent(),
+                Value<DateTime?> resolvedAt = const Value.absent(),
+                Value<String?> resolvedBy = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ConflictRecordsTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                entityType: entityType,
+                entityId: entityId,
+                outboxOperationId: outboxOperationId,
+                policy: policy,
+                localSnapshot: localSnapshot,
+                remoteSnapshot: remoteSnapshot,
+                conflictingFields: conflictingFields,
+                status: status,
+                detectedAt: detectedAt,
+                resolvedAt: resolvedAt,
+                resolvedBy: resolvedBy,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                Value<String?> companyId = const Value.absent(),
+                required String entityType,
+                required String entityId,
+                required String outboxOperationId,
+                required String policy,
+                required String localSnapshot,
+                required String remoteSnapshot,
+                required String conflictingFields,
+                Value<String> status = const Value.absent(),
+                required DateTime detectedAt,
+                Value<DateTime?> resolvedAt = const Value.absent(),
+                Value<String?> resolvedBy = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ConflictRecordsTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                entityType: entityType,
+                entityId: entityId,
+                outboxOperationId: outboxOperationId,
+                policy: policy,
+                localSnapshot: localSnapshot,
+                remoteSnapshot: remoteSnapshot,
+                conflictingFields: conflictingFields,
+                status: status,
+                detectedAt: detectedAt,
+                resolvedAt: resolvedAt,
+                resolvedBy: resolvedBy,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ConflictRecordsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ConflictRecordsTableTable,
+      ConflictRecordsTableData,
+      $$ConflictRecordsTableTableFilterComposer,
+      $$ConflictRecordsTableTableOrderingComposer,
+      $$ConflictRecordsTableTableAnnotationComposer,
+      $$ConflictRecordsTableTableCreateCompanionBuilder,
+      $$ConflictRecordsTableTableUpdateCompanionBuilder,
+      (
+        ConflictRecordsTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $ConflictRecordsTableTable,
+          ConflictRecordsTableData
+        >,
+      ),
+      ConflictRecordsTableData,
+      PrefetchHooks Function()
+    >;
+typedef $$ConflictAuditLogTableTableCreateCompanionBuilder =
+    ConflictAuditLogTableCompanion Function({
+      required String id,
+      required String organizationId,
+      Value<String?> companyId,
+      required String entityType,
+      required String entityId,
+      required String policy,
+      required String outcome,
+      required String actor,
+      required DateTime performedAt,
+      Value<String> discardedFields,
+      Value<String> conflictingFields,
+      Value<String?> conflictRecordId,
+      Value<int> rowid,
+    });
+typedef $$ConflictAuditLogTableTableUpdateCompanionBuilder =
+    ConflictAuditLogTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String?> companyId,
+      Value<String> entityType,
+      Value<String> entityId,
+      Value<String> policy,
+      Value<String> outcome,
+      Value<String> actor,
+      Value<DateTime> performedAt,
+      Value<String> discardedFields,
+      Value<String> conflictingFields,
+      Value<String?> conflictRecordId,
+      Value<int> rowid,
+    });
+
+class $$ConflictAuditLogTableTableFilterComposer
+    extends Composer<_$AppDatabase, $ConflictAuditLogTableTable> {
+  $$ConflictAuditLogTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get policy => $composableBuilder(
+    column: $table.policy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get actor => $composableBuilder(
+    column: $table.actor,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get performedAt => $composableBuilder(
+    column: $table.performedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get discardedFields => $composableBuilder(
+    column: $table.discardedFields,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get conflictingFields => $composableBuilder(
+    column: $table.conflictingFields,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get conflictRecordId => $composableBuilder(
+    column: $table.conflictRecordId,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$ConflictAuditLogTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $ConflictAuditLogTableTable> {
+  $$ConflictAuditLogTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityId => $composableBuilder(
+    column: $table.entityId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get policy => $composableBuilder(
+    column: $table.policy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get outcome => $composableBuilder(
+    column: $table.outcome,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get actor => $composableBuilder(
+    column: $table.actor,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get performedAt => $composableBuilder(
+    column: $table.performedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get discardedFields => $composableBuilder(
+    column: $table.discardedFields,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get conflictingFields => $composableBuilder(
+    column: $table.conflictingFields,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get conflictRecordId => $composableBuilder(
+    column: $table.conflictRecordId,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$ConflictAuditLogTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $ConflictAuditLogTableTable> {
+  $$ConflictAuditLogTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get entityType => $composableBuilder(
+    column: $table.entityType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get entityId =>
+      $composableBuilder(column: $table.entityId, builder: (column) => column);
+
+  GeneratedColumn<String> get policy =>
+      $composableBuilder(column: $table.policy, builder: (column) => column);
+
+  GeneratedColumn<String> get outcome =>
+      $composableBuilder(column: $table.outcome, builder: (column) => column);
+
+  GeneratedColumn<String> get actor =>
+      $composableBuilder(column: $table.actor, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get performedAt => $composableBuilder(
+    column: $table.performedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get discardedFields => $composableBuilder(
+    column: $table.discardedFields,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get conflictingFields => $composableBuilder(
+    column: $table.conflictingFields,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get conflictRecordId => $composableBuilder(
+    column: $table.conflictRecordId,
+    builder: (column) => column,
+  );
+}
+
+class $$ConflictAuditLogTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $ConflictAuditLogTableTable,
+          ConflictAuditLogTableData,
+          $$ConflictAuditLogTableTableFilterComposer,
+          $$ConflictAuditLogTableTableOrderingComposer,
+          $$ConflictAuditLogTableTableAnnotationComposer,
+          $$ConflictAuditLogTableTableCreateCompanionBuilder,
+          $$ConflictAuditLogTableTableUpdateCompanionBuilder,
+          (
+            ConflictAuditLogTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $ConflictAuditLogTableTable,
+              ConflictAuditLogTableData
+            >,
+          ),
+          ConflictAuditLogTableData,
+          PrefetchHooks Function()
+        > {
+  $$ConflictAuditLogTableTableTableManager(
+    _$AppDatabase db,
+    $ConflictAuditLogTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$ConflictAuditLogTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$ConflictAuditLogTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$ConflictAuditLogTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String?> companyId = const Value.absent(),
+                Value<String> entityType = const Value.absent(),
+                Value<String> entityId = const Value.absent(),
+                Value<String> policy = const Value.absent(),
+                Value<String> outcome = const Value.absent(),
+                Value<String> actor = const Value.absent(),
+                Value<DateTime> performedAt = const Value.absent(),
+                Value<String> discardedFields = const Value.absent(),
+                Value<String> conflictingFields = const Value.absent(),
+                Value<String?> conflictRecordId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ConflictAuditLogTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                entityType: entityType,
+                entityId: entityId,
+                policy: policy,
+                outcome: outcome,
+                actor: actor,
+                performedAt: performedAt,
+                discardedFields: discardedFields,
+                conflictingFields: conflictingFields,
+                conflictRecordId: conflictRecordId,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                Value<String?> companyId = const Value.absent(),
+                required String entityType,
+                required String entityId,
+                required String policy,
+                required String outcome,
+                required String actor,
+                required DateTime performedAt,
+                Value<String> discardedFields = const Value.absent(),
+                Value<String> conflictingFields = const Value.absent(),
+                Value<String?> conflictRecordId = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => ConflictAuditLogTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                entityType: entityType,
+                entityId: entityId,
+                policy: policy,
+                outcome: outcome,
+                actor: actor,
+                performedAt: performedAt,
+                discardedFields: discardedFields,
+                conflictingFields: conflictingFields,
+                conflictRecordId: conflictRecordId,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$ConflictAuditLogTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $ConflictAuditLogTableTable,
+      ConflictAuditLogTableData,
+      $$ConflictAuditLogTableTableFilterComposer,
+      $$ConflictAuditLogTableTableOrderingComposer,
+      $$ConflictAuditLogTableTableAnnotationComposer,
+      $$ConflictAuditLogTableTableCreateCompanionBuilder,
+      $$ConflictAuditLogTableTableUpdateCompanionBuilder,
+      (
+        ConflictAuditLogTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $ConflictAuditLogTableTable,
+          ConflictAuditLogTableData
+        >,
+      ),
+      ConflictAuditLogTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -32573,4 +34965,8 @@ class $AppDatabaseManager {
       $$OutboxTableTableTableManager(_db, _db.outboxTable);
   $$SyncCursorsTableTableTableManager get syncCursorsTable =>
       $$SyncCursorsTableTableTableManager(_db, _db.syncCursorsTable);
+  $$ConflictRecordsTableTableTableManager get conflictRecordsTable =>
+      $$ConflictRecordsTableTableTableManager(_db, _db.conflictRecordsTable);
+  $$ConflictAuditLogTableTableTableManager get conflictAuditLogTable =>
+      $$ConflictAuditLogTableTableTableManager(_db, _db.conflictAuditLogTable);
 }

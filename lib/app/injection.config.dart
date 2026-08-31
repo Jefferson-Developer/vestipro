@@ -22,6 +22,7 @@ import 'package:firebase_storage/firebase_storage.dart' as _i457;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart' as _i558;
 import 'package:get_it/get_it.dart' as _i174;
 import 'package:injectable/injectable.dart' as _i526;
+import 'package:uuid/uuid.dart' as _i706;
 
 import '../core/analytics/analytics.dart' as _i202;
 import '../core/analytics/analytics_service.dart' as _i932;
@@ -68,9 +69,18 @@ import '../core/storage/image_compressor.dart' as _i611;
 import '../core/storage/image_upload_compressor.dart' as _i620;
 import '../core/storage/storage.dart' as _i209;
 import '../core/storage/storage_data_source.dart' as _i904;
+import '../core/sync/data/repositories/drift_conflict_audit_log_repository.dart'
+    as _i59;
+import '../core/sync/data/repositories/drift_conflict_record_repository.dart'
+    as _i566;
 import '../core/sync/data/repositories/drift_outbox_repository.dart' as _i170;
 import '../core/sync/data/repositories/drift_sync_cursor_repository.dart'
     as _i152;
+import '../core/sync/domain/conflict_resolution_service.dart' as _i746;
+import '../core/sync/domain/repositories/conflict_audit_log_repository.dart'
+    as _i552;
+import '../core/sync/domain/repositories/conflict_record_repository.dart'
+    as _i814;
 import '../core/sync/domain/repositories/outbox_repository.dart' as _i234;
 import '../core/sync/domain/repositories/sync_cursor_repository.dart' as _i405;
 import '../core/sync/domain/sync_engine.dart' as _i292;
@@ -1408,6 +1418,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i841.CatalogHomeCacheRepository>(),
       ),
     );
+    gh.lazySingleton<_i552.ConflictAuditLogRepository>(
+      () => _i59.DriftConflictAuditLogRepository(gh<_i658.AppDatabase>()),
+    );
     gh.lazySingleton<_i857.CustomerRepository>(
       () =>
           _i784.SharedPreferencesCustomerRepository(gh<_i457.CustomerMapper>()),
@@ -1492,6 +1505,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i620.ImageUploadCompressor>(
       () =>
           _i620.ImageUploadCompressor(compressor: gh<_i611.ImageCompressor>()),
+    );
+    gh.lazySingleton<_i814.ConflictRecordRepository>(
+      () => _i566.DriftConflictRecordRepository(gh<_i658.AppDatabase>()),
     );
     gh.lazySingleton<_i799.OfflinePackageStatusRepository>(
       () => _i963.DriftOfflinePackageStatusRepository(gh<_i658.AppDatabase>()),
@@ -2058,6 +2074,14 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1072.CatalogHomeConfigRepository>(
       () => _i288.RemoteConfigCatalogHomeConfigRepository(
         gh<_i972.FeatureFlagService>(),
+      ),
+    );
+    gh.lazySingleton<_i746.ConflictResolutionService>(
+      () => _i746.ConflictResolutionService(
+        gh<_i814.ConflictRecordRepository>(),
+        gh<_i552.ConflictAuditLogRepository>(),
+        gh<_i234.OutboxRepository>(),
+        uuid: gh<_i706.Uuid>(),
       ),
     );
     gh.factory<_i630.LookbookBloc>(
