@@ -17,5 +17,6 @@ export 'tables/payment_terms_table.dart';
 export 'tables/price_list_items_table.dart';
 export 'tables/price_lists_table.dart';
 export 'tables/product_search_index_table.dart';
+export 'tables/sync_cursors_table.dart';
 export 'tables/variant_stock_balances_table.dart';
 export 'tables/warehouses_table.dart';

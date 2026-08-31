@@ -2,6 +2,7 @@ import 'dart:async' show unawaited;
 
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -23,6 +24,7 @@ import '../core/performance/configure_performance.dart';
 import '../core/security/configure_app_check.dart';
 import '../core/services/configure_crashlytics.dart';
 import '../core/storage/configure_storage.dart';
+import '../core/sync/domain/sync_retry_policy.dart';
 import '../features/settings/data/models/about_app_seed_model.dart';
 
 @module
@@ -179,4 +181,16 @@ abstract class AppInjectionModule {
   AppDatabase appDatabase() {
     return AppDatabase(driftDatabase(name: 'vestipro_offline'));
   }
+
+  /// Backs `ConnectivityPlusService` (TASK-109) — same lazy-DI-triggered
+  /// wiring rationale as every other third-party SDK singleton above.
+  @lazySingleton
+  Connectivity get connectivity => Connectivity();
+
+  /// Backs `SyncEngine`'s default retry/backoff policy (TASK-109) —
+  /// registered here, rather than left as a bare constructor default value,
+  /// so it stays a single explicit, swappable-in-tests dependency like
+  /// every other cross-cutting policy in this module.
+  @lazySingleton
+  SyncRetryPolicy get syncRetryPolicy => const SyncRetryPolicy();
 }

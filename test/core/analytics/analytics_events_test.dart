@@ -55,6 +55,8 @@ void main() {
           'campaign_product_clicked',
           'catalog_share_created',
           'catalog_share_opened',
+          'sync_push_completed',
+          'sync_pull_completed',
         ]),
       );
 

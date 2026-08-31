@@ -21142,6 +21142,401 @@ class OutboxTableCompanion extends UpdateCompanion<OutboxTableData> {
   }
 }
 
+class $SyncCursorsTableTable extends SyncCursorsTable
+    with TableInfo<$SyncCursorsTableTable, SyncCursorsTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $SyncCursorsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _entityKindMeta = const VerificationMeta(
+    'entityKind',
+  );
+  @override
+  late final GeneratedColumn<String> entityKind = GeneratedColumn<String>(
+    'entity_kind',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _cursorValueMeta = const VerificationMeta(
+    'cursorValue',
+  );
+  @override
+  late final GeneratedColumn<String> cursorValue = GeneratedColumn<String>(
+    'cursor_value',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    organizationId,
+    companyId,
+    entityKind,
+    cursorValue,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'sync_cursors';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<SyncCursorsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('entity_kind')) {
+      context.handle(
+        _entityKindMeta,
+        entityKind.isAcceptableOrUnknown(data['entity_kind']!, _entityKindMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_entityKindMeta);
+    }
+    if (data.containsKey('cursor_value')) {
+      context.handle(
+        _cursorValueMeta,
+        cursorValue.isAcceptableOrUnknown(
+          data['cursor_value']!,
+          _cursorValueMeta,
+        ),
+      );
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {
+    organizationId,
+    companyId,
+    entityKind,
+  };
+  @override
+  SyncCursorsTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return SyncCursorsTableData(
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      entityKind: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}entity_kind'],
+      )!,
+      cursorValue: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}cursor_value'],
+      ),
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $SyncCursorsTableTable createAlias(String alias) {
+    return $SyncCursorsTableTable(attachedDatabase, alias);
+  }
+}
+
+class SyncCursorsTableData extends DataClass
+    implements Insertable<SyncCursorsTableData> {
+  final String organizationId;
+  final String companyId;
+
+  /// Stable identifier of an `OfflinePackageEntityKind` value (e.g.
+  /// `'customers'`) — stored as text rather than an int index, same
+  /// convention as every other sync/offline table in this schema.
+  final String entityKind;
+  final String? cursorValue;
+  final DateTime updatedAt;
+  const SyncCursorsTableData({
+    required this.organizationId,
+    required this.companyId,
+    required this.entityKind,
+    this.cursorValue,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['organization_id'] = Variable<String>(organizationId);
+    map['company_id'] = Variable<String>(companyId);
+    map['entity_kind'] = Variable<String>(entityKind);
+    if (!nullToAbsent || cursorValue != null) {
+      map['cursor_value'] = Variable<String>(cursorValue);
+    }
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  SyncCursorsTableCompanion toCompanion(bool nullToAbsent) {
+    return SyncCursorsTableCompanion(
+      organizationId: Value(organizationId),
+      companyId: Value(companyId),
+      entityKind: Value(entityKind),
+      cursorValue: cursorValue == null && nullToAbsent
+          ? const Value.absent()
+          : Value(cursorValue),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory SyncCursorsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return SyncCursorsTableData(
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      entityKind: serializer.fromJson<String>(json['entityKind']),
+      cursorValue: serializer.fromJson<String?>(json['cursorValue']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String>(companyId),
+      'entityKind': serializer.toJson<String>(entityKind),
+      'cursorValue': serializer.toJson<String?>(cursorValue),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  SyncCursorsTableData copyWith({
+    String? organizationId,
+    String? companyId,
+    String? entityKind,
+    Value<String?> cursorValue = const Value.absent(),
+    DateTime? updatedAt,
+  }) => SyncCursorsTableData(
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId ?? this.companyId,
+    entityKind: entityKind ?? this.entityKind,
+    cursorValue: cursorValue.present ? cursorValue.value : this.cursorValue,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  SyncCursorsTableData copyWithCompanion(SyncCursorsTableCompanion data) {
+    return SyncCursorsTableData(
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      entityKind: data.entityKind.present
+          ? data.entityKind.value
+          : this.entityKind,
+      cursorValue: data.cursorValue.present
+          ? data.cursorValue.value
+          : this.cursorValue,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncCursorsTableData(')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('entityKind: $entityKind, ')
+          ..write('cursorValue: $cursorValue, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    organizationId,
+    companyId,
+    entityKind,
+    cursorValue,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is SyncCursorsTableData &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.entityKind == this.entityKind &&
+          other.cursorValue == this.cursorValue &&
+          other.updatedAt == this.updatedAt);
+}
+
+class SyncCursorsTableCompanion extends UpdateCompanion<SyncCursorsTableData> {
+  final Value<String> organizationId;
+  final Value<String> companyId;
+  final Value<String> entityKind;
+  final Value<String?> cursorValue;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const SyncCursorsTableCompanion({
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.entityKind = const Value.absent(),
+    this.cursorValue = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  SyncCursorsTableCompanion.insert({
+    required String organizationId,
+    required String companyId,
+    required String entityKind,
+    this.cursorValue = const Value.absent(),
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : organizationId = Value(organizationId),
+       companyId = Value(companyId),
+       entityKind = Value(entityKind),
+       updatedAt = Value(updatedAt);
+  static Insertable<SyncCursorsTableData> custom({
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? entityKind,
+    Expression<String>? cursorValue,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (entityKind != null) 'entity_kind': entityKind,
+      if (cursorValue != null) 'cursor_value': cursorValue,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  SyncCursorsTableCompanion copyWith({
+    Value<String>? organizationId,
+    Value<String>? companyId,
+    Value<String>? entityKind,
+    Value<String?>? cursorValue,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return SyncCursorsTableCompanion(
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      entityKind: entityKind ?? this.entityKind,
+      cursorValue: cursorValue ?? this.cursorValue,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (entityKind.present) {
+      map['entity_kind'] = Variable<String>(entityKind.value);
+    }
+    if (cursorValue.present) {
+      map['cursor_value'] = Variable<String>(cursorValue.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('SyncCursorsTableCompanion(')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('entityKind: $entityKind, ')
+          ..write('cursorValue: $cursorValue, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -21179,6 +21574,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $OfflinePackageLoadStatusTableTable offlinePackageLoadStatusTable =
       $OfflinePackageLoadStatusTableTable(this);
   late final $OutboxTableTable outboxTable = $OutboxTableTable(this);
+  late final $SyncCursorsTableTable syncCursorsTable = $SyncCursorsTableTable(
+    this,
+  );
   late final Index idxCustomersOrgCompany = Index(
     'idx_customers_org_company',
     'CREATE INDEX idx_customers_org_company ON customers (organization_id, company_id)',
@@ -21320,6 +21718,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     targetsTable,
     offlinePackageLoadStatusTable,
     outboxTable,
+    syncCursorsTable,
     idxCustomersOrgCompany,
     idxCustomerAddressesCustomer,
     idxCustomerContactsCustomer,
@@ -31899,6 +32298,222 @@ typedef $$OutboxTableTableProcessedTableManager =
       OutboxTableData,
       PrefetchHooks Function()
     >;
+typedef $$SyncCursorsTableTableCreateCompanionBuilder =
+    SyncCursorsTableCompanion Function({
+      required String organizationId,
+      required String companyId,
+      required String entityKind,
+      Value<String?> cursorValue,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$SyncCursorsTableTableUpdateCompanionBuilder =
+    SyncCursorsTableCompanion Function({
+      Value<String> organizationId,
+      Value<String> companyId,
+      Value<String> entityKind,
+      Value<String?> cursorValue,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$SyncCursorsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $SyncCursorsTableTable> {
+  $$SyncCursorsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get entityKind => $composableBuilder(
+    column: $table.entityKind,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get cursorValue => $composableBuilder(
+    column: $table.cursorValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$SyncCursorsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $SyncCursorsTableTable> {
+  $$SyncCursorsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get entityKind => $composableBuilder(
+    column: $table.entityKind,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get cursorValue => $composableBuilder(
+    column: $table.cursorValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$SyncCursorsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $SyncCursorsTableTable> {
+  $$SyncCursorsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get entityKind => $composableBuilder(
+    column: $table.entityKind,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get cursorValue => $composableBuilder(
+    column: $table.cursorValue,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$SyncCursorsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $SyncCursorsTableTable,
+          SyncCursorsTableData,
+          $$SyncCursorsTableTableFilterComposer,
+          $$SyncCursorsTableTableOrderingComposer,
+          $$SyncCursorsTableTableAnnotationComposer,
+          $$SyncCursorsTableTableCreateCompanionBuilder,
+          $$SyncCursorsTableTableUpdateCompanionBuilder,
+          (
+            SyncCursorsTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $SyncCursorsTableTable,
+              SyncCursorsTableData
+            >,
+          ),
+          SyncCursorsTableData,
+          PrefetchHooks Function()
+        > {
+  $$SyncCursorsTableTableTableManager(
+    _$AppDatabase db,
+    $SyncCursorsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$SyncCursorsTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$SyncCursorsTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$SyncCursorsTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> organizationId = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> entityKind = const Value.absent(),
+                Value<String?> cursorValue = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => SyncCursorsTableCompanion(
+                organizationId: organizationId,
+                companyId: companyId,
+                entityKind: entityKind,
+                cursorValue: cursorValue,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String organizationId,
+                required String companyId,
+                required String entityKind,
+                Value<String?> cursorValue = const Value.absent(),
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => SyncCursorsTableCompanion.insert(
+                organizationId: organizationId,
+                companyId: companyId,
+                entityKind: entityKind,
+                cursorValue: cursorValue,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$SyncCursorsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $SyncCursorsTableTable,
+      SyncCursorsTableData,
+      $$SyncCursorsTableTableFilterComposer,
+      $$SyncCursorsTableTableOrderingComposer,
+      $$SyncCursorsTableTableAnnotationComposer,
+      $$SyncCursorsTableTableCreateCompanionBuilder,
+      $$SyncCursorsTableTableUpdateCompanionBuilder,
+      (
+        SyncCursorsTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $SyncCursorsTableTable,
+          SyncCursorsTableData
+        >,
+      ),
+      SyncCursorsTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -31956,4 +32571,6 @@ class $AppDatabaseManager {
       );
   $$OutboxTableTableTableManager get outboxTable =>
       $$OutboxTableTableTableManager(_db, _db.outboxTable);
+  $$SyncCursorsTableTableTableManager get syncCursorsTable =>
+      $$SyncCursorsTableTableTableManager(_db, _db.syncCursorsTable);
 }

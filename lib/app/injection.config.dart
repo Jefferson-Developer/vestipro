@@ -11,6 +11,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
 import 'package:cloud_functions/cloud_functions.dart' as _i809;
+import 'package:connectivity_plus/connectivity_plus.dart' as _i895;
 import 'package:firebase_analytics/firebase_analytics.dart' as _i398;
 import 'package:firebase_app_check/firebase_app_check.dart' as _i56;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
@@ -36,6 +37,8 @@ import '../core/auth/data/repositories/auth_repository_impl.dart' as _i961;
 import '../core/auth/data/services/session_service_impl.dart' as _i520;
 import '../core/auth/domain/repositories/auth_repository.dart' as _i217;
 import '../core/auth/domain/services/session_service.dart' as _i885;
+import '../core/connectivity/connectivity_plus_service.dart' as _i4;
+import '../core/connectivity/connectivity_service.dart' as _i610;
 import '../core/database/app_database.dart' as _i935;
 import '../core/database/database.dart' as _i658;
 import '../core/environment/app_environment.dart' as _i461;
@@ -59,13 +62,22 @@ import '../core/permissions/permission_service.dart' as _i315;
 import '../core/permissions/permissions.dart' as _i47;
 import '../core/services/crash_reporter.dart' as _i349;
 import '../core/services/firebase_crash_reporter.dart' as _i559;
+import '../core/services/services.dart' as _i113;
 import '../core/storage/firebase_storage_data_source.dart' as _i833;
 import '../core/storage/image_compressor.dart' as _i611;
 import '../core/storage/image_upload_compressor.dart' as _i620;
 import '../core/storage/storage.dart' as _i209;
 import '../core/storage/storage_data_source.dart' as _i904;
 import '../core/sync/data/repositories/drift_outbox_repository.dart' as _i170;
+import '../core/sync/data/repositories/drift_sync_cursor_repository.dart'
+    as _i152;
 import '../core/sync/domain/repositories/outbox_repository.dart' as _i234;
+import '../core/sync/domain/repositories/sync_cursor_repository.dart' as _i405;
+import '../core/sync/domain/sync_engine.dart' as _i292;
+import '../core/sync/domain/sync_pull_source.dart' as _i417;
+import '../core/sync/domain/sync_push_handler.dart' as _i17;
+import '../core/sync/domain/sync_retry_policy.dart' as _i158;
+import '../core/sync/domain/sync_scheduler.dart' as _i970;
 import '../core/sync/presentation/cubit/outbox_watcher_cubit.dart' as _i866;
 import '../features/audit_log/data/datasources/audit_log_data_source.dart'
     as _i432;
@@ -995,6 +1007,7 @@ import '../features/users/presentation/bloc/user_role_edit_bloc.dart' as _i698;
 import '../features/users/users.dart' as _i220;
 import 'injection_module.dart' as _i212;
 import 'offline_package_loaders_module.dart' as _i418;
+import 'sync_module.dart' as _i350;
 
 const String _dev = 'dev';
 const String _staging = 'staging';
@@ -1008,6 +1021,7 @@ extension GetItInjectableX on _i174.GetIt {
   }) {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final appInjectionModule = _$AppInjectionModule();
+    final syncModule = _$SyncModule();
     final offlinePackageLoadersModule = _$OfflinePackageLoadersModule();
     gh.factory<_i619.FavoriteLocalMapper>(
       () => const _i619.FavoriteLocalMapper(),
@@ -1025,7 +1039,17 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i558.FlutterSecureStorage>(
       () => appInjectionModule.secureStorage,
     );
+    gh.lazySingleton<_i895.Connectivity>(() => appInjectionModule.connectivity);
+    gh.lazySingleton<_i158.SyncRetryPolicy>(
+      () => appInjectionModule.syncRetryPolicy,
+    );
     gh.lazySingleton<_i935.AppDatabase>(() => appInjectionModule.appDatabase());
+    gh.lazySingleton<List<_i17.SyncPushHandler>>(
+      () => syncModule.syncPushHandlers,
+    );
+    gh.lazySingleton<List<_i417.SyncPullSource>>(
+      () => syncModule.syncPullSources,
+    );
     gh.lazySingleton<_i26.AuthUserMapper>(() => const _i26.AuthUserMapper());
     gh.lazySingleton<_i246.AuditLogEntryMapper>(
       () => const _i246.AuditLogEntryMapper(),
@@ -1288,6 +1312,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i960.ProductFormDraftDataSource>(
       () => const _i1033.SharedPreferencesProductFormDraftDataSource(),
     );
+    gh.lazySingleton<_i610.ConnectivityService>(
+      () => _i4.ConnectivityPlusService(gh<_i895.Connectivity>()),
+    );
     gh.factory<_i277.ResolveApplicableCampaignsUseCase>(
       () => _i277.ResolveApplicableCampaignsUseCase(
         gh<_i211.PromotionalCampaignRepository>(),
@@ -1407,6 +1434,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i244.SaveProductFormDraftUseCase(
         gh<_i459.ProductFormDraftRepository>(),
       ),
+    );
+    gh.lazySingleton<_i405.SyncCursorRepository>(
+      () => _i152.DriftSyncCursorRepository(gh<_i658.AppDatabase>()),
     );
     gh.factory<_i801.GetCommercialSizeGridDraftUseCase>(
       () => _i801.GetCommercialSizeGridDraftUseCase(
@@ -2263,6 +2293,17 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.lazySingleton<_i292.SyncEngine>(
+      () => _i292.SyncEngine(
+        gh<_i234.OutboxRepository>(),
+        gh<_i405.SyncCursorRepository>(),
+        gh<List<_i17.SyncPushHandler>>(),
+        gh<List<_i417.SyncPullSource>>(),
+        gh<_i202.AnalyticsService>(),
+        gh<_i113.CrashReporter>(),
+        retryPolicy: gh<_i158.SyncRetryPolicy>(),
+      ),
+    );
     gh.factory<_i986.SeasonListBloc>(
       () => _i986.SeasonListBloc(
         listSeasons: gh<_i722.ListSeasonsUseCase>(),
@@ -2405,6 +2446,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i801.UserProfileRepositoryImpl(
         dataSource: gh<_i668.UserProfileDataSource>(),
         mapper: gh<_i756.UserProfileMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i970.SyncScheduler>(
+      () => _i970.SyncScheduler(
+        gh<_i292.SyncEngine>(),
+        gh<_i610.ConnectivityService>(),
       ),
     );
     gh.factory<_i825.GetCustomerFormConfigUseCase>(
@@ -3105,5 +3152,7 @@ extension GetItInjectableX on _i174.GetIt {
 }
 
 class _$AppInjectionModule extends _i212.AppInjectionModule {}
+
+class _$SyncModule extends _i350.SyncModule {}
 
 class _$OfflinePackageLoadersModule extends _i418.OfflinePackageLoadersModule {}

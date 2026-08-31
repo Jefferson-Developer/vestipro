@@ -17,6 +17,7 @@ import 'tables/product_search_index_table.dart';
 import 'tables/product_variants_table.dart';
 import 'tables/products_table.dart';
 import 'tables/size_grids_table.dart';
+import 'tables/sync_cursors_table.dart';
 import 'tables/targets_table.dart';
 import 'tables/variant_stock_balances_table.dart';
 import 'tables/warehouses_table.dart';
@@ -73,6 +74,10 @@ class OrderWithItemsRow {
 /// operations pending synchronization (EPIC-14) — the sync engine
 /// (TASK-109) and Central de Sincronização (TASK-112) read/drain this same
 /// table rather than a second local database.
+/// TASK-109 adds [SyncCursorsTable], the per-entity incremental pull
+/// bookmark `SyncEngine.runPull` reads/writes so a sync cycle only fetches
+/// what changed since the last one instead of the whole remote collection
+/// again.
 @DriftDatabase(
   tables: [
     CustomersTable,
@@ -95,13 +100,14 @@ class OrderWithItemsRow {
     TargetsTable,
     OfflinePackageLoadStatusTable,
     OutboxTable,
+    SyncCursorsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 15;
+  int get schemaVersion => 16;
 
   @override
   MigrationStrategy get migration {
@@ -191,6 +197,11 @@ class AppDatabase extends _$AppDatabase {
           // TASK-108: fila local (Outbox) de operações offline pendentes de
           // sincronização.
           await migrator.createTable(outboxTable);
+        }
+        if (from < 16) {
+          // TASK-109: bookmark de cursor por entidade para o pull
+          // incremental do motor de sincronização.
+          await migrator.createTable(syncCursorsTable);
         }
       },
       beforeOpen: (details) async {
@@ -1365,6 +1376,49 @@ class AppDatabase extends _$AppDatabase {
         conflict: conflict,
       );
     });
+  }
+
+  // ---------------------------------------------------------------------
+  // Sync cursors (TASK-109, EPIC-14) — see [SyncCursorsTable] docs.
+  // ---------------------------------------------------------------------
+
+  /// Inserts or updates the incremental pull bookmark for
+  /// [organizationId]/[companyId]/[entityKind] — `SyncEngine.runPull` calls
+  /// this only after successfully applying every non-skipped record of a
+  /// page, never speculatively before.
+  Future<void> upsertSyncCursor({
+    required String organizationId,
+    required String companyId,
+    required String entityKind,
+    required String? cursorValue,
+    required DateTime updatedAt,
+  }) {
+    return into(syncCursorsTable).insertOnConflictUpdate(
+      SyncCursorsTableCompanion.insert(
+        organizationId: organizationId,
+        companyId: companyId,
+        entityKind: entityKind,
+        cursorValue: Value(cursorValue),
+        updatedAt: updatedAt,
+      ),
+    );
+  }
+
+  /// The current incremental pull bookmark for
+  /// [organizationId]/[companyId]/[entityKind], or `null` if this entity has
+  /// never been pulled incrementally yet for that scope.
+  Future<SyncCursorsTableData?> getSyncCursor({
+    required String organizationId,
+    required String companyId,
+    required String entityKind,
+  }) {
+    return (select(syncCursorsTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.companyId.equals(companyId) &
+              row.entityKind.equals(entityKind),
+        ))
+        .getSingleOrNull();
   }
 }
 

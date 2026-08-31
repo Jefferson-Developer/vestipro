@@ -65,6 +65,17 @@ final class AnalyticsEvents {
   static const String catalogShareCreated = 'catalog_share_created';
   static const String catalogShareOpened = 'catalog_share_opened';
 
+  /// Logged once per `SyncEngine.runPush` call (TASK-109, EPIC-14) — the
+  /// Outbox drain pass — with `attempted`/`synced`/`failed`/`conflicts`/
+  /// `duration_ms` parameters, feeding the "métricas de sincronização"
+  /// required by seção 14 de `tasks.md`.
+  static const String syncPushCompleted = 'sync_push_completed';
+
+  /// Logged once per `SyncEngine.runPull` call (TASK-109, EPIC-14) — the
+  /// incremental pull pass — with `sources_processed`/`sources_failed`/
+  /// `applied`/`skipped`/`rejected_cross_tenant`/`duration_ms` parameters.
+  static const String syncPullCompleted = 'sync_pull_completed';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -117,5 +128,7 @@ final class AnalyticsEvents {
     campaignProductClicked,
     catalogShareCreated,
     catalogShareOpened,
+    syncPushCompleted,
+    syncPullCompleted,
   ];
 }
