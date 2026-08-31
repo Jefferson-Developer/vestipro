@@ -215,7 +215,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-104 — Implementar histórico e duplicação de pedido](TASK-104-implementar-historico-e-duplicacao-de-pedido.md) — Flutter Senior + Front-end
 
 ### EPIC-14 — Offline e Sincronização
-- [ ] [TASK-105 — Criar ADR de banco local (Drift vs. Isar)](TASK-105-criar-adr-de-banco-local.md) — Flutter Senior
+- [x] [TASK-105 — Criar ADR de banco local (Drift vs. Isar)](TASK-105-criar-adr-de-banco-local.md) — Flutter Senior
 - [ ] [TASK-106 — Modelar schema local (Drift)](TASK-106-modelar-schema-local-drift.md) — Flutter Senior
 - [ ] [TASK-107 — Criar pacote de carga offline](TASK-107-criar-pacote-de-carga-offline.md) — Flutter Senior
 - [ ] [TASK-108 — Implementar Outbox](TASK-108-implementar-outbox.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 104 / 220 tasks concluídas.
+**Progresso:** 105 / 220 tasks concluídas.
