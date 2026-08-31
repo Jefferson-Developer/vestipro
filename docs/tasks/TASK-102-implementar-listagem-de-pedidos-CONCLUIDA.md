@@ -280,7 +280,7 @@ Não realizado — autorização desta rodada é apenas para commit local, confo
 explícita do usuário.
 
 ## Hash do commit
-Preenchido após a criação do commit (ver mensagem final da execução).
+`9231ad3`
 
 ## Branch
 `main` (mesma branch corrente do repositório; nenhuma branch nova foi criada).
