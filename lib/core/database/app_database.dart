@@ -1163,6 +1163,39 @@ class AppDatabase extends _$AppDatabase {
         .get();
   }
 
+  /// Single Target row by [id], scoped to [organizationId] for
+  /// defense-in-depth even though [id] is already globally unique — the
+  /// achievement dashboard (TASK-116) reads only [TargetsTableData.
+  /// achievedValueCache]/[TargetsTableData.updatedAt] from it, the
+  /// server-computed snapshot [TargetsTable] docs describe, never a
+  /// client-side sum of raw order documents.
+  Future<TargetsTableData?> getTargetById({
+    required String organizationId,
+    required String id,
+  }) {
+    return (select(targetsTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) & row.id.equals(id),
+        ))
+        .getSingleOrNull();
+  }
+
+  /// Same as [getTargetById] but reactive: emits again whenever a future
+  /// sync task overwrites this Target's row (e.g. a fresher
+  /// `achievedValueCache` after a pull) — the near-real-time refresh
+  /// `TargetAchievementRepository.watchForTarget` (TASK-116) is built on,
+  /// without polling.
+  Stream<TargetsTableData?> watchTargetById({
+    required String organizationId,
+    required String id,
+  }) {
+    return (select(targetsTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) & row.id.equals(id),
+        ))
+        .watchSingleOrNull();
+  }
+
   // ---------------------------------------------------------------------
   // Offline package load status (TASK-107)
   // ---------------------------------------------------------------------

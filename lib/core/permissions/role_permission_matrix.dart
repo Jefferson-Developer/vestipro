@@ -52,6 +52,9 @@ abstract final class RolePermissionMatrix {
     // TASK-115: SALES_MANAGER cadastra/edita metas para sua equipe; OWNER
     // and ADMIN already get it via the full/near-full capability set above.
     Capability.targetManage,
+    // TASK-116: SALES_MANAGER acompanha o dashboard de atingimento da
+    // própria meta e da equipe.
+    Capability.targetView,
   };
 
   static const Set<Capability> _salesRepCapabilities = <Capability>{
@@ -65,6 +68,9 @@ abstract final class RolePermissionMatrix {
     Capability.opportunityManage,
     Capability.orderCreate,
     Capability.orderView,
+    // TASK-116: SALES_REP acompanha o dashboard de atingimento da própria
+    // meta.
+    Capability.targetView,
   };
 
   static const Set<Capability> _salesAssistantCapabilities = <Capability>{

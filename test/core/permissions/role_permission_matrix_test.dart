@@ -246,6 +246,38 @@ void main() {
       }
     });
 
+    test('OWNER/ADMIN/SALES_MANAGER/SALES_REP can view the achievement '
+        'dashboard (TASK-116); SALES_ASSISTANT/FINANCE/READ_ONLY cannot', () {
+      for (final role in <SystemRoleName>[
+        SystemRoleName.owner,
+        SystemRoleName.admin,
+        SystemRoleName.salesManager,
+        SystemRoleName.salesRep,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.targetView),
+          isTrue,
+          reason: '$role must be able to view the achievement dashboard.',
+        );
+      }
+
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesAssistant,
+        SystemRoleName.finance,
+        SystemRoleName.readOnly,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.targetView),
+          isFalse,
+          reason: '$role must never view the achievement dashboard.',
+        );
+      }
+    });
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,

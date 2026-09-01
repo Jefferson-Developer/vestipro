@@ -57,6 +57,7 @@ void main() {
           'catalog_share_opened',
           'target_created',
           'target_updated',
+          'target_dashboard_viewed',
           'sync_push_completed',
           'sync_pull_completed',
           'sync_center_opened',

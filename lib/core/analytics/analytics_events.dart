@@ -70,6 +70,12 @@ final class AnalyticsEvents {
   static const String targetCreated = 'target_created';
   static const String targetUpdated = 'target_updated';
 
+  /// Logged by `TargetDashboardCubit` (TASK-116, EPIC-15) once per dimension
+  /// the caller navigates the achievement dashboard to (never once per
+  /// realtime achievement tick — that would flood the taxonomy on every
+  /// sync).
+  static const String targetDashboardViewed = 'target_dashboard_viewed';
+
   /// Logged once per `SyncEngine.runPush` call (TASK-109, EPIC-14) — the
   /// Outbox drain pass — with `attempted`/`synced`/`failed`/`conflicts`/
   /// `duration_ms` parameters, feeding the "métricas de sincronização"
@@ -149,6 +155,7 @@ final class AnalyticsEvents {
     catalogShareOpened,
     targetCreated,
     targetUpdated,
+    targetDashboardViewed,
     syncPushCompleted,
     syncPullCompleted,
     syncCenterOpened,

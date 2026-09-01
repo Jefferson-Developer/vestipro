@@ -968,14 +968,22 @@ import '../features/settings/domain/usecases/submit_about_app_diagnostics_use_ca
     as _i226;
 import '../features/settings/presentation/bloc/about_app_bloc.dart' as _i398;
 import '../features/targets/data/mappers/target_mapper.dart' as _i730;
+import '../features/targets/data/repositories/drift_target_achievement_repository.dart'
+    as _i535;
 import '../features/targets/data/repositories/shared_preferences_target_repository.dart'
     as _i46;
+import '../features/targets/domain/repositories/target_achievement_repository.dart'
+    as _i154;
 import '../features/targets/domain/repositories/target_repository.dart'
     as _i876;
+import '../features/targets/domain/services/target_visibility_service.dart'
+    as _i951;
 import '../features/targets/domain/usecases/create_target_use_case.dart'
     as _i472;
 import '../features/targets/domain/usecases/update_target_use_case.dart'
     as _i604;
+import '../features/targets/presentation/cubit/target_dashboard_cubit.dart'
+    as _i293;
 import '../features/targets/presentation/cubit/target_form_cubit.dart' as _i998;
 import '../features/users/data/datasources/cloud_functions_user_access_data_source.dart'
     as _i605;
@@ -1526,6 +1534,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i814.ConflictRecordRepository>(
       () => _i566.DriftConflictRecordRepository(gh<_i658.AppDatabase>()),
+    );
+    gh.lazySingleton<_i154.TargetAchievementRepository>(
+      () => _i535.DriftTargetAchievementRepository(gh<_i658.AppDatabase>()),
     );
     gh.lazySingleton<_i799.OfflinePackageStatusRepository>(
       () => _i963.DriftOfflinePackageStatusRepository(gh<_i658.AppDatabase>()),
@@ -2880,6 +2891,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i265.TeamRepository>(),
       ),
     );
+    gh.factory<_i951.TargetVisibilityService>(
+      () => _i951.TargetVisibilityService(
+        gh<_i220.PortfolioVisibilityService>(),
+        gh<_i265.TeamRepository>(),
+      ),
+    );
     gh.factory<_i516.TeamFormBloc>(
       () => _i516.TeamFormBloc(
         listOrganizationUsers: gh<_i93.ListOrganizationUsersUseCase>(),
@@ -3077,6 +3094,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i325.CustomerOfflinePackageEntityLoader>(),
         gh<_i1044.PriceListOfflinePackageEntityLoader>(),
         gh<_i898.PaymentTermOfflinePackageEntityLoader>(),
+      ),
+    );
+    gh.factory<_i293.TargetDashboardCubit>(
+      () => _i293.TargetDashboardCubit(
+        gh<_i951.TargetVisibilityService>(),
+        gh<_i876.TargetRepository>(),
+        gh<_i154.TargetAchievementRepository>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i339.OrderApprovalQueueBloc>(

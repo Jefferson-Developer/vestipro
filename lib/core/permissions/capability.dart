@@ -54,6 +54,15 @@ enum Capability {
   /// `tasks.md`/TASK-115 describes has no `OrganizationSettings` toggle to
   /// read yet; revisit this capability's scope once that setting exists.
   targetManage,
+
+  /// View the achievement dashboard (TASK-116, EPIC-15) for at least one
+  /// dimension — never by itself which dimension: a `SALES_REP` holding
+  /// this only ever sees their own `salesRep` dimension, a `SALES_MANAGER`
+  /// their own plus their teams', resolved by `TargetVisibilityService`,
+  /// never by this capability alone. Gates whether the dashboard page is
+  /// reachable at all, the same two-layer shape `Capability.orderView` +
+  /// `OrderVisibilityService` already use for Order.
+  targetView,
 }
 
 extension CapabilityCode on Capability {
@@ -96,6 +105,7 @@ extension CapabilityCode on Capability {
       Capability.reportViewSensitive => 'report.viewSensitive',
       Capability.auditLogView => 'audit.log.view',
       Capability.targetManage => 'target.manage',
+      Capability.targetView => 'target.view',
     };
   }
 }
