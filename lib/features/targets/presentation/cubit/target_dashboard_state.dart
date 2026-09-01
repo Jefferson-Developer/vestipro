@@ -1,6 +1,7 @@
 import '../../domain/entities/target.dart';
 import '../../domain/entities/target_progress_view_model.dart';
 import '../../domain/entities/target_visibility_filter.dart';
+import '../../domain/services/closing_projection_service.dart';
 import '../../domain/value_objects/target_dimension_type.dart';
 import '../../domain/value_objects/target_metric_type.dart';
 
@@ -42,6 +43,7 @@ final class TargetDashboardState {
     this.candidates = const <Target>[],
     this.selectedTarget,
     this.progress,
+    this.closingProjection,
     this.failureMessage,
   });
 
@@ -63,6 +65,12 @@ final class TargetDashboardState {
   final List<Target> candidates;
   final Target? selectedTarget;
   final TargetProgressViewModel? progress;
+
+  /// Estimated closing result for [selectedTarget]'s period (TASK-119),
+  /// computed by `ClosingProjectionService` from this same [progress] — kept
+  /// alongside it (never separately re-derived) so the two numbers can never
+  /// disagree.
+  final ClosingProjectionResult? closingProjection;
   final String? failureMessage;
 
   /// Whether the caller may switch [dimensionType]/[dimensionId] at all — a
@@ -88,6 +96,8 @@ final class TargetDashboardState {
     bool clearSelectedTarget = false,
     TargetProgressViewModel? progress,
     bool clearProgress = false,
+    ClosingProjectionResult? closingProjection,
+    bool clearClosingProjection = false,
     String? failureMessage,
     bool clearFailureMessage = false,
   }) {
@@ -105,6 +115,9 @@ final class TargetDashboardState {
           ? null
           : (selectedTarget ?? this.selectedTarget),
       progress: clearProgress ? null : (progress ?? this.progress),
+      closingProjection: clearClosingProjection
+          ? null
+          : (closingProjection ?? this.closingProjection),
       failureMessage: clearFailureMessage
           ? null
           : (failureMessage ?? this.failureMessage),

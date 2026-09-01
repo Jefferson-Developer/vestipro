@@ -980,6 +980,9 @@ import '../features/targets/domain/repositories/target_achievement_repository.da
     as _i154;
 import '../features/targets/domain/repositories/target_repository.dart'
     as _i876;
+import '../features/targets/domain/services/closing_projection_service.dart'
+    as _i862;
+import '../features/targets/domain/services/projection_strategy.dart' as _i307;
 import '../features/targets/domain/services/ranking_calculation_service.dart'
     as _i444;
 import '../features/targets/domain/services/ranking_peer_resolver_service.dart'
@@ -1274,6 +1277,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i172.WarehouseLocalMapper>(
       () => _i172.WarehouseLocalMapper(gh<_i678.WarehouseMapper>()),
+    );
+    gh.factory<_i307.ProjectionStrategy>(
+      () => const _i307.LinearProjectionStrategy(),
+    );
+    gh.factory<_i862.ClosingProjectionService>(
+      () => _i862.ClosingProjectionService(
+        strategy: gh<_i307.ProjectionStrategy>(),
+      ),
     );
     gh.lazySingleton<_i999.CustomerFormDraftRepository>(
       () => _i920.CustomerFormDraftRepositoryImpl(
@@ -3114,6 +3125,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i293.TargetDashboardCubit>(
+      () => _i293.TargetDashboardCubit(
+        gh<_i951.TargetVisibilityService>(),
+        gh<_i876.TargetRepository>(),
+        gh<_i154.TargetAchievementRepository>(),
+        gh<_i202.AnalyticsService>(),
+        gh<_i862.ClosingProjectionService>(),
+      ),
+    );
     gh.factory<_i125.OrderHistoryBloc>(
       () => _i125.OrderHistoryBloc(
         getOrderById: gh<_i1062.GetOrderByIdUseCase>(),
@@ -3149,14 +3169,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i325.CustomerOfflinePackageEntityLoader>(),
         gh<_i1044.PriceListOfflinePackageEntityLoader>(),
         gh<_i898.PaymentTermOfflinePackageEntityLoader>(),
-      ),
-    );
-    gh.factory<_i293.TargetDashboardCubit>(
-      () => _i293.TargetDashboardCubit(
-        gh<_i951.TargetVisibilityService>(),
-        gh<_i876.TargetRepository>(),
-        gh<_i154.TargetAchievementRepository>(),
-        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i339.OrderApprovalQueueBloc>(

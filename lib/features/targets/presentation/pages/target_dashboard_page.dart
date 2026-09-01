@@ -9,6 +9,7 @@ import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
 import '../../domain/entities/target.dart';
 import '../../domain/entities/target_progress_view_model.dart';
+import '../../domain/services/closing_projection_service.dart';
 import '../../domain/value_objects/target_dimension_type.dart';
 import '../../domain/value_objects/target_metric_type.dart';
 import '../cubit/target_dashboard_cubit.dart';
@@ -334,6 +335,11 @@ class _TargetDashboardBody extends StatelessWidget {
             runSpacing: AppSpacing.spacing16,
             children: _kpiCards(target, progress),
           ),
+          const SizedBox(height: AppSpacing.spacing16),
+          _ClosingProjectionCard(
+            target: target,
+            projection: state.closingProjection,
+          ),
           const SizedBox(height: AppSpacing.spacing24),
           Text(
             'Este gráfico responde: estou no ritmo para bater a meta deste '
@@ -439,5 +445,120 @@ class _TargetDashboardBody extends StatelessWidget {
         ],
       ),
     ];
+  }
+}
+
+/// Closing-result estimate (TASK-119, EPIC-15), shown right after the
+/// achievement KPI cards. Always labeled "Projeção"/"estimativa" and styled
+/// distinctly (italicized, muted color) from `Realizado`'s solid headline in
+/// `_kpiCards` above — the value must never be mistaken for what actually
+/// happened. The methodology text ([ClosingProjectionResult
+/// .methodologyDescription]) is always rendered next to the number, per the
+/// "nunca uma caixa preta" rule (`docs/architecture/closing-projection-methodology.md`).
+class _ClosingProjectionCard extends StatelessWidget {
+  const _ClosingProjectionCard({
+    required this.target,
+    required this.projection,
+  });
+
+  final Target target;
+  final ClosingProjectionResult? projection;
+
+  @override
+  Widget build(BuildContext context) {
+    final result = projection;
+    if (result == null) return const SizedBox.shrink();
+
+    final colors = context.colors;
+    final currencyOrCount = target.metricType == TargetMetricType.revenue
+        ? _currencyFormat.format
+        : (double value) => value.toStringAsFixed(0);
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.spacing16),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.radius16),
+        border: Border.all(color: colors.outline.withValues(alpha: 0.16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Icon(
+                Icons.query_stats,
+                size: AppIconSizes.lg,
+                color: colors.outline,
+              ),
+              const SizedBox(width: AppSpacing.spacing8),
+              const Expanded(
+                child: Text(
+                  'Projeção de fechamento (estimativa)',
+                  style: AppTypography.labelLarge,
+                ),
+              ),
+              if (result.isFinalResult)
+                const AppStatusBadge(
+                  label: 'Período encerrado',
+                  variant: AppStatusBadgeVariant.neutral,
+                  icon: Icons.flag_outlined,
+                )
+              else if (result.isLowConfidence)
+                const AppStatusBadge(
+                  label: 'Baixa confiabilidade',
+                  variant: AppStatusBadgeVariant.warning,
+                  icon: Icons.warning_amber_outlined,
+                ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.spacing12),
+          Text(
+            'Estimativa: ${currencyOrCount(result.projectedValue)}',
+            style: AppTypography.headlineMedium.copyWith(
+              color: colors.outline,
+              fontStyle: FontStyle.italic,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.spacing4),
+          Row(
+            children: <Widget>[
+              Icon(
+                result.isAboveTarget ? Icons.trending_up : Icons.trending_down,
+                size: AppIconSizes.sm,
+                color: result.isAboveTarget ? colors.success : colors.error,
+              ),
+              const SizedBox(width: AppSpacing.spacing4),
+              Flexible(
+                child: Text(
+                  result.isAboveTarget
+                      ? 'Projeção acima da meta '
+                            '(${result.projectedAchievementPercentage.toStringAsFixed(1)}%)'
+                      : 'Projeção abaixo da meta '
+                            '(${result.projectedAchievementPercentage.toStringAsFixed(1)}%)',
+                  style: AppTypography.labelMedium.copyWith(
+                    color: result.isAboveTarget ? colors.success : colors.error,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.spacing8),
+          Text(
+            'Metodologia: ${result.methodologyDescription}',
+            style: AppTypography.bodySmall.copyWith(color: colors.outline),
+          ),
+          if (result.isLowConfidence) ...<Widget>[
+            const SizedBox(height: AppSpacing.spacing4),
+            Text(
+              'Poucos dias decorridos neste período — esta projeção ainda '
+              'tem baixa confiabilidade e pode mudar bastante conforme mais '
+              'vendas forem registradas.',
+              style: AppTypography.bodySmall.copyWith(color: colors.warning),
+            ),
+          ],
+        ],
+      ),
+    );
   }
 }

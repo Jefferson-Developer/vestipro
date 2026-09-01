@@ -11,6 +11,7 @@ import '../../domain/entities/target_progress_view_model.dart';
 import '../../domain/entities/target_visibility_filter.dart';
 import '../../domain/repositories/target_achievement_repository.dart';
 import '../../domain/repositories/target_repository.dart';
+import '../../domain/services/closing_projection_service.dart';
 import '../../domain/services/target_visibility_service.dart';
 import '../../domain/value_objects/target_dimension_type.dart';
 import '../../domain/value_objects/target_metric_type.dart';
@@ -24,7 +25,9 @@ import 'target_dashboard_state.dart';
 /// period's near-real-time achievement snapshot
 /// (`TargetAchievementRepository.watchForTarget`), recomputing
 /// `TargetProgressViewModel.compute` — the only place gap/atingimento/
-/// projeção are calculated — on every tick.
+/// projeção are calculated — on every tick, and then `ClosingProjectionService`
+/// (TASK-119) from that same view model so the closing estimate can never
+/// disagree with it.
 @injectable
 final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
   TargetDashboardCubit(
@@ -32,12 +35,14 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
     this._targetRepository,
     this._achievementRepository,
     this._analyticsService,
+    this._closingProjectionService,
   ) : super(const TargetDashboardState());
 
   final TargetVisibilityService _visibilityService;
   final TargetRepository _targetRepository;
   final TargetAchievementRepository _achievementRepository;
   final AnalyticsService _analyticsService;
+  final ClosingProjectionService _closingProjectionService;
 
   StreamSubscription<TargetAchievementSnapshot>? _achievementSubscription;
 
@@ -119,6 +124,7 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
           candidates: const <Target>[],
           clearSelectedTarget: true,
           clearProgress: true,
+          clearClosingProjection: true,
         ),
       );
       return;
@@ -175,6 +181,7 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
               status: TargetDashboardStatus.empty,
               clearSelectedTarget: true,
               clearProgress: true,
+              clearClosingProjection: true,
             ),
           );
           return;
@@ -193,6 +200,7 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
         status: TargetDashboardStatus.loading,
         selectedTarget: target,
         clearProgress: true,
+        clearClosingProjection: true,
       ),
     );
 
@@ -223,6 +231,7 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
         state.copyWith(
           status: TargetDashboardStatus.notCalculated,
           clearProgress: true,
+          clearClosingProjection: true,
         ),
       );
       return;
@@ -234,8 +243,13 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
       calculatedAt: snapshot.calculatedAt,
       now: DateTime.now().toUtc(),
     );
+    final closingProjection = _closingProjectionService.compute(progress);
     emit(
-      state.copyWith(status: TargetDashboardStatus.ready, progress: progress),
+      state.copyWith(
+        status: TargetDashboardStatus.ready,
+        progress: progress,
+        closingProjection: closingProjection,
+      ),
     );
   }
 

@@ -79,6 +79,7 @@ void main() {
         targetRepository,
         achievementRepository,
         FakeAnalyticsService(),
+        const ClosingProjectionService(),
       ),
     );
   }
@@ -124,7 +125,13 @@ void main() {
     expect(find.widgetWithText(AppKpiCard, 'Realizado'), findsOneWidget);
     expect(find.widgetWithText(AppKpiCard, 'Gap para a meta'), findsOneWidget);
     expect(find.widgetWithText(AppKpiCard, 'Atingimento'), findsOneWidget);
-    expect(find.textContaining('40.0%'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.widgetWithText(AppKpiCard, 'Atingimento'),
+        matching: find.textContaining('40.0%'),
+      ),
+      findsOneWidget,
+    );
   });
 
   testWidgets(
@@ -236,7 +243,13 @@ void main() {
     await pumpApp(tester, buildPage());
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('10.0%'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.widgetWithText(AppKpiCard, 'Atingimento'),
+        matching: find.textContaining('10.0%'),
+      ),
+      findsOneWidget,
+    );
 
     achievementRepository.emit(
       'target-1',
@@ -248,8 +261,124 @@ void main() {
     );
     await tester.pumpAndSettle();
 
-    expect(find.textContaining('90.0%'), findsOneWidget);
+    expect(
+      find.descendant(
+        of: find.widgetWithText(AppKpiCard, 'Atingimento'),
+        matching: find.textContaining('90.0%'),
+      ),
+      findsOneWidget,
+    );
   });
+
+  testWidgets(
+    'the closing projection (TASK-119) is always labeled as an estimate, '
+    'distinct from the realizado KPI card',
+    (tester) async {
+      stubMembership('rep-1', 'SALES_REP');
+      final now = DateTime.now().toUtc();
+      targetRepository.items.add(
+        _target(
+          id: 'target-1',
+          dimensionId: 'rep-1',
+          targetValue: 100000,
+          startDate: now.subtract(const Duration(days: 15)),
+          endDate: now.add(const Duration(days: 15)),
+        ),
+      );
+      achievementRepository.seed(
+        'target-1',
+        TargetAchievementSnapshot(
+          targetId: 'target-1',
+          realizedValue: 40000,
+          calculatedAt: now,
+        ),
+      );
+
+      await pumpApp(tester, buildPage());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Projeção de fechamento (estimativa)'), findsOneWidget);
+      expect(find.textContaining('Estimativa:'), findsOneWidget);
+      expect(find.widgetWithText(AppKpiCard, 'Realizado'), findsOneWidget);
+      // The estimate is never the same text node as the realized KPI value.
+      expect(
+        find.descendant(
+          of: find.widgetWithText(AppKpiCard, 'Realizado'),
+          matching: find.textContaining('Estimativa:'),
+        ),
+        findsNothing,
+      );
+    },
+  );
+
+  testWidgets('a period with fewer than 10% of its days elapsed shows the low-'
+      'confidence flag next to the projection', (tester) async {
+    stubMembership('rep-1', 'SALES_REP');
+    final now = DateTime.now().toUtc();
+    targetRepository.items.add(
+      _target(
+        id: 'target-1',
+        dimensionId: 'rep-1',
+        targetValue: 100000,
+        startDate: now.subtract(const Duration(hours: 1)),
+        endDate: now.add(const Duration(days: 365)),
+      ),
+    );
+    achievementRepository.seed(
+      'target-1',
+      TargetAchievementSnapshot(
+        targetId: 'target-1',
+        realizedValue: 500,
+        calculatedAt: now,
+      ),
+    );
+
+    await pumpApp(tester, buildPage());
+    await tester.pumpAndSettle();
+
+    expect(
+      find.widgetWithText(AppStatusBadge, 'Baixa confiabilidade'),
+      findsOneWidget,
+    );
+  });
+
+  testWidgets(
+    'an already-ended period shows the projection as the final result, not '
+    'a low-confidence estimate',
+    (tester) async {
+      stubMembership('rep-1', 'SALES_REP');
+      final now = DateTime.now().toUtc();
+      targetRepository.items.add(
+        _target(
+          id: 'target-1',
+          dimensionId: 'rep-1',
+          targetValue: 100000,
+          startDate: now.subtract(const Duration(days: 60)),
+          endDate: now.subtract(const Duration(days: 30)),
+        ),
+      );
+      achievementRepository.seed(
+        'target-1',
+        TargetAchievementSnapshot(
+          targetId: 'target-1',
+          realizedValue: 130000,
+          calculatedAt: now.subtract(const Duration(days: 30)),
+        ),
+      );
+
+      await pumpApp(tester, buildPage());
+      await tester.pumpAndSettle();
+
+      expect(
+        find.widgetWithText(AppStatusBadge, 'Período encerrado'),
+        findsOneWidget,
+      );
+      expect(
+        find.widgetWithText(AppStatusBadge, 'Baixa confiabilidade'),
+        findsNothing,
+      );
+    },
+  );
 }
 
 Target _target({
@@ -257,6 +386,8 @@ Target _target({
   required String dimensionId,
   double targetValue = 100000,
   TargetDimensionType dimensionType = TargetDimensionType.salesRep,
+  DateTime? startDate,
+  DateTime? endDate,
 }) {
   final now = DateTime.utc(2026, 1, 1);
   return Target(
@@ -266,8 +397,8 @@ Target _target({
     dimensionType: dimensionType,
     dimensionId: dimensionId,
     periodGranularity: TargetPeriodGranularity.monthly,
-    startDate: DateTime.utc(2026, 1, 1),
-    endDate: DateTime.utc(2026, 2, 1),
+    startDate: startDate ?? DateTime.utc(2026, 1, 1),
+    endDate: endDate ?? DateTime.utc(2026, 2, 1),
     metricType: TargetMetricType.revenue,
     targetValue: targetValue,
     currency: 'BRL',
