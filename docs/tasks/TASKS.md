@@ -226,7 +226,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-113 — Implementar indicador de conectividade](TASK-113-implementar-indicador-de-conectividade.md) — Flutter Senior + Front-end
 
 ### EPIC-15 — Metas e Performance Comercial
-- [ ] [TASK-114 — Modelar Target](TASK-114-modelar-target.md) — Flutter Senior
+- [x] [TASK-114 — Modelar Target](TASK-114-modelar-target.md) — Flutter Senior
 - [ ] [TASK-115 — Implementar cadastro de metas](TASK-115-implementar-cadastro-de-metas.md) — Flutter Senior + Front-end
 - [ ] [TASK-116 — Implementar dashboard de atingimento](TASK-116-implementar-dashboard-de-atingimento.md) — Flutter Senior + Front-end
 - [ ] [TASK-117 — Implementar positivação de carteira](TASK-117-implementar-positivacao-de-carteira.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 113 / 220 tasks concluídas.
+**Progresso:** 114 / 220 tasks concluídas.

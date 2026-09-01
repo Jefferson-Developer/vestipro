@@ -967,6 +967,7 @@ import '../features/settings/domain/usecases/search_about_app_notes_use_case.dar
 import '../features/settings/domain/usecases/submit_about_app_diagnostics_use_case.dart'
     as _i226;
 import '../features/settings/presentation/bloc/about_app_bloc.dart' as _i398;
+import '../features/targets/data/mappers/target_mapper.dart' as _i730;
 import '../features/users/data/datasources/cloud_functions_user_access_data_source.dart'
     as _i605;
 import '../features/users/data/datasources/cloud_functions_user_role_data_source.dart'
@@ -1151,6 +1152,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i370.AboutAppNotesMapper>(
       () => const _i370.AboutAppNotesMapper(),
     );
+    gh.lazySingleton<_i730.TargetMapper>(() => const _i730.TargetMapper());
     gh.lazySingleton<_i708.PortfolioAssignmentMapper>(
       () => const _i708.PortfolioAssignmentMapper(),
     );

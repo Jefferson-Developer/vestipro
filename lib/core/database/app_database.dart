@@ -84,6 +84,9 @@ class OrderWithItemsRow {
 /// could not resolve automatically, kept for TASK-111's manual resolution
 /// screen) and [ConflictAuditLogTable] (the local, append-only audit trail
 /// of every conflict resolution decision, automatic or manual).
+/// TASK-114 extends [TargetsTable] (created narrow by TASK-106) with the
+/// columns the full `Target` domain model (EPIC-15) needs — see that table's
+/// docs.
 @DriftDatabase(
   tables: [
     CustomersTable,
@@ -115,7 +118,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 17;
+  int get schemaVersion => 18;
 
   @override
   MigrationStrategy get migration {
@@ -216,6 +219,49 @@ class AppDatabase extends _$AppDatabase {
           // trilha de auditoria local de toda resolução de conflito.
           await migrator.createTable(conflictRecordsTable);
           await migrator.createTable(conflictAuditLogTable);
+        }
+        if (from < 18) {
+          // TASK-114: o placeholder estrutural de metas (TASK-106) ganha as
+          // colunas do modelo de domínio completo de `Target`. `ownerId`
+          // vira `dimensionId` (mesma coluna física, significado mais amplo:
+          // pode ser vendedor, equipe, empresa, coleção ou categoria).
+          //
+          // Guarded by an actual `PRAGMA table_info` read (rather than
+          // running unconditionally) because `migrator.createTable` always
+          // builds from *today's* `TargetsTable` Dart definition: a device
+          // jumping from a schema older than 13 straight to 18 already gets
+          // `dimension_id`/`dimension_type`/etc. for free from the `from <
+          // 13` branch's `createTable(targetsTable)` call above, so blindly
+          // renaming `owner_id` (which never existed on that device) or
+          // re-adding an already-present column here would fail the whole
+          // migration and could leave the local database unusable.
+          final targetColumns = await customSelect(
+            "PRAGMA table_info('targets')",
+          ).map((row) => row.read<String>('name')).get();
+
+          if (targetColumns.contains('owner_id') &&
+              !targetColumns.contains('dimension_id')) {
+            await migrator.renameColumn(
+              targetsTable,
+              'owner_id',
+              targetsTable.dimensionId,
+            );
+          }
+          if (!targetColumns.contains('dimension_type')) {
+            await migrator.addColumn(targetsTable, targetsTable.dimensionType);
+          }
+          if (!targetColumns.contains('period_granularity')) {
+            await migrator.addColumn(
+              targetsTable,
+              targetsTable.periodGranularity,
+            );
+          }
+          if (!targetColumns.contains('currency')) {
+            await migrator.addColumn(targetsTable, targetsTable.currency);
+          }
+          if (!targetColumns.contains('status')) {
+            await migrator.addColumn(targetsTable, targetsTable.status);
+          }
         }
       },
       beforeOpen: (details) async {
@@ -1070,9 +1116,9 @@ class AppDatabase extends _$AppDatabase {
   }
 
   // ---------------------------------------------------------------------
-  // TASK-106 — Targets ("metas", tasks.md seção 5.1) — structural
-  // placeholder ahead of TASK-114's full Target domain model, see
-  // [TargetsTable] docs.
+  // TASK-106/TASK-114 — Targets ("metas", tasks.md seção 5.1) — narrow
+  // structural cache (TASK-106) extended with the full Target domain
+  // model's columns (TASK-114), see [TargetsTable] docs.
   // ---------------------------------------------------------------------
 
   /// Replaces the full local Target set for [organizationId]/[companyId]

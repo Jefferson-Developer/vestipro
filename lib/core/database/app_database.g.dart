@@ -18904,16 +18904,27 @@ class $TargetsTableTable extends TargetsTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
-  static const VerificationMeta _ownerIdMeta = const VerificationMeta(
-    'ownerId',
+  static const VerificationMeta _dimensionIdMeta = const VerificationMeta(
+    'dimensionId',
   );
   @override
-  late final GeneratedColumn<String> ownerId = GeneratedColumn<String>(
-    'owner_id',
+  late final GeneratedColumn<String> dimensionId = GeneratedColumn<String>(
+    'dimension_id',
     aliasedName,
     false,
     type: DriftSqlType.string,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dimensionTypeMeta = const VerificationMeta(
+    'dimensionType',
+  );
+  @override
+  late final GeneratedColumn<String> dimensionType = GeneratedColumn<String>(
+    'dimension_type',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _periodStartMeta = const VerificationMeta(
     'periodStart',
@@ -18937,6 +18948,18 @@ class $TargetsTableTable extends TargetsTable
     type: DriftSqlType.dateTime,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _periodGranularityMeta = const VerificationMeta(
+    'periodGranularity',
+  );
+  @override
+  late final GeneratedColumn<String> periodGranularity =
+      GeneratedColumn<String>(
+        'period_granularity',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
   static const VerificationMeta _metricMeta = const VerificationMeta('metric');
   @override
   late final GeneratedColumn<String> metric = GeneratedColumn<String>(
@@ -18956,6 +18979,26 @@ class $TargetsTableTable extends TargetsTable
     false,
     type: DriftSqlType.double,
     requiredDuringInsert: true,
+  );
+  static const VerificationMeta _currencyMeta = const VerificationMeta(
+    'currency',
+  );
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+    'currency',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
   );
   static const VerificationMeta _achievedValueCacheMeta =
       const VerificationMeta('achievedValueCache');
@@ -19050,11 +19093,15 @@ class $TargetsTableTable extends TargetsTable
     id,
     organizationId,
     companyId,
-    ownerId,
+    dimensionId,
+    dimensionType,
     periodStart,
     periodEnd,
+    periodGranularity,
     metric,
     targetValue,
+    currency,
+    status,
     achievedValueCache,
     createdAt,
     createdBy,
@@ -19100,13 +19147,25 @@ class $TargetsTableTable extends TargetsTable
     } else if (isInserting) {
       context.missing(_companyIdMeta);
     }
-    if (data.containsKey('owner_id')) {
+    if (data.containsKey('dimension_id')) {
       context.handle(
-        _ownerIdMeta,
-        ownerId.isAcceptableOrUnknown(data['owner_id']!, _ownerIdMeta),
+        _dimensionIdMeta,
+        dimensionId.isAcceptableOrUnknown(
+          data['dimension_id']!,
+          _dimensionIdMeta,
+        ),
       );
     } else if (isInserting) {
-      context.missing(_ownerIdMeta);
+      context.missing(_dimensionIdMeta);
+    }
+    if (data.containsKey('dimension_type')) {
+      context.handle(
+        _dimensionTypeMeta,
+        dimensionType.isAcceptableOrUnknown(
+          data['dimension_type']!,
+          _dimensionTypeMeta,
+        ),
+      );
     }
     if (data.containsKey('period_start')) {
       context.handle(
@@ -19127,6 +19186,15 @@ class $TargetsTableTable extends TargetsTable
     } else if (isInserting) {
       context.missing(_periodEndMeta);
     }
+    if (data.containsKey('period_granularity')) {
+      context.handle(
+        _periodGranularityMeta,
+        periodGranularity.isAcceptableOrUnknown(
+          data['period_granularity']!,
+          _periodGranularityMeta,
+        ),
+      );
+    }
     if (data.containsKey('metric')) {
       context.handle(
         _metricMeta,
@@ -19145,6 +19213,18 @@ class $TargetsTableTable extends TargetsTable
       );
     } else if (isInserting) {
       context.missing(_targetValueMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(
+        _currencyMeta,
+        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
     }
     if (data.containsKey('achieved_value_cache')) {
       context.handle(
@@ -19230,10 +19310,14 @@ class $TargetsTableTable extends TargetsTable
         DriftSqlType.string,
         data['${effectivePrefix}company_id'],
       )!,
-      ownerId: attachedDatabase.typeMapping.read(
+      dimensionId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
-        data['${effectivePrefix}owner_id'],
+        data['${effectivePrefix}dimension_id'],
       )!,
+      dimensionType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dimension_type'],
+      ),
       periodStart: attachedDatabase.typeMapping.read(
         DriftSqlType.dateTime,
         data['${effectivePrefix}period_start'],
@@ -19242,6 +19326,10 @@ class $TargetsTableTable extends TargetsTable
         DriftSqlType.dateTime,
         data['${effectivePrefix}period_end'],
       )!,
+      periodGranularity: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}period_granularity'],
+      ),
       metric: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}metric'],
@@ -19250,6 +19338,14 @@ class $TargetsTableTable extends TargetsTable
         DriftSqlType.double,
         data['${effectivePrefix}target_value'],
       )!,
+      currency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      ),
       achievedValueCache: attachedDatabase.typeMapping.read(
         DriftSqlType.double,
         data['${effectivePrefix}achieved_value_cache'],
@@ -19296,11 +19392,15 @@ class TargetsTableData extends DataClass
   final String id;
   final String organizationId;
   final String companyId;
-  final String ownerId;
+  final String dimensionId;
+  final String? dimensionType;
   final DateTime periodStart;
   final DateTime periodEnd;
+  final String? periodGranularity;
   final String metric;
   final double targetValue;
+  final String? currency;
+  final String? status;
   final double? achievedValueCache;
   final DateTime createdAt;
   final String createdBy;
@@ -19313,11 +19413,15 @@ class TargetsTableData extends DataClass
     required this.id,
     required this.organizationId,
     required this.companyId,
-    required this.ownerId,
+    required this.dimensionId,
+    this.dimensionType,
     required this.periodStart,
     required this.periodEnd,
+    this.periodGranularity,
     required this.metric,
     required this.targetValue,
+    this.currency,
+    this.status,
     this.achievedValueCache,
     required this.createdAt,
     required this.createdBy,
@@ -19333,11 +19437,23 @@ class TargetsTableData extends DataClass
     map['id'] = Variable<String>(id);
     map['organization_id'] = Variable<String>(organizationId);
     map['company_id'] = Variable<String>(companyId);
-    map['owner_id'] = Variable<String>(ownerId);
+    map['dimension_id'] = Variable<String>(dimensionId);
+    if (!nullToAbsent || dimensionType != null) {
+      map['dimension_type'] = Variable<String>(dimensionType);
+    }
     map['period_start'] = Variable<DateTime>(periodStart);
     map['period_end'] = Variable<DateTime>(periodEnd);
+    if (!nullToAbsent || periodGranularity != null) {
+      map['period_granularity'] = Variable<String>(periodGranularity);
+    }
     map['metric'] = Variable<String>(metric);
     map['target_value'] = Variable<double>(targetValue);
+    if (!nullToAbsent || currency != null) {
+      map['currency'] = Variable<String>(currency);
+    }
+    if (!nullToAbsent || status != null) {
+      map['status'] = Variable<String>(status);
+    }
     if (!nullToAbsent || achievedValueCache != null) {
       map['achieved_value_cache'] = Variable<double>(achievedValueCache);
     }
@@ -19358,11 +19474,23 @@ class TargetsTableData extends DataClass
       id: Value(id),
       organizationId: Value(organizationId),
       companyId: Value(companyId),
-      ownerId: Value(ownerId),
+      dimensionId: Value(dimensionId),
+      dimensionType: dimensionType == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dimensionType),
       periodStart: Value(periodStart),
       periodEnd: Value(periodEnd),
+      periodGranularity: periodGranularity == null && nullToAbsent
+          ? const Value.absent()
+          : Value(periodGranularity),
       metric: Value(metric),
       targetValue: Value(targetValue),
+      currency: currency == null && nullToAbsent
+          ? const Value.absent()
+          : Value(currency),
+      status: status == null && nullToAbsent
+          ? const Value.absent()
+          : Value(status),
       achievedValueCache: achievedValueCache == null && nullToAbsent
           ? const Value.absent()
           : Value(achievedValueCache),
@@ -19387,11 +19515,17 @@ class TargetsTableData extends DataClass
       id: serializer.fromJson<String>(json['id']),
       organizationId: serializer.fromJson<String>(json['organizationId']),
       companyId: serializer.fromJson<String>(json['companyId']),
-      ownerId: serializer.fromJson<String>(json['ownerId']),
+      dimensionId: serializer.fromJson<String>(json['dimensionId']),
+      dimensionType: serializer.fromJson<String?>(json['dimensionType']),
       periodStart: serializer.fromJson<DateTime>(json['periodStart']),
       periodEnd: serializer.fromJson<DateTime>(json['periodEnd']),
+      periodGranularity: serializer.fromJson<String?>(
+        json['periodGranularity'],
+      ),
       metric: serializer.fromJson<String>(json['metric']),
       targetValue: serializer.fromJson<double>(json['targetValue']),
+      currency: serializer.fromJson<String?>(json['currency']),
+      status: serializer.fromJson<String?>(json['status']),
       achievedValueCache: serializer.fromJson<double?>(
         json['achievedValueCache'],
       ),
@@ -19411,11 +19545,15 @@ class TargetsTableData extends DataClass
       'id': serializer.toJson<String>(id),
       'organizationId': serializer.toJson<String>(organizationId),
       'companyId': serializer.toJson<String>(companyId),
-      'ownerId': serializer.toJson<String>(ownerId),
+      'dimensionId': serializer.toJson<String>(dimensionId),
+      'dimensionType': serializer.toJson<String?>(dimensionType),
       'periodStart': serializer.toJson<DateTime>(periodStart),
       'periodEnd': serializer.toJson<DateTime>(periodEnd),
+      'periodGranularity': serializer.toJson<String?>(periodGranularity),
       'metric': serializer.toJson<String>(metric),
       'targetValue': serializer.toJson<double>(targetValue),
+      'currency': serializer.toJson<String?>(currency),
+      'status': serializer.toJson<String?>(status),
       'achievedValueCache': serializer.toJson<double?>(achievedValueCache),
       'createdAt': serializer.toJson<DateTime>(createdAt),
       'createdBy': serializer.toJson<String>(createdBy),
@@ -19431,11 +19569,15 @@ class TargetsTableData extends DataClass
     String? id,
     String? organizationId,
     String? companyId,
-    String? ownerId,
+    String? dimensionId,
+    Value<String?> dimensionType = const Value.absent(),
     DateTime? periodStart,
     DateTime? periodEnd,
+    Value<String?> periodGranularity = const Value.absent(),
     String? metric,
     double? targetValue,
+    Value<String?> currency = const Value.absent(),
+    Value<String?> status = const Value.absent(),
     Value<double?> achievedValueCache = const Value.absent(),
     DateTime? createdAt,
     String? createdBy,
@@ -19448,11 +19590,19 @@ class TargetsTableData extends DataClass
     id: id ?? this.id,
     organizationId: organizationId ?? this.organizationId,
     companyId: companyId ?? this.companyId,
-    ownerId: ownerId ?? this.ownerId,
+    dimensionId: dimensionId ?? this.dimensionId,
+    dimensionType: dimensionType.present
+        ? dimensionType.value
+        : this.dimensionType,
     periodStart: periodStart ?? this.periodStart,
     periodEnd: periodEnd ?? this.periodEnd,
+    periodGranularity: periodGranularity.present
+        ? periodGranularity.value
+        : this.periodGranularity,
     metric: metric ?? this.metric,
     targetValue: targetValue ?? this.targetValue,
+    currency: currency.present ? currency.value : this.currency,
+    status: status.present ? status.value : this.status,
     achievedValueCache: achievedValueCache.present
         ? achievedValueCache.value
         : this.achievedValueCache,
@@ -19471,15 +19621,25 @@ class TargetsTableData extends DataClass
           ? data.organizationId.value
           : this.organizationId,
       companyId: data.companyId.present ? data.companyId.value : this.companyId,
-      ownerId: data.ownerId.present ? data.ownerId.value : this.ownerId,
+      dimensionId: data.dimensionId.present
+          ? data.dimensionId.value
+          : this.dimensionId,
+      dimensionType: data.dimensionType.present
+          ? data.dimensionType.value
+          : this.dimensionType,
       periodStart: data.periodStart.present
           ? data.periodStart.value
           : this.periodStart,
       periodEnd: data.periodEnd.present ? data.periodEnd.value : this.periodEnd,
+      periodGranularity: data.periodGranularity.present
+          ? data.periodGranularity.value
+          : this.periodGranularity,
       metric: data.metric.present ? data.metric.value : this.metric,
       targetValue: data.targetValue.present
           ? data.targetValue.value
           : this.targetValue,
+      currency: data.currency.present ? data.currency.value : this.currency,
+      status: data.status.present ? data.status.value : this.status,
       achievedValueCache: data.achievedValueCache.present
           ? data.achievedValueCache.value
           : this.achievedValueCache,
@@ -19501,11 +19661,15 @@ class TargetsTableData extends DataClass
           ..write('id: $id, ')
           ..write('organizationId: $organizationId, ')
           ..write('companyId: $companyId, ')
-          ..write('ownerId: $ownerId, ')
+          ..write('dimensionId: $dimensionId, ')
+          ..write('dimensionType: $dimensionType, ')
           ..write('periodStart: $periodStart, ')
           ..write('periodEnd: $periodEnd, ')
+          ..write('periodGranularity: $periodGranularity, ')
           ..write('metric: $metric, ')
           ..write('targetValue: $targetValue, ')
+          ..write('currency: $currency, ')
+          ..write('status: $status, ')
           ..write('achievedValueCache: $achievedValueCache, ')
           ..write('createdAt: $createdAt, ')
           ..write('createdBy: $createdBy, ')
@@ -19523,11 +19687,15 @@ class TargetsTableData extends DataClass
     id,
     organizationId,
     companyId,
-    ownerId,
+    dimensionId,
+    dimensionType,
     periodStart,
     periodEnd,
+    periodGranularity,
     metric,
     targetValue,
+    currency,
+    status,
     achievedValueCache,
     createdAt,
     createdBy,
@@ -19544,11 +19712,15 @@ class TargetsTableData extends DataClass
           other.id == this.id &&
           other.organizationId == this.organizationId &&
           other.companyId == this.companyId &&
-          other.ownerId == this.ownerId &&
+          other.dimensionId == this.dimensionId &&
+          other.dimensionType == this.dimensionType &&
           other.periodStart == this.periodStart &&
           other.periodEnd == this.periodEnd &&
+          other.periodGranularity == this.periodGranularity &&
           other.metric == this.metric &&
           other.targetValue == this.targetValue &&
+          other.currency == this.currency &&
+          other.status == this.status &&
           other.achievedValueCache == this.achievedValueCache &&
           other.createdAt == this.createdAt &&
           other.createdBy == this.createdBy &&
@@ -19563,11 +19735,15 @@ class TargetsTableCompanion extends UpdateCompanion<TargetsTableData> {
   final Value<String> id;
   final Value<String> organizationId;
   final Value<String> companyId;
-  final Value<String> ownerId;
+  final Value<String> dimensionId;
+  final Value<String?> dimensionType;
   final Value<DateTime> periodStart;
   final Value<DateTime> periodEnd;
+  final Value<String?> periodGranularity;
   final Value<String> metric;
   final Value<double> targetValue;
+  final Value<String?> currency;
+  final Value<String?> status;
   final Value<double?> achievedValueCache;
   final Value<DateTime> createdAt;
   final Value<String> createdBy;
@@ -19581,11 +19757,15 @@ class TargetsTableCompanion extends UpdateCompanion<TargetsTableData> {
     this.id = const Value.absent(),
     this.organizationId = const Value.absent(),
     this.companyId = const Value.absent(),
-    this.ownerId = const Value.absent(),
+    this.dimensionId = const Value.absent(),
+    this.dimensionType = const Value.absent(),
     this.periodStart = const Value.absent(),
     this.periodEnd = const Value.absent(),
+    this.periodGranularity = const Value.absent(),
     this.metric = const Value.absent(),
     this.targetValue = const Value.absent(),
+    this.currency = const Value.absent(),
+    this.status = const Value.absent(),
     this.achievedValueCache = const Value.absent(),
     this.createdAt = const Value.absent(),
     this.createdBy = const Value.absent(),
@@ -19600,11 +19780,15 @@ class TargetsTableCompanion extends UpdateCompanion<TargetsTableData> {
     required String id,
     required String organizationId,
     required String companyId,
-    required String ownerId,
+    required String dimensionId,
+    this.dimensionType = const Value.absent(),
     required DateTime periodStart,
     required DateTime periodEnd,
+    this.periodGranularity = const Value.absent(),
     required String metric,
     required double targetValue,
+    this.currency = const Value.absent(),
+    this.status = const Value.absent(),
     this.achievedValueCache = const Value.absent(),
     required DateTime createdAt,
     required String createdBy,
@@ -19617,7 +19801,7 @@ class TargetsTableCompanion extends UpdateCompanion<TargetsTableData> {
   }) : id = Value(id),
        organizationId = Value(organizationId),
        companyId = Value(companyId),
-       ownerId = Value(ownerId),
+       dimensionId = Value(dimensionId),
        periodStart = Value(periodStart),
        periodEnd = Value(periodEnd),
        metric = Value(metric),
@@ -19632,11 +19816,15 @@ class TargetsTableCompanion extends UpdateCompanion<TargetsTableData> {
     Expression<String>? id,
     Expression<String>? organizationId,
     Expression<String>? companyId,
-    Expression<String>? ownerId,
+    Expression<String>? dimensionId,
+    Expression<String>? dimensionType,
     Expression<DateTime>? periodStart,
     Expression<DateTime>? periodEnd,
+    Expression<String>? periodGranularity,
     Expression<String>? metric,
     Expression<double>? targetValue,
+    Expression<String>? currency,
+    Expression<String>? status,
     Expression<double>? achievedValueCache,
     Expression<DateTime>? createdAt,
     Expression<String>? createdBy,
@@ -19651,11 +19839,15 @@ class TargetsTableCompanion extends UpdateCompanion<TargetsTableData> {
       if (id != null) 'id': id,
       if (organizationId != null) 'organization_id': organizationId,
       if (companyId != null) 'company_id': companyId,
-      if (ownerId != null) 'owner_id': ownerId,
+      if (dimensionId != null) 'dimension_id': dimensionId,
+      if (dimensionType != null) 'dimension_type': dimensionType,
       if (periodStart != null) 'period_start': periodStart,
       if (periodEnd != null) 'period_end': periodEnd,
+      if (periodGranularity != null) 'period_granularity': periodGranularity,
       if (metric != null) 'metric': metric,
       if (targetValue != null) 'target_value': targetValue,
+      if (currency != null) 'currency': currency,
+      if (status != null) 'status': status,
       if (achievedValueCache != null)
         'achieved_value_cache': achievedValueCache,
       if (createdAt != null) 'created_at': createdAt,
@@ -19673,11 +19865,15 @@ class TargetsTableCompanion extends UpdateCompanion<TargetsTableData> {
     Value<String>? id,
     Value<String>? organizationId,
     Value<String>? companyId,
-    Value<String>? ownerId,
+    Value<String>? dimensionId,
+    Value<String?>? dimensionType,
     Value<DateTime>? periodStart,
     Value<DateTime>? periodEnd,
+    Value<String?>? periodGranularity,
     Value<String>? metric,
     Value<double>? targetValue,
+    Value<String?>? currency,
+    Value<String?>? status,
     Value<double?>? achievedValueCache,
     Value<DateTime>? createdAt,
     Value<String>? createdBy,
@@ -19692,11 +19888,15 @@ class TargetsTableCompanion extends UpdateCompanion<TargetsTableData> {
       id: id ?? this.id,
       organizationId: organizationId ?? this.organizationId,
       companyId: companyId ?? this.companyId,
-      ownerId: ownerId ?? this.ownerId,
+      dimensionId: dimensionId ?? this.dimensionId,
+      dimensionType: dimensionType ?? this.dimensionType,
       periodStart: periodStart ?? this.periodStart,
       periodEnd: periodEnd ?? this.periodEnd,
+      periodGranularity: periodGranularity ?? this.periodGranularity,
       metric: metric ?? this.metric,
       targetValue: targetValue ?? this.targetValue,
+      currency: currency ?? this.currency,
+      status: status ?? this.status,
       achievedValueCache: achievedValueCache ?? this.achievedValueCache,
       createdAt: createdAt ?? this.createdAt,
       createdBy: createdBy ?? this.createdBy,
@@ -19721,8 +19921,11 @@ class TargetsTableCompanion extends UpdateCompanion<TargetsTableData> {
     if (companyId.present) {
       map['company_id'] = Variable<String>(companyId.value);
     }
-    if (ownerId.present) {
-      map['owner_id'] = Variable<String>(ownerId.value);
+    if (dimensionId.present) {
+      map['dimension_id'] = Variable<String>(dimensionId.value);
+    }
+    if (dimensionType.present) {
+      map['dimension_type'] = Variable<String>(dimensionType.value);
     }
     if (periodStart.present) {
       map['period_start'] = Variable<DateTime>(periodStart.value);
@@ -19730,11 +19933,20 @@ class TargetsTableCompanion extends UpdateCompanion<TargetsTableData> {
     if (periodEnd.present) {
       map['period_end'] = Variable<DateTime>(periodEnd.value);
     }
+    if (periodGranularity.present) {
+      map['period_granularity'] = Variable<String>(periodGranularity.value);
+    }
     if (metric.present) {
       map['metric'] = Variable<String>(metric.value);
     }
     if (targetValue.present) {
       map['target_value'] = Variable<double>(targetValue.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
     }
     if (achievedValueCache.present) {
       map['achieved_value_cache'] = Variable<double>(achievedValueCache.value);
@@ -19772,11 +19984,15 @@ class TargetsTableCompanion extends UpdateCompanion<TargetsTableData> {
           ..write('id: $id, ')
           ..write('organizationId: $organizationId, ')
           ..write('companyId: $companyId, ')
-          ..write('ownerId: $ownerId, ')
+          ..write('dimensionId: $dimensionId, ')
+          ..write('dimensionType: $dimensionType, ')
           ..write('periodStart: $periodStart, ')
           ..write('periodEnd: $periodEnd, ')
+          ..write('periodGranularity: $periodGranularity, ')
           ..write('metric: $metric, ')
           ..write('targetValue: $targetValue, ')
+          ..write('currency: $currency, ')
+          ..write('status: $status, ')
           ..write('achievedValueCache: $achievedValueCache, ')
           ..write('createdAt: $createdAt, ')
           ..write('createdBy: $createdBy, ')
@@ -23288,9 +23504,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_targets_org_company',
     'CREATE INDEX idx_targets_org_company ON targets (organization_id, company_id)',
   );
-  late final Index idxTargetsOrgOwnerPeriod = Index(
-    'idx_targets_org_owner_period',
-    'CREATE INDEX idx_targets_org_owner_period ON targets (organization_id, owner_id, period_start)',
+  late final Index idxTargetsOrgDimensionPeriod = Index(
+    'idx_targets_org_dimension_period',
+    'CREATE INDEX idx_targets_org_dimension_period ON targets (organization_id, dimension_id, period_start)',
   );
   late final Index idxOfflinePackageLoadStatusScope = Index(
     'idx_offline_package_load_status_scope',
@@ -23365,7 +23581,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxCampaignsOrgCompany,
     idxCampaignsOrgStatus,
     idxTargetsOrgCompany,
-    idxTargetsOrgOwnerPeriod,
+    idxTargetsOrgDimensionPeriod,
     idxOfflinePackageLoadStatusScope,
     idxOutboxScopeStatus,
     idxOutboxEntity,
@@ -32857,11 +33073,15 @@ typedef $$TargetsTableTableCreateCompanionBuilder =
       required String id,
       required String organizationId,
       required String companyId,
-      required String ownerId,
+      required String dimensionId,
+      Value<String?> dimensionType,
       required DateTime periodStart,
       required DateTime periodEnd,
+      Value<String?> periodGranularity,
       required String metric,
       required double targetValue,
+      Value<String?> currency,
+      Value<String?> status,
       Value<double?> achievedValueCache,
       required DateTime createdAt,
       required String createdBy,
@@ -32877,11 +33097,15 @@ typedef $$TargetsTableTableUpdateCompanionBuilder =
       Value<String> id,
       Value<String> organizationId,
       Value<String> companyId,
-      Value<String> ownerId,
+      Value<String> dimensionId,
+      Value<String?> dimensionType,
       Value<DateTime> periodStart,
       Value<DateTime> periodEnd,
+      Value<String?> periodGranularity,
       Value<String> metric,
       Value<double> targetValue,
+      Value<String?> currency,
+      Value<String?> status,
       Value<double?> achievedValueCache,
       Value<DateTime> createdAt,
       Value<String> createdBy,
@@ -32917,8 +33141,13 @@ class $$TargetsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
-  ColumnFilters<String> get ownerId => $composableBuilder(
-    column: $table.ownerId,
+  ColumnFilters<String> get dimensionId => $composableBuilder(
+    column: $table.dimensionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dimensionType => $composableBuilder(
+    column: $table.dimensionType,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -32932,6 +33161,11 @@ class $$TargetsTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<String> get periodGranularity => $composableBuilder(
+    column: $table.periodGranularity,
+    builder: (column) => ColumnFilters(column),
+  );
+
   ColumnFilters<String> get metric => $composableBuilder(
     column: $table.metric,
     builder: (column) => ColumnFilters(column),
@@ -32939,6 +33173,16 @@ class $$TargetsTableTableFilterComposer
 
   ColumnFilters<double> get targetValue => $composableBuilder(
     column: $table.targetValue,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -33007,8 +33251,13 @@ class $$TargetsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
-  ColumnOrderings<String> get ownerId => $composableBuilder(
-    column: $table.ownerId,
+  ColumnOrderings<String> get dimensionId => $composableBuilder(
+    column: $table.dimensionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dimensionType => $composableBuilder(
+    column: $table.dimensionType,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -33022,6 +33271,11 @@ class $$TargetsTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get periodGranularity => $composableBuilder(
+    column: $table.periodGranularity,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get metric => $composableBuilder(
     column: $table.metric,
     builder: (column) => ColumnOrderings(column),
@@ -33029,6 +33283,16 @@ class $$TargetsTableTableOrderingComposer
 
   ColumnOrderings<double> get targetValue => $composableBuilder(
     column: $table.targetValue,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
     builder: (column) => ColumnOrderings(column),
   );
 
@@ -33093,8 +33357,15 @@ class $$TargetsTableTableAnnotationComposer
   GeneratedColumn<String> get companyId =>
       $composableBuilder(column: $table.companyId, builder: (column) => column);
 
-  GeneratedColumn<String> get ownerId =>
-      $composableBuilder(column: $table.ownerId, builder: (column) => column);
+  GeneratedColumn<String> get dimensionId => $composableBuilder(
+    column: $table.dimensionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get dimensionType => $composableBuilder(
+    column: $table.dimensionType,
+    builder: (column) => column,
+  );
 
   GeneratedColumn<DateTime> get periodStart => $composableBuilder(
     column: $table.periodStart,
@@ -33104,6 +33375,11 @@ class $$TargetsTableTableAnnotationComposer
   GeneratedColumn<DateTime> get periodEnd =>
       $composableBuilder(column: $table.periodEnd, builder: (column) => column);
 
+  GeneratedColumn<String> get periodGranularity => $composableBuilder(
+    column: $table.periodGranularity,
+    builder: (column) => column,
+  );
+
   GeneratedColumn<String> get metric =>
       $composableBuilder(column: $table.metric, builder: (column) => column);
 
@@ -33111,6 +33387,12 @@ class $$TargetsTableTableAnnotationComposer
     column: $table.targetValue,
     builder: (column) => column,
   );
+
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
 
   GeneratedColumn<double> get achievedValueCache => $composableBuilder(
     column: $table.achievedValueCache,
@@ -33175,11 +33457,15 @@ class $$TargetsTableTableTableManager
                 Value<String> id = const Value.absent(),
                 Value<String> organizationId = const Value.absent(),
                 Value<String> companyId = const Value.absent(),
-                Value<String> ownerId = const Value.absent(),
+                Value<String> dimensionId = const Value.absent(),
+                Value<String?> dimensionType = const Value.absent(),
                 Value<DateTime> periodStart = const Value.absent(),
                 Value<DateTime> periodEnd = const Value.absent(),
+                Value<String?> periodGranularity = const Value.absent(),
                 Value<String> metric = const Value.absent(),
                 Value<double> targetValue = const Value.absent(),
+                Value<String?> currency = const Value.absent(),
+                Value<String?> status = const Value.absent(),
                 Value<double?> achievedValueCache = const Value.absent(),
                 Value<DateTime> createdAt = const Value.absent(),
                 Value<String> createdBy = const Value.absent(),
@@ -33193,11 +33479,15 @@ class $$TargetsTableTableTableManager
                 id: id,
                 organizationId: organizationId,
                 companyId: companyId,
-                ownerId: ownerId,
+                dimensionId: dimensionId,
+                dimensionType: dimensionType,
                 periodStart: periodStart,
                 periodEnd: periodEnd,
+                periodGranularity: periodGranularity,
                 metric: metric,
                 targetValue: targetValue,
+                currency: currency,
+                status: status,
                 achievedValueCache: achievedValueCache,
                 createdAt: createdAt,
                 createdBy: createdBy,
@@ -33213,11 +33503,15 @@ class $$TargetsTableTableTableManager
                 required String id,
                 required String organizationId,
                 required String companyId,
-                required String ownerId,
+                required String dimensionId,
+                Value<String?> dimensionType = const Value.absent(),
                 required DateTime periodStart,
                 required DateTime periodEnd,
+                Value<String?> periodGranularity = const Value.absent(),
                 required String metric,
                 required double targetValue,
+                Value<String?> currency = const Value.absent(),
+                Value<String?> status = const Value.absent(),
                 Value<double?> achievedValueCache = const Value.absent(),
                 required DateTime createdAt,
                 required String createdBy,
@@ -33231,11 +33525,15 @@ class $$TargetsTableTableTableManager
                 id: id,
                 organizationId: organizationId,
                 companyId: companyId,
-                ownerId: ownerId,
+                dimensionId: dimensionId,
+                dimensionType: dimensionType,
                 periodStart: periodStart,
                 periodEnd: periodEnd,
+                periodGranularity: periodGranularity,
                 metric: metric,
                 targetValue: targetValue,
+                currency: currency,
+                status: status,
                 achievedValueCache: achievedValueCache,
                 createdAt: createdAt,
                 createdBy: createdBy,
