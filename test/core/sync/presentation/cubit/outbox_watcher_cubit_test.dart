@@ -132,4 +132,21 @@ class _FakeOutboxRepository implements OutboxRepository {
   }) {
     throw UnimplementedError();
   }
+
+  @override
+  Future<AppResult<void>> requeue({
+    required String id,
+    required Map<String, dynamic> payload,
+    required DateTime attemptedAt,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<void>> retryFailed({
+    required String id,
+    required DateTime requestedAt,
+  }) {
+    throw UnimplementedError();
+  }
 }

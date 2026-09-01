@@ -27,30 +27,40 @@ final class CloudFunctionsOrderSubmissionDataSource
     required Order order,
     required String idempotencyKey,
   }) async {
+    final data = <String, dynamic>{
+      'organizationId': order.organizationId,
+      'companyId': order.companyId,
+      'orderId': idempotencyKey,
+      'branchId': order.branchId,
+      'customerId': order.customerId,
+      'sellerId': order.sellerId,
+      'deliveryAddress': _addressToJson(order.deliveryAddress),
+      'billingAddress': _addressToJson(order.billingAddress),
+      'priceListId': order.priceListId,
+      'paymentTermId': order.paymentTermId,
+      'items': order.items
+          .map((item) => _itemToJson(item, collectionId: order.collectionId))
+          .toList(growable: false),
+      'attachmentUrls': order.attachmentUrls,
+      'shippingAmount': order.shippingAmount,
+      'clientOrderTotal': order.itemsSubtotal + order.shippingAmount,
+    };
+    if (order.carrierId != null) {
+      data['carrierId'] = order.carrierId;
+    }
+    if (order.collectionId != null) {
+      data['collectionId'] = order.collectionId;
+    }
+    if (order.orderType != null) {
+      data['orderType'] = order.orderType;
+    }
+    if (order.notes != null) {
+      data['notes'] = order.notes;
+    }
+
     final response = await _cloudFunctionsService.call<Map<String, dynamic>>(
       'submitOrder',
-      data: <String, dynamic>{
-        'organizationId': order.organizationId,
-        'companyId': order.companyId,
-        'orderId': idempotencyKey,
-        'branchId': order.branchId,
-        'customerId': order.customerId,
-        'sellerId': order.sellerId,
-        'deliveryAddress': _addressToJson(order.deliveryAddress),
-        'billingAddress': _addressToJson(order.billingAddress),
-        'priceListId': order.priceListId,
-        'paymentTermId': order.paymentTermId,
-        if (order.carrierId != null) 'carrierId': order.carrierId,
-        if (order.collectionId != null) 'collectionId': order.collectionId,
-        if (order.orderType != null) 'orderType': order.orderType,
-        'items': order.items
-            .map((item) => _itemToJson(item, collectionId: order.collectionId))
-            .toList(growable: false),
-        if (order.notes != null) 'notes': order.notes,
-        'attachmentUrls': order.attachmentUrls,
-        'shippingAmount': order.shippingAmount,
-        'clientOrderTotal': order.itemsSubtotal + order.shippingAmount,
-      },
+      data: data,
       requireAuth: true,
     );
 
@@ -58,25 +68,35 @@ final class CloudFunctionsOrderSubmissionDataSource
   }
 
   Map<String, dynamic> _addressToJson(OrderAddress address) {
-    return <String, dynamic>{
+    final data = <String, dynamic>{
       'street': address.street,
-      if (address.number != null) 'number': address.number,
-      if (address.complement != null) 'complement': address.complement,
-      if (address.district != null) 'district': address.district,
       'city': address.city,
       'state': address.state,
       'zipCode': address.zipCode,
       'country': address.country,
     };
+    if (address.number != null) {
+      data['number'] = address.number;
+    }
+    if (address.complement != null) {
+      data['complement'] = address.complement;
+    }
+    if (address.district != null) {
+      data['district'] = address.district;
+    }
+    return data;
   }
 
   Map<String, dynamic> _itemToJson(OrderItem item, {String? collectionId}) {
-    return <String, dynamic>{
+    final data = <String, dynamic>{
       'id': item.id,
       'productId': item.productId,
       'variantId': item.variantId,
       'quantity': item.quantity,
-      if (collectionId != null) 'collectionId': collectionId,
     };
+    if (collectionId != null) {
+      data['collectionId'] = collectionId;
+    }
+    return data;
   }
 }

@@ -85,6 +85,11 @@ final class AnalyticsEvents {
   /// novamente" (individual) or "Tentar novamente todos" (em lote).
   static const String syncManualRetryTriggered = 'sync_manual_retry_triggered';
 
+  /// Logged whenever TASK-113's aggregated connectivity indicator changes
+  /// between the four UI states, including the time the app spent offline
+  /// before coming back online.
+  static const String connectivityStatusChanged = 'connectivity_status_changed';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -141,5 +146,6 @@ final class AnalyticsEvents {
     syncPullCompleted,
     syncCenterOpened,
     syncManualRetryTriggered,
+    connectivityStatusChanged,
   ];
 }

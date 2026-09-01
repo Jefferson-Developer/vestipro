@@ -223,7 +223,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-110 — Implementar resolução de conflitos](TASK-110-implementar-resolucao-de-conflitos.md) — Flutter Senior
 - [x] [TASK-111 — Implementar tela de conflito](TASK-111-implementar-tela-de-conflito.md) — Flutter Senior + Front-end
 - [x] [TASK-112 — Implementar central de sincronização](TASK-112-implementar-central-de-sincronizacao.md) — Flutter Senior + Front-end
-- [ ] [TASK-113 — Implementar indicador de conectividade](TASK-113-implementar-indicador-de-conectividade.md) — Flutter Senior + Front-end
+- [x] [TASK-113 — Implementar indicador de conectividade](TASK-113-implementar-indicador-de-conectividade.md) — Flutter Senior + Front-end
 
 ### EPIC-15 — Metas e Performance Comercial
 - [ ] [TASK-114 — Modelar Target](TASK-114-modelar-target.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 112 / 220 tasks concluídas.
+**Progresso:** 113 / 220 tasks concluídas.

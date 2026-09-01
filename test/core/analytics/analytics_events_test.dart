@@ -57,6 +57,9 @@ void main() {
           'catalog_share_opened',
           'sync_push_completed',
           'sync_pull_completed',
+          'sync_center_opened',
+          'sync_manual_retry_triggered',
+          'connectivity_status_changed',
         ]),
       );
 

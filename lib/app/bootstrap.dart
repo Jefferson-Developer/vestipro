@@ -8,7 +8,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
 
+import '../core/analytics/analytics.dart';
 import '../core/auth/auth.dart';
+import '../core/connectivity/connectivity.dart';
 import '../core/design_system/design_system.dart';
 import '../core/environment/app_environment.dart';
 import '../core/errors/errors.dart';
@@ -16,7 +18,6 @@ import '../core/feature_flags/feature_flags.dart';
 import '../core/navigation/navigation.dart';
 import '../core/permissions/permissions.dart';
 import '../core/services/services.dart';
-import '../core/utils/utils.dart';
 import '../features/authentication/authentication.dart';
 import '../features/authentication/presentation/bloc/forgot_password_bloc.dart';
 import '../features/authentication/presentation/bloc/login_bloc.dart';
@@ -156,16 +157,20 @@ class VestiProApp extends StatelessWidget {
             showInsightsShortcut: _resolveShowInsightsShortcut(),
           ),
           catalogHomePageBuilder: (context, orgId, companyId) =>
-              CatalogHomePage(
-                organizationId: orgId,
-                companyId: companyId,
-                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                createBloc: () => getIt<CatalogHomeBloc>(),
-                onCreateProductTap: () => context.go(
-                  ProductFormRoute(
-                    orgId: orgId,
-                    companyId: companyId ?? kPlaceholderCompanyId,
-                  ).location,
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId: companyId ?? kPlaceholderCompanyId,
+                child: CatalogHomePage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  createBloc: () => getIt<CatalogHomeBloc>(),
+                  onCreateProductTap: () => context.go(
+                    ProductFormRoute(
+                      orgId: orgId,
+                      companyId: companyId ?? kPlaceholderCompanyId,
+                    ).location,
+                  ),
                 ),
               ),
           auditLogPageBuilder: (context, orgId) => AuditLogPage(
@@ -184,150 +189,184 @@ class VestiProApp extends StatelessWidget {
             createRoleEditBloc: () => getIt<UserRoleEditBloc>(),
           ),
           customerFormPageBuilder: (context, orgId, companyId) =>
-              CustomerFormPage(
-                organizationId: orgId,
+              _withConnectivityIndicator(
+                orgId: orgId,
                 companyId: companyId,
-                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                permissionService: getIt<PermissionService>(),
-                createBloc: () => getIt<CustomerFormBloc>(),
+                child: CustomerFormPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  permissionService: getIt<PermissionService>(),
+                  createBloc: () => getIt<CustomerFormBloc>(),
+                ),
               ),
           productFormPageBuilder: (context, orgId, companyId) {
             final currentUser = getIt<AuthRepository>().currentUser;
-            return ProductFormPage(
-              organizationId: orgId,
+            return _withConnectivityIndicator(
+              orgId: orgId,
               companyId: companyId,
-              userId: currentUser?.uid ?? '',
-              actorName:
-                  currentUser?.displayName ?? currentUser?.email ?? 'Usuário',
-              permissionService: getIt<PermissionService>(),
-              createBloc: () => getIt<ProductFormBloc>(),
-              createMediaBloc: () => getIt<ProductMediaBloc>(),
+              child: ProductFormPage(
+                organizationId: orgId,
+                companyId: companyId,
+                userId: currentUser?.uid ?? '',
+                actorName:
+                    currentUser?.displayName ?? currentUser?.email ?? 'Usuário',
+                permissionService: getIt<PermissionService>(),
+                createBloc: () => getIt<ProductFormBloc>(),
+                createMediaBloc: () => getIt<ProductMediaBloc>(),
+              ),
             );
           },
           customerPortfolioPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  CustomerPortfolioPage(
-                    organizationId: orgId,
+                  _withConnectivityIndicator(
+                    orgId: orgId,
                     companyId: companyId,
-                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                    permissionService: getIt<PermissionService>(),
-                    createBloc: () => getIt<CustomerPortfolioBloc>(),
-                    createSegmentBloc: () => getIt<CustomerSegmentBloc>(),
-                    onCustomerSelected: (customer) => context.go(
-                      CustomerDetailRoute(
-                        orgId: orgId,
-                        customerId: customer.id,
-                      ).location,
-                    ),
-                    initialSearchQuery: queryParameters['q'] ?? '',
-                    initialFilters:
-                        CustomerPortfolioFilters.fromQueryParameters(
-                          queryParameters,
-                        ),
-                    onUrlStateChanged: (searchQuery, filters) => context.go(
-                      CustomerPortfolioRoute(
-                        orgId: orgId,
-                        companyId: companyId,
-                        queryParameters: filters.toQueryParameters(
-                          search: searchQuery,
-                        ),
-                      ).location,
+                    child: CustomerPortfolioPage(
+                      organizationId: orgId,
+                      companyId: companyId,
+                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                      permissionService: getIt<PermissionService>(),
+                      createBloc: () => getIt<CustomerPortfolioBloc>(),
+                      createSegmentBloc: () => getIt<CustomerSegmentBloc>(),
+                      onCustomerSelected: (customer) => context.go(
+                        CustomerDetailRoute(
+                          orgId: orgId,
+                          customerId: customer.id,
+                        ).location,
+                      ),
+                      initialSearchQuery: queryParameters['q'] ?? '',
+                      initialFilters:
+                          CustomerPortfolioFilters.fromQueryParameters(
+                            queryParameters,
+                          ),
+                      onUrlStateChanged: (searchQuery, filters) => context.go(
+                        CustomerPortfolioRoute(
+                          orgId: orgId,
+                          companyId: companyId,
+                          queryParameters: filters.toQueryParameters(
+                            search: searchQuery,
+                          ),
+                        ).location,
+                      ),
                     ),
                   ),
           orderListPageBuilder: (context, orgId, companyId, queryParameters) =>
-              OrderListPage(
-                organizationId: orgId,
+              _withConnectivityIndicator(
+                orgId: orgId,
                 companyId: companyId,
-                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                permissionService: getIt<PermissionService>(),
-                createBloc: () => getIt<OrderListBloc>(),
-                initialSearchQuery: queryParameters['q'] ?? '',
-                initialFilters: OrderListFilters.fromQueryParameters(
-                  queryParameters,
-                ),
-                onOrderDraftSelected: (order) => context.go(
-                  OrderDraftRoute(
-                    orgId: orgId,
-                    companyId: companyId,
-                    draftId: order.id,
-                  ).location,
-                ),
-                onOrderHistorySelected: (order) => context.go(
-                  OrderHistoryRoute(
-                    orgId: orgId,
-                    companyId: companyId,
-                    orderId: order.id,
-                  ).location,
-                ),
-                onUrlStateChanged: (searchQuery, filters) => context.go(
-                  OrderListRoute(
-                    orgId: orgId,
-                    companyId: companyId,
-                    queryParameters: filters.toQueryParameters(
-                      search: searchQuery,
-                    ),
-                  ).location,
-                ),
-              ),
-          orderApprovalQueuePageBuilder: (context, orgId, companyId) =>
-              OrderApprovalQueuePage(
-                organizationId: orgId,
-                companyId: companyId,
-                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                permissionService: getIt<PermissionService>(),
-                createBloc: () => getIt<OrderApprovalQueueBloc>(),
-              ),
-          orderHistoryPageBuilder: (context, orgId, companyId, orderId) =>
-              OrderHistoryPage(
-                organizationId: orgId,
-                companyId: companyId,
-                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                orderId: orderId,
-                permissionService: getIt<PermissionService>(),
-                createBloc: () => getIt<OrderHistoryBloc>(),
-                createDuplicationCubit: () => getIt<OrderDuplicationCubit>(),
-                onDuplicated: (order) => context.go(
-                  OrderDraftRoute(
-                    orgId: orgId,
-                    companyId: companyId,
-                    draftId: order.id,
-                  ).location,
-                ),
-              ),
-          orderDraftPageBuilder: (context, orgId, companyId, queryParameters) =>
-              OrderDraftPage(
-                organizationId: orgId,
-                companyId: companyId,
-                sellerId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                permissionService: getIt<PermissionService>(),
-                createBloc: () => getIt<OrderDraftBloc>(),
-                createCustomerPortfolioBloc: () =>
-                    getIt<CustomerPortfolioBloc>(),
-                createOrderItemsGridCubit: () => getIt<OrderItemsGridCubit>(),
-                createOrderPricingSummaryCubit: () =>
-                    getIt<OrderPricingSummaryCubit>(),
-                createOrderSubmissionValidationCubit: () =>
-                    getIt<OrderSubmissionValidationCubit>(),
-                draftId: queryParameters['draftId'],
-                onContinueToProducts: (order) async {
-                  await context.push(
-                    OrderProductCatalogRoute(
+                child: OrderListPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  permissionService: getIt<PermissionService>(),
+                  createBloc: () => getIt<OrderListBloc>(),
+                  initialSearchQuery: queryParameters['q'] ?? '',
+                  initialFilters: OrderListFilters.fromQueryParameters(
+                    queryParameters,
+                  ),
+                  onOrderDraftSelected: (order) => context.go(
+                    OrderDraftRoute(
                       orgId: orgId,
                       companyId: companyId,
                       draftId: order.id,
                     ).location,
-                  );
-                },
-                onSubmitOrder: (order) => _submitOrder(context, order),
+                  ),
+                  onOrderHistorySelected: (order) => context.go(
+                    OrderHistoryRoute(
+                      orgId: orgId,
+                      companyId: companyId,
+                      orderId: order.id,
+                    ).location,
+                  ),
+                  onUrlStateChanged: (searchQuery, filters) => context.go(
+                    OrderListRoute(
+                      orgId: orgId,
+                      companyId: companyId,
+                      queryParameters: filters.toQueryParameters(
+                        search: searchQuery,
+                      ),
+                    ).location,
+                  ),
+                ),
+              ),
+          orderApprovalQueuePageBuilder: (context, orgId, companyId) =>
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId: companyId,
+                child: OrderApprovalQueuePage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  permissionService: getIt<PermissionService>(),
+                  createBloc: () => getIt<OrderApprovalQueueBloc>(),
+                ),
+              ),
+          orderHistoryPageBuilder: (context, orgId, companyId, orderId) =>
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId: companyId,
+                child: OrderHistoryPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  orderId: orderId,
+                  permissionService: getIt<PermissionService>(),
+                  createBloc: () => getIt<OrderHistoryBloc>(),
+                  createDuplicationCubit: () => getIt<OrderDuplicationCubit>(),
+                  onDuplicated: (order) => context.go(
+                    OrderDraftRoute(
+                      orgId: orgId,
+                      companyId: companyId,
+                      draftId: order.id,
+                    ).location,
+                  ),
+                ),
+              ),
+          orderDraftPageBuilder: (context, orgId, companyId, queryParameters) =>
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId: companyId,
+                child: OrderDraftPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  sellerId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  permissionService: getIt<PermissionService>(),
+                  createBloc: () => getIt<OrderDraftBloc>(),
+                  createCustomerPortfolioBloc: () =>
+                      getIt<CustomerPortfolioBloc>(),
+                  createOrderItemsGridCubit: () => getIt<OrderItemsGridCubit>(),
+                  createOrderPricingSummaryCubit: () =>
+                      getIt<OrderPricingSummaryCubit>(),
+                  createOrderSubmissionValidationCubit: () =>
+                      getIt<OrderSubmissionValidationCubit>(),
+                  draftId: queryParameters['draftId'],
+                  onContinueToProducts: (order) async {
+                    await context.push(
+                      OrderProductCatalogRoute(
+                        orgId: orgId,
+                        companyId: companyId,
+                        draftId: order.id,
+                      ).location,
+                    );
+                  },
+                  onSubmitOrder: (order) => _submitOrder(context, order),
+                ),
               ),
           orderProductCatalogPageBuilder:
-              (context, orgId, companyId, draftId) => OrderProductCatalogPage(
-                organizationId: orgId,
-                companyId: companyId,
-                draftId: draftId,
-                createCatalogFilterBloc: () => getIt<CatalogFilterBloc>(),
-                createItemsCounterCubit: () => getIt<OrderItemsCounterCubit>(),
-              ),
+              (context, orgId, companyId, draftId) =>
+                  _withConnectivityIndicator(
+                    orgId: orgId,
+                    companyId: companyId,
+                    child: OrderProductCatalogPage(
+                      organizationId: orgId,
+                      companyId: companyId,
+                      draftId: draftId,
+                      createCatalogFilterBloc: () => getIt<CatalogFilterBloc>(),
+                      createItemsCounterCubit: () =>
+                          getIt<OrderItemsCounterCubit>(),
+                    ),
+                  ),
           orderProductDetailPageBuilder:
               (
                 context,
@@ -336,14 +375,18 @@ class VestiProApp extends StatelessWidget {
                 draftId,
                 productId,
                 queryParameters,
-              ) => OrderProductAdditionPage(
-                organizationId: orgId,
+              ) => _withConnectivityIndicator(
+                orgId: orgId,
                 companyId: companyId,
-                draftId: draftId,
-                productId: productId,
-                origin: queryParameters['origin'] ?? 'grid',
-                createProductDetailBloc: () => getIt<ProductDetailBloc>(),
-                createAdditionCubit: () => getIt<OrderProductAdditionCubit>(),
+                child: OrderProductAdditionPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  draftId: draftId,
+                  productId: productId,
+                  origin: queryParameters['origin'] ?? 'grid',
+                  createProductDetailBloc: () => getIt<ProductDetailBloc>(),
+                  createAdditionCubit: () => getIt<OrderProductAdditionCubit>(),
+                ),
               ),
           conflictListPageBuilder: (context, orgId) => ConflictListPage(
             organizationId: orgId,
@@ -363,34 +406,44 @@ class VestiProApp extends StatelessWidget {
                 onResolved: (_) =>
                     context.go(ConflictListRoute(orgId: orgId).location),
               ),
-          syncCenterPageBuilder: (context, orgId, companyId) => SyncCenterPage(
-            organizationId: orgId,
-            companyId: companyId,
-            createCubit: () => getIt<SyncCenterCubit>(),
-            onOpenConflicts: () =>
-                context.go(ConflictListRoute(orgId: orgId).location),
-          ),
-          catalogBrowsePageBuilder: (context, orgId, queryParameters) =>
-              CatalogFilterPage(
-                organizationId: orgId,
-                companyId: queryParameters['companyId'],
-                createBloc: () => getIt<CatalogFilterBloc>(),
-                initialViewMode: queryParameters.containsKey('mode')
-                    ? CatalogViewMode.fromCode(queryParameters['mode'])
-                    : null,
-                initialFilter: CatalogFilter.fromQueryParameters(
-                  queryParameters,
+          syncCenterPageBuilder: (context, orgId, companyId) =>
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId: companyId,
+                child: SyncCenterPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  createCubit: () => getIt<SyncCenterCubit>(),
+                  onOpenConflicts: () =>
+                      context.go(ConflictListRoute(orgId: orgId).location),
                 ),
-                onProductSelected: (product) =>
-                    context.go(CatalogBrowseRoute(orgId: orgId).location),
-                onUrlStateChanged: (viewMode, filter) => context.go(
-                  CatalogBrowseRoute(
-                    orgId: orgId,
-                    queryParameters: <String, String>{
-                      'mode': viewMode.code,
-                      ...filter.toQueryParameters(),
-                    },
-                  ).location,
+              ),
+          catalogBrowsePageBuilder: (context, orgId, queryParameters) =>
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId:
+                    queryParameters['companyId'] ?? kPlaceholderCompanyId,
+                child: CatalogFilterPage(
+                  organizationId: orgId,
+                  companyId: queryParameters['companyId'],
+                  createBloc: () => getIt<CatalogFilterBloc>(),
+                  initialViewMode: queryParameters.containsKey('mode')
+                      ? CatalogViewMode.fromCode(queryParameters['mode'])
+                      : null,
+                  initialFilter: CatalogFilter.fromQueryParameters(
+                    queryParameters,
+                  ),
+                  onProductSelected: (product) =>
+                      context.go(CatalogBrowseRoute(orgId: orgId).location),
+                  onUrlStateChanged: (viewMode, filter) => context.go(
+                    CatalogBrowseRoute(
+                      orgId: orgId,
+                      queryParameters: <String, String>{
+                        'mode': viewMode.code,
+                        ...filter.toQueryParameters(),
+                      },
+                    ).location,
+                  ),
                 ),
               ),
           customerDetailPageBuilder: (context, orgId, customerId) =>
@@ -448,50 +501,30 @@ class VestiProApp extends StatelessWidget {
 /// destination — a later task can replace this with a proper order detail/
 /// confirmation route without touching anything else in this flow.
 Future<void> _submitOrder(BuildContext context, Order order) async {
-  final result = await getIt<SubmitOrderUseCase>()(order: order);
-  if (!context.mounted) return;
+  await submitOrderFromDraft(
+    context: context,
+    order: order,
+    submitOrderUseCase: getIt<SubmitOrderUseCase>(),
+    saveOrderDraftUseCase: getIt<SaveOrderDraftUseCase>(),
+    navigateTo: (location) => context.go(location),
+  );
+}
 
-  switch (result) {
-    case AppSuccess<OrderSubmissionResult>(value: final submission):
-      final updatedOrder = order.copyWith(
-        status: submission.status,
-        syncStatus: OrderSyncStatus.synced,
-        orderNumber: submission.orderNumber,
-        discountAmount: submission.discountAmount,
-        surchargeAmount: submission.surchargeAmount,
-        shippingAmount: submission.shippingAmount,
-        statusHistory: <OrderStatusHistoryEntry>[
-          ...order.statusHistory,
-          OrderStatusHistoryEntry(
-            previousStatus: order.status,
-            newStatus: submission.status,
-            changedAt: submission.submittedAt,
-            actorId: order.sellerId,
-          ),
-        ],
-        updatedAt: submission.submittedAt,
-        version: order.version + 1,
-      );
-      await getIt<SaveOrderDraftUseCase>()(order: updatedOrder);
-      if (!context.mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(
-            'Pedido ${submission.orderNumber} enviado com sucesso.',
-          ),
-        ),
-      );
-      context.go(
-        CatalogHomeRoute(
-          orgId: order.organizationId,
-          companyId: order.companyId,
-        ).location,
-      );
-    case AppFailure<OrderSubmissionResult>(failure: final failure):
-      ScaffoldMessenger.of(
-        context,
-      ).showSnackBar(SnackBar(content: Text(failure.message)));
-  }
+Widget _withConnectivityIndicator({
+  required String orgId,
+  required String companyId,
+  required Widget child,
+}) {
+  return ConnectivityIndicatorShell(
+    organizationId: orgId,
+    companyId: companyId,
+    createCubit: () => ConnectivityIndicatorCubit(
+      getIt<ConnectivityService>(),
+      getIt<OutboxRepository>(),
+      getIt<AnalyticsService>(),
+    ),
+    child: child,
+  );
 }
 
 /// Resolves whether the `feature_insights_enabled` shortcut (TASK-018)

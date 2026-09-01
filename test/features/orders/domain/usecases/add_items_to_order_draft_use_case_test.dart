@@ -188,9 +188,9 @@ Order _order({required List<OrderItem> items}) {
 
 final class _FakeOrderDraftRepository implements OrderDraftRepository {
   _FakeOrderDraftRepository({
-    required Order? existingDraft,
+    required this._existingDraft,
     this.saveResult = const AppSuccess<void>(null),
-  }) : _existingDraft = existingDraft;
+  });
 
   final Order? _existingDraft;
   final AppResult<void> saveResult;

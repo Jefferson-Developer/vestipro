@@ -23,15 +23,19 @@ final class CloudFunctionsOrderApprovalDataSource
     required OrderApprovalDecisionValue decision,
     String? reason,
   }) async {
+    final data = <String, dynamic>{
+      'organizationId': organizationId,
+      'companyId': companyId,
+      'orderId': orderId,
+      'decision': _decisionToJson(decision),
+    };
+    if (reason != null) {
+      data['reason'] = reason;
+    }
+
     final response = await _cloudFunctionsService.call<Map<String, dynamic>>(
       'decideOrderApproval',
-      data: <String, dynamic>{
-        'organizationId': organizationId,
-        'companyId': companyId,
-        'orderId': orderId,
-        'decision': _decisionToJson(decision),
-        if (reason != null) 'reason': reason,
-      },
+      data: data,
       requireAuth: true,
     );
 

@@ -27,6 +27,7 @@ export 'catalog/app_size_grid.dart';
 export 'charts/app_management_chart.dart';
 export 'chips/app_filter_chip.dart';
 export 'feedback/app_empty_state.dart';
+export 'feedback/app_connectivity_indicator.dart';
 export 'feedback/app_error_state.dart';
 export 'feedback/app_skeleton.dart';
 export 'feedback/app_snackbar.dart';
