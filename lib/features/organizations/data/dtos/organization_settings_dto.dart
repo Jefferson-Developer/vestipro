@@ -1,4 +1,5 @@
 import '../../../../core/errors/errors.dart';
+import '../../domain/value_objects/organization_settings.dart';
 
 final class OrganizationSettingsDto {
   const OrganizationSettingsDto({
@@ -12,6 +13,10 @@ final class OrganizationSettingsDto {
     this.customerContactTypes = const <String>[],
     this.allowMultipleCollectionsPerProduct = false,
     this.stockReservationExpiresInMinutes = 15,
+    this.positivacaoPeriodGranularity = defaultPositivacaoPeriodGranularity,
+    this.positivacaoEligibleOrderStatuses =
+        defaultPositivacaoEligibleOrderStatuses,
+    this.positivacaoMinOrderValue,
   });
 
   factory OrganizationSettingsDto.fromJson(Map<String, dynamic> json) {
@@ -27,6 +32,10 @@ final class OrganizationSettingsDto {
         json['allowMultipleCollectionsPerProduct'];
     final stockReservationExpiresInMinutes =
         json['stockReservationExpiresInMinutes'];
+    final positivacaoPeriodGranularity = json['positivacaoPeriodGranularity'];
+    final rawPositivacaoEligibleOrderStatuses =
+        json['positivacaoEligibleOrderStatuses'];
+    final positivacaoMinOrderValue = json['positivacaoMinOrderValue'];
 
     if (currency is! String ||
         country is! String ||
@@ -36,7 +45,11 @@ final class OrganizationSettingsDto {
         (stockReservationExpiresInMinutes != null &&
             stockReservationExpiresInMinutes is! int) ||
         (allowMultipleCollectionsPerProduct != null &&
-            allowMultipleCollectionsPerProduct is! bool)) {
+            allowMultipleCollectionsPerProduct is! bool) ||
+        (positivacaoPeriodGranularity != null &&
+            positivacaoPeriodGranularity is! String) ||
+        (positivacaoMinOrderValue != null &&
+            positivacaoMinOrderValue is! num)) {
       throw const ValidationException(
         'Invalid organization settings payload.',
         code: 'invalid_organization_settings_payload',
@@ -56,6 +69,14 @@ final class OrganizationSettingsDto {
           allowMultipleCollectionsPerProduct as bool? ?? false,
       stockReservationExpiresInMinutes:
           stockReservationExpiresInMinutes as int? ?? 15,
+      positivacaoPeriodGranularity:
+          positivacaoPeriodGranularity as String? ??
+          defaultPositivacaoPeriodGranularity,
+      positivacaoEligibleOrderStatuses:
+          rawPositivacaoEligibleOrderStatuses == null
+          ? defaultPositivacaoEligibleOrderStatuses
+          : _stringListFromJson(rawPositivacaoEligibleOrderStatuses),
+      positivacaoMinOrderValue: (positivacaoMinOrderValue as num?)?.toDouble(),
     );
   }
 
@@ -86,6 +107,15 @@ final class OrganizationSettingsDto {
   final bool allowMultipleCollectionsPerProduct;
   final int stockReservationExpiresInMinutes;
 
+  /// See `OrganizationSettings.positivacaoPeriodGranularity`/
+  /// `positivacaoEligibleOrderStatuses`/`positivacaoMinOrderValue`'s own docs
+  /// (TASK-117). Always written (like [stockReservationExpiresInMinutes]),
+  /// never conditionally omitted, so [fromJson] never needs to guess whether
+  /// a missing key means "not configured yet" vs. "explicitly cleared".
+  final String positivacaoPeriodGranularity;
+  final List<String> positivacaoEligibleOrderStatuses;
+  final double? positivacaoMinOrderValue;
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'currency': currency,
@@ -102,6 +132,10 @@ final class OrganizationSettingsDto {
       if (allowMultipleCollectionsPerProduct)
         'allowMultipleCollectionsPerProduct': true,
       'stockReservationExpiresInMinutes': stockReservationExpiresInMinutes,
+      'positivacaoPeriodGranularity': positivacaoPeriodGranularity,
+      'positivacaoEligibleOrderStatuses': positivacaoEligibleOrderStatuses,
+      if (positivacaoMinOrderValue != null)
+        'positivacaoMinOrderValue': positivacaoMinOrderValue,
     };
   }
 }

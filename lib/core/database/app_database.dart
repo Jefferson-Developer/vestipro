@@ -13,6 +13,7 @@ import 'tables/order_items_table.dart';
 import 'tables/orders_table.dart';
 import 'tables/outbox_table.dart';
 import 'tables/payment_terms_table.dart';
+import 'tables/positivacao_snapshots_table.dart';
 import 'tables/price_list_items_table.dart';
 import 'tables/price_lists_table.dart';
 import 'tables/product_search_index_table.dart';
@@ -87,6 +88,9 @@ class OrderWithItemsRow {
 /// TASK-114 extends [TargetsTable] (created narrow by TASK-106) with the
 /// columns the full `Target` domain model (EPIC-15) needs — see that table's
 /// docs.
+/// TASK-117 adds [PositivacaoSnapshotsTable], the narrow server-computed
+/// cache the positivação de carteira dashboard reads — same "no pipeline
+/// populates it yet" precedent as [TargetsTable.achievedValueCache].
 @DriftDatabase(
   tables: [
     CustomersTable,
@@ -112,13 +116,14 @@ class OrderWithItemsRow {
     SyncCursorsTable,
     ConflictRecordsTable,
     ConflictAuditLogTable,
+    PositivacaoSnapshotsTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 18;
+  int get schemaVersion => 19;
 
   @override
   MigrationStrategy get migration {
@@ -262,6 +267,10 @@ class AppDatabase extends _$AppDatabase {
           if (!targetColumns.contains('status')) {
             await migrator.addColumn(targetsTable, targetsTable.status);
           }
+        }
+        if (from < 19) {
+          // TASK-117: cache local do snapshot de positivação de carteira.
+          await migrator.createTable(positivacaoSnapshotsTable);
         }
       },
       beforeOpen: (details) async {
@@ -1190,6 +1199,41 @@ class AppDatabase extends _$AppDatabase {
     required String id,
   }) {
     return (select(targetsTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) & row.id.equals(id),
+        ))
+        .watchSingleOrNull();
+  }
+
+  // ---------------------------------------------------------------------
+  // Positivação de carteira (TASK-117)
+  // ---------------------------------------------------------------------
+
+  /// Single positivação snapshot row for [organizationId]/[id], scoped for
+  /// defense-in-depth even though [id] is already a unique composite key —
+  /// `DriftPositivacaoRepository` reads only [PositivacaoSnapshotsTableData
+  /// .totalPortfolio]/[positivatedCount]/[nonPositivatedCustomerIdsJson]/
+  /// [calculatedAt], the server-computed snapshot this table exists for,
+  /// never a client-side sum of raw Customer/Order documents.
+  Future<PositivacaoSnapshotsTableData?> getPositivacaoSnapshotById({
+    required String organizationId,
+    required String id,
+  }) {
+    return (select(positivacaoSnapshotsTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) & row.id.equals(id),
+        ))
+        .getSingleOrNull();
+  }
+
+  /// Same as [getPositivacaoSnapshotById] but reactive — the near-real-time
+  /// refresh mechanism `PositivacaoRepository.watchForDimension` is built on,
+  /// without polling.
+  Stream<PositivacaoSnapshotsTableData?> watchPositivacaoSnapshotById({
+    required String organizationId,
+    required String id,
+  }) {
+    return (select(positivacaoSnapshotsTable)..where(
           (row) =>
               row.organizationId.equals(organizationId) & row.id.equals(id),
         ))

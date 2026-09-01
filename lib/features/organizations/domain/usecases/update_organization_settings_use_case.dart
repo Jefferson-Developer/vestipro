@@ -30,6 +30,10 @@ final class UpdateOrganizationSettingsUseCase {
     List<String> customerContactTypes = const <String>[],
     bool allowMultipleCollectionsPerProduct = false,
     int stockReservationExpiresInMinutes = 15,
+    String positivacaoPeriodGranularity = defaultPositivacaoPeriodGranularity,
+    List<String> positivacaoEligibleOrderStatuses =
+        defaultPositivacaoEligibleOrderStatuses,
+    double? positivacaoMinOrderValue,
   }) async {
     final trimmedId = id.trim();
     final trimmedUpdatedBy = updatedBy.trim();
@@ -61,6 +65,9 @@ final class UpdateOrganizationSettingsUseCase {
         customerContactTypes: customerContactTypes,
         allowMultipleCollectionsPerProduct: allowMultipleCollectionsPerProduct,
         stockReservationExpiresInMinutes: stockReservationExpiresInMinutes,
+        positivacaoPeriodGranularity: positivacaoPeriodGranularity,
+        positivacaoEligibleOrderStatuses: positivacaoEligibleOrderStatuses,
+        positivacaoMinOrderValue: positivacaoMinOrderValue,
       );
     } on ValidationException catch (exception) {
       return AppFailure<Organization>(mapAppExceptionToFailure(exception));

@@ -133,6 +133,45 @@ void main() {
       expect(roundTrippedDto.stockReservationExpiresInMinutes, 45);
     });
 
+    test('settingsToEntity/settingsToDto round-trip a custom positivação '
+        'rule (TASK-117)', () {
+      const dtoWithPositivacao = OrganizationSettingsDto(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+        positivacaoPeriodGranularity: 'quarterly',
+        positivacaoEligibleOrderStatuses: <String>['invoiced', 'delivered'],
+        positivacaoMinOrderValue: 250,
+      );
+
+      final entity = mapper.settingsToEntity(dtoWithPositivacao);
+      expect(entity.positivacaoPeriodGranularity, 'quarterly');
+      expect(entity.positivacaoEligibleOrderStatuses, <String>[
+        'invoiced',
+        'delivered',
+      ]);
+      expect(entity.positivacaoMinOrderValue, 250);
+
+      final roundTrippedDto = mapper.settingsToDto(entity);
+      expect(roundTrippedDto.positivacaoPeriodGranularity, 'quarterly');
+      expect(roundTrippedDto.positivacaoEligibleOrderStatuses, <String>[
+        'invoiced',
+        'delivered',
+      ]);
+      expect(roundTrippedDto.positivacaoMinOrderValue, 250);
+    });
+
+    test('settingsToEntity defaults positivação fields when absent from the '
+        'DTO', () {
+      final entity = mapper.settingsToEntity(dto.settings);
+      expect(entity.positivacaoPeriodGranularity, 'monthly');
+      expect(
+        entity.positivacaoEligibleOrderStatuses,
+        defaultPositivacaoEligibleOrderStatuses,
+      );
+      expect(entity.positivacaoMinOrderValue, isNull);
+    });
+
     test('toDto is the exact inverse of toEntity', () {
       final entity = mapper.toEntity(dto);
       final roundTrippedDto = mapper.toDto(entity);

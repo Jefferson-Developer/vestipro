@@ -4,6 +4,24 @@ import '../../../../core/errors/errors.dart';
 
 part 'organization_settings.freezed.dart';
 
+/// Default `OrganizationSettings.positivacaoPeriodGranularity` for an
+/// organization that never configured its own (TASK-117) — matches
+/// `TargetPeriodGranularity.monthly.name` without importing that enum here.
+const String defaultPositivacaoPeriodGranularity = 'monthly';
+
+/// Default `OrganizationSettings.positivacaoEligibleOrderStatuses` (TASK-117):
+/// which `OrderStatus.name` codes count as "the customer bought" until an
+/// organization narrows/widens the set itself. Deliberately excludes
+/// `draft`/`pendingSync`/`submitted`/`underReview` (not yet a firm commercial
+/// commitment) and `rejected`/`cancelled` (never a sale).
+const List<String> defaultPositivacaoEligibleOrderStatuses = <String>[
+  'approved',
+  'delivered',
+  'invoiced',
+  'partiallyInvoiced',
+  'shipped',
+];
+
 /// Organization-wide defaults (currency, country, default language) that
 /// Companies and Branches inherit unless they override them explicitly
 /// (TASK-027).
@@ -56,6 +74,33 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     /// expire automatically, but the timeout is organization-configurable
     /// instead of hardcoded in the client.
     @Default(15) int stockReservationExpiresInMinutes,
+
+    /// Positivação de carteira (TASK-117, EPIC-15/VESTI-087): reporting
+    /// cadence used to derive the "current period" window a positivação
+    /// dashboard/snapshot is computed for. Stored as the raw
+    /// `TargetPeriodGranularity.name` string (`monthly`/`quarterly`/`yearly`)
+    /// instead of importing that enum here, same decoupling technique as
+    /// [customerAddressTypes]/[customerContactTypes] above — the `targets`
+    /// feature owns decoding/validating it, this settings model only stores
+    /// the string.
+    @Default(defaultPositivacaoPeriodGranularity)
+    String positivacaoPeriodGranularity,
+
+    /// Which `OrderStatus.name` codes count as "the customer bought" for
+    /// positivação (TASK-117). Deliberately not every [OrderStatus] — a
+    /// `draft`/`pendingSync`/`cancelled`/`rejected` order must never count.
+    /// Stored as raw strings for the same reason as
+    /// [positivacaoPeriodGranularity]: this settings model never imports the
+    /// `orders` feature's `OrderStatus` enum, the `targets` feature validates
+    /// each code against it when parsing `PositivacaoSettings`.
+    @Default(defaultPositivacaoEligibleOrderStatuses)
+    List<String> positivacaoEligibleOrderStatuses,
+
+    /// Minimum order total (in [currency]) for that order to count towards
+    /// positivação, when the organization wants one — `null` means no
+    /// minimum (any eligible-status order already counts), same
+    /// nullable-means-unlimited/disabled convention as [maxTeamsPerUser].
+    double? positivacaoMinOrderValue,
   }) = _OrganizationSettings;
 
   /// Builds validated [OrganizationSettings], trimming each value and
@@ -77,6 +122,10 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     List<String> customerContactTypes = const <String>[],
     bool allowMultipleCollectionsPerProduct = false,
     int stockReservationExpiresInMinutes = 15,
+    String positivacaoPeriodGranularity = defaultPositivacaoPeriodGranularity,
+    List<String> positivacaoEligibleOrderStatuses =
+        defaultPositivacaoEligibleOrderStatuses,
+    double? positivacaoMinOrderValue,
   }) {
     final fieldErrors = <String, String>{};
     final trimmedCurrency = currency.trim();
@@ -96,6 +145,11 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     final normalizedCustomerContactTypes = _normalizeSettingsList(
       customerContactTypes,
     );
+    final trimmedPositivacaoPeriodGranularity = positivacaoPeriodGranularity
+        .trim();
+    final normalizedPositivacaoEligibleOrderStatuses = _normalizeSettingsList(
+      positivacaoEligibleOrderStatuses,
+    );
 
     if (trimmedCurrency.isEmpty) {
       fieldErrors['currency'] = 'Currency is required.';
@@ -114,6 +168,28 @@ abstract class OrganizationSettings with _$OrganizationSettings {
         stockReservationExpiresInMinutes > 60) {
       fieldErrors['stockReservationExpiresInMinutes'] =
           'Stock reservation expiration must stay between 15 and 60 minutes.';
+    }
+    // `TargetPeriodGranularity.values.map((v) => v.name)` is not imported
+    // here (see the field's own doc) — this only rejects garbage strings so
+    // an org can never persist a code the `targets` feature cannot decode;
+    // the `targets` feature itself independently rejects an unknown value
+    // when parsing `PositivacaoSettings`.
+    if (!const <String>{
+      'monthly',
+      'quarterly',
+      'yearly',
+    }.contains(trimmedPositivacaoPeriodGranularity)) {
+      fieldErrors['positivacaoPeriodGranularity'] =
+          'Positivação period granularity must be monthly, quarterly or '
+          'yearly.';
+    }
+    if (normalizedPositivacaoEligibleOrderStatuses.isEmpty) {
+      fieldErrors['positivacaoEligibleOrderStatuses'] =
+          'At least one order status must count towards positivação.';
+    }
+    if (positivacaoMinOrderValue != null && positivacaoMinOrderValue < 0) {
+      fieldErrors['positivacaoMinOrderValue'] =
+          'Positivação minimum order value cannot be negative.';
     }
 
     if (fieldErrors.isNotEmpty) {
@@ -137,6 +213,10 @@ abstract class OrganizationSettings with _$OrganizationSettings {
       customerContactTypes: normalizedCustomerContactTypes,
       allowMultipleCollectionsPerProduct: allowMultipleCollectionsPerProduct,
       stockReservationExpiresInMinutes: stockReservationExpiresInMinutes,
+      positivacaoPeriodGranularity: trimmedPositivacaoPeriodGranularity,
+      positivacaoEligibleOrderStatuses:
+          normalizedPositivacaoEligibleOrderStatuses,
+      positivacaoMinOrderValue: positivacaoMinOrderValue,
     );
   }
 }

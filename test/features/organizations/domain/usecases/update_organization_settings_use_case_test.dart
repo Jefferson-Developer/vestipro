@@ -126,6 +126,44 @@ void main() {
       );
     });
 
+    test('passes a custom positivação rule through to the repository '
+        '(TASK-117)', () async {
+      const settingsWithPositivacao = OrganizationSettings(
+        currency: 'USD',
+        country: 'US',
+        defaultLanguage: 'en-US',
+        positivacaoPeriodGranularity: 'quarterly',
+        positivacaoEligibleOrderStatuses: <String>['invoiced'],
+        positivacaoMinOrderValue: 100,
+      );
+      when(
+        () => repository.updateSettings(
+          id: any(named: 'id'),
+          settings: any(named: 'settings'),
+          updatedBy: any(named: 'updatedBy'),
+        ),
+      ).thenAnswer((_) async => AppSuccess<Organization>(updatedOrganization));
+
+      await useCase.call(
+        id: 'org-1',
+        currency: 'USD',
+        country: 'US',
+        defaultLanguage: 'en-US',
+        updatedBy: 'user-2',
+        positivacaoPeriodGranularity: 'quarterly',
+        positivacaoEligibleOrderStatuses: <String>['invoiced'],
+        positivacaoMinOrderValue: 100,
+      );
+
+      verify(
+        () => repository.updateSettings(
+          id: 'org-1',
+          settings: settingsWithPositivacao,
+          updatedBy: 'user-2',
+        ),
+      ).called(1);
+    });
+
     test('propagates a conflict failure from the repository', () async {
       when(
         () => repository.updateSettings(

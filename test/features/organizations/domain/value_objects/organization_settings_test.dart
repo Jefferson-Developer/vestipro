@@ -132,5 +132,97 @@ void main() {
         ),
       );
     });
+
+    test('defaults positivação fields (TASK-117) when not provided', () {
+      final settings = OrganizationSettings.validated(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+      );
+
+      expect(settings.positivacaoPeriodGranularity, 'monthly');
+      expect(
+        settings.positivacaoEligibleOrderStatuses,
+        defaultPositivacaoEligibleOrderStatuses,
+      );
+      expect(settings.positivacaoMinOrderValue, isNull);
+    });
+
+    test('accepts a custom positivação rule (TASK-117)', () {
+      final settings = OrganizationSettings.validated(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+        positivacaoPeriodGranularity: 'quarterly',
+        positivacaoEligibleOrderStatuses: <String>['invoiced', 'delivered'],
+        positivacaoMinOrderValue: 250,
+      );
+
+      expect(settings.positivacaoPeriodGranularity, 'quarterly');
+      expect(settings.positivacaoEligibleOrderStatuses, <String>[
+        'delivered',
+        'invoiced',
+      ]);
+      expect(settings.positivacaoMinOrderValue, 250);
+    });
+
+    test('rejects an unknown positivacaoPeriodGranularity', () {
+      expect(
+        () => OrganizationSettings.validated(
+          currency: 'BRL',
+          country: 'BR',
+          defaultLanguage: 'pt-BR',
+          positivacaoPeriodGranularity: 'weekly',
+        ),
+        throwsA(
+          isA<ValidationException>().having(
+            (exception) => exception.fieldErrors.containsKey(
+              'positivacaoPeriodGranularity',
+            ),
+            'fieldErrors has positivacaoPeriodGranularity',
+            isTrue,
+          ),
+        ),
+      );
+    });
+
+    test('rejects an empty positivacaoEligibleOrderStatuses list', () {
+      expect(
+        () => OrganizationSettings.validated(
+          currency: 'BRL',
+          country: 'BR',
+          defaultLanguage: 'pt-BR',
+          positivacaoEligibleOrderStatuses: const <String>[],
+        ),
+        throwsA(
+          isA<ValidationException>().having(
+            (exception) => exception.fieldErrors.containsKey(
+              'positivacaoEligibleOrderStatuses',
+            ),
+            'fieldErrors has positivacaoEligibleOrderStatuses',
+            isTrue,
+          ),
+        ),
+      );
+    });
+
+    test('rejects a negative positivacaoMinOrderValue', () {
+      expect(
+        () => OrganizationSettings.validated(
+          currency: 'BRL',
+          country: 'BR',
+          defaultLanguage: 'pt-BR',
+          positivacaoMinOrderValue: -1,
+        ),
+        throwsA(
+          isA<ValidationException>().having(
+            (exception) =>
+                exception.fieldErrors.containsKey('positivacaoMinOrderValue'),
+            'fieldErrors has positivacaoMinOrderValue',
+            isTrue,
+          ),
+        ),
+      );
+    });
   });
 }

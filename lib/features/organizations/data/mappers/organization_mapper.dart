@@ -54,6 +54,9 @@ final class OrganizationMapper {
       allowMultipleCollectionsPerProduct:
           dto.allowMultipleCollectionsPerProduct,
       stockReservationExpiresInMinutes: dto.stockReservationExpiresInMinutes,
+      positivacaoPeriodGranularity: dto.positivacaoPeriodGranularity,
+      positivacaoEligibleOrderStatuses: dto.positivacaoEligibleOrderStatuses,
+      positivacaoMinOrderValue: dto.positivacaoMinOrderValue,
     );
   }
 
@@ -71,6 +74,10 @@ final class OrganizationMapper {
           settings.allowMultipleCollectionsPerProduct,
       stockReservationExpiresInMinutes:
           settings.stockReservationExpiresInMinutes,
+      positivacaoPeriodGranularity: settings.positivacaoPeriodGranularity,
+      positivacaoEligibleOrderStatuses:
+          settings.positivacaoEligibleOrderStatuses,
+      positivacaoMinOrderValue: settings.positivacaoMinOrderValue,
     );
   }
 

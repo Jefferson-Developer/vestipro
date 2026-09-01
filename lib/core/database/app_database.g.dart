@@ -23360,6 +23360,739 @@ class ConflictAuditLogTableCompanion
   }
 }
 
+class $PositivacaoSnapshotsTableTable extends PositivacaoSnapshotsTable
+    with
+        TableInfo<
+          $PositivacaoSnapshotsTableTable,
+          PositivacaoSnapshotsTableData
+        > {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $PositivacaoSnapshotsTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dimensionTypeMeta = const VerificationMeta(
+    'dimensionType',
+  );
+  @override
+  late final GeneratedColumn<String> dimensionType = GeneratedColumn<String>(
+    'dimension_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dimensionIdMeta = const VerificationMeta(
+    'dimensionId',
+  );
+  @override
+  late final GeneratedColumn<String> dimensionId = GeneratedColumn<String>(
+    'dimension_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _periodStartMeta = const VerificationMeta(
+    'periodStart',
+  );
+  @override
+  late final GeneratedColumn<DateTime> periodStart = GeneratedColumn<DateTime>(
+    'period_start',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _periodEndMeta = const VerificationMeta(
+    'periodEnd',
+  );
+  @override
+  late final GeneratedColumn<DateTime> periodEnd = GeneratedColumn<DateTime>(
+    'period_end',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _totalPortfolioMeta = const VerificationMeta(
+    'totalPortfolio',
+  );
+  @override
+  late final GeneratedColumn<int> totalPortfolio = GeneratedColumn<int>(
+    'total_portfolio',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _positivatedCountMeta = const VerificationMeta(
+    'positivatedCount',
+  );
+  @override
+  late final GeneratedColumn<int> positivatedCount = GeneratedColumn<int>(
+    'positivated_count',
+    aliasedName,
+    true,
+    type: DriftSqlType.int,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _nonPositivatedCustomerIdsJsonMeta =
+      const VerificationMeta('nonPositivatedCustomerIdsJson');
+  @override
+  late final GeneratedColumn<String> nonPositivatedCustomerIdsJson =
+      GeneratedColumn<String>(
+        'non_positivated_customer_ids_json',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _calculatedAtMeta = const VerificationMeta(
+    'calculatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> calculatedAt = GeneratedColumn<DateTime>(
+    'calculated_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    companyId,
+    dimensionType,
+    dimensionId,
+    periodStart,
+    periodEnd,
+    totalPortfolio,
+    positivatedCount,
+    nonPositivatedCustomerIdsJson,
+    calculatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'positivacao_snapshots';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<PositivacaoSnapshotsTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('dimension_type')) {
+      context.handle(
+        _dimensionTypeMeta,
+        dimensionType.isAcceptableOrUnknown(
+          data['dimension_type']!,
+          _dimensionTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_dimensionTypeMeta);
+    }
+    if (data.containsKey('dimension_id')) {
+      context.handle(
+        _dimensionIdMeta,
+        dimensionId.isAcceptableOrUnknown(
+          data['dimension_id']!,
+          _dimensionIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_dimensionIdMeta);
+    }
+    if (data.containsKey('period_start')) {
+      context.handle(
+        _periodStartMeta,
+        periodStart.isAcceptableOrUnknown(
+          data['period_start']!,
+          _periodStartMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_periodStartMeta);
+    }
+    if (data.containsKey('period_end')) {
+      context.handle(
+        _periodEndMeta,
+        periodEnd.isAcceptableOrUnknown(data['period_end']!, _periodEndMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_periodEndMeta);
+    }
+    if (data.containsKey('total_portfolio')) {
+      context.handle(
+        _totalPortfolioMeta,
+        totalPortfolio.isAcceptableOrUnknown(
+          data['total_portfolio']!,
+          _totalPortfolioMeta,
+        ),
+      );
+    }
+    if (data.containsKey('positivated_count')) {
+      context.handle(
+        _positivatedCountMeta,
+        positivatedCount.isAcceptableOrUnknown(
+          data['positivated_count']!,
+          _positivatedCountMeta,
+        ),
+      );
+    }
+    if (data.containsKey('non_positivated_customer_ids_json')) {
+      context.handle(
+        _nonPositivatedCustomerIdsJsonMeta,
+        nonPositivatedCustomerIdsJson.isAcceptableOrUnknown(
+          data['non_positivated_customer_ids_json']!,
+          _nonPositivatedCustomerIdsJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('calculated_at')) {
+      context.handle(
+        _calculatedAtMeta,
+        calculatedAt.isAcceptableOrUnknown(
+          data['calculated_at']!,
+          _calculatedAtMeta,
+        ),
+      );
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  PositivacaoSnapshotsTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return PositivacaoSnapshotsTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      dimensionType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dimension_type'],
+      )!,
+      dimensionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dimension_id'],
+      )!,
+      periodStart: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}period_start'],
+      )!,
+      periodEnd: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}period_end'],
+      )!,
+      totalPortfolio: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}total_portfolio'],
+      ),
+      positivatedCount: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}positivated_count'],
+      ),
+      nonPositivatedCustomerIdsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}non_positivated_customer_ids_json'],
+      ),
+      calculatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}calculated_at'],
+      ),
+    );
+  }
+
+  @override
+  $PositivacaoSnapshotsTableTable createAlias(String alias) {
+    return $PositivacaoSnapshotsTableTable(attachedDatabase, alias);
+  }
+}
+
+class PositivacaoSnapshotsTableData extends DataClass
+    implements Insertable<PositivacaoSnapshotsTableData> {
+  final String id;
+  final String organizationId;
+  final String companyId;
+  final String dimensionType;
+  final String dimensionId;
+  final DateTime periodStart;
+  final DateTime periodEnd;
+  final int? totalPortfolio;
+  final int? positivatedCount;
+  final String? nonPositivatedCustomerIdsJson;
+  final DateTime? calculatedAt;
+  const PositivacaoSnapshotsTableData({
+    required this.id,
+    required this.organizationId,
+    required this.companyId,
+    required this.dimensionType,
+    required this.dimensionId,
+    required this.periodStart,
+    required this.periodEnd,
+    this.totalPortfolio,
+    this.positivatedCount,
+    this.nonPositivatedCustomerIdsJson,
+    this.calculatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    map['company_id'] = Variable<String>(companyId);
+    map['dimension_type'] = Variable<String>(dimensionType);
+    map['dimension_id'] = Variable<String>(dimensionId);
+    map['period_start'] = Variable<DateTime>(periodStart);
+    map['period_end'] = Variable<DateTime>(periodEnd);
+    if (!nullToAbsent || totalPortfolio != null) {
+      map['total_portfolio'] = Variable<int>(totalPortfolio);
+    }
+    if (!nullToAbsent || positivatedCount != null) {
+      map['positivated_count'] = Variable<int>(positivatedCount);
+    }
+    if (!nullToAbsent || nonPositivatedCustomerIdsJson != null) {
+      map['non_positivated_customer_ids_json'] = Variable<String>(
+        nonPositivatedCustomerIdsJson,
+      );
+    }
+    if (!nullToAbsent || calculatedAt != null) {
+      map['calculated_at'] = Variable<DateTime>(calculatedAt);
+    }
+    return map;
+  }
+
+  PositivacaoSnapshotsTableCompanion toCompanion(bool nullToAbsent) {
+    return PositivacaoSnapshotsTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      companyId: Value(companyId),
+      dimensionType: Value(dimensionType),
+      dimensionId: Value(dimensionId),
+      periodStart: Value(periodStart),
+      periodEnd: Value(periodEnd),
+      totalPortfolio: totalPortfolio == null && nullToAbsent
+          ? const Value.absent()
+          : Value(totalPortfolio),
+      positivatedCount: positivatedCount == null && nullToAbsent
+          ? const Value.absent()
+          : Value(positivatedCount),
+      nonPositivatedCustomerIdsJson:
+          nonPositivatedCustomerIdsJson == null && nullToAbsent
+          ? const Value.absent()
+          : Value(nonPositivatedCustomerIdsJson),
+      calculatedAt: calculatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(calculatedAt),
+    );
+  }
+
+  factory PositivacaoSnapshotsTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return PositivacaoSnapshotsTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      dimensionType: serializer.fromJson<String>(json['dimensionType']),
+      dimensionId: serializer.fromJson<String>(json['dimensionId']),
+      periodStart: serializer.fromJson<DateTime>(json['periodStart']),
+      periodEnd: serializer.fromJson<DateTime>(json['periodEnd']),
+      totalPortfolio: serializer.fromJson<int?>(json['totalPortfolio']),
+      positivatedCount: serializer.fromJson<int?>(json['positivatedCount']),
+      nonPositivatedCustomerIdsJson: serializer.fromJson<String?>(
+        json['nonPositivatedCustomerIdsJson'],
+      ),
+      calculatedAt: serializer.fromJson<DateTime?>(json['calculatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String>(companyId),
+      'dimensionType': serializer.toJson<String>(dimensionType),
+      'dimensionId': serializer.toJson<String>(dimensionId),
+      'periodStart': serializer.toJson<DateTime>(periodStart),
+      'periodEnd': serializer.toJson<DateTime>(periodEnd),
+      'totalPortfolio': serializer.toJson<int?>(totalPortfolio),
+      'positivatedCount': serializer.toJson<int?>(positivatedCount),
+      'nonPositivatedCustomerIdsJson': serializer.toJson<String?>(
+        nonPositivatedCustomerIdsJson,
+      ),
+      'calculatedAt': serializer.toJson<DateTime?>(calculatedAt),
+    };
+  }
+
+  PositivacaoSnapshotsTableData copyWith({
+    String? id,
+    String? organizationId,
+    String? companyId,
+    String? dimensionType,
+    String? dimensionId,
+    DateTime? periodStart,
+    DateTime? periodEnd,
+    Value<int?> totalPortfolio = const Value.absent(),
+    Value<int?> positivatedCount = const Value.absent(),
+    Value<String?> nonPositivatedCustomerIdsJson = const Value.absent(),
+    Value<DateTime?> calculatedAt = const Value.absent(),
+  }) => PositivacaoSnapshotsTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId ?? this.companyId,
+    dimensionType: dimensionType ?? this.dimensionType,
+    dimensionId: dimensionId ?? this.dimensionId,
+    periodStart: periodStart ?? this.periodStart,
+    periodEnd: periodEnd ?? this.periodEnd,
+    totalPortfolio: totalPortfolio.present
+        ? totalPortfolio.value
+        : this.totalPortfolio,
+    positivatedCount: positivatedCount.present
+        ? positivatedCount.value
+        : this.positivatedCount,
+    nonPositivatedCustomerIdsJson: nonPositivatedCustomerIdsJson.present
+        ? nonPositivatedCustomerIdsJson.value
+        : this.nonPositivatedCustomerIdsJson,
+    calculatedAt: calculatedAt.present ? calculatedAt.value : this.calculatedAt,
+  );
+  PositivacaoSnapshotsTableData copyWithCompanion(
+    PositivacaoSnapshotsTableCompanion data,
+  ) {
+    return PositivacaoSnapshotsTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      dimensionType: data.dimensionType.present
+          ? data.dimensionType.value
+          : this.dimensionType,
+      dimensionId: data.dimensionId.present
+          ? data.dimensionId.value
+          : this.dimensionId,
+      periodStart: data.periodStart.present
+          ? data.periodStart.value
+          : this.periodStart,
+      periodEnd: data.periodEnd.present ? data.periodEnd.value : this.periodEnd,
+      totalPortfolio: data.totalPortfolio.present
+          ? data.totalPortfolio.value
+          : this.totalPortfolio,
+      positivatedCount: data.positivatedCount.present
+          ? data.positivatedCount.value
+          : this.positivatedCount,
+      nonPositivatedCustomerIdsJson: data.nonPositivatedCustomerIdsJson.present
+          ? data.nonPositivatedCustomerIdsJson.value
+          : this.nonPositivatedCustomerIdsJson,
+      calculatedAt: data.calculatedAt.present
+          ? data.calculatedAt.value
+          : this.calculatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PositivacaoSnapshotsTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('dimensionType: $dimensionType, ')
+          ..write('dimensionId: $dimensionId, ')
+          ..write('periodStart: $periodStart, ')
+          ..write('periodEnd: $periodEnd, ')
+          ..write('totalPortfolio: $totalPortfolio, ')
+          ..write('positivatedCount: $positivatedCount, ')
+          ..write(
+            'nonPositivatedCustomerIdsJson: $nonPositivatedCustomerIdsJson, ',
+          )
+          ..write('calculatedAt: $calculatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    companyId,
+    dimensionType,
+    dimensionId,
+    periodStart,
+    periodEnd,
+    totalPortfolio,
+    positivatedCount,
+    nonPositivatedCustomerIdsJson,
+    calculatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is PositivacaoSnapshotsTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.dimensionType == this.dimensionType &&
+          other.dimensionId == this.dimensionId &&
+          other.periodStart == this.periodStart &&
+          other.periodEnd == this.periodEnd &&
+          other.totalPortfolio == this.totalPortfolio &&
+          other.positivatedCount == this.positivatedCount &&
+          other.nonPositivatedCustomerIdsJson ==
+              this.nonPositivatedCustomerIdsJson &&
+          other.calculatedAt == this.calculatedAt);
+}
+
+class PositivacaoSnapshotsTableCompanion
+    extends UpdateCompanion<PositivacaoSnapshotsTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String> companyId;
+  final Value<String> dimensionType;
+  final Value<String> dimensionId;
+  final Value<DateTime> periodStart;
+  final Value<DateTime> periodEnd;
+  final Value<int?> totalPortfolio;
+  final Value<int?> positivatedCount;
+  final Value<String?> nonPositivatedCustomerIdsJson;
+  final Value<DateTime?> calculatedAt;
+  final Value<int> rowid;
+  const PositivacaoSnapshotsTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.dimensionType = const Value.absent(),
+    this.dimensionId = const Value.absent(),
+    this.periodStart = const Value.absent(),
+    this.periodEnd = const Value.absent(),
+    this.totalPortfolio = const Value.absent(),
+    this.positivatedCount = const Value.absent(),
+    this.nonPositivatedCustomerIdsJson = const Value.absent(),
+    this.calculatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  PositivacaoSnapshotsTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    required String companyId,
+    required String dimensionType,
+    required String dimensionId,
+    required DateTime periodStart,
+    required DateTime periodEnd,
+    this.totalPortfolio = const Value.absent(),
+    this.positivatedCount = const Value.absent(),
+    this.nonPositivatedCustomerIdsJson = const Value.absent(),
+    this.calculatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       companyId = Value(companyId),
+       dimensionType = Value(dimensionType),
+       dimensionId = Value(dimensionId),
+       periodStart = Value(periodStart),
+       periodEnd = Value(periodEnd);
+  static Insertable<PositivacaoSnapshotsTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? dimensionType,
+    Expression<String>? dimensionId,
+    Expression<DateTime>? periodStart,
+    Expression<DateTime>? periodEnd,
+    Expression<int>? totalPortfolio,
+    Expression<int>? positivatedCount,
+    Expression<String>? nonPositivatedCustomerIdsJson,
+    Expression<DateTime>? calculatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (dimensionType != null) 'dimension_type': dimensionType,
+      if (dimensionId != null) 'dimension_id': dimensionId,
+      if (periodStart != null) 'period_start': periodStart,
+      if (periodEnd != null) 'period_end': periodEnd,
+      if (totalPortfolio != null) 'total_portfolio': totalPortfolio,
+      if (positivatedCount != null) 'positivated_count': positivatedCount,
+      if (nonPositivatedCustomerIdsJson != null)
+        'non_positivated_customer_ids_json': nonPositivatedCustomerIdsJson,
+      if (calculatedAt != null) 'calculated_at': calculatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  PositivacaoSnapshotsTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String>? companyId,
+    Value<String>? dimensionType,
+    Value<String>? dimensionId,
+    Value<DateTime>? periodStart,
+    Value<DateTime>? periodEnd,
+    Value<int?>? totalPortfolio,
+    Value<int?>? positivatedCount,
+    Value<String?>? nonPositivatedCustomerIdsJson,
+    Value<DateTime?>? calculatedAt,
+    Value<int>? rowid,
+  }) {
+    return PositivacaoSnapshotsTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      dimensionType: dimensionType ?? this.dimensionType,
+      dimensionId: dimensionId ?? this.dimensionId,
+      periodStart: periodStart ?? this.periodStart,
+      periodEnd: periodEnd ?? this.periodEnd,
+      totalPortfolio: totalPortfolio ?? this.totalPortfolio,
+      positivatedCount: positivatedCount ?? this.positivatedCount,
+      nonPositivatedCustomerIdsJson:
+          nonPositivatedCustomerIdsJson ?? this.nonPositivatedCustomerIdsJson,
+      calculatedAt: calculatedAt ?? this.calculatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (dimensionType.present) {
+      map['dimension_type'] = Variable<String>(dimensionType.value);
+    }
+    if (dimensionId.present) {
+      map['dimension_id'] = Variable<String>(dimensionId.value);
+    }
+    if (periodStart.present) {
+      map['period_start'] = Variable<DateTime>(periodStart.value);
+    }
+    if (periodEnd.present) {
+      map['period_end'] = Variable<DateTime>(periodEnd.value);
+    }
+    if (totalPortfolio.present) {
+      map['total_portfolio'] = Variable<int>(totalPortfolio.value);
+    }
+    if (positivatedCount.present) {
+      map['positivated_count'] = Variable<int>(positivatedCount.value);
+    }
+    if (nonPositivatedCustomerIdsJson.present) {
+      map['non_positivated_customer_ids_json'] = Variable<String>(
+        nonPositivatedCustomerIdsJson.value,
+      );
+    }
+    if (calculatedAt.present) {
+      map['calculated_at'] = Variable<DateTime>(calculatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('PositivacaoSnapshotsTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('dimensionType: $dimensionType, ')
+          ..write('dimensionId: $dimensionId, ')
+          ..write('periodStart: $periodStart, ')
+          ..write('periodEnd: $periodEnd, ')
+          ..write('totalPortfolio: $totalPortfolio, ')
+          ..write('positivatedCount: $positivatedCount, ')
+          ..write(
+            'nonPositivatedCustomerIdsJson: $nonPositivatedCustomerIdsJson, ',
+          )
+          ..write('calculatedAt: $calculatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -23404,6 +24137,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ConflictRecordsTableTable(this);
   late final $ConflictAuditLogTableTable conflictAuditLogTable =
       $ConflictAuditLogTableTable(this);
+  late final $PositivacaoSnapshotsTableTable positivacaoSnapshotsTable =
+      $PositivacaoSnapshotsTableTable(this);
   late final Index idxCustomersOrgCompany = Index(
     'idx_customers_org_company',
     'CREATE INDEX idx_customers_org_company ON customers (organization_id, company_id)',
@@ -23528,6 +24263,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_conflict_audit_log_scope',
     'CREATE INDEX idx_conflict_audit_log_scope ON conflict_audit_log (organization_id, performed_at)',
   );
+  late final Index idxPositivacaoSnapshotsOrgCompany = Index(
+    'idx_positivacao_snapshots_org_company',
+    'CREATE INDEX idx_positivacao_snapshots_org_company ON positivacao_snapshots (organization_id, company_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -23556,6 +24295,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     syncCursorsTable,
     conflictRecordsTable,
     conflictAuditLogTable,
+    positivacaoSnapshotsTable,
     idxCustomersOrgCompany,
     idxCustomerAddressesCustomer,
     idxCustomerContactsCustomer,
@@ -23587,6 +24327,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxOutboxEntity,
     idxConflictRecordsScopeStatus,
     idxConflictAuditLogScope,
+    idxPositivacaoSnapshotsOrgCompany,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -35204,6 +35945,359 @@ typedef $$ConflictAuditLogTableTableProcessedTableManager =
       ConflictAuditLogTableData,
       PrefetchHooks Function()
     >;
+typedef $$PositivacaoSnapshotsTableTableCreateCompanionBuilder =
+    PositivacaoSnapshotsTableCompanion Function({
+      required String id,
+      required String organizationId,
+      required String companyId,
+      required String dimensionType,
+      required String dimensionId,
+      required DateTime periodStart,
+      required DateTime periodEnd,
+      Value<int?> totalPortfolio,
+      Value<int?> positivatedCount,
+      Value<String?> nonPositivatedCustomerIdsJson,
+      Value<DateTime?> calculatedAt,
+      Value<int> rowid,
+    });
+typedef $$PositivacaoSnapshotsTableTableUpdateCompanionBuilder =
+    PositivacaoSnapshotsTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String> companyId,
+      Value<String> dimensionType,
+      Value<String> dimensionId,
+      Value<DateTime> periodStart,
+      Value<DateTime> periodEnd,
+      Value<int?> totalPortfolio,
+      Value<int?> positivatedCount,
+      Value<String?> nonPositivatedCustomerIdsJson,
+      Value<DateTime?> calculatedAt,
+      Value<int> rowid,
+    });
+
+class $$PositivacaoSnapshotsTableTableFilterComposer
+    extends Composer<_$AppDatabase, $PositivacaoSnapshotsTableTable> {
+  $$PositivacaoSnapshotsTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dimensionType => $composableBuilder(
+    column: $table.dimensionType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dimensionId => $composableBuilder(
+    column: $table.dimensionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get periodStart => $composableBuilder(
+    column: $table.periodStart,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get periodEnd => $composableBuilder(
+    column: $table.periodEnd,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get totalPortfolio => $composableBuilder(
+    column: $table.totalPortfolio,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get positivatedCount => $composableBuilder(
+    column: $table.positivatedCount,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get nonPositivatedCustomerIdsJson => $composableBuilder(
+    column: $table.nonPositivatedCustomerIdsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get calculatedAt => $composableBuilder(
+    column: $table.calculatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$PositivacaoSnapshotsTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $PositivacaoSnapshotsTableTable> {
+  $$PositivacaoSnapshotsTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dimensionType => $composableBuilder(
+    column: $table.dimensionType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dimensionId => $composableBuilder(
+    column: $table.dimensionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get periodStart => $composableBuilder(
+    column: $table.periodStart,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get periodEnd => $composableBuilder(
+    column: $table.periodEnd,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get totalPortfolio => $composableBuilder(
+    column: $table.totalPortfolio,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get positivatedCount => $composableBuilder(
+    column: $table.positivatedCount,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get nonPositivatedCustomerIdsJson =>
+      $composableBuilder(
+        column: $table.nonPositivatedCustomerIdsJson,
+        builder: (column) => ColumnOrderings(column),
+      );
+
+  ColumnOrderings<DateTime> get calculatedAt => $composableBuilder(
+    column: $table.calculatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$PositivacaoSnapshotsTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $PositivacaoSnapshotsTableTable> {
+  $$PositivacaoSnapshotsTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get dimensionType => $composableBuilder(
+    column: $table.dimensionType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get dimensionId => $composableBuilder(
+    column: $table.dimensionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get periodStart => $composableBuilder(
+    column: $table.periodStart,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get periodEnd =>
+      $composableBuilder(column: $table.periodEnd, builder: (column) => column);
+
+  GeneratedColumn<int> get totalPortfolio => $composableBuilder(
+    column: $table.totalPortfolio,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get positivatedCount => $composableBuilder(
+    column: $table.positivatedCount,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get nonPositivatedCustomerIdsJson =>
+      $composableBuilder(
+        column: $table.nonPositivatedCustomerIdsJson,
+        builder: (column) => column,
+      );
+
+  GeneratedColumn<DateTime> get calculatedAt => $composableBuilder(
+    column: $table.calculatedAt,
+    builder: (column) => column,
+  );
+}
+
+class $$PositivacaoSnapshotsTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $PositivacaoSnapshotsTableTable,
+          PositivacaoSnapshotsTableData,
+          $$PositivacaoSnapshotsTableTableFilterComposer,
+          $$PositivacaoSnapshotsTableTableOrderingComposer,
+          $$PositivacaoSnapshotsTableTableAnnotationComposer,
+          $$PositivacaoSnapshotsTableTableCreateCompanionBuilder,
+          $$PositivacaoSnapshotsTableTableUpdateCompanionBuilder,
+          (
+            PositivacaoSnapshotsTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $PositivacaoSnapshotsTableTable,
+              PositivacaoSnapshotsTableData
+            >,
+          ),
+          PositivacaoSnapshotsTableData,
+          PrefetchHooks Function()
+        > {
+  $$PositivacaoSnapshotsTableTableTableManager(
+    _$AppDatabase db,
+    $PositivacaoSnapshotsTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$PositivacaoSnapshotsTableTableFilterComposer(
+                $db: db,
+                $table: table,
+              ),
+          createOrderingComposer: () =>
+              $$PositivacaoSnapshotsTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$PositivacaoSnapshotsTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> dimensionType = const Value.absent(),
+                Value<String> dimensionId = const Value.absent(),
+                Value<DateTime> periodStart = const Value.absent(),
+                Value<DateTime> periodEnd = const Value.absent(),
+                Value<int?> totalPortfolio = const Value.absent(),
+                Value<int?> positivatedCount = const Value.absent(),
+                Value<String?> nonPositivatedCustomerIdsJson =
+                    const Value.absent(),
+                Value<DateTime?> calculatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PositivacaoSnapshotsTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                dimensionType: dimensionType,
+                dimensionId: dimensionId,
+                periodStart: periodStart,
+                periodEnd: periodEnd,
+                totalPortfolio: totalPortfolio,
+                positivatedCount: positivatedCount,
+                nonPositivatedCustomerIdsJson: nonPositivatedCustomerIdsJson,
+                calculatedAt: calculatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                required String companyId,
+                required String dimensionType,
+                required String dimensionId,
+                required DateTime periodStart,
+                required DateTime periodEnd,
+                Value<int?> totalPortfolio = const Value.absent(),
+                Value<int?> positivatedCount = const Value.absent(),
+                Value<String?> nonPositivatedCustomerIdsJson =
+                    const Value.absent(),
+                Value<DateTime?> calculatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => PositivacaoSnapshotsTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                dimensionType: dimensionType,
+                dimensionId: dimensionId,
+                periodStart: periodStart,
+                periodEnd: periodEnd,
+                totalPortfolio: totalPortfolio,
+                positivatedCount: positivatedCount,
+                nonPositivatedCustomerIdsJson: nonPositivatedCustomerIdsJson,
+                calculatedAt: calculatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$PositivacaoSnapshotsTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $PositivacaoSnapshotsTableTable,
+      PositivacaoSnapshotsTableData,
+      $$PositivacaoSnapshotsTableTableFilterComposer,
+      $$PositivacaoSnapshotsTableTableOrderingComposer,
+      $$PositivacaoSnapshotsTableTableAnnotationComposer,
+      $$PositivacaoSnapshotsTableTableCreateCompanionBuilder,
+      $$PositivacaoSnapshotsTableTableUpdateCompanionBuilder,
+      (
+        PositivacaoSnapshotsTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $PositivacaoSnapshotsTableTable,
+          PositivacaoSnapshotsTableData
+        >,
+      ),
+      PositivacaoSnapshotsTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -35267,4 +36361,9 @@ class $AppDatabaseManager {
       $$ConflictRecordsTableTableTableManager(_db, _db.conflictRecordsTable);
   $$ConflictAuditLogTableTableTableManager get conflictAuditLogTable =>
       $$ConflictAuditLogTableTableTableManager(_db, _db.conflictAuditLogTable);
+  $$PositivacaoSnapshotsTableTableTableManager get positivacaoSnapshotsTable =>
+      $$PositivacaoSnapshotsTableTableTableManager(
+        _db,
+        _db.positivacaoSnapshotsTable,
+      );
 }

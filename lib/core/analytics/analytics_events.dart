@@ -76,6 +76,19 @@ final class AnalyticsEvents {
   /// sync).
   static const String targetDashboardViewed = 'target_dashboard_viewed';
 
+  /// Logged by `PositivacaoDashboardCubit` (TASK-117, EPIC-15) once per
+  /// dimension the caller navigates the positivação de carteira dashboard
+  /// to — same "once per dimension switch, never once per realtime tick"
+  /// rule as [targetDashboardViewed].
+  static const String positivacaoDashboardViewed =
+      'positivacao_dashboard_viewed';
+
+  /// Logged by the positivação settings admin screen (TASK-117, EPIC-15)
+  /// whenever an OWNER/ADMIN updates the organization's positivação rule
+  /// (`OrganizationSettings.positivacao*`).
+  static const String positivacaoSettingsUpdated =
+      'positivacao_settings_updated';
+
   /// Logged once per `SyncEngine.runPush` call (TASK-109, EPIC-14) — the
   /// Outbox drain pass — with `attempted`/`synced`/`failed`/`conflicts`/
   /// `duration_ms` parameters, feeding the "métricas de sincronização"
@@ -156,6 +169,8 @@ final class AnalyticsEvents {
     targetCreated,
     targetUpdated,
     targetDashboardViewed,
+    positivacaoDashboardViewed,
+    positivacaoSettingsUpdated,
     syncPushCompleted,
     syncPullCompleted,
     syncCenterOpened,

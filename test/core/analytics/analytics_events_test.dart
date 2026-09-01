@@ -58,6 +58,8 @@ void main() {
           'target_created',
           'target_updated',
           'target_dashboard_viewed',
+          'positivacao_dashboard_viewed',
+          'positivacao_settings_updated',
           'sync_push_completed',
           'sync_pull_completed',
           'sync_center_opened',

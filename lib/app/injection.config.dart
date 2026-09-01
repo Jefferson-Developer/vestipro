@@ -968,10 +968,14 @@ import '../features/settings/domain/usecases/submit_about_app_diagnostics_use_ca
     as _i226;
 import '../features/settings/presentation/bloc/about_app_bloc.dart' as _i398;
 import '../features/targets/data/mappers/target_mapper.dart' as _i730;
+import '../features/targets/data/repositories/drift_positivacao_repository.dart'
+    as _i8;
 import '../features/targets/data/repositories/drift_target_achievement_repository.dart'
     as _i535;
 import '../features/targets/data/repositories/shared_preferences_target_repository.dart'
     as _i46;
+import '../features/targets/domain/repositories/positivacao_repository.dart'
+    as _i1031;
 import '../features/targets/domain/repositories/target_achievement_repository.dart'
     as _i154;
 import '../features/targets/domain/repositories/target_repository.dart'
@@ -982,6 +986,10 @@ import '../features/targets/domain/usecases/create_target_use_case.dart'
     as _i472;
 import '../features/targets/domain/usecases/update_target_use_case.dart'
     as _i604;
+import '../features/targets/presentation/cubit/positivacao_dashboard_cubit.dart'
+    as _i627;
+import '../features/targets/presentation/cubit/positivacao_settings_cubit.dart'
+    as _i936;
 import '../features/targets/presentation/cubit/target_dashboard_cubit.dart'
     as _i293;
 import '../features/targets/presentation/cubit/target_form_cubit.dart' as _i998;
@@ -1492,6 +1500,9 @@ extension GetItInjectableX on _i174.GetIt {
         dataSource: gh<_i659.CustomerSegmentDataSource>(),
         mapper: gh<_i712.CustomerSegmentMapper>(),
       ),
+    );
+    gh.lazySingleton<_i1031.PositivacaoRepository>(
+      () => _i8.DriftPositivacaoRepository(gh<_i658.AppDatabase>()),
     );
     gh.lazySingleton<_i234.OutboxRepository>(
       () => _i170.DriftOutboxRepository(gh<_i658.AppDatabase>()),
@@ -2998,6 +3009,13 @@ extension GetItInjectableX on _i174.GetIt {
         sessionService: gh<_i885.SessionService>(),
       ),
     );
+    gh.factory<_i936.PositivacaoSettingsCubit>(
+      () => _i936.PositivacaoSettingsCubit(
+        gh<_i265.GetOrganizationUseCase>(),
+        gh<_i265.UpdateOrganizationSettingsUseCase>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i424.OrderListBloc>(
       () => _i424.OrderListBloc(
         listOrders: gh<_i144.ListOrdersUseCase>(),
@@ -3057,6 +3075,15 @@ extension GetItInjectableX on _i174.GetIt {
         listPortfolioAssignments: gh<_i321.ListPortfolioAssignmentsUseCase>(),
         assignPortfolio: gh<_i636.AssignPortfolioUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i627.PositivacaoDashboardCubit>(
+      () => _i627.PositivacaoDashboardCubit(
+        gh<_i951.TargetVisibilityService>(),
+        gh<_i265.GetOrganizationUseCase>(),
+        gh<_i1031.PositivacaoRepository>(),
+        gh<_i909.GetCustomerByIdUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i125.OrderHistoryBloc>(
