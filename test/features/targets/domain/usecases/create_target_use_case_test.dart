@@ -1,14 +1,22 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
+import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/errors/errors.dart';
+import 'package:vestipro/core/permissions/permissions.dart';
 import 'package:vestipro/core/utils/utils.dart';
+import 'package:vestipro/features/organizations/organizations.dart';
 import 'package:vestipro/features/targets/targets.dart';
 
 class _MockTargetRepository extends Mock implements TargetRepository {}
 
+class _MockMembershipRepository extends Mock implements MembershipRepository {}
+
 void main() {
   group('CreateTargetUseCase', () {
     late _MockTargetRepository repository;
+    late _MockMembershipRepository membershipRepository;
+    late PermissionService permissionService;
+    late FakeAnalyticsService analytics;
     late CreateTargetUseCase useCase;
 
     setUpAll(() {
@@ -19,7 +27,10 @@ void main() {
 
     setUp(() {
       repository = _MockTargetRepository();
-      useCase = CreateTargetUseCase(repository);
+      membershipRepository = _MockMembershipRepository();
+      permissionService = PermissionService(membershipRepository);
+      analytics = FakeAnalyticsService();
+      useCase = CreateTargetUseCase(repository, permissionService, analytics);
       when(() => repository.create(target: any(named: 'target'))).thenAnswer((
         invocation,
       ) async {
@@ -34,6 +45,7 @@ void main() {
           metricType: any(named: 'metricType'),
         ),
       ).thenAnswer((_) async => const AppSuccess<List<Target>>(<Target>[]));
+      _stubMembership(membershipRepository, 'manager-1', 'SALES_MANAGER');
     });
 
     Future<AppResult<Target>> callUseCase({
@@ -41,6 +53,7 @@ void main() {
       DateTime? endDate,
       double targetValue = 100000,
       TargetStatus status = TargetStatus.active,
+      String createdBy = 'manager-1',
     }) {
       return useCase.call(
         id: 'target-1',
@@ -54,7 +67,7 @@ void main() {
         metricType: TargetMetricType.revenue,
         targetValue: targetValue,
         status: status,
-        createdBy: 'manager-1',
+        createdBy: createdBy,
       );
     }
 
@@ -67,6 +80,25 @@ void main() {
       expect(target.version, 1);
       expect(target.syncStatus, TargetSyncStatus.pending);
       expect(target.currency, 'BRL');
+      expect(
+        analytics.loggedEvents.any(
+          (event) => event.name == AnalyticsEvents.targetCreated,
+        ),
+        isTrue,
+      );
+    });
+
+    test('denies creation for a SALES_REP actor and never calls the repository '
+        '(RBAC)', () async {
+      _stubMembership(membershipRepository, 'rep-1', 'SALES_REP');
+
+      final result = await callUseCase(createdBy: 'rep-1');
+
+      expect(result, isA<AppFailure<Target>>());
+      final failure = (result as AppFailure<Target>).failure;
+      expect(failure, isA<PermissionFailure>());
+      expect((failure as PermissionFailure).code, 'target_manage_denied');
+      verifyNever(() => repository.create(target: any(named: 'target')));
     });
 
     test('rejects a negative targetValue', () async {
@@ -221,6 +253,33 @@ void main() {
       verifyNever(() => repository.create(target: any(named: 'target')));
     });
   });
+}
+
+void _stubMembership(
+  _MockMembershipRepository membershipRepository,
+  String userId,
+  String roleName,
+) {
+  when(
+    () =>
+        membershipRepository.getByUser(organizationId: 'org-1', userId: userId),
+  ).thenAnswer(
+    (_) async => AppSuccess<Membership>(
+      Membership(
+        id: userId,
+        organizationId: 'org-1',
+        userId: userId,
+        roleId: roleName,
+        roleName: roleName,
+        status: MembershipStatus.active,
+        version: 1,
+        createdAt: DateTime.utc(2026, 1, 1),
+        createdBy: 'owner-1',
+        updatedAt: DateTime.utc(2026, 1, 1),
+        updatedBy: 'owner-1',
+      ),
+    ),
+  );
 }
 
 Target _buildFallbackTarget({

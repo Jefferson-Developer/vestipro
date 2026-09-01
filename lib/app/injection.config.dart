@@ -968,6 +968,15 @@ import '../features/settings/domain/usecases/submit_about_app_diagnostics_use_ca
     as _i226;
 import '../features/settings/presentation/bloc/about_app_bloc.dart' as _i398;
 import '../features/targets/data/mappers/target_mapper.dart' as _i730;
+import '../features/targets/data/repositories/shared_preferences_target_repository.dart'
+    as _i46;
+import '../features/targets/domain/repositories/target_repository.dart'
+    as _i876;
+import '../features/targets/domain/usecases/create_target_use_case.dart'
+    as _i472;
+import '../features/targets/domain/usecases/update_target_use_case.dart'
+    as _i604;
+import '../features/targets/presentation/cubit/target_form_cubit.dart' as _i998;
 import '../features/users/data/datasources/cloud_functions_user_access_data_source.dart'
     as _i605;
 import '../features/users/data/datasources/cloud_functions_user_role_data_source.dart'
@@ -1395,6 +1404,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i321.ProductRepository>(
       () => _i323.SharedPreferencesProductRepository(gh<_i309.ProductMapper>()),
+    );
+    gh.lazySingleton<_i876.TargetRepository>(
+      () => _i46.SharedPreferencesTargetRepository(gh<_i730.TargetMapper>()),
     );
     gh.lazySingleton<_i459.ProductFormDraftRepository>(
       () => _i873.ProductFormDraftRepositoryImpl(
@@ -2380,6 +2392,14 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i1062.OrderSubmissionMapper>(),
       ),
     );
+    gh.factory<_i604.UpdateTargetUseCase>(
+      () => _i604.UpdateTargetUseCase(
+        gh<_i876.TargetRepository>(),
+        gh<_i47.PermissionService>(),
+        gh<_i753.AuditLogRepository>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i321.ListPortfolioAssignmentsUseCase>(
       () => _i321.ListPortfolioAssignmentsUseCase(
         gh<_i295.PortfolioAssignmentRepository>(),
@@ -2472,6 +2492,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i522.OrganizationRepositoryImpl(
         dataSource: gh<_i268.OrganizationDataSource>(),
         mapper: gh<_i719.OrganizationMapper>(),
+      ),
+    );
+    gh.factory<_i472.CreateTargetUseCase>(
+      () => _i472.CreateTargetUseCase(
+        gh<_i876.TargetRepository>(),
+        gh<_i47.PermissionService>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i647.PublishProductUseCase>(
@@ -2771,6 +2798,13 @@ extension GetItInjectableX on _i174.GetIt {
         createAccountWithEmailAndPassword:
             gh<_i90.CreateAccountWithEmailAndPasswordUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i998.TargetFormCubit>(
+      () => _i998.TargetFormCubit(
+        gh<_i876.TargetRepository>(),
+        gh<_i472.CreateTargetUseCase>(),
+        gh<_i604.UpdateTargetUseCase>(),
       ),
     );
     gh.factory<_i55.CreateOrganizationUseCase>(

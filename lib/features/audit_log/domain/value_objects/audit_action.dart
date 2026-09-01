@@ -67,6 +67,12 @@ enum AuditAction {
   promotionalCampaignCreated,
   promotionalCampaignUpdated,
   promotionalCampaignEnded,
+
+  /// A `Target` (meta comercial, EPIC-15/TASK-115) field changed via
+  /// `UpdateTargetUseCase` — always recorded, never conditional on
+  /// `TargetStatus.active`, so the audit trail also covers edits made while
+  /// a target is still a draft.
+  targetUpdated,
 }
 
 extension AuditActionCode on AuditAction {
@@ -105,6 +111,7 @@ extension AuditActionCode on AuditAction {
       AuditAction.promotionalCampaignCreated => 'promotionalCampaign.created',
       AuditAction.promotionalCampaignUpdated => 'promotionalCampaign.updated',
       AuditAction.promotionalCampaignEnded => 'promotionalCampaign.ended',
+      AuditAction.targetUpdated => 'target.updated',
     };
   }
 }

@@ -214,6 +214,38 @@ void main() {
       }
     });
 
+    test('only OWNER/ADMIN/SALES_MANAGER can manage targets (TASK-115); '
+        'SALES_REP/SALES_ASSISTANT/FINANCE/READ_ONLY never can', () {
+      for (final role in <SystemRoleName>[
+        SystemRoleName.owner,
+        SystemRoleName.admin,
+        SystemRoleName.salesManager,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.targetManage),
+          isTrue,
+          reason: '$role must be able to manage targets.',
+        );
+      }
+
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesRep,
+        SystemRoleName.salesAssistant,
+        SystemRoleName.finance,
+        SystemRoleName.readOnly,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.targetManage),
+          isFalse,
+          reason: '$role must never manage targets.',
+        );
+      }
+    });
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,

@@ -65,6 +65,11 @@ final class AnalyticsEvents {
   static const String catalogShareCreated = 'catalog_share_created';
   static const String catalogShareOpened = 'catalog_share_opened';
 
+  /// Logged by `CreateTargetUseCase`/`UpdateTargetUseCase` (TASK-115,
+  /// EPIC-15) whenever a meta comercial is created or edited.
+  static const String targetCreated = 'target_created';
+  static const String targetUpdated = 'target_updated';
+
   /// Logged once per `SyncEngine.runPush` call (TASK-109, EPIC-14) — the
   /// Outbox drain pass — with `attempted`/`synced`/`failed`/`conflicts`/
   /// `duration_ms` parameters, feeding the "métricas de sincronização"
@@ -142,6 +147,8 @@ final class AnalyticsEvents {
     campaignProductClicked,
     catalogShareCreated,
     catalogShareOpened,
+    targetCreated,
+    targetUpdated,
     syncPushCompleted,
     syncPullCompleted,
     syncCenterOpened,

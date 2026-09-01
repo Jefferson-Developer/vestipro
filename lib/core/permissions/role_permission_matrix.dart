@@ -49,6 +49,9 @@ abstract final class RolePermissionMatrix {
     Capability.teamManage,
     Capability.reportExport,
     Capability.reportViewSensitive,
+    // TASK-115: SALES_MANAGER cadastra/edita metas para sua equipe; OWNER
+    // and ADMIN already get it via the full/near-full capability set above.
+    Capability.targetManage,
   };
 
   static const Set<Capability> _salesRepCapabilities = <Capability>{

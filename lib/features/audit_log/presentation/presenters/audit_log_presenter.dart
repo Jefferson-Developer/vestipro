@@ -30,6 +30,7 @@ String auditActionLabel(AuditAction action) {
     AuditAction.promotionalCampaignCreated => 'Campanha promocional criada',
     AuditAction.promotionalCampaignUpdated => 'Campanha promocional alterada',
     AuditAction.promotionalCampaignEnded => 'Campanha promocional encerrada',
+    AuditAction.targetUpdated => 'Meta alterada',
   };
 }
 
@@ -48,6 +49,7 @@ String auditEntityLabel(AuditLogEntry entry) {
     'paymentTerm' => 'Condição',
     'discountPolicy' => 'Política de desconto',
     'promotionalCampaign' => 'Campanha promocional',
+    'target' => 'Meta',
     _ => entry.entityType,
   };
   return '$type ${entry.entityId}';

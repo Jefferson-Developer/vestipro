@@ -1,4 +1,8 @@
+import 'package:injectable/injectable.dart';
+
+import '../../../../core/analytics/analytics.dart';
 import '../../../../core/errors/errors.dart';
+import '../../../../core/permissions/permissions.dart';
 import '../../../../core/utils/utils.dart';
 import '../entities/target.dart';
 import '../repositories/target_repository.dart';
@@ -10,8 +14,8 @@ import '../value_objects/target_status.dart';
 import '../value_objects/target_sync_status.dart';
 import 'target_use_case_helpers.dart';
 
-/// Creates a Target ("meta comercial"), anticipating the cadastro de metas
-/// flow (TASK-115, `VESTI-085`).
+/// Creates a Target ("meta comercial"), the cadastro de metas flow
+/// (TASK-115, `VESTI-085`).
 ///
 /// Field validation covers the rules `Target`'s own docs describe as this use
 /// case's job (never the entity's, since the entity has no repository
@@ -21,10 +25,21 @@ import 'target_use_case_helpers.dart';
 /// [dimensionType]/[dimensionId]/[metricType] may have an overlapping period.
 /// A [TargetStatus.draft] target skips the overlap check entirely: it is not
 /// yet competing for that period/dimension slot.
+///
+/// [createdBy] doubles as the RBAC actor: [Capability.targetManage] is
+/// re-checked here (never trusted from the UI alone, same defense-in-depth
+/// precedent as `DecideOrderApprovalUseCase`) before anything is persisted.
+@injectable
 final class CreateTargetUseCase {
-  CreateTargetUseCase(this._repository);
+  CreateTargetUseCase(
+    this._repository,
+    this._permissionService,
+    this._analyticsService,
+  );
 
   final TargetRepository _repository;
+  final PermissionService _permissionService;
+  final AnalyticsService _analyticsService;
 
   Future<AppResult<Target>> call({
     required String id,
@@ -82,6 +97,18 @@ final class CreateTargetUseCase {
       );
     }
 
+    final permissionResult = await _permissionService.hasPermission(
+      organizationId: trimmedOrganizationId,
+      userId: trimmedCreatedBy,
+      capability: Capability.targetManage,
+    );
+    if (permissionResult is AppFailure<bool>) {
+      return AppFailure<Target>(permissionResult.failure);
+    }
+    if (!(permissionResult as AppSuccess<bool>).value) {
+      return AppFailure<Target>(targetManageDeniedFailure());
+    }
+
     if (status == TargetStatus.active) {
       final candidatesResult = await _repository.listByDimension(
         organizationId: trimmedOrganizationId,
@@ -136,6 +163,18 @@ final class CreateTargetUseCase {
       syncStatus: TargetSyncStatus.pending,
     );
 
-    return _repository.create(target: target);
+    final result = await _repository.create(target: target);
+    if (result case AppSuccess<Target>(value: final created)) {
+      await _analyticsService.logEvent(
+        AnalyticsEvents.targetCreated,
+        parameters: <String, Object?>{
+          'organization_id': created.organizationId,
+          'company_id': created.companyId,
+          'dimension_type': created.dimensionType.name,
+          'metric_type': created.metricType.name,
+        },
+      );
+    }
+    return result;
   }
 }

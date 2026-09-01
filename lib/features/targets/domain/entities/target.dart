@@ -70,4 +70,23 @@ abstract class Target with _$Target {
       bEnd: other.endDate,
     );
   }
+
+  /// Flat snapshot for `AuditLogEntry.previousValue`/`newValue`
+  /// (`AuditLogEntryFactory.build`), mirroring
+  /// `PromotionalCampaign.toAuditMap` — never includes anything from
+  /// [sensitiveAuditValueKeys] because none of this entity's fields are
+  /// sensitive to begin with.
+  Map<String, Object?> toAuditMap() {
+    return <String, Object?>{
+      'dimensionType': dimensionType.name,
+      'dimensionId': dimensionId,
+      'periodGranularity': periodGranularity.name,
+      'startDate': startDate.toUtc().toIso8601String(),
+      'endDate': endDate.toUtc().toIso8601String(),
+      'metricType': metricType.name,
+      'targetValue': targetValue,
+      'currency': currency,
+      'status': status.name,
+    };
+  }
 }

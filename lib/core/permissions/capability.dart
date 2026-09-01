@@ -44,6 +44,16 @@ enum Capability {
   reportExport,
   reportViewSensitive,
   auditLogView,
+
+  /// Create/edit a `Target` (meta comercial, EPIC-15/TASK-115) for any
+  /// dimension (vendedor, equipe, empresa, coleção, categoria). Deliberately
+  /// the only gate `CreateTargetUseCase`/`UpdateTargetUseCase` check — a
+  /// `SALES_REP` (who never has it, see `RolePermissionMatrix`) cannot
+  /// create nor edit any Target yet, including their own, since the
+  /// org-configurable "self-edit non-financial fields" carve-out
+  /// `tasks.md`/TASK-115 describes has no `OrganizationSettings` toggle to
+  /// read yet; revisit this capability's scope once that setting exists.
+  targetManage,
 }
 
 extension CapabilityCode on Capability {
@@ -85,6 +95,7 @@ extension CapabilityCode on Capability {
       Capability.reportExport => 'report.export',
       Capability.reportViewSensitive => 'report.viewSensitive',
       Capability.auditLogView => 'audit.log.view',
+      Capability.targetManage => 'target.manage',
     };
   }
 }
