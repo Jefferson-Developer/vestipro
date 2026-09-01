@@ -12,18 +12,21 @@ import {
   evaluateInsights,
   type Insight,
   type InsightContext,
+  type InsightCustomerGrowthSnapshot,
   type InsightCustomerSnapshot,
   type InsightDataset,
   type InsightOrganizationSettings,
   type InsightRevenueComparisonMode,
   type InsightRevenueComparisonSnapshot,
 } from './insight-engine';
+import { GrowingCustomerInsightRule } from './growing-customer-insight-rule';
 import { InactiveCustomerInsightRule } from './inactive-customer-insight-rule';
 import { RevenueDropInsightRule } from './revenue-drop-insight-rule';
 
 const defaultRules = [
   new InactiveCustomerInsightRule(),
   new RevenueDropInsightRule(),
+  new GrowingCustomerInsightRule(),
 ] as const;
 
 export const generateInsightsScheduled = onSchedule(
@@ -56,12 +59,16 @@ export async function generateInsightsScheduledHandler(
     );
     const customerSnapshots = await loadCustomerSnapshots(organization.ref);
     const revenueComparisons = await loadRevenueComparisons(organization.ref);
+    const customerGrowthSnapshots = await loadCustomerGrowthSnapshots(
+      organization.ref,
+    );
     for (const insights of buildInsightsForOrganization({
       organizationId: organization.id,
       asOf: now,
       settings,
       customerSnapshots,
       revenueComparisons,
+      customerGrowthSnapshots,
     })) {
       await persistInsights(organization.ref, insights);
       logger.info('generateInsightsScheduled processed company', {
@@ -163,6 +170,42 @@ async function loadRevenueComparisons(
   });
 }
 
+async function loadCustomerGrowthSnapshots(
+  organizationRef: DocumentReference,
+): Promise<InsightCustomerGrowthSnapshot[]> {
+  const snapshot = await organizationRef
+    .collection('insightCustomerGrowthSnapshots')
+    .get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    const periods = Array.isArray(data.periods) ? data.periods : [];
+    return {
+      customerId: data.customerId as string,
+      organizationId: data.organizationId as string,
+      companyId: data.companyId as string,
+      recipientUserId: data.recipientUserId as string,
+      customerName: data.customerName as string,
+      periods: periods.map((period: DocumentData) => ({
+        periodKey: period.periodKey as string,
+        revenue: period.revenue as number,
+        hasOutlierOrder: Boolean(period.hasOutlierOrder),
+        outlierAdjustedRevenue:
+          (period.outlierAdjustedRevenue as number | null | undefined) ??
+          null,
+      })),
+      topGrowingCategoryId:
+        (data.topGrowingCategoryId as string | null | undefined) ?? null,
+      topGrowingCategoryName:
+        (data.topGrowingCategoryName as string | null | undefined) ?? null,
+      topGrowingCategoryRevenueGrowthAmount:
+        (data.topGrowingCategoryRevenueGrowthAmount as
+          | number
+          | null
+          | undefined) ?? null,
+    };
+  });
+}
+
 function resolveSettings(
   settingsData: DocumentData | undefined,
 ): InsightOrganizationSettings {
@@ -185,6 +228,12 @@ function resolveSettings(
       settingsData?.revenueComparisonMode === 'monthOverMonth'
         ? 'monthOverMonth'
         : DEFAULT_INSIGHT_SETTINGS.revenueComparisonMode,
+    customerGrowthMinConsecutivePeriods:
+      positiveNumber(settingsData?.customerGrowthMinConsecutivePeriods) ??
+      DEFAULT_INSIGHT_SETTINGS.customerGrowthMinConsecutivePeriods,
+    customerGrowthMinimumAverageRate:
+      positiveNumber(settingsData?.customerGrowthMinimumAverageRate) ??
+      DEFAULT_INSIGHT_SETTINGS.customerGrowthMinimumAverageRate,
     lifetimeDays:
       typeof lifetimeDays === 'number' && lifetimeDays > 0
         ? lifetimeDays
@@ -198,10 +247,13 @@ export function buildInsightsForOrganization(params: {
   settings: InsightOrganizationSettings;
   customerSnapshots: readonly InsightCustomerSnapshot[];
   revenueComparisons: readonly InsightRevenueComparisonSnapshot[];
+  customerGrowthSnapshots?: readonly InsightCustomerGrowthSnapshot[];
 }): Insight[][] {
+  const customerGrowthSnapshots = params.customerGrowthSnapshots ?? [];
   const companyIds = new Set<string>([
     ...params.customerSnapshots.map((item) => item.companyId),
     ...params.revenueComparisons.map((item) => item.companyId),
+    ...customerGrowthSnapshots.map((item) => item.companyId),
   ]);
   const results: Insight[][] = [];
   for (const companyId of companyIds) {
@@ -211,6 +263,9 @@ export function buildInsightsForOrganization(params: {
         (item) => item.companyId === companyId,
       ),
       revenueComparisons: params.revenueComparisons.filter(
+        (item) => item.companyId === companyId,
+      ),
+      customerGrowthSnapshots: customerGrowthSnapshots.filter(
         (item) => item.companyId === companyId,
       ),
     };

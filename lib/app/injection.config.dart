@@ -352,6 +352,8 @@ import '../features/insights/data/repositories/insight_repository_impl.dart'
     as _i666;
 import '../features/insights/domain/repositories/insight_repository.dart'
     as _i644;
+import '../features/insights/domain/rules/growing_customer_insight_rule.dart'
+    as _i425;
 import '../features/insights/domain/rules/inactive_customer_insight_rule.dart'
     as _i364;
 import '../features/insights/domain/rules/revenue_drop_insight_rule.dart'
@@ -1161,6 +1163,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => const _i712.CustomerSegmentMapper(),
     );
     gh.lazySingleton<_i963.InsightMapper>(() => const _i963.InsightMapper());
+    gh.lazySingleton<_i425.GrowingCustomerInsightRule>(
+      () => const _i425.GrowingCustomerInsightRule(),
+    );
     gh.lazySingleton<_i364.InactiveCustomerInsightRule>(
       () => const _i364.InactiveCustomerInsightRule(),
     );
@@ -1260,12 +1265,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i611.ImageCompressor>(
       () => const _i611.FlutterImageCompressor(),
-    );
-    gh.lazySingleton<List<_i629.InsightRule>>(
-      () => insightModule.insightRules(
-        gh<_i364.InactiveCustomerInsightRule>(),
-        gh<_i622.RevenueDropInsightRule>(),
-      ),
     );
     gh.lazySingleton<_i358.PaymentTermRepository>(
       () => _i973.SharedPreferencesPaymentTermRepository(),
@@ -1521,12 +1520,6 @@ extension GetItInjectableX on _i174.GetIt {
         reorderCategories: gh<_i892.ReorderCategoriesUseCase>(),
       ),
     );
-    gh.lazySingleton<_i918.InsightEngine>(
-      () => _i918.InsightEngine(
-        gh<List<_i629.InsightRule>>(),
-        gh<_i864.InsightStructuralValidator>(),
-      ),
-    );
     gh.factory<_i249.LoadCatalogHomeCacheUseCase>(
       () => _i249.LoadCatalogHomeCacheUseCase(
         gh<_i841.CatalogHomeCacheRepository>(),
@@ -1630,6 +1623,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i814.ConflictRecordRepository>(
       () => _i566.DriftConflictRecordRepository(gh<_i658.AppDatabase>()),
+    );
+    gh.lazySingleton<List<_i629.InsightRule>>(
+      () => insightModule.insightRules(
+        gh<_i364.InactiveCustomerInsightRule>(),
+        gh<_i622.RevenueDropInsightRule>(),
+        gh<_i425.GrowingCustomerInsightRule>(),
+      ),
     );
     gh.lazySingleton<_i154.TargetAchievementRepository>(
       () => _i535.DriftTargetAchievementRepository(gh<_i658.AppDatabase>()),
@@ -2151,6 +2151,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i3.FirestoreInviteDataSource(
         gh<_i340.CloudFunctionsService>(),
         gh<_i974.FirebaseFirestore>(),
+      ),
+    );
+    gh.lazySingleton<_i918.InsightEngine>(
+      () => _i918.InsightEngine(
+        gh<List<_i629.InsightRule>>(),
+        gh<_i864.InsightStructuralValidator>(),
       ),
     );
     gh.lazySingleton<_i176.UserRoleDataSource>(

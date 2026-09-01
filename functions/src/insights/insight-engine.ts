@@ -1,4 +1,7 @@
-export type InsightType = 'inactiveCustomer' | 'revenueDrop';
+export type InsightType =
+  | 'inactiveCustomer'
+  | 'revenueDrop'
+  | 'customerGrowth';
 export type InsightStatus =
   | 'fresh'
   | 'viewed'
@@ -11,7 +14,8 @@ export type InsightActionType =
   | 'startOrder'
   | 'scheduleContact'
   | 'viewCategory'
-  | 'viewOrderHistory';
+  | 'viewOrderHistory'
+  | 'viewOpportunities';
 export type InsightRevenueComparisonMode =
   | 'monthOverMonth'
   | 'yearOverYear';
@@ -95,12 +99,34 @@ export interface InsightRevenueComparisonSnapshot {
   topCategoryRevenueDropAmount?: number | null;
 }
 
+export interface InsightCustomerGrowthPeriod {
+  periodKey: string;
+  revenue: number;
+  hasOutlierOrder?: boolean;
+  outlierAdjustedRevenue?: number | null;
+}
+
+export interface InsightCustomerGrowthSnapshot {
+  customerId: string;
+  organizationId: string;
+  companyId: string;
+  recipientUserId: string;
+  customerName: string;
+  /** Ordered chronologically, oldest first, most recent period last. */
+  periods: InsightCustomerGrowthPeriod[];
+  topGrowingCategoryId?: string | null;
+  topGrowingCategoryName?: string | null;
+  topGrowingCategoryRevenueGrowthAmount?: number | null;
+}
+
 export interface InsightOrganizationSettings {
   inactivityThresholdDays: number;
   inactivityThresholdDaysBySegment: Record<string, number>;
   revenueDropThreshold: number;
   revenueDropMinimumBaselineAmount: number;
   revenueComparisonMode: InsightRevenueComparisonMode;
+  customerGrowthMinConsecutivePeriods: number;
+  customerGrowthMinimumAverageRate: number;
   lifetimeDays: number;
 }
 
@@ -108,6 +134,7 @@ export interface InsightDataset {
   settings: InsightOrganizationSettings;
   customerSnapshots: InsightCustomerSnapshot[];
   revenueComparisons: InsightRevenueComparisonSnapshot[];
+  customerGrowthSnapshots: InsightCustomerGrowthSnapshot[];
 }
 
 export interface InsightContext {
@@ -127,6 +154,8 @@ export const DEFAULT_INSIGHT_SETTINGS: InsightOrganizationSettings = {
   revenueDropThreshold: 0.3,
   revenueDropMinimumBaselineAmount: 1000,
   revenueComparisonMode: 'yearOverYear',
+  customerGrowthMinConsecutivePeriods: 3,
+  customerGrowthMinimumAverageRate: 0.15,
   lifetimeDays: 7,
 };
 

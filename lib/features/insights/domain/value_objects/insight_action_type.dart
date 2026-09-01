@@ -4,4 +4,5 @@ enum InsightActionType {
   scheduleContact,
   viewCategory,
   viewOrderHistory,
+  viewOpportunities,
 }
