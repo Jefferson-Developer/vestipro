@@ -49,6 +49,11 @@ import '../core/feature_flags/firebase_feature_flag_service.dart' as _i845;
 import '../core/functions/app_client_metadata.dart' as _i465;
 import '../core/functions/cloud_functions_service.dart' as _i147;
 import '../core/functions/functions.dart' as _i340;
+import '../core/notifications/data/repositories/shared_preferences_notification_inbox_repository.dart'
+    as _i393;
+import '../core/notifications/domain/repositories/notification_inbox_repository.dart'
+    as _i73;
+import '../core/notifications/notifications.dart' as _i387;
 import '../core/offline/data/repositories/drift_offline_package_status_repository.dart'
     as _i963;
 import '../core/offline/domain/download_offline_package_use_case.dart' as _i109;
@@ -972,12 +977,20 @@ import '../features/targets/data/repositories/drift_positivacao_repository.dart'
     as _i8;
 import '../features/targets/data/repositories/drift_target_achievement_repository.dart'
     as _i535;
+import '../features/targets/data/repositories/shared_preferences_target_alert_dispatch_repository.dart'
+    as _i369;
+import '../features/targets/data/repositories/shared_preferences_target_alert_settings_repository.dart'
+    as _i1066;
 import '../features/targets/data/repositories/shared_preferences_target_repository.dart'
     as _i46;
 import '../features/targets/domain/repositories/positivacao_repository.dart'
     as _i1031;
 import '../features/targets/domain/repositories/target_achievement_repository.dart'
     as _i154;
+import '../features/targets/domain/repositories/target_alert_dispatch_repository.dart'
+    as _i836;
+import '../features/targets/domain/repositories/target_alert_settings_repository.dart'
+    as _i256;
 import '../features/targets/domain/repositories/target_repository.dart'
     as _i876;
 import '../features/targets/domain/services/closing_projection_service.dart'
@@ -991,6 +1004,8 @@ import '../features/targets/domain/services/target_visibility_service.dart'
     as _i951;
 import '../features/targets/domain/usecases/create_target_use_case.dart'
     as _i472;
+import '../features/targets/domain/usecases/process_target_alert_use_case.dart'
+    as _i154;
 import '../features/targets/domain/usecases/update_target_use_case.dart'
     as _i604;
 import '../features/targets/presentation/cubit/positivacao_dashboard_cubit.dart'
@@ -1267,6 +1282,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1015.ProductCollectionLinkRepository>(
       () => const _i654.SharedPreferencesProductCollectionLinkRepository(),
     );
+    gh.lazySingleton<_i836.TargetAlertDispatchRepository>(
+      () => const _i369.SharedPreferencesTargetAlertDispatchRepository(),
+    );
+    gh.lazySingleton<_i73.NotificationInboxRepository>(
+      () => const _i393.SharedPreferencesNotificationInboxRepository(),
+    );
     gh.factory<_i1068.ListActivePaymentTermsUseCase>(
       () => _i1068.ListActivePaymentTermsUseCase(
         gh<_i358.PaymentTermRepository>(),
@@ -1280,6 +1301,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i307.ProjectionStrategy>(
       () => const _i307.LinearProjectionStrategy(),
+    );
+    gh.lazySingleton<_i256.TargetAlertSettingsRepository>(
+      () => const _i1066.SharedPreferencesTargetAlertSettingsRepository(),
     );
     gh.factory<_i862.ClosingProjectionService>(
       () => _i862.ClosingProjectionService(
@@ -2022,6 +2046,14 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i924.RegisterCrmActivityUseCase>(
       () => _i924.RegisterCrmActivityUseCase(gh<_i558.CrmActivityRepository>()),
+    );
+    gh.factory<_i154.ProcessTargetAlertUseCase>(
+      () => _i154.ProcessTargetAlertUseCase(
+        gh<_i256.TargetAlertSettingsRepository>(),
+        gh<_i836.TargetAlertDispatchRepository>(),
+        gh<_i387.NotificationInboxRepository>(),
+        gh<_i202.AnalyticsService>(),
+      ),
     );
     gh.lazySingleton<_i147.CloudFunctionsService>(
       () => _i147.CloudFunctionsService(
@@ -3010,6 +3042,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i639.FutureStockRepository>(),
       ),
     );
+    gh.factory<_i293.TargetDashboardCubit>(
+      () => _i293.TargetDashboardCubit(
+        gh<_i951.TargetVisibilityService>(),
+        gh<_i876.TargetRepository>(),
+        gh<_i154.TargetAchievementRepository>(),
+        gh<_i202.AnalyticsService>(),
+        gh<_i862.ClosingProjectionService>(),
+        gh<_i154.ProcessTargetAlertUseCase>(),
+      ),
+    );
     gh.factory<_i698.UserRoleEditBloc>(
       () => _i698.UserRoleEditBloc(
         updateUserRole: gh<_i428.UpdateUserRoleUseCase>(),
@@ -3123,15 +3165,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1031.PositivacaoRepository>(),
         gh<_i909.GetCustomerByIdUseCase>(),
         gh<_i202.AnalyticsService>(),
-      ),
-    );
-    gh.factory<_i293.TargetDashboardCubit>(
-      () => _i293.TargetDashboardCubit(
-        gh<_i951.TargetVisibilityService>(),
-        gh<_i876.TargetRepository>(),
-        gh<_i154.TargetAchievementRepository>(),
-        gh<_i202.AnalyticsService>(),
-        gh<_i862.ClosingProjectionService>(),
       ),
     );
     gh.factory<_i125.OrderHistoryBloc>(

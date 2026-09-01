@@ -94,6 +94,7 @@ final class AnalyticsEvents {
   /// to — same "once per dimension switch, never once per realtime tick"
   /// rule as [targetDashboardViewed]/[positivacaoDashboardViewed].
   static const String rankingDashboardViewed = 'ranking_dashboard_viewed';
+  static const String targetAlertTriggered = 'target_alert_triggered';
 
   /// Logged once per `SyncEngine.runPush` call (TASK-109, EPIC-14) — the
   /// Outbox drain pass — with `attempted`/`synced`/`failed`/`conflicts`/
@@ -178,6 +179,7 @@ final class AnalyticsEvents {
     positivacaoDashboardViewed,
     positivacaoSettingsUpdated,
     rankingDashboardViewed,
+    targetAlertTriggered,
     syncPushCompleted,
     syncPullCompleted,
     syncCenterOpened,

@@ -13,6 +13,7 @@ import '../../domain/repositories/target_achievement_repository.dart';
 import '../../domain/repositories/target_repository.dart';
 import '../../domain/services/closing_projection_service.dart';
 import '../../domain/services/target_visibility_service.dart';
+import '../../domain/usecases/process_target_alert_use_case.dart';
 import '../../domain/value_objects/target_dimension_type.dart';
 import '../../domain/value_objects/target_metric_type.dart';
 import 'target_dashboard_state.dart';
@@ -36,6 +37,7 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
     this._achievementRepository,
     this._analyticsService,
     this._closingProjectionService,
+    this._processTargetAlertUseCase,
   ) : super(const TargetDashboardState());
 
   final TargetVisibilityService _visibilityService;
@@ -43,6 +45,7 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
   final TargetAchievementRepository _achievementRepository;
   final AnalyticsService _analyticsService;
   final ClosingProjectionService _closingProjectionService;
+  final ProcessTargetAlertUseCase _processTargetAlertUseCase;
 
   StreamSubscription<TargetAchievementSnapshot>? _achievementSubscription;
 
@@ -53,6 +56,7 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
     required String organizationId,
     required String companyId,
     required String userId,
+    String? initialTargetId,
   }) async {
     emit(
       state.copyWith(
@@ -88,6 +92,23 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
       return;
     }
 
+    final trimmedInitialTargetId = initialTargetId?.trim();
+    if (trimmedInitialTargetId != null && trimmedInitialTargetId.isNotEmpty) {
+      final targetResult = await _targetRepository.getById(
+        organizationId: organizationId,
+        id: trimmedInitialTargetId,
+      );
+      if (targetResult case AppSuccess<Target>(value: final target)) {
+        await selectDimension(
+          dimensionType: target.dimensionType,
+          dimensionId: target.dimensionId,
+          metricType: target.metricType,
+          preferredTargetId: target.id,
+        );
+        return;
+      }
+    }
+
     await selectDimension(
       dimensionType: TargetDimensionType.salesRep,
       dimensionId: userId,
@@ -102,6 +123,7 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
     required TargetDimensionType dimensionType,
     required String dimensionId,
     TargetMetricType? metricType,
+    String? preferredTargetId,
   }) async {
     final filter = state.visibilityFilter;
     final trimmedDimensionId = dimensionId.trim();
@@ -125,6 +147,7 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
           clearSelectedTarget: true,
           clearProgress: true,
           clearClosingProjection: true,
+          clearActiveAlert: true,
         ),
       );
       return;
@@ -182,11 +205,17 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
               clearSelectedTarget: true,
               clearProgress: true,
               clearClosingProjection: true,
+              clearActiveAlert: true,
             ),
           );
           return;
         }
-        await selectPeriod(defaultTarget);
+        await selectPeriod(
+          candidates.firstWhere(
+            (candidate) => candidate.id == preferredTargetId,
+            orElse: () => defaultTarget,
+          ),
+        );
     }
   }
 
@@ -201,6 +230,7 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
         selectedTarget: target,
         clearProgress: true,
         clearClosingProjection: true,
+        clearActiveAlert: true,
       ),
     );
 
@@ -210,7 +240,9 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
           targetId: target.id,
         )
         .listen(
-          _onAchievement,
+          (snapshot) {
+            unawaited(_onAchievement(snapshot));
+          },
           onError: (Object error) {
             emit(
               state.copyWith(
@@ -222,7 +254,7 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
         );
   }
 
-  void _onAchievement(TargetAchievementSnapshot snapshot) {
+  Future<void> _onAchievement(TargetAchievementSnapshot snapshot) async {
     final target = state.selectedTarget;
     if (target == null || target.id != snapshot.targetId) return;
 
@@ -232,6 +264,7 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
           status: TargetDashboardStatus.notCalculated,
           clearProgress: true,
           clearClosingProjection: true,
+          clearActiveAlert: true,
         ),
       );
       return;
@@ -244,11 +277,18 @@ final class TargetDashboardCubit extends Cubit<TargetDashboardState> {
       now: DateTime.now().toUtc(),
     );
     final closingProjection = _closingProjectionService.compute(progress);
+    final activeAlert = await _processTargetAlertUseCase(
+      target: target,
+      progress: progress,
+      userId: state.userId,
+      now: progress.now,
+    );
     emit(
       state.copyWith(
         status: TargetDashboardStatus.ready,
         progress: progress,
         closingProjection: closingProjection,
+        activeAlert: activeAlert,
       ),
     );
   }

@@ -8,6 +8,8 @@ import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
 import '../../domain/entities/target.dart';
+import '../../domain/entities/target_alert.dart';
+import '../../domain/entities/target_alert_assessment.dart';
 import '../../domain/entities/target_progress_view_model.dart';
 import '../../domain/services/closing_projection_service.dart';
 import '../../domain/value_objects/target_dimension_type.dart';
@@ -39,6 +41,7 @@ class TargetDashboardPage extends StatelessWidget {
     required this.userId,
     required this.permissionService,
     required this.createCubit,
+    this.initialTargetId,
     super.key,
   });
 
@@ -47,6 +50,7 @@ class TargetDashboardPage extends StatelessWidget {
   final String userId;
   final PermissionService permissionService;
   final TargetDashboardCubit Function() createCubit;
+  final String? initialTargetId;
 
   @override
   Widget build(BuildContext context) {
@@ -65,6 +69,7 @@ class TargetDashboardPage extends StatelessWidget {
                 organizationId: organizationId,
                 companyId: companyId,
                 userId: userId,
+                initialTargetId: initialTargetId,
               ),
             );
             return cubit;
@@ -330,6 +335,10 @@ class _TargetDashboardBody extends StatelessWidget {
             ),
           ),
           const SizedBox(height: AppSpacing.spacing16),
+          if (state.activeAlert != null) ...<Widget>[
+            _TargetAlertBanner(alert: state.activeAlert!),
+            const SizedBox(height: AppSpacing.spacing16),
+          ],
           Wrap(
             spacing: AppSpacing.spacing16,
             runSpacing: AppSpacing.spacing16,
@@ -445,6 +454,72 @@ class _TargetDashboardBody extends StatelessWidget {
         ],
       ),
     ];
+  }
+}
+
+class _TargetAlertBanner extends StatelessWidget {
+  const _TargetAlertBanner({required this.alert});
+
+  final TargetAlert alert;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final badgeVariant = switch (alert.classification) {
+      TargetAlertClassification.highRisk => AppStatusBadgeVariant.error,
+      TargetAlertClassification.moderateRisk => AppStatusBadgeVariant.warning,
+      TargetAlertClassification.opportunity => AppStatusBadgeVariant.success,
+      TargetAlertClassification.onTrack => AppStatusBadgeVariant.info,
+    };
+    final containerColor = switch (alert.classification) {
+      TargetAlertClassification.highRisk => colors.error.withValues(
+        alpha: 0.08,
+      ),
+      TargetAlertClassification.moderateRisk => colors.warning.withValues(
+        alpha: 0.12,
+      ),
+      TargetAlertClassification.opportunity => colors.success.withValues(
+        alpha: 0.08,
+      ),
+      TargetAlertClassification.onTrack => colors.info.withValues(alpha: 0.08),
+    };
+
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(AppSpacing.spacing16),
+      decoration: BoxDecoration(
+        color: containerColor,
+        borderRadius: BorderRadius.circular(AppRadius.radius16),
+        border: Border.all(color: colors.outline.withValues(alpha: 0.16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Expanded(
+                child: Text(alert.title, style: AppTypography.titleMedium),
+              ),
+              AppStatusBadge(
+                label: _badgeLabel(alert.classification),
+                variant: badgeVariant,
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.spacing8),
+          Text(alert.message, style: AppTypography.bodyMedium),
+        ],
+      ),
+    );
+  }
+
+  String _badgeLabel(TargetAlertClassification classification) {
+    return switch (classification) {
+      TargetAlertClassification.highRisk => 'Risco alto',
+      TargetAlertClassification.moderateRisk => 'Risco moderado',
+      TargetAlertClassification.opportunity => 'Oportunidade',
+      TargetAlertClassification.onTrack => 'No ritmo',
+    };
   }
 }
 

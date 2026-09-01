@@ -35,6 +35,7 @@ import '../features/products/products.dart';
 import '../core/sync/sync.dart';
 import '../features/settings/presentation/bloc/about_app_bloc.dart';
 import '../features/settings/settings.dart';
+import '../features/targets/targets.dart';
 import '../features/users/users.dart';
 import '../firebase_options.dart';
 import 'firebase_bootstrap_error_app.dart';
@@ -188,6 +189,20 @@ class VestiProApp extends StatelessWidget {
             createBloc: () => getIt<UserListBloc>(),
             createRoleEditBloc: () => getIt<UserRoleEditBloc>(),
           ),
+          targetDashboardPageBuilder:
+              (context, orgId, companyId, queryParameters) =>
+                  _withConnectivityIndicator(
+                    orgId: orgId,
+                    companyId: companyId,
+                    child: TargetDashboardPage(
+                      organizationId: orgId,
+                      companyId: companyId,
+                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                      permissionService: getIt<PermissionService>(),
+                      initialTargetId: queryParameters['targetId'],
+                      createCubit: () => getIt<TargetDashboardCubit>(),
+                    ),
+                  ),
           customerFormPageBuilder: (context, orgId, companyId) =>
               _withConnectivityIndicator(
                 orgId: orgId,

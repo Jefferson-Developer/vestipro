@@ -232,7 +232,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-117 — Implementar positivação de carteira](TASK-117-implementar-positivacao-de-carteira.md) — Flutter Senior + Front-end
 - [x] [TASK-118 — Implementar ranking comercial](TASK-118-implementar-ranking-comercial.md) — Flutter Senior + Front-end
 - [x] [TASK-119 — Implementar projeção de fechamento](TASK-119-implementar-projecao-de-fechamento.md) — Flutter Senior + Front-end
-- [ ] [TASK-120 — Implementar alertas de meta](TASK-120-implementar-alertas-de-meta.md) — Flutter Senior + Front-end
+- [x] [TASK-120 — Implementar alertas de meta](TASK-120-implementar-alertas-de-meta.md) — Flutter Senior + Front-end
 
 ### EPIC-16 — Insights e Recomendação
 - [ ] [TASK-121 — Criar engine base de insights](TASK-121-criar-engine-base-de-insights.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 119 / 220 tasks concluídas.
+**Progresso:** 120 / 220 tasks concluídas.

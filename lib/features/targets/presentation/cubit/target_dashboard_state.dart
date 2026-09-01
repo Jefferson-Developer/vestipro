@@ -1,4 +1,5 @@
 import '../../domain/entities/target.dart';
+import '../../domain/entities/target_alert.dart';
 import '../../domain/entities/target_progress_view_model.dart';
 import '../../domain/entities/target_visibility_filter.dart';
 import '../../domain/services/closing_projection_service.dart';
@@ -44,6 +45,7 @@ final class TargetDashboardState {
     this.selectedTarget,
     this.progress,
     this.closingProjection,
+    this.activeAlert,
     this.failureMessage,
   });
 
@@ -71,6 +73,7 @@ final class TargetDashboardState {
   /// alongside it (never separately re-derived) so the two numbers can never
   /// disagree.
   final ClosingProjectionResult? closingProjection;
+  final TargetAlert? activeAlert;
   final String? failureMessage;
 
   /// Whether the caller may switch [dimensionType]/[dimensionId] at all — a
@@ -98,6 +101,8 @@ final class TargetDashboardState {
     bool clearProgress = false,
     ClosingProjectionResult? closingProjection,
     bool clearClosingProjection = false,
+    TargetAlert? activeAlert,
+    bool clearActiveAlert = false,
     String? failureMessage,
     bool clearFailureMessage = false,
   }) {
@@ -118,6 +123,7 @@ final class TargetDashboardState {
       closingProjection: clearClosingProjection
           ? null
           : (closingProjection ?? this.closingProjection),
+      activeAlert: clearActiveAlert ? null : (activeAlert ?? this.activeAlert),
       failureMessage: clearFailureMessage
           ? null
           : (failureMessage ?? this.failureMessage),

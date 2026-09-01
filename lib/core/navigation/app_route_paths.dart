@@ -203,6 +203,33 @@ final class OrderApprovalQueueRoute extends AppRoute {
   String get location => '/org/$orgId/companies/$companyId/orders/approvals';
 }
 
+final class TargetDashboardRoute extends AppRoute {
+  const TargetDashboardRoute({
+    required this.orgId,
+    required this.companyId,
+    this.targetId,
+  });
+
+  final String orgId;
+  final String companyId;
+  final String? targetId;
+
+  static const name = 'targetDashboard';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/targets/dashboard';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/companies/$companyId/targets/dashboard';
+    final id = targetId?.trim();
+    if (id == null || id.isEmpty) return path;
+    return Uri(
+      path: path,
+      queryParameters: <String, String>{'targetId': id},
+    ).toString();
+  }
+}
+
 /// Pedido history/detail route (TASK-104), scoped by Organization and
 /// Company — the "Ver histórico" destination from [OrderListRoute]. Protected
 /// in [AppRouter] by `order.view`, the same capability [OrderListRoute]

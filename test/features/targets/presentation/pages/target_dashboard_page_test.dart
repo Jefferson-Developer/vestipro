@@ -6,6 +6,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/design_system/design_system.dart';
 import 'package:vestipro/core/errors/errors.dart';
+import 'package:vestipro/core/notifications/notifications.dart';
 import 'package:vestipro/core/permissions/permissions.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
@@ -80,6 +81,12 @@ void main() {
         achievementRepository,
         FakeAnalyticsService(),
         const ClosingProjectionService(),
+        ProcessTargetAlertUseCase(
+          _FakeTargetAlertSettingsRepository(),
+          _FakeTargetAlertDispatchRepository(),
+          _FakeNotificationInboxRepository(),
+          FakeAnalyticsService(),
+        ),
       ),
     );
   }
@@ -133,6 +140,36 @@ void main() {
       findsOneWidget,
     );
   });
+
+  testWidgets(
+    'shows a persistent visual alert banner when the target is off pace',
+    (tester) async {
+      stubMembership('rep-1', 'SALES_REP');
+      targetRepository.items.add(
+        _target(
+          id: 'target-1',
+          dimensionId: 'rep-1',
+          targetValue: 100000,
+          startDate: DateTime.utc(2026, 8, 1),
+          endDate: DateTime.utc(2026, 10, 1),
+        ),
+      );
+      achievementRepository.seed(
+        'target-1',
+        TargetAchievementSnapshot(
+          targetId: 'target-1',
+          realizedValue: 10000,
+          calculatedAt: DateTime.utc(2026, 9, 1),
+        ),
+      );
+
+      await pumpApp(tester, buildPage());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Meta em risco alto'), findsOneWidget);
+      expect(find.widgetWithText(AppStatusBadge, 'Risco alto'), findsOneWidget);
+    },
+  );
 
   testWidgets(
     'a SALES_REP with no meta cadastrada for the period sees the empty '
@@ -517,4 +554,63 @@ final class _FakeTargetAchievementRepository
     yield _current[targetId] ?? TargetAchievementSnapshot(targetId: targetId);
     yield* _controllerFor(targetId).stream;
   }
+}
+
+final class _FakeTargetAlertSettingsRepository
+    implements TargetAlertSettingsRepository {
+  @override
+  Future<AppResult<TargetAlertSettings>> getForOrganization({
+    required String organizationId,
+  }) async => const AppSuccess<TargetAlertSettings>(
+    TargetAlertSettings(
+      highRiskPaceRatioThreshold: 0.6,
+      moderateRiskPaceRatioThreshold: 0.9,
+    ),
+  );
+
+  @override
+  Future<AppResult<TargetAlertSettings>> saveForOrganization({
+    required String organizationId,
+    required TargetAlertSettings settings,
+  }) async => AppSuccess<TargetAlertSettings>(settings);
+}
+
+final class _FakeTargetAlertDispatchRepository
+    implements TargetAlertDispatchRepository {
+  final Map<String, DateTime> _records = <String, DateTime>{};
+
+  @override
+  Future<AppResult<DateTime?>> getLastDispatchedAt({
+    required String organizationId,
+    required String targetId,
+    required TargetAlertClassification classification,
+  }) async => AppSuccess<DateTime?>(
+    _records['$organizationId::$targetId::${classification.name}'],
+  );
+
+  @override
+  Future<AppResult<DateTime>> markDispatched({
+    required String organizationId,
+    required String targetId,
+    required TargetAlertClassification classification,
+    required DateTime dispatchedAt,
+  }) async {
+    _records['$organizationId::$targetId::${classification.name}'] =
+        dispatchedAt;
+    return AppSuccess<DateTime>(dispatchedAt);
+  }
+}
+
+final class _FakeNotificationInboxRepository
+    implements NotificationInboxRepository {
+  @override
+  Future<AppResult<AppNotification>> create({
+    required AppNotification notification,
+  }) async => AppSuccess<AppNotification>(notification);
+
+  @override
+  Future<AppResult<List<AppNotification>>> listForUser({
+    required String organizationId,
+    required String userId,
+  }) async => const AppSuccess<List<AppNotification>>(<AppNotification>[]);
 }

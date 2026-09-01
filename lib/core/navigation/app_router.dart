@@ -22,6 +22,7 @@ class AppRouter {
     required this.catalogHomePageBuilder,
     required this.auditLogPageBuilder,
     required this.userManagementPageBuilder,
+    this.targetDashboardPageBuilder,
     required this.loginPageBuilder,
     required this.signUpPageBuilder,
     required this.forgotPasswordPageBuilder,
@@ -60,6 +61,13 @@ class AppRouter {
   final Widget Function(BuildContext context, String orgId) auditLogPageBuilder;
   final Widget Function(BuildContext context, String orgId)
   userManagementPageBuilder;
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  targetDashboardPageBuilder;
   final Widget Function(BuildContext context, String orgId, String companyId)?
   customerFormPageBuilder;
   final Widget Function(BuildContext context, String orgId, String companyId)?
@@ -250,6 +258,25 @@ class AppRouter {
         ),
         builder: (context, state) =>
             userManagementPageBuilder(context, state.pathParameters['orgId']!),
+      ),
+      GoRoute(
+        path: TargetDashboardRoute.pathPattern,
+        name: TargetDashboardRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.targetView,
+        ),
+        builder: (context, state) {
+          final builder = targetDashboardPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
       ),
       GoRoute(
         path: OrderListRoute.pathPattern,
