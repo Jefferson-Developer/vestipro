@@ -19,17 +19,20 @@ import {
   type InsightOrganizationSettings,
   type InsightRevenueComparisonMode,
   type InsightRevenueComparisonSnapshot,
+  type InsightUpSellSnapshot,
 } from './insight-engine';
 import { CrossSellInsightRule } from './cross-sell-insight-rule';
 import { GrowingCustomerInsightRule } from './growing-customer-insight-rule';
 import { InactiveCustomerInsightRule } from './inactive-customer-insight-rule';
 import { RevenueDropInsightRule } from './revenue-drop-insight-rule';
+import { UpSellInsightRule } from './up-sell-insight-rule';
 
 const defaultRules = [
   new InactiveCustomerInsightRule(),
   new RevenueDropInsightRule(),
   new GrowingCustomerInsightRule(),
   new CrossSellInsightRule(),
+  new UpSellInsightRule(),
 ] as const;
 
 export const generateInsightsScheduled = onSchedule(
@@ -66,6 +69,7 @@ export async function generateInsightsScheduledHandler(
       organization.ref,
     );
     const crossSellSnapshots = await loadCrossSellSnapshots(organization.ref);
+    const upSellSnapshots = await loadUpSellSnapshots(organization.ref);
     for (const insights of buildInsightsForOrganization({
       organizationId: organization.id,
       asOf: now,
@@ -74,6 +78,7 @@ export async function generateInsightsScheduledHandler(
       revenueComparisons,
       customerGrowthSnapshots,
       crossSellSnapshots,
+      upSellSnapshots,
     })) {
       await persistInsights(organization.ref, insights);
       logger.info('generateInsightsScheduled processed company', {
@@ -244,6 +249,50 @@ async function loadCrossSellSnapshots(
   });
 }
 
+async function loadUpSellSnapshots(
+  organizationRef: DocumentReference,
+): Promise<InsightUpSellSnapshot[]> {
+  const snapshot = await organizationRef
+    .collection('insightUpSellSnapshots')
+    .get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    const candidates = Array.isArray(data.candidates) ? data.candidates : [];
+    return {
+      customerId: data.customerId as string,
+      organizationId: data.organizationId as string,
+      companyId: data.companyId as string,
+      recipientUserId: data.recipientUserId as string,
+      customerName: data.customerName as string,
+      comparisonGroupLabel: data.comparisonGroupLabel as string,
+      comparisonGroupSize: (data.comparisonGroupSize as number) ?? 0,
+      candidates: candidates.map((candidate: DocumentData) => {
+        const variantCandidates = Array.isArray(candidate.variantCandidates)
+          ? candidate.variantCandidates
+          : [];
+        return {
+          categoryId: candidate.categoryId as string,
+          categoryName: candidate.categoryName as string,
+          customerAverageTicket: candidate.customerAverageTicket as number,
+          customerAverageQuantity:
+            candidate.customerAverageQuantity as number,
+          peerAverageTicket: candidate.peerAverageTicket as number,
+          peerAverageQuantity: candidate.peerAverageQuantity as number,
+          variantCandidates: variantCandidates.map(
+            (variant: DocumentData) => ({
+              variantId: variant.variantId as string,
+              variantLabel: variant.variantLabel as string,
+              desiredAdditionalQuantity:
+                variant.desiredAdditionalQuantity as number,
+              availableStock: variant.availableStock as number,
+            }),
+          ),
+        };
+      }),
+    };
+  });
+}
+
 function resolveSettings(
   settingsData: DocumentData | undefined,
 ): InsightOrganizationSettings {
@@ -272,6 +321,9 @@ function resolveSettings(
     customerGrowthMinimumAverageRate:
       positiveNumber(settingsData?.customerGrowthMinimumAverageRate) ??
       DEFAULT_INSIGHT_SETTINGS.customerGrowthMinimumAverageRate,
+    upSellMinimumTicketGapPercentage:
+      positiveNumber(settingsData?.upSellMinimumTicketGapPercentage) ??
+      DEFAULT_INSIGHT_SETTINGS.upSellMinimumTicketGapPercentage,
     lifetimeDays:
       typeof lifetimeDays === 'number' && lifetimeDays > 0
         ? lifetimeDays
@@ -287,14 +339,17 @@ export function buildInsightsForOrganization(params: {
   revenueComparisons: readonly InsightRevenueComparisonSnapshot[];
   customerGrowthSnapshots?: readonly InsightCustomerGrowthSnapshot[];
   crossSellSnapshots?: readonly InsightCrossSellSnapshot[];
+  upSellSnapshots?: readonly InsightUpSellSnapshot[];
 }): Insight[][] {
   const customerGrowthSnapshots = params.customerGrowthSnapshots ?? [];
   const crossSellSnapshots = params.crossSellSnapshots ?? [];
+  const upSellSnapshots = params.upSellSnapshots ?? [];
   const companyIds = new Set<string>([
     ...params.customerSnapshots.map((item) => item.companyId),
     ...params.revenueComparisons.map((item) => item.companyId),
     ...customerGrowthSnapshots.map((item) => item.companyId),
     ...crossSellSnapshots.map((item) => item.companyId),
+    ...upSellSnapshots.map((item) => item.companyId),
   ]);
   const results: Insight[][] = [];
   for (const companyId of companyIds) {
@@ -310,6 +365,9 @@ export function buildInsightsForOrganization(params: {
         (item) => item.companyId === companyId,
       ),
       crossSellSnapshots: crossSellSnapshots.filter(
+        (item) => item.companyId === companyId,
+      ),
+      upSellSnapshots: upSellSnapshots.filter(
         (item) => item.companyId === companyId,
       ),
     };

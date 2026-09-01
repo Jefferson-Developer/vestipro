@@ -3,6 +3,7 @@ import 'insight_customer_growth_snapshot.dart';
 import 'insight_customer_snapshot.dart';
 import 'insight_organization_settings.dart';
 import 'insight_revenue_comparison_snapshot.dart';
+import 'insight_up_sell_snapshot.dart';
 
 final class InsightDataset {
   const InsightDataset({
@@ -11,6 +12,7 @@ final class InsightDataset {
     this.revenueComparisons = const <InsightRevenueComparisonSnapshot>[],
     this.customerGrowthSnapshots = const <InsightCustomerGrowthSnapshot>[],
     this.crossSellSnapshots = const <InsightCrossSellSnapshot>[],
+    this.upSellSnapshots = const <InsightUpSellSnapshot>[],
   });
 
   final InsightOrganizationSettings settings;
@@ -18,4 +20,5 @@ final class InsightDataset {
   final List<InsightRevenueComparisonSnapshot> revenueComparisons;
   final List<InsightCustomerGrowthSnapshot> customerGrowthSnapshots;
   final List<InsightCrossSellSnapshot> crossSellSnapshots;
+  final List<InsightUpSellSnapshot> upSellSnapshots;
 }

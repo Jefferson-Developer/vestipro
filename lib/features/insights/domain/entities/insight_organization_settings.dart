@@ -9,6 +9,7 @@ final class InsightOrganizationSettings {
     this.revenueComparisonMode = InsightRevenueComparisonMode.yearOverYear,
     this.customerGrowthMinConsecutivePeriods = 3,
     this.customerGrowthMinimumAverageRate = 0.15,
+    this.upSellMinimumTicketGapPercentage = 0.15,
     this.defaultLifetime = const Duration(days: 7),
   });
 
@@ -25,6 +26,13 @@ final class InsightOrganizationSettings {
   /// Minimum average growth rate (e.g. `0.15` = 15%) across the consecutive
   /// periods required before a "growing customer" insight can be raised.
   final double customerGrowthMinimumAverageRate;
+
+  /// Minimum percentage gap (e.g. `0.15` = 15%) between a customer's average
+  /// ticket in a category and the higher-volume comparison group's average
+  /// ticket in that same category, required before an "up-sell" insight can
+  /// be raised — ensures the insight only surfaces a relevant and
+  /// sustainable difference, never noise.
+  final double upSellMinimumTicketGapPercentage;
   final Duration defaultLifetime;
 
   int resolveInactivityThreshold(String? segment) {

@@ -2,7 +2,8 @@ export type InsightType =
   | 'inactiveCustomer'
   | 'revenueDrop'
   | 'customerGrowth'
-  | 'crossSell';
+  | 'crossSell'
+  | 'upSell';
 export type InsightStatus =
   | 'fresh'
   | 'viewed'
@@ -16,7 +17,8 @@ export type InsightActionType =
   | 'scheduleContact'
   | 'viewCategory'
   | 'viewOrderHistory'
-  | 'viewOpportunities';
+  | 'viewOpportunities'
+  | 'expandGrid';
 export type InsightRevenueComparisonMode =
   | 'monthOverMonth'
   | 'yearOverYear';
@@ -147,6 +149,41 @@ export interface InsightCrossSellSnapshot {
   candidates: InsightCrossSellCategoryCandidate[];
 }
 
+export interface InsightUpSellVariantCandidate {
+  variantId: string;
+  variantLabel: string;
+  /** Additional quantity that would close the gap, before checking stock. */
+  desiredAdditionalQuantity: number;
+  /** Real stock balance available for this variant at evaluation time. */
+  availableStock: number;
+}
+
+export interface InsightUpSellCategoryCandidate {
+  categoryId: string;
+  categoryName: string;
+  customerAverageTicket: number;
+  customerAverageQuantity: number;
+  peerAverageTicket: number;
+  peerAverageQuantity: number;
+  variantCandidates?: InsightUpSellVariantCandidate[];
+}
+
+export interface InsightUpSellSnapshot {
+  customerId: string;
+  organizationId: string;
+  companyId: string;
+  recipientUserId: string;
+  customerName: string;
+  /**
+   * Human-readable description of the criterion used to select the
+   * higher-volume similar-customers comparison group (same basis used by
+   * cross-sell). Always exposed in the insight evidence — never a black box.
+   */
+  comparisonGroupLabel: string;
+  comparisonGroupSize: number;
+  candidates: InsightUpSellCategoryCandidate[];
+}
+
 export interface InsightOrganizationSettings {
   inactivityThresholdDays: number;
   inactivityThresholdDaysBySegment: Record<string, number>;
@@ -155,6 +192,7 @@ export interface InsightOrganizationSettings {
   revenueComparisonMode: InsightRevenueComparisonMode;
   customerGrowthMinConsecutivePeriods: number;
   customerGrowthMinimumAverageRate: number;
+  upSellMinimumTicketGapPercentage: number;
   lifetimeDays: number;
 }
 
@@ -164,6 +202,7 @@ export interface InsightDataset {
   revenueComparisons: InsightRevenueComparisonSnapshot[];
   customerGrowthSnapshots: InsightCustomerGrowthSnapshot[];
   crossSellSnapshots: InsightCrossSellSnapshot[];
+  upSellSnapshots: InsightUpSellSnapshot[];
 }
 
 export interface InsightContext {
@@ -185,6 +224,7 @@ export const DEFAULT_INSIGHT_SETTINGS: InsightOrganizationSettings = {
   revenueComparisonMode: 'yearOverYear',
   customerGrowthMinConsecutivePeriods: 3,
   customerGrowthMinimumAverageRate: 0.15,
+  upSellMinimumTicketGapPercentage: 0.15,
   lifetimeDays: 7,
 };
 

@@ -5,4 +5,5 @@ enum InsightActionType {
   viewCategory,
   viewOrderHistory,
   viewOpportunities,
+  expandGrid,
 }

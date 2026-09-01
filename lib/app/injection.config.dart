@@ -360,6 +360,7 @@ import '../features/insights/domain/rules/inactive_customer_insight_rule.dart'
     as _i364;
 import '../features/insights/domain/rules/revenue_drop_insight_rule.dart'
     as _i622;
+import '../features/insights/domain/rules/up_sell_insight_rule.dart' as _i810;
 import '../features/insights/domain/services/insight_engine.dart' as _i918;
 import '../features/insights/domain/services/insight_rule.dart' as _i629;
 import '../features/insights/domain/services/insight_structural_validator.dart'
@@ -1177,6 +1178,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i622.RevenueDropInsightRule>(
       () => const _i622.RevenueDropInsightRule(),
     );
+    gh.lazySingleton<_i810.UpSellInsightRule>(
+      () => const _i810.UpSellInsightRule(),
+    );
     gh.lazySingleton<_i864.InsightStructuralValidator>(
       () => const _i864.InsightStructuralValidator(),
     );
@@ -1444,6 +1448,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i211.PromotionalCampaignRepository>(),
       ),
     );
+    gh.lazySingleton<List<_i629.InsightRule>>(
+      () => insightModule.insightRules(
+        gh<_i364.InactiveCustomerInsightRule>(),
+        gh<_i622.RevenueDropInsightRule>(),
+        gh<_i425.GrowingCustomerInsightRule>(),
+        gh<_i671.CrossSellInsightRule>(),
+        gh<_i810.UpSellInsightRule>(),
+      ),
+    );
     gh.lazySingleton<_i626.CollectionRepository>(
       () => const _i717.SharedPreferencesCollectionRepository(),
     );
@@ -1523,6 +1536,12 @@ extension GetItInjectableX on _i174.GetIt {
         listCategories: gh<_i435.ListCategoriesUseCase>(),
         deleteCategory: gh<_i578.DeleteCategoryUseCase>(),
         reorderCategories: gh<_i892.ReorderCategoriesUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i918.InsightEngine>(
+      () => _i918.InsightEngine(
+        gh<List<_i629.InsightRule>>(),
+        gh<_i864.InsightStructuralValidator>(),
       ),
     );
     gh.factory<_i249.LoadCatalogHomeCacheUseCase>(
@@ -1634,14 +1653,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i799.OfflinePackageStatusRepository>(
       () => _i963.DriftOfflinePackageStatusRepository(gh<_i658.AppDatabase>()),
-    );
-    gh.lazySingleton<List<_i629.InsightRule>>(
-      () => insightModule.insightRules(
-        gh<_i364.InactiveCustomerInsightRule>(),
-        gh<_i622.RevenueDropInsightRule>(),
-        gh<_i425.GrowingCustomerInsightRule>(),
-        gh<_i671.CrossSellInsightRule>(),
-      ),
     );
     gh.factory<_i551.ClearCustomerFormDraftUseCase>(
       () => _i551.ClearCustomerFormDraftUseCase(
@@ -2157,12 +2168,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i3.FirestoreInviteDataSource(
         gh<_i340.CloudFunctionsService>(),
         gh<_i974.FirebaseFirestore>(),
-      ),
-    );
-    gh.lazySingleton<_i918.InsightEngine>(
-      () => _i918.InsightEngine(
-        gh<List<_i629.InsightRule>>(),
-        gh<_i864.InsightStructuralValidator>(),
       ),
     );
     gh.lazySingleton<_i176.UserRoleDataSource>(
