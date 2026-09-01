@@ -1,0 +1,30 @@
+/// Public surface of `lib/features/insights/`.
+library;
+
+export 'data/datasources/firestore_insight_data_source.dart';
+export 'data/datasources/insight_data_source.dart';
+export 'data/dtos/insight_dto.dart';
+export 'data/mappers/insight_mapper.dart';
+export 'data/repositories/insight_repository_impl.dart';
+export 'domain/entities/insight.dart';
+export 'domain/entities/insight_action.dart';
+export 'domain/entities/insight_context.dart';
+export 'domain/entities/insight_customer_snapshot.dart';
+export 'domain/entities/insight_dataset.dart';
+export 'domain/entities/insight_estimated_impact.dart';
+export 'domain/entities/insight_evidence.dart';
+export 'domain/entities/insight_organization_settings.dart';
+export 'domain/entities/insight_page.dart';
+export 'domain/entities/insight_revenue_comparison_snapshot.dart';
+export 'domain/repositories/insight_repository.dart';
+export 'domain/rules/inactive_customer_insight_rule.dart';
+export 'domain/rules/revenue_drop_insight_rule.dart';
+export 'domain/services/insight_engine.dart';
+export 'domain/services/insight_rule.dart';
+export 'domain/services/insight_structural_validator.dart';
+export 'domain/value_objects/insight_action_type.dart';
+export 'domain/value_objects/insight_revenue_comparison_mode.dart';
+export 'domain/value_objects/insight_severity.dart';
+export 'domain/value_objects/insight_status.dart';
+export 'domain/value_objects/insight_type.dart';
+export 'insight_module.dart';

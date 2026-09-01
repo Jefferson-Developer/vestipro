@@ -1,0 +1,1 @@
+enum InsightRevenueComparisonMode { monthOverMonth, yearOverYear }

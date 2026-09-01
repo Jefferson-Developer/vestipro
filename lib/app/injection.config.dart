@@ -343,6 +343,24 @@ import '../features/favorites/domain/usecases/watch_favorite_product_ids_use_cas
 import '../features/favorites/presentation/bloc/favorites_bloc.dart' as _i318;
 import '../features/favorites/presentation/cubit/favorite_status_cubit.dart'
     as _i249;
+import '../features/insights/data/datasources/firestore_insight_data_source.dart'
+    as _i837;
+import '../features/insights/data/datasources/insight_data_source.dart'
+    as _i902;
+import '../features/insights/data/mappers/insight_mapper.dart' as _i963;
+import '../features/insights/data/repositories/insight_repository_impl.dart'
+    as _i666;
+import '../features/insights/domain/repositories/insight_repository.dart'
+    as _i644;
+import '../features/insights/domain/rules/inactive_customer_insight_rule.dart'
+    as _i364;
+import '../features/insights/domain/rules/revenue_drop_insight_rule.dart'
+    as _i622;
+import '../features/insights/domain/services/insight_engine.dart' as _i918;
+import '../features/insights/domain/services/insight_rule.dart' as _i629;
+import '../features/insights/domain/services/insight_structural_validator.dart'
+    as _i864;
+import '../features/insights/insight_module.dart' as _i676;
 import '../features/inventory/data/datasources/firestore_stock_alert_data_source.dart'
     as _i8;
 import '../features/inventory/data/datasources/firestore_stock_turnover_data_source.dart'
@@ -1086,6 +1104,7 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final appInjectionModule = _$AppInjectionModule();
     final syncModule = _$SyncModule();
+    final insightModule = _$InsightModule();
     final offlinePackageLoadersModule = _$OfflinePackageLoadersModule();
     gh.factory<_i619.FavoriteLocalMapper>(
       () => const _i619.FavoriteLocalMapper(),
@@ -1140,6 +1159,16 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i457.CustomerMapper>(() => const _i457.CustomerMapper());
     gh.lazySingleton<_i712.CustomerSegmentMapper>(
       () => const _i712.CustomerSegmentMapper(),
+    );
+    gh.lazySingleton<_i963.InsightMapper>(() => const _i963.InsightMapper());
+    gh.lazySingleton<_i364.InactiveCustomerInsightRule>(
+      () => const _i364.InactiveCustomerInsightRule(),
+    );
+    gh.lazySingleton<_i622.RevenueDropInsightRule>(
+      () => const _i622.RevenueDropInsightRule(),
+    );
+    gh.lazySingleton<_i864.InsightStructuralValidator>(
+      () => const _i864.InsightStructuralValidator(),
     );
     gh.lazySingleton<_i655.StockAlertMapper>(
       () => const _i655.StockAlertMapper(),
@@ -1231,6 +1260,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i611.ImageCompressor>(
       () => const _i611.FlutterImageCompressor(),
+    );
+    gh.lazySingleton<List<_i629.InsightRule>>(
+      () => insightModule.insightRules(
+        gh<_i364.InactiveCustomerInsightRule>(),
+        gh<_i622.RevenueDropInsightRule>(),
+      ),
     );
     gh.lazySingleton<_i358.PaymentTermRepository>(
       () => _i973.SharedPreferencesPaymentTermRepository(),
@@ -1484,6 +1519,12 @@ extension GetItInjectableX on _i174.GetIt {
         listCategories: gh<_i435.ListCategoriesUseCase>(),
         deleteCategory: gh<_i578.DeleteCategoryUseCase>(),
         reorderCategories: gh<_i892.ReorderCategoriesUseCase>(),
+      ),
+    );
+    gh.lazySingleton<_i918.InsightEngine>(
+      () => _i918.InsightEngine(
+        gh<List<_i629.InsightRule>>(),
+        gh<_i864.InsightStructuralValidator>(),
       ),
     );
     gh.factory<_i249.LoadCatalogHomeCacheUseCase>(
@@ -2250,6 +2291,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i340.CloudFunctionsService>(),
       ),
     );
+    gh.lazySingleton<_i902.InsightDataSource>(
+      () => _i837.FirestoreInsightDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i228.TeamDataSource>(
       () => _i23.FirestoreTeamDataSource(gh<_i974.FirebaseFirestore>()),
     );
@@ -2542,6 +2586,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i292.SyncEngine>(),
         gh<_i202.AnalyticsService>(),
         gh<_i113.CrashReporter>(),
+      ),
+    );
+    gh.lazySingleton<_i644.InsightRepository>(
+      () => _i666.InsightRepositoryImpl(
+        dataSource: gh<_i902.InsightDataSource>(),
+        mapper: gh<_i963.InsightMapper>(),
+        validator: gh<_i864.InsightStructuralValidator>(),
       ),
     );
     gh.lazySingleton<_i183.OrderPricingRepository>(
@@ -3363,5 +3414,7 @@ extension GetItInjectableX on _i174.GetIt {
 class _$AppInjectionModule extends _i212.AppInjectionModule {}
 
 class _$SyncModule extends _i350.SyncModule {}
+
+class _$InsightModule extends _i676.InsightModule {}
 
 class _$OfflinePackageLoadersModule extends _i418.OfflinePackageLoadersModule {}
