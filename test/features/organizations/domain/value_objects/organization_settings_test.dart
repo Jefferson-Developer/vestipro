@@ -166,6 +166,47 @@ void main() {
       expect(settings.positivacaoMinOrderValue, 250);
     });
 
+    test('defaults rankingVisibilityMode (TASK-118) to full_ranking when not '
+        'provided', () {
+      final settings = OrganizationSettings.validated(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+      );
+
+      expect(settings.rankingVisibilityMode, 'full_ranking');
+    });
+
+    test('accepts a custom rankingVisibilityMode (TASK-118)', () {
+      final settings = OrganizationSettings.validated(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+        rankingVisibilityMode: 'relative_position_only',
+      );
+
+      expect(settings.rankingVisibilityMode, 'relative_position_only');
+    });
+
+    test('rejects an unknown rankingVisibilityMode', () {
+      expect(
+        () => OrganizationSettings.validated(
+          currency: 'BRL',
+          country: 'BR',
+          defaultLanguage: 'pt-BR',
+          rankingVisibilityMode: 'anonymous',
+        ),
+        throwsA(
+          isA<ValidationException>().having(
+            (exception) =>
+                exception.fieldErrors.containsKey('rankingVisibilityMode'),
+            'fieldErrors has rankingVisibilityMode',
+            isTrue,
+          ),
+        ),
+      );
+    });
+
     test('rejects an unknown positivacaoPeriodGranularity', () {
       expect(
         () => OrganizationSettings.validated(

@@ -60,6 +60,7 @@ void main() {
           'target_dashboard_viewed',
           'positivacao_dashboard_viewed',
           'positivacao_settings_updated',
+          'ranking_dashboard_viewed',
           'sync_push_completed',
           'sync_pull_completed',
           'sync_center_opened',

@@ -230,7 +230,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-115 — Implementar cadastro de metas](TASK-115-implementar-cadastro-de-metas.md) — Flutter Senior + Front-end
 - [x] [TASK-116 — Implementar dashboard de atingimento](TASK-116-implementar-dashboard-de-atingimento.md) — Flutter Senior + Front-end
 - [x] [TASK-117 — Implementar positivação de carteira](TASK-117-implementar-positivacao-de-carteira.md) — Flutter Senior + Front-end
-- [ ] [TASK-118 — Implementar ranking comercial](TASK-118-implementar-ranking-comercial.md) — Flutter Senior + Front-end
+- [x] [TASK-118 — Implementar ranking comercial](TASK-118-implementar-ranking-comercial.md) — Flutter Senior + Front-end
 - [ ] [TASK-119 — Implementar projeção de fechamento](TASK-119-implementar-projecao-de-fechamento.md) — Flutter Senior + Front-end
 - [ ] [TASK-120 — Implementar alertas de meta](TASK-120-implementar-alertas-de-meta.md) — Flutter Senior + Front-end
 
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 117 / 220 tasks concluídas.
+**Progresso:** 118 / 220 tasks concluídas.

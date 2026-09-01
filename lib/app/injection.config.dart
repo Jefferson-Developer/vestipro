@@ -980,6 +980,10 @@ import '../features/targets/domain/repositories/target_achievement_repository.da
     as _i154;
 import '../features/targets/domain/repositories/target_repository.dart'
     as _i876;
+import '../features/targets/domain/services/ranking_calculation_service.dart'
+    as _i444;
+import '../features/targets/domain/services/ranking_peer_resolver_service.dart'
+    as _i960;
 import '../features/targets/domain/services/target_visibility_service.dart'
     as _i951;
 import '../features/targets/domain/usecases/create_target_use_case.dart'
@@ -990,6 +994,8 @@ import '../features/targets/presentation/cubit/positivacao_dashboard_cubit.dart'
     as _i627;
 import '../features/targets/presentation/cubit/positivacao_settings_cubit.dart'
     as _i936;
+import '../features/targets/presentation/cubit/ranking_dashboard_cubit.dart'
+    as _i758;
 import '../features/targets/presentation/cubit/target_dashboard_cubit.dart'
     as _i293;
 import '../features/targets/presentation/cubit/target_form_cubit.dart' as _i998;
@@ -1071,6 +1077,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i162.PaymentTermLocalMapper>(
       () => const _i162.PaymentTermLocalMapper(),
+    );
+    gh.factory<_i444.RankingCalculationService>(
+      () => const _i444.RankingCalculationService(),
     );
     gh.lazySingleton<_i461.AppEnvironment>(
       () => appInjectionModule.appEnvironment,
@@ -2862,6 +2871,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i334.RevokeInviteUseCase>(
       () => _i334.RevokeInviteUseCase(gh<_i75.InviteRepository>()),
     );
+    gh.factory<_i960.RankingPeerResolverService>(
+      () => _i960.RankingPeerResolverService(
+        gh<_i265.MembershipRepository>(),
+        gh<_i265.TeamRepository>(),
+      ),
+    );
     gh.factory<_i302.PortfolioVisibilityService>(
       () => _i302.PortfolioVisibilityService(
         gh<_i265.MembershipRepository>(),
@@ -2998,6 +3013,19 @@ extension GetItInjectableX on _i174.GetIt {
         qualifyLead: gh<_i924.QualifyLeadUseCase>(),
         disqualifyLead: gh<_i904.DisqualifyLeadUseCase>(),
         listOrganizationUsers: gh<_i220.ListOrganizationUsersUseCase>(),
+      ),
+    );
+    gh.factory<_i758.RankingDashboardCubit>(
+      () => _i758.RankingDashboardCubit(
+        gh<_i951.TargetVisibilityService>(),
+        gh<_i960.RankingPeerResolverService>(),
+        gh<_i265.GetOrganizationUseCase>(),
+        gh<_i876.TargetRepository>(),
+        gh<_i154.TargetAchievementRepository>(),
+        gh<_i265.MembershipRepository>(),
+        gh<_i265.TeamRepository>(),
+        gh<_i444.RankingCalculationService>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i249.FavoriteStatusCubit>(

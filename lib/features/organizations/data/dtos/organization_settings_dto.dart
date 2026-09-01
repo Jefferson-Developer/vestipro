@@ -17,6 +17,7 @@ final class OrganizationSettingsDto {
     this.positivacaoEligibleOrderStatuses =
         defaultPositivacaoEligibleOrderStatuses,
     this.positivacaoMinOrderValue,
+    this.rankingVisibilityMode = defaultRankingVisibilityMode,
   });
 
   factory OrganizationSettingsDto.fromJson(Map<String, dynamic> json) {
@@ -36,6 +37,7 @@ final class OrganizationSettingsDto {
     final rawPositivacaoEligibleOrderStatuses =
         json['positivacaoEligibleOrderStatuses'];
     final positivacaoMinOrderValue = json['positivacaoMinOrderValue'];
+    final rankingVisibilityMode = json['rankingVisibilityMode'];
 
     if (currency is! String ||
         country is! String ||
@@ -49,7 +51,8 @@ final class OrganizationSettingsDto {
         (positivacaoPeriodGranularity != null &&
             positivacaoPeriodGranularity is! String) ||
         (positivacaoMinOrderValue != null &&
-            positivacaoMinOrderValue is! num)) {
+            positivacaoMinOrderValue is! num) ||
+        (rankingVisibilityMode != null && rankingVisibilityMode is! String)) {
       throw const ValidationException(
         'Invalid organization settings payload.',
         code: 'invalid_organization_settings_payload',
@@ -77,6 +80,8 @@ final class OrganizationSettingsDto {
           ? defaultPositivacaoEligibleOrderStatuses
           : _stringListFromJson(rawPositivacaoEligibleOrderStatuses),
       positivacaoMinOrderValue: (positivacaoMinOrderValue as num?)?.toDouble(),
+      rankingVisibilityMode:
+          rankingVisibilityMode as String? ?? defaultRankingVisibilityMode,
     );
   }
 
@@ -116,6 +121,11 @@ final class OrganizationSettingsDto {
   final List<String> positivacaoEligibleOrderStatuses;
   final double? positivacaoMinOrderValue;
 
+  /// See `OrganizationSettings.rankingVisibilityMode`'s own doc (TASK-118).
+  /// Always written, never conditionally omitted — same rationale as
+  /// [positivacaoPeriodGranularity].
+  final String rankingVisibilityMode;
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'currency': currency,
@@ -136,6 +146,7 @@ final class OrganizationSettingsDto {
       'positivacaoEligibleOrderStatuses': positivacaoEligibleOrderStatuses,
       if (positivacaoMinOrderValue != null)
         'positivacaoMinOrderValue': positivacaoMinOrderValue,
+      'rankingVisibilityMode': rankingVisibilityMode,
     };
   }
 }

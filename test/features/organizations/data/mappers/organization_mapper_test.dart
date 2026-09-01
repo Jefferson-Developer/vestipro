@@ -172,6 +172,28 @@ void main() {
       expect(entity.positivacaoMinOrderValue, isNull);
     });
 
+    test('settingsToEntity/settingsToDto round-trip a custom '
+        'rankingVisibilityMode (TASK-118)', () {
+      const dtoWithRanking = OrganizationSettingsDto(
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+        rankingVisibilityMode: 'relative_position_only',
+      );
+
+      final entity = mapper.settingsToEntity(dtoWithRanking);
+      expect(entity.rankingVisibilityMode, 'relative_position_only');
+
+      final roundTrippedDto = mapper.settingsToDto(entity);
+      expect(roundTrippedDto.rankingVisibilityMode, 'relative_position_only');
+    });
+
+    test('settingsToEntity defaults rankingVisibilityMode when absent from '
+        'the DTO', () {
+      final entity = mapper.settingsToEntity(dto.settings);
+      expect(entity.rankingVisibilityMode, 'full_ranking');
+    });
+
     test('toDto is the exact inverse of toEntity', () {
       final entity = mapper.toEntity(dto);
       final roundTrippedDto = mapper.toDto(entity);

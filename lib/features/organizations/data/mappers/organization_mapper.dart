@@ -57,6 +57,7 @@ final class OrganizationMapper {
       positivacaoPeriodGranularity: dto.positivacaoPeriodGranularity,
       positivacaoEligibleOrderStatuses: dto.positivacaoEligibleOrderStatuses,
       positivacaoMinOrderValue: dto.positivacaoMinOrderValue,
+      rankingVisibilityMode: dto.rankingVisibilityMode,
     );
   }
 
@@ -78,6 +79,7 @@ final class OrganizationMapper {
       positivacaoEligibleOrderStatuses:
           settings.positivacaoEligibleOrderStatuses,
       positivacaoMinOrderValue: settings.positivacaoMinOrderValue,
+      rankingVisibilityMode: settings.rankingVisibilityMode,
     );
   }
 

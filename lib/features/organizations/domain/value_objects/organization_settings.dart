@@ -22,6 +22,23 @@ const List<String> defaultPositivacaoEligibleOrderStatuses = <String>[
   'shipped',
 ];
 
+/// Default `OrganizationSettings.rankingVisibilityMode` (TASK-118): an
+/// organization that never configured its own shows the full nominal ranking
+/// to every role that can view it — matches `RankingVisibilityMode
+/// .fullRanking.code` without importing that enum here (same decoupling
+/// technique already used by [defaultPositivacaoPeriodGranularity]).
+const String defaultRankingVisibilityMode = 'full_ranking';
+
+/// Every raw code [OrganizationSettings.rankingVisibilityMode] accepts —
+/// kept here (not in the `targets` feature) so [OrganizationSettings
+/// .validated] can reject a garbage code without importing
+/// `RankingVisibilityMode`, same technique already used for
+/// [OrganizationSettings.positivacaoPeriodGranularity].
+const Set<String> validRankingVisibilityModes = <String>{
+  'full_ranking',
+  'relative_position_only',
+};
+
 /// Organization-wide defaults (currency, country, default language) that
 /// Companies and Branches inherit unless they override them explicitly
 /// (TASK-027).
@@ -101,6 +118,18 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     /// minimum (any eligible-status order already counts), same
     /// nullable-means-unlimited/disabled convention as [maxTeamsPerUser].
     double? positivacaoMinOrderValue,
+
+    /// Ranking comercial visibility rule (TASK-118, EPIC-15): whether a
+    /// `SALES_REP` sees the full nominal ranking of their peers
+    /// (`full_ranking`) or only their own relative position (e.g. "você
+    /// está em 4º de 12", `relative_position_only`). Stored as a raw code
+    /// (one of [validRankingVisibilityModes]) instead of importing
+    /// `RankingVisibilityMode` here, same decoupling technique as
+    /// [positivacaoPeriodGranularity]. Never changes what a
+    /// `SALES_MANAGER`/`ADMIN`/`OWNER` sees — those roles always get the
+    /// full ranking of the scope they manage, regardless of this setting;
+    /// see `RankingCalculationService`'s own docs.
+    @Default(defaultRankingVisibilityMode) String rankingVisibilityMode,
   }) = _OrganizationSettings;
 
   /// Builds validated [OrganizationSettings], trimming each value and
@@ -126,6 +155,7 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     List<String> positivacaoEligibleOrderStatuses =
         defaultPositivacaoEligibleOrderStatuses,
     double? positivacaoMinOrderValue,
+    String rankingVisibilityMode = defaultRankingVisibilityMode,
   }) {
     final fieldErrors = <String, String>{};
     final trimmedCurrency = currency.trim();
@@ -150,6 +180,7 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     final normalizedPositivacaoEligibleOrderStatuses = _normalizeSettingsList(
       positivacaoEligibleOrderStatuses,
     );
+    final trimmedRankingVisibilityMode = rankingVisibilityMode.trim();
 
     if (trimmedCurrency.isEmpty) {
       fieldErrors['currency'] = 'Currency is required.';
@@ -191,6 +222,11 @@ abstract class OrganizationSettings with _$OrganizationSettings {
       fieldErrors['positivacaoMinOrderValue'] =
           'Positivação minimum order value cannot be negative.';
     }
+    if (!validRankingVisibilityModes.contains(trimmedRankingVisibilityMode)) {
+      fieldErrors['rankingVisibilityMode'] =
+          'Ranking visibility mode must be full_ranking or '
+          'relative_position_only.';
+    }
 
     if (fieldErrors.isNotEmpty) {
       throw ValidationException(
@@ -217,6 +253,7 @@ abstract class OrganizationSettings with _$OrganizationSettings {
       positivacaoEligibleOrderStatuses:
           normalizedPositivacaoEligibleOrderStatuses,
       positivacaoMinOrderValue: positivacaoMinOrderValue,
+      rankingVisibilityMode: trimmedRankingVisibilityMode,
     );
   }
 }

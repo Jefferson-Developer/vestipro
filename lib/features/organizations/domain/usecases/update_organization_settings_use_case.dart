@@ -34,6 +34,7 @@ final class UpdateOrganizationSettingsUseCase {
     List<String> positivacaoEligibleOrderStatuses =
         defaultPositivacaoEligibleOrderStatuses,
     double? positivacaoMinOrderValue,
+    String rankingVisibilityMode = defaultRankingVisibilityMode,
   }) async {
     final trimmedId = id.trim();
     final trimmedUpdatedBy = updatedBy.trim();
@@ -68,6 +69,7 @@ final class UpdateOrganizationSettingsUseCase {
         positivacaoPeriodGranularity: positivacaoPeriodGranularity,
         positivacaoEligibleOrderStatuses: positivacaoEligibleOrderStatuses,
         positivacaoMinOrderValue: positivacaoMinOrderValue,
+        rankingVisibilityMode: rankingVisibilityMode,
       );
     } on ValidationException catch (exception) {
       return AppFailure<Organization>(mapAppExceptionToFailure(exception));

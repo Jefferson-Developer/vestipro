@@ -89,6 +89,12 @@ final class AnalyticsEvents {
   static const String positivacaoSettingsUpdated =
       'positivacao_settings_updated';
 
+  /// Logged by `RankingDashboardCubit` (TASK-118, EPIC-15) once per
+  /// dimension/metric the caller navigates the ranking comercial dashboard
+  /// to — same "once per dimension switch, never once per realtime tick"
+  /// rule as [targetDashboardViewed]/[positivacaoDashboardViewed].
+  static const String rankingDashboardViewed = 'ranking_dashboard_viewed';
+
   /// Logged once per `SyncEngine.runPush` call (TASK-109, EPIC-14) — the
   /// Outbox drain pass — with `attempted`/`synced`/`failed`/`conflicts`/
   /// `duration_ms` parameters, feeding the "métricas de sincronização"
@@ -171,6 +177,7 @@ final class AnalyticsEvents {
     targetDashboardViewed,
     positivacaoDashboardViewed,
     positivacaoSettingsUpdated,
+    rankingDashboardViewed,
     syncPushCompleted,
     syncPullCompleted,
     syncCenterOpened,
