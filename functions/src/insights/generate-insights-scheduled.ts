@@ -12,6 +12,7 @@ import {
   evaluateInsights,
   type Insight,
   type InsightContext,
+  type InsightCrossSellSnapshot,
   type InsightCustomerGrowthSnapshot,
   type InsightCustomerSnapshot,
   type InsightDataset,
@@ -19,6 +20,7 @@ import {
   type InsightRevenueComparisonMode,
   type InsightRevenueComparisonSnapshot,
 } from './insight-engine';
+import { CrossSellInsightRule } from './cross-sell-insight-rule';
 import { GrowingCustomerInsightRule } from './growing-customer-insight-rule';
 import { InactiveCustomerInsightRule } from './inactive-customer-insight-rule';
 import { RevenueDropInsightRule } from './revenue-drop-insight-rule';
@@ -27,6 +29,7 @@ const defaultRules = [
   new InactiveCustomerInsightRule(),
   new RevenueDropInsightRule(),
   new GrowingCustomerInsightRule(),
+  new CrossSellInsightRule(),
 ] as const;
 
 export const generateInsightsScheduled = onSchedule(
@@ -62,6 +65,7 @@ export async function generateInsightsScheduledHandler(
     const customerGrowthSnapshots = await loadCustomerGrowthSnapshots(
       organization.ref,
     );
+    const crossSellSnapshots = await loadCrossSellSnapshots(organization.ref);
     for (const insights of buildInsightsForOrganization({
       organizationId: organization.id,
       asOf: now,
@@ -69,6 +73,7 @@ export async function generateInsightsScheduledHandler(
       customerSnapshots,
       revenueComparisons,
       customerGrowthSnapshots,
+      crossSellSnapshots,
     })) {
       await persistInsights(organization.ref, insights);
       logger.info('generateInsightsScheduled processed company', {
@@ -206,6 +211,39 @@ async function loadCustomerGrowthSnapshots(
   });
 }
 
+async function loadCrossSellSnapshots(
+  organizationRef: DocumentReference,
+): Promise<InsightCrossSellSnapshot[]> {
+  const snapshot = await organizationRef
+    .collection('insightCrossSellSnapshots')
+    .get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    const candidates = Array.isArray(data.candidates) ? data.candidates : [];
+    return {
+      customerId: data.customerId as string,
+      organizationId: data.organizationId as string,
+      companyId: data.companyId as string,
+      recipientUserId: data.recipientUserId as string,
+      customerName: data.customerName as string,
+      similarityGroupLabel: data.similarityGroupLabel as string,
+      similarityGroupSize: (data.similarityGroupSize as number) ?? 0,
+      candidates: candidates.map((candidate: DocumentData) => ({
+        categoryId: candidate.categoryId as string,
+        categoryName: candidate.categoryName as string,
+        peerAdoptionRate: candidate.peerAdoptionRate as number,
+        peerAverageTicket: candidate.peerAverageTicket as number,
+        alreadyPurchasedByCustomer: Boolean(
+          candidate.alreadyPurchasedByCustomer,
+        ),
+        isAvailableInCustomerPriceList:
+          candidate.isAvailableInCustomerPriceList !== false,
+        isActiveCollection: candidate.isActiveCollection !== false,
+      })),
+    };
+  });
+}
+
 function resolveSettings(
   settingsData: DocumentData | undefined,
 ): InsightOrganizationSettings {
@@ -248,12 +286,15 @@ export function buildInsightsForOrganization(params: {
   customerSnapshots: readonly InsightCustomerSnapshot[];
   revenueComparisons: readonly InsightRevenueComparisonSnapshot[];
   customerGrowthSnapshots?: readonly InsightCustomerGrowthSnapshot[];
+  crossSellSnapshots?: readonly InsightCrossSellSnapshot[];
 }): Insight[][] {
   const customerGrowthSnapshots = params.customerGrowthSnapshots ?? [];
+  const crossSellSnapshots = params.crossSellSnapshots ?? [];
   const companyIds = new Set<string>([
     ...params.customerSnapshots.map((item) => item.companyId),
     ...params.revenueComparisons.map((item) => item.companyId),
     ...customerGrowthSnapshots.map((item) => item.companyId),
+    ...crossSellSnapshots.map((item) => item.companyId),
   ]);
   const results: Insight[][] = [];
   for (const companyId of companyIds) {
@@ -266,6 +307,9 @@ export function buildInsightsForOrganization(params: {
         (item) => item.companyId === companyId,
       ),
       customerGrowthSnapshots: customerGrowthSnapshots.filter(
+        (item) => item.companyId === companyId,
+      ),
+      crossSellSnapshots: crossSellSnapshots.filter(
         (item) => item.companyId === companyId,
       ),
     };

@@ -352,6 +352,8 @@ import '../features/insights/data/repositories/insight_repository_impl.dart'
     as _i666;
 import '../features/insights/domain/repositories/insight_repository.dart'
     as _i644;
+import '../features/insights/domain/rules/cross_sell_insight_rule.dart'
+    as _i671;
 import '../features/insights/domain/rules/growing_customer_insight_rule.dart'
     as _i425;
 import '../features/insights/domain/rules/inactive_customer_insight_rule.dart'
@@ -1163,6 +1165,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => const _i712.CustomerSegmentMapper(),
     );
     gh.lazySingleton<_i963.InsightMapper>(() => const _i963.InsightMapper());
+    gh.lazySingleton<_i671.CrossSellInsightRule>(
+      () => const _i671.CrossSellInsightRule(),
+    );
     gh.lazySingleton<_i425.GrowingCustomerInsightRule>(
       () => const _i425.GrowingCustomerInsightRule(),
     );
@@ -1624,18 +1629,19 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i814.ConflictRecordRepository>(
       () => _i566.DriftConflictRecordRepository(gh<_i658.AppDatabase>()),
     );
-    gh.lazySingleton<List<_i629.InsightRule>>(
-      () => insightModule.insightRules(
-        gh<_i364.InactiveCustomerInsightRule>(),
-        gh<_i622.RevenueDropInsightRule>(),
-        gh<_i425.GrowingCustomerInsightRule>(),
-      ),
-    );
     gh.lazySingleton<_i154.TargetAchievementRepository>(
       () => _i535.DriftTargetAchievementRepository(gh<_i658.AppDatabase>()),
     );
     gh.lazySingleton<_i799.OfflinePackageStatusRepository>(
       () => _i963.DriftOfflinePackageStatusRepository(gh<_i658.AppDatabase>()),
+    );
+    gh.lazySingleton<List<_i629.InsightRule>>(
+      () => insightModule.insightRules(
+        gh<_i364.InactiveCustomerInsightRule>(),
+        gh<_i622.RevenueDropInsightRule>(),
+        gh<_i425.GrowingCustomerInsightRule>(),
+        gh<_i671.CrossSellInsightRule>(),
+      ),
     );
     gh.factory<_i551.ClearCustomerFormDraftUseCase>(
       () => _i551.ClearCustomerFormDraftUseCase(

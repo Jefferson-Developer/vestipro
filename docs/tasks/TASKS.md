@@ -239,7 +239,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-122 — Implementar insight de cliente inativo](TASK-122-implementar-insight-de-cliente-inativo.md) — Flutter Senior
 - [x] [TASK-123 — Implementar insight de queda de faturamento](TASK-123-implementar-insight-de-queda-de-faturamento.md) — Flutter Senior
 - [x] [TASK-124 — Implementar insight de cliente em crescimento](TASK-124-implementar-insight-de-cliente-em-crescimento.md) — Flutter Senior
-- [ ] [TASK-125 — Implementar insight de cross-sell](TASK-125-implementar-insight-de-cross-sell.md) — Flutter Senior
+- [x] [TASK-125 — Implementar insight de cross-sell](TASK-125-implementar-insight-de-cross-sell.md) — Flutter Senior
 - [ ] [TASK-126 — Implementar insight de up-sell](TASK-126-implementar-insight-de-up-sell.md) — Flutter Senior
 - [ ] [TASK-127 — Implementar insight de mix insuficiente](TASK-127-implementar-insight-de-mix-insuficiente.md) — Flutter Senior
 - [ ] [TASK-128 — Implementar insight de estoque alto/giro baixo e reposição](TASK-128-implementar-insight-de-estoque-e-reposicao.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 124 / 220 tasks concluídas.
+**Progresso:** 125 / 220 tasks concluídas.

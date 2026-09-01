@@ -1,7 +1,8 @@
 export type InsightType =
   | 'inactiveCustomer'
   | 'revenueDrop'
-  | 'customerGrowth';
+  | 'customerGrowth'
+  | 'crossSell';
 export type InsightStatus =
   | 'fresh'
   | 'viewed'
@@ -119,6 +120,33 @@ export interface InsightCustomerGrowthSnapshot {
   topGrowingCategoryRevenueGrowthAmount?: number | null;
 }
 
+export interface InsightCrossSellCategoryCandidate {
+  categoryId: string;
+  categoryName: string;
+  /** Fraction (0..1) of the similar-customers group that buys this category. */
+  peerAdoptionRate: number;
+  peerAverageTicket: number;
+  alreadyPurchasedByCustomer?: boolean;
+  isAvailableInCustomerPriceList?: boolean;
+  isActiveCollection?: boolean;
+}
+
+export interface InsightCrossSellSnapshot {
+  customerId: string;
+  organizationId: string;
+  companyId: string;
+  recipientUserId: string;
+  customerName: string;
+  /**
+   * Human-readable description of the criterion used to select the
+   * "similar customers" comparison group (e.g. same segment and region).
+   * Always exposed in the insight evidence — never a black box.
+   */
+  similarityGroupLabel: string;
+  similarityGroupSize: number;
+  candidates: InsightCrossSellCategoryCandidate[];
+}
+
 export interface InsightOrganizationSettings {
   inactivityThresholdDays: number;
   inactivityThresholdDaysBySegment: Record<string, number>;
@@ -135,6 +163,7 @@ export interface InsightDataset {
   customerSnapshots: InsightCustomerSnapshot[];
   revenueComparisons: InsightRevenueComparisonSnapshot[];
   customerGrowthSnapshots: InsightCustomerGrowthSnapshot[];
+  crossSellSnapshots: InsightCrossSellSnapshot[];
 }
 
 export interface InsightContext {

@@ -1,5 +1,6 @@
 import 'package:injectable/injectable.dart';
 
+import 'domain/rules/cross_sell_insight_rule.dart';
 import 'domain/rules/growing_customer_insight_rule.dart';
 import 'domain/rules/inactive_customer_insight_rule.dart';
 import 'domain/rules/revenue_drop_insight_rule.dart';
@@ -12,11 +13,13 @@ abstract class InsightModule {
     InactiveCustomerInsightRule inactiveCustomerRule,
     RevenueDropInsightRule revenueDropRule,
     GrowingCustomerInsightRule growingCustomerRule,
+    CrossSellInsightRule crossSellRule,
   ) {
     return <InsightRule>[
       inactiveCustomerRule,
       revenueDropRule,
       growingCustomerRule,
+      crossSellRule,
     ];
   }
 }
