@@ -4,6 +4,7 @@ import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/insight.dart';
 import '../../domain/entities/insight_page.dart';
+import '../../domain/entities/insight_visibility_filter.dart';
 import '../../domain/repositories/insight_repository.dart';
 import '../../domain/services/insight_structural_validator.dart';
 import '../../domain/value_objects/insight_status.dart';
@@ -85,6 +86,83 @@ final class InsightRepositoryImpl implements InsightRepository {
         UnexpectedFailure(
           'Unexpected error listing insights.',
           code: 'insight_list_page_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<AppResult<InsightPage>> listPageByVisibility({
+    required String organizationId,
+    required InsightVisibilityFilter visibility,
+    int limit = 25,
+    DateTime? before,
+    InsightType? type,
+  }) async {
+    if (!visibility.canViewAny) {
+      return const AppSuccess<InsightPage>(
+        InsightPage(insights: <Insight>[], hasMore: false),
+      );
+    }
+    try {
+      final items = await dataSource.listPageByVisibility(
+        organizationId: organizationId,
+        recipientUserIds: visibility.recipientUserIds,
+        limit: limit,
+        before: before,
+        type: type?.name,
+      );
+      final insights = items
+          .map(mapper.toEntity)
+          .where(
+            (insight) =>
+                insight.status != InsightStatus.dismissed &&
+                insight.status != InsightStatus.resolved,
+          )
+          .toList(growable: false);
+      return AppSuccess<InsightPage>(
+        InsightPage(
+          insights: insights,
+          hasMore: items.length == limit,
+          nextCursor: items.length == limit && items.isNotEmpty
+              ? items.last.generatedAt
+              : null,
+        ),
+      );
+    } on AppException catch (exception) {
+      return AppFailure<InsightPage>(mapAppExceptionToFailure(exception));
+    } catch (exception) {
+      return AppFailure<InsightPage>(
+        UnexpectedFailure(
+          'Unexpected error listing opportunity center insights.',
+          code: 'insight_list_page_by_visibility_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
+  @override
+  Future<AppResult<void>> updateStatus({
+    required String organizationId,
+    required String insightId,
+    required InsightStatus status,
+  }) async {
+    try {
+      await dataSource.updateStatus(
+        organizationId: organizationId,
+        insightId: insightId,
+        status: status.name,
+      );
+      return const AppSuccess<void>(null);
+    } on AppException catch (exception) {
+      return AppFailure<void>(mapAppExceptionToFailure(exception));
+    } catch (exception) {
+      return AppFailure<void>(
+        UnexpectedFailure(
+          'Unexpected error updating insight status.',
+          code: 'insight_update_status_unexpected',
           cause: exception,
         ),
       );

@@ -55,6 +55,9 @@ abstract final class RolePermissionMatrix {
     // TASK-116: SALES_MANAGER acompanha o dashboard de atingimento da
     // própria meta e da equipe.
     Capability.targetView,
+    // TASK-132: SALES_MANAGER acessa a Central de Oportunidades para a
+    // própria carteira e a de sua equipe.
+    Capability.insightView,
   };
 
   static const Set<Capability> _salesRepCapabilities = <Capability>{
@@ -71,6 +74,9 @@ abstract final class RolePermissionMatrix {
     // TASK-116: SALES_REP acompanha o dashboard de atingimento da própria
     // meta.
     Capability.targetView,
+    // TASK-132: SALES_REP acessa a Central de Oportunidades para a própria
+    // carteira.
+    Capability.insightView,
   };
 
   static const Set<Capability> _salesAssistantCapabilities = <Capability>{

@@ -278,6 +278,38 @@ void main() {
       }
     });
 
+    test('OWNER/ADMIN/SALES_MANAGER/SALES_REP can view the Central de '
+        'Oportunidades (TASK-132); SALES_ASSISTANT/FINANCE/READ_ONLY cannot', () {
+      for (final role in <SystemRoleName>[
+        SystemRoleName.owner,
+        SystemRoleName.admin,
+        SystemRoleName.salesManager,
+        SystemRoleName.salesRep,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.insightView),
+          isTrue,
+          reason: '$role must be able to view the Central de Oportunidades.',
+        );
+      }
+
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesAssistant,
+        SystemRoleName.finance,
+        SystemRoleName.readOnly,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.insightView),
+          isFalse,
+          reason: '$role must never view the Central de Oportunidades.',
+        );
+      }
+    });
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,

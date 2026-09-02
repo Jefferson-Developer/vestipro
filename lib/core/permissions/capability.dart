@@ -63,6 +63,20 @@ enum Capability {
   /// reachable at all, the same two-layer shape `Capability.orderView` +
   /// `OrderVisibilityService` already use for Order.
   targetView,
+
+  /// View the Central de Oportunidades (TASK-132, EPIC-16) — the screen
+  /// aggregating every `Insight` (TASK-121 a TASK-131) the caller may see.
+  /// Never by itself which insights: a `SALES_REP` holding this only ever
+  /// sees insights addressed to their own carteira, a `SALES_MANAGER`
+  /// their own plus their teams', resolved by `InsightVisibilityService`,
+  /// never by this capability alone — same two-layer shape
+  /// `Capability.targetView` + `TargetVisibilityService` already use for
+  /// `Target`. Deliberately its own capability, not a reuse of
+  /// `Capability.opportunityView` (the unrelated CRM lead/pipeline
+  /// "Opportunity" entity under `features/opportunities/`), since the two
+  /// screens gate entirely different domains and must be grantable
+  /// independently.
+  insightView,
 }
 
 extension CapabilityCode on Capability {
@@ -106,6 +120,7 @@ extension CapabilityCode on Capability {
       Capability.auditLogView => 'audit.log.view',
       Capability.targetManage => 'target.manage',
       Capability.targetView => 'target.view',
+      Capability.insightView => 'insight.view',
     };
   }
 }

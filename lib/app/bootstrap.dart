@@ -26,6 +26,7 @@ import '../features/audit_log/audit_log.dart';
 import '../features/catalog/catalog.dart';
 import '../features/customers/customers.dart';
 import '../features/catalog_share/catalog_share.dart';
+import '../features/insights/insights.dart';
 import '../features/invites/invites.dart';
 import '../features/onboarding/onboarding.dart';
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
@@ -201,6 +202,37 @@ class VestiProApp extends StatelessWidget {
                       permissionService: getIt<PermissionService>(),
                       initialTargetId: queryParameters['targetId'],
                       createCubit: () => getIt<TargetDashboardCubit>(),
+                    ),
+                  ),
+          opportunityCenterPageBuilder:
+              (context, orgId, companyId, queryParameters) =>
+                  _withConnectivityIndicator(
+                    orgId: orgId,
+                    companyId: companyId,
+                    child: OpportunityCenterPage(
+                      organizationId: orgId,
+                      companyId: companyId,
+                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                      permissionService: getIt<PermissionService>(),
+                      createBloc: () => getIt<OpportunityCenterBloc>(),
+                      initialFilters:
+                          OpportunityCenterFilters.fromQueryParameters(
+                            queryParameters,
+                          ),
+                      onUrlStateChanged: (filters) => context.go(
+                        OpportunityCenterRoute(
+                          orgId: orgId,
+                          companyId: companyId,
+                          queryParameters: filters.toQueryParameters(),
+                        ).location,
+                      ),
+                      onActionExecuted: (insight, action) =>
+                          _navigateForInsightAction(
+                            context: context,
+                            orgId: orgId,
+                            companyId: companyId,
+                            action: action,
+                          ),
                     ),
                   ),
           customerFormPageBuilder: (context, orgId, companyId) =>
@@ -522,6 +554,61 @@ Future<void> _submitOrder(BuildContext context, Order order) async {
     submitOrderUseCase: getIt<SubmitOrderUseCase>(),
     saveOrderDraftUseCase: getIt<SaveOrderDraftUseCase>(),
     navigateTo: (location) => context.go(location),
+  );
+}
+
+/// Resolves the already-existing, already-validated destination for an
+/// `Insight`'s quick/secondary action (TASK-132) — the Central de
+/// Oportunidades itself never hard-codes another feature's route (same
+/// composition-root contract `_submitOrder`/`onOrderDraftSelected` already
+/// follow), so every `InsightActionType` is mapped here to a real
+/// [AppRoute] already reachable elsewhere in the app.
+///
+/// Every action type carrying a `customerId` (open cliente, agendar
+/// contato, iniciar pedido, ver histórico/oportunidades, ...) resolves to
+/// [CustomerDetailRoute]: the customer 360 (TASK-052) is the one existing
+/// hub that already hosts CRM activities/follow-ups (TASK-059/060), order
+/// history and "próxima melhor ação" (TASK-063) for that customer — never a
+/// second, bespoke screen per insight type. `resumeOrder` resolves to the
+/// abandoned draft itself via [OrderDraftRoute]. Action types with neither
+/// (pure product/seller-level insights, e.g. `suggestCampaign`/
+/// `notifyReplenishment`/`viewSellerDetail`) have no dedicated destination
+/// page registered in [AppRouter] yet — a real, documented gap (see
+/// `docs/tasks/TASK-132-implementar-central-de-oportunidades-CONCLUIDA.md`)
+/// — so they only surface an [AppSnackbar] instead of silently doing
+/// nothing or crashing.
+void _navigateForInsightAction({
+  required BuildContext context,
+  required String orgId,
+  required String companyId,
+  required InsightAction action,
+}) {
+  final customerId = action.customerId;
+  if (action.type == InsightActionType.resumeOrder) {
+    final orderId = action.payload['orderId'] as String?;
+    if (orderId != null && orderId.trim().isNotEmpty) {
+      context.go(
+        OrderDraftRoute(
+          orgId: orgId,
+          companyId: companyId,
+          draftId: orderId,
+        ).location,
+      );
+      return;
+    }
+  }
+  if (customerId != null && customerId.trim().isNotEmpty) {
+    context.go(
+      CustomerDetailRoute(orgId: orgId, customerId: customerId).location,
+    );
+    return;
+  }
+  AppSnackbar.show(
+    context,
+    message:
+        'Ainda não há uma tela dedicada para esta ação — use a evidência do '
+        'insight para decidir o próximo passo.',
+    variant: AppSnackbarVariant.info,
   );
 }
 

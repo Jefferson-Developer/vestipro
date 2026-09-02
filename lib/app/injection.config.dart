@@ -376,7 +376,15 @@ import '../features/insights/domain/services/insight_engine.dart' as _i918;
 import '../features/insights/domain/services/insight_rule.dart' as _i629;
 import '../features/insights/domain/services/insight_structural_validator.dart'
     as _i864;
+import '../features/insights/domain/services/insight_visibility_service.dart'
+    as _i44;
+import '../features/insights/domain/usecases/list_opportunity_center_insights_use_case.dart'
+    as _i1006;
+import '../features/insights/domain/usecases/update_insight_status_use_case.dart'
+    as _i756;
 import '../features/insights/insight_module.dart' as _i676;
+import '../features/insights/presentation/bloc/opportunity_center_bloc.dart'
+    as _i904;
 import '../features/inventory/data/datasources/firestore_stock_alert_data_source.dart'
     as _i8;
 import '../features/inventory/data/datasources/firestore_stock_turnover_data_source.dart'
@@ -2956,6 +2964,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i932.UpdatePaymentTermUseCase>(),
       ),
     );
+    gh.factory<_i756.UpdateInsightStatusUseCase>(
+      () => _i756.UpdateInsightStatusUseCase(gh<_i644.InsightRepository>()),
+    );
     gh.factory<_i658.AddMemberToTeamUseCase>(
       () => _i658.AddMemberToTeamUseCase(
         gh<_i320.TeamRepository>(),
@@ -3057,6 +3068,12 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i44.InsightVisibilityService>(
+      () => _i44.InsightVisibilityService(
+        gh<_i220.PortfolioVisibilityService>(),
+        gh<_i265.TeamRepository>(),
+      ),
+    );
     gh.factory<_i63.OrderVisibilityService>(
       () => _i63.OrderVisibilityService(
         gh<_i220.PortfolioVisibilityService>(),
@@ -3145,6 +3162,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i639.FutureStockRepository>(),
       ),
     );
+    gh.factory<_i1006.ListOpportunityCenterInsightsUseCase>(
+      () => _i1006.ListOpportunityCenterInsightsUseCase(
+        gh<_i44.InsightVisibilityService>(),
+        gh<_i644.InsightRepository>(),
+      ),
+    );
     gh.factory<_i293.TargetDashboardCubit>(
       () => _i293.TargetDashboardCubit(
         gh<_i951.TargetVisibilityService>(),
@@ -3204,6 +3227,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i424.OrderListBloc(
         listOrders: gh<_i144.ListOrdersUseCase>(),
         listLocalPendingOrders: gh<_i233.ListLocalPendingOrdersUseCase>(),
+      ),
+    );
+    gh.factory<_i904.OpportunityCenterBloc>(
+      () => _i904.OpportunityCenterBloc(
+        gh<_i1006.ListOpportunityCenterInsightsUseCase>(),
+        gh<_i756.UpdateInsightStatusUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i438.PreviewCustomerSegmentCountUseCase>(

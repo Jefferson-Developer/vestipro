@@ -43,6 +43,7 @@ class AppRouter {
     this.conflictListPageBuilder,
     this.conflictDetailPageBuilder,
     this.syncCenterPageBuilder,
+    this.opportunityCenterPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
     AuthorizationGuard? authorizationGuard,
@@ -161,6 +162,19 @@ class AppRouter {
   final Widget Function(BuildContext context, String orgId, String companyId)?
   syncCenterPageBuilder;
 
+  /// Builds the Central de Oportunidades screen (TASK-132), given
+  /// `orgId`/`companyId` and the raw `queryParameters` of
+  /// [OpportunityCenterRoute] — the caller decides how to turn those into an
+  /// `OpportunityCenterFilters`, same "router hands raw params, page owns
+  /// parsing" contract [customerPortfolioPageBuilder] already sets.
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  opportunityCenterPageBuilder;
+
   /// Builds the catalog's filterable browsing screen (TASK-082), given
   /// `orgId` and the raw `queryParameters` of [CatalogBrowseRoute] — the
   /// caller decides how to turn those into a `CatalogViewMode`/
@@ -269,6 +283,25 @@ class AppRouter {
         ),
         builder: (context, state) {
           final builder = targetDashboardPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: OpportunityCenterRoute.pathPattern,
+        name: OpportunityCenterRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.insightView,
+        ),
+        builder: (context, state) {
+          final builder = opportunityCenterPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,
