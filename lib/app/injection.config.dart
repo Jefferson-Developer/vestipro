@@ -352,6 +352,8 @@ import '../features/insights/data/repositories/insight_repository_impl.dart'
     as _i666;
 import '../features/insights/domain/repositories/insight_repository.dart'
     as _i644;
+import '../features/insights/domain/rules/abandoned_order_insight_rule.dart'
+    as _i617;
 import '../features/insights/domain/rules/churn_risk_insight_rule.dart' as _i47;
 import '../features/insights/domain/rules/cross_sell_insight_rule.dart'
     as _i671;
@@ -1173,6 +1175,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => const _i712.CustomerSegmentMapper(),
     );
     gh.lazySingleton<_i963.InsightMapper>(() => const _i963.InsightMapper());
+    gh.lazySingleton<_i617.AbandonedDraftOrderInsightRule>(
+      () => const _i617.AbandonedDraftOrderInsightRule(),
+    );
     gh.lazySingleton<_i47.ChurnRiskInsightRule>(
       () => const _i47.ChurnRiskInsightRule(),
     );
@@ -1406,19 +1411,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i101.PriceListItemRepository>(
       () => const _i808.SharedPreferencesPriceListItemRepository(),
     );
-    gh.lazySingleton<List<_i629.InsightRule>>(
-      () => insightModule.insightRules(
-        gh<_i364.InactiveCustomerInsightRule>(),
-        gh<_i622.RevenueDropInsightRule>(),
-        gh<_i425.GrowingCustomerInsightRule>(),
-        gh<_i671.CrossSellInsightRule>(),
-        gh<_i810.UpSellInsightRule>(),
-        gh<_i101.InsufficientMixInsightRule>(),
-        gh<_i572.HighStockLowTurnoverInsightRule>(),
-        gh<_i104.ReplenishmentSuggestionInsightRule>(),
-        gh<_i47.ChurnRiskInsightRule>(),
-      ),
-    );
     gh.lazySingleton<_i431.OrderLocalMapper>(
       () => _i431.OrderLocalMapper(gh<_i169.OrderMapper>()),
     );
@@ -1561,12 +1553,6 @@ extension GetItInjectableX on _i174.GetIt {
         reorderCategories: gh<_i892.ReorderCategoriesUseCase>(),
       ),
     );
-    gh.lazySingleton<_i918.InsightEngine>(
-      () => _i918.InsightEngine(
-        gh<List<_i629.InsightRule>>(),
-        gh<_i864.InsightStructuralValidator>(),
-      ),
-    );
     gh.factory<_i249.LoadCatalogHomeCacheUseCase>(
       () => _i249.LoadCatalogHomeCacheUseCase(
         gh<_i841.CatalogHomeCacheRepository>(),
@@ -1644,6 +1630,20 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i59.CampaignListBloc(
         listCampaigns: gh<_i328.ListCampaignsUseCase>(),
         deleteCampaign: gh<_i961.DeleteCampaignUseCase>(),
+      ),
+    );
+    gh.lazySingleton<List<_i629.InsightRule>>(
+      () => insightModule.insightRules(
+        gh<_i364.InactiveCustomerInsightRule>(),
+        gh<_i622.RevenueDropInsightRule>(),
+        gh<_i425.GrowingCustomerInsightRule>(),
+        gh<_i671.CrossSellInsightRule>(),
+        gh<_i810.UpSellInsightRule>(),
+        gh<_i101.InsufficientMixInsightRule>(),
+        gh<_i572.HighStockLowTurnoverInsightRule>(),
+        gh<_i104.ReplenishmentSuggestionInsightRule>(),
+        gh<_i47.ChurnRiskInsightRule>(),
+        gh<_i617.AbandonedDraftOrderInsightRule>(),
       ),
     );
     gh.factory<_i546.ListTopOpportunityOutcomeReasonsUseCase>(
@@ -2191,6 +2191,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i3.FirestoreInviteDataSource(
         gh<_i340.CloudFunctionsService>(),
         gh<_i974.FirebaseFirestore>(),
+      ),
+    );
+    gh.lazySingleton<_i918.InsightEngine>(
+      () => _i918.InsightEngine(
+        gh<List<_i629.InsightRule>>(),
+        gh<_i864.InsightStructuralValidator>(),
       ),
     );
     gh.lazySingleton<_i176.UserRoleDataSource>(

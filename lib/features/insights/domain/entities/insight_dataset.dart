@@ -1,3 +1,4 @@
+import 'insight_abandoned_order_snapshot.dart';
 import 'insight_churn_risk_snapshot.dart';
 import 'insight_cross_sell_snapshot.dart';
 import 'insight_customer_growth_snapshot.dart';
@@ -19,6 +20,7 @@ final class InsightDataset {
     this.insufficientMixSnapshots = const <InsightInsufficientMixSnapshot>[],
     this.stockPositionSnapshots = const <InsightStockPositionSnapshot>[],
     this.churnRiskSnapshots = const <InsightChurnRiskSnapshot>[],
+    this.abandonedOrderSnapshots = const <InsightAbandonedOrderSnapshot>[],
   });
 
   final InsightOrganizationSettings settings;
@@ -30,4 +32,5 @@ final class InsightDataset {
   final List<InsightInsufficientMixSnapshot> insufficientMixSnapshots;
   final List<InsightStockPositionSnapshot> stockPositionSnapshots;
   final List<InsightChurnRiskSnapshot> churnRiskSnapshots;
+  final List<InsightAbandonedOrderSnapshot> abandonedOrderSnapshots;
 }

@@ -8,4 +8,5 @@ enum InsightActionType {
   expandGrid,
   suggestCampaign,
   notifyReplenishment,
+  resumeOrder,
 }

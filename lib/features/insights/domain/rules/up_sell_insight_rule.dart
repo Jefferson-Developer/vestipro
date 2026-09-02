@@ -74,13 +74,15 @@ final class UpSellInsightRule implements InsightRule {
             evidence: <InsightEvidence>[
               InsightEvidence(
                 code: 'up_sell_comparison_group',
-                label: 'Base de comparacao (clientes semelhantes de maior volume)',
+                label:
+                    'Base de comparacao (clientes semelhantes de maior volume)',
                 value: snapshot.comparisonGroupLabel,
                 numericValue: snapshot.comparisonGroupSize.toDouble(),
               ),
               InsightEvidence(
                 code: 'up_sell_customer_average_ticket:${candidate.categoryId}',
-                label: 'Ticket medio atual do cliente em "${candidate.categoryName}"',
+                label:
+                    'Ticket medio atual do cliente em "${candidate.categoryName}"',
                 value: candidate.customerAverageTicket.toStringAsFixed(2),
                 numericValue: candidate.customerAverageTicket,
                 unit: 'BRL',

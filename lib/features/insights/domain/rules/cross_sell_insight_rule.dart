@@ -35,10 +35,10 @@ final class CrossSellInsightRule implements InsightRule {
       }
 
       final eligible =
-          snapshot.candidates.where((candidate) => candidate.isEligible).toList()
-            ..sort(
-              (a, b) => b.relevanceScore.compareTo(a.relevanceScore),
-            );
+          snapshot.candidates
+              .where((candidate) => candidate.isEligible)
+              .toList()
+            ..sort((a, b) => b.relevanceScore.compareTo(a.relevanceScore));
       if (eligible.isEmpty) {
         continue;
       }

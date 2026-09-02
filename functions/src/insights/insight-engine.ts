@@ -7,7 +7,8 @@ export type InsightType =
   | 'insufficientMix'
   | 'highStockLowTurnover'
   | 'replenishmentSuggestion'
-  | 'churnRisk';
+  | 'churnRisk'
+  | 'abandonedOrder';
 export type InsightStatus =
   | 'fresh'
   | 'viewed'
@@ -24,7 +25,8 @@ export type InsightActionType =
   | 'viewOpportunities'
   | 'expandGrid'
   | 'suggestCampaign'
-  | 'notifyReplenishment';
+  | 'notifyReplenishment'
+  | 'resumeOrder';
 export type InsightRevenueComparisonMode =
   | 'monthOverMonth'
   | 'yearOverYear';
@@ -305,6 +307,49 @@ export interface InsightChurnRiskSnapshot {
   averageTicket?: number | null;
 }
 
+/**
+ * Per-draft-order dataset used by `AbandonedOrderInsightRule` (TASK-130) to
+ * detect order drafts (`draft`/`pendingSync`) left untouched for too long,
+ * distinguishing a recently-parked "carrinho salvo" from a truly stale
+ * "pedido abandonado".
+ */
+export interface InsightAbandonedOrderSnapshot {
+  orderId: string;
+  organizationId: string;
+  companyId: string;
+  recipientUserId: string;
+  customerId: string;
+  customerName: string;
+  /**
+   * Timestamp of the last time the draft's content (items/quantities) was
+   * changed — never the last Outbox sync attempt. This is the only signal
+   * the rule uses to detect staleness.
+   */
+  lastContentChangeAt: Date;
+  itemCount: number;
+  /** Sum of the items already included in the draft. */
+  estimatedValue: number;
+  /**
+   * Purely informational: whether this draft still has a pending Outbox
+   * mutation. Intentionally never read by the rule's staleness gate — only
+   * `lastContentChangeAt` decides abandonment.
+   */
+  hasPendingOutboxSync?: boolean;
+  /**
+   * Whether the draft was started while the seller was actively assisting
+   * this customer, which makes "Contatar cliente" a relevant secondary
+   * action alongside "Retomar pedido".
+   */
+  startedInServiceContext?: boolean;
+  /**
+   * Whether the draft references a customer/product that has since been
+   * deleted, or a price list that has since expired — resuming it must
+   * surface an explicit warning, never reopen silently.
+   */
+  hasInvalidReference?: boolean;
+  invalidReferenceReason?: string | null;
+}
+
 export interface InsightOrganizationSettings {
   inactivityThresholdDays: number;
   inactivityThresholdDaysBySegment: Record<string, number>;
@@ -350,6 +395,13 @@ export interface InsightOrganizationSettings {
   /** Minimum composed risk score (0..1) to classify a customer as
    * "critico" risk. */
   churnRiskCriticalThreshold: number;
+  /** Minimum hours since a draft order's content was last changed before it
+   * is raised as a "carrinho salvo" (saved cart) insight. */
+  abandonedOrderSavedCartThresholdHours: number;
+  /** Minimum hours since a draft order's content was last changed before it
+   * is raised as a "pedido abandonado" (abandoned order) insight instead of
+   * the lower "carrinho salvo" severity. */
+  abandonedOrderAbandonedThresholdHours: number;
   lifetimeDays: number;
 }
 
@@ -363,6 +415,7 @@ export interface InsightDataset {
   insufficientMixSnapshots: InsightInsufficientMixSnapshot[];
   stockPositionSnapshots: InsightStockPositionSnapshot[];
   churnRiskSnapshots: InsightChurnRiskSnapshot[];
+  abandonedOrderSnapshots: InsightAbandonedOrderSnapshot[];
 }
 
 export interface InsightContext {
@@ -403,6 +456,8 @@ export const DEFAULT_INSIGHT_SETTINGS: InsightOrganizationSettings = {
   churnRiskMediumThreshold: 0.35,
   churnRiskHighThreshold: 0.55,
   churnRiskCriticalThreshold: 0.75,
+  abandonedOrderSavedCartThresholdHours: 24,
+  abandonedOrderAbandonedThresholdHours: 72,
   lifetimeDays: 7,
 };
 

@@ -31,6 +31,8 @@ final class InsightOrganizationSettings {
     this.churnRiskMediumThreshold = 0.35,
     this.churnRiskHighThreshold = 0.55,
     this.churnRiskCriticalThreshold = 0.75,
+    this.abandonedOrderSavedCartThresholdHours = 24,
+    this.abandonedOrderAbandonedThresholdHours = 72,
     this.defaultLifetime = const Duration(days: 7),
   });
 
@@ -134,6 +136,16 @@ final class InsightOrganizationSettings {
   /// Minimum composed risk score (0..1) required to classify a customer as
   /// "critico" risk.
   final double churnRiskCriticalThreshold;
+
+  /// Minimum hours since a draft order's content (items/quantities) was last
+  /// changed before it is raised as a "carrinho salvo" (saved cart) insight
+  /// ([AbandonedDraftOrderInsightRule]).
+  final double abandonedOrderSavedCartThresholdHours;
+
+  /// Minimum hours since a draft order's content was last changed before it
+  /// is raised as a "pedido abandonado" (abandoned order) insight instead of
+  /// the lower "carrinho salvo" severity.
+  final double abandonedOrderAbandonedThresholdHours;
 
   final Duration defaultLifetime;
 
