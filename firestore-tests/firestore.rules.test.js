@@ -349,6 +349,24 @@ function auditLogDoc({ organizationId, actorUserId, action = 'role.changed' }) {
   };
 }
 
+function salesDailyAggregateDoc({ organizationId, companyId = 'company-a' }) {
+  return {
+    organizationId,
+    companyId,
+    dimension: 'salesDaily',
+    scopeId: companyId,
+    periodKey: '2026-08-15',
+    revenueGross: 1500,
+    revenueNet: 1450,
+    discountAmount: 50,
+    orderCount: 2,
+    itemQuantity: 20,
+    labels: {},
+    generatedAt: now(),
+    version: 1,
+  };
+}
+
 let testEnv;
 
 beforeAll(async () => {
@@ -1629,5 +1647,77 @@ describe('organizations/{organizationId}/auditLogs/{logId}  (TASK-033)', () => {
 
     const db = testEnv.authenticatedContext('owner-a').firestore();
     await assertFails(db.doc(`organizations/${ORG_A}/auditLogs/log-1`).delete());
+  });
+});
+
+describe('organizations/{organizationId}/salesDailyAggregates/{aggregateId}  (TASK-133)', () => {
+  // Representative of all five `*Aggregates` collections this task adds
+  // (`salesDailyAggregates`/`customerMonthlyAggregates`/
+  // `productMonthlyAggregates`/`sellerMonthlyAggregates`/
+  // `regionMonthlyAggregates`) — they share the exact same rule (gated by
+  // `report.viewSensitive`, client never writes), so one is exercised here
+  // in depth instead of duplicating the same five assertions per
+  // collection.
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/salesDailyAggregates/company-a_company-a_2026-08-15`)
+        .set(salesDailyAggregateDoc({ organizationId: ORG_A }));
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_B}/salesDailyAggregates/company-b_company-b_2026-08-15`)
+        .set(salesDailyAggregateDoc({ organizationId: ORG_B, companyId: 'company-b' }));
+    });
+  });
+
+  test('OWNER (report.viewSensitive) consegue ler o snapshot da própria organization', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/salesDailyAggregates/company-a_company-a_2026-08-15`).get(),
+    );
+  });
+
+  test('SALES_MANAGER (report.viewSensitive) consegue listar snapshots da própria organization', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      db.collection(`organizations/${ORG_A}/salesDailyAggregates`).get(),
+    );
+  });
+
+  test('SALES_REP (sem report.viewSensitive) não consegue ler nem listar snapshots', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/salesDailyAggregates/company-a_company-a_2026-08-15`).get(),
+    );
+    await assertFails(db.collection(`organizations/${ORG_A}/salesDailyAggregates`).get());
+  });
+
+  test('OWNER da Org A não consegue ler o snapshot da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_B}/salesDailyAggregates/company-b_company-b_2026-08-15`).get(),
+    );
+  });
+
+  test('nenhum papel, nem OWNER, consegue criar um snapshot pelo client (só a Admin SDK escreve)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/salesDailyAggregates/company-a_company-a_2026-08-16`)
+        .set(salesDailyAggregateDoc({ organizationId: ORG_A })),
+    );
+  });
+
+  test('nenhum papel, nem OWNER, consegue atualizar ou excluir um snapshot já existente', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/salesDailyAggregates/company-a_company-a_2026-08-15`)
+        .update({ revenueGross: 999999 }),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/salesDailyAggregates/company-a_company-a_2026-08-15`).delete(),
+    );
   });
 });

@@ -961,6 +961,47 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/{salesDaily,customerMonthly,
+      // productMonthly,sellerMonthly,regionMonthly}Aggregates/{docId}
+      // (TASK-133 — camada de agregação server-side)
+      //
+      // Pre-computed BI/dashboard snapshots (revenue/order-count/quantity by
+      // day, customer, product/category/collection, seller and region) —
+      // only ever written by the Admin SDK (`recomputeSalesDailyOnOrderWrite`
+      // trigger / `recomputeMonthlyAggregates` callable / its nightly
+      // schedule), never by the client, same `allow create, update, delete:
+      // if false` already used by `stockTurnoverMetrics` above. Gated by
+      // `report.viewSensitive` — same capability `stockTurnoverMetrics`
+      // itself reads with, since these snapshots carry aggregated revenue,
+      // the same class of sensitive commercial data.
+      // -------------------------------------------------------------------
+
+      match /salesDailyAggregates/{aggregateId} {
+        allow get, list: if hasCapability(organizationId, 'report.viewSensitive');
+        allow create, update, delete: if false;
+      }
+
+      match /customerMonthlyAggregates/{aggregateId} {
+        allow get, list: if hasCapability(organizationId, 'report.viewSensitive');
+        allow create, update, delete: if false;
+      }
+
+      match /productMonthlyAggregates/{aggregateId} {
+        allow get, list: if hasCapability(organizationId, 'report.viewSensitive');
+        allow create, update, delete: if false;
+      }
+
+      match /sellerMonthlyAggregates/{aggregateId} {
+        allow get, list: if hasCapability(organizationId, 'report.viewSensitive');
+        allow create, update, delete: if false;
+      }
+
+      match /regionMonthlyAggregates/{aggregateId} {
+        allow get, list: if hasCapability(organizationId, 'report.viewSensitive');
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/members/{userId}  (Membership)
       // -------------------------------------------------------------------
 
