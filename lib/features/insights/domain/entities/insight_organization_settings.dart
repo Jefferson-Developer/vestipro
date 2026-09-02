@@ -10,6 +10,10 @@ final class InsightOrganizationSettings {
     this.customerGrowthMinConsecutivePeriods = 3,
     this.customerGrowthMinimumAverageRate = 0.15,
     this.upSellMinimumTicketGapPercentage = 0.15,
+    this.insufficientMixThresholdPercentage = 0.7,
+    this.insufficientMixExcludedCategoryIds = const <String>{},
+    this.insufficientMixExcludedCategoryIdsBySegment =
+        const <String, Set<String>>{},
     this.defaultLifetime = const Duration(days: 7),
   });
 
@@ -33,6 +37,22 @@ final class InsightOrganizationSettings {
   /// be raised — ensures the insight only surfaces a relevant and
   /// sustainable difference, never noise.
   final double upSellMinimumTicketGapPercentage;
+
+  /// Fraction (e.g. `0.7` = 70%) of the comparison group's mix benchmark
+  /// (average number of distinct categories purchased) a customer must reach
+  /// before an "insufficient mix" insight stops being raised.
+  final double insufficientMixThresholdPercentage;
+
+  /// Categories excluded from the mix benchmark calculation for every
+  /// customer (e.g. a category exclusive to another sales channel),
+  /// configurable by the organization without code changes.
+  final Set<String> insufficientMixExcludedCategoryIds;
+
+  /// Additional categories excluded from the mix benchmark calculation only
+  /// for customers of a given segment/profile, merged with
+  /// [insufficientMixExcludedCategoryIds].
+  final Map<String, Set<String>> insufficientMixExcludedCategoryIdsBySegment;
+
   final Duration defaultLifetime;
 
   int resolveInactivityThreshold(String? segment) {
@@ -42,5 +62,19 @@ final class InsightOrganizationSettings {
     }
     return inactivityThresholdDaysBySegment[normalized] ??
         inactivityThresholdDays;
+  }
+
+  /// Resolves the effective set of category ids excluded from the mix
+  /// benchmark calculation for the given customer [segment], merging the
+  /// organization-wide exclusions with any segment-specific ones.
+  Set<String> resolveInsufficientMixExcludedCategoryIds(String? segment) {
+    final normalized = segment?.trim().toLowerCase();
+    final bySegment = normalized == null
+        ? null
+        : insufficientMixExcludedCategoryIdsBySegment[normalized];
+    if (bySegment == null || bySegment.isEmpty) {
+      return insufficientMixExcludedCategoryIds;
+    }
+    return <String>{...insufficientMixExcludedCategoryIds, ...bySegment};
   }
 }

@@ -16,6 +16,7 @@ import {
   type InsightCustomerGrowthSnapshot,
   type InsightCustomerSnapshot,
   type InsightDataset,
+  type InsightInsufficientMixSnapshot,
   type InsightOrganizationSettings,
   type InsightRevenueComparisonMode,
   type InsightRevenueComparisonSnapshot,
@@ -24,6 +25,7 @@ import {
 import { CrossSellInsightRule } from './cross-sell-insight-rule';
 import { GrowingCustomerInsightRule } from './growing-customer-insight-rule';
 import { InactiveCustomerInsightRule } from './inactive-customer-insight-rule';
+import { InsufficientMixInsightRule } from './insufficient-mix-insight-rule';
 import { RevenueDropInsightRule } from './revenue-drop-insight-rule';
 import { UpSellInsightRule } from './up-sell-insight-rule';
 
@@ -33,6 +35,7 @@ const defaultRules = [
   new GrowingCustomerInsightRule(),
   new CrossSellInsightRule(),
   new UpSellInsightRule(),
+  new InsufficientMixInsightRule(),
 ] as const;
 
 export const generateInsightsScheduled = onSchedule(
@@ -70,6 +73,9 @@ export async function generateInsightsScheduledHandler(
     );
     const crossSellSnapshots = await loadCrossSellSnapshots(organization.ref);
     const upSellSnapshots = await loadUpSellSnapshots(organization.ref);
+    const insufficientMixSnapshots = await loadInsufficientMixSnapshots(
+      organization.ref,
+    );
     for (const insights of buildInsightsForOrganization({
       organizationId: organization.id,
       asOf: now,
@@ -79,6 +85,7 @@ export async function generateInsightsScheduledHandler(
       customerGrowthSnapshots,
       crossSellSnapshots,
       upSellSnapshots,
+      insufficientMixSnapshots,
     })) {
       await persistInsights(organization.ref, insights);
       logger.info('generateInsightsScheduled processed company', {
@@ -293,6 +300,34 @@ async function loadUpSellSnapshots(
   });
 }
 
+async function loadInsufficientMixSnapshots(
+  organizationRef: DocumentReference,
+): Promise<InsightInsufficientMixSnapshot[]> {
+  const snapshot = await organizationRef
+    .collection('insightInsufficientMixSnapshots')
+    .get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    const candidates = Array.isArray(data.candidates) ? data.candidates : [];
+    return {
+      customerId: data.customerId as string,
+      organizationId: data.organizationId as string,
+      companyId: data.companyId as string,
+      recipientUserId: data.recipientUserId as string,
+      customerName: data.customerName as string,
+      comparisonGroupLabel: data.comparisonGroupLabel as string,
+      comparisonGroupSize: (data.comparisonGroupSize as number) ?? 0,
+      segment: (data.segment as string | null | undefined) ?? null,
+      candidates: candidates.map((candidate: DocumentData) => ({
+        categoryId: candidate.categoryId as string,
+        categoryName: candidate.categoryName as string,
+        peerAdoptionRate: candidate.peerAdoptionRate as number,
+        purchasedByCustomer: Boolean(candidate.purchasedByCustomer),
+      })),
+    };
+  });
+}
+
 function resolveSettings(
   settingsData: DocumentData | undefined,
 ): InsightOrganizationSettings {
@@ -324,6 +359,16 @@ function resolveSettings(
     upSellMinimumTicketGapPercentage:
       positiveNumber(settingsData?.upSellMinimumTicketGapPercentage) ??
       DEFAULT_INSIGHT_SETTINGS.upSellMinimumTicketGapPercentage,
+    insufficientMixThresholdPercentage:
+      positiveNumber(settingsData?.insufficientMixThresholdPercentage) ??
+      DEFAULT_INSIGHT_SETTINGS.insufficientMixThresholdPercentage,
+    insufficientMixExcludedCategoryIds:
+      normalizeStringArray(settingsData?.insufficientMixExcludedCategoryIds) ??
+      DEFAULT_INSIGHT_SETTINGS.insufficientMixExcludedCategoryIds,
+    insufficientMixExcludedCategoryIdsBySegment:
+      normalizeSegmentCategoryIds(
+        settingsData?.insufficientMixExcludedCategoryIdsBySegment,
+      ) ?? DEFAULT_INSIGHT_SETTINGS.insufficientMixExcludedCategoryIdsBySegment,
     lifetimeDays:
       typeof lifetimeDays === 'number' && lifetimeDays > 0
         ? lifetimeDays
@@ -340,16 +385,19 @@ export function buildInsightsForOrganization(params: {
   customerGrowthSnapshots?: readonly InsightCustomerGrowthSnapshot[];
   crossSellSnapshots?: readonly InsightCrossSellSnapshot[];
   upSellSnapshots?: readonly InsightUpSellSnapshot[];
+  insufficientMixSnapshots?: readonly InsightInsufficientMixSnapshot[];
 }): Insight[][] {
   const customerGrowthSnapshots = params.customerGrowthSnapshots ?? [];
   const crossSellSnapshots = params.crossSellSnapshots ?? [];
   const upSellSnapshots = params.upSellSnapshots ?? [];
+  const insufficientMixSnapshots = params.insufficientMixSnapshots ?? [];
   const companyIds = new Set<string>([
     ...params.customerSnapshots.map((item) => item.companyId),
     ...params.revenueComparisons.map((item) => item.companyId),
     ...customerGrowthSnapshots.map((item) => item.companyId),
     ...crossSellSnapshots.map((item) => item.companyId),
     ...upSellSnapshots.map((item) => item.companyId),
+    ...insufficientMixSnapshots.map((item) => item.companyId),
   ]);
   const results: Insight[][] = [];
   for (const companyId of companyIds) {
@@ -368,6 +416,9 @@ export function buildInsightsForOrganization(params: {
         (item) => item.companyId === companyId,
       ),
       upSellSnapshots: upSellSnapshots.filter(
+        (item) => item.companyId === companyId,
+      ),
+      insufficientMixSnapshots: insufficientMixSnapshots.filter(
         (item) => item.companyId === companyId,
       ),
     };
@@ -399,6 +450,28 @@ function normalizeSegmentThresholds(
 
 function positiveNumber(value: unknown): number | undefined {
   return typeof value === 'number' && value > 0 ? value : undefined;
+}
+
+function normalizeStringArray(value: unknown): string[] | undefined {
+  if (!Array.isArray(value)) {
+    return undefined;
+  }
+  return value.filter((item): item is string => typeof item === 'string');
+}
+
+function normalizeSegmentCategoryIds(
+  value: unknown,
+): Record<string, string[]> | undefined {
+  if (!value || typeof value !== 'object') {
+    return undefined;
+  }
+  const entries = Object.entries(value as Record<string, unknown>)
+    .map(([segment, categoryIds]) => [
+      segment.trim().toLowerCase(),
+      normalizeStringArray(categoryIds) ?? [],
+    ] as const)
+    .filter(([, categoryIds]) => categoryIds.length > 0);
+  return Object.fromEntries(entries);
 }
 
 function serializeInsight(insight: Insight): DocumentData {

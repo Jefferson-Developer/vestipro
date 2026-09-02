@@ -3,7 +3,8 @@ export type InsightType =
   | 'revenueDrop'
   | 'customerGrowth'
   | 'crossSell'
-  | 'upSell';
+  | 'upSell'
+  | 'insufficientMix';
 export type InsightStatus =
   | 'fresh'
   | 'viewed'
@@ -184,6 +185,41 @@ export interface InsightUpSellSnapshot {
   candidates: InsightUpSellCategoryCandidate[];
 }
 
+export interface InsightInsufficientMixCategoryCandidate {
+  categoryId: string;
+  categoryName: string;
+  /**
+   * Fraction (0..1) of the comparison group that buys this category. By
+   * linearity of expectation, the sum of this value across the whole
+   * category universe equals the group's average number of distinct
+   * categories purchased per customer (the mix benchmark).
+   */
+  peerAdoptionRate: number;
+  purchasedByCustomer?: boolean;
+}
+
+export interface InsightInsufficientMixSnapshot {
+  customerId: string;
+  organizationId: string;
+  companyId: string;
+  recipientUserId: string;
+  customerName: string;
+  /**
+   * Human-readable description of the criterion used to select the
+   * benchmark comparison group (segment, region, porte, or a combination),
+   * configurable by the organization. Always exposed in the insight
+   * evidence — never a black box.
+   */
+  comparisonGroupLabel: string;
+  comparisonGroupSize: number;
+  /**
+   * Segment used to resolve organization-configured category exclusions for
+   * this customer's profile.
+   */
+  segment?: string | null;
+  candidates: InsightInsufficientMixCategoryCandidate[];
+}
+
 export interface InsightOrganizationSettings {
   inactivityThresholdDays: number;
   inactivityThresholdDaysBySegment: Record<string, number>;
@@ -193,6 +229,9 @@ export interface InsightOrganizationSettings {
   customerGrowthMinConsecutivePeriods: number;
   customerGrowthMinimumAverageRate: number;
   upSellMinimumTicketGapPercentage: number;
+  insufficientMixThresholdPercentage: number;
+  insufficientMixExcludedCategoryIds: string[];
+  insufficientMixExcludedCategoryIdsBySegment: Record<string, string[]>;
   lifetimeDays: number;
 }
 
@@ -203,6 +242,7 @@ export interface InsightDataset {
   customerGrowthSnapshots: InsightCustomerGrowthSnapshot[];
   crossSellSnapshots: InsightCrossSellSnapshot[];
   upSellSnapshots: InsightUpSellSnapshot[];
+  insufficientMixSnapshots: InsightInsufficientMixSnapshot[];
 }
 
 export interface InsightContext {
@@ -225,6 +265,9 @@ export const DEFAULT_INSIGHT_SETTINGS: InsightOrganizationSettings = {
   customerGrowthMinConsecutivePeriods: 3,
   customerGrowthMinimumAverageRate: 0.15,
   upSellMinimumTicketGapPercentage: 0.15,
+  insufficientMixThresholdPercentage: 0.7,
+  insufficientMixExcludedCategoryIds: [],
+  insufficientMixExcludedCategoryIdsBySegment: {},
   lifetimeDays: 7,
 };
 
