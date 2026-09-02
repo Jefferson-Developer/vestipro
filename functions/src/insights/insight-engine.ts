@@ -6,7 +6,8 @@ export type InsightType =
   | 'upSell'
   | 'insufficientMix'
   | 'highStockLowTurnover'
-  | 'replenishmentSuggestion';
+  | 'replenishmentSuggestion'
+  | 'churnRisk';
 export type InsightStatus =
   | 'fresh'
   | 'viewed'
@@ -265,6 +266,45 @@ export interface InsightStockPositionSnapshot {
   isDiscontinued?: boolean;
 }
 
+/**
+ * Per-customer dataset used by `ChurnRiskInsightRule` (TASK-129) to combine
+ * three independent signals — decline in purchase frequency, decline in
+ * revenue and the customer health score (TASK-062) — into a single,
+ * explainable churn-risk score.
+ */
+export interface InsightChurnRiskSnapshot {
+  customerId: string;
+  organizationId: string;
+  companyId: string;
+  recipientUserId: string;
+  customerName: string;
+  /**
+   * Total number of orders observed within the historical lookback window.
+   * Gates whether the churn-risk score is reliable enough to be raised — a
+   * customer with too little history must not produce a false positive.
+   */
+  historicalOrderCount: number;
+  /** Recent purchase frequency (orders per period, e.g. orders/month). */
+  recentPurchaseFrequency: number;
+  /** Baseline purchase frequency over the historical comparison window. */
+  historicalPurchaseFrequency: number;
+  /** Revenue recorded in the recent observation window. */
+  recentRevenue: number;
+  /**
+   * Baseline revenue recorded in the historical comparison window. Also
+   * used, together with `averageTicket`, as the customer's financial impact
+   * base for churn-risk prioritization.
+   */
+  historicalRevenue: number;
+  /** Customer health score (0..100, higher is healthier), from TASK-062. */
+  healthScore: number;
+  /**
+   * Optional historical average ticket, used as a financial-impact
+   * fallback when `historicalRevenue` is not available.
+   */
+  averageTicket?: number | null;
+}
+
 export interface InsightOrganizationSettings {
   inactivityThresholdDays: number;
   inactivityThresholdDaysBySegment: Record<string, number>;
@@ -289,6 +329,27 @@ export interface InsightOrganizationSettings {
   /** Minimum turnover index above which a product is "high-turnover". */
   replenishmentHighTurnoverIndexThreshold: number;
   replenishmentHighTurnoverIndexThresholdByCategory: Record<string, number>;
+  /** Weight (0..1) of the purchase-frequency-decline signal in the
+   * churn-risk composition score. */
+  churnRiskFrequencyWeight: number;
+  /** Weight (0..1) of the revenue-decline signal in the churn-risk
+   * composition score. */
+  churnRiskValueWeight: number;
+  /** Weight (0..1) of the customer health-score signal (TASK-062) in the
+   * churn-risk composition score. */
+  churnRiskHealthScoreWeight: number;
+  /** Minimum number of historical orders required for a reliable
+   * churn-risk score. */
+  churnRiskMinimumHistoricalOrders: number;
+  /** Minimum composed risk score (0..1) to classify a customer as "medio"
+   * risk and raise a churn-risk insight. */
+  churnRiskMediumThreshold: number;
+  /** Minimum composed risk score (0..1) to classify a customer as "alto"
+   * risk. */
+  churnRiskHighThreshold: number;
+  /** Minimum composed risk score (0..1) to classify a customer as
+   * "critico" risk. */
+  churnRiskCriticalThreshold: number;
   lifetimeDays: number;
 }
 
@@ -301,6 +362,7 @@ export interface InsightDataset {
   upSellSnapshots: InsightUpSellSnapshot[];
   insufficientMixSnapshots: InsightInsufficientMixSnapshot[];
   stockPositionSnapshots: InsightStockPositionSnapshot[];
+  churnRiskSnapshots: InsightChurnRiskSnapshot[];
 }
 
 export interface InsightContext {
@@ -334,6 +396,13 @@ export const DEFAULT_INSIGHT_SETTINGS: InsightOrganizationSettings = {
   replenishmentLowCoverageDaysThresholdByCategory: {},
   replenishmentHighTurnoverIndexThreshold: 1.5,
   replenishmentHighTurnoverIndexThresholdByCategory: {},
+  churnRiskFrequencyWeight: 0.35,
+  churnRiskValueWeight: 0.35,
+  churnRiskHealthScoreWeight: 0.3,
+  churnRiskMinimumHistoricalOrders: 3,
+  churnRiskMediumThreshold: 0.35,
+  churnRiskHighThreshold: 0.55,
+  churnRiskCriticalThreshold: 0.75,
   lifetimeDays: 7,
 };
 

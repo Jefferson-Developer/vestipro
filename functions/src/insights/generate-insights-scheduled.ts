@@ -11,6 +11,7 @@ import {
   DEFAULT_INSIGHT_SETTINGS,
   evaluateInsights,
   type Insight,
+  type InsightChurnRiskSnapshot,
   type InsightContext,
   type InsightCrossSellSnapshot,
   type InsightCustomerGrowthSnapshot,
@@ -23,6 +24,7 @@ import {
   type InsightStockPositionSnapshot,
   type InsightUpSellSnapshot,
 } from './insight-engine';
+import { ChurnRiskInsightRule } from './churn-risk-insight-rule';
 import { CrossSellInsightRule } from './cross-sell-insight-rule';
 import { GrowingCustomerInsightRule } from './growing-customer-insight-rule';
 import { HighStockLowTurnoverInsightRule } from './high-stock-low-turnover-insight-rule';
@@ -41,6 +43,7 @@ const defaultRules = [
   new InsufficientMixInsightRule(),
   new HighStockLowTurnoverInsightRule(),
   new ReplenishmentSuggestionInsightRule(),
+  new ChurnRiskInsightRule(),
 ] as const;
 
 export const generateInsightsScheduled = onSchedule(
@@ -84,6 +87,7 @@ export async function generateInsightsScheduledHandler(
     const stockPositionSnapshots = await loadStockPositionSnapshots(
       organization.ref,
     );
+    const churnRiskSnapshots = await loadChurnRiskSnapshots(organization.ref);
     for (const insights of buildInsightsForOrganization({
       organizationId: organization.id,
       asOf: now,
@@ -95,6 +99,7 @@ export async function generateInsightsScheduledHandler(
       upSellSnapshots,
       insufficientMixSnapshots,
       stockPositionSnapshots,
+      churnRiskSnapshots,
     })) {
       await persistInsights(organization.ref, insights);
       logger.info('generateInsightsScheduled processed company', {
@@ -369,6 +374,32 @@ async function loadStockPositionSnapshots(
   });
 }
 
+async function loadChurnRiskSnapshots(
+  organizationRef: DocumentReference,
+): Promise<InsightChurnRiskSnapshot[]> {
+  const snapshot = await organizationRef
+    .collection('insightChurnRiskSnapshots')
+    .get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      customerId: data.customerId as string,
+      organizationId: data.organizationId as string,
+      companyId: data.companyId as string,
+      recipientUserId: data.recipientUserId as string,
+      customerName: data.customerName as string,
+      historicalOrderCount: (data.historicalOrderCount as number) ?? 0,
+      recentPurchaseFrequency: (data.recentPurchaseFrequency as number) ?? 0,
+      historicalPurchaseFrequency:
+        (data.historicalPurchaseFrequency as number) ?? 0,
+      recentRevenue: (data.recentRevenue as number) ?? 0,
+      historicalRevenue: (data.historicalRevenue as number) ?? 0,
+      healthScore: (data.healthScore as number) ?? 0,
+      averageTicket: (data.averageTicket as number | null | undefined) ?? null,
+    };
+  });
+}
+
 function resolveSettings(
   settingsData: DocumentData | undefined,
 ): InsightOrganizationSettings {
@@ -441,6 +472,27 @@ function resolveSettings(
         settingsData?.replenishmentHighTurnoverIndexThresholdByCategory,
       ) ??
       DEFAULT_INSIGHT_SETTINGS.replenishmentHighTurnoverIndexThresholdByCategory,
+    churnRiskFrequencyWeight:
+      positiveNumber(settingsData?.churnRiskFrequencyWeight) ??
+      DEFAULT_INSIGHT_SETTINGS.churnRiskFrequencyWeight,
+    churnRiskValueWeight:
+      positiveNumber(settingsData?.churnRiskValueWeight) ??
+      DEFAULT_INSIGHT_SETTINGS.churnRiskValueWeight,
+    churnRiskHealthScoreWeight:
+      positiveNumber(settingsData?.churnRiskHealthScoreWeight) ??
+      DEFAULT_INSIGHT_SETTINGS.churnRiskHealthScoreWeight,
+    churnRiskMinimumHistoricalOrders:
+      positiveNumber(settingsData?.churnRiskMinimumHistoricalOrders) ??
+      DEFAULT_INSIGHT_SETTINGS.churnRiskMinimumHistoricalOrders,
+    churnRiskMediumThreshold:
+      positiveNumber(settingsData?.churnRiskMediumThreshold) ??
+      DEFAULT_INSIGHT_SETTINGS.churnRiskMediumThreshold,
+    churnRiskHighThreshold:
+      positiveNumber(settingsData?.churnRiskHighThreshold) ??
+      DEFAULT_INSIGHT_SETTINGS.churnRiskHighThreshold,
+    churnRiskCriticalThreshold:
+      positiveNumber(settingsData?.churnRiskCriticalThreshold) ??
+      DEFAULT_INSIGHT_SETTINGS.churnRiskCriticalThreshold,
     lifetimeDays:
       typeof lifetimeDays === 'number' && lifetimeDays > 0
         ? lifetimeDays
@@ -459,12 +511,14 @@ export function buildInsightsForOrganization(params: {
   upSellSnapshots?: readonly InsightUpSellSnapshot[];
   insufficientMixSnapshots?: readonly InsightInsufficientMixSnapshot[];
   stockPositionSnapshots?: readonly InsightStockPositionSnapshot[];
+  churnRiskSnapshots?: readonly InsightChurnRiskSnapshot[];
 }): Insight[][] {
   const customerGrowthSnapshots = params.customerGrowthSnapshots ?? [];
   const crossSellSnapshots = params.crossSellSnapshots ?? [];
   const upSellSnapshots = params.upSellSnapshots ?? [];
   const insufficientMixSnapshots = params.insufficientMixSnapshots ?? [];
   const stockPositionSnapshots = params.stockPositionSnapshots ?? [];
+  const churnRiskSnapshots = params.churnRiskSnapshots ?? [];
   const companyIds = new Set<string>([
     ...params.customerSnapshots.map((item) => item.companyId),
     ...params.revenueComparisons.map((item) => item.companyId),
@@ -473,6 +527,7 @@ export function buildInsightsForOrganization(params: {
     ...upSellSnapshots.map((item) => item.companyId),
     ...insufficientMixSnapshots.map((item) => item.companyId),
     ...stockPositionSnapshots.map((item) => item.companyId),
+    ...churnRiskSnapshots.map((item) => item.companyId),
   ]);
   const results: Insight[][] = [];
   for (const companyId of companyIds) {
@@ -497,6 +552,9 @@ export function buildInsightsForOrganization(params: {
         (item) => item.companyId === companyId,
       ),
       stockPositionSnapshots: stockPositionSnapshots.filter(
+        (item) => item.companyId === companyId,
+      ),
+      churnRiskSnapshots: churnRiskSnapshots.filter(
         (item) => item.companyId === companyId,
       ),
     };

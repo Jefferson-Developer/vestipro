@@ -352,6 +352,7 @@ import '../features/insights/data/repositories/insight_repository_impl.dart'
     as _i666;
 import '../features/insights/domain/repositories/insight_repository.dart'
     as _i644;
+import '../features/insights/domain/rules/churn_risk_insight_rule.dart' as _i47;
 import '../features/insights/domain/rules/cross_sell_insight_rule.dart'
     as _i671;
 import '../features/insights/domain/rules/growing_customer_insight_rule.dart'
@@ -1172,6 +1173,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => const _i712.CustomerSegmentMapper(),
     );
     gh.lazySingleton<_i963.InsightMapper>(() => const _i963.InsightMapper());
+    gh.lazySingleton<_i47.ChurnRiskInsightRule>(
+      () => const _i47.ChurnRiskInsightRule(),
+    );
     gh.lazySingleton<_i671.CrossSellInsightRule>(
       () => const _i671.CrossSellInsightRule(),
     );
@@ -1412,6 +1416,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i101.InsufficientMixInsightRule>(),
         gh<_i572.HighStockLowTurnoverInsightRule>(),
         gh<_i104.ReplenishmentSuggestionInsightRule>(),
+        gh<_i47.ChurnRiskInsightRule>(),
       ),
     );
     gh.lazySingleton<_i431.OrderLocalMapper>(

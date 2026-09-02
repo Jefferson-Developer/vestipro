@@ -24,6 +24,13 @@ final class InsightOrganizationSettings {
     this.replenishmentHighTurnoverIndexThreshold = 1.5,
     this.replenishmentHighTurnoverIndexThresholdByCategory =
         const <String, double>{},
+    this.churnRiskFrequencyWeight = 0.35,
+    this.churnRiskValueWeight = 0.35,
+    this.churnRiskHealthScoreWeight = 0.30,
+    this.churnRiskMinimumHistoricalOrders = 3,
+    this.churnRiskMediumThreshold = 0.35,
+    this.churnRiskHighThreshold = 0.55,
+    this.churnRiskCriticalThreshold = 0.75,
     this.defaultLifetime = const Duration(days: 7),
   });
 
@@ -96,6 +103,37 @@ final class InsightOrganizationSettings {
   /// Category-specific overrides for
   /// [replenishmentHighTurnoverIndexThreshold].
   final Map<String, double> replenishmentHighTurnoverIndexThresholdByCategory;
+
+  /// Weight (0..1) of the purchase-frequency-decline signal in the
+  /// churn-risk composition score ([ChurnRiskInsightRule]).
+  final double churnRiskFrequencyWeight;
+
+  /// Weight (0..1) of the revenue-decline signal in the churn-risk
+  /// composition score.
+  final double churnRiskValueWeight;
+
+  /// Weight (0..1) of the customer health-score signal (TASK-062) in the
+  /// churn-risk composition score.
+  final double churnRiskHealthScoreWeight;
+
+  /// Minimum number of historical orders a customer must have for the
+  /// churn-risk score to be considered reliable. Customers below this
+  /// threshold never raise a churn-risk insight, avoiding false positives
+  /// caused by insufficient purchase history.
+  final int churnRiskMinimumHistoricalOrders;
+
+  /// Minimum composed risk score (0..1) required to classify a customer as
+  /// "medio" risk and raise a churn-risk insight. Scores below this
+  /// threshold are considered "baixo" risk and are not surfaced.
+  final double churnRiskMediumThreshold;
+
+  /// Minimum composed risk score (0..1) required to classify a customer as
+  /// "alto" risk.
+  final double churnRiskHighThreshold;
+
+  /// Minimum composed risk score (0..1) required to classify a customer as
+  /// "critico" risk.
+  final double churnRiskCriticalThreshold;
 
   final Duration defaultLifetime;
 

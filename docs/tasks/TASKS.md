@@ -243,7 +243,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-126 — Implementar insight de up-sell](TASK-126-implementar-insight-de-up-sell.md) — Flutter Senior
 - [x] [TASK-127 — Implementar insight de mix insuficiente](TASK-127-implementar-insight-de-mix-insuficiente.md) — Flutter Senior
 - [x] [TASK-128 — Implementar insight de estoque alto/giro baixo e reposição](TASK-128-implementar-insight-de-estoque-e-reposicao.md) — Flutter Senior
-- [ ] [TASK-129 — Implementar insight de risco de churn](TASK-129-implementar-insight-de-risco-de-churn.md) — Flutter Senior
+- [x] [TASK-129 — Implementar insight de risco de churn](TASK-129-implementar-insight-de-risco-de-churn.md) — Flutter Senior
 - [ ] [TASK-130 — Implementar insight de pedido abandonado/carrinho salvo](TASK-130-implementar-insight-de-pedido-abandonado.md) — Flutter Senior
 - [ ] [TASK-131 — Implementar insight de vendedor abaixo da meta](TASK-131-implementar-insight-de-vendedor-abaixo-da-meta.md) — Flutter Senior
 - [ ] [TASK-132 — Implementar central de oportunidades](TASK-132-implementar-central-de-oportunidades.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 128 / 220 tasks concluídas.
+**Progresso:** 129 / 220 tasks concluídas.

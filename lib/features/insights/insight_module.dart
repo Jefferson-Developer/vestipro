@@ -1,5 +1,6 @@
 import 'package:injectable/injectable.dart';
 
+import 'domain/rules/churn_risk_insight_rule.dart';
 import 'domain/rules/cross_sell_insight_rule.dart';
 import 'domain/rules/growing_customer_insight_rule.dart';
 import 'domain/rules/high_stock_low_turnover_insight_rule.dart';
@@ -22,6 +23,7 @@ abstract class InsightModule {
     InsufficientMixInsightRule insufficientMixRule,
     HighStockLowTurnoverInsightRule highStockLowTurnoverRule,
     ReplenishmentSuggestionInsightRule replenishmentSuggestionRule,
+    ChurnRiskInsightRule churnRiskRule,
   ) {
     return <InsightRule>[
       inactiveCustomerRule,
@@ -32,6 +34,7 @@ abstract class InsightModule {
       insufficientMixRule,
       highStockLowTurnoverRule,
       replenishmentSuggestionRule,
+      churnRiskRule,
     ];
   }
 }
