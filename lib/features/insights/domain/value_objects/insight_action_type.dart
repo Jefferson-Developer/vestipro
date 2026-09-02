@@ -6,4 +6,6 @@ enum InsightActionType {
   viewOrderHistory,
   viewOpportunities,
   expandGrid,
+  suggestCampaign,
+  notifyReplenishment,
 }

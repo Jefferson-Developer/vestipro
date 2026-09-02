@@ -4,6 +4,7 @@ import 'insight_customer_snapshot.dart';
 import 'insight_insufficient_mix_snapshot.dart';
 import 'insight_organization_settings.dart';
 import 'insight_revenue_comparison_snapshot.dart';
+import 'insight_stock_position_snapshot.dart';
 import 'insight_up_sell_snapshot.dart';
 
 final class InsightDataset {
@@ -15,6 +16,7 @@ final class InsightDataset {
     this.crossSellSnapshots = const <InsightCrossSellSnapshot>[],
     this.upSellSnapshots = const <InsightUpSellSnapshot>[],
     this.insufficientMixSnapshots = const <InsightInsufficientMixSnapshot>[],
+    this.stockPositionSnapshots = const <InsightStockPositionSnapshot>[],
   });
 
   final InsightOrganizationSettings settings;
@@ -24,4 +26,5 @@ final class InsightDataset {
   final List<InsightCrossSellSnapshot> crossSellSnapshots;
   final List<InsightUpSellSnapshot> upSellSnapshots;
   final List<InsightInsufficientMixSnapshot> insufficientMixSnapshots;
+  final List<InsightStockPositionSnapshot> stockPositionSnapshots;
 }

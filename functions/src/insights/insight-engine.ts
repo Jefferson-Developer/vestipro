@@ -4,7 +4,9 @@ export type InsightType =
   | 'customerGrowth'
   | 'crossSell'
   | 'upSell'
-  | 'insufficientMix';
+  | 'insufficientMix'
+  | 'highStockLowTurnover'
+  | 'replenishmentSuggestion';
 export type InsightStatus =
   | 'fresh'
   | 'viewed'
@@ -19,7 +21,9 @@ export type InsightActionType =
   | 'viewCategory'
   | 'viewOrderHistory'
   | 'viewOpportunities'
-  | 'expandGrid';
+  | 'expandGrid'
+  | 'suggestCampaign'
+  | 'notifyReplenishment';
 export type InsightRevenueComparisonMode =
   | 'monthOverMonth'
   | 'yearOverYear';
@@ -220,6 +224,47 @@ export interface InsightInsufficientMixSnapshot {
   candidates: InsightInsufficientMixCategoryCandidate[];
 }
 
+/**
+ * Per-product/variant stock position dataset, used by both
+ * `HighStockLowTurnoverInsightRule` and `ReplenishmentSuggestionInsightRule`
+ * to detect opposite risk signals from the same underlying stock indicators
+ * (TASK-090 saldo por variante, TASK-094 indicadores de giro de estoque):
+ * excess stock parked with low turnover on one side, and high-turnover
+ * items at risk of stockout on the other.
+ */
+export interface InsightStockPositionSnapshot {
+  productId: string;
+  /** Variant identifier, when tracked at variant level (color/size). */
+  variantId?: string | null;
+  organizationId: string;
+  companyId: string;
+  recipientUserId: string;
+  productName: string;
+  variantLabel?: string | null;
+  categoryId: string;
+  categoryName: string;
+  /** Current stock balance (units), per TASK-090. */
+  currentStockQuantity: number;
+  /** Estimated coverage, in days, at the recent average consumption rate. */
+  coverageDays: number;
+  /** Turnover index for the evaluated period (per TASK-094). */
+  turnoverIndex: number;
+  /** Days elapsed since the last sale considered relevant. */
+  daysWithoutRelevantSale: number;
+  /** Average daily consumption (units/day) behind the suggested reorder point. */
+  averageDailyConsumption: number;
+  /**
+   * Suggested reorder point (units), computed upstream from the recent
+   * average consumption (TASK-133 aggregation layer).
+   */
+  suggestedReorderPointQuantity: number;
+  /**
+   * Whether the product/variant is discontinued or outside the current
+   * active collection.
+   */
+  isDiscontinued?: boolean;
+}
+
 export interface InsightOrganizationSettings {
   inactivityThresholdDays: number;
   inactivityThresholdDaysBySegment: Record<string, number>;
@@ -232,6 +277,18 @@ export interface InsightOrganizationSettings {
   insufficientMixThresholdPercentage: number;
   insufficientMixExcludedCategoryIds: string[];
   insufficientMixExcludedCategoryIdsBySegment: Record<string, string[]>;
+  /** Minimum coverage (days) above which stock is considered "high". */
+  highStockCoverageDaysThreshold: number;
+  highStockCoverageDaysThresholdByCategory: Record<string, number>;
+  /** Maximum turnover index below which turnover is considered "low". */
+  lowTurnoverIndexThreshold: number;
+  lowTurnoverIndexThresholdByCategory: Record<string, number>;
+  /** Maximum coverage (days) below which a stockout risk is raised. */
+  replenishmentLowCoverageDaysThreshold: number;
+  replenishmentLowCoverageDaysThresholdByCategory: Record<string, number>;
+  /** Minimum turnover index above which a product is "high-turnover". */
+  replenishmentHighTurnoverIndexThreshold: number;
+  replenishmentHighTurnoverIndexThresholdByCategory: Record<string, number>;
   lifetimeDays: number;
 }
 
@@ -243,6 +300,7 @@ export interface InsightDataset {
   crossSellSnapshots: InsightCrossSellSnapshot[];
   upSellSnapshots: InsightUpSellSnapshot[];
   insufficientMixSnapshots: InsightInsufficientMixSnapshot[];
+  stockPositionSnapshots: InsightStockPositionSnapshot[];
 }
 
 export interface InsightContext {
@@ -268,6 +326,14 @@ export const DEFAULT_INSIGHT_SETTINGS: InsightOrganizationSettings = {
   insufficientMixThresholdPercentage: 0.7,
   insufficientMixExcludedCategoryIds: [],
   insufficientMixExcludedCategoryIdsBySegment: {},
+  highStockCoverageDaysThreshold: 60,
+  highStockCoverageDaysThresholdByCategory: {},
+  lowTurnoverIndexThreshold: 0.5,
+  lowTurnoverIndexThresholdByCategory: {},
+  replenishmentLowCoverageDaysThreshold: 10,
+  replenishmentLowCoverageDaysThresholdByCategory: {},
+  replenishmentHighTurnoverIndexThreshold: 1.5,
+  replenishmentHighTurnoverIndexThresholdByCategory: {},
   lifetimeDays: 7,
 };
 

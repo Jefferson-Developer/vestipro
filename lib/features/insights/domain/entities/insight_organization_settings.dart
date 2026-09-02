@@ -14,6 +14,16 @@ final class InsightOrganizationSettings {
     this.insufficientMixExcludedCategoryIds = const <String>{},
     this.insufficientMixExcludedCategoryIdsBySegment =
         const <String, Set<String>>{},
+    this.highStockCoverageDaysThreshold = 60,
+    this.highStockCoverageDaysThresholdByCategory = const <String, double>{},
+    this.lowTurnoverIndexThreshold = 0.5,
+    this.lowTurnoverIndexThresholdByCategory = const <String, double>{},
+    this.replenishmentLowCoverageDaysThreshold = 10,
+    this.replenishmentLowCoverageDaysThresholdByCategory =
+        const <String, double>{},
+    this.replenishmentHighTurnoverIndexThreshold = 1.5,
+    this.replenishmentHighTurnoverIndexThresholdByCategory =
+        const <String, double>{},
     this.defaultLifetime = const Duration(days: 7),
   });
 
@@ -53,6 +63,40 @@ final class InsightOrganizationSettings {
   /// [insufficientMixExcludedCategoryIds].
   final Map<String, Set<String>> insufficientMixExcludedCategoryIdsBySegment;
 
+  /// Minimum stock coverage, in days, above which a product/variant is
+  /// considered to have "high stock" for the liquidation-candidate rule
+  /// ([HighStockLowTurnoverInsightRule]).
+  final double highStockCoverageDaysThreshold;
+
+  /// Category-specific overrides for [highStockCoverageDaysThreshold] (basic,
+  /// moda and fashion categories have distinct expected coverage).
+  final Map<String, double> highStockCoverageDaysThresholdByCategory;
+
+  /// Maximum turnover index below which a product/variant is considered to
+  /// have "low turnover" for the liquidation-candidate rule
+  /// ([HighStockLowTurnoverInsightRule]).
+  final double lowTurnoverIndexThreshold;
+
+  /// Category-specific overrides for [lowTurnoverIndexThreshold].
+  final Map<String, double> lowTurnoverIndexThresholdByCategory;
+
+  /// Maximum stock coverage, in days, below which a product/variant is at
+  /// risk of rupture for the replenishment rule
+  /// ([ReplenishmentSuggestionInsightRule]).
+  final double replenishmentLowCoverageDaysThreshold;
+
+  /// Category-specific overrides for [replenishmentLowCoverageDaysThreshold].
+  final Map<String, double> replenishmentLowCoverageDaysThresholdByCategory;
+
+  /// Minimum turnover index above which a product/variant is considered
+  /// high-turnover for the replenishment rule
+  /// ([ReplenishmentSuggestionInsightRule]).
+  final double replenishmentHighTurnoverIndexThreshold;
+
+  /// Category-specific overrides for
+  /// [replenishmentHighTurnoverIndexThreshold].
+  final Map<String, double> replenishmentHighTurnoverIndexThresholdByCategory;
+
   final Duration defaultLifetime;
 
   int resolveInactivityThreshold(String? segment) {
@@ -76,5 +120,65 @@ final class InsightOrganizationSettings {
       return insufficientMixExcludedCategoryIds;
     }
     return <String>{...insufficientMixExcludedCategoryIds, ...bySegment};
+  }
+
+  /// Resolves the effective coverage-days threshold above which a
+  /// product/variant of [categoryId] is considered to have "high stock",
+  /// falling back to [highStockCoverageDaysThreshold] when there is no
+  /// category-specific override.
+  double resolveHighStockCoverageDaysThreshold(String? categoryId) {
+    return _resolveByCategory(
+      categoryId,
+      highStockCoverageDaysThresholdByCategory,
+      highStockCoverageDaysThreshold,
+    );
+  }
+
+  /// Resolves the effective turnover-index threshold below which a
+  /// product/variant of [categoryId] is considered to have "low turnover",
+  /// falling back to [lowTurnoverIndexThreshold] when there is no
+  /// category-specific override.
+  double resolveLowTurnoverIndexThreshold(String? categoryId) {
+    return _resolveByCategory(
+      categoryId,
+      lowTurnoverIndexThresholdByCategory,
+      lowTurnoverIndexThreshold,
+    );
+  }
+
+  /// Resolves the effective coverage-days threshold below which a
+  /// product/variant of [categoryId] is at risk of rupture, falling back to
+  /// [replenishmentLowCoverageDaysThreshold] when there is no
+  /// category-specific override.
+  double resolveReplenishmentLowCoverageDaysThreshold(String? categoryId) {
+    return _resolveByCategory(
+      categoryId,
+      replenishmentLowCoverageDaysThresholdByCategory,
+      replenishmentLowCoverageDaysThreshold,
+    );
+  }
+
+  /// Resolves the effective turnover-index threshold above which a
+  /// product/variant of [categoryId] is considered high-turnover, falling
+  /// back to [replenishmentHighTurnoverIndexThreshold] when there is no
+  /// category-specific override.
+  double resolveReplenishmentHighTurnoverIndexThreshold(String? categoryId) {
+    return _resolveByCategory(
+      categoryId,
+      replenishmentHighTurnoverIndexThresholdByCategory,
+      replenishmentHighTurnoverIndexThreshold,
+    );
+  }
+
+  double _resolveByCategory(
+    String? categoryId,
+    Map<String, double> thresholdsByCategory,
+    double fallback,
+  ) {
+    final normalized = categoryId?.trim();
+    if (normalized == null || normalized.isEmpty) {
+      return fallback;
+    }
+    return thresholdsByCategory[normalized] ?? fallback;
   }
 }

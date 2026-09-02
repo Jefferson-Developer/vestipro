@@ -20,12 +20,15 @@ import {
   type InsightOrganizationSettings,
   type InsightRevenueComparisonMode,
   type InsightRevenueComparisonSnapshot,
+  type InsightStockPositionSnapshot,
   type InsightUpSellSnapshot,
 } from './insight-engine';
 import { CrossSellInsightRule } from './cross-sell-insight-rule';
 import { GrowingCustomerInsightRule } from './growing-customer-insight-rule';
+import { HighStockLowTurnoverInsightRule } from './high-stock-low-turnover-insight-rule';
 import { InactiveCustomerInsightRule } from './inactive-customer-insight-rule';
 import { InsufficientMixInsightRule } from './insufficient-mix-insight-rule';
+import { ReplenishmentSuggestionInsightRule } from './replenishment-suggestion-insight-rule';
 import { RevenueDropInsightRule } from './revenue-drop-insight-rule';
 import { UpSellInsightRule } from './up-sell-insight-rule';
 
@@ -36,6 +39,8 @@ const defaultRules = [
   new CrossSellInsightRule(),
   new UpSellInsightRule(),
   new InsufficientMixInsightRule(),
+  new HighStockLowTurnoverInsightRule(),
+  new ReplenishmentSuggestionInsightRule(),
 ] as const;
 
 export const generateInsightsScheduled = onSchedule(
@@ -76,6 +81,9 @@ export async function generateInsightsScheduledHandler(
     const insufficientMixSnapshots = await loadInsufficientMixSnapshots(
       organization.ref,
     );
+    const stockPositionSnapshots = await loadStockPositionSnapshots(
+      organization.ref,
+    );
     for (const insights of buildInsightsForOrganization({
       organizationId: organization.id,
       asOf: now,
@@ -86,6 +94,7 @@ export async function generateInsightsScheduledHandler(
       crossSellSnapshots,
       upSellSnapshots,
       insufficientMixSnapshots,
+      stockPositionSnapshots,
     })) {
       await persistInsights(organization.ref, insights);
       logger.info('generateInsightsScheduled processed company', {
@@ -328,6 +337,38 @@ async function loadInsufficientMixSnapshots(
   });
 }
 
+async function loadStockPositionSnapshots(
+  organizationRef: DocumentReference,
+): Promise<InsightStockPositionSnapshot[]> {
+  const snapshot = await organizationRef
+    .collection('insightStockPositionSnapshots')
+    .get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      productId: data.productId as string,
+      variantId: (data.variantId as string | null | undefined) ?? null,
+      organizationId: data.organizationId as string,
+      companyId: data.companyId as string,
+      recipientUserId: data.recipientUserId as string,
+      productName: data.productName as string,
+      variantLabel: (data.variantLabel as string | null | undefined) ?? null,
+      categoryId: data.categoryId as string,
+      categoryName: data.categoryName as string,
+      currentStockQuantity: (data.currentStockQuantity as number) ?? 0,
+      coverageDays: (data.coverageDays as number) ?? 0,
+      turnoverIndex: (data.turnoverIndex as number) ?? 0,
+      daysWithoutRelevantSale:
+        (data.daysWithoutRelevantSale as number) ?? 0,
+      averageDailyConsumption:
+        (data.averageDailyConsumption as number) ?? 0,
+      suggestedReorderPointQuantity:
+        (data.suggestedReorderPointQuantity as number) ?? 0,
+      isDiscontinued: Boolean(data.isDiscontinued),
+    };
+  });
+}
+
 function resolveSettings(
   settingsData: DocumentData | undefined,
 ): InsightOrganizationSettings {
@@ -369,6 +410,37 @@ function resolveSettings(
       normalizeSegmentCategoryIds(
         settingsData?.insufficientMixExcludedCategoryIdsBySegment,
       ) ?? DEFAULT_INSIGHT_SETTINGS.insufficientMixExcludedCategoryIdsBySegment,
+    highStockCoverageDaysThreshold:
+      positiveNumber(settingsData?.highStockCoverageDaysThreshold) ??
+      DEFAULT_INSIGHT_SETTINGS.highStockCoverageDaysThreshold,
+    highStockCoverageDaysThresholdByCategory:
+      normalizeCategoryThresholds(
+        settingsData?.highStockCoverageDaysThresholdByCategory,
+      ) ?? DEFAULT_INSIGHT_SETTINGS.highStockCoverageDaysThresholdByCategory,
+    lowTurnoverIndexThreshold:
+      positiveNumber(settingsData?.lowTurnoverIndexThreshold) ??
+      DEFAULT_INSIGHT_SETTINGS.lowTurnoverIndexThreshold,
+    lowTurnoverIndexThresholdByCategory:
+      normalizeCategoryThresholds(
+        settingsData?.lowTurnoverIndexThresholdByCategory,
+      ) ?? DEFAULT_INSIGHT_SETTINGS.lowTurnoverIndexThresholdByCategory,
+    replenishmentLowCoverageDaysThreshold:
+      positiveNumber(settingsData?.replenishmentLowCoverageDaysThreshold) ??
+      DEFAULT_INSIGHT_SETTINGS.replenishmentLowCoverageDaysThreshold,
+    replenishmentLowCoverageDaysThresholdByCategory:
+      normalizeCategoryThresholds(
+        settingsData?.replenishmentLowCoverageDaysThresholdByCategory,
+      ) ??
+      DEFAULT_INSIGHT_SETTINGS.replenishmentLowCoverageDaysThresholdByCategory,
+    replenishmentHighTurnoverIndexThreshold:
+      positiveNumber(
+        settingsData?.replenishmentHighTurnoverIndexThreshold,
+      ) ?? DEFAULT_INSIGHT_SETTINGS.replenishmentHighTurnoverIndexThreshold,
+    replenishmentHighTurnoverIndexThresholdByCategory:
+      normalizeCategoryThresholds(
+        settingsData?.replenishmentHighTurnoverIndexThresholdByCategory,
+      ) ??
+      DEFAULT_INSIGHT_SETTINGS.replenishmentHighTurnoverIndexThresholdByCategory,
     lifetimeDays:
       typeof lifetimeDays === 'number' && lifetimeDays > 0
         ? lifetimeDays
@@ -386,11 +458,13 @@ export function buildInsightsForOrganization(params: {
   crossSellSnapshots?: readonly InsightCrossSellSnapshot[];
   upSellSnapshots?: readonly InsightUpSellSnapshot[];
   insufficientMixSnapshots?: readonly InsightInsufficientMixSnapshot[];
+  stockPositionSnapshots?: readonly InsightStockPositionSnapshot[];
 }): Insight[][] {
   const customerGrowthSnapshots = params.customerGrowthSnapshots ?? [];
   const crossSellSnapshots = params.crossSellSnapshots ?? [];
   const upSellSnapshots = params.upSellSnapshots ?? [];
   const insufficientMixSnapshots = params.insufficientMixSnapshots ?? [];
+  const stockPositionSnapshots = params.stockPositionSnapshots ?? [];
   const companyIds = new Set<string>([
     ...params.customerSnapshots.map((item) => item.companyId),
     ...params.revenueComparisons.map((item) => item.companyId),
@@ -398,6 +472,7 @@ export function buildInsightsForOrganization(params: {
     ...crossSellSnapshots.map((item) => item.companyId),
     ...upSellSnapshots.map((item) => item.companyId),
     ...insufficientMixSnapshots.map((item) => item.companyId),
+    ...stockPositionSnapshots.map((item) => item.companyId),
   ]);
   const results: Insight[][] = [];
   for (const companyId of companyIds) {
@@ -419,6 +494,9 @@ export function buildInsightsForOrganization(params: {
         (item) => item.companyId === companyId,
       ),
       insufficientMixSnapshots: insufficientMixSnapshots.filter(
+        (item) => item.companyId === companyId,
+      ),
+      stockPositionSnapshots: stockPositionSnapshots.filter(
         (item) => item.companyId === companyId,
       ),
     };
@@ -443,6 +521,26 @@ function normalizeSegmentThresholds(
     .filter(([, threshold]) => typeof threshold === 'number' && threshold > 0)
     .map(([segment, threshold]) => [
       segment.trim().toLowerCase(),
+      threshold as number,
+    ]);
+  return Object.fromEntries(entries);
+}
+
+/**
+ * Normalizes a category-id-keyed threshold map. Unlike segment names,
+ * category ids are opaque identifiers, so keys are trimmed but never
+ * lowercased.
+ */
+function normalizeCategoryThresholds(
+  value: unknown,
+): Record<string, number> | undefined {
+  if (!value || typeof value !== 'object') {
+    return undefined;
+  }
+  const entries = Object.entries(value as Record<string, unknown>)
+    .filter(([, threshold]) => typeof threshold === 'number' && threshold > 0)
+    .map(([categoryId, threshold]) => [
+      categoryId.trim(),
       threshold as number,
     ]);
   return Object.fromEntries(entries);
