@@ -9,4 +9,5 @@ enum InsightActionType {
   suggestCampaign,
   notifyReplenishment,
   resumeOrder,
+  viewSellerDetail,
 }

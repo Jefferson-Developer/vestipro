@@ -33,6 +33,10 @@ final class InsightOrganizationSettings {
     this.churnRiskCriticalThreshold = 0.75,
     this.abandonedOrderSavedCartThresholdHours = 24,
     this.abandonedOrderAbandonedThresholdHours = 72,
+    this.sellerBelowTargetMinimumElapsedDays = 5,
+    this.sellerBelowTargetMediumThreshold = 0.10,
+    this.sellerBelowTargetHighThreshold = 0.30,
+    this.sellerBelowTargetCriticalThreshold = 0.50,
     this.defaultLifetime = const Duration(days: 7),
   });
 
@@ -146,6 +150,27 @@ final class InsightOrganizationSettings {
   /// is raised as a "pedido abandonado" (abandoned order) insight instead of
   /// the lower "carrinho salvo" severity.
   final double abandonedOrderAbandonedThresholdHours;
+
+  /// Minimum number of relevant days (calendar or business days, per
+  /// organization configuration) that must have elapsed in the target's
+  /// period before [SalesRepBelowTargetInsightRule] is allowed to raise an
+  /// insight for a seller (e.g. "so a partir do 5o dia util") — avoids a
+  /// false alarm from too little pace data early in the period.
+  final int sellerBelowTargetMinimumElapsedDays;
+
+  /// Minimum [InsightSalesRepBelowTargetSnapshot.underAchievementRatio]
+  /// (0..1) required to raise a "medio" risk insight — this is also the
+  /// rule's gate: below this, the seller is considered on track and no
+  /// insight is raised (e.g. `0.10` = projection under 90% of the goal).
+  final double sellerBelowTargetMediumThreshold;
+
+  /// Minimum underAchievementRatio required to classify a seller as "alto"
+  /// risk.
+  final double sellerBelowTargetHighThreshold;
+
+  /// Minimum underAchievementRatio required to classify a seller as
+  /// "critico" risk.
+  final double sellerBelowTargetCriticalThreshold;
 
   final Duration defaultLifetime;
 

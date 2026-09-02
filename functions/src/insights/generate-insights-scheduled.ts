@@ -22,6 +22,7 @@ import {
   type InsightOrganizationSettings,
   type InsightRevenueComparisonMode,
   type InsightRevenueComparisonSnapshot,
+  type InsightSalesRepBelowTargetSnapshot,
   type InsightStockPositionSnapshot,
   type InsightUpSellSnapshot,
 } from './insight-engine';
@@ -34,6 +35,7 @@ import { InactiveCustomerInsightRule } from './inactive-customer-insight-rule';
 import { InsufficientMixInsightRule } from './insufficient-mix-insight-rule';
 import { ReplenishmentSuggestionInsightRule } from './replenishment-suggestion-insight-rule';
 import { RevenueDropInsightRule } from './revenue-drop-insight-rule';
+import { SalesRepBelowTargetInsightRule } from './sales-rep-below-target-insight-rule';
 import { UpSellInsightRule } from './up-sell-insight-rule';
 
 const defaultRules = [
@@ -47,6 +49,7 @@ const defaultRules = [
   new ReplenishmentSuggestionInsightRule(),
   new ChurnRiskInsightRule(),
   new AbandonedOrderInsightRule(),
+  new SalesRepBelowTargetInsightRule(),
 ] as const;
 
 export const generateInsightsScheduled = onSchedule(
@@ -94,6 +97,9 @@ export async function generateInsightsScheduledHandler(
     const abandonedOrderSnapshots = await loadAbandonedOrderSnapshots(
       organization.ref,
     );
+    const salesRepBelowTargetSnapshots = await loadSalesRepBelowTargetSnapshots(
+      organization.ref,
+    );
     for (const insights of buildInsightsForOrganization({
       organizationId: organization.id,
       asOf: now,
@@ -107,6 +113,7 @@ export async function generateInsightsScheduledHandler(
       stockPositionSnapshots,
       churnRiskSnapshots,
       abandonedOrderSnapshots,
+      salesRepBelowTargetSnapshots,
     })) {
       await persistInsights(organization.ref, insights);
       logger.info('generateInsightsScheduled processed company', {
@@ -436,6 +443,31 @@ async function loadAbandonedOrderSnapshots(
   });
 }
 
+async function loadSalesRepBelowTargetSnapshots(
+  organizationRef: DocumentReference,
+): Promise<InsightSalesRepBelowTargetSnapshot[]> {
+  const snapshot = await organizationRef
+    .collection('insightSalesRepBelowTargetSnapshots')
+    .get();
+  return snapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      sellerId: (data.sellerId as string) ?? doc.id,
+      organizationId: data.organizationId as string,
+      companyId: data.companyId as string,
+      recipientUserId: data.recipientUserId as string,
+      sellerName: data.sellerName as string,
+      periodLabel: data.periodLabel as string,
+      periodStartDate: (data.periodStartDate as Timestamp).toDate(),
+      periodEndDate: (data.periodEndDate as Timestamp).toDate(),
+      targetValue: (data.targetValue as number) ?? 0,
+      realizedValue: (data.realizedValue as number) ?? 0,
+      elapsedRelevantDays: (data.elapsedRelevantDays as number) ?? 0,
+      totalRelevantDays: (data.totalRelevantDays as number) ?? 0,
+    };
+  });
+}
+
 function resolveSettings(
   settingsData: DocumentData | undefined,
 ): InsightOrganizationSettings {
@@ -535,6 +567,18 @@ function resolveSettings(
     abandonedOrderAbandonedThresholdHours:
       positiveNumber(settingsData?.abandonedOrderAbandonedThresholdHours) ??
       DEFAULT_INSIGHT_SETTINGS.abandonedOrderAbandonedThresholdHours,
+    sellerBelowTargetMinimumElapsedDays:
+      positiveNumber(settingsData?.sellerBelowTargetMinimumElapsedDays) ??
+      DEFAULT_INSIGHT_SETTINGS.sellerBelowTargetMinimumElapsedDays,
+    sellerBelowTargetMediumThreshold:
+      positiveNumber(settingsData?.sellerBelowTargetMediumThreshold) ??
+      DEFAULT_INSIGHT_SETTINGS.sellerBelowTargetMediumThreshold,
+    sellerBelowTargetHighThreshold:
+      positiveNumber(settingsData?.sellerBelowTargetHighThreshold) ??
+      DEFAULT_INSIGHT_SETTINGS.sellerBelowTargetHighThreshold,
+    sellerBelowTargetCriticalThreshold:
+      positiveNumber(settingsData?.sellerBelowTargetCriticalThreshold) ??
+      DEFAULT_INSIGHT_SETTINGS.sellerBelowTargetCriticalThreshold,
     lifetimeDays:
       typeof lifetimeDays === 'number' && lifetimeDays > 0
         ? lifetimeDays
@@ -555,6 +599,7 @@ export function buildInsightsForOrganization(params: {
   stockPositionSnapshots?: readonly InsightStockPositionSnapshot[];
   churnRiskSnapshots?: readonly InsightChurnRiskSnapshot[];
   abandonedOrderSnapshots?: readonly InsightAbandonedOrderSnapshot[];
+  salesRepBelowTargetSnapshots?: readonly InsightSalesRepBelowTargetSnapshot[];
 }): Insight[][] {
   const customerGrowthSnapshots = params.customerGrowthSnapshots ?? [];
   const crossSellSnapshots = params.crossSellSnapshots ?? [];
@@ -563,6 +608,8 @@ export function buildInsightsForOrganization(params: {
   const stockPositionSnapshots = params.stockPositionSnapshots ?? [];
   const churnRiskSnapshots = params.churnRiskSnapshots ?? [];
   const abandonedOrderSnapshots = params.abandonedOrderSnapshots ?? [];
+  const salesRepBelowTargetSnapshots =
+    params.salesRepBelowTargetSnapshots ?? [];
   const companyIds = new Set<string>([
     ...params.customerSnapshots.map((item) => item.companyId),
     ...params.revenueComparisons.map((item) => item.companyId),
@@ -573,6 +620,7 @@ export function buildInsightsForOrganization(params: {
     ...stockPositionSnapshots.map((item) => item.companyId),
     ...churnRiskSnapshots.map((item) => item.companyId),
     ...abandonedOrderSnapshots.map((item) => item.companyId),
+    ...salesRepBelowTargetSnapshots.map((item) => item.companyId),
   ]);
   const results: Insight[][] = [];
   for (const companyId of companyIds) {
@@ -603,6 +651,9 @@ export function buildInsightsForOrganization(params: {
         (item) => item.companyId === companyId,
       ),
       abandonedOrderSnapshots: abandonedOrderSnapshots.filter(
+        (item) => item.companyId === companyId,
+      ),
+      salesRepBelowTargetSnapshots: salesRepBelowTargetSnapshots.filter(
         (item) => item.companyId === companyId,
       ),
     };

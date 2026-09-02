@@ -6,6 +6,7 @@ import 'insight_customer_snapshot.dart';
 import 'insight_insufficient_mix_snapshot.dart';
 import 'insight_organization_settings.dart';
 import 'insight_revenue_comparison_snapshot.dart';
+import 'insight_sales_rep_below_target_snapshot.dart';
 import 'insight_stock_position_snapshot.dart';
 import 'insight_up_sell_snapshot.dart';
 
@@ -21,6 +22,8 @@ final class InsightDataset {
     this.stockPositionSnapshots = const <InsightStockPositionSnapshot>[],
     this.churnRiskSnapshots = const <InsightChurnRiskSnapshot>[],
     this.abandonedOrderSnapshots = const <InsightAbandonedOrderSnapshot>[],
+    this.salesRepBelowTargetSnapshots =
+        const <InsightSalesRepBelowTargetSnapshot>[],
   });
 
   final InsightOrganizationSettings settings;
@@ -33,4 +36,5 @@ final class InsightDataset {
   final List<InsightStockPositionSnapshot> stockPositionSnapshots;
   final List<InsightChurnRiskSnapshot> churnRiskSnapshots;
   final List<InsightAbandonedOrderSnapshot> abandonedOrderSnapshots;
+  final List<InsightSalesRepBelowTargetSnapshot> salesRepBelowTargetSnapshots;
 }

@@ -9,6 +9,7 @@ import 'domain/rules/inactive_customer_insight_rule.dart';
 import 'domain/rules/insufficient_mix_insight_rule.dart';
 import 'domain/rules/replenishment_suggestion_insight_rule.dart';
 import 'domain/rules/revenue_drop_insight_rule.dart';
+import 'domain/rules/sales_rep_below_target_insight_rule.dart';
 import 'domain/rules/up_sell_insight_rule.dart';
 import 'domain/services/insight_rule.dart';
 
@@ -26,6 +27,7 @@ abstract class InsightModule {
     ReplenishmentSuggestionInsightRule replenishmentSuggestionRule,
     ChurnRiskInsightRule churnRiskRule,
     AbandonedDraftOrderInsightRule abandonedOrderRule,
+    SalesRepBelowTargetInsightRule salesRepBelowTargetRule,
   ) {
     return <InsightRule>[
       inactiveCustomerRule,
@@ -38,6 +40,7 @@ abstract class InsightModule {
       replenishmentSuggestionRule,
       churnRiskRule,
       abandonedOrderRule,
+      salesRepBelowTargetRule,
     ];
   }
 }

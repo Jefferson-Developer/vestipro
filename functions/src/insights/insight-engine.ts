@@ -8,7 +8,8 @@ export type InsightType =
   | 'highStockLowTurnover'
   | 'replenishmentSuggestion'
   | 'churnRisk'
-  | 'abandonedOrder';
+  | 'abandonedOrder'
+  | 'sellerBelowTarget';
 export type InsightStatus =
   | 'fresh'
   | 'viewed'
@@ -26,7 +27,8 @@ export type InsightActionType =
   | 'expandGrid'
   | 'suggestCampaign'
   | 'notifyReplenishment'
-  | 'resumeOrder';
+  | 'resumeOrder'
+  | 'viewSellerDetail';
 export type InsightRevenueComparisonMode =
   | 'monthOverMonth'
   | 'yearOverYear';
@@ -350,6 +352,41 @@ export interface InsightAbandonedOrderSnapshot {
   invalidReferenceReason?: string | null;
 }
 
+/**
+ * Per-seller dataset used by `SalesRepBelowTargetInsightRule` (TASK-131) to
+ * detect a sales representative whose pace, extrapolated linearly to the end
+ * of the target's period (TASK-115, EPIC-15), would not reach the goal
+ * cadastrado.
+ *
+ * `elapsedRelevantDays`/`totalRelevantDays` are already resolved upstream
+ * (TASK-133 aggregation layer) to whichever counting convention the
+ * organization configured — calendar days or business days only.
+ *
+ * `recipientUserId` must always be resolved server-side to the seller's
+ * *current sales manager* (never the seller themselves): this is what
+ * restricts this insight's visibility to `SALES_MANAGER`/`ADMIN` and
+ * guarantees a manager only ever receives insights about their own team.
+ */
+export interface InsightSalesRepBelowTargetSnapshot {
+  sellerId: string;
+  organizationId: string;
+  companyId: string;
+  recipientUserId: string;
+  sellerName: string;
+  /** Human-readable label for the target's period (e.g. "Setembro/2026"). */
+  periodLabel: string;
+  periodStartDate: Date;
+  periodEndDate: Date;
+  /** Goal cadastrado (TASK-115) for this seller in this period. */
+  targetValue: number;
+  /** Realized value so far in this period, as of the aggregation cutoff. */
+  realizedValue: number;
+  /** Relevant days already elapsed in the period. */
+  elapsedRelevantDays: number;
+  /** Total relevant days in the whole period. */
+  totalRelevantDays: number;
+}
+
 export interface InsightOrganizationSettings {
   inactivityThresholdDays: number;
   inactivityThresholdDaysBySegment: Record<string, number>;
@@ -402,6 +439,20 @@ export interface InsightOrganizationSettings {
    * is raised as a "pedido abandonado" (abandoned order) insight instead of
    * the lower "carrinho salvo" severity. */
   abandonedOrderAbandonedThresholdHours: number;
+  /** Minimum number of relevant days elapsed in the target's period before
+   * `SalesRepBelowTargetInsightRule` is allowed to raise an insight for a
+   * seller (e.g. "so a partir do 5o dia util"). */
+  sellerBelowTargetMinimumElapsedDays: number;
+  /** Minimum under-achievement ratio (0..1) required to raise a "medio"
+   * risk insight — also the rule's gate (e.g. `0.10` = projection under 90%
+   * of the goal). */
+  sellerBelowTargetMediumThreshold: number;
+  /** Minimum under-achievement ratio required to classify a seller as
+   * "alto" risk. */
+  sellerBelowTargetHighThreshold: number;
+  /** Minimum under-achievement ratio required to classify a seller as
+   * "critico" risk. */
+  sellerBelowTargetCriticalThreshold: number;
   lifetimeDays: number;
 }
 
@@ -416,6 +467,7 @@ export interface InsightDataset {
   stockPositionSnapshots: InsightStockPositionSnapshot[];
   churnRiskSnapshots: InsightChurnRiskSnapshot[];
   abandonedOrderSnapshots: InsightAbandonedOrderSnapshot[];
+  salesRepBelowTargetSnapshots: InsightSalesRepBelowTargetSnapshot[];
 }
 
 export interface InsightContext {
@@ -458,6 +510,10 @@ export const DEFAULT_INSIGHT_SETTINGS: InsightOrganizationSettings = {
   churnRiskCriticalThreshold: 0.75,
   abandonedOrderSavedCartThresholdHours: 24,
   abandonedOrderAbandonedThresholdHours: 72,
+  sellerBelowTargetMinimumElapsedDays: 5,
+  sellerBelowTargetMediumThreshold: 0.1,
+  sellerBelowTargetHighThreshold: 0.3,
+  sellerBelowTargetCriticalThreshold: 0.5,
   lifetimeDays: 7,
 };
 
