@@ -335,12 +335,18 @@ import '../features/dashboards/domain/repositories/aggregation_repository.dart'
     as _i649;
 import '../features/dashboards/domain/services/executive_dashboard_visibility_service.dart'
     as _i846;
+import '../features/dashboards/domain/usecases/load_customer_dashboard_ranking_use_case.dart'
+    as _i899;
+import '../features/dashboards/domain/usecases/load_customer_dashboard_snapshot_use_case.dart'
+    as _i6;
 import '../features/dashboards/domain/usecases/load_executive_dashboard_snapshot_use_case.dart'
     as _i1064;
 import '../features/dashboards/domain/usecases/load_sales_dashboard_group_rows_use_case.dart'
     as _i904;
 import '../features/dashboards/domain/usecases/load_sales_dashboard_snapshot_use_case.dart'
     as _i754;
+import '../features/dashboards/presentation/bloc/customer_dashboard_bloc.dart'
+    as _i667;
 import '../features/dashboards/presentation/bloc/executive_dashboard_bloc.dart'
     as _i250;
 import '../features/dashboards/presentation/bloc/sales_dashboard_bloc.dart'
@@ -2729,6 +2735,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i899.LoadCustomerDashboardRankingUseCase>(
+      () => _i899.LoadCustomerDashboardRankingUseCase(
+        gh<_i649.AggregationRepository>(),
+      ),
+    );
     gh.factory<_i904.LoadSalesDashboardGroupRowsUseCase>(
       () => _i904.LoadSalesDashboardGroupRowsUseCase(
         gh<_i649.AggregationRepository>(),
@@ -2876,6 +2887,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i201.ListAuditLogEntriesUseCase(
         gh<_i753.AuditLogRepository>(),
         gh<_i47.PermissionService>(),
+      ),
+    );
+    gh.factory<_i6.LoadCustomerDashboardSnapshotUseCase>(
+      () => _i6.LoadCustomerDashboardSnapshotUseCase(
+        gh<_i649.AggregationRepository>(),
+        gh<_i1031.PositivacaoRepository>(),
       ),
     );
     gh.factory<_i628.AcceptInviteBloc>(
@@ -3225,6 +3242,16 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1006.ListOpportunityCenterInsightsUseCase(
         gh<_i44.InsightVisibilityService>(),
         gh<_i644.InsightRepository>(),
+      ),
+    );
+    gh.factory<_i667.CustomerDashboardBloc>(
+      () => _i667.CustomerDashboardBloc(
+        gh<_i846.ExecutiveDashboardVisibilityService>(),
+        gh<_i6.LoadCustomerDashboardSnapshotUseCase>(),
+        gh<_i899.LoadCustomerDashboardRankingUseCase>(),
+        gh<_i799.CompanyRepository>(),
+        gh<_i320.TeamRepository>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i250.ExecutiveDashboardBloc>(

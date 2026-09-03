@@ -322,6 +322,37 @@ final class SalesDashboardRoute extends AppRoute {
   }
 }
 
+/// Customer Dashboard route (TASK-136, EPIC-17), scoped by Organization and
+/// Company. [queryParameters] carries `teamId`/`month`/`segment`/`sortBy`/
+/// `sortDir` (see `CustomerDashboardFilters.toQueryParameters`), so a
+/// Flutter Web reload/share link restores exactly the same view, same
+/// precedent [SalesDashboardRoute] already sets. Protected in [AppRouter] by
+/// `report.viewSensitive` — same capability [SalesDashboardRoute]/
+/// [ExecutiveDashboardRoute] themselves require, since every EPIC-17
+/// dashboard reads the same TASK-133 aggregation collections.
+final class CustomerDashboardRoute extends AppRoute {
+  const CustomerDashboardRoute({
+    required this.orgId,
+    required this.companyId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String companyId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'customerDashboard';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/dashboards/customers';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/companies/$companyId/dashboards/customers';
+    if (queryParameters.isEmpty) return path;
+    return Uri(path: path, queryParameters: queryParameters).toString();
+  }
+}
+
 /// Pedido history/detail route (TASK-104), scoped by Organization and
 /// Company — the "Ver histórico" destination from [OrderListRoute]. Protected
 /// in [AppRouter] by `order.view`, the same capability [OrderListRoute]
