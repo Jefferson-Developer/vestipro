@@ -323,6 +323,22 @@ import '../features/customers/presentation/bloc/customer_portfolio_bloc.dart'
     as _i522;
 import '../features/customers/presentation/bloc/customer_segment_bloc.dart'
     as _i901;
+import '../features/dashboards/data/datasources/aggregation_remote_data_source.dart'
+    as _i204;
+import '../features/dashboards/data/datasources/firestore_aggregation_data_source.dart'
+    as _i398;
+import '../features/dashboards/data/mappers/aggregation_snapshot_mapper.dart'
+    as _i588;
+import '../features/dashboards/data/repositories/aggregation_repository_impl.dart'
+    as _i60;
+import '../features/dashboards/domain/repositories/aggregation_repository.dart'
+    as _i649;
+import '../features/dashboards/domain/services/executive_dashboard_visibility_service.dart'
+    as _i846;
+import '../features/dashboards/domain/usecases/load_executive_dashboard_snapshot_use_case.dart'
+    as _i1064;
+import '../features/dashboards/presentation/bloc/executive_dashboard_bloc.dart'
+    as _i250;
 import '../features/favorites/data/datasources/favorite_remote_data_source.dart'
     as _i1002;
 import '../features/favorites/data/datasources/firestore_favorite_remote_data_source.dart'
@@ -1130,6 +1146,9 @@ extension GetItInjectableX on _i174.GetIt {
     final syncModule = _$SyncModule();
     final insightModule = _$InsightModule();
     final offlinePackageLoadersModule = _$OfflinePackageLoadersModule();
+    gh.factory<_i588.AggregationSnapshotMapper>(
+      () => const _i588.AggregationSnapshotMapper(),
+    );
     gh.factory<_i619.FavoriteLocalMapper>(
       () => const _i619.FavoriteLocalMapper(),
     );
@@ -2218,6 +2237,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i340.CloudFunctionsService>(),
       ),
     );
+    gh.lazySingleton<_i204.AggregationRemoteDataSource>(
+      () => _i398.FirestoreAggregationDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i661.PriceListLocalStoreRepository>(
       () => _i525.DriftPriceListLocalStoreRepository(
         gh<_i658.AppDatabase>(),
@@ -2470,6 +2492,13 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i169.OrderMapper>(),
       ),
     );
+    gh.lazySingleton<_i649.AggregationRepository>(
+      () => _i60.AggregationRepositoryImpl(
+        gh<_i204.AggregationRemoteDataSource>(),
+        gh<_i588.AggregationSnapshotMapper>(),
+        cacheTtl: gh<Duration>(),
+      ),
+    );
     gh.factory<_i609.GetActiveWarehousesUseCase>(
       () => _i609.GetActiveWarehousesUseCase(gh<_i62.WarehouseRepository>()),
     );
@@ -2623,6 +2652,14 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i485.TeamRepositoryImpl(
         dataSource: gh<_i228.TeamDataSource>(),
         mapper: gh<_i802.TeamMapper>(),
+      ),
+    );
+    gh.factory<_i1064.LoadExecutiveDashboardSnapshotUseCase>(
+      () => _i1064.LoadExecutiveDashboardSnapshotUseCase(
+        gh<_i649.AggregationRepository>(),
+        gh<_i1031.PositivacaoRepository>(),
+        gh<_i876.TargetRepository>(),
+        gh<_i154.TargetAchievementRepository>(),
       ),
     );
     gh.factory<_i938.CreatePromotionalCampaignUseCase>(
@@ -3028,6 +3065,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i334.RevokeInviteUseCase>(
       () => _i334.RevokeInviteUseCase(gh<_i75.InviteRepository>()),
     );
+    gh.factory<_i846.ExecutiveDashboardVisibilityService>(
+      () => _i846.ExecutiveDashboardVisibilityService(
+        gh<_i265.MembershipRepository>(),
+        gh<_i265.TeamRepository>(),
+      ),
+    );
     gh.factory<_i960.RankingPeerResolverService>(
       () => _i960.RankingPeerResolverService(
         gh<_i265.MembershipRepository>(),
@@ -3166,6 +3209,16 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1006.ListOpportunityCenterInsightsUseCase(
         gh<_i44.InsightVisibilityService>(),
         gh<_i644.InsightRepository>(),
+      ),
+    );
+    gh.factory<_i250.ExecutiveDashboardBloc>(
+      () => _i250.ExecutiveDashboardBloc(
+        gh<_i846.ExecutiveDashboardVisibilityService>(),
+        gh<_i1064.LoadExecutiveDashboardSnapshotUseCase>(),
+        gh<_i799.CompanyRepository>(),
+        gh<_i320.TeamRepository>(),
+        gh<_i1006.ListOpportunityCenterInsightsUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i293.TargetDashboardCubit>(

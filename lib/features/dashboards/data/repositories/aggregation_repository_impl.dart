@@ -1,3 +1,5 @@
+import 'package:injectable/injectable.dart';
+
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/aggregation_snapshot.dart';
@@ -23,12 +25,13 @@ import '../mappers/aggregation_snapshot_mapper.dart';
 /// (TASK-134+) turns out to actually need offline persistence for a
 /// specific widget, once its concrete read pattern is known — this keeps
 /// this task's schema footprint at zero.
+@LazySingleton(as: AggregationRepository)
 final class AggregationRepositoryImpl implements AggregationRepository {
   AggregationRepositoryImpl(
     this._remote,
     this._mapper, {
     this.cacheTtl = const Duration(minutes: 5),
-    DateTime Function()? now,
+    @ignoreParam DateTime Function()? now,
   }) : _now = now ?? DateTime.now;
 
   /// Shorter than `VariantStockBalanceRepositoryImpl.cacheTtl` (10 minutes)

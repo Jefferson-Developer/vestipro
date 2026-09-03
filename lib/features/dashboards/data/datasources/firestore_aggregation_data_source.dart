@@ -1,4 +1,5 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:injectable/injectable.dart';
 
 import '../../../../core/database/database.dart';
 import '../../domain/value_objects/aggregation_dimension.dart';
@@ -15,6 +16,7 @@ String buildAggregationDocId({
   required String periodKey,
 }) => '${companyId}_${scopeId}_$periodKey';
 
+@LazySingleton(as: AggregationRemoteDataSource)
 final class FirestoreAggregationDataSource
     implements AggregationRemoteDataSource {
   FirestoreAggregationDataSource(this._firestore);

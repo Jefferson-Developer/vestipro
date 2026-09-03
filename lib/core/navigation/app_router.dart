@@ -44,6 +44,7 @@ class AppRouter {
     this.conflictDetailPageBuilder,
     this.syncCenterPageBuilder,
     this.opportunityCenterPageBuilder,
+    this.executiveDashboardPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
     AuthorizationGuard? authorizationGuard,
@@ -175,6 +176,19 @@ class AppRouter {
   )?
   opportunityCenterPageBuilder;
 
+  /// Builds the Executive Dashboard screen (TASK-134), given
+  /// `orgId`/`companyId` and the raw `queryParameters` of
+  /// [ExecutiveDashboardRoute] — the caller decides how to turn those into
+  /// an `ExecutiveDashboardFilters`, same "router hands raw params, page
+  /// owns parsing" contract [opportunityCenterPageBuilder] already sets.
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  executiveDashboardPageBuilder;
+
   /// Builds the catalog's filterable browsing screen (TASK-082), given
   /// `orgId` and the raw `queryParameters` of [CatalogBrowseRoute] — the
   /// caller decides how to turn those into a `CatalogViewMode`/
@@ -302,6 +316,25 @@ class AppRouter {
         ),
         builder: (context, state) {
           final builder = opportunityCenterPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: ExecutiveDashboardRoute.pathPattern,
+        name: ExecutiveDashboardRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.reportViewSensitive,
+        ),
+        builder: (context, state) {
+          final builder = executiveDashboardPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,

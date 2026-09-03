@@ -260,6 +260,37 @@ final class OpportunityCenterRoute extends AppRoute {
   }
 }
 
+/// Executive Dashboard route (TASK-134, EPIC-17), scoped by Organization and
+/// Company. [queryParameters] carries `teamId`/`month` (see
+/// `ExecutiveDashboardFilters.toQueryParameters`), so a Flutter Web
+/// reload/share link restores exactly the same company/team/period view,
+/// same precedent [OpportunityCenterRoute]/[OrderListRoute] already set.
+/// Protected in [AppRouter] by `report.viewSensitive` — the same capability
+/// `firestore.rules` already requires to read any of the five TASK-133
+/// aggregation collections this dashboard reads.
+final class ExecutiveDashboardRoute extends AppRoute {
+  const ExecutiveDashboardRoute({
+    required this.orgId,
+    required this.companyId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String companyId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'executiveDashboard';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/dashboards/executive';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/companies/$companyId/dashboards/executive';
+    if (queryParameters.isEmpty) return path;
+    return Uri(path: path, queryParameters: queryParameters).toString();
+  }
+}
+
 /// Pedido history/detail route (TASK-104), scoped by Organization and
 /// Company — the "Ver histórico" destination from [OrderListRoute]. Protected
 /// in [AppRouter] by `order.view`, the same capability [OrderListRoute]

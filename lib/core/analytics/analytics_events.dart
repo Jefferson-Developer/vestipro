@@ -96,6 +96,19 @@ final class AnalyticsEvents {
   static const String rankingDashboardViewed = 'ranking_dashboard_viewed';
   static const String targetAlertTriggered = 'target_alert_triggered';
 
+  /// Logged by every EPIC-17 BI dashboard bloc/cubit (starting with
+  /// `ExecutiveDashboardBloc`, TASK-134) once per company/team/period filter
+  /// combination the caller navigates to — `dashboard_type` (`executive`,
+  /// and every future TASK-135 a TASK-143 value) plus the applied
+  /// `company_id`/`team_id`/`month` are always carried as parameters, so a
+  /// single event name lets analytics answer "quais dashboards de BI são
+  /// mais usados" without a dedicated `*_dashboard_viewed` event per screen
+  /// — deliberately not reusing [targetDashboardViewed]/
+  /// [positivacaoDashboardViewed]/[rankingDashboardViewed] (EPIC-15's own,
+  /// narrower, per-dashboard event names, already shipped before this
+  /// cross-cutting convention existed for EPIC-17).
+  static const String dashboardViewed = 'dashboard_viewed';
+
   /// Logged once per `SyncEngine.runPush` call (TASK-109, EPIC-14) — the
   /// Outbox drain pass — with `attempted`/`synced`/`failed`/`conflicts`/
   /// `duration_ms` parameters, feeding the "métricas de sincronização"
@@ -180,6 +193,7 @@ final class AnalyticsEvents {
     positivacaoSettingsUpdated,
     rankingDashboardViewed,
     targetAlertTriggered,
+    dashboardViewed,
     syncPushCompleted,
     syncPullCompleted,
     syncCenterOpened,

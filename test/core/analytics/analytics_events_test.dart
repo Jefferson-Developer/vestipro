@@ -62,6 +62,7 @@ void main() {
           'positivacao_settings_updated',
           'ranking_dashboard_viewed',
           'target_alert_triggered',
+          'dashboard_viewed',
           'sync_push_completed',
           'sync_pull_completed',
           'sync_center_opened',

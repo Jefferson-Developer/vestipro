@@ -26,6 +26,7 @@ import '../features/audit_log/audit_log.dart';
 import '../features/catalog/catalog.dart';
 import '../features/customers/customers.dart';
 import '../features/catalog_share/catalog_share.dart';
+import '../features/dashboards/dashboards.dart';
 import '../features/insights/insights.dart';
 import '../features/invites/invites.dart';
 import '../features/onboarding/onboarding.dart';
@@ -233,6 +234,36 @@ class VestiProApp extends StatelessWidget {
                             companyId: companyId,
                             action: action,
                           ),
+                    ),
+                  ),
+          executiveDashboardPageBuilder:
+              (context, orgId, companyId, queryParameters) =>
+                  _withConnectivityIndicator(
+                    orgId: orgId,
+                    companyId: companyId,
+                    child: ExecutiveDashboardPage(
+                      organizationId: orgId,
+                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                      permissionService: getIt<PermissionService>(),
+                      createBloc: () => getIt<ExecutiveDashboardBloc>(),
+                      initialFilters:
+                          ExecutiveDashboardFilters.fromQueryParameters(
+                            queryParameters,
+                            defaultCompanyId: companyId,
+                          ),
+                      onUrlStateChanged: (filters) => context.go(
+                        ExecutiveDashboardRoute(
+                          orgId: orgId,
+                          companyId: filters.companyId,
+                          queryParameters: filters.toQueryParameters(),
+                        ).location,
+                      ),
+                      onOpenOpportunityCenter: () => context.go(
+                        OpportunityCenterRoute(
+                          orgId: orgId,
+                          companyId: companyId,
+                        ).location,
+                      ),
                     ),
                   ),
           customerFormPageBuilder: (context, orgId, companyId) =>

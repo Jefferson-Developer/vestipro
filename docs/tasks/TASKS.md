@@ -250,7 +250,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ### EPIC-17 — Dashboards e BI
 - [x] [TASK-133 — Criar camada de agregação server-side](TASK-133-criar-camada-de-agregacao-server-side.md) — Flutter Senior
-- [ ] [TASK-134 — Implementar dashboard executivo](TASK-134-implementar-dashboard-executivo.md) — Flutter Senior + Front-end
+- [x] [TASK-134 — Implementar dashboard executivo](TASK-134-implementar-dashboard-executivo.md) — Flutter Senior + Front-end
 - [ ] [TASK-135 — Implementar dashboard de vendas](TASK-135-implementar-dashboard-de-vendas.md) — Flutter Senior + Front-end
 - [ ] [TASK-136 — Implementar dashboard de clientes](TASK-136-implementar-dashboard-de-clientes.md) — Flutter Senior + Front-end
 - [ ] [TASK-137 — Implementar dashboard de produtos](TASK-137-implementar-dashboard-de-produtos.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 133 / 220 tasks concluídas.
+**Progresso:** 134 / 220 tasks concluídas.

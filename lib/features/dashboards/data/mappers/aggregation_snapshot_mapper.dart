@@ -1,13 +1,12 @@
+import 'package:injectable/injectable.dart';
+
 import '../../domain/entities/aggregation_snapshot.dart';
 import '../dtos/aggregation_snapshot_dto.dart';
 
-/// Not yet registered in the DI container (`@injectable`/`@LazySingleton`)
-/// — no presentation-layer consumer exists yet for `lib/features/dashboards`
-/// (that starts at TASK-134, the first dashboard task). Registering it plus
-/// running `build_runner` to regenerate `injection.config.dart` is
-/// deferred to whichever task first wires a BLoC to
-/// `AggregationRepository`, so this task does not touch generated DI code
-/// with zero real consumers to justify it.
+/// Registered in the DI container starting with TASK-134
+/// (`ExecutiveDashboardBloc`, the first presentation-layer consumer of
+/// `AggregationRepository`).
+@injectable
 final class AggregationSnapshotMapper {
   const AggregationSnapshotMapper();
 
