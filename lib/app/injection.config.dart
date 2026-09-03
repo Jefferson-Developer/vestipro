@@ -337,8 +337,14 @@ import '../features/dashboards/domain/services/executive_dashboard_visibility_se
     as _i846;
 import '../features/dashboards/domain/usecases/load_executive_dashboard_snapshot_use_case.dart'
     as _i1064;
+import '../features/dashboards/domain/usecases/load_sales_dashboard_group_rows_use_case.dart'
+    as _i904;
+import '../features/dashboards/domain/usecases/load_sales_dashboard_snapshot_use_case.dart'
+    as _i754;
 import '../features/dashboards/presentation/bloc/executive_dashboard_bloc.dart'
     as _i250;
+import '../features/dashboards/presentation/bloc/sales_dashboard_bloc.dart'
+    as _i588;
 import '../features/favorites/data/datasources/favorite_remote_data_source.dart'
     as _i1002;
 import '../features/favorites/data/datasources/firestore_favorite_remote_data_source.dart'
@@ -2723,6 +2729,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i904.LoadSalesDashboardGroupRowsUseCase>(
+      () => _i904.LoadSalesDashboardGroupRowsUseCase(
+        gh<_i649.AggregationRepository>(),
+      ),
+    );
+    gh.factory<_i754.LoadSalesDashboardSnapshotUseCase>(
+      () => _i754.LoadSalesDashboardSnapshotUseCase(
+        gh<_i649.AggregationRepository>(),
+      ),
+    );
     gh.factory<_i647.PublishProductUseCase>(
       () => _i647.PublishProductUseCase(
         gh<_i321.ProductRepository>(),
@@ -3280,6 +3296,16 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i424.OrderListBloc(
         listOrders: gh<_i144.ListOrdersUseCase>(),
         listLocalPendingOrders: gh<_i233.ListLocalPendingOrdersUseCase>(),
+      ),
+    );
+    gh.factory<_i588.SalesDashboardBloc>(
+      () => _i588.SalesDashboardBloc(
+        gh<_i846.ExecutiveDashboardVisibilityService>(),
+        gh<_i754.LoadSalesDashboardSnapshotUseCase>(),
+        gh<_i904.LoadSalesDashboardGroupRowsUseCase>(),
+        gh<_i799.CompanyRepository>(),
+        gh<_i320.TeamRepository>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i904.OpportunityCenterBloc>(

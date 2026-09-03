@@ -45,6 +45,7 @@ class AppRouter {
     this.syncCenterPageBuilder,
     this.opportunityCenterPageBuilder,
     this.executiveDashboardPageBuilder,
+    this.salesDashboardPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
     AuthorizationGuard? authorizationGuard,
@@ -188,6 +189,19 @@ class AppRouter {
     Map<String, String> queryParameters,
   )?
   executiveDashboardPageBuilder;
+
+  /// Builds the Sales Dashboard screen (TASK-135), given `orgId`/`companyId`
+  /// and the raw `queryParameters` of [SalesDashboardRoute] — the caller
+  /// decides how to turn those into a `SalesDashboardFilters`, same "router
+  /// hands raw params, page owns parsing" contract
+  /// [executiveDashboardPageBuilder] already sets.
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  salesDashboardPageBuilder;
 
   /// Builds the catalog's filterable browsing screen (TASK-082), given
   /// `orgId` and the raw `queryParameters` of [CatalogBrowseRoute] — the
@@ -335,6 +349,25 @@ class AppRouter {
         ),
         builder: (context, state) {
           final builder = executiveDashboardPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: SalesDashboardRoute.pathPattern,
+        name: SalesDashboardRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.reportViewSensitive,
+        ),
+        builder: (context, state) {
+          final builder = salesDashboardPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,
