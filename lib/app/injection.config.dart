@@ -345,6 +345,10 @@ import '../features/dashboards/domain/usecases/load_customer_dashboard_snapshot_
     as _i6;
 import '../features/dashboards/domain/usecases/load_executive_dashboard_snapshot_use_case.dart'
     as _i1064;
+import '../features/dashboards/domain/usecases/load_inventory_dashboard_snapshot_use_case.dart'
+    as _i737;
+import '../features/dashboards/domain/usecases/load_inventory_dashboard_stalled_products_use_case.dart'
+    as _i328;
 import '../features/dashboards/domain/usecases/load_product_dashboard_ranking_use_case.dart'
     as _i106;
 import '../features/dashboards/domain/usecases/load_sales_dashboard_group_rows_use_case.dart'
@@ -357,6 +361,8 @@ import '../features/dashboards/presentation/bloc/customer_dashboard_bloc.dart'
     as _i667;
 import '../features/dashboards/presentation/bloc/executive_dashboard_bloc.dart'
     as _i250;
+import '../features/dashboards/presentation/bloc/inventory_dashboard_bloc.dart'
+    as _i144;
 import '../features/dashboards/presentation/bloc/product_dashboard_bloc.dart'
     as _i261;
 import '../features/dashboards/presentation/bloc/sales_dashboard_bloc.dart'
@@ -3078,6 +3084,12 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i737.LoadInventoryDashboardSnapshotUseCase>(
+      () => _i737.LoadInventoryDashboardSnapshotUseCase(
+        gh<_i722.GetStockTurnoverMetricsUseCase>(),
+        gh<_i684.ListStockAlertsUseCase>(),
+      ),
+    );
     gh.factory<_i998.TargetFormCubit>(
       () => _i998.TargetFormCubit(
         gh<_i876.TargetRepository>(),
@@ -3262,6 +3274,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1006.ListOpportunityCenterInsightsUseCase(
         gh<_i44.InsightVisibilityService>(),
         gh<_i644.InsightRepository>(),
+      ),
+    );
+    gh.factory<_i328.LoadInventoryDashboardStalledProductsUseCase>(
+      () => _i328.LoadInventoryDashboardStalledProductsUseCase(
+        gh<_i321.ProductRepository>(),
+        gh<_i722.GetStockTurnoverMetricsUseCase>(),
       ),
     );
     gh.factory<_i667.CustomerDashboardBloc>(
@@ -3480,6 +3498,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i325.CustomerOfflinePackageEntityLoader>(),
         gh<_i1044.PriceListOfflinePackageEntityLoader>(),
         gh<_i898.PaymentTermOfflinePackageEntityLoader>(),
+      ),
+    );
+    gh.factory<_i144.InventoryDashboardBloc>(
+      () => _i144.InventoryDashboardBloc(
+        gh<_i846.ExecutiveDashboardVisibilityService>(),
+        gh<_i737.LoadInventoryDashboardSnapshotUseCase>(),
+        gh<_i328.LoadInventoryDashboardStalledProductsUseCase>(),
+        gh<_i799.CompanyRepository>(),
+        gh<_i609.GetActiveWarehousesUseCase>(),
+        gh<_i626.CollectionRepository>(),
+        gh<_i648.CategoryRepository>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i339.OrderApprovalQueueBloc>(

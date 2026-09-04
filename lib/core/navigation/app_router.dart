@@ -49,6 +49,7 @@ class AppRouter {
     this.customerDashboardPageBuilder,
     this.productDashboardPageBuilder,
     this.collectionDashboardPageBuilder,
+    this.inventoryDashboardPageBuilder,
     this.productDetailPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
@@ -245,6 +246,19 @@ class AppRouter {
     Map<String, String> queryParameters,
   )?
   collectionDashboardPageBuilder;
+
+  /// Builds the Inventory Dashboard screen (TASK-139), given `orgId`/
+  /// `companyId` and the raw `queryParameters` of [InventoryDashboardRoute]
+  /// — the caller decides how to turn those into an
+  /// `InventoryDashboardFilters`, same "router hands raw params, page owns
+  /// parsing" contract [collectionDashboardPageBuilder] already sets.
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  inventoryDashboardPageBuilder;
 
   /// Builds the standalone, read-only product detail screen (TASK-078 reused
   /// outside the order draft flow), given `orgId`/`productId` from
@@ -475,6 +489,25 @@ class AppRouter {
         ),
         builder: (context, state) {
           final builder = collectionDashboardPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: InventoryDashboardRoute.pathPattern,
+        name: InventoryDashboardRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.reportViewSensitive,
+        ),
+        builder: (context, state) {
+          final builder = inventoryDashboardPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,

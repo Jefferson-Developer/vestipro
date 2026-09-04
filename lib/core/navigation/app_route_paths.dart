@@ -415,6 +415,38 @@ final class CollectionDashboardRoute extends AppRoute {
   }
 }
 
+/// Inventory Dashboard route (TASK-139, EPIC-17), scoped by Organization and
+/// Company. [queryParameters] carries `month`/`warehouseId`/`collectionId`/
+/// `categoryId`/`stalledDays` (see
+/// `InventoryDashboardFilters.toQueryParameters`), so a Flutter Web
+/// reload/share link restores exactly the same view, same precedent
+/// [ProductDashboardRoute]/[CollectionDashboardRoute] already set. Protected
+/// in [AppRouter] by `report.viewSensitive` — same capability every EPIC-17
+/// dashboard already requires, since it reads the same TASK-094 giro de
+/// estoque source those two also read.
+final class InventoryDashboardRoute extends AppRoute {
+  const InventoryDashboardRoute({
+    required this.orgId,
+    required this.companyId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String companyId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'inventoryDashboard';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/dashboards/inventory';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/companies/$companyId/dashboards/inventory';
+    if (queryParameters.isEmpty) return path;
+    return Uri(path: path, queryParameters: queryParameters).toString();
+  }
+}
+
 /// Standalone, read-only product detail route (TASK-078's `ProductDetailPage`
 /// reused outside the order draft flow), scoped by Organization only —
 /// `Product.companyId` itself is optional (TASK-064), so this route never
