@@ -353,6 +353,59 @@ final class CustomerDashboardRoute extends AppRoute {
   }
 }
 
+/// Product Dashboard route (TASK-137, EPIC-17), scoped by Organization and
+/// Company. [queryParameters] carries `month`/`collectionId`/`categoryId`/
+/// `sortBy`/`sortDir` (see `ProductDashboardFilters.toQueryParameters`), so a
+/// Flutter Web reload/share link restores exactly the same view, same
+/// precedent [CustomerDashboardRoute] already sets. Protected in [AppRouter]
+/// by `report.viewSensitive` — same capability every EPIC-17 dashboard
+/// already requires, since every one of them reads the same TASK-133
+/// aggregation collections.
+final class ProductDashboardRoute extends AppRoute {
+  const ProductDashboardRoute({
+    required this.orgId,
+    required this.companyId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String companyId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'productDashboard';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/dashboards/products';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/companies/$companyId/dashboards/products';
+    if (queryParameters.isEmpty) return path;
+    return Uri(path: path, queryParameters: queryParameters).toString();
+  }
+}
+
+/// Standalone, read-only product detail route (TASK-078's `ProductDetailPage`
+/// reused outside the order draft flow), scoped by Organization only —
+/// `Product.companyId` itself is optional (TASK-064), so this route never
+/// requires one. Reached today from [ProductDashboardRoute]'s ranking
+/// drill-down; unlike [OrderProductDetailRoute] (its own order-draft-scoped
+/// equivalent, gated by `order.create`), this route carries no add-to-order
+/// affordance and is not gated by any [Capability] — same "catálogo é
+/// navegável por qualquer usuário autenticado" precedent
+/// [CatalogHomeRoute]/[CatalogBrowseRoute] already set.
+final class ProductDetailRoute extends AppRoute {
+  const ProductDetailRoute({required this.orgId, required this.productId});
+
+  final String orgId;
+  final String productId;
+
+  static const name = 'productDetail';
+  static const pathPattern = '/org/:orgId/products/:productId';
+
+  @override
+  String get location => '/org/$orgId/products/$productId';
+}
+
 /// Pedido history/detail route (TASK-104), scoped by Organization and
 /// Company — the "Ver histórico" destination from [OrderListRoute]. Protected
 /// in [AppRouter] by `order.view`, the same capability [OrderListRoute]

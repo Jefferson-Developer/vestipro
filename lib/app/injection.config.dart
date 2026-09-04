@@ -335,12 +335,16 @@ import '../features/dashboards/domain/repositories/aggregation_repository.dart'
     as _i649;
 import '../features/dashboards/domain/services/executive_dashboard_visibility_service.dart'
     as _i846;
+import '../features/dashboards/domain/usecases/build_product_dashboard_snapshot_use_case.dart'
+    as _i675;
 import '../features/dashboards/domain/usecases/load_customer_dashboard_ranking_use_case.dart'
     as _i899;
 import '../features/dashboards/domain/usecases/load_customer_dashboard_snapshot_use_case.dart'
     as _i6;
 import '../features/dashboards/domain/usecases/load_executive_dashboard_snapshot_use_case.dart'
     as _i1064;
+import '../features/dashboards/domain/usecases/load_product_dashboard_ranking_use_case.dart'
+    as _i106;
 import '../features/dashboards/domain/usecases/load_sales_dashboard_group_rows_use_case.dart'
     as _i904;
 import '../features/dashboards/domain/usecases/load_sales_dashboard_snapshot_use_case.dart'
@@ -349,6 +353,8 @@ import '../features/dashboards/presentation/bloc/customer_dashboard_bloc.dart'
     as _i667;
 import '../features/dashboards/presentation/bloc/executive_dashboard_bloc.dart'
     as _i250;
+import '../features/dashboards/presentation/bloc/product_dashboard_bloc.dart'
+    as _i261;
 import '../features/dashboards/presentation/bloc/sales_dashboard_bloc.dart'
     as _i588;
 import '../features/favorites/data/datasources/favorite_remote_data_source.dart'
@@ -1160,6 +1166,9 @@ extension GetItInjectableX on _i174.GetIt {
     final offlinePackageLoadersModule = _$OfflinePackageLoadersModule();
     gh.factory<_i588.AggregationSnapshotMapper>(
       () => const _i588.AggregationSnapshotMapper(),
+    );
+    gh.factory<_i675.BuildProductDashboardSnapshotUseCase>(
+      () => const _i675.BuildProductDashboardSnapshotUseCase(),
     );
     gh.factory<_i619.FavoriteLocalMapper>(
       () => const _i619.FavoriteLocalMapper(),
@@ -2829,6 +2838,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i794.AboutAppRepository>(),
       ),
     );
+    gh.factory<_i106.LoadProductDashboardRankingUseCase>(
+      () => _i106.LoadProductDashboardRankingUseCase(
+        gh<_i649.AggregationRepository>(),
+        gh<_i41.ResolveApplicablePriceListsUseCase>(),
+        gh<_i101.PriceListItemRepository>(),
+      ),
+    );
     gh.factory<_i420.CatalogHomeBloc>(
       () => _i420.CatalogHomeBloc(
         getCatalogHomeConfig: gh<_i316.GetCatalogHomeConfigUseCase>(),
@@ -3288,6 +3304,19 @@ extension GetItInjectableX on _i174.GetIt {
         qualifyLead: gh<_i924.QualifyLeadUseCase>(),
         disqualifyLead: gh<_i904.DisqualifyLeadUseCase>(),
         listOrganizationUsers: gh<_i220.ListOrganizationUsersUseCase>(),
+      ),
+    );
+    gh.factory<_i261.ProductDashboardBloc>(
+      () => _i261.ProductDashboardBloc(
+        gh<_i846.ExecutiveDashboardVisibilityService>(),
+        gh<_i106.LoadProductDashboardRankingUseCase>(),
+        gh<_i675.BuildProductDashboardSnapshotUseCase>(),
+        gh<_i799.CompanyRepository>(),
+        gh<_i626.CollectionRepository>(),
+        gh<_i648.CategoryRepository>(),
+        gh<_i722.GetStockTurnoverMetricsUseCase>(),
+        gh<_i321.ProductRepository>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i758.RankingDashboardCubit>(

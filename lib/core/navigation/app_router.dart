@@ -47,6 +47,8 @@ class AppRouter {
     this.executiveDashboardPageBuilder,
     this.salesDashboardPageBuilder,
     this.customerDashboardPageBuilder,
+    this.productDashboardPageBuilder,
+    this.productDetailPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
     AuthorizationGuard? authorizationGuard,
@@ -216,6 +218,26 @@ class AppRouter {
     Map<String, String> queryParameters,
   )?
   customerDashboardPageBuilder;
+
+  /// Builds the Product Dashboard screen (TASK-137), given `orgId`/
+  /// `companyId` and the raw `queryParameters` of [ProductDashboardRoute] —
+  /// the caller decides how to turn those into a `ProductDashboardFilters`,
+  /// same "router hands raw params, page owns parsing" contract
+  /// [customerDashboardPageBuilder] already sets.
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  productDashboardPageBuilder;
+
+  /// Builds the standalone, read-only product detail screen (TASK-078 reused
+  /// outside the order draft flow), given `orgId`/`productId` from
+  /// [ProductDetailRoute] — reached today from [ProductDashboardRoute]'s
+  /// ranking drill-down.
+  final Widget Function(BuildContext context, String orgId, String productId)?
+  productDetailPageBuilder;
 
   /// Builds the catalog's filterable browsing screen (TASK-082), given
   /// `orgId` and the raw `queryParameters` of [CatalogBrowseRoute] — the
@@ -407,6 +429,38 @@ class AppRouter {
             state.pathParameters['orgId']!,
             state.pathParameters['companyId']!,
             state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: ProductDashboardRoute.pathPattern,
+        name: ProductDashboardRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.reportViewSensitive,
+        ),
+        builder: (context, state) {
+          final builder = productDashboardPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: ProductDetailRoute.pathPattern,
+        name: ProductDetailRoute.name,
+        builder: (context, state) {
+          final builder = productDetailPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['productId']!,
           );
         },
       ),
