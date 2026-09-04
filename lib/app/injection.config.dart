@@ -337,6 +337,8 @@ import '../features/dashboards/domain/services/executive_dashboard_visibility_se
     as _i846;
 import '../features/dashboards/domain/usecases/build_product_dashboard_snapshot_use_case.dart'
     as _i675;
+import '../features/dashboards/domain/usecases/load_collection_dashboard_entries_use_case.dart'
+    as _i58;
 import '../features/dashboards/domain/usecases/load_customer_dashboard_ranking_use_case.dart'
     as _i899;
 import '../features/dashboards/domain/usecases/load_customer_dashboard_snapshot_use_case.dart'
@@ -349,6 +351,8 @@ import '../features/dashboards/domain/usecases/load_sales_dashboard_group_rows_u
     as _i904;
 import '../features/dashboards/domain/usecases/load_sales_dashboard_snapshot_use_case.dart'
     as _i754;
+import '../features/dashboards/presentation/bloc/collection_dashboard_bloc.dart'
+    as _i455;
 import '../features/dashboards/presentation/bloc/customer_dashboard_bloc.dart'
     as _i667;
 import '../features/dashboards/presentation/bloc/executive_dashboard_bloc.dart'
@@ -3280,6 +3284,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i58.LoadCollectionDashboardEntriesUseCase>(
+      () => _i58.LoadCollectionDashboardEntriesUseCase(
+        gh<_i649.AggregationRepository>(),
+        gh<_i722.GetStockTurnoverMetricsUseCase>(),
+      ),
+    );
     gh.factory<_i293.TargetDashboardCubit>(
       () => _i293.TargetDashboardCubit(
         gh<_i951.TargetVisibilityService>(),
@@ -3488,6 +3498,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i761.FavoriteRepository>(),
         gh<_i321.ProductRepository>(),
         gh<_i385.GetVariantAvailabilityUseCase>(),
+      ),
+    );
+    gh.factory<_i455.CollectionDashboardBloc>(
+      () => _i455.CollectionDashboardBloc(
+        gh<_i846.ExecutiveDashboardVisibilityService>(),
+        gh<_i58.LoadCollectionDashboardEntriesUseCase>(),
+        gh<_i799.CompanyRepository>(),
+        gh<_i626.CollectionRepository>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i593.OnboardingBloc>(

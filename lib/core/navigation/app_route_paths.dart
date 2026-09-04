@@ -384,6 +384,37 @@ final class ProductDashboardRoute extends AppRoute {
   }
 }
 
+/// Collection Dashboard route (TASK-138, EPIC-17), scoped by Organization
+/// and Company. [queryParameters] carries `collectionIds` (comma-separated,
+/// see `CollectionDashboardFilters.toQueryParameters`), so a Flutter Web
+/// reload/share link restores exactly the same comparison, same precedent
+/// [ProductDashboardRoute] already sets. Protected in [AppRouter] by
+/// `report.viewSensitive` — same capability every EPIC-17 dashboard already
+/// requires, since every one of them reads the same TASK-133 aggregation
+/// collections.
+final class CollectionDashboardRoute extends AppRoute {
+  const CollectionDashboardRoute({
+    required this.orgId,
+    required this.companyId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String companyId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'collectionDashboard';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/dashboards/collections';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/companies/$companyId/dashboards/collections';
+    if (queryParameters.isEmpty) return path;
+    return Uri(path: path, queryParameters: queryParameters).toString();
+  }
+}
+
 /// Standalone, read-only product detail route (TASK-078's `ProductDetailPage`
 /// reused outside the order draft flow), scoped by Organization only —
 /// `Product.companyId` itself is optional (TASK-064), so this route never

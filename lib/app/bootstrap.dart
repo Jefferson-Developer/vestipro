@@ -356,6 +356,39 @@ class VestiProApp extends StatelessWidget {
                       ),
                     ),
                   ),
+          collectionDashboardPageBuilder:
+              (context, orgId, companyId, queryParameters) =>
+                  _withConnectivityIndicator(
+                    orgId: orgId,
+                    companyId: companyId,
+                    child: CollectionDashboardPage(
+                      organizationId: orgId,
+                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                      permissionService: getIt<PermissionService>(),
+                      createBloc: () => getIt<CollectionDashboardBloc>(),
+                      initialFilters:
+                          CollectionDashboardFilters.fromQueryParameters(
+                            queryParameters,
+                            defaultCompanyId: companyId,
+                          ),
+                      onUrlStateChanged: (filters) => context.go(
+                        CollectionDashboardRoute(
+                          orgId: orgId,
+                          companyId: filters.companyId,
+                          queryParameters: filters.toQueryParameters(),
+                        ).location,
+                      ),
+                      onDrillDownToCollection: (collectionId) => context.go(
+                        ProductDashboardRoute(
+                          orgId: orgId,
+                          companyId: companyId,
+                          queryParameters: <String, String>{
+                            'collectionId': collectionId,
+                          },
+                        ).location,
+                      ),
+                    ),
+                  ),
           productDetailPageBuilder: (context, orgId, productId) =>
               ProductDetailPage(
                 organizationId: orgId,
