@@ -62,6 +62,10 @@ abstract final class RolePermissionMatrix {
     // própria equipe ou com toda a organização.
     Capability.reportShareTeam,
     Capability.reportShareOrganization,
+    // TASK-149: SALES_MANAGER cria/pausa/exclui agendamentos de relatórios;
+    // OWNER e ADMIN já a recebem via o conjunto completo/quase completo
+    // acima.
+    Capability.reportSchedule,
   };
 
   static const Set<Capability> _salesRepCapabilities = <Capability>{

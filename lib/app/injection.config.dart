@@ -1070,6 +1070,8 @@ import '../features/reports/data/datasources/cloud_functions_report_export_remot
 import '../features/reports/data/datasources/cloud_functions_report_remote_data_source.dart'
     as _i712;
 import '../features/reports/data/datasources/csv_isolate_encoder.dart' as _i77;
+import '../features/reports/data/datasources/firestore_report_schedule_remote_data_source.dart'
+    as _i272;
 import '../features/reports/data/datasources/firestore_saved_report_remote_data_source.dart'
     as _i925;
 import '../features/reports/data/datasources/pdf_isolate_encoder.dart' as _i750;
@@ -1081,6 +1083,8 @@ import '../features/reports/data/datasources/report_file_saver_data_source.dart'
     as _i712;
 import '../features/reports/data/datasources/report_remote_data_source.dart'
     as _i922;
+import '../features/reports/data/datasources/report_schedule_remote_data_source.dart'
+    as _i226;
 import '../features/reports/data/datasources/saved_report_remote_data_source.dart'
     as _i603;
 import '../features/reports/data/datasources/xlsx_isolate_encoder.dart'
@@ -1089,6 +1093,8 @@ import '../features/reports/data/repositories/report_export_repository_impl.dart
     as _i959;
 import '../features/reports/data/repositories/report_repository_impl.dart'
     as _i593;
+import '../features/reports/data/repositories/report_schedule_repository_impl.dart'
+    as _i437;
 import '../features/reports/data/repositories/saved_report_repository_impl.dart'
     as _i462;
 import '../features/reports/data/repositories/shared_preferences_report_draft_repository.dart'
@@ -1096,16 +1102,20 @@ import '../features/reports/data/repositories/shared_preferences_report_draft_re
 import '../features/reports/domain/repositories/report_export_repository.dart'
     as _i876;
 import '../features/reports/domain/repositories/report_repository.dart' as _i22;
+import '../features/reports/domain/repositories/report_schedule_repository.dart'
+    as _i30;
 import '../features/reports/domain/repositories/saved_report_repository.dart'
     as _i117;
-import '../features/reports/domain/services/no_active_schedule_report_schedule_reference_checker.dart'
-    as _i107;
+import '../features/reports/domain/services/firestore_report_schedule_reference_checker.dart'
+    as _i451;
 import '../features/reports/domain/services/report_schedule_reference_checker.dart'
     as _i426;
 import '../features/reports/domain/usecases/export_report_to_csv.dart' as _i89;
 import '../features/reports/domain/usecases/export_report_to_pdf.dart' as _i35;
 import '../features/reports/domain/usecases/export_report_to_xlsx.dart'
     as _i847;
+import '../features/reports/domain/usecases/report_schedule_use_cases.dart'
+    as _i450;
 import '../features/reports/domain/usecases/report_use_cases.dart' as _i565;
 import '../features/reports/domain/usecases/saved_report_use_cases.dart'
     as _i411;
@@ -1113,6 +1123,8 @@ import '../features/reports/domain/usecases/validate_report_definition.dart'
     as _i908;
 import '../features/reports/presentation/bloc/report_builder_bloc.dart'
     as _i822;
+import '../features/reports/presentation/bloc/report_schedules_bloc.dart'
+    as _i879;
 import '../features/reports/presentation/bloc/saved_reports_bloc.dart' as _i855;
 import '../features/settings/data/datasources/about_app_data_source.dart'
     as _i364;
@@ -1650,9 +1662,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i626.CollectionRepository>(
       () => const _i717.SharedPreferencesCollectionRepository(),
-    );
-    gh.lazySingleton<_i426.ReportScheduleReferenceChecker>(
-      () => const _i107.NoActiveScheduleReportScheduleReferenceChecker(),
     );
     gh.lazySingleton<_i260.SeasonRepository>(
       () => const _i860.SharedPreferencesSeasonRepository(),
@@ -2612,6 +2621,11 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i1043.FirestoreUserProfileDataSource(gh<_i974.FirebaseFirestore>()),
     );
+    gh.lazySingleton<_i226.ReportScheduleRemoteDataSource>(
+      () => _i272.FirestoreReportScheduleRemoteDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.lazySingleton<_i671.ProductRemoteSearchDataSource>(
       () => _i580.FirestoreProductRemoteSearchDataSource(
         gh<_i974.FirebaseFirestore>(),
@@ -2623,6 +2637,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i103.LoadInitialPriceListOfflineDataUseCase>(),
         gh<_i661.PriceListLocalStoreRepository>(),
         gh<_i315.PermissionService>(),
+      ),
+    );
+    gh.lazySingleton<_i30.ReportScheduleRepository>(
+      () => _i437.ReportScheduleRepositoryImpl(
+        gh<_i226.ReportScheduleRemoteDataSource>(),
       ),
     );
     gh.lazySingleton<_i503.StockTurnoverRepository>(
@@ -2808,6 +2827,14 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i411.ListSavedReports(
         gh<_i117.SavedReportRepository>(),
         gh<_i957.MembershipRepository>(),
+      ),
+    );
+    gh.factory<_i450.CreateReportSchedule>(
+      () => _i450.CreateReportSchedule(
+        gh<_i30.ReportScheduleRepository>(),
+        gh<_i957.MembershipRepository>(),
+        gh<_i47.PermissionService>(),
+        gh<_i706.Uuid>(),
       ),
     );
     gh.lazySingleton<_i440.RoleRepository>(
@@ -3025,13 +3052,6 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i1010.CatalogShareMapper>(),
       ),
     );
-    gh.factory<_i411.DeleteSavedReport>(
-      () => _i411.DeleteSavedReport(
-        gh<_i117.SavedReportRepository>(),
-        gh<_i957.MembershipRepository>(),
-        gh<_i426.ReportScheduleReferenceChecker>(),
-      ),
-    );
     gh.lazySingleton<_i568.ProductSearchRepository>(
       () => _i941.ProductSearchRepositoryImpl(
         remoteDataSource: gh<_i671.ProductRemoteSearchDataSource>(),
@@ -3093,9 +3113,20 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i753.AuditLogRepository>(),
       ),
     );
+    gh.lazySingleton<_i426.ReportScheduleReferenceChecker>(
+      () => _i451.FirestoreReportScheduleReferenceChecker(
+        gh<_i30.ReportScheduleRepository>(),
+      ),
+    );
     gh.factory<_i722.GetStockTurnoverMetricsUseCase>(
       () => _i722.GetStockTurnoverMetricsUseCase(
         gh<_i503.StockTurnoverRepository>(),
+      ),
+    );
+    gh.factory<_i450.ListReportSchedules>(
+      () => _i450.ListReportSchedules(
+        gh<_i30.ReportScheduleRepository>(),
+        gh<_i47.PermissionService>(),
       ),
     );
     gh.factory<_i906.CreateBranchUseCase>(
@@ -3106,6 +3137,18 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i820.UpdateBranchUseCase>(
       () => _i820.UpdateBranchUseCase(gh<_i160.BranchRepository>()),
+    );
+    gh.factory<_i450.PauseReportSchedule>(
+      () => _i450.PauseReportSchedule(
+        gh<_i30.ReportScheduleRepository>(),
+        gh<_i957.MembershipRepository>(),
+      ),
+    );
+    gh.factory<_i450.DeleteReportSchedule>(
+      () => _i450.DeleteReportSchedule(
+        gh<_i30.ReportScheduleRepository>(),
+        gh<_i957.MembershipRepository>(),
+      ),
     );
     gh.factory<_i268.SearchProductsUseCase>(
       () => _i268.SearchProductsUseCase(gh<_i568.ProductSearchRepository>()),
@@ -3119,6 +3162,15 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i487.WatchFavoriteProductIdsUseCase>(
       () =>
           _i487.WatchFavoriteProductIdsUseCase(gh<_i761.FavoriteRepository>()),
+    );
+    gh.factory<_i879.ReportSchedulesBloc>(
+      () => _i879.ReportSchedulesBloc(
+        gh<_i450.ListReportSchedules>(),
+        gh<_i450.CreateReportSchedule>(),
+        gh<_i450.PauseReportSchedule>(),
+        gh<_i450.DeleteReportSchedule>(),
+        gh<_i202.AnalyticsService>(),
+      ),
     );
     gh.factory<_i98.DiscountPolicyCubit>(
       () => _i98.DiscountPolicyCubit(
@@ -3478,16 +3530,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
       ),
     );
-    gh.factory<_i855.SavedReportsBloc>(
-      () => _i855.SavedReportsBloc(
-        gh<_i411.ListSavedReports>(),
-        gh<_i411.SaveReportView>(),
-        gh<_i411.UpdateSavedReport>(),
-        gh<_i411.DeleteSavedReport>(),
-        gh<_i411.OpenSavedReportInBuilder>(),
-        gh<_i202.AnalyticsService>(),
-      ),
-    );
     gh.factory<_i250.ExecutiveDashboardBloc>(
       () => _i250.ExecutiveDashboardBloc(
         gh<_i846.ExecutiveDashboardVisibilityService>(),
@@ -3582,6 +3624,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i265.GetOrganizationUseCase>(),
         gh<_i265.UpdateOrganizationSettingsUseCase>(),
         gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i411.DeleteSavedReport>(
+      () => _i411.DeleteSavedReport(
+        gh<_i117.SavedReportRepository>(),
+        gh<_i957.MembershipRepository>(),
+        gh<_i426.ReportScheduleReferenceChecker>(),
       ),
     );
     gh.factory<_i424.OrderListBloc>(
@@ -3797,6 +3846,16 @@ extension GetItInjectableX on _i174.GetIt {
         completeOnboarding: gh<_i675.CompleteOnboardingUseCase>(),
         authRepository: gh<_i472.AuthRepository>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i855.SavedReportsBloc>(
+      () => _i855.SavedReportsBloc(
+        gh<_i411.ListSavedReports>(),
+        gh<_i411.SaveReportView>(),
+        gh<_i411.UpdateSavedReport>(),
+        gh<_i411.DeleteSavedReport>(),
+        gh<_i411.OpenSavedReportInBuilder>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i965.ProductSearchBloc>(

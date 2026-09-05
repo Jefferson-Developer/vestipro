@@ -319,9 +319,10 @@ final class _FakeScheduleReferenceChecker
   final Set<String> blockedReportIds = <String>{};
 
   @override
-  Future<AppResult<bool>> hasActiveScheduleReferencing(
-    String savedReportId,
-  ) async => AppSuccess<bool>(blockedReportIds.contains(savedReportId));
+  Future<AppResult<bool>> hasActiveScheduleReferencing({
+    required String organizationId,
+    required String savedReportId,
+  }) async => AppSuccess<bool>(blockedReportIds.contains(savedReportId));
 }
 
 final class _FakeDraftRepository implements ReportDraftRepository {

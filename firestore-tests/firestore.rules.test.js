@@ -242,6 +242,79 @@ function savedReportDoc({
   };
 }
 
+function reportScheduleDoc({
+  organizationId,
+  companyId = 'company-a',
+  savedReportId = 'private-rep-a',
+  savedReportName = 'Minhas vendas do mês',
+  frequency = 'daily',
+  weekday = null,
+  dayOfMonth = null,
+  hour = 8,
+  minute = 0,
+  format = 'pdf',
+  locale = 'ptBr',
+  recipientUserIds = ['rep-a'],
+  status = 'active',
+  createdBy = 'manager-a',
+  updatedBy = createdBy,
+  nextRunAt = new Date(Date.now() + 24 * 60 * 60 * 1000),
+  lastRunAt = null,
+  lastRunCycleKey = null,
+  lastRunStatus = null,
+  lastRunError = null,
+}) {
+  return {
+    organizationId,
+    companyId,
+    savedReportId,
+    savedReportName,
+    frequency,
+    weekday,
+    dayOfMonth,
+    hour,
+    minute,
+    format,
+    locale,
+    recipientUserIds,
+    status,
+    nextRunAt,
+    lastRunAt,
+    lastRunCycleKey,
+    lastRunStatus,
+    lastRunError,
+    version: 1,
+    createdAt: now(),
+    createdBy,
+    updatedAt: now(),
+    updatedBy,
+  };
+}
+
+function reportScheduleDeliveryDoc({
+  organizationId,
+  scheduleId = 'schedule-a',
+  savedReportId = 'private-rep-a',
+  recipientUserId = 'rep-a',
+  cycleKey = new Date().toISOString(),
+  status = 'delivered',
+  format = 'pdf',
+}) {
+  return {
+    organizationId,
+    scheduleId,
+    savedReportId,
+    recipientUserId,
+    cycleKey,
+    status,
+    format,
+    downloadUrl: status === 'delivered' ? 'https://example.com/fake-signed-url' : null,
+    expiresAt: status === 'delivered' ? new Date(Date.now() + 24 * 60 * 60 * 1000) : null,
+    reason: status === 'delivered' ? null : 'recipient_cannot_export_reports',
+    generatedAt: now(),
+  };
+}
+
 function catalogShareDoc({
   organizationId,
   createdBy = 'rep-a',
@@ -1877,5 +1950,147 @@ describe('organizations/{organizationId}/savedReports/{reportId}  (TASK-145)', (
   test('dono exclui a própria visualização', async () => {
     const db = testEnv.authenticatedContext('rep-a').firestore();
     await assertSucceeds(db.doc(`organizations/${ORG_A}/savedReports/private-rep-a`).delete());
+  });
+});
+
+describe('organizations/{organizationId}/reportSchedules/{scheduleId}  (TASK-149)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/reportSchedules/schedule-manager-a`)
+        .set(reportScheduleDoc({ organizationId: ORG_A, createdBy: 'manager-a' }));
+      await db
+        .doc(`organizations/${ORG_B}/reportSchedules/schedule-owner-b`)
+        .set(reportScheduleDoc({ organizationId: ORG_B, createdBy: 'owner-b' }));
+    });
+  });
+
+  test('SALES_MANAGER (report.schedule) lê os agendamentos da própria organização', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/reportSchedules/schedule-manager-a`).get(),
+    );
+  });
+
+  test('SALES_REP (sem report.schedule) não lê nenhum agendamento', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/reportSchedules/schedule-manager-a`).get(),
+    );
+  });
+
+  test('membro da Org A não lê agendamento da Org B, mesmo sabendo o id', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_B}/reportSchedules/schedule-owner-b`).get(),
+    );
+  });
+
+  test('SALES_MANAGER (report.schedule) cria um agendamento', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      db
+        .doc(`organizations/${ORG_A}/reportSchedules/schedule-new`)
+        .set(reportScheduleDoc({ organizationId: ORG_A, createdBy: 'manager-a' })),
+    );
+  });
+
+  test('SALES_REP (sem report.schedule) não cria agendamento', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/reportSchedules/schedule-rep`)
+        .set(reportScheduleDoc({ organizationId: ORG_A, createdBy: 'rep-a' })),
+    );
+  });
+
+  test('criador pausa o próprio agendamento; ADMIN pausa agendamento de outro criador', async () => {
+    const managerDb = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      managerDb.doc(`organizations/${ORG_A}/reportSchedules/schedule-manager-a`).update({
+        status: 'paused',
+        updatedBy: 'manager-a',
+      }),
+    );
+
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+    await assertSucceeds(
+      adminDb.doc(`organizations/${ORG_A}/reportSchedules/schedule-manager-a`).update({
+        status: 'active',
+        updatedBy: 'admin-a',
+      }),
+    );
+  });
+
+  test('membro que não é criador nem OWNER/ADMIN não pausa nem exclui o agendamento', async () => {
+    const financeDb = testEnv.authenticatedContext('finance-a').firestore();
+    await assertFails(
+      financeDb.doc(`organizations/${ORG_A}/reportSchedules/schedule-manager-a`).update({
+        status: 'paused',
+        updatedBy: 'finance-a',
+      }),
+    );
+    await assertFails(
+      financeDb.doc(`organizations/${ORG_A}/reportSchedules/schedule-manager-a`).delete(),
+    );
+  });
+
+  test('um `update` nunca consegue adiantar nextRunAt (reservado à Cloud Function)', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/reportSchedules/schedule-manager-a`).update({
+        nextRunAt: new Date(),
+        updatedBy: 'manager-a',
+      }),
+    );
+  });
+
+  test('criador exclui o próprio agendamento', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/reportSchedules/schedule-manager-a`).delete(),
+    );
+  });
+});
+
+describe('organizations/{organizationId}/reportScheduleDeliveries/{deliveryId}  (TASK-149)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/reportScheduleDeliveries/delivery-rep-a`)
+        .set(reportScheduleDeliveryDoc({ organizationId: ORG_A, recipientUserId: 'rep-a' }));
+    });
+  });
+
+  test('destinatário lê a própria entrega', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/reportScheduleDeliveries/delivery-rep-a`).get(),
+    );
+  });
+
+  test('SALES_MANAGER (report.schedule) lê a entrega de outro destinatário para diagnosticar falhas', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/reportScheduleDeliveries/delivery-rep-a`).get(),
+    );
+  });
+
+  test('outro destinatário sem report.schedule não lê a entrega de outra pessoa', async () => {
+    const db = testEnv.authenticatedContext('rep-b').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/reportScheduleDeliveries/delivery-rep-a`).get(),
+    );
+  });
+
+  test('nenhum cliente consegue escrever diretamente (reservado à Cloud Function)', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/reportScheduleDeliveries/delivery-new`)
+        .set(reportScheduleDeliveryDoc({ organizationId: ORG_A })),
+    );
   });
 });

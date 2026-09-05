@@ -73,6 +73,9 @@ void main() {
           'report_view_saved',
           'report_view_shared',
           'report_view_deleted',
+          'report_schedule_created',
+          'report_schedule_paused',
+          'report_schedule_deleted',
         ]),
       );
 

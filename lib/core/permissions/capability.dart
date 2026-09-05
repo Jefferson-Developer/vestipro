@@ -92,6 +92,18 @@ enum Capability {
   /// Strictly more privileged than [reportShareTeam]; a role missing this one
   /// can still hold [reportShareTeam] and cap out at team-level sharing.
   reportShareOrganization,
+
+  /// Create/pause/delete a `ReportSchedule` (TASK-149, EPIC-18) — periodic,
+  /// automated delivery of a `SavedReport` (TASK-145). Restricted to
+  /// `SALES_MANAGER`/`ADMIN`/`OWNER` (`tasks.md`, seção "Regras de negócio e
+  /// restrições" da TASK-149); a `SALES_REP`/`FINANCE`/`SALES_ASSISTANT`
+  /// holding neither this capability nor OWNER/ADMIN's full set can never
+  /// schedule a report, even for their own saved views. Deliberately does
+  /// not gate *receiving* a scheduled report as a recipient — the Cloud
+  /// Function (`runReportSchedules`) re-checks each recipient's own
+  /// [reportExport]-equivalent role independently at send time, never the
+  /// creator's.
+  reportSchedule,
 }
 
 extension CapabilityCode on Capability {
@@ -138,6 +150,7 @@ extension CapabilityCode on Capability {
       Capability.insightView => 'insight.view',
       Capability.reportShareTeam => 'report.share.team',
       Capability.reportShareOrganization => 'report.share.organization',
+      Capability.reportSchedule => 'report.schedule',
     };
   }
 }

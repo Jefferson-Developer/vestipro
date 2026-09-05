@@ -73,7 +73,7 @@ service cloud.firestore {
               'customer.create', 'customer.update', 'customer.delete',
               'order.create', 'order.view', 'order.approve', 'discount.approveAboveLimit',
               'team.manage', 'report.export', 'report.viewSensitive',
-              'report.share.team', 'report.share.organization'
+              'report.share.team', 'report.share.organization', 'report.schedule'
             ])
         || (roleName == 'SALES_REP' && capabilityCode in [
               'customer.create', 'customer.update', 'order.create', 'order.view',
@@ -1219,6 +1219,88 @@ service cloud.firestore {
           && request.resource.data.updatedBy == request.auth.uid;
 
         allow delete: if canManageSavedReport(organizationId);
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/reportSchedules/{scheduleId}
+      // (TASK-149)
+      // -------------------------------------------------------------------
+      //
+      // Periodic, automated delivery of a `SavedReport` (TASK-145). Only a
+      // holder of `report.schedule` (OWNER/ADMIN/SALES_MANAGER,
+      // RolePermissionMatrix) may create one, and only its own
+      // `createdBy` or an OWNER/ADMIN may update (pause) or delete it —
+      // same "creator or admin" precedent `canManageSavedReport` already
+      // uses above. `nextRunAt`/`lastRun*` fields are only ever advanced by
+      // the `runReportSchedules` Cloud Function (Admin SDK, bypasses these
+      // Rules) — a client `update` may only ever touch `status` (pause) plus
+      // its own audit fields, never the scheduling/execution bookkeeping the
+      // Function alone owns.
+
+      function canManageReportSchedule(organizationId) {
+        return isActiveMember(organizationId)
+          && (resource.data.createdBy == request.auth.uid || isOwnerOrAdmin(organizationId));
+      }
+
+      match /reportSchedules/{scheduleId} {
+        allow read: if hasCapability(organizationId, 'report.schedule');
+
+        allow create: if isActiveMember(organizationId)
+          && hasCapability(organizationId, 'report.schedule')
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.companyId is string
+          && request.resource.data.companyId.size() > 0
+          && request.resource.data.savedReportId is string
+          && request.resource.data.savedReportId.size() > 0
+          && request.resource.data.status == 'active'
+          && request.resource.data.recipientUserIds is list
+          && request.resource.data.recipientUserIds.size() > 0
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.updatedBy == request.auth.uid;
+
+        // A client-side `update` (pause) may only ever flip `status` —
+        // `nextRunAt`/`lastRunAt`/`lastRunCycleKey`/`lastRunStatus`/
+        // `lastRunError` are exclusively written by `runReportSchedules`
+        // (Admin SDK), so `unchanged('nextRunAt')` guards against a client
+        // ever forging a fresh execution window for itself.
+        allow update: if canManageReportSchedule(organizationId)
+          && unchanged('organizationId')
+          && unchanged('companyId')
+          && unchanged('savedReportId')
+          && unchanged('createdAt')
+          && unchanged('createdBy')
+          && unchanged('nextRunAt')
+          && unchanged('lastRunAt')
+          && unchanged('lastRunCycleKey')
+          && unchanged('lastRunStatus')
+          && request.resource.data.status in ['active', 'paused']
+          && request.resource.data.updatedBy == request.auth.uid;
+
+        allow delete: if canManageReportSchedule(organizationId);
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/reportScheduleDeliveries/{deliveryId}
+      // (TASK-149)
+      // -------------------------------------------------------------------
+      //
+      // Append-only outcome log `runReportSchedules` writes once per
+      // recipient per cycle (Admin SDK — `allow write: if false` below is
+      // pure defense-in-depth). This is also the "notificação interna" queue
+      // TASK-151 (Central de Notificações, not built yet) is expected to
+      // read from — until then, a recipient can already see their own
+      // deliveries directly here, and whoever manages schedules
+      // (`report.schedule`) can see every delivery to diagnose a failure,
+      // satisfying TASK-149's "falha de execução nunca é silenciosa".
+
+      match /reportScheduleDeliveries/{deliveryId} {
+        allow read: if isActiveMember(organizationId)
+          && (
+            resource.data.recipientUserId == request.auth.uid
+            || hasCapability(organizationId, 'report.schedule')
+          );
+
+        allow write: if false;
       }
     }
   }

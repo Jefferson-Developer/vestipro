@@ -369,6 +369,38 @@ void main() {
       }
     });
 
+    test('only OWNER/ADMIN/SALES_MANAGER can schedule reports (TASK-149); '
+        'SALES_REP/SALES_ASSISTANT/FINANCE/READ_ONLY never can', () {
+      for (final role in <SystemRoleName>[
+        SystemRoleName.owner,
+        SystemRoleName.admin,
+        SystemRoleName.salesManager,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.reportSchedule),
+          isTrue,
+          reason: '$role must be able to schedule reports.',
+        );
+      }
+
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesRep,
+        SystemRoleName.salesAssistant,
+        SystemRoleName.finance,
+        SystemRoleName.readOnly,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.reportSchedule),
+          isFalse,
+          reason: '$role must never be able to schedule reports.',
+        );
+      }
+    });
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,

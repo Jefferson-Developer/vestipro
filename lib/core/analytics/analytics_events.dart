@@ -150,6 +150,18 @@ final class AnalyticsEvents {
   /// permanently deleted.
   static const String reportViewDeleted = 'report_view_deleted';
 
+  /// Logged by `ReportSchedulesBloc` (TASK-149, EPIC-18) whenever a new
+  /// periodic `ReportSchedule` is created for a `SavedReport`.
+  static const String reportScheduleCreated = 'report_schedule_created';
+
+  /// Logged by `ReportSchedulesBloc` (TASK-149) whenever an existing
+  /// `ReportSchedule` is paused.
+  static const String reportSchedulePaused = 'report_schedule_paused';
+
+  /// Logged by `ReportSchedulesBloc` (TASK-149) whenever a `ReportSchedule`
+  /// is permanently deleted.
+  static const String reportScheduleDeleted = 'report_schedule_deleted';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -220,5 +232,8 @@ final class AnalyticsEvents {
     reportViewSaved,
     reportViewShared,
     reportViewDeleted,
+    reportScheduleCreated,
+    reportSchedulePaused,
+    reportScheduleDeleted,
   ];
 }

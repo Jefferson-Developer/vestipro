@@ -267,7 +267,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-146 — Implementar exportação CSV](TASK-146-implementar-exportacao-csv.md) — Flutter Senior
 - [x] [TASK-147 — Implementar exportação XLSX](TASK-147-implementar-exportacao-xlsx.md) — Flutter Senior
 - [x] [TASK-148 — Implementar exportação PDF](TASK-148-implementar-exportacao-pdf.md) — Flutter Senior + Front-end
-- [ ] [TASK-149 — Implementar agendamento de relatórios](TASK-149-implementar-agendamento-de-relatorios.md) — Flutter Senior
+- [x] [TASK-149 — Implementar agendamento de relatórios](TASK-149-implementar-agendamento-de-relatorios.md) — Flutter Senior
 
 ### EPIC-19 — Notificações e Engajamento
 - [ ] [TASK-150 — Configurar Firebase Cloud Messaging](TASK-150-configurar-firebase-cloud-messaging.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 148 / 220 tasks concluídas.
+**Progresso:** 149 / 220 tasks concluídas.

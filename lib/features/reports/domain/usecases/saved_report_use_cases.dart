@@ -378,7 +378,10 @@ final class DeleteSavedReport {
     }
 
     final referenceResult = await _scheduleReferenceChecker
-        .hasActiveScheduleReferencing(report.id);
+        .hasActiveScheduleReferencing(
+          organizationId: report.organizationId,
+          savedReportId: report.id,
+        );
     if (referenceResult is AppFailure<bool>) {
       return AppFailure<void>(referenceResult.failure);
     }

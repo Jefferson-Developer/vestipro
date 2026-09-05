@@ -522,8 +522,10 @@ void main() {
               AppSuccess<Membership>(buildMembership('rep-a', 'SALES_REP')),
         );
         when(
-          () =>
-              scheduleReferenceChecker.hasActiveScheduleReferencing(report.id),
+          () => scheduleReferenceChecker.hasActiveScheduleReferencing(
+            organizationId: organizationId,
+            savedReportId: report.id,
+          ),
         ).thenAnswer((_) async => const AppSuccess<bool>(false));
         when(
           () => repository.delete(
@@ -558,7 +560,10 @@ void main() {
       expect(result, isA<AppFailure<void>>());
       expect((result as AppFailure<void>).failure, isA<PermissionFailure>());
       verifyNever(
-        () => scheduleReferenceChecker.hasActiveScheduleReferencing(any()),
+        () => scheduleReferenceChecker.hasActiveScheduleReferencing(
+          organizationId: any(named: 'organizationId'),
+          savedReportId: any(named: 'savedReportId'),
+        ),
       );
       verifyNever(
         () => repository.delete(
@@ -581,7 +586,10 @@ void main() {
             AppSuccess<Membership>(buildMembership('rep-a', 'SALES_REP')),
       );
       when(
-        () => scheduleReferenceChecker.hasActiveScheduleReferencing(report.id),
+        () => scheduleReferenceChecker.hasActiveScheduleReferencing(
+          organizationId: organizationId,
+          savedReportId: report.id,
+        ),
       ).thenAnswer((_) async => const AppSuccess<bool>(true));
 
       final result = await useCase(requesterId: 'rep-a', report: report);

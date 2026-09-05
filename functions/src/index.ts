@@ -39,6 +39,7 @@ export {
   exportReportToCsv,
   exportReportToXlsx,
   exportReportToPdf,
+  runReportSchedules,
 } from './reports';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
