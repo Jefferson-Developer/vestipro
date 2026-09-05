@@ -7,6 +7,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
+import 'package:intl/intl.dart';
 
 import '../core/analytics/analytics.dart';
 import '../core/auth/auth.dart';
@@ -415,6 +416,159 @@ class VestiProApp extends StatelessWidget {
                         ProductDetailRoute(
                           orgId: orgId,
                           productId: productId,
+                        ).location,
+                      ),
+                    ),
+                  ),
+          representativeDashboardPageBuilder:
+              (context, orgId, companyId, sellerId, queryParameters) =>
+                  _withConnectivityIndicator(
+                    orgId: orgId,
+                    companyId: companyId,
+                    child: RepresentativeDashboardPage(
+                      organizationId: orgId,
+                      requesterUserId:
+                          getIt<AuthRepository>().currentUser?.uid ?? '',
+                      initialFilters:
+                          RepresentativeDashboardFilters.fromQueryParameters(
+                            queryParameters,
+                            defaultCompanyId: companyId,
+                            defaultSellerId: sellerId,
+                          ),
+                      createBloc: () => getIt<RepresentativeDashboardBloc>(),
+                      onOpenCrmActivity: (task) {
+                        final customerId = task.customerId;
+                        if (customerId != null) {
+                          context.go(
+                            CustomerDetailRoute(
+                              orgId: orgId,
+                              customerId: customerId,
+                            ).location,
+                          );
+                        } else {
+                          context.go(
+                            OpportunityCenterRoute(
+                              orgId: orgId,
+                              companyId: companyId,
+                            ).location,
+                          );
+                        }
+                      },
+                      onOpenCustomer: (customerId) => context.go(
+                        CustomerDetailRoute(
+                          orgId: orgId,
+                          customerId: customerId,
+                        ).location,
+                      ),
+                      onOpenInsight: (insight) {
+                        final customerId = insight.customerId;
+                        if (customerId != null) {
+                          context.go(
+                            CustomerDetailRoute(
+                              orgId: orgId,
+                              customerId: customerId,
+                            ).location,
+                          );
+                        } else {
+                          context.go(
+                            OpportunityCenterRoute(
+                              orgId: orgId,
+                              companyId: companyId,
+                            ).location,
+                          );
+                        }
+                      },
+                    ),
+                  ),
+          funnelDashboardPageBuilder:
+              (context, orgId, companyId, queryParameters) =>
+                  _withConnectivityIndicator(
+                    orgId: orgId,
+                    companyId: companyId,
+                    child: FunnelDashboardPage(
+                      organizationId: orgId,
+                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                      initialFilters:
+                          FunnelDashboardFilters.fromQueryParameters(
+                            queryParameters,
+                            fallbackMonthKey: DateFormat(
+                              'yyyy-MM',
+                            ).format(DateTime.now().toUtc()),
+                            fallbackCompanyId: companyId,
+                          ),
+                      createBloc: () => getIt<FunnelDashboardBloc>(),
+                      onOpenStageOpportunities: (stageId) => context.go(
+                        OpportunityCenterRoute(
+                          orgId: orgId,
+                          companyId: companyId,
+                          queryParameters: <String, String>{'stageId': stageId},
+                        ).location,
+                      ),
+                      onFiltersChanged: (filters) => context.go(
+                        FunnelDashboardRoute(
+                          orgId: orgId,
+                          companyId: companyId,
+                          queryParameters: filters.toQueryParameters(),
+                        ).location,
+                      ),
+                    ),
+                  ),
+          targetsDashboardPageBuilder:
+              (context, orgId, companyId, queryParameters) =>
+                  _withConnectivityIndicator(
+                    orgId: orgId,
+                    companyId: companyId,
+                    child: TargetsDashboardPage(
+                      organizationId: orgId,
+                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                      initialFilters:
+                          TargetsDashboardFilters.fromQueryParameters(
+                            queryParameters,
+                            fallbackCompanyId: companyId,
+                          ),
+                      createBloc: () => getIt<TargetsDashboardBloc>(),
+                      onOpenOpportunities: (sellerId) => context.go(
+                        OpportunityCenterRoute(
+                          orgId: orgId,
+                          companyId: companyId,
+                          queryParameters: <String, String>{
+                            'sellerId': sellerId,
+                            'types': 'sellerBelowTarget',
+                          },
+                        ).location,
+                      ),
+                    ),
+                  ),
+          geographicDashboardPageBuilder:
+              (context, orgId, companyId, queryParameters) =>
+                  _withConnectivityIndicator(
+                    orgId: orgId,
+                    companyId: companyId,
+                    child: GeographicDashboardPage(
+                      organizationId: orgId,
+                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                      initialFilters:
+                          GeographicDashboardFilters.fromQueryParameters(
+                            queryParameters,
+                            fallbackCompanyId: companyId,
+                          ),
+                      createBloc: () => getIt<GeographicDashboardBloc>(),
+                      onOpenCustomers: (customerIds) => context.go(
+                        CustomerPortfolioRoute(
+                          orgId: orgId,
+                          companyId: companyId,
+                          queryParameters: <String, String>{
+                            'customerIds': customerIds.join(','),
+                          },
+                        ).location,
+                      ),
+                      onOpenOrders: (orderIds) => context.go(
+                        OrderListRoute(
+                          orgId: orgId,
+                          companyId: companyId,
+                          queryParameters: <String, String>{
+                            'orderIds': orderIds.join(','),
+                          },
                         ).location,
                       ),
                     ),

@@ -63,6 +63,7 @@ describe('recomputeMonthlyAggregatesForCompany', () => {
     expect(result.generatedSnapshots).toBeGreaterThan(0);
     expect(dataSource.writesByDimension.get('customerMonthly')?.size).toBe(2);
     expect(dataSource.writesByDimension.get('sellerMonthly')?.size).toBe(1);
+    expect(dataSource.writesByDimension.get('representativeMonthly')?.size).toBe(1);
     expect(dataSource.writesByDimension.get('regionMonthly')?.size).toBe(2);
     expect(dataSource.writesByDimension.get('productMonthly')?.size).toBe(1);
 
@@ -92,6 +93,7 @@ describe('recomputeMonthlyAggregatesForCompany', () => {
 
     expect(dataSource.writesByDimension.get('customerMonthly')?.size).toBe(1);
     expect(dataSource.writesByDimension.get('sellerMonthly')?.size).toBe(1);
+    expect(dataSource.writesByDimension.get('representativeMonthly')?.size).toBe(1);
     expect(dataSource.writesByDimension.get('regionMonthly')?.size).toBe(1);
     expect(dataSource.writesByDimension.get('productMonthly')?.size).toBe(1);
   });

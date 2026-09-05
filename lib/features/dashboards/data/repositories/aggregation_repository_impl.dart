@@ -1,4 +1,7 @@
+import 'dart:convert';
+
 import 'package:injectable/injectable.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
@@ -9,7 +12,7 @@ import '../datasources/aggregation_remote_data_source.dart';
 import '../datasources/firestore_aggregation_data_source.dart';
 import '../mappers/aggregation_snapshot_mapper.dart';
 
-/// Reads from the five pre-computed aggregate collections
+/// Reads from the server-side pre-computed aggregate collections
 /// (`functions/src/aggregations`) with an in-memory, TTL-bounded cache in
 /// front of the remote datasource — never recomputing anything client-side.
 ///
@@ -79,12 +82,19 @@ final class AggregationRepositoryImpl implements AggregationRepository {
         snapshot,
         _now(),
       );
+      if (snapshot != null) {
+        await _persistSnapshot(cacheKey, snapshot);
+      }
       return AppSuccess<AggregationSnapshot?>(snapshot);
     } on AppException catch (exception) {
+      final fallback = await _readPersistedSnapshot(cacheKey);
+      if (fallback != null) return AppSuccess<AggregationSnapshot?>(fallback);
       return AppFailure<AggregationSnapshot?>(
         mapAppExceptionToFailure(exception),
       );
     } catch (exception) {
+      final fallback = await _readPersistedSnapshot(cacheKey);
+      if (fallback != null) return AppSuccess<AggregationSnapshot?>(fallback);
       return AppFailure<AggregationSnapshot?>(
         UnexpectedFailure(
           'Unexpected error loading an aggregation snapshot.',
@@ -187,6 +197,59 @@ final class AggregationRepositoryImpl implements AggregationRepository {
 
   bool _isExpired(DateTime fetchedAt) {
     return _now().difference(fetchedAt) >= cacheTtl;
+  }
+
+  Future<void> _persistSnapshot(
+    String cacheKey,
+    AggregationSnapshot snapshot,
+  ) async {
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString(
+      'aggregation_durable::$cacheKey',
+      jsonEncode(<String, Object?>{
+        'organizationId': snapshot.organizationId,
+        'companyId': snapshot.companyId,
+        'dimension': snapshot.dimension.name,
+        'scopeId': snapshot.scopeId,
+        'periodKey': snapshot.periodKey,
+        'revenueGross': snapshot.revenueGross,
+        'revenueNet': snapshot.revenueNet,
+        'discountAmount': snapshot.discountAmount,
+        'orderCount': snapshot.orderCount,
+        'itemQuantity': snapshot.itemQuantity,
+        'labels': snapshot.labels,
+        'generatedAt': snapshot.generatedAt.toUtc().toIso8601String(),
+        'version': snapshot.version,
+      }),
+    );
+  }
+
+  Future<AggregationSnapshot?> _readPersistedSnapshot(String cacheKey) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final raw = prefs.getString('aggregation_durable::$cacheKey');
+      if (raw == null) return null;
+      final json = jsonDecode(raw) as Map<String, dynamic>;
+      final dimensionName = json['dimension'] as String;
+      return AggregationSnapshot(
+        organizationId: json['organizationId'] as String,
+        companyId: json['companyId'] as String,
+        dimension: AggregationDimension.values.byName(dimensionName),
+        scopeId: json['scopeId'] as String,
+        periodKey: json['periodKey'] as String,
+        revenueGross: (json['revenueGross'] as num).toDouble(),
+        revenueNet: (json['revenueNet'] as num).toDouble(),
+        discountAmount: (json['discountAmount'] as num).toDouble(),
+        orderCount: (json['orderCount'] as num).toInt(),
+        itemQuantity: (json['itemQuantity'] as num).toInt(),
+        labels: Map<String, String>.from(json['labels'] as Map),
+        generatedAt: DateTime.parse(json['generatedAt'] as String),
+        version: (json['version'] as num).toInt(),
+        isFromLocalCache: true,
+      );
+    } catch (_) {
+      return null;
+    }
   }
 }
 

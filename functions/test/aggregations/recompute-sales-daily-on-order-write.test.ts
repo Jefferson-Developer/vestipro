@@ -80,6 +80,8 @@ describe('recomputeSalesDailyForOrderChange', () => {
     const snapshot = [...(written?.values() ?? [])][0];
     expect(snapshot.orderCount).toBe(2);
     expect(snapshot.revenueGross).toBeCloseTo(1500, 2);
+    const sellerRows = dataSource.writesByDimension.get('sellerDaily');
+    expect(sellerRows?.size).toBe(1);
   });
 
   it('is idempotent: recomputing the same day twice yields the exact same snapshot (upsert overwrite, no duplication)', async () => {

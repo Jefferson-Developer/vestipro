@@ -95,6 +95,7 @@ final class MarkOpportunityLostUseCase {
     final now = DateTime.now().toUtc();
     final updated = opportunity.copyWith(
       stageId: normalizedStageId ?? opportunity.stageId,
+      outcomeFromStageId: opportunity.stageId,
       status: OpportunityStatus.lost,
       lostReasonId: trimmedReasonId,
       lostReason: snapshotForOutcomeReason(reason),

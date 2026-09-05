@@ -2,7 +2,10 @@ import { logger } from 'firebase-functions/v2';
 import { onDocumentWritten } from 'firebase-functions/v2/firestore';
 import { Timestamp, type DocumentData } from 'firebase-admin/firestore';
 
-import { buildSalesDailySnapshots } from './aggregation-builders';
+import {
+  buildSalesDailySnapshots,
+  buildSellerDailySnapshots,
+} from './aggregation-builders';
 import {
   createFirestoreAggregationDataSource,
   type AggregationDataSource,
@@ -78,11 +81,24 @@ export async function recomputeSalesDailyForOrderChange(
     facts,
     generatedAt,
   });
-  await dataSource.upsertAggregates(
-    affected.organizationId,
-    'salesDaily',
-    snapshots,
-  );
+  const sellerSnapshots = buildSellerDailySnapshots({
+    organizationId: affected.organizationId,
+    dayKey: affected.dayKey,
+    facts,
+    generatedAt,
+  });
+  await Promise.all([
+    dataSource.upsertAggregates(
+      affected.organizationId,
+      'salesDaily',
+      snapshots,
+    ),
+    dataSource.upsertAggregates(
+      affected.organizationId,
+      'sellerDaily',
+      sellerSnapshots,
+    ),
+  ]);
 }
 
 export const recomputeSalesDailyOnOrderWrite = onDocumentWritten(

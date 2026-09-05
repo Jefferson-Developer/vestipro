@@ -23,6 +23,7 @@ export interface CustomerLabel {
 
 export interface SellerLabel {
   name: string;
+  teamIds?: readonly string[];
 }
 
 /** Builds one `salesDaily` snapshot per company found in [facts] — every
@@ -52,6 +53,34 @@ export function buildSalesDailySnapshots(params: {
       generatedAt,
     }),
   );
+}
+
+/** Builds the near-real-time per-seller rows used by the representative
+ * dashboard's "venda de hoje" card. */
+export function buildSellerDailySnapshots(params: {
+  organizationId: string;
+  dayKey: string;
+  facts: readonly OrderAggregationFact[];
+  generatedAt?: Timestamp;
+}): AggregateSnapshotDoc[] {
+  const generatedAt = params.generatedAt ?? Timestamp.now();
+  const grouped = groupBy(
+    params.facts.filter(isRevenueRecognized),
+    (fact) => `${fact.companyId}::${fact.sellerId}`,
+  );
+  return [...grouped.values()].map((sellerFacts) => {
+    const first = sellerFacts[0];
+    return buildOrderLevelSnapshot({
+      organizationId: params.organizationId,
+      dimension: 'sellerDaily',
+      companyId: first.companyId,
+      scopeId: first.sellerId,
+      periodKey: params.dayKey,
+      facts: sellerFacts,
+      labels: {},
+      generatedAt,
+    });
+  });
 }
 
 export function buildCustomerMonthlySnapshots(params: {
@@ -99,7 +128,7 @@ export function buildSellerMonthlySnapshots(params: {
     recognized,
     (fact) => `${fact.companyId}::${fact.sellerId}`,
   );
-  return [...grouped.entries()].map(([, companyFacts]) => {
+  const snapshots = [...grouped.entries()].map(([, companyFacts]) => {
     const first = companyFacts[0];
     const label = params.sellerLabels?.get(first.sellerId);
     return buildOrderLevelSnapshot({
@@ -113,30 +142,73 @@ export function buildSellerMonthlySnapshots(params: {
       generatedAt,
     });
   });
+  for (const snapshot of snapshots) {
+    const teamIds = params.sellerLabels?.get(snapshot.scopeId)?.teamIds ?? [];
+    const primaryTeamId = [...teamIds].sort()[0];
+    if (!primaryTeamId) continue;
+    const peers = snapshots
+      .filter(
+        (candidate) =>
+          candidate.companyId === snapshot.companyId &&
+          (params.sellerLabels?.get(candidate.scopeId)?.teamIds ?? []).includes(
+            primaryTeamId,
+          ),
+      )
+      .sort((a, b) => b.revenueNet - a.revenueNet || a.scopeId.localeCompare(b.scopeId));
+    snapshot.labels = {
+      ...snapshot.labels,
+      teamId: primaryTeamId,
+      teamRank: String(peers.findIndex((peer) => peer.scopeId === snapshot.scopeId) + 1),
+      teamSize: String(peers.length),
+    };
+  }
+  return snapshots;
 }
 
 export function buildRegionMonthlySnapshots(params: {
   organizationId: string;
   monthKey: string;
   facts: readonly OrderAggregationFact[];
+  productLabels?: ReadonlyMap<string, ProductLabel>;
   generatedAt?: Timestamp;
 }): AggregateSnapshotDoc[] {
   const generatedAt = params.generatedAt ?? Timestamp.now();
   const recognized = params.facts.filter(isRevenueRecognized);
   const grouped = groupBy(
     recognized,
-    (fact) => `${fact.companyId}::${fact.region}`,
+    (fact) => `${fact.companyId}::${fact.region}::${fact.city ?? 'UNKNOWN'}`,
   );
   return [...grouped.entries()].map(([, companyFacts]) => {
     const first = companyFacts[0];
+    const city = first.city ?? 'UNKNOWN';
+    const productQuantity = new Map<string, number>();
+    for (const fact of companyFacts) {
+      for (const item of fact.items) {
+        const name = params.productLabels?.get(item.productId)?.name ?? item.productId;
+        productQuantity.set(name, (productQuantity.get(name) ?? 0) + item.quantity);
+      }
+    }
+    const topProducts = [...productQuantity.entries()]
+      .sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+      .slice(0, 3)
+      .map(([name, quantity]) => `${name.replace(/[|:]/g, ' ')}:${quantity}`)
+      .join('|');
     return buildOrderLevelSnapshot({
       organizationId: params.organizationId,
       dimension: 'regionMonthly',
       companyId: first.companyId,
-      scopeId: first.region,
+      scopeId: city === 'UNKNOWN' ? first.region : `${first.region}:${city}`,
       periodKey: params.monthKey,
       facts: companyFacts,
-      labels: { region: first.region },
+      labels: {
+        region: first.region,
+        state: first.region,
+        city,
+        customerIds: [...new Set(companyFacts.map((fact) => fact.customerId))].join(','),
+        orderIds: [...new Set(companyFacts.map((fact) => fact.id))].join(','),
+        sellerIds: [...new Set(companyFacts.map((fact) => fact.sellerId))].join(','),
+        topProducts,
+      },
       generatedAt,
     });
   });

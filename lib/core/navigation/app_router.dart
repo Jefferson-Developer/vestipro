@@ -50,6 +50,10 @@ class AppRouter {
     this.productDashboardPageBuilder,
     this.collectionDashboardPageBuilder,
     this.inventoryDashboardPageBuilder,
+    this.representativeDashboardPageBuilder,
+    this.funnelDashboardPageBuilder,
+    this.targetsDashboardPageBuilder,
+    this.geographicDashboardPageBuilder,
     this.productDetailPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
@@ -259,6 +263,39 @@ class AppRouter {
     Map<String, String> queryParameters,
   )?
   inventoryDashboardPageBuilder;
+
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    String sellerId,
+    Map<String, String> queryParameters,
+  )?
+  representativeDashboardPageBuilder;
+
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  funnelDashboardPageBuilder;
+
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  targetsDashboardPageBuilder;
+
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  geographicDashboardPageBuilder;
 
   /// Builds the standalone, read-only product detail screen (TASK-078 reused
   /// outside the order draft flow), given `orgId`/`productId` from
@@ -508,6 +545,83 @@ class AppRouter {
         ),
         builder: (context, state) {
           final builder = inventoryDashboardPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: RepresentativeDashboardRoute.pathPattern,
+        name: RepresentativeDashboardRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.targetView,
+        ),
+        builder: (context, state) {
+          final builder = representativeDashboardPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.pathParameters['sellerId']!,
+            state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: FunnelDashboardRoute.pathPattern,
+        name: FunnelDashboardRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.targetView,
+        ),
+        builder: (context, state) {
+          final builder = funnelDashboardPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: TargetsDashboardRoute.pathPattern,
+        name: TargetsDashboardRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.targetView,
+        ),
+        builder: (context, state) {
+          final builder = targetsDashboardPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: GeographicDashboardRoute.pathPattern,
+        name: GeographicDashboardRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.reportViewSensitive,
+        ),
+        builder: (context, state) {
+          final builder = geographicDashboardPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,

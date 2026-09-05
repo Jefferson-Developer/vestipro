@@ -49,6 +49,7 @@ abstract class Opportunity with _$Opportunity {
     required double revenueForecast,
     required String responsibleUserId,
     required String stageId,
+    String? outcomeFromStageId,
     required OpportunityStatus status,
     required DateTime expectedCloseDate,
     String? wonReasonId,

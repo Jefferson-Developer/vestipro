@@ -112,6 +112,30 @@ service cloud.firestore {
       return get(membershipPath(organizationId)).data.teamIds;
     }
 
+    function memberPath(organizationId, userId) {
+      return /databases/$(database)/documents/organizations/$(organizationId)/members/$(userId);
+    }
+
+    // TASK-140: seller aggregates are visible to the seller themself, to a
+    // manager sharing at least one active team with that seller, and to the
+    // tenant-wide reporting roles. The aggregate payload can never grant
+    // access by itself; the real Membership documents are always re-read.
+    function canReadSellerAggregate(organizationId) {
+      return isActiveMember(organizationId)
+        && (
+          resource.data.scopeId == request.auth.uid
+          || currentRoleName(organizationId) in ['OWNER', 'ADMIN', 'FINANCE']
+          || (
+            isSalesManager(organizationId)
+            && exists(memberPath(organizationId, resource.data.scopeId))
+            && get(memberPath(organizationId, resource.data.scopeId)).data.status == 'active'
+            && requesterTeamIds(organizationId).hasAny(
+              get(memberPath(organizationId, resource.data.scopeId)).data.teamIds
+            )
+          )
+        );
+    }
+
     function teamPath(organizationId, teamId) {
       return /databases/$(database)/documents/organizations/$(organizationId)/teams/$(teamId);
     }
@@ -993,6 +1017,16 @@ service cloud.firestore {
 
       match /sellerMonthlyAggregates/{aggregateId} {
         allow get, list: if hasCapability(organizationId, 'report.viewSensitive');
+        allow create, update, delete: if false;
+      }
+
+      match /sellerDailyAggregates/{aggregateId} {
+        allow get, list: if canReadSellerAggregate(organizationId);
+        allow create, update, delete: if false;
+      }
+
+      match /representativeMonthlyAggregates/{aggregateId} {
+        allow get, list: if canReadSellerAggregate(organizationId);
         allow create, update, delete: if false;
       }
 

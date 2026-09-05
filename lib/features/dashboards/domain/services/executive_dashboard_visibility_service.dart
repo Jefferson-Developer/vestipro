@@ -21,7 +21,7 @@ import '../entities/executive_dashboard_visibility_filter.dart';
 /// to `.none`, correct for *its* domain — a customer portfolio — but wrong
 /// for this one).
 @injectable
-final class ExecutiveDashboardVisibilityService {
+class ExecutiveDashboardVisibilityService {
   const ExecutiveDashboardVisibilityService(
     this._membershipRepository,
     this._teamRepository,

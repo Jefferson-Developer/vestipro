@@ -81,6 +81,7 @@ void main() {
 
         final updated = (result as AppSuccess<Opportunity>).value;
         expect(updated.stageId, 'stage-lost');
+        expect(updated.outcomeFromStageId, 'stage-qualification');
       },
     );
 

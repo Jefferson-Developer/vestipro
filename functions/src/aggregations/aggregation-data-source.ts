@@ -110,7 +110,7 @@ export function createFirestoreAggregationDataSource(
       return result;
     },
 
-    async loadSellerLabels(_organizationId, sellerIds) {
+    async loadSellerLabels(organizationId, sellerIds) {
       // Seller display names live on the top-level `users/{uid}` profile
       // (`name` field) — same source `resolveActorName`
       // (`functions/src/invites/invite-shared.ts`) already reads from,
@@ -118,6 +118,10 @@ export function createFirestoreAggregationDataSource(
       // carries `roleName`/`teamIds`/`status`).
       const result = new Map<string, SellerLabel>();
       const collectionRef = db.collection('users');
+      const membershipRef = db
+        .collection('organizations')
+        .doc(organizationId)
+        .collection('members');
       for (const chunk of chunkIds(sellerIds)) {
         if (chunk.length === 0) continue;
         const snapshot = await collectionRef
@@ -126,8 +130,19 @@ export function createFirestoreAggregationDataSource(
         for (const doc of snapshot.docs) {
           const data = doc.data();
           if (typeof data.name === 'string' && data.name.trim().length > 0) {
-            result.set(doc.id, { name: data.name });
+            result.set(doc.id, { name: data.name, teamIds: [] });
           }
+        }
+        const memberships = await membershipRef.where('__name__', 'in', chunk).get();
+        for (const member of memberships.docs) {
+          const current = result.get(member.id) ?? { name: member.id };
+          const rawTeamIds = member.data().teamIds;
+          result.set(member.id, {
+            ...current,
+            teamIds: Array.isArray(rawTeamIds)
+              ? rawTeamIds.filter((value): value is string => typeof value === 'string')
+              : [],
+          });
         }
       }
       return result;

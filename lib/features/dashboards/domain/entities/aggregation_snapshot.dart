@@ -22,6 +22,7 @@ final class AggregationSnapshot {
     required this.labels,
     required this.generatedAt,
     required this.version,
+    this.isFromLocalCache = false,
   });
 
   final String organizationId;
@@ -51,4 +52,27 @@ final class AggregationSnapshot {
 
   final DateTime generatedAt;
   final int version;
+
+  /// Whether this value was recovered from the durable last-known snapshot
+  /// after a remote read failed (for example while the seller is offline).
+  final bool isFromLocalCache;
+
+  AggregationSnapshot copyWith({bool? isFromLocalCache}) {
+    return AggregationSnapshot(
+      organizationId: organizationId,
+      companyId: companyId,
+      dimension: dimension,
+      scopeId: scopeId,
+      periodKey: periodKey,
+      revenueGross: revenueGross,
+      revenueNet: revenueNet,
+      discountAmount: discountAmount,
+      orderCount: orderCount,
+      itemQuantity: itemQuantity,
+      labels: labels,
+      generatedAt: generatedAt,
+      version: version,
+      isFromLocalCache: isFromLocalCache ?? this.isFromLocalCache,
+    );
+  }
 }

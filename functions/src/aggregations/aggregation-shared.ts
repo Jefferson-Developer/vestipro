@@ -1,7 +1,7 @@
 import { Timestamp, type DocumentData } from 'firebase-admin/firestore';
 
 /**
- * The five snapshot dimensions this layer pre-computes (TASK-133, `tasks.md`
+ * The snapshot dimensions this layer pre-computes (TASK-133/TASK-140, `tasks.md`
  * seção 22: "Dashboards complexos não devem executar centenas de consultas
  * do cliente... Criar snapshots/agregações server-side"). Every dashboard in
  * EPIC-17 (TASK-134 a TASK-143) that needs revenue/order-count/quantity by
@@ -18,6 +18,8 @@ import { Timestamp, type DocumentData } from 'firebase-admin/firestore';
  */
 export type AggregationDimension =
   | 'salesDaily'
+  | 'sellerDaily'
+  | 'representativeMonthly'
   | 'customerMonthly'
   | 'productMonthly'
   | 'sellerMonthly'
@@ -27,6 +29,8 @@ export const AGGREGATE_COLLECTION_BY_DIMENSION: Readonly<
   Record<AggregationDimension, string>
 > = {
   salesDaily: 'salesDailyAggregates',
+  sellerDaily: 'sellerDailyAggregates',
+  representativeMonthly: 'representativeMonthlyAggregates',
   customerMonthly: 'customerMonthlyAggregates',
   productMonthly: 'productMonthlyAggregates',
   sellerMonthly: 'sellerMonthlyAggregates',
@@ -65,7 +69,8 @@ export interface OrderAggregationItemFact {
  * The subset of an `organizations/{orgId}/orders/{orderId}` document this
  * module needs, extracted once per order and shared by every aggregator
  * (salesDaily, customerMonthly, productMonthly, sellerMonthly,
- * regionMonthly) so each order is only parsed once even though it feeds five
+ * regionMonthly) so each order is only parsed once even though it feeds
+ * multiple
  * different snapshot dimensions.
  */
 export interface OrderAggregationFact {
@@ -77,6 +82,8 @@ export interface OrderAggregationFact {
   /** `deliveryAddress.state` — the only region signal already persisted on
    * every order (no separate `region` field exists on `Order` today). */
   region: string;
+  /** Delivery city. Kept optional for backwards-compatible unit fixtures. */
+  city?: string;
   status: string;
   createdAt: Timestamp;
   itemsSubtotal: number;
@@ -126,6 +133,11 @@ export function extractOrderFact(
     data.deliveryAddress.state.trim().length > 0
       ? (data.deliveryAddress.state as string).trim().toUpperCase()
       : 'UNKNOWN';
+  const city =
+    typeof data.deliveryAddress?.city === 'string' &&
+    data.deliveryAddress.city.trim().length > 0
+      ? (data.deliveryAddress.city as string).trim()
+      : 'UNKNOWN';
 
   return {
     id,
@@ -134,6 +146,7 @@ export function extractOrderFact(
     customerId: data.customerId,
     sellerId: data.sellerId,
     region,
+    city,
     status: data.status,
     createdAt: data.createdAt,
     itemsSubtotal: sumField(items, 'subtotal'),
@@ -174,9 +187,9 @@ export interface AggregateSnapshotDoc {
   companyId: string;
   dimension: AggregationDimension;
   /** `companyId` itself for `salesDaily` (company-wide, no sub-scope);
-   * customerId/productId/sellerId/region (state) for the other four. */
+   * sellerId for seller dimensions; customerId/productId/region otherwise. */
   scopeId: string;
-  /** `YYYY-MM-DD` for `salesDaily`, `YYYY-MM` for every monthly dimension. */
+  /** `YYYY-MM-DD` for daily dimensions, `YYYY-MM` for monthly dimensions. */
   periodKey: string;
   revenueGross: number;
   revenueNet: number;

@@ -5,6 +5,7 @@ import {
   buildProductMonthlySnapshots,
   buildRegionMonthlySnapshots,
   buildSalesDailySnapshots,
+  buildSellerDailySnapshots,
   buildSellerMonthlySnapshots,
 } from '../../src/aggregations/aggregation-builders';
 import type { OrderAggregationFact } from '../../src/aggregations/aggregation-shared';
@@ -93,6 +94,22 @@ describe('buildSalesDailySnapshots', () => {
   });
 });
 
+describe('buildSellerDailySnapshots', () => {
+  it('keeps each representative sale isolated in the daily snapshot', () => {
+    const snapshots = buildSellerDailySnapshots({
+      organizationId: 'org-1',
+      dayKey: '2026-08-15',
+      facts: [
+        fact({ id: 'order-1', sellerId: 'seller-1', itemsSubtotal: 900 }),
+        fact({ id: 'order-2', sellerId: 'seller-2', itemsSubtotal: 400 }),
+      ],
+    });
+    expect(snapshots).toHaveLength(2);
+    expect(snapshots.find((row) => row.scopeId === 'seller-1')?.revenueNet).toBe(850);
+    expect(snapshots.every((row) => row.dimension === 'sellerDaily')).toBe(true);
+  });
+});
+
 describe('buildCustomerMonthlySnapshots', () => {
   it('groups by company + customer and denormalizes the customer label', () => {
     const snapshots = buildCustomerMonthlySnapshots({
@@ -130,6 +147,23 @@ describe('buildSellerMonthlySnapshots', () => {
     expect(
       snapshots.find((snapshot) => snapshot.scopeId === 'seller-1')?.labels.sellerName,
     ).toBe('João Vendedor');
+  });
+
+  it('computes a deterministic rank inside the seller primary team', () => {
+    const snapshots = buildSellerMonthlySnapshots({
+      organizationId: 'org-1',
+      monthKey: '2026-08',
+      facts: [
+        fact({ sellerId: 'seller-1', itemsSubtotal: 1000 }),
+        fact({ id: 'order-2', sellerId: 'seller-2', itemsSubtotal: 500 }),
+      ],
+      sellerLabels: new Map([
+        ['seller-1', { name: 'Ana', teamIds: ['team-a'] }],
+        ['seller-2', { name: 'Bia', teamIds: ['team-a'] }],
+      ]),
+    });
+    expect(snapshots.find((row) => row.scopeId === 'seller-1')?.labels.teamRank).toBe('1');
+    expect(snapshots.find((row) => row.scopeId === 'seller-2')?.labels.teamRank).toBe('2');
   });
 });
 

@@ -87,10 +87,15 @@ export async function recomputeMonthlyAggregatesForCompany(params: {
     sellerLabels,
     generatedAt,
   });
+  const representativeMonthly = sellerMonthly.map((snapshot) => ({
+    ...snapshot,
+    dimension: 'representativeMonthly' as const,
+  }));
   const regionMonthly = buildRegionMonthlySnapshots({
     organizationId: params.organizationId,
     monthKey: params.monthKey,
     facts,
+    productLabels,
     generatedAt,
   });
   const productMonthly = buildProductMonthlySnapshots({
@@ -111,6 +116,11 @@ export async function recomputeMonthlyAggregatesForCompany(params: {
       params.organizationId,
       'sellerMonthly',
       sellerMonthly,
+    ),
+    params.dataSource.upsertAggregates(
+      params.organizationId,
+      'representativeMonthly',
+      representativeMonthly,
     ),
     params.dataSource.upsertAggregates(
       params.organizationId,

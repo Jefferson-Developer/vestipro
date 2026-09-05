@@ -21,6 +21,7 @@ final class OpportunityDto {
     required this.revenueForecast,
     required this.responsibleUserId,
     required this.stageId,
+    this.outcomeFromStageId,
     required this.status,
     required this.expectedCloseDate,
     this.wonReasonId,
@@ -53,6 +54,7 @@ final class OpportunityDto {
     final revenueForecast = json['revenueForecast'];
     final responsibleUserId = json['responsibleUserId'];
     final stageId = json['stageId'];
+    final outcomeFromStageId = json['outcomeFromStageId'];
     final status = json['status'];
     final expectedCloseDate = json['expectedCloseDate'];
     final wonReasonId = json['wonReasonId'];
@@ -80,6 +82,7 @@ final class OpportunityDto {
         (revenueForecast is! num) ||
         responsibleUserId is! String ||
         stageId is! String ||
+        (outcomeFromStageId != null && outcomeFromStageId is! String) ||
         status is! String ||
         expectedCloseDate is! Timestamp ||
         (wonReasonId != null && wonReasonId is! String) ||
@@ -114,6 +117,7 @@ final class OpportunityDto {
       revenueForecast: revenueForecast.toDouble(),
       responsibleUserId: responsibleUserId,
       stageId: stageId,
+      outcomeFromStageId: outcomeFromStageId as String?,
       status: status,
       expectedCloseDate: expectedCloseDate.toDate(),
       wonReasonId: wonReasonId as String?,
@@ -144,6 +148,7 @@ final class OpportunityDto {
   final double revenueForecast;
   final String responsibleUserId;
   final String stageId;
+  final String? outcomeFromStageId;
   final String status;
   final DateTime expectedCloseDate;
   final String? wonReasonId;
@@ -173,6 +178,7 @@ final class OpportunityDto {
       'revenueForecast': revenueForecast,
       'responsibleUserId': responsibleUserId,
       'stageId': stageId,
+      'outcomeFromStageId': outcomeFromStageId,
       'status': status,
       'expectedCloseDate': Timestamp.fromDate(expectedCloseDate),
       'wonReasonId': wonReasonId,

@@ -1,5 +1,6 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/dashboards/dashboards.dart';
 
@@ -10,6 +11,7 @@ void main() {
     late AggregationRepositoryImpl repository;
 
     setUp(() {
+      SharedPreferences.setMockInitialValues(<String, Object>{});
       remote = _FakeAggregationRemoteDataSource();
       clock = DateTime.utc(2026, 8, 15, 10);
       repository = AggregationRepositoryImpl(
@@ -126,6 +128,37 @@ void main() {
         expect(result, isA<AppFailure<AggregationSnapshot?>>());
       },
     );
+
+    test('recovers the durable last snapshot when a new repository instance '
+        'is offline', () async {
+      remote.byId['company-1_rep-1_2026-08-15'] = _dto(scopeId: 'rep-1');
+      await repository.getSnapshot(
+        organizationId: 'org-1',
+        dimension: AggregationDimension.salesDaily,
+        companyId: 'company-1',
+        scopeId: 'rep-1',
+        periodKey: '2026-08-15',
+      );
+
+      final offlineRemote = _FakeAggregationRemoteDataSource()
+        ..throwOnGetById = true;
+      final restartedRepository = AggregationRepositoryImpl(
+        offlineRemote,
+        const AggregationSnapshotMapper(),
+        now: () => clock,
+      );
+      final result = await restartedRepository.getSnapshot(
+        organizationId: 'org-1',
+        dimension: AggregationDimension.salesDaily,
+        companyId: 'company-1',
+        scopeId: 'rep-1',
+        periodKey: '2026-08-15',
+      );
+
+      final snapshot = (result as AppSuccess<AggregationSnapshot?>).value!;
+      expect(snapshot.revenueNet, 1400);
+      expect(snapshot.isFromLocalCache, isTrue);
+    });
   });
 }
 

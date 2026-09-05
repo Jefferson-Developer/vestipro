@@ -447,6 +447,107 @@ final class InventoryDashboardRoute extends AppRoute {
   }
 }
 
+/// Individual field-sales dashboard (TASK-140). The seller id is part of
+/// the typed path so the domain and Firestore Rules can independently check
+/// self access or the requester's managed-team relationship.
+final class RepresentativeDashboardRoute extends AppRoute {
+  const RepresentativeDashboardRoute({
+    required this.orgId,
+    required this.companyId,
+    required this.sellerId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String companyId;
+  final String sellerId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'representativeDashboard';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/dashboards/representatives/:sellerId';
+
+  @override
+  String get location {
+    final path =
+        '/org/$orgId/companies/$companyId/dashboards/representatives/$sellerId';
+    if (queryParameters.isEmpty) return path;
+    return Uri(path: path, queryParameters: queryParameters).toString();
+  }
+}
+
+/// CRM funnel health dashboard (TASK-141), scoped by organization/company.
+final class FunnelDashboardRoute extends AppRoute {
+  const FunnelDashboardRoute({
+    required this.orgId,
+    required this.companyId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String companyId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'funnelDashboard';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/dashboards/funnel';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/companies/$companyId/dashboards/funnel';
+    if (queryParameters.isEmpty) return path;
+    return Uri(path: path, queryParameters: queryParameters).toString();
+  }
+}
+
+/// Performance-versus-target dashboard (TASK-142), with shareable team,
+/// seller and period filters.
+final class TargetsDashboardRoute extends AppRoute {
+  const TargetsDashboardRoute({
+    required this.orgId,
+    required this.companyId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String companyId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'targetsDashboard';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/dashboards/targets';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/companies/$companyId/dashboards/targets';
+    if (queryParameters.isEmpty) return path;
+    return Uri(path: path, queryParameters: queryParameters).toString();
+  }
+}
+
+/// Commercial performance by Brazilian region/state/city (TASK-143).
+final class GeographicDashboardRoute extends AppRoute {
+  const GeographicDashboardRoute({
+    required this.orgId,
+    required this.companyId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String companyId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'geographicDashboard';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/dashboards/geographic';
+
+  @override
+  String get location => Uri(
+    path: '/org/$orgId/companies/$companyId/dashboards/geographic',
+    queryParameters: queryParameters.isEmpty ? null : queryParameters,
+  ).toString();
+}
+
 /// Standalone, read-only product detail route (TASK-078's `ProductDetailPage`
 /// reused outside the order draft flow), scoped by Organization only —
 /// `Product.companyId` itself is optional (TASK-064), so this route never

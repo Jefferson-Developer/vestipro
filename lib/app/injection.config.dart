@@ -335,6 +335,12 @@ import '../features/dashboards/domain/repositories/aggregation_repository.dart'
     as _i649;
 import '../features/dashboards/domain/services/executive_dashboard_visibility_service.dart'
     as _i846;
+import '../features/dashboards/domain/services/funnel_dashboard_visibility_service.dart'
+    as _i104;
+import '../features/dashboards/domain/services/representative_dashboard_visibility_service.dart'
+    as _i372;
+import '../features/dashboards/domain/usecases/build_funnel_dashboard_snapshot_use_case.dart'
+    as _i882;
 import '../features/dashboards/domain/usecases/build_product_dashboard_snapshot_use_case.dart'
     as _i675;
 import '../features/dashboards/domain/usecases/load_collection_dashboard_entries_use_case.dart'
@@ -345,28 +351,44 @@ import '../features/dashboards/domain/usecases/load_customer_dashboard_snapshot_
     as _i6;
 import '../features/dashboards/domain/usecases/load_executive_dashboard_snapshot_use_case.dart'
     as _i1064;
+import '../features/dashboards/domain/usecases/load_funnel_dashboard_use_case.dart'
+    as _i817;
+import '../features/dashboards/domain/usecases/load_geographic_dashboard_use_case.dart'
+    as _i516;
 import '../features/dashboards/domain/usecases/load_inventory_dashboard_snapshot_use_case.dart'
     as _i737;
 import '../features/dashboards/domain/usecases/load_inventory_dashboard_stalled_products_use_case.dart'
     as _i328;
 import '../features/dashboards/domain/usecases/load_product_dashboard_ranking_use_case.dart'
     as _i106;
+import '../features/dashboards/domain/usecases/load_representative_dashboard_use_case.dart'
+    as _i491;
 import '../features/dashboards/domain/usecases/load_sales_dashboard_group_rows_use_case.dart'
     as _i904;
 import '../features/dashboards/domain/usecases/load_sales_dashboard_snapshot_use_case.dart'
     as _i754;
+import '../features/dashboards/domain/usecases/load_targets_dashboard_use_case.dart'
+    as _i974;
 import '../features/dashboards/presentation/bloc/collection_dashboard_bloc.dart'
     as _i455;
 import '../features/dashboards/presentation/bloc/customer_dashboard_bloc.dart'
     as _i667;
 import '../features/dashboards/presentation/bloc/executive_dashboard_bloc.dart'
     as _i250;
+import '../features/dashboards/presentation/bloc/funnel_dashboard_bloc.dart'
+    as _i721;
+import '../features/dashboards/presentation/bloc/geographic_dashboard_bloc.dart'
+    as _i6;
 import '../features/dashboards/presentation/bloc/inventory_dashboard_bloc.dart'
     as _i144;
 import '../features/dashboards/presentation/bloc/product_dashboard_bloc.dart'
     as _i261;
+import '../features/dashboards/presentation/bloc/representative_dashboard_bloc.dart'
+    as _i29;
 import '../features/dashboards/presentation/bloc/sales_dashboard_bloc.dart'
     as _i588;
+import '../features/dashboards/presentation/bloc/targets_dashboard_bloc.dart'
+    as _i659;
 import '../features/favorites/data/datasources/favorite_remote_data_source.dart'
     as _i1002;
 import '../features/favorites/data/datasources/firestore_favorite_remote_data_source.dart'
@@ -427,6 +449,7 @@ import '../features/insights/domain/usecases/list_opportunity_center_insights_us
 import '../features/insights/domain/usecases/update_insight_status_use_case.dart'
     as _i756;
 import '../features/insights/insight_module.dart' as _i676;
+import '../features/insights/insights.dart' as _i385;
 import '../features/insights/presentation/bloc/opportunity_center_bloc.dart'
     as _i904;
 import '../features/inventory/data/datasources/firestore_stock_alert_data_source.dart'
@@ -594,6 +617,7 @@ import '../features/opportunities/domain/usecases/update_opportunity_outcome_rea
     as _i552;
 import '../features/opportunities/domain/usecases/update_opportunity_stage_use_case.dart'
     as _i942;
+import '../features/opportunities/opportunities.dart' as _i269;
 import '../features/opportunities/presentation/bloc/opportunity_outcome_reason_admin_bloc.dart'
     as _i683;
 import '../features/opportunities/presentation/bloc/pipeline_stage_admin_bloc.dart'
@@ -1103,6 +1127,7 @@ import '../features/targets/presentation/cubit/ranking_dashboard_cubit.dart'
 import '../features/targets/presentation/cubit/target_dashboard_cubit.dart'
     as _i293;
 import '../features/targets/presentation/cubit/target_form_cubit.dart' as _i998;
+import '../features/targets/targets.dart' as _i924;
 import '../features/users/data/datasources/cloud_functions_user_access_data_source.dart'
     as _i605;
 import '../features/users/data/datasources/cloud_functions_user_role_data_source.dart'
@@ -1176,6 +1201,9 @@ extension GetItInjectableX on _i174.GetIt {
     final offlinePackageLoadersModule = _$OfflinePackageLoadersModule();
     gh.factory<_i588.AggregationSnapshotMapper>(
       () => const _i588.AggregationSnapshotMapper(),
+    );
+    gh.factory<_i882.BuildFunnelDashboardSnapshotUseCase>(
+      () => const _i882.BuildFunnelDashboardSnapshotUseCase(),
     );
     gh.factory<_i675.BuildProductDashboardSnapshotUseCase>(
       () => const _i675.BuildProductDashboardSnapshotUseCase(),
@@ -3136,6 +3164,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i265.TeamRepository>(),
       ),
     );
+    gh.factory<_i104.FunnelDashboardVisibilityService>(
+      () => _i104.FunnelDashboardVisibilityService(
+        gh<_i265.MembershipRepository>(),
+        gh<_i265.TeamRepository>(),
+      ),
+    );
+    gh.factory<_i372.RepresentativeDashboardVisibilityService>(
+      () => _i372.RepresentativeDashboardVisibilityService(
+        gh<_i265.MembershipRepository>(),
+        gh<_i265.TeamRepository>(),
+      ),
+    );
     gh.factory<_i960.RankingPeerResolverService>(
       () => _i960.RankingPeerResolverService(
         gh<_i265.MembershipRepository>(),
@@ -3236,6 +3276,16 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i974.LoadTargetsDashboardUseCase>(
+      () => _i974.LoadTargetsDashboardUseCase(
+        gh<_i649.AggregationRepository>(),
+        gh<_i924.TargetRepository>(),
+        gh<_i265.TeamRepository>(),
+        gh<_i924.TargetVisibilityService>(),
+        gh<_i385.InsightRepository>(),
+        gh<_i924.RankingCalculationService>(),
+      ),
+    );
     gh.factory<_i1062.GetOrderByIdUseCase>(
       () => _i1062.GetOrderByIdUseCase(
         gh<_i1051.OrderListRepository>(),
@@ -3318,6 +3368,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i154.ProcessTargetAlertUseCase>(),
       ),
     );
+    gh.factory<_i491.LoadRepresentativeDashboardUseCase>(
+      () => _i491.LoadRepresentativeDashboardUseCase(
+        gh<_i372.RepresentativeDashboardVisibilityService>(),
+        gh<_i649.AggregationRepository>(),
+        gh<_i1031.PositivacaoRepository>(),
+        gh<_i876.TargetRepository>(),
+        gh<_i154.TargetAchievementRepository>(),
+        gh<_i588.CrmTaskRepository>(),
+        gh<_i644.InsightRepository>(),
+        gh<_i576.ListCustomerPortfolioUseCase>(),
+      ),
+    );
     gh.factory<_i698.UserRoleEditBloc>(
       () => _i698.UserRoleEditBloc(
         updateUserRole: gh<_i428.UpdateUserRoleUseCase>(),
@@ -3380,6 +3442,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i424.OrderListBloc(
         listOrders: gh<_i144.ListOrdersUseCase>(),
         listLocalPendingOrders: gh<_i233.ListLocalPendingOrdersUseCase>(),
+      ),
+    );
+    gh.factory<_i29.RepresentativeDashboardBloc>(
+      () => _i29.RepresentativeDashboardBloc(
+        gh<_i491.LoadRepresentativeDashboardUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i588.SalesDashboardBloc>(
@@ -3454,6 +3522,12 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i659.TargetsDashboardBloc>(
+      () => _i659.TargetsDashboardBloc(
+        gh<_i974.LoadTargetsDashboardUseCase>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i627.PositivacaoDashboardCubit>(
       () => _i627.PositivacaoDashboardCubit(
         gh<_i951.TargetVisibilityService>(),
@@ -3518,6 +3592,20 @@ extension GetItInjectableX on _i174.GetIt {
         decideOrderApproval: gh<_i828.DecideOrderApprovalUseCase>(),
       ),
     );
+    gh.factory<_i817.LoadFunnelDashboardUseCase>(
+      () => _i817.LoadFunnelDashboardUseCase(
+        gh<_i104.FunnelDashboardVisibilityService>(),
+        gh<_i269.ListPipelineStagesUseCase>(),
+        gh<_i269.ListPipelineOpportunitiesUseCase>(),
+        gh<_i882.BuildFunnelDashboardSnapshotUseCase>(),
+      ),
+    );
+    gh.factory<_i516.LoadGeographicDashboardUseCase>(
+      () => _i516.LoadGeographicDashboardUseCase(
+        gh<_i649.AggregationRepository>(),
+        gh<_i846.ExecutiveDashboardVisibilityService>(),
+      ),
+    );
     gh.factory<_i385.GetVariantAvailabilityUseCase>(
       () => _i385.GetVariantAvailabilityUseCase(
         gh<_i766.VariantAvailabilityRepository>(),
@@ -3553,6 +3641,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i965.ProductSearchBloc(
         searchProducts: gh<_i268.SearchProductsUseCase>(),
         getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
+      ),
+    );
+    gh.factory<_i721.FunnelDashboardBloc>(
+      () => _i721.FunnelDashboardBloc(
+        gh<_i817.LoadFunnelDashboardUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i578.ProductDetailBloc>(
@@ -3602,6 +3696,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i909.GetCustomerByIdUseCase>(),
         gh<_i530.ResolveOrderDraftDefaultsUseCase>(),
         gh<_i81.OrderDraftRepository>(),
+      ),
+    );
+    gh.factory<_i6.GeographicDashboardBloc>(
+      () => _i6.GeographicDashboardBloc(
+        gh<_i516.LoadGeographicDashboardUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i318.FavoritesBloc>(

@@ -256,10 +256,10 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-137 — Implementar dashboard de produtos](TASK-137-implementar-dashboard-de-produtos.md) — Flutter Senior + Front-end
 - [x] [TASK-138 — Implementar dashboard de coleção](TASK-138-implementar-dashboard-de-colecao.md) — Flutter Senior + Front-end
 - [x] [TASK-139 — Implementar dashboard de estoque](TASK-139-implementar-dashboard-de-estoque.md) — Flutter Senior + Front-end
-- [ ] [TASK-140 — Implementar dashboard do representante](TASK-140-implementar-dashboard-do-representante.md) — Flutter Senior + Front-end
-- [ ] [TASK-141 — Implementar dashboard de funil (CRM)](TASK-141-implementar-dashboard-de-funil.md) — Flutter Senior + Front-end
-- [ ] [TASK-142 — Implementar dashboard de metas](TASK-142-implementar-dashboard-de-metas.md) — Flutter Senior + Front-end
-- [ ] [TASK-143 — Implementar dashboard geográfico](TASK-143-implementar-dashboard-geografico.md) — Flutter Senior + Front-end
+- [x] [TASK-140 — Implementar dashboard do representante](TASK-140-implementar-dashboard-do-representante.md) — Flutter Senior + Front-end
+- [x] [TASK-141 — Implementar dashboard de funil (CRM)](TASK-141-implementar-dashboard-de-funil.md) — Flutter Senior + Front-end
+- [x] [TASK-142 — Implementar dashboard de metas](TASK-142-implementar-dashboard-de-metas.md) — Flutter Senior + Front-end
+- [x] [TASK-143 — Implementar dashboard geográfico](TASK-143-implementar-dashboard-geografico.md) — Flutter Senior + Front-end
 
 ### EPIC-18 — Relatórios Customizados e Exportações
 - [ ] [TASK-144 — Implementar construtor de relatórios](TASK-144-implementar-construtor-de-relatorios.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 139 / 220 tasks concluídas.
+**Progresso:** 143 / 220 tasks concluídas.

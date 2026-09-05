@@ -1,4 +1,5 @@
-/// The five server-side aggregation dimensions TASK-133 pre-computes —
+/// The server-side aggregation dimensions available to EPIC-17 — the
+/// original five from TASK-133 plus TASK-140's privacy-scoped seller views —
 /// every dashboard in EPIC-17 (TASK-134 a TASK-143) reads one of these
 /// instead of querying raw `orders`/`customers`/`products` collections
 /// directly (`tasks.md`, seção 22: "Dashboards complexos não devem executar
@@ -13,6 +14,15 @@ enum AggregationDimension {
   /// `companyId` itself — no further sub-scope). Recomputed near-real-time,
   /// on every order write.
   salesDaily,
+
+  /// Revenue/order-count by seller and day. Recomputed near-real-time and
+  /// readable by that seller (or an authorized manager) for the field home.
+  sellerDaily,
+
+  /// Privacy-scoped copy of the monthly seller aggregate used by the field
+  /// dashboard. Kept separate because the management sales dashboard needs
+  /// a bounded multi-seller list while representatives may only `get` self.
+  representativeMonthly,
 
   /// Revenue/order-count by customer, per month. Recomputed nightly (batch).
   customerMonthly,
@@ -39,6 +49,9 @@ extension AggregationDimensionCollection on AggregationDimension {
   /// `firestore.rules`.
   String get collectionName => switch (this) {
     AggregationDimension.salesDaily => 'salesDailyAggregates',
+    AggregationDimension.sellerDaily => 'sellerDailyAggregates',
+    AggregationDimension.representativeMonthly =>
+      'representativeMonthlyAggregates',
     AggregationDimension.customerMonthly => 'customerMonthlyAggregates',
     AggregationDimension.productMonthly => 'productMonthlyAggregates',
     AggregationDimension.sellerMonthly => 'sellerMonthlyAggregates',
@@ -49,5 +62,7 @@ extension AggregationDimensionCollection on AggregationDimension {
   /// write); `false` for the four recomputed only by the nightly batch —
   /// purely informational, e.g. for a dashboard to decide whether to show a
   /// "atualizado agora" vs. "atualizado até ontem à noite" freshness hint.
-  bool get isNearRealTime => this == AggregationDimension.salesDaily;
+  bool get isNearRealTime =>
+      this == AggregationDimension.salesDaily ||
+      this == AggregationDimension.sellerDaily;
 }
