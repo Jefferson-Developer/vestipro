@@ -181,4 +181,19 @@ final class _FakeNotificationInboxRepository
     required String organizationId,
     required String userId,
   }) async => AppSuccess<List<AppNotification>>(items);
+
+  @override
+  Future<AppResult<void>> markAsRead({
+    required String organizationId,
+    required String userId,
+    required String notificationId,
+    DateTime? readAt,
+  }) async => const AppSuccess<void>(null);
+
+  @override
+  Future<AppResult<void>> markAllAsRead({
+    required String organizationId,
+    required String userId,
+    DateTime? readAt,
+  }) async => const AppSuccess<void>(null);
 }

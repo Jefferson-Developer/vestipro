@@ -1,10 +1,18 @@
 library;
 
-export 'data/repositories/shared_preferences_notification_inbox_repository.dart';
+export 'data/local/notification_inbox_local_cache.dart';
+export 'data/repositories/notification_inbox_repository_impl.dart';
 export 'domain/entities/app_notification.dart';
 export 'domain/entities/push_device.dart';
 export 'domain/repositories/notification_inbox_repository.dart';
 export 'domain/repositories/push_device_repository.dart';
+export 'domain/usecases/list_notifications_for_user_use_case.dart';
+export 'domain/usecases/mark_all_notifications_as_read_use_case.dart';
+export 'domain/usecases/mark_notification_as_read_use_case.dart';
+export 'presentation/bloc/notification_center_bloc.dart';
+export 'presentation/bloc/notification_center_event.dart';
+export 'presentation/bloc/notification_center_state.dart';
+export 'presentation/pages/notification_center_page.dart';
 export 'push/configure_messaging.dart';
 export 'push/device_installation_id_provider.dart';
 export 'push/firebase_messaging_background_handler.dart';

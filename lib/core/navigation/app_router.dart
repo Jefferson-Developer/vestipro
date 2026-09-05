@@ -22,6 +22,7 @@ class AppRouter {
     required this.catalogHomePageBuilder,
     required this.auditLogPageBuilder,
     required this.userManagementPageBuilder,
+    this.notificationCenterPageBuilder,
     this.targetDashboardPageBuilder,
     required this.loginPageBuilder,
     required this.signUpPageBuilder,
@@ -75,6 +76,13 @@ class AppRouter {
   final Widget Function(BuildContext context, String orgId) auditLogPageBuilder;
   final Widget Function(BuildContext context, String orgId)
   userManagementPageBuilder;
+
+  /// Builds the central de notificações internas screen (TASK-151), given
+  /// `orgId` from [NotificationCenterRoute]. Optional (like most feature
+  /// builders below) so tests/examples that build their own [AppRouter]
+  /// without wiring TASK-151 keep compiling unchanged.
+  final Widget Function(BuildContext context, String orgId)?
+  notificationCenterPageBuilder;
   final Widget Function(
     BuildContext context,
     String orgId,
@@ -411,6 +419,15 @@ class AppRouter {
         ),
         builder: (context, state) =>
             userManagementPageBuilder(context, state.pathParameters['orgId']!),
+      ),
+      GoRoute(
+        path: NotificationCenterRoute.pathPattern,
+        name: NotificationCenterRoute.name,
+        builder: (context, state) {
+          final builder = notificationCenterPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(context, state.pathParameters['orgId']!);
+        },
       ),
       GoRoute(
         path: TargetDashboardRoute.pathPattern,

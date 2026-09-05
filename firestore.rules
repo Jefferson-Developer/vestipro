@@ -1132,6 +1132,47 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/notifications/{notificationId}  (TASK-151)
+      // -------------------------------------------------------------------
+      //
+      // Central de notificações internas: cada documento pertence a um único
+      // destinatário (`userId`) dentro da organização. `list`/`get` só
+      // devolvem documentos cujo `userId` seja o do próprio requisitante —
+      // como a query do cliente (`NotificationDataSource.listForUser`) já
+      // filtra por `userId == auth.uid`, a regra é satisfeita para todo
+      // documento realmente retornado e nega a operação inteira caso algum
+      // dia uma query tente ler notificação de outro usuário. Hoje o próprio
+      // app cria a notificação (ex.: alerta de meta, TASK-149) — por isso
+      // `create` exige `userId == auth.uid` — mas o conteúdo (`title`,
+      // `body`, `category`, `deepLink`, `createdAt`) nunca pode ser alterado
+      // depois: `update` só aceita a marcação de leitura (`readAt`), nunca
+      // reescrever o restante do documento.
+
+      match /notifications/{notificationId} {
+        allow get: if isActiveMember(organizationId)
+          && resource.data.userId == request.auth.uid;
+
+        allow list: if isActiveMember(organizationId)
+          && resource.data.userId == request.auth.uid;
+
+        allow create: if isActiveMember(organizationId)
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.userId == request.auth.uid;
+
+        allow update: if isActiveMember(organizationId)
+          && resource.data.userId == request.auth.uid
+          && unchanged('organizationId')
+          && unchanged('userId')
+          && unchanged('category')
+          && unchanged('title')
+          && unchanged('body')
+          && unchanged('deepLink')
+          && unchanged('createdAt');
+
+        allow delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/invites/{inviteId}  (TASK-039)
       // -------------------------------------------------------------------
       //

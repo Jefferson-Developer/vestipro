@@ -86,7 +86,7 @@ final class ProcessTargetAlertUseCase {
       id: _uuid.v4(),
       organizationId: target.organizationId,
       userId: userId,
-      category: AppNotificationCategory.targetAlert,
+      category: AppNotificationCategory.commercial,
       title: content.title,
       body: content.message,
       deepLink: deepLink,

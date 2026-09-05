@@ -275,6 +275,13 @@ class VestiProApp extends StatelessWidget {
             createBloc: () => getIt<UserListBloc>(),
             createRoleEditBloc: () => getIt<UserRoleEditBloc>(),
           ),
+          notificationCenterPageBuilder: (context, orgId) =>
+              NotificationCenterPage(
+                organizationId: orgId,
+                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                createBloc: () => getIt<NotificationCenterBloc>(),
+                onOpenDeepLink: (location) => context.go(location),
+              ),
           targetDashboardPageBuilder:
               (context, orgId, companyId, queryParameters) =>
                   _withConnectivityIndicator(

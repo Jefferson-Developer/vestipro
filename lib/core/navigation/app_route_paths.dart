@@ -114,6 +114,23 @@ final class AuditLogRoute extends AppRoute {
   String get location => '/org/$orgId/settings/audit-log';
 }
 
+/// Central de notificações internas (TASK-151), scoped by Organization only
+/// — `AppNotification` maps to `organizations/{organizationId}/notifications`,
+/// never to a specific company. Every authenticated member may open it (no
+/// [Capability] gate): it only ever lists the current user's own
+/// notifications.
+final class NotificationCenterRoute extends AppRoute {
+  const NotificationCenterRoute({required this.orgId});
+
+  final String orgId;
+
+  static const name = 'notificationCenter';
+  static const pathPattern = '/org/:orgId/notifications';
+
+  @override
+  String get location => '/org/$orgId/notifications';
+}
+
 /// User and permission management route (TASK-042/TASK-043), scoped by
 /// Organization. Protected in [AppRouter] by `user.changeRole`.
 final class UserManagementRoute extends AppRoute {

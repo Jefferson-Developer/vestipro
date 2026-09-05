@@ -51,20 +51,35 @@ import '../core/feature_flags/firebase_feature_flag_service.dart' as _i845;
 import '../core/functions/app_client_metadata.dart' as _i465;
 import '../core/functions/cloud_functions_service.dart' as _i147;
 import '../core/functions/functions.dart' as _i340;
+import '../core/notifications/data/datasources/firestore_notification_data_source.dart'
+    as _i980;
 import '../core/notifications/data/datasources/firestore_push_device_data_source.dart'
     as _i1068;
+import '../core/notifications/data/datasources/notification_data_source.dart'
+    as _i473;
 import '../core/notifications/data/datasources/push_device_data_source.dart'
     as _i589;
+import '../core/notifications/data/local/notification_inbox_local_cache.dart'
+    as _i322;
+import '../core/notifications/data/mappers/notification_mapper.dart' as _i211;
 import '../core/notifications/data/mappers/push_device_mapper.dart' as _i827;
+import '../core/notifications/data/repositories/notification_inbox_repository_impl.dart'
+    as _i382;
 import '../core/notifications/data/repositories/push_device_repository_impl.dart'
     as _i1028;
-import '../core/notifications/data/repositories/shared_preferences_notification_inbox_repository.dart'
-    as _i393;
 import '../core/notifications/domain/repositories/notification_inbox_repository.dart'
     as _i73;
 import '../core/notifications/domain/repositories/push_device_repository.dart'
     as _i845;
+import '../core/notifications/domain/usecases/list_notifications_for_user_use_case.dart'
+    as _i1019;
+import '../core/notifications/domain/usecases/mark_all_notifications_as_read_use_case.dart'
+    as _i948;
+import '../core/notifications/domain/usecases/mark_notification_as_read_use_case.dart'
+    as _i421;
 import '../core/notifications/notifications.dart' as _i387;
+import '../core/notifications/presentation/bloc/notification_center_bloc.dart'
+    as _i84;
 import '../core/notifications/push/device_installation_id_provider.dart'
     as _i10;
 import '../core/notifications/push/firebase_messaging_notification_router.dart'
@@ -1331,6 +1346,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => syncModule.syncPullSources,
     );
     gh.lazySingleton<_i26.AuthUserMapper>(() => const _i26.AuthUserMapper());
+    gh.lazySingleton<_i322.NotificationInboxLocalCache>(
+      () => const _i322.NotificationInboxLocalCache(),
+    );
+    gh.lazySingleton<_i211.NotificationMapper>(
+      () => const _i211.NotificationMapper(),
+    );
     gh.lazySingleton<_i246.AuditLogEntryMapper>(
       () => const _i246.AuditLogEntryMapper(),
     );
@@ -1549,9 +1570,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i836.TargetAlertDispatchRepository>(
       () => const _i369.SharedPreferencesTargetAlertDispatchRepository(),
-    );
-    gh.lazySingleton<_i73.NotificationInboxRepository>(
-      () => const _i393.SharedPreferencesNotificationInboxRepository(),
     );
     gh.factory<_i1068.ListActivePaymentTermsUseCase>(
       () => _i1068.ListActivePaymentTermsUseCase(
@@ -2353,14 +2371,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i924.RegisterCrmActivityUseCase>(
       () => _i924.RegisterCrmActivityUseCase(gh<_i558.CrmActivityRepository>()),
     );
-    gh.factory<_i154.ProcessTargetAlertUseCase>(
-      () => _i154.ProcessTargetAlertUseCase(
-        gh<_i256.TargetAlertSettingsRepository>(),
-        gh<_i836.TargetAlertDispatchRepository>(),
-        gh<_i387.NotificationInboxRepository>(),
-        gh<_i202.AnalyticsService>(),
-      ),
-    );
     gh.lazySingleton<_i147.CloudFunctionsService>(
       () => _i147.CloudFunctionsService(
         gh<_i809.FirebaseFunctions>(),
@@ -2472,6 +2482,10 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i904.StorageDataSource>(
       () => _i833.FirebaseStorageDataSource(gh<_i457.FirebaseStorage>()),
+    );
+    gh.lazySingleton<_i473.NotificationDataSource>(
+      () =>
+          _i980.FirestoreNotificationDataSource(gh<_i974.FirebaseFirestore>()),
     );
     gh.lazySingleton<_i847.PortfolioAssignmentDataSource>(
       () => _i954.FirestorePortfolioAssignmentDataSource(
@@ -2889,6 +2903,21 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i957.MembershipRepository>(),
       ),
     );
+    gh.lazySingleton<_i73.NotificationInboxRepository>(
+      () => _i382.NotificationInboxRepositoryImpl(
+        gh<_i473.NotificationDataSource>(),
+        gh<_i322.NotificationInboxLocalCache>(),
+        gh<_i211.NotificationMapper>(),
+      ),
+    );
+    gh.factory<_i154.ProcessTargetAlertUseCase>(
+      () => _i154.ProcessTargetAlertUseCase(
+        gh<_i256.TargetAlertSettingsRepository>(),
+        gh<_i836.TargetAlertDispatchRepository>(),
+        gh<_i387.NotificationInboxRepository>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i450.CreateReportSchedule>(
       () => _i450.CreateReportSchedule(
         gh<_i30.ReportScheduleRepository>(),
@@ -3136,6 +3165,21 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i344.CatalogShareLookupRepository>(),
       ),
     );
+    gh.factory<_i1019.ListNotificationsForUserUseCase>(
+      () => _i1019.ListNotificationsForUserUseCase(
+        gh<_i73.NotificationInboxRepository>(),
+      ),
+    );
+    gh.factory<_i948.MarkAllNotificationsAsReadUseCase>(
+      () => _i948.MarkAllNotificationsAsReadUseCase(
+        gh<_i73.NotificationInboxRepository>(),
+      ),
+    );
+    gh.factory<_i421.MarkNotificationAsReadUseCase>(
+      () => _i421.MarkNotificationAsReadUseCase(
+        gh<_i73.NotificationInboxRepository>(),
+      ),
+    );
     gh.factory<_i1069.GetVariantInventoryAvailabilityUseCase>(
       () => _i1069.GetVariantInventoryAvailabilityUseCase(
         gh<_i221.VariantStockBalanceRepository>(),
@@ -3244,6 +3288,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i592.OrderApprovalRepository>(),
         gh<_i47.PermissionService>(),
         gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i84.NotificationCenterBloc>(
+      () => _i84.NotificationCenterBloc(
+        listNotificationsForUser: gh<_i1019.ListNotificationsForUserUseCase>(),
+        markNotificationAsRead: gh<_i421.MarkNotificationAsReadUseCase>(),
+        markAllNotificationsAsRead:
+            gh<_i948.MarkAllNotificationsAsReadUseCase>(),
       ),
     );
     gh.factory<_i968.ProductMediaBloc>(
