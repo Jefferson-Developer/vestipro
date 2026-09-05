@@ -7,6 +7,17 @@
 /// event).
 enum AppNotificationCategory { crm, commercial, system }
 
+/// How urgently a notification needs the recipient's attention (TASK-153).
+///
+/// This is deliberately independent from [AppNotificationCategory]: a
+/// `commercial` notification can be either [critical] (e.g. meta em risco
+/// alto, pedido rejeitado, falha crítica de sincronização) or [informative]
+/// (e.g. meta próxima de ser atingida, oportunidade comercial identificada
+/// pela engine de insights). Every caller that predates TASK-153 (TASK-149's
+/// target alerts below `highRisk`, TASK-152's CRM reminders) keeps defaulting
+/// to [informative] — nothing downgrades silently.
+enum AppNotificationPriority { critical, informative }
+
 /// Internal notification persisted for the in-app notification center
 /// (TASK-151), mapped to
 /// `organizations/{organizationId}/notifications/{notificationId}`.
@@ -21,6 +32,7 @@ final class AppNotification {
     required this.deepLink,
     required this.createdAt,
     this.readAt,
+    this.priority = AppNotificationPriority.informative,
   });
 
   final String id;
@@ -32,4 +44,5 @@ final class AppNotification {
   final String deepLink;
   final DateTime createdAt;
   final DateTime? readAt;
+  final AppNotificationPriority priority;
 }

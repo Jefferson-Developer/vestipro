@@ -169,6 +169,22 @@ final class AnalyticsEvents {
   /// manager with team visibility) are carried as parameters.
   static const String crmReminderTriggered = 'crm_reminder_triggered';
 
+  /// Logged by `ProcessOrderCommercialAlertUseCase` (TASK-153, EPIC-19)
+  /// whenever an internal notification is actually dispatched for a pedido
+  /// rejeitado or a falha crítica de sincronização — `classification`
+  /// (`rejected`/`criticalSyncFailure`) is carried as a parameter. Never
+  /// carries the order's monetary value, same "no financial/personal data in
+  /// analytics" rule every other event in this catalog already follows.
+  static const String commercialOrderAlertTriggered =
+      'commercial_order_alert_triggered';
+
+  /// Logged by `ProcessInsightCommercialAlertUseCase` (TASK-153, EPIC-19)
+  /// whenever an internal notification is actually dispatched for a "hot"
+  /// commercial opportunity the insights engine (EPIC-16) identified —
+  /// `insight_type` and `severity` are carried as parameters.
+  static const String commercialOpportunityAlertTriggered =
+      'commercial_opportunity_alert_triggered';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -243,5 +259,7 @@ final class AnalyticsEvents {
     reportSchedulePaused,
     reportScheduleDeleted,
     crmReminderTriggered,
+    commercialOrderAlertTriggered,
+    commercialOpportunityAlertTriggered,
   ];
 }

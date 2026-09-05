@@ -78,6 +78,7 @@ final class NotificationInboxLocalCache {
         deepLink: _requiredString(json, 'deepLink'),
         createdAt: _requiredDate(json, 'createdAt'),
         readAt: _optionalDate(json, 'readAt'),
+        priority: _priorityFromString(json['priority']),
       );
     } catch (_) {
       return null;
@@ -96,6 +97,7 @@ final class NotificationInboxLocalCache {
       'createdAt': notification.createdAt.toUtc().toIso8601String(),
       if (notification.readAt != null)
         'readAt': notification.readAt!.toUtc().toIso8601String(),
+      'priority': notification.priority.name,
     };
   }
 
@@ -103,6 +105,18 @@ final class NotificationInboxLocalCache {
     return AppNotificationCategory.values.firstWhere(
       (category) => category.name == value,
       orElse: () => AppNotificationCategory.system,
+    );
+  }
+
+  /// Missing entirely (every notification cached before TASK-153) or
+  /// unrecognized both degrade to `informative`, same "never let a corrupt/
+  /// older cache entry throw" precedent [_categoryFromString]/[load] already
+  /// follow.
+  AppNotificationPriority _priorityFromString(Object? value) {
+    if (value is! String) return AppNotificationPriority.informative;
+    return AppNotificationPriority.values.firstWhere(
+      (priority) => priority.name == value,
+      orElse: () => AppNotificationPriority.informative,
     );
   }
 

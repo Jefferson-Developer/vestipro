@@ -10,6 +10,7 @@ import '../../../../core/utils/utils.dart';
 import '../../domain/entities/order.dart';
 import '../../domain/entities/order_list_filters.dart';
 import '../../domain/entities/order_list_page_result.dart';
+import '../../domain/usecases/generate_order_commercial_alerts_use_case.dart';
 import '../../domain/usecases/list_local_pending_orders_use_case.dart';
 import '../../domain/usecases/list_orders_use_case.dart';
 import 'order_list_event.dart';
@@ -33,6 +34,7 @@ final class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
   OrderListBloc({
     required this.listOrders,
     required this.listLocalPendingOrders,
+    this.generateOrderCommercialAlerts,
   }) : super(const OrderListState()) {
     on<OrderListStarted>(_onStarted);
     on<OrderListRefreshRequested>(_onRefreshRequested);
@@ -48,6 +50,14 @@ final class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
 
   final ListOrdersUseCase listOrders;
   final ListLocalPendingOrdersUseCase listLocalPendingOrders;
+
+  /// Optional (defaults to `null` so existing call sites/tests that predate
+  /// TASK-153 keep compiling unchanged) — when present, dispatches
+  /// "pedido com problema" commercial alerts (TASK-153) for every order this
+  /// load just fetched (server page + still-local-pending), addressed to the
+  /// current viewer (`state.userId`) — exactly the same scope [listOrders]/
+  /// [listLocalPendingOrders] already restrict the list itself to.
+  final GenerateOrderCommercialAlertsUseCase? generateOrderCommercialAlerts;
 
   Timer? _searchTimer;
   int _searchToken = 0;
@@ -71,6 +81,7 @@ final class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
     );
     await _loadLocalPendingOrders(emit);
     await _loadFirstPage(emit);
+    await _generateCommercialAlerts();
   }
 
   Future<void> _onRefreshRequested(
@@ -89,6 +100,7 @@ final class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
     );
     await _loadLocalPendingOrders(emit);
     await _loadFirstPage(emit);
+    await _generateCommercialAlerts();
   }
 
   void _onSearchChanged(
@@ -228,6 +240,23 @@ final class OrderListBloc extends Bloc<OrderListEvent, OrderListState> {
     );
     await _loadLocalPendingOrders(emit);
     await _loadFirstPage(emit);
+    await _generateCommercialAlerts();
+  }
+
+  /// Fire-and-forget from the UI's perspective (never surfaced in
+  /// [OrderListState] — it only ever populates the notification center,
+  /// TASK-151), but awaited here so tests can assert on it deterministically
+  /// — mirrors `CrmTaskListBloc._generateReminders` (TASK-152).
+  Future<void> _generateCommercialAlerts() async {
+    final generateAlerts = generateOrderCommercialAlerts;
+    if (generateAlerts == null) return;
+    final orders = <Order>[...state.localPendingOrders, ...state.orders];
+    if (orders.isEmpty) return;
+    await generateAlerts(
+      orders: orders,
+      recipientUserId: state.userId,
+      now: DateTime.now().toUtc(),
+    );
   }
 
   Future<void> _loadLocalPendingOrders(Emitter<OrderListState> emit) async {

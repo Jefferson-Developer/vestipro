@@ -17,6 +17,7 @@ final class NotificationDto {
     required this.deepLink,
     required this.createdAt,
     this.readAt,
+    this.priority = 'informative',
   });
 
   factory NotificationDto.fromJson(
@@ -31,6 +32,11 @@ final class NotificationDto {
     final deepLink = json['deepLink'];
     final createdAt = json['createdAt'];
     final readAt = json['readAt'];
+    // Absent on every notification written before TASK-153 shipped this
+    // field — defaults to `informative` rather than failing the whole
+    // document, unlike every other (always-present-since-TASK-151) field
+    // below.
+    final priority = json['priority'];
 
     if (organizationId is! String ||
         userId is! String ||
@@ -39,7 +45,8 @@ final class NotificationDto {
         body is! String ||
         deepLink is! String ||
         createdAt is! Timestamp ||
-        (readAt != null && readAt is! Timestamp)) {
+        (readAt != null && readAt is! Timestamp) ||
+        (priority != null && priority is! String)) {
       throw const ValidationException(
         'Invalid notification payload.',
         code: 'invalid_notification_payload',
@@ -56,6 +63,7 @@ final class NotificationDto {
       deepLink: deepLink,
       createdAt: createdAt.toDate(),
       readAt: (readAt as Timestamp?)?.toDate(),
+      priority: (priority as String?) ?? 'informative',
     );
   }
 
@@ -72,6 +80,10 @@ final class NotificationDto {
   final DateTime createdAt;
   final DateTime? readAt;
 
+  /// Raw `AppNotificationPriority.name` (TASK-153) — same "string, not the
+  /// domain enum" convention as [category].
+  final String priority;
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'organizationId': organizationId,
@@ -82,6 +94,7 @@ final class NotificationDto {
       'deepLink': deepLink,
       'createdAt': Timestamp.fromDate(createdAt),
       'readAt': readAt == null ? null : Timestamp.fromDate(readAt!),
+      'priority': priority,
     };
   }
 }

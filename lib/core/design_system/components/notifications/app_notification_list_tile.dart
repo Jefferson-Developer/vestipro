@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 
 import '../../foundations/foundations.dart';
 import '../../theme/theme.dart';
+import '../badges/app_status_badge.dart';
 
 /// The three groupings [AppNotificationListTile] renders an icon/color for —
 /// mirrors `AppNotificationCategory` (`lib/core/notifications/`) without
@@ -24,6 +25,7 @@ class AppNotificationListTile extends StatelessWidget {
     required this.category,
     required this.timestampLabel,
     required this.isUnread,
+    this.isCritical = false,
     this.onTap,
   });
 
@@ -32,6 +34,15 @@ class AppNotificationListTile extends StatelessWidget {
   final AppNotificationTileCategory category;
   final String timestampLabel;
   final bool isUnread;
+
+  /// Whether this notification is high-priority (TASK-153) — e.g. meta em
+  /// risco alto, pedido rejeitado, falha crítica de sincronização. Never
+  /// signaled by color alone: a critical notification renders an
+  /// [AppStatusBadge] with both an icon and the "Crítico" label, on top of
+  /// (never instead of) its [category] color, so it stays legible for
+  /// color-blind users and in a grayscale screenshot — same accessibility
+  /// contract [isUnread] already sets for this tile.
+  final bool isCritical;
   final VoidCallback? onTap;
 
   IconData get _categoryIcon => switch (category) {
@@ -57,10 +68,11 @@ class AppNotificationListTile extends StatelessWidget {
     final colors = context.colors;
     final categoryColor = _categoryColor(colors);
     final semanticStatus = isUnread ? 'não lida' : 'lida';
+    final semanticPriority = isCritical ? ', crítico' : '';
 
     return Semantics(
       button: onTap != null,
-      label: '$_categoryLabel: $title, $semanticStatus',
+      label: '$_categoryLabel: $title, $semanticStatus$semanticPriority',
       child: InkWell(
         onTap: onTap,
         borderRadius: BorderRadius.circular(AppRadius.radius8),
@@ -123,6 +135,14 @@ class AppNotificationListTile extends StatelessWidget {
                       ),
                     ),
                     const SizedBox(height: AppSpacing.spacing8),
+                    if (isCritical) ...<Widget>[
+                      const AppStatusBadge(
+                        label: 'Crítico',
+                        variant: AppStatusBadgeVariant.error,
+                        icon: Icons.priority_high,
+                      ),
+                      const SizedBox(height: AppSpacing.spacing8),
+                    ],
                     Text(
                       timestampLabel,
                       style: AppTypography.labelMedium.copyWith(

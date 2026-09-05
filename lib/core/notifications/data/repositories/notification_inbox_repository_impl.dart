@@ -259,6 +259,7 @@ final class NotificationInboxRepositoryImpl
       deepLink: notification.deepLink,
       createdAt: notification.createdAt,
       readAt: notification.readAt ?? readAt,
+      priority: notification.priority,
     );
   }
 

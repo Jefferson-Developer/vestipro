@@ -462,6 +462,10 @@ import '../features/insights/data/datasources/insight_data_source.dart'
 import '../features/insights/data/mappers/insight_mapper.dart' as _i963;
 import '../features/insights/data/repositories/insight_repository_impl.dart'
     as _i666;
+import '../features/insights/data/repositories/shared_preferences_insight_alert_dispatch_repository.dart'
+    as _i909;
+import '../features/insights/domain/repositories/insight_alert_dispatch_repository.dart'
+    as _i453;
 import '../features/insights/domain/repositories/insight_repository.dart'
     as _i644;
 import '../features/insights/domain/rules/abandoned_order_insight_rule.dart'
@@ -490,8 +494,12 @@ import '../features/insights/domain/services/insight_structural_validator.dart'
     as _i864;
 import '../features/insights/domain/services/insight_visibility_service.dart'
     as _i44;
+import '../features/insights/domain/usecases/generate_insight_commercial_alerts_use_case.dart'
+    as _i113;
 import '../features/insights/domain/usecases/list_opportunity_center_insights_use_case.dart'
     as _i1006;
+import '../features/insights/domain/usecases/process_insight_commercial_alert_use_case.dart'
+    as _i591;
 import '../features/insights/domain/usecases/update_insight_status_use_case.dart'
     as _i756;
 import '../features/insights/insight_module.dart' as _i676;
@@ -702,8 +710,12 @@ import '../features/orders/data/repositories/order_pricing_repository_impl.dart'
     as _i258;
 import '../features/orders/data/repositories/order_submission_repository_impl.dart'
     as _i167;
+import '../features/orders/data/repositories/shared_preferences_order_commercial_alert_dispatch_repository.dart'
+    as _i180;
 import '../features/orders/domain/repositories/order_approval_repository.dart'
     as _i592;
+import '../features/orders/domain/repositories/order_commercial_alert_dispatch_repository.dart'
+    as _i42;
 import '../features/orders/domain/repositories/order_draft_repository.dart'
     as _i81;
 import '../features/orders/domain/repositories/order_list_repository.dart'
@@ -726,6 +738,8 @@ import '../features/orders/domain/usecases/duplicate_order_use_case.dart'
     as _i315;
 import '../features/orders/domain/usecases/ensure_customer_in_seller_portfolio_use_case.dart'
     as _i583;
+import '../features/orders/domain/usecases/generate_order_commercial_alerts_use_case.dart'
+    as _i787;
 import '../features/orders/domain/usecases/get_order_by_id_use_case.dart'
     as _i1062;
 import '../features/orders/domain/usecases/get_order_draft_use_case.dart'
@@ -737,6 +751,8 @@ import '../features/orders/domain/usecases/get_order_submission_context_use_case
 import '../features/orders/domain/usecases/list_local_pending_orders_use_case.dart'
     as _i233;
 import '../features/orders/domain/usecases/list_orders_use_case.dart' as _i144;
+import '../features/orders/domain/usecases/process_order_commercial_alert_use_case.dart'
+    as _i491;
 import '../features/orders/domain/usecases/resolve_order_draft_defaults_use_case.dart'
     as _i530;
 import '../features/orders/domain/usecases/save_order_draft_use_case.dart'
@@ -1576,6 +1592,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i31.DiscountPolicyRepository>(
       () => const _i684.SharedPreferencesDiscountPolicyRepository(),
     );
+    gh.lazySingleton<_i453.InsightAlertDispatchRepository>(
+      () => const _i909.SharedPreferencesInsightAlertDispatchRepository(),
+    );
     gh.lazySingleton<_i1015.ProductCollectionLinkRepository>(
       () => const _i654.SharedPreferencesProductCollectionLinkRepository(),
     );
@@ -1701,6 +1720,10 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i960.ProductFormDraftDataSource>(
       () => const _i1033.SharedPreferencesProductFormDraftDataSource(),
+    );
+    gh.lazySingleton<_i42.OrderCommercialAlertDispatchRepository>(
+      () =>
+          const _i180.SharedPreferencesOrderCommercialAlertDispatchRepository(),
     );
     gh.lazySingleton<_i610.ConnectivityService>(
       () => _i4.ConnectivityPlusService(gh<_i895.Connectivity>()),
@@ -3148,6 +3171,13 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i591.ProcessInsightCommercialAlertUseCase>(
+      () => _i591.ProcessInsightCommercialAlertUseCase(
+        gh<_i453.InsightAlertDispatchRepository>(),
+        gh<_i387.NotificationInboxRepository>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i90.CreateAccountWithEmailAndPasswordUseCase>(
       () => _i90.CreateAccountWithEmailAndPasswordUseCase(
         gh<_i472.AuthRepository>(),
@@ -3412,6 +3442,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i756.OrganizationRepository>(),
       ),
     );
+    gh.factory<_i491.ProcessOrderCommercialAlertUseCase>(
+      () => _i491.ProcessOrderCommercialAlertUseCase(
+        gh<_i42.OrderCommercialAlertDispatchRepository>(),
+        gh<_i387.NotificationInboxRepository>(),
+        gh<_i47.PermissionService>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i481.SignUpBloc>(
       () => _i481.SignUpBloc(
         createAccountWithEmailAndPassword:
@@ -3470,6 +3508,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i334.RevokeInviteUseCase>(
       () => _i334.RevokeInviteUseCase(gh<_i75.InviteRepository>()),
+    );
+    gh.factory<_i113.GenerateInsightCommercialAlertsUseCase>(
+      () => _i113.GenerateInsightCommercialAlertsUseCase(
+        gh<_i591.ProcessInsightCommercialAlertUseCase>(),
+      ),
     );
     gh.factory<_i846.ExecutiveDashboardVisibilityService>(
       () => _i846.ExecutiveDashboardVisibilityService(
@@ -3676,6 +3719,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i904.OpportunityCenterBloc>(
+      () => _i904.OpportunityCenterBloc(
+        gh<_i1006.ListOpportunityCenterInsightsUseCase>(),
+        gh<_i756.UpdateInsightStatusUseCase>(),
+        gh<_i202.AnalyticsService>(),
+        generateInsightCommercialAlerts:
+            gh<_i113.GenerateInsightCommercialAlertsUseCase>(),
+      ),
+    );
     gh.factory<_i58.LoadCollectionDashboardEntriesUseCase>(
       () => _i58.LoadCollectionDashboardEntriesUseCase(
         gh<_i649.AggregationRepository>(),
@@ -3769,10 +3821,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i426.ReportScheduleReferenceChecker>(),
       ),
     );
-    gh.factory<_i424.OrderListBloc>(
-      () => _i424.OrderListBloc(
-        listOrders: gh<_i144.ListOrdersUseCase>(),
-        listLocalPendingOrders: gh<_i233.ListLocalPendingOrdersUseCase>(),
+    gh.factory<_i787.GenerateOrderCommercialAlertsUseCase>(
+      () => _i787.GenerateOrderCommercialAlertsUseCase(
+        gh<_i491.ProcessOrderCommercialAlertUseCase>(),
       ),
     );
     gh.factory<_i29.RepresentativeDashboardBloc>(
@@ -3788,13 +3839,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i904.LoadSalesDashboardGroupRowsUseCase>(),
         gh<_i799.CompanyRepository>(),
         gh<_i320.TeamRepository>(),
-        gh<_i202.AnalyticsService>(),
-      ),
-    );
-    gh.factory<_i904.OpportunityCenterBloc>(
-      () => _i904.OpportunityCenterBloc(
-        gh<_i1006.ListOpportunityCenterInsightsUseCase>(),
-        gh<_i756.UpdateInsightStatusUseCase>(),
         gh<_i202.AnalyticsService>(),
       ),
     );
@@ -3852,6 +3896,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i712.ReportFileSaverDataSource>(),
         gh<_i813.ReportExportRemoteDataSource>(),
         gh<_i750.ReportBrandingDataSource>(),
+      ),
+    );
+    gh.factory<_i424.OrderListBloc>(
+      () => _i424.OrderListBloc(
+        listOrders: gh<_i144.ListOrdersUseCase>(),
+        listLocalPendingOrders: gh<_i233.ListLocalPendingOrdersUseCase>(),
+        generateOrderCommercialAlerts:
+            gh<_i787.GenerateOrderCommercialAlertsUseCase>(),
       ),
     );
     gh.factory<_i565.ExecuteReportQuery>(

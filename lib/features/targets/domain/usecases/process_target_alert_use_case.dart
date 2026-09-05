@@ -91,6 +91,13 @@ final class ProcessTargetAlertUseCase {
       body: content.message,
       deepLink: deepLink,
       createdAt: instant,
+      // Meta em risco alto is the one classification that actually warrants
+      // interrupting the seller/gestor now (TASK-153's "priorização visual
+      // diferenciada para alertas críticos"); moderate risk and the
+      // opportunity nudge stay informative.
+      priority: assessment.classification == TargetAlertClassification.highRisk
+          ? AppNotificationPriority.critical
+          : AppNotificationPriority.informative,
     );
 
     final notificationCreated = await _notificationInboxRepository.create(

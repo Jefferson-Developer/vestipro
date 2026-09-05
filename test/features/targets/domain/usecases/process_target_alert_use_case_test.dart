@@ -65,8 +65,36 @@ void main() {
           analyticsService.loggedEvents.last.name,
           AnalyticsEvents.targetAlertTriggered,
         );
+        // TASK-153: meta em risco alto is the one classification that
+        // warrants a critical, visually-distinct notification.
+        expect(
+          notificationInboxRepository.items.single.priority,
+          AppNotificationPriority.critical,
+        );
       },
     );
+
+    test('a moderate-risk alert is queued as an informative (non-critical) '
+        'notification (TASK-153)', () async {
+      final moderateRiskProgress = TargetProgressViewModel.compute(
+        target: target,
+        realizedValue: 35,
+        now: DateTime.utc(2026, 1, 16),
+      );
+
+      final alert = await useCase(
+        target: target,
+        progress: moderateRiskProgress,
+        userId: 'rep-1',
+        now: DateTime.utc(2026, 1, 16),
+      );
+
+      expect(alert!.classification, TargetAlertClassification.moderateRisk);
+      expect(
+        notificationInboxRepository.items.single.priority,
+        AppNotificationPriority.informative,
+      );
+    });
 
     test(
       'does not duplicate the same alert inside the configured cooldown',

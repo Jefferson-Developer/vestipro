@@ -182,6 +182,8 @@ class _NotificationCenterContent extends StatelessWidget {
             category: _tileCategory(notification.category),
             timestampLabel: _timestampLabel(notification.createdAt),
             isUnread: notification.readAt == null,
+            isCritical:
+                notification.priority == AppNotificationPriority.critical,
             onTap: () => _handleTap(context, notification),
           );
         },

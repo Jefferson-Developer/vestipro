@@ -29,6 +29,7 @@ final class NotificationMapper {
       deepLink: dto.deepLink,
       createdAt: dto.createdAt,
       readAt: dto.readAt,
+      priority: _priorityFromString(dto.priority),
     );
   }
 
@@ -43,6 +44,7 @@ final class NotificationMapper {
       deepLink: entity.deepLink,
       createdAt: entity.createdAt,
       readAt: entity.readAt,
+      priority: entity.priority.name,
     );
   }
 
@@ -52,6 +54,16 @@ final class NotificationMapper {
       // An unrecognized/future category (e.g. written by a newer app
       // version) degrades to `system` instead of crashing the whole list.
       orElse: () => AppNotificationCategory.system,
+    );
+  }
+
+  AppNotificationPriority _priorityFromString(String value) {
+    return AppNotificationPriority.values.firstWhere(
+      (priority) => priority.name == value,
+      // An unrecognized/future priority, or one absent entirely (every
+      // notification written before TASK-153), degrades to `informative`
+      // rather than crashing the whole list.
+      orElse: () => AppNotificationPriority.informative,
     );
   }
 }

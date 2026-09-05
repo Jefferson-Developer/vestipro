@@ -1144,9 +1144,10 @@ service cloud.firestore {
       // dia uma query tente ler notificação de outro usuário. Hoje o próprio
       // app cria a notificação (ex.: alerta de meta, TASK-149) — por isso
       // `create` exige `userId == auth.uid` — mas o conteúdo (`title`,
-      // `body`, `category`, `deepLink`, `createdAt`) nunca pode ser alterado
-      // depois: `update` só aceita a marcação de leitura (`readAt`), nunca
-      // reescrever o restante do documento.
+      // `body`, `category`, `deepLink`, `createdAt`, `priority` — a
+      // priorização visual crítico/informativo do TASK-153) nunca pode ser
+      // alterado depois: `update` só aceita a marcação de leitura (`readAt`),
+      // nunca reescrever o restante do documento.
 
       match /notifications/{notificationId} {
         allow get: if isActiveMember(organizationId)
@@ -1167,7 +1168,8 @@ service cloud.firestore {
           && unchanged('title')
           && unchanged('body')
           && unchanged('deepLink')
-          && unchanged('createdAt');
+          && unchanged('createdAt')
+          && unchanged('priority');
 
         allow delete: if false;
       }

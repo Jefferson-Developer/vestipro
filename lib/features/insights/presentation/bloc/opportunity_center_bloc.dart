@@ -8,6 +8,7 @@ import '../../../../core/analytics/analytics.dart';
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/insight.dart';
 import '../../domain/entities/insight_page.dart';
+import '../../domain/usecases/generate_insight_commercial_alerts_use_case.dart';
 import '../../domain/usecases/list_opportunity_center_insights_use_case.dart';
 import '../../domain/usecases/update_insight_status_use_case.dart';
 import '../../domain/value_objects/insight_status.dart';
@@ -44,8 +45,9 @@ final class OpportunityCenterBloc
   OpportunityCenterBloc(
     this._listOpportunityCenterInsights,
     this._updateInsightStatus,
-    this._analyticsService,
-  ) : super(const OpportunityCenterState()) {
+    this._analyticsService, {
+    this.generateInsightCommercialAlerts,
+  }) : super(const OpportunityCenterState()) {
     on<OpportunityCenterStarted>(_onStarted);
     on<OpportunityCenterFiltersChanged>(_onFiltersChanged);
     on<OpportunityCenterNextPageRequested>(_onNextPageRequested);
@@ -62,6 +64,17 @@ final class OpportunityCenterBloc
   final ListOpportunityCenterInsightsUseCase _listOpportunityCenterInsights;
   final UpdateInsightStatusUseCase _updateInsightStatus;
   final AnalyticsService _analyticsService;
+
+  /// Optional (defaults to `null` so existing call sites/tests that predate
+  /// TASK-153 keep compiling unchanged) — when present, dispatches "hot
+  /// opportunity" commercial alerts (TASK-153) for every insight the
+  /// caller's first page load just fetched, addressed to the current
+  /// viewer (`state.userId`) — exactly the same scope
+  /// [_listOpportunityCenterInsights] already restricts the list itself to.
+  /// Deliberately only the first page, never [_onNextPageRequested]: same
+  /// "once per session load, not once per scroll" placement
+  /// `CrmTaskListBloc`/`OrderListBloc` already use for their own alerts.
+  final GenerateInsightCommercialAlertsUseCase? generateInsightCommercialAlerts;
 
   int _requestToken = 0;
 
@@ -168,6 +181,7 @@ final class OpportunityCenterBloc
             clearFailure: true,
           ),
         );
+        await _generateCommercialAlerts(page.insights);
       case AppFailure<InsightPage>(failure: final failure):
         emit(
           state.copyWith(
@@ -179,6 +193,21 @@ final class OpportunityCenterBloc
           ),
         );
     }
+  }
+
+  /// Fire-and-forget from the UI's perspective (never surfaced in
+  /// [OpportunityCenterState] — it only ever populates the notification
+  /// center, TASK-151), but awaited here so tests can assert on it
+  /// deterministically — mirrors `CrmTaskListBloc._generateReminders`
+  /// (TASK-152)/`OrderListBloc._generateCommercialAlerts` (TASK-153).
+  Future<void> _generateCommercialAlerts(List<Insight> insights) async {
+    final generateAlerts = generateInsightCommercialAlerts;
+    if (generateAlerts == null || insights.isEmpty) return;
+    await generateAlerts(
+      insights: insights,
+      recipientUserId: state.userId,
+      now: DateTime.now().toUtc(),
+    );
   }
 
   void _onInsightOpened(
