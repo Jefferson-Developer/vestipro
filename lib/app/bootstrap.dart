@@ -3,6 +3,7 @@ import 'dart:developer' as developer;
 import 'dart:ui' show PlatformDispatcher;
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
@@ -17,6 +18,7 @@ import '../core/environment/app_environment.dart';
 import '../core/errors/errors.dart';
 import '../core/feature_flags/feature_flags.dart';
 import '../core/navigation/navigation.dart';
+import '../core/notifications/notifications.dart';
 import '../core/permissions/permissions.dart';
 import '../core/services/services.dart';
 import '../features/authentication/authentication.dart';
@@ -56,6 +58,12 @@ Future<void> bootstrap(AppEnvironment environment) async {
     await Firebase.initializeApp(
       options: DefaultFirebaseOptions.currentPlatform,
     );
+    // TASK-150: registered unconditionally, right after Firebase itself
+    // initializes — must happen this early (FlutterFire's own requirement),
+    // never gated behind whether anything later resolves `FirebaseMessaging`
+    // through `getIt`, since the platform SDK needs to know the background
+    // isolate entry point before any background push could ever arrive.
+    FirebaseMessaging.onBackgroundMessage(firebaseMessagingBackgroundHandler);
   } catch (error, stackTrace) {
     final exception = FirebaseInitializationException(
       'Falha ao inicializar o Firebase para o ambiente '
@@ -78,6 +86,7 @@ Future<void> bootstrap(AppEnvironment environment) async {
   Bloc.observer = const VestiProBlocObserver();
   configureDependencies(environment);
   configureGlobalErrorHandlers();
+  configurePushNotificationLifecycle();
   runApp(VestiProApp(environment: environment));
 }
 
@@ -134,6 +143,79 @@ void configureGlobalErrorHandlers({
     }
     return previousPlatformOnError?.call(error, stackTrace) ?? true;
   };
+}
+
+/// Wires push notification plumbing that must start as soon as the app
+/// boots, independent of any UI ever resolving these services through
+/// [getIt] on its own (TASK-150):
+///
+/// - Eagerly resolves [PushNotificationRouter] so its `onMessage`/
+///   `onMessageOpenedApp` subscriptions start immediately — otherwise,
+///   being a lazy singleton like every other DI-registered service here, it
+///   would only start listening the first time some future UI (TASK-151)
+///   happens to resolve it, silently missing any push received before then.
+/// - Registers this device's FCM token for whoever the session changes to:
+///   a real login, or an already-signed-in session simply restored on a
+///   fresh app launch (`SessionService.sessionChanges` emits the current
+///   user immediately upon subscription). Resolves that user's active
+///   Organization itself (same [ResolveActiveOrganizationIdUseCase]
+///   `LoginBloc` already uses, and the same single-Organization limitation
+///   it already documents), so no other call site needs to know push
+///   exists at all.
+/// - Unregisters/invalidates this device's token the moment the session
+///   goes back to signed-out (logout, or a remotely revoked session —
+///   TASK-046), so a different account signing in afterwards on this same
+///   device never inherits the previous one's push registration.
+///
+/// Every step here is best-effort by design: a [PushTokenService]/
+/// [ResolveActiveOrganizationIdUseCase] failure must never surface as a
+/// login/session-restore/logout failure anywhere else in the app — both
+/// services this depends on already guarantee they never throw.
+@visibleForTesting
+void configurePushNotificationLifecycle({
+  SessionService Function()? resolveSessionService,
+  PushTokenService Function()? resolvePushTokenService,
+  ResolveActiveOrganizationIdUseCase Function()?
+  resolveActiveOrganizationIdUseCase,
+  PushNotificationRouter Function()? resolvePushNotificationRouter,
+}) {
+  final resolveSession = resolveSessionService ?? () => getIt<SessionService>();
+  final resolveToken =
+      resolvePushTokenService ?? () => getIt<PushTokenService>();
+  final resolveOrg =
+      resolveActiveOrganizationIdUseCase ??
+      () => getIt<ResolveActiveOrganizationIdUseCase>();
+  final resolveRouter =
+      resolvePushNotificationRouter ?? () => getIt<PushNotificationRouter>();
+
+  resolveRouter();
+
+  resolveSession().sessionChanges.listen((user) {
+    if (user == null) {
+      unawaited(resolveToken().unregisterCurrentDevice());
+      return;
+    }
+
+    unawaited(_registerPushDeviceForUser(user.uid, resolveOrg, resolveToken));
+  });
+}
+
+Future<void> _registerPushDeviceForUser(
+  String userId,
+  ResolveActiveOrganizationIdUseCase Function() resolveOrg,
+  PushTokenService Function() resolveToken,
+) async {
+  final organizationResult = await resolveOrg()(userId: userId);
+  final organizationId = organizationResult.fold(
+    onSuccess: (id) => id,
+    onFailure: (_) => null,
+  );
+  if (organizationId == null) return;
+
+  await resolveToken().registerDevice(
+    organizationId: organizationId,
+    userId: userId,
+  );
 }
 
 class VestiProApp extends StatelessWidget {

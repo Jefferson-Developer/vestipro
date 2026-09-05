@@ -8,6 +8,7 @@ import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_crashlytics/firebase_crashlytics.dart';
+import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
 import 'package:firebase_storage/firebase_storage.dart';
@@ -22,6 +23,7 @@ import '../core/database/configure_firestore.dart';
 import '../core/environment/app_environment.dart';
 import '../core/feature_flags/configure_remote_config.dart';
 import '../core/functions/configure_functions.dart';
+import '../core/notifications/push/configure_messaging.dart';
 import '../core/performance/configure_performance.dart';
 import '../core/security/configure_app_check.dart';
 import '../core/services/configure_crashlytics.dart';
@@ -159,6 +161,19 @@ abstract class AppInjectionModule {
     final remoteConfig = FirebaseRemoteConfig.instance;
     unawaited(configureRemoteConfig(remoteConfig, environment: environment));
     return remoteConfig;
+  }
+
+  /// Sets up foreground presentation options (TASK-150) the first time
+  /// something resolves [FirebaseMessaging] — same lazy-DI-triggered wiring
+  /// rationale as every other Firebase product provider above.
+  /// `onBackgroundMessage` is registered separately in `bootstrap.dart`
+  /// (must happen unconditionally, as early as `Firebase.initializeApp`
+  /// itself — not gated behind whether anything ever resolves this getter).
+  @lazySingleton
+  FirebaseMessaging firebaseMessaging() {
+    final messaging = FirebaseMessaging.instance;
+    unawaited(configureMessaging(messaging));
+    return messaging;
   }
 
   @lazySingleton

@@ -17,6 +17,7 @@ import 'package:firebase_analytics/firebase_analytics.dart' as _i398;
 import 'package:firebase_app_check/firebase_app_check.dart' as _i56;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
 import 'package:firebase_crashlytics/firebase_crashlytics.dart' as _i141;
+import 'package:firebase_messaging/firebase_messaging.dart' as _i892;
 import 'package:firebase_performance/firebase_performance.dart' as _i346;
 import 'package:firebase_remote_config/firebase_remote_config.dart' as _i627;
 import 'package:firebase_storage/firebase_storage.dart' as _i457;
@@ -50,11 +51,32 @@ import '../core/feature_flags/firebase_feature_flag_service.dart' as _i845;
 import '../core/functions/app_client_metadata.dart' as _i465;
 import '../core/functions/cloud_functions_service.dart' as _i147;
 import '../core/functions/functions.dart' as _i340;
+import '../core/notifications/data/datasources/firestore_push_device_data_source.dart'
+    as _i1068;
+import '../core/notifications/data/datasources/push_device_data_source.dart'
+    as _i589;
+import '../core/notifications/data/mappers/push_device_mapper.dart' as _i827;
+import '../core/notifications/data/repositories/push_device_repository_impl.dart'
+    as _i1028;
 import '../core/notifications/data/repositories/shared_preferences_notification_inbox_repository.dart'
     as _i393;
 import '../core/notifications/domain/repositories/notification_inbox_repository.dart'
     as _i73;
+import '../core/notifications/domain/repositories/push_device_repository.dart'
+    as _i845;
 import '../core/notifications/notifications.dart' as _i387;
+import '../core/notifications/push/device_installation_id_provider.dart'
+    as _i10;
+import '../core/notifications/push/firebase_messaging_notification_router.dart'
+    as _i461;
+import '../core/notifications/push/firebase_messaging_permission_service.dart'
+    as _i518;
+import '../core/notifications/push/firebase_messaging_push_token_service.dart'
+    as _i710;
+import '../core/notifications/push/push_notification_router.dart' as _i456;
+import '../core/notifications/push/push_permission_service.dart' as _i675;
+import '../core/notifications/push/push_registration_local_store.dart' as _i343;
+import '../core/notifications/push/push_token_service.dart' as _i210;
 import '../core/offline/data/repositories/drift_offline_package_status_repository.dart'
     as _i963;
 import '../core/offline/domain/download_offline_package_use_case.dart' as _i109;
@@ -1298,6 +1320,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i706.Uuid>(() => appInjectionModule.uuid);
     gh.lazySingleton<_i361.Dio>(() => appInjectionModule.dio);
+    gh.lazySingleton<_i892.FirebaseMessaging>(
+      () => appInjectionModule.firebaseMessaging(),
+    );
     gh.lazySingleton<_i935.AppDatabase>(() => appInjectionModule.appDatabase());
     gh.lazySingleton<List<_i17.SyncPushHandler>>(
       () => syncModule.syncPushHandlers,
@@ -1487,6 +1512,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i959.PriceListItemLocalMapper>(),
       ),
     );
+    gh.lazySingleton<_i675.PushPermissionService>(
+      () => _i518.FirebaseMessagingPermissionService(
+        gh<_i892.FirebaseMessaging>(),
+      ),
+    );
+    gh.lazySingleton<_i10.DeviceInstallationIdProvider>(
+      () =>
+          _i10.SharedPreferencesDeviceInstallationIdProvider(gh<_i706.Uuid>()),
+    );
     gh.lazySingleton<_i43.OpportunityRepository>(
       () => _i771.SharedPreferencesOpportunityRepository(
         gh<_i449.OpportunityMapper>(),
@@ -1558,6 +1592,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i36.SaveCatalogPreferencesUseCase>(
       () => _i36.SaveCatalogPreferencesUseCase(
         gh<_i1031.CatalogPreferencesRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i456.PushNotificationRouter>(
+      () => _i461.FirebaseMessagingNotificationRouter(
+        gh<_i892.FirebaseMessaging>(),
       ),
     );
     gh.lazySingleton<_i174.SizeGridTemplateRepository>(
@@ -1644,6 +1683,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i750.PdfIsolateEncoder>(
       () => const _i750.FlutterPdfIsolateEncoder(),
+    );
+    gh.lazySingleton<_i343.PushRegistrationLocalStore>(
+      () => _i343.SharedPreferencesPushRegistrationLocalStore(),
     );
     gh.lazySingleton<List<_i629.InsightRule>>(
       () => insightModule.insightRules(
@@ -2425,6 +2467,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i244.OrderItemsCounterCubit>(
       () => _i244.OrderItemsCounterCubit(gh<_i485.GetOrderDraftUseCase>()),
     );
+    gh.lazySingleton<_i589.PushDeviceDataSource>(
+      () => _i1068.FirestorePushDeviceDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i904.StorageDataSource>(
       () => _i833.FirebaseStorageDataSource(gh<_i457.FirebaseStorage>()),
     );
@@ -2490,6 +2535,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i923.RoleDataSource>(
       () => _i892.FirestoreRoleDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.lazySingleton<_i845.PushDeviceRepository>(
+      () => _i1028.PushDeviceRepositoryImpl(
+        dataSource: gh<_i589.PushDeviceDataSource>(),
+        mapper: gh<_i827.PushDeviceMapper>(),
+      ),
     );
     gh.factory<_i419.CampaignFormBloc>(
       () => _i419.CampaignFormBloc(
@@ -2768,6 +2819,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i117.SavedReportRepository>(),
         gh<_i957.MembershipRepository>(),
         gh<_i47.PermissionService>(),
+      ),
+    );
+    gh.lazySingleton<_i210.PushTokenService>(
+      () => _i710.FirebaseMessagingPushTokenService(
+        messaging: gh<_i892.FirebaseMessaging>(),
+        repository: gh<_i845.PushDeviceRepository>(),
+        deviceIdProvider: gh<_i10.DeviceInstallationIdProvider>(),
+        clientMetadataProvider: gh<_i340.AppClientMetadataProvider>(),
+        registrationStore: gh<_i343.PushRegistrationLocalStore>(),
       ),
     );
     gh.factory<_i604.UpdateTargetUseCase>(

@@ -1096,6 +1096,42 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/pushDevices/{deviceId}  (TASK-150)
+      // -------------------------------------------------------------------
+      //
+      // Cada documento é o vínculo token FCM ↔ usuário ↔ dispositivo de um
+      // único membro ativo, escrito pelo próprio cliente logo após login/
+      // renovação de token (`PushTokenService`) — nunca por outro usuário.
+      // Quem efetivamente envia push (Cloud Function, fora do escopo desta
+      // task) usa o Admin SDK e ignora estas Rules, então a única
+      // preocupação aqui é impedir que um cliente crie, leia ou altere o
+      // vínculo de outro usuário. Nenhum caso de uso lista/enumera
+      // `pushDevices` do cliente — `allow list: if false` — nem exclui
+      // fisicamente um vínculo — desativação é sempre `deletedAt` via
+      // `update` (mesma convenção de soft delete de todo o restante deste
+      // arquivo).
+
+      match /pushDevices/{deviceId} {
+        allow get: if isActiveMember(organizationId)
+          && resource.data.userId == request.auth.uid;
+
+        allow list: if false;
+
+        allow create: if isActiveMember(organizationId)
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.userId == request.auth.uid;
+
+        allow update: if isActiveMember(organizationId)
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.userId == request.auth.uid
+          && resource.data.userId == request.auth.uid
+          && unchanged('organizationId')
+          && unchanged('userId');
+
+        allow delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/invites/{inviteId}  (TASK-039)
       // -------------------------------------------------------------------
       //
