@@ -12,6 +12,7 @@
 import 'package:cloud_firestore/cloud_firestore.dart' as _i974;
 import 'package:cloud_functions/cloud_functions.dart' as _i809;
 import 'package:connectivity_plus/connectivity_plus.dart' as _i895;
+import 'package:dio/dio.dart' as _i361;
 import 'package:firebase_analytics/firebase_analytics.dart' as _i398;
 import 'package:firebase_app_check/firebase_app_check.dart' as _i56;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
@@ -1071,6 +1072,9 @@ import '../features/reports/data/datasources/cloud_functions_report_remote_data_
 import '../features/reports/data/datasources/csv_isolate_encoder.dart' as _i77;
 import '../features/reports/data/datasources/firestore_saved_report_remote_data_source.dart'
     as _i925;
+import '../features/reports/data/datasources/pdf_isolate_encoder.dart' as _i750;
+import '../features/reports/data/datasources/report_branding_data_source.dart'
+    as _i750;
 import '../features/reports/data/datasources/report_export_remote_data_source.dart'
     as _i813;
 import '../features/reports/data/datasources/report_file_saver_data_source.dart'
@@ -1099,6 +1103,7 @@ import '../features/reports/domain/services/no_active_schedule_report_schedule_r
 import '../features/reports/domain/services/report_schedule_reference_checker.dart'
     as _i426;
 import '../features/reports/domain/usecases/export_report_to_csv.dart' as _i89;
+import '../features/reports/domain/usecases/export_report_to_pdf.dart' as _i35;
 import '../features/reports/domain/usecases/export_report_to_xlsx.dart'
     as _i847;
 import '../features/reports/domain/usecases/report_use_cases.dart' as _i565;
@@ -1280,6 +1285,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => appInjectionModule.syncRetryPolicy,
     );
     gh.lazySingleton<_i706.Uuid>(() => appInjectionModule.uuid);
+    gh.lazySingleton<_i361.Dio>(() => appInjectionModule.dio);
     gh.lazySingleton<_i935.AppDatabase>(() => appInjectionModule.appDatabase());
     gh.lazySingleton<List<_i17.SyncPushHandler>>(
       () => syncModule.syncPushHandlers,
@@ -1623,6 +1629,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i277.ResolveApplicableCampaignsUseCase(
         gh<_i211.PromotionalCampaignRepository>(),
       ),
+    );
+    gh.lazySingleton<_i750.PdfIsolateEncoder>(
+      () => const _i750.FlutterPdfIsolateEncoder(),
     );
     gh.lazySingleton<List<_i629.InsightRule>>(
       () => insightModule.insightRules(
@@ -3084,14 +3093,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i753.AuditLogRepository>(),
       ),
     );
-    gh.lazySingleton<_i876.ReportExportRepository>(
-      () => _i959.ReportExportRepositoryImpl(
-        gh<_i77.CsvIsolateEncoder>(),
-        gh<_i969.XlsxIsolateEncoder>(),
-        gh<_i712.ReportFileSaverDataSource>(),
-        gh<_i813.ReportExportRemoteDataSource>(),
-      ),
-    );
     gh.factory<_i722.GetStockTurnoverMetricsUseCase>(
       () => _i722.GetStockTurnoverMetricsUseCase(
         gh<_i503.StockTurnoverRepository>(),
@@ -3105,12 +3106,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i820.UpdateBranchUseCase>(
       () => _i820.UpdateBranchUseCase(gh<_i160.BranchRepository>()),
-    );
-    gh.factory<_i89.ExportReportToCsv>(
-      () => _i89.ExportReportToCsv(gh<_i876.ReportExportRepository>()),
-    );
-    gh.factory<_i847.ExportReportToXlsx>(
-      () => _i847.ExportReportToXlsx(gh<_i876.ReportExportRepository>()),
     );
     gh.factory<_i268.SearchProductsUseCase>(
       () => _i268.SearchProductsUseCase(gh<_i568.ProductSearchRepository>()),
@@ -3375,6 +3370,12 @@ extension GetItInjectableX on _i174.GetIt {
         createTeam: gh<_i265.CreateTeamUseCase>(),
         updateTeam: gh<_i265.UpdateTeamUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.lazySingleton<_i750.ReportBrandingDataSource>(
+      () => _i750.OrganizationReportBrandingDataSource(
+        gh<_i756.OrganizationRepository>(),
+        gh<_i361.Dio>(),
       ),
     );
     gh.factory<_i75.PromotionalCampaignCubit>(
@@ -3658,6 +3659,16 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.lazySingleton<_i876.ReportExportRepository>(
+      () => _i959.ReportExportRepositoryImpl(
+        gh<_i77.CsvIsolateEncoder>(),
+        gh<_i969.XlsxIsolateEncoder>(),
+        gh<_i750.PdfIsolateEncoder>(),
+        gh<_i712.ReportFileSaverDataSource>(),
+        gh<_i813.ReportExportRemoteDataSource>(),
+        gh<_i750.ReportBrandingDataSource>(),
+      ),
+    );
     gh.factory<_i565.ExecuteReportQuery>(
       () => _i565.ExecuteReportQuery(
         gh<_i22.ReportRepository>(),
@@ -3723,18 +3734,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i325.CustomerOfflinePackageEntityLoader>(),
         gh<_i1044.PriceListOfflinePackageEntityLoader>(),
         gh<_i898.PaymentTermOfflinePackageEntityLoader>(),
-      ),
-    );
-    gh.factory<_i822.ReportBuilderBloc>(
-      () => _i822.ReportBuilderBloc(
-        gh<_i565.LoadReportCatalog>(),
-        gh<_i565.ExecuteReportQuery>(),
-        gh<_i908.ValidateReportDefinition>(),
-        gh<_i22.ReportDraftRepository>(),
-        gh<_i202.AnalyticsService>(),
-        gh<_i89.ExportReportToCsv>(),
-        gh<_i847.ExportReportToXlsx>(),
-        gh<_i869.FeatureFlagService>(),
       ),
     );
     gh.factory<_i144.InventoryDashboardBloc>(
@@ -3861,6 +3860,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i81.OrderDraftRepository>(),
       ),
     );
+    gh.factory<_i89.ExportReportToCsv>(
+      () => _i89.ExportReportToCsv(gh<_i876.ReportExportRepository>()),
+    );
+    gh.factory<_i35.ExportReportToPdf>(
+      () => _i35.ExportReportToPdf(gh<_i876.ReportExportRepository>()),
+    );
+    gh.factory<_i847.ExportReportToXlsx>(
+      () => _i847.ExportReportToXlsx(gh<_i876.ReportExportRepository>()),
+    );
     gh.factory<_i6.GeographicDashboardBloc>(
       () => _i6.GeographicDashboardBloc(
         gh<_i516.LoadGeographicDashboardUseCase>(),
@@ -3928,6 +3936,19 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i795.ProductVariantRepository>(),
         gh<_i385.GetVariantAvailabilityUseCase>(),
         gh<_i352.ResolvePriceForVariantUseCase>(),
+      ),
+    );
+    gh.factory<_i822.ReportBuilderBloc>(
+      () => _i822.ReportBuilderBloc(
+        gh<_i565.LoadReportCatalog>(),
+        gh<_i565.ExecuteReportQuery>(),
+        gh<_i908.ValidateReportDefinition>(),
+        gh<_i22.ReportDraftRepository>(),
+        gh<_i202.AnalyticsService>(),
+        gh<_i89.ExportReportToCsv>(),
+        gh<_i847.ExportReportToXlsx>(),
+        gh<_i35.ExportReportToPdf>(),
+        gh<_i869.FeatureFlagService>(),
       ),
     );
     gh.factory<_i21.OrderDuplicationCubit>(

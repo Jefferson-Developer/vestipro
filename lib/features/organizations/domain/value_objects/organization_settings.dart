@@ -130,6 +130,20 @@ abstract class OrganizationSettings with _$OrganizationSettings {
     /// full ranking of the scope they manage, regardless of this setting;
     /// see `RankingCalculationService`'s own docs.
     @Default(defaultRankingVisibilityMode) String rankingVisibilityMode,
+
+    /// Organization branding applied to executive-facing exports (PDF report
+    /// export, TASK-148) — a downloadable image URL (typically a Firebase
+    /// Storage download URL, but never assumed to be one: fetched with a
+    /// plain HTTP GET). `null` means the organization never configured a
+    /// logo, in which case `PdfReportEncoder` falls back to VestiPro's own
+    /// default identity — branding is only ever applied when explicitly
+    /// configured, never inferred.
+    String? brandingLogoUrl,
+
+    /// Organization brand color applied to a PDF report export's cover page
+    /// (TASK-148), as a `#RRGGBB` hex string. `null` means "not configured",
+    /// same fallback rule as [brandingLogoUrl].
+    String? brandingPrimaryColorHex,
   }) = _OrganizationSettings;
 
   /// Builds validated [OrganizationSettings], trimming each value and
@@ -156,6 +170,8 @@ abstract class OrganizationSettings with _$OrganizationSettings {
         defaultPositivacaoEligibleOrderStatuses,
     double? positivacaoMinOrderValue,
     String rankingVisibilityMode = defaultRankingVisibilityMode,
+    String? brandingLogoUrl,
+    String? brandingPrimaryColorHex,
   }) {
     final fieldErrors = <String, String>{};
     final trimmedCurrency = currency.trim();
@@ -181,6 +197,8 @@ abstract class OrganizationSettings with _$OrganizationSettings {
       positivacaoEligibleOrderStatuses,
     );
     final trimmedRankingVisibilityMode = rankingVisibilityMode.trim();
+    final trimmedBrandingLogoUrl = brandingLogoUrl?.trim();
+    final trimmedBrandingPrimaryColorHex = brandingPrimaryColorHex?.trim();
 
     if (trimmedCurrency.isEmpty) {
       fieldErrors['currency'] = 'Currency is required.';
@@ -227,6 +245,12 @@ abstract class OrganizationSettings with _$OrganizationSettings {
           'Ranking visibility mode must be full_ranking or '
           'relative_position_only.';
     }
+    if (trimmedBrandingPrimaryColorHex != null &&
+        trimmedBrandingPrimaryColorHex.isNotEmpty &&
+        !_hexColorPattern.hasMatch(trimmedBrandingPrimaryColorHex)) {
+      fieldErrors['brandingPrimaryColorHex'] =
+          'Branding primary color must be a #RRGGBB hex string.';
+    }
 
     if (fieldErrors.isNotEmpty) {
       throw ValidationException(
@@ -254,9 +278,20 @@ abstract class OrganizationSettings with _$OrganizationSettings {
           normalizedPositivacaoEligibleOrderStatuses,
       positivacaoMinOrderValue: positivacaoMinOrderValue,
       rankingVisibilityMode: trimmedRankingVisibilityMode,
+      brandingLogoUrl:
+          (trimmedBrandingLogoUrl == null || trimmedBrandingLogoUrl.isEmpty)
+          ? null
+          : trimmedBrandingLogoUrl,
+      brandingPrimaryColorHex:
+          (trimmedBrandingPrimaryColorHex == null ||
+              trimmedBrandingPrimaryColorHex.isEmpty)
+          ? null
+          : trimmedBrandingPrimaryColorHex,
     );
   }
 }
+
+final _hexColorPattern = RegExp(r'^#[0-9A-Fa-f]{6}$');
 
 List<String> _normalizeSettingsList(Iterable<String> values) {
   final normalized = values

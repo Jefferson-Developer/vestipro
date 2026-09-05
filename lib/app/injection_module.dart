@@ -3,6 +3,7 @@ import 'dart:async' show unawaited;
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
@@ -207,4 +208,13 @@ abstract class AppInjectionModule {
   /// all of them at once.
   @lazySingleton
   Uuid get uuid => const Uuid();
+
+  /// Backs `OrganizationReportBrandingDataSource` (TASK-148): a plain HTTP
+  /// GET client for downloading a PDF report export's logo image from
+  /// `OrganizationSettings.brandingLogoUrl` — the one dependency `dio` was
+  /// already reserved for ("external REST integrations", see its own
+  /// `pubspec.yaml` comment) but had never actually been used by any feature
+  /// until now.
+  @lazySingleton
+  Dio get dio => Dio();
 }

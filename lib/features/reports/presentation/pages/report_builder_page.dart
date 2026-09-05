@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -12,6 +14,7 @@ import '../bloc/report_builder_state.dart';
 import '../bloc/saved_reports_bloc.dart';
 import '../bloc/saved_reports_event.dart';
 import '../bloc/saved_reports_state.dart';
+import 'report_pdf_preview_page.dart';
 
 class ReportBuilderPage extends StatelessWidget {
   const ReportBuilderPage({
@@ -165,6 +168,36 @@ class _ReportBuilderView extends StatelessWidget {
               content: Text(
                 state.exportFailure?.message ??
                     'Não foi possível exportar o relatório.',
+              ),
+            ),
+          );
+        }
+      },
+      child: body,
+    );
+
+    body = BlocListener<ReportBuilderBloc, ReportBuilderState>(
+      listenWhen: (previous, current) =>
+          previous.pdfPreviewStatus != current.pdfPreviewStatus,
+      listener: (context, state) {
+        if (state.pdfPreviewStatus == ReportPdfPreviewStatus.ready &&
+            state.pdfPreview != null) {
+          unawaited(
+            Navigator.of(context).push(
+              MaterialPageRoute<void>(
+                builder: (_) => BlocProvider.value(
+                  value: context.read<ReportBuilderBloc>(),
+                  child: ReportPdfPreviewPage(preview: state.pdfPreview!),
+                ),
+              ),
+            ),
+          );
+        } else if (state.pdfPreviewStatus == ReportPdfPreviewStatus.failure) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(
+                state.pdfPreviewFailure?.message ??
+                    'Não foi possível gerar a pré-visualização do PDF.',
               ),
             ),
           );
@@ -665,16 +698,33 @@ class _Preview extends StatelessWidget {
           : const Icon(Icons.grid_on_outlined),
       label: const Text('Exportar XLSX'),
     );
+    final isPdfPreviewLoading =
+        state.pdfPreviewStatus == ReportPdfPreviewStatus.loading;
+    final exportPdfButton = OutlinedButton.icon(
+      key: const Key('export-report-pdf'),
+      onPressed: isPdfPreviewLoading
+          ? null
+          : () => context.read<ReportBuilderBloc>().add(
+              const ReportPdfPreviewRequested(),
+            ),
+      icon: isPdfPreviewLoading
+          ? const SizedBox.square(
+              dimension: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.picture_as_pdf_outlined),
+      label: const Text('Exportar PDF'),
+    );
     // `Capability.reportExport` mirrors `role_permission_matrix.dart`'s own
     // OWNER/ADMIN/SALES_MANAGER/FINANCE grant — `hasPermission == true` here
     // is only a UX affordance: the real, authoritative boundary is
-    // `exportReportToCsv`/`exportReportToXlsx`'s own `assertCanExportReports`
-    // (small exports) and `storage.rules`' `report.export` check (large
-    // exports' download link).
+    // `exportReportToCsv`/`exportReportToXlsx`/`exportReportToPdf`'s own
+    // `assertCanExportReports` (small exports) and `storage.rules`'
+    // `report.export` check (large exports' download link).
     final permissions = permissionService;
     final exportButtons = Wrap(
       spacing: 8,
-      children: [exportCsvButton, exportXlsxButton],
+      children: [exportCsvButton, exportXlsxButton, exportPdfButton],
     );
     final exportAction = permissions == null
         ? exportButtons

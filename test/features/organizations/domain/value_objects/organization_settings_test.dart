@@ -265,5 +265,73 @@ void main() {
         ),
       );
     });
+
+    test(
+      'defaults brandingLogoUrl/brandingPrimaryColorHex to null when not configured (TASK-148)',
+      () {
+        final settings = OrganizationSettings.validated(
+          currency: 'BRL',
+          country: 'BR',
+          defaultLanguage: 'pt-BR',
+        );
+
+        expect(settings.brandingLogoUrl, isNull);
+        expect(settings.brandingPrimaryColorHex, isNull);
+      },
+    );
+
+    test(
+      'accepts a configured brandingLogoUrl/brandingPrimaryColorHex, trimmed (TASK-148)',
+      () {
+        final settings = OrganizationSettings.validated(
+          currency: 'BRL',
+          country: 'BR',
+          defaultLanguage: 'pt-BR',
+          brandingLogoUrl: ' https://cdn.example.com/logo.png ',
+          brandingPrimaryColorHex: ' #112233 ',
+        );
+
+        expect(settings.brandingLogoUrl, 'https://cdn.example.com/logo.png');
+        expect(settings.brandingPrimaryColorHex, '#112233');
+      },
+    );
+
+    test(
+      'normalizes a blank brandingLogoUrl/brandingPrimaryColorHex to null instead of rejecting it (TASK-148)',
+      () {
+        final settings = OrganizationSettings.validated(
+          currency: 'BRL',
+          country: 'BR',
+          defaultLanguage: 'pt-BR',
+          brandingLogoUrl: '   ',
+          brandingPrimaryColorHex: '   ',
+        );
+
+        expect(settings.brandingLogoUrl, isNull);
+        expect(settings.brandingPrimaryColorHex, isNull);
+      },
+    );
+
+    test(
+      'rejects a brandingPrimaryColorHex that is not a #RRGGBB hex string (TASK-148)',
+      () {
+        expect(
+          () => OrganizationSettings.validated(
+            currency: 'BRL',
+            country: 'BR',
+            defaultLanguage: 'pt-BR',
+            brandingPrimaryColorHex: 'blue',
+          ),
+          throwsA(
+            isA<ValidationException>().having(
+              (exception) =>
+                  exception.fieldErrors.containsKey('brandingPrimaryColorHex'),
+              'fieldErrors has brandingPrimaryColorHex',
+              isTrue,
+            ),
+          ),
+        );
+      },
+    );
   });
 }

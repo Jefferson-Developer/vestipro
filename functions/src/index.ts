@@ -33,7 +33,13 @@ export {
   recomputeMonthlyAggregates,
   recomputeMonthlyAggregatesScheduled,
 } from './aggregations';
-export { loadReportCatalog, executeReportQuery, exportReportToCsv, exportReportToXlsx } from './reports';
+export {
+  loadReportCatalog,
+  executeReportQuery,
+  exportReportToCsv,
+  exportReportToXlsx,
+  exportReportToPdf,
+} from './reports';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

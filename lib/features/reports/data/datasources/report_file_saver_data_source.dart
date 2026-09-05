@@ -18,12 +18,13 @@ abstract interface class ReportFileSaverDataSource {
 
 /// Mime-type/allowed-extension known to this datasource, keyed by the
 /// export file's own extension (`ReportExportFileNameBuilder`'s `.csv`/
-/// `.xlsx`) — kept as a small lookup instead of a format parameter so a
-/// future export format (`.pdf`, TASK-148) only needs a new map entry, never
-/// a signature change on [ReportFileSaverDataSource.save].
+/// `.xlsx`/`.pdf`) — kept as a small lookup instead of a format parameter so
+/// a future export format only needs a new map entry, never a signature
+/// change on [ReportFileSaverDataSource.save].
 const Map<String, String> _mimeTypeByExtension = <String, String>{
   'csv': 'text/csv',
   'xlsx': 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+  'pdf': 'application/pdf',
 };
 
 @LazySingleton(as: ReportFileSaverDataSource)

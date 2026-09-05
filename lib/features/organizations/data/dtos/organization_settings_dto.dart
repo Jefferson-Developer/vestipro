@@ -18,6 +18,8 @@ final class OrganizationSettingsDto {
         defaultPositivacaoEligibleOrderStatuses,
     this.positivacaoMinOrderValue,
     this.rankingVisibilityMode = defaultRankingVisibilityMode,
+    this.brandingLogoUrl,
+    this.brandingPrimaryColorHex,
   });
 
   factory OrganizationSettingsDto.fromJson(Map<String, dynamic> json) {
@@ -38,6 +40,8 @@ final class OrganizationSettingsDto {
         json['positivacaoEligibleOrderStatuses'];
     final positivacaoMinOrderValue = json['positivacaoMinOrderValue'];
     final rankingVisibilityMode = json['rankingVisibilityMode'];
+    final brandingLogoUrl = json['brandingLogoUrl'];
+    final brandingPrimaryColorHex = json['brandingPrimaryColorHex'];
 
     if (currency is! String ||
         country is! String ||
@@ -52,7 +56,10 @@ final class OrganizationSettingsDto {
             positivacaoPeriodGranularity is! String) ||
         (positivacaoMinOrderValue != null &&
             positivacaoMinOrderValue is! num) ||
-        (rankingVisibilityMode != null && rankingVisibilityMode is! String)) {
+        (rankingVisibilityMode != null && rankingVisibilityMode is! String) ||
+        (brandingLogoUrl != null && brandingLogoUrl is! String) ||
+        (brandingPrimaryColorHex != null &&
+            brandingPrimaryColorHex is! String)) {
       throw const ValidationException(
         'Invalid organization settings payload.',
         code: 'invalid_organization_settings_payload',
@@ -82,6 +89,8 @@ final class OrganizationSettingsDto {
       positivacaoMinOrderValue: (positivacaoMinOrderValue as num?)?.toDouble(),
       rankingVisibilityMode:
           rankingVisibilityMode as String? ?? defaultRankingVisibilityMode,
+      brandingLogoUrl: brandingLogoUrl as String?,
+      brandingPrimaryColorHex: brandingPrimaryColorHex as String?,
     );
   }
 
@@ -126,6 +135,13 @@ final class OrganizationSettingsDto {
   /// [positivacaoPeriodGranularity].
   final String rankingVisibilityMode;
 
+  /// See `OrganizationSettings.brandingLogoUrl`/`brandingPrimaryColorHex`'s
+  /// own docs (TASK-148). Omitted by [toJson] when `null`, same "not
+  /// configured" convention as [segment] — never inferred, never defaulted
+  /// to a placeholder value.
+  final String? brandingLogoUrl;
+  final String? brandingPrimaryColorHex;
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'currency': currency,
@@ -147,6 +163,9 @@ final class OrganizationSettingsDto {
       if (positivacaoMinOrderValue != null)
         'positivacaoMinOrderValue': positivacaoMinOrderValue,
       'rankingVisibilityMode': rankingVisibilityMode,
+      if (brandingLogoUrl != null) 'brandingLogoUrl': brandingLogoUrl,
+      if (brandingPrimaryColorHex != null)
+        'brandingPrimaryColorHex': brandingPrimaryColorHex,
     };
   }
 }

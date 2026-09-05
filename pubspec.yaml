@@ -87,6 +87,15 @@ dependencies:
   excel: ^4.0.6
   archive: ^3.6.1
   xml: ^6.6.1
+  # PDF export (TASK-148): `pdf` is a pure-Dart, actively maintained,
+  # cross-platform (mobile/desktop/web) PDF producer — same "no native code,
+  # no commercial license" rationale already applied to `excel` above.
+  # `printing` is its companion Flutter plugin, used only by the
+  # presentation-layer preview screen (`PdfPreview` widget) so the user can
+  # see the generated document and cancel before it is actually saved
+  # (`ReportPdfPreviewPage`) — `PdfReportEncoder` itself never imports it.
+  pdf: ^3.11.5
+  printing: ^5.13.4
 
 dev_dependencies:
   flutter_test:

@@ -70,7 +70,17 @@ mixin _$OrganizationSettings {
 /// `SALES_MANAGER`/`ADMIN`/`OWNER` sees — those roles always get the
 /// full ranking of the scope they manage, regardless of this setting;
 /// see `RankingCalculationService`'s own docs.
- String get rankingVisibilityMode;
+ String get rankingVisibilityMode;/// Organization branding applied to executive-facing exports (PDF report
+/// export, TASK-148) — a downloadable image URL (typically a Firebase
+/// Storage download URL, but never assumed to be one: fetched with a
+/// plain HTTP GET). `null` means the organization never configured a
+/// logo, in which case `PdfReportEncoder` falls back to VestiPro's own
+/// default identity — branding is only ever applied when explicitly
+/// configured, never inferred.
+ String? get brandingLogoUrl;/// Organization brand color applied to a PDF report export's cover page
+/// (TASK-148), as a `#RRGGBB` hex string. `null` means "not configured",
+/// same fallback rule as [brandingLogoUrl].
+ String? get brandingPrimaryColorHex;
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -81,16 +91,16 @@ $OrganizationSettingsCopyWith<OrganizationSettings> get copyWith => _$Organizati
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment)&&(identical(other.maxTeamsPerUser, maxTeamsPerUser) || other.maxTeamsPerUser == maxTeamsPerUser)&&const DeepCollectionEquality().equals(other.requiredCustomerFields, requiredCustomerFields)&&const DeepCollectionEquality().equals(other.customerAddressTypes, customerAddressTypes)&&const DeepCollectionEquality().equals(other.customerContactTypes, customerContactTypes)&&(identical(other.allowMultipleCollectionsPerProduct, allowMultipleCollectionsPerProduct) || other.allowMultipleCollectionsPerProduct == allowMultipleCollectionsPerProduct)&&(identical(other.stockReservationExpiresInMinutes, stockReservationExpiresInMinutes) || other.stockReservationExpiresInMinutes == stockReservationExpiresInMinutes)&&(identical(other.positivacaoPeriodGranularity, positivacaoPeriodGranularity) || other.positivacaoPeriodGranularity == positivacaoPeriodGranularity)&&const DeepCollectionEquality().equals(other.positivacaoEligibleOrderStatuses, positivacaoEligibleOrderStatuses)&&(identical(other.positivacaoMinOrderValue, positivacaoMinOrderValue) || other.positivacaoMinOrderValue == positivacaoMinOrderValue)&&(identical(other.rankingVisibilityMode, rankingVisibilityMode) || other.rankingVisibilityMode == rankingVisibilityMode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment)&&(identical(other.maxTeamsPerUser, maxTeamsPerUser) || other.maxTeamsPerUser == maxTeamsPerUser)&&const DeepCollectionEquality().equals(other.requiredCustomerFields, requiredCustomerFields)&&const DeepCollectionEquality().equals(other.customerAddressTypes, customerAddressTypes)&&const DeepCollectionEquality().equals(other.customerContactTypes, customerContactTypes)&&(identical(other.allowMultipleCollectionsPerProduct, allowMultipleCollectionsPerProduct) || other.allowMultipleCollectionsPerProduct == allowMultipleCollectionsPerProduct)&&(identical(other.stockReservationExpiresInMinutes, stockReservationExpiresInMinutes) || other.stockReservationExpiresInMinutes == stockReservationExpiresInMinutes)&&(identical(other.positivacaoPeriodGranularity, positivacaoPeriodGranularity) || other.positivacaoPeriodGranularity == positivacaoPeriodGranularity)&&const DeepCollectionEquality().equals(other.positivacaoEligibleOrderStatuses, positivacaoEligibleOrderStatuses)&&(identical(other.positivacaoMinOrderValue, positivacaoMinOrderValue) || other.positivacaoMinOrderValue == positivacaoMinOrderValue)&&(identical(other.rankingVisibilityMode, rankingVisibilityMode) || other.rankingVisibilityMode == rankingVisibilityMode)&&(identical(other.brandingLogoUrl, brandingLogoUrl) || other.brandingLogoUrl == brandingLogoUrl)&&(identical(other.brandingPrimaryColorHex, brandingPrimaryColorHex) || other.brandingPrimaryColorHex == brandingPrimaryColorHex));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment,maxTeamsPerUser,const DeepCollectionEquality().hash(requiredCustomerFields),const DeepCollectionEquality().hash(customerAddressTypes),const DeepCollectionEquality().hash(customerContactTypes),allowMultipleCollectionsPerProduct,stockReservationExpiresInMinutes,positivacaoPeriodGranularity,const DeepCollectionEquality().hash(positivacaoEligibleOrderStatuses),positivacaoMinOrderValue,rankingVisibilityMode);
+int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment,maxTeamsPerUser,const DeepCollectionEquality().hash(requiredCustomerFields),const DeepCollectionEquality().hash(customerAddressTypes),const DeepCollectionEquality().hash(customerContactTypes),allowMultipleCollectionsPerProduct,stockReservationExpiresInMinutes,positivacaoPeriodGranularity,const DeepCollectionEquality().hash(positivacaoEligibleOrderStatuses),positivacaoMinOrderValue,rankingVisibilityMode,brandingLogoUrl,brandingPrimaryColorHex);
 
 @override
 String toString() {
-  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment, maxTeamsPerUser: $maxTeamsPerUser, requiredCustomerFields: $requiredCustomerFields, customerAddressTypes: $customerAddressTypes, customerContactTypes: $customerContactTypes, allowMultipleCollectionsPerProduct: $allowMultipleCollectionsPerProduct, stockReservationExpiresInMinutes: $stockReservationExpiresInMinutes, positivacaoPeriodGranularity: $positivacaoPeriodGranularity, positivacaoEligibleOrderStatuses: $positivacaoEligibleOrderStatuses, positivacaoMinOrderValue: $positivacaoMinOrderValue, rankingVisibilityMode: $rankingVisibilityMode)';
+  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment, maxTeamsPerUser: $maxTeamsPerUser, requiredCustomerFields: $requiredCustomerFields, customerAddressTypes: $customerAddressTypes, customerContactTypes: $customerContactTypes, allowMultipleCollectionsPerProduct: $allowMultipleCollectionsPerProduct, stockReservationExpiresInMinutes: $stockReservationExpiresInMinutes, positivacaoPeriodGranularity: $positivacaoPeriodGranularity, positivacaoEligibleOrderStatuses: $positivacaoEligibleOrderStatuses, positivacaoMinOrderValue: $positivacaoMinOrderValue, rankingVisibilityMode: $rankingVisibilityMode, brandingLogoUrl: $brandingLogoUrl, brandingPrimaryColorHex: $brandingPrimaryColorHex)';
 }
 
 
@@ -101,7 +111,7 @@ abstract mixin class $OrganizationSettingsCopyWith<$Res>  {
   factory $OrganizationSettingsCopyWith(OrganizationSettings value, $Res Function(OrganizationSettings) _then) = _$OrganizationSettingsCopyWithImpl;
 @useResult
 $Res call({
- String currency, String country, String defaultLanguage, String? segment, int? maxTeamsPerUser, List<String> requiredCustomerFields, List<String> customerAddressTypes, List<String> customerContactTypes, bool allowMultipleCollectionsPerProduct, int stockReservationExpiresInMinutes, String positivacaoPeriodGranularity, List<String> positivacaoEligibleOrderStatuses, double? positivacaoMinOrderValue, String rankingVisibilityMode
+ String currency, String country, String defaultLanguage, String? segment, int? maxTeamsPerUser, List<String> requiredCustomerFields, List<String> customerAddressTypes, List<String> customerContactTypes, bool allowMultipleCollectionsPerProduct, int stockReservationExpiresInMinutes, String positivacaoPeriodGranularity, List<String> positivacaoEligibleOrderStatuses, double? positivacaoMinOrderValue, String rankingVisibilityMode, String? brandingLogoUrl, String? brandingPrimaryColorHex
 });
 
 
@@ -118,7 +128,7 @@ class _$OrganizationSettingsCopyWithImpl<$Res>
 
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,Object? maxTeamsPerUser = freezed,Object? requiredCustomerFields = null,Object? customerAddressTypes = null,Object? customerContactTypes = null,Object? allowMultipleCollectionsPerProduct = null,Object? stockReservationExpiresInMinutes = null,Object? positivacaoPeriodGranularity = null,Object? positivacaoEligibleOrderStatuses = null,Object? positivacaoMinOrderValue = freezed,Object? rankingVisibilityMode = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,Object? maxTeamsPerUser = freezed,Object? requiredCustomerFields = null,Object? customerAddressTypes = null,Object? customerContactTypes = null,Object? allowMultipleCollectionsPerProduct = null,Object? stockReservationExpiresInMinutes = null,Object? positivacaoPeriodGranularity = null,Object? positivacaoEligibleOrderStatuses = null,Object? positivacaoMinOrderValue = freezed,Object? rankingVisibilityMode = null,Object? brandingLogoUrl = freezed,Object? brandingPrimaryColorHex = freezed,}) {
   return _then(_self.copyWith(
 currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
@@ -134,7 +144,9 @@ as int,positivacaoPeriodGranularity: null == positivacaoPeriodGranularity ? _sel
 as String,positivacaoEligibleOrderStatuses: null == positivacaoEligibleOrderStatuses ? _self.positivacaoEligibleOrderStatuses : positivacaoEligibleOrderStatuses // ignore: cast_nullable_to_non_nullable
 as List<String>,positivacaoMinOrderValue: freezed == positivacaoMinOrderValue ? _self.positivacaoMinOrderValue : positivacaoMinOrderValue // ignore: cast_nullable_to_non_nullable
 as double?,rankingVisibilityMode: null == rankingVisibilityMode ? _self.rankingVisibilityMode : rankingVisibilityMode // ignore: cast_nullable_to_non_nullable
-as String,
+as String,brandingLogoUrl: freezed == brandingLogoUrl ? _self.brandingLogoUrl : brandingLogoUrl // ignore: cast_nullable_to_non_nullable
+as String?,brandingPrimaryColorHex: freezed == brandingPrimaryColorHex ? _self.brandingPrimaryColorHex : brandingPrimaryColorHex // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -219,10 +231,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser,  List<String> requiredCustomerFields,  List<String> customerAddressTypes,  List<String> customerContactTypes,  bool allowMultipleCollectionsPerProduct,  int stockReservationExpiresInMinutes,  String positivacaoPeriodGranularity,  List<String> positivacaoEligibleOrderStatuses,  double? positivacaoMinOrderValue,  String rankingVisibilityMode)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser,  List<String> requiredCustomerFields,  List<String> customerAddressTypes,  List<String> customerContactTypes,  bool allowMultipleCollectionsPerProduct,  int stockReservationExpiresInMinutes,  String positivacaoPeriodGranularity,  List<String> positivacaoEligibleOrderStatuses,  double? positivacaoMinOrderValue,  String rankingVisibilityMode,  String? brandingLogoUrl,  String? brandingPrimaryColorHex)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OrganizationSettings() when $default != null:
-return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser,_that.requiredCustomerFields,_that.customerAddressTypes,_that.customerContactTypes,_that.allowMultipleCollectionsPerProduct,_that.stockReservationExpiresInMinutes,_that.positivacaoPeriodGranularity,_that.positivacaoEligibleOrderStatuses,_that.positivacaoMinOrderValue,_that.rankingVisibilityMode);case _:
+return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser,_that.requiredCustomerFields,_that.customerAddressTypes,_that.customerContactTypes,_that.allowMultipleCollectionsPerProduct,_that.stockReservationExpiresInMinutes,_that.positivacaoPeriodGranularity,_that.positivacaoEligibleOrderStatuses,_that.positivacaoMinOrderValue,_that.rankingVisibilityMode,_that.brandingLogoUrl,_that.brandingPrimaryColorHex);case _:
   return orElse();
 
 }
@@ -240,10 +252,10 @@ return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser,  List<String> requiredCustomerFields,  List<String> customerAddressTypes,  List<String> customerContactTypes,  bool allowMultipleCollectionsPerProduct,  int stockReservationExpiresInMinutes,  String positivacaoPeriodGranularity,  List<String> positivacaoEligibleOrderStatuses,  double? positivacaoMinOrderValue,  String rankingVisibilityMode)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser,  List<String> requiredCustomerFields,  List<String> customerAddressTypes,  List<String> customerContactTypes,  bool allowMultipleCollectionsPerProduct,  int stockReservationExpiresInMinutes,  String positivacaoPeriodGranularity,  List<String> positivacaoEligibleOrderStatuses,  double? positivacaoMinOrderValue,  String rankingVisibilityMode,  String? brandingLogoUrl,  String? brandingPrimaryColorHex)  $default,) {final _that = this;
 switch (_that) {
 case _OrganizationSettings():
-return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser,_that.requiredCustomerFields,_that.customerAddressTypes,_that.customerContactTypes,_that.allowMultipleCollectionsPerProduct,_that.stockReservationExpiresInMinutes,_that.positivacaoPeriodGranularity,_that.positivacaoEligibleOrderStatuses,_that.positivacaoMinOrderValue,_that.rankingVisibilityMode);case _:
+return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser,_that.requiredCustomerFields,_that.customerAddressTypes,_that.customerContactTypes,_that.allowMultipleCollectionsPerProduct,_that.stockReservationExpiresInMinutes,_that.positivacaoPeriodGranularity,_that.positivacaoEligibleOrderStatuses,_that.positivacaoMinOrderValue,_that.rankingVisibilityMode,_that.brandingLogoUrl,_that.brandingPrimaryColorHex);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -260,10 +272,10 @@ return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser,  List<String> requiredCustomerFields,  List<String> customerAddressTypes,  List<String> customerContactTypes,  bool allowMultipleCollectionsPerProduct,  int stockReservationExpiresInMinutes,  String positivacaoPeriodGranularity,  List<String> positivacaoEligibleOrderStatuses,  double? positivacaoMinOrderValue,  String rankingVisibilityMode)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String currency,  String country,  String defaultLanguage,  String? segment,  int? maxTeamsPerUser,  List<String> requiredCustomerFields,  List<String> customerAddressTypes,  List<String> customerContactTypes,  bool allowMultipleCollectionsPerProduct,  int stockReservationExpiresInMinutes,  String positivacaoPeriodGranularity,  List<String> positivacaoEligibleOrderStatuses,  double? positivacaoMinOrderValue,  String rankingVisibilityMode,  String? brandingLogoUrl,  String? brandingPrimaryColorHex)?  $default,) {final _that = this;
 switch (_that) {
 case _OrganizationSettings() when $default != null:
-return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser,_that.requiredCustomerFields,_that.customerAddressTypes,_that.customerContactTypes,_that.allowMultipleCollectionsPerProduct,_that.stockReservationExpiresInMinutes,_that.positivacaoPeriodGranularity,_that.positivacaoEligibleOrderStatuses,_that.positivacaoMinOrderValue,_that.rankingVisibilityMode);case _:
+return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment,_that.maxTeamsPerUser,_that.requiredCustomerFields,_that.customerAddressTypes,_that.customerContactTypes,_that.allowMultipleCollectionsPerProduct,_that.stockReservationExpiresInMinutes,_that.positivacaoPeriodGranularity,_that.positivacaoEligibleOrderStatuses,_that.positivacaoMinOrderValue,_that.rankingVisibilityMode,_that.brandingLogoUrl,_that.brandingPrimaryColorHex);case _:
   return null;
 
 }
@@ -275,7 +287,7 @@ return $default(_that.currency,_that.country,_that.defaultLanguage,_that.segment
 
 
 class _OrganizationSettings extends OrganizationSettings {
-  const _OrganizationSettings({required this.currency, required this.country, required this.defaultLanguage, this.segment, this.maxTeamsPerUser, final  List<String> requiredCustomerFields = const <String>[], final  List<String> customerAddressTypes = const <String>[], final  List<String> customerContactTypes = const <String>[], this.allowMultipleCollectionsPerProduct = false, this.stockReservationExpiresInMinutes = 15, this.positivacaoPeriodGranularity = defaultPositivacaoPeriodGranularity, final  List<String> positivacaoEligibleOrderStatuses = defaultPositivacaoEligibleOrderStatuses, this.positivacaoMinOrderValue, this.rankingVisibilityMode = defaultRankingVisibilityMode}): _requiredCustomerFields = requiredCustomerFields,_customerAddressTypes = customerAddressTypes,_customerContactTypes = customerContactTypes,_positivacaoEligibleOrderStatuses = positivacaoEligibleOrderStatuses,super._();
+  const _OrganizationSettings({required this.currency, required this.country, required this.defaultLanguage, this.segment, this.maxTeamsPerUser, final  List<String> requiredCustomerFields = const <String>[], final  List<String> customerAddressTypes = const <String>[], final  List<String> customerContactTypes = const <String>[], this.allowMultipleCollectionsPerProduct = false, this.stockReservationExpiresInMinutes = 15, this.positivacaoPeriodGranularity = defaultPositivacaoPeriodGranularity, final  List<String> positivacaoEligibleOrderStatuses = defaultPositivacaoEligibleOrderStatuses, this.positivacaoMinOrderValue, this.rankingVisibilityMode = defaultRankingVisibilityMode, this.brandingLogoUrl, this.brandingPrimaryColorHex}): _requiredCustomerFields = requiredCustomerFields,_customerAddressTypes = customerAddressTypes,_customerContactTypes = customerContactTypes,_positivacaoEligibleOrderStatuses = positivacaoEligibleOrderStatuses,super._();
   
 
 @override final  String currency;
@@ -386,6 +398,18 @@ class _OrganizationSettings extends OrganizationSettings {
 /// full ranking of the scope they manage, regardless of this setting;
 /// see `RankingCalculationService`'s own docs.
 @override@JsonKey() final  String rankingVisibilityMode;
+/// Organization branding applied to executive-facing exports (PDF report
+/// export, TASK-148) — a downloadable image URL (typically a Firebase
+/// Storage download URL, but never assumed to be one: fetched with a
+/// plain HTTP GET). `null` means the organization never configured a
+/// logo, in which case `PdfReportEncoder` falls back to VestiPro's own
+/// default identity — branding is only ever applied when explicitly
+/// configured, never inferred.
+@override final  String? brandingLogoUrl;
+/// Organization brand color applied to a PDF report export's cover page
+/// (TASK-148), as a `#RRGGBB` hex string. `null` means "not configured",
+/// same fallback rule as [brandingLogoUrl].
+@override final  String? brandingPrimaryColorHex;
 
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
@@ -397,16 +421,16 @@ _$OrganizationSettingsCopyWith<_OrganizationSettings> get copyWith => __$Organiz
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment)&&(identical(other.maxTeamsPerUser, maxTeamsPerUser) || other.maxTeamsPerUser == maxTeamsPerUser)&&const DeepCollectionEquality().equals(other._requiredCustomerFields, _requiredCustomerFields)&&const DeepCollectionEquality().equals(other._customerAddressTypes, _customerAddressTypes)&&const DeepCollectionEquality().equals(other._customerContactTypes, _customerContactTypes)&&(identical(other.allowMultipleCollectionsPerProduct, allowMultipleCollectionsPerProduct) || other.allowMultipleCollectionsPerProduct == allowMultipleCollectionsPerProduct)&&(identical(other.stockReservationExpiresInMinutes, stockReservationExpiresInMinutes) || other.stockReservationExpiresInMinutes == stockReservationExpiresInMinutes)&&(identical(other.positivacaoPeriodGranularity, positivacaoPeriodGranularity) || other.positivacaoPeriodGranularity == positivacaoPeriodGranularity)&&const DeepCollectionEquality().equals(other._positivacaoEligibleOrderStatuses, _positivacaoEligibleOrderStatuses)&&(identical(other.positivacaoMinOrderValue, positivacaoMinOrderValue) || other.positivacaoMinOrderValue == positivacaoMinOrderValue)&&(identical(other.rankingVisibilityMode, rankingVisibilityMode) || other.rankingVisibilityMode == rankingVisibilityMode));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrganizationSettings&&(identical(other.currency, currency) || other.currency == currency)&&(identical(other.country, country) || other.country == country)&&(identical(other.defaultLanguage, defaultLanguage) || other.defaultLanguage == defaultLanguage)&&(identical(other.segment, segment) || other.segment == segment)&&(identical(other.maxTeamsPerUser, maxTeamsPerUser) || other.maxTeamsPerUser == maxTeamsPerUser)&&const DeepCollectionEquality().equals(other._requiredCustomerFields, _requiredCustomerFields)&&const DeepCollectionEquality().equals(other._customerAddressTypes, _customerAddressTypes)&&const DeepCollectionEquality().equals(other._customerContactTypes, _customerContactTypes)&&(identical(other.allowMultipleCollectionsPerProduct, allowMultipleCollectionsPerProduct) || other.allowMultipleCollectionsPerProduct == allowMultipleCollectionsPerProduct)&&(identical(other.stockReservationExpiresInMinutes, stockReservationExpiresInMinutes) || other.stockReservationExpiresInMinutes == stockReservationExpiresInMinutes)&&(identical(other.positivacaoPeriodGranularity, positivacaoPeriodGranularity) || other.positivacaoPeriodGranularity == positivacaoPeriodGranularity)&&const DeepCollectionEquality().equals(other._positivacaoEligibleOrderStatuses, _positivacaoEligibleOrderStatuses)&&(identical(other.positivacaoMinOrderValue, positivacaoMinOrderValue) || other.positivacaoMinOrderValue == positivacaoMinOrderValue)&&(identical(other.rankingVisibilityMode, rankingVisibilityMode) || other.rankingVisibilityMode == rankingVisibilityMode)&&(identical(other.brandingLogoUrl, brandingLogoUrl) || other.brandingLogoUrl == brandingLogoUrl)&&(identical(other.brandingPrimaryColorHex, brandingPrimaryColorHex) || other.brandingPrimaryColorHex == brandingPrimaryColorHex));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment,maxTeamsPerUser,const DeepCollectionEquality().hash(_requiredCustomerFields),const DeepCollectionEquality().hash(_customerAddressTypes),const DeepCollectionEquality().hash(_customerContactTypes),allowMultipleCollectionsPerProduct,stockReservationExpiresInMinutes,positivacaoPeriodGranularity,const DeepCollectionEquality().hash(_positivacaoEligibleOrderStatuses),positivacaoMinOrderValue,rankingVisibilityMode);
+int get hashCode => Object.hash(runtimeType,currency,country,defaultLanguage,segment,maxTeamsPerUser,const DeepCollectionEquality().hash(_requiredCustomerFields),const DeepCollectionEquality().hash(_customerAddressTypes),const DeepCollectionEquality().hash(_customerContactTypes),allowMultipleCollectionsPerProduct,stockReservationExpiresInMinutes,positivacaoPeriodGranularity,const DeepCollectionEquality().hash(_positivacaoEligibleOrderStatuses),positivacaoMinOrderValue,rankingVisibilityMode,brandingLogoUrl,brandingPrimaryColorHex);
 
 @override
 String toString() {
-  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment, maxTeamsPerUser: $maxTeamsPerUser, requiredCustomerFields: $requiredCustomerFields, customerAddressTypes: $customerAddressTypes, customerContactTypes: $customerContactTypes, allowMultipleCollectionsPerProduct: $allowMultipleCollectionsPerProduct, stockReservationExpiresInMinutes: $stockReservationExpiresInMinutes, positivacaoPeriodGranularity: $positivacaoPeriodGranularity, positivacaoEligibleOrderStatuses: $positivacaoEligibleOrderStatuses, positivacaoMinOrderValue: $positivacaoMinOrderValue, rankingVisibilityMode: $rankingVisibilityMode)';
+  return 'OrganizationSettings(currency: $currency, country: $country, defaultLanguage: $defaultLanguage, segment: $segment, maxTeamsPerUser: $maxTeamsPerUser, requiredCustomerFields: $requiredCustomerFields, customerAddressTypes: $customerAddressTypes, customerContactTypes: $customerContactTypes, allowMultipleCollectionsPerProduct: $allowMultipleCollectionsPerProduct, stockReservationExpiresInMinutes: $stockReservationExpiresInMinutes, positivacaoPeriodGranularity: $positivacaoPeriodGranularity, positivacaoEligibleOrderStatuses: $positivacaoEligibleOrderStatuses, positivacaoMinOrderValue: $positivacaoMinOrderValue, rankingVisibilityMode: $rankingVisibilityMode, brandingLogoUrl: $brandingLogoUrl, brandingPrimaryColorHex: $brandingPrimaryColorHex)';
 }
 
 
@@ -417,7 +441,7 @@ abstract mixin class _$OrganizationSettingsCopyWith<$Res> implements $Organizati
   factory _$OrganizationSettingsCopyWith(_OrganizationSettings value, $Res Function(_OrganizationSettings) _then) = __$OrganizationSettingsCopyWithImpl;
 @override @useResult
 $Res call({
- String currency, String country, String defaultLanguage, String? segment, int? maxTeamsPerUser, List<String> requiredCustomerFields, List<String> customerAddressTypes, List<String> customerContactTypes, bool allowMultipleCollectionsPerProduct, int stockReservationExpiresInMinutes, String positivacaoPeriodGranularity, List<String> positivacaoEligibleOrderStatuses, double? positivacaoMinOrderValue, String rankingVisibilityMode
+ String currency, String country, String defaultLanguage, String? segment, int? maxTeamsPerUser, List<String> requiredCustomerFields, List<String> customerAddressTypes, List<String> customerContactTypes, bool allowMultipleCollectionsPerProduct, int stockReservationExpiresInMinutes, String positivacaoPeriodGranularity, List<String> positivacaoEligibleOrderStatuses, double? positivacaoMinOrderValue, String rankingVisibilityMode, String? brandingLogoUrl, String? brandingPrimaryColorHex
 });
 
 
@@ -434,7 +458,7 @@ class __$OrganizationSettingsCopyWithImpl<$Res>
 
 /// Create a copy of OrganizationSettings
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,Object? maxTeamsPerUser = freezed,Object? requiredCustomerFields = null,Object? customerAddressTypes = null,Object? customerContactTypes = null,Object? allowMultipleCollectionsPerProduct = null,Object? stockReservationExpiresInMinutes = null,Object? positivacaoPeriodGranularity = null,Object? positivacaoEligibleOrderStatuses = null,Object? positivacaoMinOrderValue = freezed,Object? rankingVisibilityMode = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? currency = null,Object? country = null,Object? defaultLanguage = null,Object? segment = freezed,Object? maxTeamsPerUser = freezed,Object? requiredCustomerFields = null,Object? customerAddressTypes = null,Object? customerContactTypes = null,Object? allowMultipleCollectionsPerProduct = null,Object? stockReservationExpiresInMinutes = null,Object? positivacaoPeriodGranularity = null,Object? positivacaoEligibleOrderStatuses = null,Object? positivacaoMinOrderValue = freezed,Object? rankingVisibilityMode = null,Object? brandingLogoUrl = freezed,Object? brandingPrimaryColorHex = freezed,}) {
   return _then(_OrganizationSettings(
 currency: null == currency ? _self.currency : currency // ignore: cast_nullable_to_non_nullable
 as String,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
@@ -450,7 +474,9 @@ as int,positivacaoPeriodGranularity: null == positivacaoPeriodGranularity ? _sel
 as String,positivacaoEligibleOrderStatuses: null == positivacaoEligibleOrderStatuses ? _self._positivacaoEligibleOrderStatuses : positivacaoEligibleOrderStatuses // ignore: cast_nullable_to_non_nullable
 as List<String>,positivacaoMinOrderValue: freezed == positivacaoMinOrderValue ? _self.positivacaoMinOrderValue : positivacaoMinOrderValue // ignore: cast_nullable_to_non_nullable
 as double?,rankingVisibilityMode: null == rankingVisibilityMode ? _self.rankingVisibilityMode : rankingVisibilityMode // ignore: cast_nullable_to_non_nullable
-as String,
+as String,brandingLogoUrl: freezed == brandingLogoUrl ? _self.brandingLogoUrl : brandingLogoUrl // ignore: cast_nullable_to_non_nullable
+as String?,brandingPrimaryColorHex: freezed == brandingPrimaryColorHex ? _self.brandingPrimaryColorHex : brandingPrimaryColorHex // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

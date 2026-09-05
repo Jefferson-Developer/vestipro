@@ -29,6 +29,7 @@ void main() {
             FakeAnalyticsService(),
             ExportReportToCsv(_ExportRepository()),
             ExportReportToXlsx(_ExportRepository()),
+            ExportReportToPdf(_ExportRepository()),
             FakeFeatureFlagService(),
           ),
         ),
@@ -67,6 +68,7 @@ void main() {
             FakeAnalyticsService(),
             ExportReportToCsv(_ExportRepository()),
             ExportReportToXlsx(_ExportRepository()),
+            ExportReportToPdf(_ExportRepository()),
             FakeFeatureFlagService(),
           ),
         ),
@@ -110,6 +112,7 @@ void main() {
               FakeAnalyticsService(),
               ExportReportToCsv(exportRepository),
               ExportReportToXlsx(exportRepository),
+              ExportReportToPdf(exportRepository),
               FakeFeatureFlagService(),
             ),
           ),
@@ -156,6 +159,7 @@ void main() {
               FakeAnalyticsService(),
               ExportReportToCsv(exportRepository),
               ExportReportToXlsx(exportRepository),
+              ExportReportToPdf(exportRepository),
               FakeFeatureFlagService(),
             ),
           ),
@@ -282,6 +286,34 @@ final class _ExportRepository implements ReportExportRepository {
       rowCount: 1,
       location: RemoteReportExportLocation(
         downloadUrl: 'https://example.com/remote.xlsx',
+        expiresAt: DateTime.utc(2026, 9, 5),
+      ),
+    ),
+  );
+
+  @override
+  Future<List<int>> encodePdf({
+    required ReportDefinition definition,
+    required ReportQueryResult result,
+    required ReportCatalog catalog,
+    required ReportBranding branding,
+    required ReportExportLocale locale,
+  }) async => const <int>[1, 2, 3];
+
+  @override
+  Future<ReportBranding> loadBranding(String organizationId) async =>
+      const ReportBranding.none();
+
+  @override
+  Future<AppResult<ReportExportSummary>> requestCloudPdfExport({
+    required ReportDefinition definition,
+    required ReportExportLocale locale,
+  }) async => AppSuccess<ReportExportSummary>(
+    ReportExportSummary(
+      fileName: 'remote.pdf',
+      rowCount: 1,
+      location: RemoteReportExportLocation(
+        downloadUrl: 'https://example.com/remote.pdf',
         expiresAt: DateTime.utc(2026, 9, 5),
       ),
     ),

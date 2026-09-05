@@ -1,9 +1,9 @@
-/// Which export use case (`ExportReportToCsv`/`ExportReportToXlsx`) a
-/// `ReportExportRequested` (TASK-146/TASK-147) event asks the builder to run
-/// — kept as its own enum instead of inferring the format from
-/// `ReportExportSummary.fileName`'s extension, since the choice has to be
-/// made *before* a summary exists at all.
-enum ReportExportFormat { csv, xlsx }
+/// Which export use case (`ExportReportToCsv`/`ExportReportToXlsx`/
+/// `ExportReportToPdf`) a `ReportExportRequested` (TASK-146/TASK-147/
+/// TASK-148) event asks the builder to run — kept as its own enum instead of
+/// inferring the format from `ReportExportSummary.fileName`'s extension,
+/// since the choice has to be made *before* a summary exists at all.
+enum ReportExportFormat { csv, xlsx, pdf }
 
 /// The locale a CSV/XLSX export (TASK-146/TASK-147) is formatted for. Deliberately tied to
 /// a single delimiter/decimal-separator pair instead of letting them vary
@@ -92,4 +92,46 @@ final class ReportExportSummary {
           expiresAt: DateTime.parse(json['expiresAt'] as String),
         ),
       );
+}
+
+/// Outcome of `ExportReportToPdf.preview` (TASK-148) — never both variants
+/// at once, mirroring [ReportExportLocation]'s own local/remote split.
+///
+/// A PDF export is the one format with a mandatory pré-visualização step
+/// before the file is actually persisted (TASK-148's "Pré-visualização
+/// permite cancelar antes de gerar o arquivo final" acceptance criterion),
+/// so this is intentionally a distinct type from [ReportExportSummary]
+/// instead of reusing it: [LocalReportPdfPreview] carries the already-
+/// encoded [LocalReportPdfPreview.bytes] for the preview screen to render
+/// *before* `ExportReportToPdf.confirm` ever calls `saveLocalFile`, while
+/// [RemoteReportPdfPreview] means the volume was too large for a client-side
+/// preview at all — the Cloud Function generated and uploaded the whole
+/// file already, so there is nothing left to preview or confirm.
+sealed class ReportPdfPreviewResult {
+  const ReportPdfPreviewResult();
+}
+
+/// The PDF was small enough to be generated on-device (`PdfReportEncoder`)
+/// and is held in memory as [bytes] — not yet saved anywhere — until the
+/// user confirms the preview (`ExportReportToPdf.confirm`) or cancels it.
+final class LocalReportPdfPreview extends ReportPdfPreviewResult {
+  const LocalReportPdfPreview({
+    required this.bytes,
+    required this.fileName,
+    required this.rowCount,
+  });
+
+  final List<int> bytes;
+  final String fileName;
+  final int rowCount;
+}
+
+/// The export exceeded the client-side row threshold and was generated
+/// entirely server-side by the `exportReportToPdf` Cloud Function — same
+/// large-volume delegation as `RemoteReportExportLocation`, with no local
+/// preview step: [summary] is already the final, uploaded result.
+final class RemoteReportPdfPreview extends ReportPdfPreviewResult {
+  const RemoteReportPdfPreview(this.summary);
+
+  final ReportExportSummary summary;
 }

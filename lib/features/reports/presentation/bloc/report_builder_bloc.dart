@@ -11,6 +11,7 @@ import '../../domain/entities/report_catalog.dart';
 import '../../domain/entities/report_export_result.dart';
 import '../../domain/repositories/report_repository.dart';
 import '../../domain/usecases/export_report_to_csv.dart';
+import '../../domain/usecases/export_report_to_pdf.dart';
 import '../../domain/usecases/export_report_to_xlsx.dart';
 import '../../domain/usecases/report_use_cases.dart';
 import '../../domain/usecases/validate_report_definition.dart';
@@ -28,6 +29,7 @@ final class ReportBuilderBloc
     this._analytics,
     this._exportToCsv,
     this._exportToXlsx,
+    this._exportToPdf,
     this._featureFlags,
   ) : super(const ReportBuilderState()) {
     on<ReportBuilderStarted>(_onStarted);
@@ -39,6 +41,9 @@ final class ReportBuilderBloc
     on<ReportExecutionRequested>(_onExecute);
     on<ReportBuilderRetried>(_onRetry);
     on<ReportExportRequested>(_onExport);
+    on<ReportPdfPreviewRequested>(_onPdfPreviewRequested);
+    on<ReportPdfPreviewCancelled>(_onPdfPreviewCancelled);
+    on<ReportPdfExportConfirmed>(_onPdfExportConfirmed);
   }
 
   final LoadReportCatalog _loadCatalog;
@@ -48,6 +53,7 @@ final class ReportBuilderBloc
   final AnalyticsService _analytics;
   final ExportReportToCsv _exportToCsv;
   final ExportReportToXlsx _exportToXlsx;
+  final ExportReportToPdf _exportToPdf;
   final FeatureFlagService _featureFlags;
 
   Future<void> _onStarted(
@@ -353,6 +359,121 @@ final class ReportBuilderBloc
           state.copyWith(
             exportStatus: ReportExportStatus.failure,
             exportFailure: failure,
+          ),
+        );
+    }
+  }
+
+  Future<void> _onPdfPreviewRequested(
+    ReportPdfPreviewRequested event,
+    Emitter<ReportBuilderState> emit,
+  ) async {
+    final definition = state.definition;
+    final preview = state.preview;
+    final catalog = state.catalog;
+    if (definition == null || preview == null || catalog == null) return;
+    emit(
+      state.copyWith(
+        pdfPreviewStatus: ReportPdfPreviewStatus.loading,
+        clearPdfPreview: true,
+        clearPdfPreviewFailure: true,
+      ),
+    );
+    final maxLocalRows = _featureFlags.getInt(
+      FeatureFlagRegistry.configReportExportMaxLocalRows,
+    );
+    final result = await _exportToPdf(
+      definition: definition,
+      result: preview,
+      catalog: catalog,
+      maxLocalRows: maxLocalRows,
+    );
+    switch (result) {
+      case AppSuccess(value: final LocalReportPdfPreview localPreview):
+        emit(
+          state.copyWith(
+            pdfPreviewStatus: ReportPdfPreviewStatus.ready,
+            pdfPreview: localPreview,
+          ),
+        );
+      case AppSuccess(value: final RemoteReportPdfPreview remotePreview):
+        emit(
+          state.copyWith(
+            pdfPreviewStatus: ReportPdfPreviewStatus.idle,
+            exportStatus: ReportExportStatus.success,
+            exportSummary: remotePreview.summary,
+          ),
+        );
+        await _analytics.logEvent(
+          AnalyticsEvents.reportExported,
+          parameters: <String, Object?>{
+            'formato': ReportExportFormat.pdf.name,
+            'row_count': remotePreview.summary.rowCount,
+            'delegated_to_cloud': true,
+          },
+        );
+      case AppFailure(failure: final failure):
+        emit(
+          state.copyWith(
+            pdfPreviewStatus: ReportPdfPreviewStatus.failure,
+            pdfPreviewFailure: failure,
+          ),
+        );
+    }
+  }
+
+  Future<void> _onPdfPreviewCancelled(
+    ReportPdfPreviewCancelled event,
+    Emitter<ReportBuilderState> emit,
+  ) async {
+    emit(
+      state.copyWith(
+        pdfPreviewStatus: ReportPdfPreviewStatus.idle,
+        clearPdfPreview: true,
+        clearPdfPreviewFailure: true,
+      ),
+    );
+  }
+
+  Future<void> _onPdfExportConfirmed(
+    ReportPdfExportConfirmed event,
+    Emitter<ReportBuilderState> emit,
+  ) async {
+    final preview = state.pdfPreview;
+    if (preview == null) return;
+    emit(
+      state.copyWith(
+        exportStatus: ReportExportStatus.exporting,
+        clearExportFailure: true,
+        clearExportSummary: true,
+      ),
+    );
+    final result = await _exportToPdf.confirm(preview);
+    switch (result) {
+      case AppSuccess(value: final summary):
+        emit(
+          state.copyWith(
+            exportStatus: ReportExportStatus.success,
+            exportSummary: summary,
+            pdfPreviewStatus: ReportPdfPreviewStatus.idle,
+            clearPdfPreview: true,
+          ),
+        );
+        await _analytics.logEvent(
+          AnalyticsEvents.reportExported,
+          parameters: <String, Object?>{
+            'formato': ReportExportFormat.pdf.name,
+            'row_count': summary.rowCount,
+            'delegated_to_cloud': false,
+          },
+        );
+      case AppFailure(failure: final failure):
+        emit(
+          state.copyWith(
+            exportStatus: ReportExportStatus.failure,
+            exportFailure: failure,
+            pdfPreviewStatus: ReportPdfPreviewStatus.idle,
+            clearPdfPreview: true,
           ),
         );
     }

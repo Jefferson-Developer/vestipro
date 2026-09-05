@@ -58,6 +58,8 @@ final class OrganizationMapper {
       positivacaoEligibleOrderStatuses: dto.positivacaoEligibleOrderStatuses,
       positivacaoMinOrderValue: dto.positivacaoMinOrderValue,
       rankingVisibilityMode: dto.rankingVisibilityMode,
+      brandingLogoUrl: dto.brandingLogoUrl,
+      brandingPrimaryColorHex: dto.brandingPrimaryColorHex,
     );
   }
 
@@ -80,6 +82,8 @@ final class OrganizationMapper {
           settings.positivacaoEligibleOrderStatuses,
       positivacaoMinOrderValue: settings.positivacaoMinOrderValue,
       rankingVisibilityMode: settings.rankingVisibilityMode,
+      brandingLogoUrl: settings.brandingLogoUrl,
+      brandingPrimaryColorHex: settings.brandingPrimaryColorHex,
     );
   }
 
