@@ -89,6 +89,9 @@ void main() {
           ShouldDispatchNotificationUseCase(
             FakeCommunicationPreferencesRepository(),
           ),
+          ResolveNotificationDeliveryTimeUseCase(
+            FakeCommunicationPreferencesRepository(),
+          ),
           FakeAnalyticsService(),
         ),
       ),

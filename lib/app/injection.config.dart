@@ -89,10 +89,14 @@ import '../core/notifications/domain/usecases/mark_all_notifications_as_read_use
     as _i948;
 import '../core/notifications/domain/usecases/mark_notification_as_read_use_case.dart'
     as _i421;
+import '../core/notifications/domain/usecases/resolve_notification_delivery_time_use_case.dart'
+    as _i1015;
 import '../core/notifications/domain/usecases/save_communication_preferences_use_case.dart'
     as _i304;
 import '../core/notifications/domain/usecases/should_dispatch_notification_use_case.dart'
     as _i876;
+import '../core/notifications/domain/usecases/sync_device_timezone_use_case.dart'
+    as _i973;
 import '../core/notifications/domain/usecases/watch_communication_preferences_use_case.dart'
     as _i764;
 import '../core/notifications/notifications.dart' as _i387;
@@ -102,6 +106,7 @@ import '../core/notifications/presentation/bloc/notification_center_bloc.dart'
     as _i84;
 import '../core/notifications/push/device_installation_id_provider.dart'
     as _i10;
+import '../core/notifications/push/device_timezone_provider.dart' as _i274;
 import '../core/notifications/push/firebase_messaging_notification_router.dart'
     as _i461;
 import '../core/notifications/push/firebase_messaging_permission_service.dart'
@@ -1558,6 +1563,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i1031.CatalogPreferencesRepository>(
       () => const _i590.SharedPreferencesCatalogPreferencesRepository(),
+    );
+    gh.lazySingleton<_i274.DeviceTimezoneProvider>(
+      () => const _i274.SystemDeviceTimezoneProvider(),
     );
     gh.factory<_i595.LoadInitialPaymentTermOfflineDataUseCase>(
       () => _i595.LoadInitialPaymentTermOfflineDataUseCase(
@@ -3298,6 +3306,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i693.CommunicationPreferencesRepository>(),
       ),
     );
+    gh.factory<_i973.SyncDeviceTimezoneUseCase>(
+      () => _i973.SyncDeviceTimezoneUseCase(
+        gh<_i693.CommunicationPreferencesRepository>(),
+        gh<_i274.DeviceTimezoneProvider>(),
+      ),
+    );
     gh.lazySingleton<_i426.ReportScheduleReferenceChecker>(
       () => _i451.FirestoreReportScheduleReferenceChecker(
         gh<_i30.ReportScheduleRepository>(),
@@ -3348,15 +3362,6 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i487.WatchFavoriteProductIdsUseCase(gh<_i761.FavoriteRepository>()),
     );
-    gh.factory<_i491.ProcessOrderCommercialAlertUseCase>(
-      () => _i491.ProcessOrderCommercialAlertUseCase(
-        gh<_i42.OrderCommercialAlertDispatchRepository>(),
-        gh<_i387.NotificationInboxRepository>(),
-        gh<_i387.ShouldDispatchNotificationUseCase>(),
-        gh<_i47.PermissionService>(),
-        gh<_i202.AnalyticsService>(),
-      ),
-    );
     gh.factory<_i879.ReportSchedulesBloc>(
       () => _i879.ReportSchedulesBloc(
         gh<_i450.ListReportSchedules>(),
@@ -3386,14 +3391,6 @@ extension GetItInjectableX on _i174.GetIt {
         markNotificationAsRead: gh<_i421.MarkNotificationAsReadUseCase>(),
         markAllNotificationsAsRead:
             gh<_i948.MarkAllNotificationsAsReadUseCase>(),
-      ),
-    );
-    gh.factory<_i591.ProcessInsightCommercialAlertUseCase>(
-      () => _i591.ProcessInsightCommercialAlertUseCase(
-        gh<_i453.InsightAlertDispatchRepository>(),
-        gh<_i387.NotificationInboxRepository>(),
-        gh<_i387.ShouldDispatchNotificationUseCase>(),
-        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i968.ProductMediaBloc>(
@@ -3511,15 +3508,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i684.ListStockAlertsUseCase>(),
       ),
     );
-    gh.factory<_i154.ProcessTargetAlertUseCase>(
-      () => _i154.ProcessTargetAlertUseCase(
-        gh<_i256.TargetAlertSettingsRepository>(),
-        gh<_i836.TargetAlertDispatchRepository>(),
-        gh<_i387.NotificationInboxRepository>(),
-        gh<_i387.ShouldDispatchNotificationUseCase>(),
-        gh<_i202.AnalyticsService>(),
-      ),
-    );
     gh.factory<_i998.TargetFormCubit>(
       () => _i998.TargetFormCubit(
         gh<_i876.TargetRepository>(),
@@ -3545,6 +3533,11 @@ extension GetItInjectableX on _i174.GetIt {
         submitDiagnostics: gh<_i226.SubmitAboutAppDiagnosticsUseCase>(),
       ),
     );
+    gh.factory<_i1015.ResolveNotificationDeliveryTimeUseCase>(
+      () => _i1015.ResolveNotificationDeliveryTimeUseCase(
+        gh<_i693.CommunicationPreferencesRepository>(),
+      ),
+    );
     gh.factory<_i68.EnsureSystemRolesUseCase>(
       () => _i68.EnsureSystemRolesUseCase(gh<_i440.RoleRepository>()),
     );
@@ -3565,11 +3558,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i334.RevokeInviteUseCase>(
       () => _i334.RevokeInviteUseCase(gh<_i75.InviteRepository>()),
-    );
-    gh.factory<_i113.GenerateInsightCommercialAlertsUseCase>(
-      () => _i113.GenerateInsightCommercialAlertsUseCase(
-        gh<_i591.ProcessInsightCommercialAlertUseCase>(),
-      ),
     );
     gh.factory<_i846.ExecutiveDashboardVisibilityService>(
       () => _i846.ExecutiveDashboardVisibilityService(
@@ -3599,14 +3587,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i302.PortfolioVisibilityService(
         gh<_i265.MembershipRepository>(),
         gh<_i265.TeamRepository>(),
-      ),
-    );
-    gh.factory<_i532.ProcessCrmTaskReminderUseCase>(
-      () => _i532.ProcessCrmTaskReminderUseCase(
-        gh<_i516.CrmReminderDispatchRepository>(),
-        gh<_i387.NotificationInboxRepository>(),
-        gh<_i387.ShouldDispatchNotificationUseCase>(),
-        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i977.LoadInitialCustomerOfflineDataUseCase>(
@@ -3694,11 +3674,6 @@ extension GetItInjectableX on _i174.GetIt {
         updateCustomer: gh<_i172.UpdateCustomerUseCase>(),
         listOrganizationUsers: gh<_i220.ListOrganizationUsersUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
-      ),
-    );
-    gh.factory<_i1058.GenerateCrmTaskRemindersUseCase>(
-      () => _i1058.GenerateCrmTaskRemindersUseCase(
-        gh<_i532.ProcessCrmTaskReminderUseCase>(),
       ),
     );
     gh.factory<_i480.LeadFormBloc>(
@@ -3793,20 +3768,19 @@ extension GetItInjectableX on _i174.GetIt {
             gh<_i113.GenerateInsightCommercialAlertsUseCase>(),
       ),
     );
+    gh.factory<_i532.ProcessCrmTaskReminderUseCase>(
+      () => _i532.ProcessCrmTaskReminderUseCase(
+        gh<_i516.CrmReminderDispatchRepository>(),
+        gh<_i387.NotificationInboxRepository>(),
+        gh<_i387.ShouldDispatchNotificationUseCase>(),
+        gh<_i387.ResolveNotificationDeliveryTimeUseCase>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i58.LoadCollectionDashboardEntriesUseCase>(
       () => _i58.LoadCollectionDashboardEntriesUseCase(
         gh<_i649.AggregationRepository>(),
         gh<_i722.GetStockTurnoverMetricsUseCase>(),
-      ),
-    );
-    gh.factory<_i293.TargetDashboardCubit>(
-      () => _i293.TargetDashboardCubit(
-        gh<_i951.TargetVisibilityService>(),
-        gh<_i876.TargetRepository>(),
-        gh<_i154.TargetAchievementRepository>(),
-        gh<_i202.AnalyticsService>(),
-        gh<_i862.ClosingProjectionService>(),
-        gh<_i154.ProcessTargetAlertUseCase>(),
       ),
     );
     gh.factory<_i491.LoadRepresentativeDashboardUseCase>(
@@ -3819,6 +3793,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i588.CrmTaskRepository>(),
         gh<_i644.InsightRepository>(),
         gh<_i576.ListCustomerPortfolioUseCase>(),
+      ),
+    );
+    gh.factory<_i154.ProcessTargetAlertUseCase>(
+      () => _i154.ProcessTargetAlertUseCase(
+        gh<_i256.TargetAlertSettingsRepository>(),
+        gh<_i836.TargetAlertDispatchRepository>(),
+        gh<_i387.NotificationInboxRepository>(),
+        gh<_i387.ShouldDispatchNotificationUseCase>(),
+        gh<_i387.ResolveNotificationDeliveryTimeUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i698.UserRoleEditBloc>(
@@ -3886,9 +3870,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i426.ReportScheduleReferenceChecker>(),
       ),
     );
-    gh.factory<_i787.GenerateOrderCommercialAlertsUseCase>(
-      () => _i787.GenerateOrderCommercialAlertsUseCase(
-        gh<_i491.ProcessOrderCommercialAlertUseCase>(),
+    gh.factory<_i491.ProcessOrderCommercialAlertUseCase>(
+      () => _i491.ProcessOrderCommercialAlertUseCase(
+        gh<_i42.OrderCommercialAlertDispatchRepository>(),
+        gh<_i387.NotificationInboxRepository>(),
+        gh<_i387.ShouldDispatchNotificationUseCase>(),
+        gh<_i387.ResolveNotificationDeliveryTimeUseCase>(),
+        gh<_i47.PermissionService>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i29.RepresentativeDashboardBloc>(
@@ -3951,6 +3940,15 @@ extension GetItInjectableX on _i174.GetIt {
         createCatalogShareLink: gh<_i990.CreateCatalogShareLinkUseCase>(),
         getCatalogShare: gh<_i795.GetCatalogShareUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i591.ProcessInsightCommercialAlertUseCase>(
+      () => _i591.ProcessInsightCommercialAlertUseCase(
+        gh<_i453.InsightAlertDispatchRepository>(),
+        gh<_i387.NotificationInboxRepository>(),
+        gh<_i387.ShouldDispatchNotificationUseCase>(),
+        gh<_i387.ResolveNotificationDeliveryTimeUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.lazySingleton<_i876.ReportExportRepository>(
@@ -4056,6 +4054,11 @@ extension GetItInjectableX on _i174.GetIt {
         decideOrderApproval: gh<_i828.DecideOrderApprovalUseCase>(),
       ),
     );
+    gh.factory<_i113.GenerateInsightCommercialAlertsUseCase>(
+      () => _i113.GenerateInsightCommercialAlertsUseCase(
+        gh<_i591.ProcessInsightCommercialAlertUseCase>(),
+      ),
+    );
     gh.factory<_i817.LoadFunnelDashboardUseCase>(
       () => _i817.LoadFunnelDashboardUseCase(
         gh<_i104.FunnelDashboardVisibilityService>(),
@@ -4080,6 +4083,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i761.FavoriteRepository>(),
         gh<_i321.ProductRepository>(),
         gh<_i385.GetVariantAvailabilityUseCase>(),
+      ),
+    );
+    gh.factory<_i1058.GenerateCrmTaskRemindersUseCase>(
+      () => _i1058.GenerateCrmTaskRemindersUseCase(
+        gh<_i532.ProcessCrmTaskReminderUseCase>(),
       ),
     );
     gh.factory<_i455.CollectionDashboardBloc>(
@@ -4117,6 +4125,16 @@ extension GetItInjectableX on _i174.GetIt {
         getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
       ),
     );
+    gh.factory<_i293.TargetDashboardCubit>(
+      () => _i293.TargetDashboardCubit(
+        gh<_i951.TargetVisibilityService>(),
+        gh<_i876.TargetRepository>(),
+        gh<_i154.TargetAchievementRepository>(),
+        gh<_i202.AnalyticsService>(),
+        gh<_i862.ClosingProjectionService>(),
+        gh<_i154.ProcessTargetAlertUseCase>(),
+      ),
+    );
     gh.factory<_i721.FunnelDashboardBloc>(
       () => _i721.FunnelDashboardBloc(
         gh<_i817.LoadFunnelDashboardUseCase>(),
@@ -4145,6 +4163,11 @@ extension GetItInjectableX on _i174.GetIt {
         getDraft: gh<_i801.GetCommercialSizeGridDraftUseCase>(),
         saveDraft: gh<_i644.SaveCommercialSizeGridDraftUseCase>(),
         getAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
+      ),
+    );
+    gh.factory<_i787.GenerateOrderCommercialAlertsUseCase>(
+      () => _i787.GenerateOrderCommercialAlertsUseCase(
+        gh<_i491.ProcessOrderCommercialAlertUseCase>(),
       ),
     );
     gh.factory<_i1025.GetOrderSubmissionContextUseCase>(

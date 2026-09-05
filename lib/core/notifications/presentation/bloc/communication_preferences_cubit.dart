@@ -8,6 +8,7 @@ import '../../../errors/errors.dart';
 import '../../../utils/utils.dart';
 import '../../domain/entities/app_notification.dart';
 import '../../domain/entities/communication_preferences.dart';
+import '../../domain/entities/quiet_hours.dart';
 import '../../domain/usecases/save_communication_preferences_use_case.dart';
 import '../../domain/usecases/watch_communication_preferences_use_case.dart';
 import 'communication_preferences_state.dart';
@@ -125,6 +126,53 @@ final class CommunicationPreferencesCubit
             'category': category.name,
             'channel': channel.name,
             'frequency': frequency.name,
+          },
+        );
+      case AppFailure<CommunicationPreferences>(failure: final failure):
+        emit(
+          state.copyWith(
+            saveStatus: CommunicationPreferencesSaveStatus.failure,
+            saveFailure: failure,
+          ),
+        );
+    }
+  }
+
+  /// Persists a new [quietHours] configuration (TASK-155) — every other
+  /// preference (category/channel frequencies) stays untouched, same
+  /// "only the targeted cell changes" contract [updateFrequency] already
+  /// follows.
+  Future<void> updateQuietHours(QuietHours quietHours) async {
+    final current = state.preferences;
+    if (current == null) return;
+    if (state.saveStatus == CommunicationPreferencesSaveStatus.saving) return;
+
+    final candidate = current.withQuietHours(quietHours);
+
+    emit(
+      state.copyWith(
+        saveStatus: CommunicationPreferencesSaveStatus.saving,
+        clearSaveFailure: true,
+      ),
+    );
+
+    final result = await _savePreferences(preferences: candidate);
+    if (isClosed) return;
+
+    switch (result) {
+      case AppSuccess<CommunicationPreferences>(value: final saved):
+        emit(
+          state.copyWith(
+            saveStatus: CommunicationPreferencesSaveStatus.success,
+            preferences: saved,
+            clearSaveFailure: true,
+          ),
+        );
+        await _analyticsService.logEvent(
+          AnalyticsEvents.communicationPreferencesUpdated,
+          parameters: <String, Object?>{
+            'organization_id': saved.organizationId,
+            'quiet_hours_enabled': saved.quietHours.enabled,
           },
         );
       case AppFailure<CommunicationPreferences>(failure: final failure):

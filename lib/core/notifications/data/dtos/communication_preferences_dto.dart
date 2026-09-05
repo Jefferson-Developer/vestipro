@@ -14,6 +14,7 @@ final class CommunicationPreferencesDto {
     required this.organizationId,
     required this.userId,
     required this.categories,
+    this.quietHours,
     this.updatedAt,
   });
 
@@ -25,11 +26,13 @@ final class CommunicationPreferencesDto {
     final userId = json['userId'];
     final categories = json['categories'];
     final updatedAt = json['updatedAt'];
+    final quietHours = json['quietHours'];
 
     if (organizationId is! String ||
         userId is! String ||
         categories is! Map ||
-        (updatedAt != null && updatedAt is! Timestamp)) {
+        (updatedAt != null && updatedAt is! Timestamp) ||
+        (quietHours != null && quietHours is! Map)) {
       throw const ValidationException(
         'Invalid communication preferences payload.',
         code: 'invalid_communication_preferences_payload',
@@ -50,6 +53,9 @@ final class CommunicationPreferencesDto {
             : const <String, String>{};
         return MapEntry(key.toString(), channelFrequencies);
       }),
+      quietHours: (quietHours as Map?)?.map(
+        (key, value) => MapEntry(key.toString(), value),
+      ),
       updatedAt: (updatedAt as Timestamp?)?.toDate(),
     );
   }
@@ -62,6 +68,15 @@ final class CommunicationPreferencesDto {
   /// "never depend on the domain enum's ordinal" convention `NotificationDto`
   /// already documents for its own `category` field.
   final Map<String, Map<String, String>> categories;
+
+  /// Raw `QuietHours` field map (TASK-155): `enabled` (bool),
+  /// `startMinuteOfDay`/`endMinuteOfDay` (int), `activeWeekdays` (List of
+  /// int, `DateTime.weekday` values), `timezoneOffsetMinutes` (int?,
+  /// nullable until the first device sync) and `timezoneUpdatedAt`
+  /// (Timestamp?). `null` for every document written before TASK-155 shipped
+  /// this field — `CommunicationPreferencesMapper` degrades that to the
+  /// documented default (disabled).
+  final Map<String, Object?>? quietHours;
   final DateTime? updatedAt;
 
   Map<String, dynamic> toJson() {
@@ -69,6 +84,7 @@ final class CommunicationPreferencesDto {
       'organizationId': organizationId,
       'userId': userId,
       'categories': categories,
+      'quietHours': quietHours,
       'updatedAt': updatedAt == null ? null : Timestamp.fromDate(updatedAt!),
     };
   }

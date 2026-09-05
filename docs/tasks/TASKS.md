@@ -275,7 +275,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-152 — Implementar notificações de CRM](TASK-152-implementar-notificacoes-de-crm.md) — Flutter Senior + Front-end
 - [x] [TASK-153 — Implementar notificações comerciais](TASK-153-implementar-notificacoes-comerciais.md) — Flutter Senior + Front-end
 - [x] [TASK-154 — Implementar preferências de comunicação](TASK-154-implementar-preferencias-de-comunicacao.md) — Flutter Senior + Front-end
-- [ ] [TASK-155 — Implementar quiet hours](TASK-155-implementar-quiet-hours.md) — Flutter Senior + Front-end
+- [x] [TASK-155 — Implementar quiet hours](TASK-155-implementar-quiet-hours.md) — Flutter Senior + Front-end
 
 ### EPIC-20 — LGPD e Privacidade
 - [ ] [TASK-156 — Implementar política de privacidade e termos](TASK-156-implementar-politica-de-privacidade.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 154 / 220 tasks concluídas.
+**Progresso:** 155 / 220 tasks concluídas.

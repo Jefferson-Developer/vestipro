@@ -175,4 +175,63 @@ void main() {
         (refreshed as AppSuccess<CommunicationPreferences>).value;
     expect(preferences.hasSystemCategoryFullyDisabled, isFalse);
   });
+
+  testWidgets(
+    'enabling quiet hours (TASK-155) persists it and reveals the weekday '
+    'selector, starting from every weekday active',
+    (tester) async {
+      await pumpApp(tester, buildPage());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Dias da semana'), findsNothing);
+
+      final checkbox = find.byKey(
+        const ValueKey<String>('quiet-hours-enabled-checkbox'),
+      );
+      await tester.ensureVisible(checkbox);
+      await tester.pumpAndSettle();
+      await tester.tap(checkbox);
+      await tester.pumpAndSettle();
+
+      expect(find.text('Dias da semana'), findsOneWidget);
+      final saved = await repository.get(
+        organizationId: 'org-1',
+        userId: 'user-1',
+      );
+      final preferences = (saved as AppSuccess<CommunicationPreferences>).value;
+      expect(preferences.quietHours.enabled, isTrue);
+      expect(preferences.quietHours.activeWeekdays, QuietHours.kAllWeekdays);
+    },
+  );
+
+  testWidgets(
+    'deselecting a weekday chip removes only that day, keeping the others '
+    'active',
+    (tester) async {
+      repository.seed(
+        CommunicationPreferences.defaults(
+          organizationId: 'org-1',
+          userId: 'user-1',
+        ).withQuietHours(const QuietHours(enabled: true)),
+      );
+
+      await pumpApp(tester, buildPage());
+      await tester.pumpAndSettle();
+
+      final mondayChip = find.byKey(
+        const ValueKey<String>('quiet-hours-weekday-1'),
+      );
+      await tester.ensureVisible(mondayChip);
+      await tester.pumpAndSettle();
+      await tester.tap(mondayChip);
+      await tester.pumpAndSettle();
+
+      final saved = await repository.get(
+        organizationId: 'org-1',
+        userId: 'user-1',
+      );
+      final preferences = (saved as AppSuccess<CommunicationPreferences>).value;
+      expect(preferences.quietHours.activeWeekdays, <int>{2, 3, 4, 5, 6, 7});
+    },
+  );
 }

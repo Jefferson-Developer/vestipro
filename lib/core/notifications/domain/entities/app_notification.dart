@@ -33,6 +33,7 @@ final class AppNotification {
     required this.createdAt,
     this.readAt,
     this.priority = AppNotificationPriority.informative,
+    this.deliverAt,
   });
 
   final String id;
@@ -45,4 +46,29 @@ final class AppNotification {
   final DateTime createdAt;
   final DateTime? readAt;
   final AppNotificationPriority priority;
+
+  /// `null` (the default, and every notification written before TASK-155)
+  /// means this notification is visible as soon as it is created — the only
+  /// behavior that existed before quiet hours.
+  ///
+  /// A non-null value means this notification was suppressed by the
+  /// recipient's own quiet hours (`QuietHours.isActiveAt`) at the moment it
+  /// was generated: it is already durably persisted (never lost, never
+  /// dropped) but `NotificationInboxRepository.listForUser` hides it from
+  /// [userId] until `DateTime.now().toUtc()` reaches this instant, at which
+  /// point it becomes visible on the very next load — no separate "flush"
+  /// job needs to run for it to eventually appear. Critical notifications
+  /// (see [AppNotificationPriority.critical]) never set this field, even
+  /// when generated during quiet hours — TASK-154/TASK-155's "notificações
+  /// críticas de segurança/sessão não são bloqueadas" exception.
+  final DateTime? deliverAt;
+
+  /// Whether this notification is already visible to [userId] at
+  /// [now] (defaults to the real current instant) — `false` only while
+  /// [deliverAt] is still in the future.
+  bool isVisibleAt([DateTime? now]) {
+    final deliverAtInstant = deliverAt;
+    if (deliverAtInstant == null) return true;
+    return !(now ?? DateTime.now()).toUtc().isBefore(deliverAtInstant);
+  }
 }

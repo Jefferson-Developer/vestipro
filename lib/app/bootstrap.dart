@@ -87,6 +87,7 @@ Future<void> bootstrap(AppEnvironment environment) async {
   configureDependencies(environment);
   configureGlobalErrorHandlers();
   configurePushNotificationLifecycle();
+  configureQuietHoursTimezoneSync();
   runApp(VestiProApp(environment: environment));
 }
 
@@ -198,6 +199,54 @@ void configurePushNotificationLifecycle({
 
     unawaited(_registerPushDeviceForUser(user.uid, resolveOrg, resolveToken));
   });
+}
+
+/// Keeps this device's recipient-side quiet-hours timezone in sync
+/// (TASK-155) for whoever the session changes to — mirrors
+/// [configurePushNotificationLifecycle]'s own "resolve the active
+/// Organization once per session change" shape, but only on sign-in: there
+/// is nothing to unregister on sign-out (unlike a push token), quiet hours
+/// are simply not evaluated for a signed-out user.
+///
+/// Best-effort by design — `SyncDeviceTimezoneUseCase` itself never throws
+/// (see its own doc), so a failure here can only come from
+/// [resolveActiveOrganizationIdUseCase] itself, already the same
+/// [ResolveActiveOrganizationIdUseCase] every other session-lifecycle hook
+/// resolves.
+@visibleForTesting
+void configureQuietHoursTimezoneSync({
+  SessionService Function()? resolveSessionService,
+  SyncDeviceTimezoneUseCase Function()? resolveSyncDeviceTimezoneUseCase,
+  ResolveActiveOrganizationIdUseCase Function()?
+  resolveActiveOrganizationIdUseCase,
+}) {
+  final resolveSession = resolveSessionService ?? () => getIt<SessionService>();
+  final resolveSync =
+      resolveSyncDeviceTimezoneUseCase ??
+      () => getIt<SyncDeviceTimezoneUseCase>();
+  final resolveOrg =
+      resolveActiveOrganizationIdUseCase ??
+      () => getIt<ResolveActiveOrganizationIdUseCase>();
+
+  resolveSession().sessionChanges.listen((user) {
+    if (user == null) return;
+    unawaited(_syncDeviceTimezoneForUser(user.uid, resolveOrg, resolveSync));
+  });
+}
+
+Future<void> _syncDeviceTimezoneForUser(
+  String userId,
+  ResolveActiveOrganizationIdUseCase Function() resolveOrg,
+  SyncDeviceTimezoneUseCase Function() resolveSync,
+) async {
+  final organizationResult = await resolveOrg()(userId: userId);
+  final organizationId = organizationResult.fold(
+    onSuccess: (id) => id,
+    onFailure: (_) => null,
+  );
+  if (organizationId == null) return;
+
+  await resolveSync()(organizationId: organizationId, userId: userId);
 }
 
 Future<void> _registerPushDeviceForUser(

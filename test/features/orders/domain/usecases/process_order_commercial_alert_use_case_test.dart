@@ -33,6 +33,7 @@ void main() {
         dispatchRepository,
         notificationInboxRepository,
         ShouldDispatchNotificationUseCase(preferencesRepository),
+        ResolveNotificationDeliveryTimeUseCase(preferencesRepository),
         permissionService,
         analyticsService,
       );

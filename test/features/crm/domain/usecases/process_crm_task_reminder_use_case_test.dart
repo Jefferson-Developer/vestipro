@@ -24,6 +24,7 @@ void main() {
         dispatchRepository,
         notificationInboxRepository,
         ShouldDispatchNotificationUseCase(preferencesRepository),
+        ResolveNotificationDeliveryTimeUseCase(preferencesRepository),
         analyticsService,
       );
     });
@@ -110,12 +111,42 @@ void main() {
       expect(managerNotification.title, contains('equipe'));
     });
 
-    test('does not notify outside the allowed sending window', () async {
+    test(
+      'is still dispatched (never dropped) but with a future deliverAt '
+      'when the recipient\'s own quiet hours (TASK-155) are active at now',
+      () async {
+        preferencesRepository.seed(
+          CommunicationPreferences.defaults(
+            organizationId: 'org-1',
+            userId: 'rep-1',
+          ).withQuietHours(
+            const QuietHours(enabled: true, timezoneOffsetMinutes: 0),
+          ),
+        );
+        final task = _buildTask(dueAt: now.subtract(const Duration(hours: 2)));
+        // 23:00 UTC falls inside the default 22:00-07:00 quiet-hours window
+        // (with a 0-minute recipient offset, local == UTC here).
+        final lateNight = DateTime.utc(2026, 9, 5, 23);
+
+        final dispatched = await useCase(
+          task: task,
+          recipientUserId: 'rep-1',
+          now: lateNight,
+        );
+
+        expect(dispatched, isTrue);
+        expect(notificationInboxRepository.items, hasLength(1));
+        expect(
+          notificationInboxRepository.items.single.deliverAt,
+          DateTime.utc(2026, 9, 6, 7),
+        );
+      },
+    );
+
+    test('a recipient without quiet hours configured (the default) is notified '
+        'immediately regardless of the hour', () async {
       final task = _buildTask(dueAt: now.subtract(const Duration(hours: 2)));
-      // Also built from local components, so `.toLocal().hour` is
-      // guaranteed to be 23 on every machine — outside the default 8h-18h
-      // window.
-      final lateNight = DateTime(2026, 9, 5, 23).toUtc();
+      final lateNight = DateTime.utc(2026, 9, 5, 23);
 
       final dispatched = await useCase(
         task: task,
@@ -123,25 +154,8 @@ void main() {
         now: lateNight,
       );
 
-      expect(dispatched, isFalse);
-      expect(notificationInboxRepository.items, isEmpty);
-    });
-
-    test('never dispatches when the configured window excludes now', () async {
-      final task = _buildTask(dueAt: now.subtract(const Duration(hours: 2)));
-
-      final dispatched = await useCase(
-        task: task,
-        recipientUserId: 'rep-1',
-        now: now,
-        settings: const CrmReminderSettings(
-          allowedSendingStartHour: 0,
-          allowedSendingEndHour: 1,
-        ),
-      );
-
-      expect(dispatched, isFalse);
-      expect(notificationInboxRepository.items, isEmpty);
+      expect(dispatched, isTrue);
+      expect(notificationInboxRepository.items.single.deliverAt, isNull);
     });
 
     test('does not notify when the recipient disabled the crm/central '

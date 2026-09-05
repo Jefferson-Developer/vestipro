@@ -30,6 +30,7 @@ final class NotificationMapper {
       createdAt: dto.createdAt,
       readAt: dto.readAt,
       priority: _priorityFromString(dto.priority),
+      deliverAt: dto.deliverAt,
     );
   }
 
@@ -45,6 +46,7 @@ final class NotificationMapper {
       createdAt: entity.createdAt,
       readAt: entity.readAt,
       priority: entity.priority.name,
+      deliverAt: entity.deliverAt,
     );
   }
 

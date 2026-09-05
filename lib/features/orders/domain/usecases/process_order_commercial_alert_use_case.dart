@@ -39,6 +39,7 @@ final class ProcessOrderCommercialAlertUseCase {
     this._dispatchRepository,
     this._notificationInboxRepository,
     this._shouldDispatchNotification,
+    this._resolveNotificationDeliveryTime,
     this._permissionService,
     this._analyticsService,
   ) : _uuid = const Uuid();
@@ -46,6 +47,7 @@ final class ProcessOrderCommercialAlertUseCase {
   final OrderCommercialAlertDispatchRepository _dispatchRepository;
   final NotificationInboxRepository _notificationInboxRepository;
   final ShouldDispatchNotificationUseCase _shouldDispatchNotification;
+  final ResolveNotificationDeliveryTimeUseCase _resolveNotificationDeliveryTime;
   final PermissionService _permissionService;
   final AnalyticsService _analyticsService;
   final Uuid _uuid;
@@ -101,6 +103,18 @@ final class ProcessOrderCommercialAlertUseCase {
       orderId: order.id,
     ).location;
 
+    // TASK-155: both classifications here (rejected/criticalSyncFailure) are
+    // already `critical` — this call always resolves to `null` (deliver
+    // now) today, kept for consistency with the other three generators and
+    // so a future non-critical order alert automatically gets the same
+    // quiet-hours treatment without another change here.
+    final deliverAt = await _resolveNotificationDeliveryTime(
+      organizationId: order.organizationId,
+      userId: recipientUserId,
+      priority: AppNotificationPriority.critical,
+      now: instant,
+    );
+
     final notification = AppNotification(
       id: _uuid.v4(),
       organizationId: order.organizationId,
@@ -111,6 +125,7 @@ final class ProcessOrderCommercialAlertUseCase {
       deepLink: deepLink,
       createdAt: instant,
       priority: AppNotificationPriority.critical,
+      deliverAt: deliverAt,
     );
 
     final created = await _notificationInboxRepository.create(

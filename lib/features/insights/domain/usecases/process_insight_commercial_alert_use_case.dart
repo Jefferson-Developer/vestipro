@@ -48,12 +48,14 @@ final class ProcessInsightCommercialAlertUseCase {
     this._dispatchRepository,
     this._notificationInboxRepository,
     this._shouldDispatchNotification,
+    this._resolveNotificationDeliveryTime,
     this._analyticsService,
   ) : _uuid = const Uuid();
 
   final InsightAlertDispatchRepository _dispatchRepository;
   final NotificationInboxRepository _notificationInboxRepository;
   final ShouldDispatchNotificationUseCase _shouldDispatchNotification;
+  final ResolveNotificationDeliveryTimeUseCase _resolveNotificationDeliveryTime;
   final AnalyticsService _analyticsService;
   final Uuid _uuid;
 
@@ -93,6 +95,19 @@ final class ProcessInsightCommercialAlertUseCase {
     );
     if (!allowed) return false;
 
+    final priority = insight.severity == InsightSeverity.critical
+        ? AppNotificationPriority.critical
+        : AppNotificationPriority.informative;
+    // TASK-155: a `critical` oportunidade always reaches the recipient
+    // immediately; a `high`-severity one is instead written now with a
+    // future `deliverAt` when it falls inside their own quiet hours.
+    final deliverAt = await _resolveNotificationDeliveryTime(
+      organizationId: insight.organizationId,
+      userId: recipientUserId,
+      priority: priority,
+      now: instant,
+    );
+
     final notification = AppNotification(
       id: _uuid.v4(),
       organizationId: insight.organizationId,
@@ -104,9 +119,8 @@ final class ProcessInsightCommercialAlertUseCase {
           : insight.description,
       deepLink: _resolveDeepLink(insight),
       createdAt: instant,
-      priority: insight.severity == InsightSeverity.critical
-          ? AppNotificationPriority.critical
-          : AppNotificationPriority.informative,
+      priority: priority,
+      deliverAt: deliverAt,
     );
 
     final created = await _notificationInboxRepository.create(

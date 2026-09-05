@@ -18,6 +18,7 @@ final class NotificationDto {
     required this.createdAt,
     this.readAt,
     this.priority = 'informative',
+    this.deliverAt,
   });
 
   factory NotificationDto.fromJson(
@@ -37,6 +38,10 @@ final class NotificationDto {
     // document, unlike every other (always-present-since-TASK-151) field
     // below.
     final priority = json['priority'];
+    // Absent on every notification written before TASK-155 shipped this
+    // field — `null` degrades to "already visible", the only behavior that
+    // existed before quiet hours.
+    final deliverAt = json['deliverAt'];
 
     if (organizationId is! String ||
         userId is! String ||
@@ -46,7 +51,8 @@ final class NotificationDto {
         deepLink is! String ||
         createdAt is! Timestamp ||
         (readAt != null && readAt is! Timestamp) ||
-        (priority != null && priority is! String)) {
+        (priority != null && priority is! String) ||
+        (deliverAt != null && deliverAt is! Timestamp)) {
       throw const ValidationException(
         'Invalid notification payload.',
         code: 'invalid_notification_payload',
@@ -64,6 +70,7 @@ final class NotificationDto {
       createdAt: createdAt.toDate(),
       readAt: (readAt as Timestamp?)?.toDate(),
       priority: (priority as String?) ?? 'informative',
+      deliverAt: (deliverAt as Timestamp?)?.toDate(),
     );
   }
 
@@ -84,6 +91,9 @@ final class NotificationDto {
   /// domain enum" convention as [category].
   final String priority;
 
+  /// `AppNotification.deliverAt` (TASK-155) — `null` means already visible.
+  final DateTime? deliverAt;
+
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
       'organizationId': organizationId,
@@ -95,6 +105,7 @@ final class NotificationDto {
       'createdAt': Timestamp.fromDate(createdAt),
       'readAt': readAt == null ? null : Timestamp.fromDate(readAt!),
       'priority': priority,
+      'deliverAt': deliverAt == null ? null : Timestamp.fromDate(deliverAt!),
     };
   }
 }

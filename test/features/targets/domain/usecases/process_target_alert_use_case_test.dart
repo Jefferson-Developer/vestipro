@@ -40,6 +40,7 @@ void main() {
         dispatchRepository,
         notificationInboxRepository,
         ShouldDispatchNotificationUseCase(preferencesRepository),
+        ResolveNotificationDeliveryTimeUseCase(preferencesRepository),
         analyticsService,
       );
     });
@@ -148,6 +149,62 @@ void main() {
       expect(alert, isNotNull);
       expect(alert!.notificationQueued, isFalse);
       expect(notificationInboxRepository.items, isEmpty);
+    });
+
+    test('a moderate-risk (non-critical) alert is written now with a future '
+        'deliverAt when it falls inside the recipient\'s own quiet hours '
+        '(TASK-155), never dropped', () async {
+      preferencesRepository.seed(
+        CommunicationPreferences.defaults(
+          organizationId: 'org-1',
+          userId: 'rep-1',
+        ).withQuietHours(
+          const QuietHours(enabled: true, timezoneOffsetMinutes: 0),
+        ),
+      );
+      final moderateRiskProgress = TargetProgressViewModel.compute(
+        target: target,
+        realizedValue: 35,
+        now: DateTime.utc(2026, 1, 16),
+      );
+
+      // 00:00 UTC falls inside the default 22:00-07:00 quiet-hours
+      // window (with a 0-minute recipient offset, local == UTC here).
+      final alert = await useCase(
+        target: target,
+        progress: moderateRiskProgress,
+        userId: 'rep-1',
+        now: DateTime.utc(2026, 1, 16),
+      );
+
+      expect(alert!.notificationQueued, isTrue);
+      expect(notificationInboxRepository.items, hasLength(1));
+      expect(
+        notificationInboxRepository.items.single.deliverAt,
+        DateTime.utc(2026, 1, 16, 7),
+      );
+    });
+
+    test('a highRisk (critical) alert always reaches the recipient immediately '
+        'even during their own quiet hours (TASK-155)', () async {
+      preferencesRepository.seed(
+        CommunicationPreferences.defaults(
+          organizationId: 'org-1',
+          userId: 'rep-1',
+        ).withQuietHours(
+          const QuietHours(enabled: true, timezoneOffsetMinutes: 0),
+        ),
+      );
+
+      final alert = await useCase(
+        target: target,
+        progress: progress,
+        userId: 'rep-1',
+        now: DateTime.utc(2026, 1, 16),
+      );
+
+      expect(alert!.classification, TargetAlertClassification.highRisk);
+      expect(notificationInboxRepository.items.single.deliverAt, isNull);
     });
   });
 }

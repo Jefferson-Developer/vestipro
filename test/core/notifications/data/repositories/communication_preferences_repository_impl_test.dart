@@ -128,6 +128,53 @@ void main() {
       },
     );
 
+    test('save() round-trips quietHours (TASK-155) through the mapper '
+        'unchanged, including the recipient timezone offset', () async {
+      final preferences =
+          CommunicationPreferences.defaults(
+            organizationId: 'org-1',
+            userId: 'user-1',
+          ).withQuietHours(
+            const QuietHours(
+              enabled: true,
+              startMinuteOfDay: 21 * 60,
+              endMinuteOfDay: 6 * 60 + 30,
+              activeWeekdays: <int>{1, 2, 3, 4, 5},
+              timezoneOffsetMinutes: -180,
+            ),
+          );
+
+      await repository.save(preferences: preferences);
+
+      final readResult = await repository.get(
+        organizationId: 'org-1',
+        userId: 'user-1',
+      );
+      final read = (readResult as AppSuccess<CommunicationPreferences>).value;
+      expect(read.quietHours.enabled, isTrue);
+      expect(read.quietHours.startMinuteOfDay, 21 * 60);
+      expect(read.quietHours.endMinuteOfDay, 6 * 60 + 30);
+      expect(read.quietHours.activeWeekdays, <int>{1, 2, 3, 4, 5});
+      expect(read.quietHours.timezoneOffsetMinutes, -180);
+    });
+
+    test('get() degrades quietHours to the disabled default for a document '
+        'written before TASK-155 (no quietHours field at all)', () async {
+      dataSource.seedWithoutQuietHours(
+        organizationId: 'org-1',
+        userId: 'user-1',
+      );
+
+      final result = await repository.get(
+        organizationId: 'org-1',
+        userId: 'user-1',
+      );
+
+      final preferences =
+          (result as AppSuccess<CommunicationPreferences>).value;
+      expect(preferences.quietHours.enabled, isFalse);
+    });
+
     test(
       'never leaks one user/organization\'s preference into another\'s read',
       () async {
@@ -217,5 +264,18 @@ final class _FakeCommunicationPreferencesDataSource
     final key = _key(dto.organizationId, dto.userId);
     _stored[key] = dto;
     _controllerFor(key).add(dto);
+  }
+
+  /// Simulates a document written before TASK-155 shipped `quietHours` at
+  /// all — [CommunicationPreferencesDto.quietHours] stays `null`.
+  void seedWithoutQuietHours({
+    required String organizationId,
+    required String userId,
+  }) {
+    _stored[_key(organizationId, userId)] = CommunicationPreferencesDto(
+      organizationId: organizationId,
+      userId: userId,
+      categories: const <String, Map<String, String>>{},
+    );
   }
 }

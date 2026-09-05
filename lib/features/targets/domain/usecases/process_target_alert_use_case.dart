@@ -21,6 +21,7 @@ final class ProcessTargetAlertUseCase {
     this._dispatchRepository,
     this._notificationInboxRepository,
     this._shouldDispatchNotification,
+    this._resolveNotificationDeliveryTime,
     this._analyticsService,
   ) : _evaluator = const TargetAlertEvaluator(),
       _uuid = const Uuid();
@@ -29,6 +30,7 @@ final class ProcessTargetAlertUseCase {
   final TargetAlertDispatchRepository _dispatchRepository;
   final NotificationInboxRepository _notificationInboxRepository;
   final ShouldDispatchNotificationUseCase _shouldDispatchNotification;
+  final ResolveNotificationDeliveryTimeUseCase _resolveNotificationDeliveryTime;
   final AnalyticsService _analyticsService;
   final TargetAlertEvaluator _evaluator;
   final Uuid _uuid;
@@ -95,6 +97,21 @@ final class ProcessTargetAlertUseCase {
       );
     }
 
+    final priority =
+        assessment.classification == TargetAlertClassification.highRisk
+        ? AppNotificationPriority.critical
+        : AppNotificationPriority.informative;
+    // TASK-155: a highRisk (critical) alert always reaches the recipient
+    // immediately, even during their own quiet hours; a moderate-risk/
+    // opportunity (informative) one is instead written now with a future
+    // `deliverAt` — never lost, simply hidden until quiet hours end.
+    final deliverAt = await _resolveNotificationDeliveryTime(
+      organizationId: target.organizationId,
+      userId: userId,
+      priority: priority,
+      now: instant,
+    );
+
     final notification = AppNotification(
       id: _uuid.v4(),
       organizationId: target.organizationId,
@@ -108,9 +125,8 @@ final class ProcessTargetAlertUseCase {
       // interrupting the seller/gestor now (TASK-153's "priorização visual
       // diferenciada para alertas críticos"); moderate risk and the
       // opportunity nudge stay informative.
-      priority: assessment.classification == TargetAlertClassification.highRisk
-          ? AppNotificationPriority.critical
-          : AppNotificationPriority.informative,
+      priority: priority,
+      deliverAt: deliverAt,
     );
 
     final notificationCreated = await _notificationInboxRepository.create(

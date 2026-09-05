@@ -97,6 +97,7 @@ final class CommunicationPreferencesRepositoryImpl
         organizationId: preferences.organizationId,
         userId: preferences.userId,
         categoryPreferences: preferences.categoryPreferences,
+        quietHours: preferences.quietHours,
         updatedAt: DateTime.now().toUtc(),
       );
       await dataSource.upsert(mapper.toDto(withTimestamp));

@@ -31,6 +31,7 @@ final class ProcessCrmTaskReminderUseCase {
     this._dispatchRepository,
     this._notificationInboxRepository,
     this._shouldDispatchNotification,
+    this._resolveNotificationDeliveryTime,
     this._analyticsService,
   ) : _evaluator = const CrmTaskReminderEvaluator(),
       _uuid = const Uuid();
@@ -38,6 +39,7 @@ final class ProcessCrmTaskReminderUseCase {
   final CrmReminderDispatchRepository _dispatchRepository;
   final NotificationInboxRepository _notificationInboxRepository;
   final ShouldDispatchNotificationUseCase _shouldDispatchNotification;
+  final ResolveNotificationDeliveryTimeUseCase _resolveNotificationDeliveryTime;
   final AnalyticsService _analyticsService;
   final CrmTaskReminderEvaluator _evaluator;
   final Uuid _uuid;
@@ -58,10 +60,6 @@ final class ProcessCrmTaskReminderUseCase {
       settings: settings,
     );
     if (classification == CrmTaskReminderClassification.none) return false;
-
-    // Temporary quiet-hours guard — see `CrmReminderSettings` docs for why
-    // this is not yet delegated to a shared TASK-155 policy.
-    if (!settings.isWithinAllowedSendingWindow(now.toLocal())) return false;
 
     // TASK-154: never writes the central de notificações entry at all when
     // the recipient turned `crm`/central off — checked before the cooldown
@@ -99,6 +97,18 @@ final class ProcessCrmTaskReminderUseCase {
       organizationId: task.organizationId,
     );
 
+    // TASK-155: a CRM reminder is always `informative` — never `critical` —
+    // so it is written now with a future `deliverAt` whenever it falls
+    // inside the recipient's own quiet hours, replacing this use case's
+    // former ad-hoc, org-wide 8h-18h window (`CrmReminderSettings`'s own
+    // doc already anticipated this replacement).
+    final deliverAt = await _resolveNotificationDeliveryTime(
+      organizationId: task.organizationId,
+      userId: recipientUserId,
+      priority: AppNotificationPriority.informative,
+      now: now,
+    );
+
     final notification = AppNotification(
       id: _uuid.v4(),
       organizationId: task.organizationId,
@@ -108,6 +118,7 @@ final class ProcessCrmTaskReminderUseCase {
       body: content.body,
       deepLink: deepLink,
       createdAt: now,
+      deliverAt: deliverAt,
     );
 
     final created = await _notificationInboxRepository.create(

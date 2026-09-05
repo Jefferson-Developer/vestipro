@@ -24,6 +24,7 @@ void main() {
         dispatchRepository,
         notificationInboxRepository,
         ShouldDispatchNotificationUseCase(preferencesRepository),
+        ResolveNotificationDeliveryTimeUseCase(preferencesRepository),
         analyticsService,
       );
     });
@@ -161,6 +162,62 @@ void main() {
       expect(withinCooldown, isFalse);
       expect(afterCooldown, isTrue);
       expect(notificationInboxRepository.items, hasLength(2));
+    });
+
+    test(
+      'a high-severity (informative) opportunity is written now with a '
+      'future deliverAt during the recipient\'s own quiet hours (TASK-155)',
+      () async {
+        preferencesRepository.seed(
+          CommunicationPreferences.defaults(
+            organizationId: 'org-1',
+            userId: 'rep-1',
+          ).withQuietHours(
+            const QuietHours(enabled: true, timezoneOffsetMinutes: 0),
+          ),
+        );
+        final insight = _buildInsight(
+          type: InsightType.crossSell,
+          severity: InsightSeverity.high,
+        );
+
+        // Midnight UTC falls inside the default 22:00-07:00 quiet-hours
+        // window (0-minute recipient offset here).
+        await useCase(
+          insight: insight,
+          recipientUserId: 'rep-1',
+          now: DateTime.utc(2026, 6, 1),
+        );
+
+        expect(
+          notificationInboxRepository.items.single.deliverAt,
+          DateTime.utc(2026, 6, 1, 7),
+        );
+      },
+    );
+
+    test('a critical-severity opportunity still reaches the recipient '
+        'immediately during their own quiet hours (TASK-155)', () async {
+      preferencesRepository.seed(
+        CommunicationPreferences.defaults(
+          organizationId: 'org-1',
+          userId: 'rep-1',
+        ).withQuietHours(
+          const QuietHours(enabled: true, timezoneOffsetMinutes: 0),
+        ),
+      );
+      final insight = _buildInsight(
+        type: InsightType.upSell,
+        severity: InsightSeverity.critical,
+      );
+
+      await useCase(
+        insight: insight,
+        recipientUserId: 'rep-1',
+        now: DateTime.utc(2026, 6, 1),
+      );
+
+      expect(notificationInboxRepository.items.single.deliverAt, isNull);
     });
   });
 }

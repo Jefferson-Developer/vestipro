@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../design_system/design_system.dart';
 import '../../domain/entities/app_notification.dart';
 import '../../domain/entities/communication_preferences.dart';
+import '../../domain/entities/quiet_hours.dart';
 import '../bloc/communication_preferences_cubit.dart';
 import '../bloc/communication_preferences_state.dart';
 
@@ -110,8 +111,217 @@ class _CommunicationPreferencesScaffold extends StatelessWidget {
             ),
             const SizedBox(height: AppSpacing.spacing16),
           ],
+          _QuietHoursSection(
+            quietHours: preferences.quietHours,
+            isSaving: isSaving,
+            onChanged: (quietHours) => context
+                .read<CommunicationPreferencesCubit>()
+                .updateQuietHours(quietHours),
+          ),
         ],
       ),
+    );
+  }
+}
+
+/// The "horário de silêncio" section (TASK-155): lets the current user
+/// suppress non-critical notifications during a configurable local time
+/// window, on configurable weekdays — critical (security/session) alerts
+/// always keep reaching them regardless.
+class _QuietHoursSection extends StatelessWidget {
+  const _QuietHoursSection({
+    required this.quietHours,
+    required this.isSaving,
+    required this.onChanged,
+  });
+
+  final QuietHours quietHours;
+  final bool isSaving;
+  final ValueChanged<QuietHours> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+
+    return Container(
+      padding: const EdgeInsets.all(AppSpacing.spacing16),
+      decoration: BoxDecoration(
+        color: colors.surface,
+        borderRadius: BorderRadius.circular(AppRadius.radius16),
+        border: Border.all(color: colors.outline.withValues(alpha: 0.16)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          Row(
+            children: <Widget>[
+              Icon(Icons.bedtime_outlined, color: colors.primary),
+              const SizedBox(width: AppSpacing.spacing8),
+              Text(
+                'Horário de silêncio',
+                style: AppTypography.titleMedium.copyWith(
+                  color: colors.onSurface,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: AppSpacing.spacing4),
+          Text(
+            'Notificações críticas de segurança continuam chegando. As '
+            'demais ficam guardadas e aparecem assim que o horário de '
+            'silêncio terminar — nunca são perdidas.',
+            style: AppTypography.bodySmall.copyWith(color: colors.outline),
+          ),
+          const SizedBox(height: AppSpacing.spacing12),
+          AppCheckbox(
+            key: const ValueKey<String>('quiet-hours-enabled-checkbox'),
+            value: quietHours.enabled,
+            isDisabled: isSaving,
+            label: 'Ativar horário de silêncio',
+            onChanged: (enabled) =>
+                onChanged(quietHours.copyWith(enabled: enabled)),
+          ),
+          if (quietHours.enabled) ...<Widget>[
+            const SizedBox(height: AppSpacing.spacing12),
+            Row(
+              children: <Widget>[
+                Expanded(
+                  child: _TimeOfDaySelector(
+                    key: const ValueKey<String>('quiet-hours-start-selector'),
+                    label: 'Início',
+                    minuteOfDay: quietHours.startMinuteOfDay,
+                    isDisabled: isSaving,
+                    onChanged: (minuteOfDay) => onChanged(
+                      quietHours.copyWith(startMinuteOfDay: minuteOfDay),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: AppSpacing.spacing12),
+                Expanded(
+                  child: _TimeOfDaySelector(
+                    key: const ValueKey<String>('quiet-hours-end-selector'),
+                    label: 'Fim',
+                    minuteOfDay: quietHours.endMinuteOfDay,
+                    isDisabled: isSaving,
+                    onChanged: (minuteOfDay) => onChanged(
+                      quietHours.copyWith(endMinuteOfDay: minuteOfDay),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: AppSpacing.spacing12),
+            Text(
+              'Dias da semana',
+              style: AppTypography.labelMedium.copyWith(
+                color: colors.onSurface,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.spacing4),
+            Wrap(
+              spacing: AppSpacing.spacing8,
+              runSpacing: AppSpacing.spacing8,
+              children: <Widget>[
+                for (final weekday in _kOrderedWeekdays)
+                  AppFilterChip(
+                    key: ValueKey<String>('quiet-hours-weekday-$weekday'),
+                    label: _weekdayLabel(weekday),
+                    selected: quietHours.activeWeekdays.contains(weekday),
+                    isDisabled: isSaving,
+                    onSelected: (_) => onChanged(
+                      quietHours.copyWith(
+                        activeWeekdays: _toggleWeekday(
+                          quietHours.activeWeekdays,
+                          weekday,
+                        ),
+                      ),
+                    ),
+                  ),
+              ],
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  Set<int> _toggleWeekday(Set<int> current, int weekday) {
+    final updated = Set<int>.of(current);
+    if (!updated.remove(weekday)) updated.add(weekday);
+    // Never lets every weekday be deselected — an empty set would silently
+    // turn quiet hours into a no-op despite `enabled` staying `true`,
+    // confusing the user about why notifications still arrive at night.
+    return updated.isEmpty ? current : updated;
+  }
+}
+
+/// `DateTime.weekday` values in the order they should be displayed
+/// (Monday-first, matching the pt-BR week convention this app already uses
+/// elsewhere, e.g. calendar/agenda screens).
+const List<int> _kOrderedWeekdays = <int>[1, 2, 3, 4, 5, 6, 7];
+
+String _weekdayLabel(int weekday) {
+  return switch (weekday) {
+    1 => 'Seg',
+    2 => 'Ter',
+    3 => 'Qua',
+    4 => 'Qui',
+    5 => 'Sex',
+    6 => 'Sáb',
+    7 => 'Dom',
+    _ => '?',
+  };
+}
+
+/// A minute-of-day selector built on Flutter's own [showTimePicker] (already
+/// locale-aware, no dedicated Design System time-picker component exists
+/// yet) — presented as a labelled, tappable field consistent with this
+/// page's other controls.
+class _TimeOfDaySelector extends StatelessWidget {
+  const _TimeOfDaySelector({
+    required this.label,
+    required this.minuteOfDay,
+    required this.isDisabled,
+    required this.onChanged,
+    super.key,
+  });
+
+  final String label;
+  final int minuteOfDay;
+  final bool isDisabled;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    final colors = context.colors;
+    final timeOfDay = TimeOfDay(
+      hour: minuteOfDay ~/ 60,
+      minute: minuteOfDay % 60,
+    );
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Text(
+          label,
+          style: AppTypography.labelMedium.copyWith(color: colors.onSurface),
+        ),
+        const SizedBox(height: AppSpacing.spacing4),
+        OutlinedButton(
+          onPressed: isDisabled
+              ? null
+              : () async {
+                  final selected = await showTimePicker(
+                    context: context,
+                    initialTime: timeOfDay,
+                  );
+                  if (selected != null) {
+                    onChanged(selected.hour * 60 + selected.minute);
+                  }
+                },
+          child: Text(timeOfDay.format(context)),
+        ),
+      ],
     );
   }
 }

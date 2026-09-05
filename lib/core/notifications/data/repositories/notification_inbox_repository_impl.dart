@@ -87,7 +87,7 @@ final class NotificationInboxRepositoryImpl
         userId: userId,
         notifications: merged,
       );
-      return AppSuccess<List<AppNotification>>(merged);
+      return AppSuccess<List<AppNotification>>(_visibleOnly(merged));
     } catch (exception) {
       // Offline (or any remote failure): the notification center must stay
       // usable with whatever was last synced, rather than surface an error.
@@ -96,7 +96,7 @@ final class NotificationInboxRepositoryImpl
         userId: userId,
       );
       if (cached.isNotEmpty) {
-        return AppSuccess<List<AppNotification>>(cached);
+        return AppSuccess<List<AppNotification>>(_visibleOnly(cached));
       }
       return AppFailure<List<AppNotification>>(
         exception is AppException
@@ -168,13 +168,18 @@ final class NotificationInboxRepositoryImpl
         organizationId: organizationId,
         userId: userId,
       );
+      // Never marks a notification still suppressed by quiet hours
+      // (TASK-155) as read before it has even become visible to the
+      // recipient — "marcar todas como lidas" only ever applies to what is
+      // actually shown right now (`_visibleOnly`'s same instant).
       unreadIds = <String>[
         for (final notification in current)
-          if (notification.readAt == null) notification.id,
+          if (notification.readAt == null && notification.isVisibleAt(instant))
+            notification.id,
       ];
       final updated = <AppNotification>[
         for (final notification in current)
-          if (notification.readAt == null)
+          if (notification.readAt == null && notification.isVisibleAt(instant))
             _markRead(notification, instant)
           else
             notification,
@@ -260,7 +265,22 @@ final class NotificationInboxRepositoryImpl
       createdAt: notification.createdAt,
       readAt: notification.readAt ?? readAt,
       priority: notification.priority,
+      deliverAt: notification.deliverAt,
     );
+  }
+
+  /// Hides every notification still suppressed by the recipient's own quiet
+  /// hours (TASK-155) — `AppNotification.deliverAt` still in the future at
+  /// the moment this is called. Applied to both the remote-backed and the
+  /// offline-cached result, so a notification generated during quiet hours
+  /// (already durably persisted, never lost) simply becomes visible the
+  /// next time this method runs after quiet hours end, without any separate
+  /// delivery/flush job ever needing to run.
+  List<AppNotification> _visibleOnly(List<AppNotification> notifications) {
+    final now = DateTime.now().toUtc();
+    return notifications
+        .where((notification) => notification.isVisibleAt(now))
+        .toList(growable: false);
   }
 
   /// Remote is the source of truth for anything it already knows about;

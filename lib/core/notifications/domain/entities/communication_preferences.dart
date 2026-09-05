@@ -1,4 +1,5 @@
 import 'app_notification.dart';
+import 'quiet_hours.dart';
 
 /// Every surface a notification can actually reach the user through
 /// (TASK-154). `inApp` is the central de notificações internas (TASK-151) —
@@ -88,6 +89,7 @@ final class CommunicationPreferences {
     required this.organizationId,
     required this.userId,
     required this.categoryPreferences,
+    this.quietHours = const QuietHours(),
     this.updatedAt,
   });
 
@@ -113,6 +115,10 @@ final class CommunicationPreferences {
   final String userId;
   final Map<AppNotificationCategory, CategoryCommunicationPreference>
   categoryPreferences;
+
+  /// This recipient's quiet-hours window (TASK-155) — disabled by default,
+  /// same opt-in convention as every other TASK-154 preference.
+  final QuietHours quietHours;
 
   /// `null` until the very first save.
   final DateTime? updatedAt;
@@ -160,11 +166,25 @@ final class CommunicationPreferences {
       organizationId: organizationId,
       userId: userId,
       updatedAt: updatedAt,
+      quietHours: quietHours,
       categoryPreferences:
           <AppNotificationCategory, CategoryCommunicationPreference>{
             ...categoryPreferences,
             category: updatedCategoryPreference,
           },
+    );
+  }
+
+  /// Returns a new [CommunicationPreferences] with [quietHours] replacing
+  /// this recipient's current window — every category/channel preference
+  /// untouched.
+  CommunicationPreferences withQuietHours(QuietHours quietHours) {
+    return CommunicationPreferences(
+      organizationId: organizationId,
+      userId: userId,
+      updatedAt: updatedAt,
+      categoryPreferences: categoryPreferences,
+      quietHours: quietHours,
     );
   }
 

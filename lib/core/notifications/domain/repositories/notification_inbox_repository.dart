@@ -17,7 +17,11 @@ abstract interface class NotificationInboxRepository {
 
   /// Bounded to the last [kNotificationInboxRetentionLimit] notifications
   /// for [userId], newest first. Never returns a notification belonging to
-  /// another user or organization.
+  /// another user or organization. Never returns a notification still
+  /// suppressed by the recipient's own quiet hours either (TASK-155) —
+  /// `AppNotification.deliverAt` still in the future — even though it is
+  /// already durably persisted; it simply appears on a later call once that
+  /// instant passes.
   Future<AppResult<List<AppNotification>>> listForUser({
     required String organizationId,
     required String userId,
