@@ -1,19 +1,33 @@
 import '../../../../core/utils/utils.dart';
+import '../entities/report_catalog.dart';
 import '../entities/report_definition.dart';
 import '../entities/report_export_result.dart';
 import '../entities/report_query_result.dart';
 
-/// Ports `ExportReportToCsv` (TASK-146) needs, each backed by a different
-/// datasource: [encodeCsv] runs entirely on-device (an isolate, see
-/// `CsvIsolateEncoder`), [saveLocalFile] hands the encoded bytes to the
-/// platform's own "save file" flow, and [requestCloudCsvExport] delegates
-/// the whole large-volume flow to the `exportReportToCsv` Cloud Function.
+/// Ports `ExportReportToCsv` (TASK-146) and `ExportReportToXlsx` (TASK-147)
+/// need, each backed by a different datasource: [encodeCsv]/[encodeXlsx] run
+/// entirely on-device (an isolate, see `CsvIsolateEncoder`/
+/// `XlsxIsolateEncoder`), [saveLocalFile] hands the encoded bytes to the
+/// platform's own "save file" flow (format-agnostic — it infers
+/// mime-type/extension from `fileName`), and [requestCloudCsvExport]/
+/// [requestCloudXlsxExport] delegate the whole large-volume flow to the
+/// matching Cloud Function.
 abstract interface class ReportExportRepository {
   /// Encodes [result] as CSV bytes (BOM + [locale]'s delimiter/decimal
   /// convention) off the calling isolate, so generating a large file never
   /// blocks the UI thread.
   Future<List<int>> encodeCsv(
     ReportQueryResult result,
+    ReportExportLocale locale,
+  );
+
+  /// Encodes [result] as XLSX bytes off the calling isolate — cell types
+  /// (date/currency/percentage/number/text) are resolved from [catalog]
+  /// (`ReportColumnValueTypeResolver`), the same schema the report was built
+  /// against, never guessed from the raw runtime value alone.
+  Future<List<int>> encodeXlsx(
+    ReportQueryResult result,
+    ReportCatalog catalog,
     ReportExportLocale locale,
   );
 
@@ -34,6 +48,16 @@ abstract interface class ReportExportRepository {
   /// [ReportQueryResult] — and uploads the resulting CSV to a
   /// user-restricted, time-limited Storage location.
   Future<AppResult<ReportExportSummary>> requestCloudCsvExport({
+    required ReportDefinition definition,
+    required ReportExportLocale locale,
+  });
+
+  /// Same large-volume delegation as [requestCloudCsvExport], but for the
+  /// `exportReportToXlsx` Cloud Function (TASK-147) — also never trusts a
+  /// client-computed [ReportQueryResult] or [ReportCatalog]; the callable
+  /// re-derives its own copy of both, server-side, under the caller's own
+  /// role/tenant scope.
+  Future<AppResult<ReportExportSummary>> requestCloudXlsxExport({
     required ReportDefinition definition,
     required ReportExportLocale locale,
   });

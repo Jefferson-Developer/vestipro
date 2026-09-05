@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/permissions/permissions.dart';
 import '../../domain/entities/report_catalog.dart';
 import '../../domain/entities/report_definition.dart';
+import '../../domain/entities/report_export_result.dart';
 import '../../domain/entities/saved_report.dart';
 import '../bloc/report_builder_bloc.dart';
 import '../bloc/report_builder_event.dart';
@@ -634,7 +635,7 @@ class _Preview extends StatelessWidget {
       );
     }
     final isExporting = state.exportStatus == ReportExportStatus.exporting;
-    final exportButton = OutlinedButton.icon(
+    final exportCsvButton = OutlinedButton.icon(
       key: const Key('export-report-csv'),
       onPressed: isExporting
           ? null
@@ -649,21 +650,41 @@ class _Preview extends StatelessWidget {
           : const Icon(Icons.download_outlined),
       label: const Text('Exportar CSV'),
     );
+    final exportXlsxButton = OutlinedButton.icon(
+      key: const Key('export-report-xlsx'),
+      onPressed: isExporting
+          ? null
+          : () => context.read<ReportBuilderBloc>().add(
+              const ReportExportRequested(format: ReportExportFormat.xlsx),
+            ),
+      icon: isExporting
+          ? const SizedBox.square(
+              dimension: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.grid_on_outlined),
+      label: const Text('Exportar XLSX'),
+    );
     // `Capability.reportExport` mirrors `role_permission_matrix.dart`'s own
     // OWNER/ADMIN/SALES_MANAGER/FINANCE grant — `hasPermission == true` here
     // is only a UX affordance: the real, authoritative boundary is
-    // `exportReportToCsv`'s own `assertCanExportReports` (small exports) and
-    // `storage.rules`' `report.export` check (large exports' download link).
+    // `exportReportToCsv`/`exportReportToXlsx`'s own `assertCanExportReports`
+    // (small exports) and `storage.rules`' `report.export` check (large
+    // exports' download link).
     final permissions = permissionService;
+    final exportButtons = Wrap(
+      spacing: 8,
+      children: [exportCsvButton, exportXlsxButton],
+    );
     final exportAction = permissions == null
-        ? exportButton
+        ? exportButtons
         : PermissionBuilder(
             permissionService: permissions,
             organizationId: organizationId,
             userId: userId,
             capability: Capability.reportExport,
             builder: (context, granted) =>
-                granted ? exportButton : const SizedBox.shrink(),
+                granted ? exportButtons : const SizedBox.shrink(),
           );
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),

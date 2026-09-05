@@ -74,6 +74,19 @@ dependencies:
   firebase_remote_config: ^6.5.6
   firebase_app_check: ^0.4.6
   bloc_concurrency: ^0.3.0
+  # XLSX export (TASK-147): `excel` is a pure-Dart, actively maintained
+  # (2024+ releases), cross-platform (mobile/desktop/web, no native code)
+  # reader/writer — the only real candidate that doesn't require a
+  # commercial license (unlike `syncfusion_flutter_xlsio`). It has no
+  # built-in freeze-pane/AutoFilter API, so `XlsxReportEncoder`
+  # (`domain/services/xlsx_report_encoder.dart`) post-processes the
+  # generated archive's worksheet XML directly for those two features,
+  # using `archive` (zip read/write) and `xml` (OOXML element injection) —
+  # both already transitive dependencies of `excel`, declared here directly
+  # because our own code calls their APIs, not just `excel`'s.
+  excel: ^4.0.6
+  archive: ^3.6.1
+  xml: ^6.6.1
 
 dev_dependencies:
   flutter_test:

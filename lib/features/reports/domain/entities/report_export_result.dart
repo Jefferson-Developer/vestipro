@@ -1,4 +1,11 @@
-/// The locale a CSV export (TASK-146) is formatted for. Deliberately tied to
+/// Which export use case (`ExportReportToCsv`/`ExportReportToXlsx`) a
+/// `ReportExportRequested` (TASK-146/TASK-147) event asks the builder to run
+/// — kept as its own enum instead of inferring the format from
+/// `ReportExportSummary.fileName`'s extension, since the choice has to be
+/// made *before* a summary exists at all.
+enum ReportExportFormat { csv, xlsx }
+
+/// The locale a CSV/XLSX export (TASK-146/TASK-147) is formatted for. Deliberately tied to
 /// a single delimiter/decimal-separator pair instead of letting them vary
 /// independently — pt-BR always pairs `;` with a comma decimal separator and
 /// en-US always pairs `,` with a dot decimal separator, so the two can never

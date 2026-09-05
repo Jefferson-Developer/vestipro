@@ -20,4 +20,14 @@ final class CloudFunctionsReportExportRemoteDataSource
     data: <String, dynamic>{...definition.toJson(), 'locale': locale.code},
     requireAuth: true,
   );
+
+  @override
+  Future<Map<String, dynamic>> exportXlsx({
+    required ReportDefinition definition,
+    required ReportExportLocale locale,
+  }) => _functions.call<Map<String, dynamic>>(
+    'exportReportToXlsx',
+    data: <String, dynamic>{...definition.toJson(), 'locale': locale.code},
+    requireAuth: true,
+  );
 }

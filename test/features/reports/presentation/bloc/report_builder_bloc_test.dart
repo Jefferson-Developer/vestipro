@@ -30,6 +30,7 @@ void main() {
       drafts,
       analytics,
       ExportReportToCsv(exportRepository),
+      ExportReportToXlsx(exportRepository),
       featureFlags,
     );
   }
@@ -207,6 +208,87 @@ void main() {
   );
 
   blocTest<ReportBuilderBloc, ReportBuilderState>(
+    'export requested as XLSX below the configured threshold saves it locally and logs analytics (TASK-147)',
+    build: buildBloc,
+    act: (bloc) async {
+      bloc.add(
+        const ReportBuilderStarted(
+          organizationId: 'org-a',
+          companyId: 'company-a',
+          userId: 'user-a',
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+      bloc.add(const ReportDimensionToggled('seller'));
+      bloc.add(const ReportMetricToggled('orders'));
+      bloc.add(
+        const ReportFilterChanged(
+          ReportFilter(
+            fieldId: 'period',
+            operatorId: 'equals',
+            value: '2026-09',
+          ),
+        ),
+      );
+      bloc.add(const ReportExecutionRequested());
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      bloc.add(const ReportExportRequested(format: ReportExportFormat.xlsx));
+    },
+    wait: const Duration(milliseconds: 20),
+    verify: (bloc) {
+      expect(exportRepository.xlsxCloudRequests, isEmpty);
+      expect(exportRepository.savedFileNames, hasLength(1));
+      expect(exportRepository.savedFileNames.single, endsWith('.xlsx'));
+      expect(bloc.state.exportStatus, ReportExportStatus.success);
+      expect(bloc.state.exportSummary?.isRemote, isFalse);
+      final exportedEvent = analytics.loggedEvents.firstWhere(
+        (event) => event.name == AnalyticsEvents.reportExported,
+      );
+      expect(exportedEvent.parameters?['formato'], 'xlsx');
+    },
+  );
+
+  blocTest<ReportBuilderBloc, ReportBuilderState>(
+    'export requested as XLSX above the configured threshold delegates to the Cloud Function (TASK-147)',
+    build: buildBloc,
+    setUp: () => featureFlags.overrideFlag(
+      FeatureFlagRegistry.configReportExportMaxLocalRows,
+      0,
+    ),
+    act: (bloc) async {
+      bloc.add(
+        const ReportBuilderStarted(
+          organizationId: 'org-a',
+          companyId: 'company-a',
+          userId: 'user-a',
+        ),
+      );
+      await Future<void>.delayed(Duration.zero);
+      bloc.add(const ReportDimensionToggled('seller'));
+      bloc.add(const ReportMetricToggled('orders'));
+      bloc.add(
+        const ReportFilterChanged(
+          ReportFilter(
+            fieldId: 'period',
+            operatorId: 'equals',
+            value: '2026-09',
+          ),
+        ),
+      );
+      bloc.add(const ReportExecutionRequested());
+      await Future<void>.delayed(const Duration(milliseconds: 20));
+      bloc.add(const ReportExportRequested(format: ReportExportFormat.xlsx));
+    },
+    wait: const Duration(milliseconds: 20),
+    verify: (bloc) {
+      expect(exportRepository.savedFileNames, isEmpty);
+      expect(exportRepository.xlsxCloudRequests, hasLength(1));
+      expect(bloc.state.exportStatus, ReportExportStatus.success);
+      expect(bloc.state.exportSummary?.isRemote, isTrue);
+    },
+  );
+
+  blocTest<ReportBuilderBloc, ReportBuilderState>(
     'export failure surfaces the failure without discarding the still-valid preview (TASK-146)',
     build: buildBloc,
     setUp: () =>
@@ -312,6 +394,7 @@ final class _DraftRepository implements ReportDraftRepository {
 
 final class _ReportExportRepository implements ReportExportRepository {
   final List<ReportDefinition> cloudRequests = <ReportDefinition>[];
+  final List<ReportDefinition> xlsxCloudRequests = <ReportDefinition>[];
   final List<String> savedFileNames = <String>[];
   AppResult<String> Function()? saveLocalOverride;
   AppResult<ReportExportSummary> Function()? cloudOverride;
@@ -319,6 +402,13 @@ final class _ReportExportRepository implements ReportExportRepository {
   @override
   Future<List<int>> encodeCsv(
     ReportQueryResult result,
+    ReportExportLocale locale,
+  ) async => const <int>[1, 2, 3];
+
+  @override
+  Future<List<int>> encodeXlsx(
+    ReportQueryResult result,
+    ReportCatalog catalog,
     ReportExportLocale locale,
   ) async => const <int>[1, 2, 3];
 
@@ -347,6 +437,26 @@ final class _ReportExportRepository implements ReportExportRepository {
         rowCount: 999,
         location: RemoteReportExportLocation(
           downloadUrl: 'https://example.com/remote_report.csv',
+          expiresAt: DateTime.utc(2026, 9, 5),
+        ),
+      ),
+    );
+  }
+
+  @override
+  Future<AppResult<ReportExportSummary>> requestCloudXlsxExport({
+    required ReportDefinition definition,
+    required ReportExportLocale locale,
+  }) async {
+    xlsxCloudRequests.add(definition);
+    final override = cloudOverride;
+    if (override != null) return override();
+    return AppSuccess<ReportExportSummary>(
+      ReportExportSummary(
+        fileName: 'remote_report.xlsx',
+        rowCount: 999,
+        location: RemoteReportExportLocation(
+          downloadUrl: 'https://example.com/remote_report.xlsx',
           expiresAt: DateTime.utc(2026, 9, 5),
         ),
       ),

@@ -1,4 +1,5 @@
 import '../../domain/entities/report_definition.dart';
+import '../../domain/entities/report_export_result.dart';
 
 sealed class ReportBuilderEvent {
   const ReportBuilderEvent();
@@ -48,9 +49,11 @@ final class ReportBuilderRetried extends ReportBuilderEvent {
   const ReportBuilderRetried();
 }
 
-/// Requests exporting `ReportBuilderState.preview` to CSV (TASK-146) — a
-/// no-op unless a preview is already loaded (`ReportExecutionRequested` must
-/// have already succeeded).
+/// Requests exporting `ReportBuilderState.preview` to CSV (TASK-146) or XLSX
+/// (TASK-147) — a no-op unless a preview is already loaded
+/// (`ReportExecutionRequested` must have already succeeded). Defaults to
+/// [ReportExportFormat.csv] to keep existing call sites/tests unchanged.
 final class ReportExportRequested extends ReportBuilderEvent {
-  const ReportExportRequested();
+  const ReportExportRequested({this.format = ReportExportFormat.csv});
+  final ReportExportFormat format;
 }

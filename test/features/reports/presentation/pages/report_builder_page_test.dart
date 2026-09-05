@@ -28,6 +28,7 @@ void main() {
             _Drafts(),
             FakeAnalyticsService(),
             ExportReportToCsv(_ExportRepository()),
+            ExportReportToXlsx(_ExportRepository()),
             FakeFeatureFlagService(),
           ),
         ),
@@ -65,6 +66,7 @@ void main() {
             _Drafts(),
             FakeAnalyticsService(),
             ExportReportToCsv(_ExportRepository()),
+            ExportReportToXlsx(_ExportRepository()),
             FakeFeatureFlagService(),
           ),
         ),
@@ -107,6 +109,7 @@ void main() {
               _Drafts(),
               FakeAnalyticsService(),
               ExportReportToCsv(exportRepository),
+              ExportReportToXlsx(exportRepository),
               FakeFeatureFlagService(),
             ),
           ),
@@ -125,6 +128,53 @@ void main() {
       await tester.tap(find.byKey(const Key('export-report-csv')));
       await tester.pumpAndSettle();
       expect(exportRepository.savedFileNames, hasLength(1));
+      expect(find.textContaining('Exportado'), findsOneWidget);
+    },
+  );
+
+  testWidgets(
+    'tapping "Exportar XLSX" saves the report locally and confirms it (TASK-147)',
+    (tester) async {
+      tester.view.physicalSize = const Size(1200, 800);
+      tester.view.devicePixelRatio = 1;
+      addTearDown(tester.view.resetPhysicalSize);
+      addTearDown(tester.view.resetDevicePixelRatio);
+      final repository = _Repository();
+      final validator = const ValidateReportDefinition();
+      final exportRepository = _ExportRepository();
+      await tester.pumpWidget(
+        MaterialApp(
+          home: ReportBuilderPage(
+            organizationId: 'org-a',
+            companyId: 'company-a',
+            userId: 'user-a',
+            createBloc: () => ReportBuilderBloc(
+              LoadReportCatalog(repository),
+              ExecuteReportQuery(repository, validator),
+              validator,
+              _Drafts(),
+              FakeAnalyticsService(),
+              ExportReportToCsv(exportRepository),
+              ExportReportToXlsx(exportRepository),
+              FakeFeatureFlagService(),
+            ),
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('Vendedor'));
+      await tester.tap(find.text('Pedidos'));
+      await tester.enterText(
+        find.byKey(const Key('report-period-filter')),
+        '2026-09',
+      );
+      await tester.ensureVisible(find.byKey(const Key('execute-report')));
+      await tester.tap(find.byKey(const Key('execute-report')));
+      await tester.pumpAndSettle();
+      await tester.tap(find.byKey(const Key('export-report-xlsx')));
+      await tester.pumpAndSettle();
+      expect(exportRepository.savedFileNames, hasLength(1));
+      expect(exportRepository.savedFileNames.single, endsWith('.xlsx'));
       expect(find.textContaining('Exportado'), findsOneWidget);
     },
   );
@@ -192,6 +242,13 @@ final class _ExportRepository implements ReportExportRepository {
   ) async => const <int>[1, 2, 3];
 
   @override
+  Future<List<int>> encodeXlsx(
+    ReportQueryResult result,
+    ReportCatalog catalog,
+    ReportExportLocale locale,
+  ) async => const <int>[1, 2, 3];
+
+  @override
   Future<AppResult<String>> saveLocalFile({
     required List<int> bytes,
     required String fileName,
@@ -210,6 +267,21 @@ final class _ExportRepository implements ReportExportRepository {
       rowCount: 1,
       location: RemoteReportExportLocation(
         downloadUrl: 'https://example.com/remote.csv',
+        expiresAt: DateTime.utc(2026, 9, 5),
+      ),
+    ),
+  );
+
+  @override
+  Future<AppResult<ReportExportSummary>> requestCloudXlsxExport({
+    required ReportDefinition definition,
+    required ReportExportLocale locale,
+  }) async => AppSuccess<ReportExportSummary>(
+    ReportExportSummary(
+      fileName: 'remote.xlsx',
+      rowCount: 1,
+      location: RemoteReportExportLocation(
+        downloadUrl: 'https://example.com/remote.xlsx',
         expiresAt: DateTime.utc(2026, 9, 5),
       ),
     ),

@@ -8,8 +8,10 @@ import '../../../../core/feature_flags/feature_flags.dart';
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/report_definition.dart';
 import '../../domain/entities/report_catalog.dart';
+import '../../domain/entities/report_export_result.dart';
 import '../../domain/repositories/report_repository.dart';
 import '../../domain/usecases/export_report_to_csv.dart';
+import '../../domain/usecases/export_report_to_xlsx.dart';
 import '../../domain/usecases/report_use_cases.dart';
 import '../../domain/usecases/validate_report_definition.dart';
 import 'report_builder_event.dart';
@@ -25,6 +27,7 @@ final class ReportBuilderBloc
     this._drafts,
     this._analytics,
     this._exportToCsv,
+    this._exportToXlsx,
     this._featureFlags,
   ) : super(const ReportBuilderState()) {
     on<ReportBuilderStarted>(_onStarted);
@@ -44,6 +47,7 @@ final class ReportBuilderBloc
   final ReportDraftRepository _drafts;
   final AnalyticsService _analytics;
   final ExportReportToCsv _exportToCsv;
+  final ExportReportToXlsx _exportToXlsx;
   final FeatureFlagService _featureFlags;
 
   Future<void> _onStarted(
@@ -304,7 +308,8 @@ final class ReportBuilderBloc
   ) async {
     final definition = state.definition;
     final preview = state.preview;
-    if (definition == null || preview == null) return;
+    final catalog = state.catalog;
+    if (definition == null || preview == null || catalog == null) return;
     emit(
       state.copyWith(
         exportStatus: ReportExportStatus.exporting,
@@ -315,11 +320,18 @@ final class ReportBuilderBloc
     final maxLocalRows = _featureFlags.getInt(
       FeatureFlagRegistry.configReportExportMaxLocalRows,
     );
-    final result = await _exportToCsv(
-      definition: definition,
-      result: preview,
-      maxLocalRows: maxLocalRows,
-    );
+    final result = event.format == ReportExportFormat.xlsx
+        ? await _exportToXlsx(
+            definition: definition,
+            result: preview,
+            catalog: catalog,
+            maxLocalRows: maxLocalRows,
+          )
+        : await _exportToCsv(
+            definition: definition,
+            result: preview,
+            maxLocalRows: maxLocalRows,
+          );
     switch (result) {
       case AppSuccess(value: final summary):
         emit(
@@ -331,7 +343,7 @@ final class ReportBuilderBloc
         await _analytics.logEvent(
           AnalyticsEvents.reportExported,
           parameters: <String, Object?>{
-            'formato': 'csv',
+            'formato': event.format.name,
             'row_count': summary.rowCount,
             'delegated_to_cloud': summary.isRemote,
           },

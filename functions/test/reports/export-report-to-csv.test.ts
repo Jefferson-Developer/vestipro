@@ -74,6 +74,7 @@ describe('buildExportFileName (TASK-146)', () => {
       metrics: ['revenueNet'],
       organizationId: 'org-a',
       generatedAt: new Date(Date.UTC(2026, 8, 4, 12, 30, 0)),
+      extension: 'csv',
     };
     const first = buildExportFileName(params);
     const second = buildExportFileName(params);
@@ -86,9 +87,23 @@ describe('buildExportFileName (TASK-146)', () => {
       dimensions: ['customer'],
       metrics: ['revenueNet'],
       organizationId: 'org-a',
+      extension: 'csv',
     };
     const first = buildExportFileName({ ...base, generatedAt: new Date(Date.UTC(2026, 8, 4, 12, 0, 0)) });
     const second = buildExportFileName({ ...base, generatedAt: new Date(Date.UTC(2026, 8, 4, 12, 0, 1)) });
     expect(first).not.toBe(second);
+  });
+
+  test('varies only the extension for the same report/organization/moment (TASK-147)', () => {
+    const base = {
+      dimensions: ['customer'],
+      metrics: ['revenueNet'],
+      organizationId: 'org-a',
+      generatedAt: new Date(Date.UTC(2026, 8, 4, 12, 30, 0)),
+    };
+    const csvName = buildExportFileName({ ...base, extension: 'csv' });
+    const xlsxName = buildExportFileName({ ...base, extension: 'xlsx' });
+    expect(csvName).toBe('customer-revenuenet_org-a_20260904-123000.csv');
+    expect(xlsxName).toBe('customer-revenuenet_org-a_20260904-123000.xlsx');
   });
 });

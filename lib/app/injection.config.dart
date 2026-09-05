@@ -1079,6 +1079,8 @@ import '../features/reports/data/datasources/report_remote_data_source.dart'
     as _i922;
 import '../features/reports/data/datasources/saved_report_remote_data_source.dart'
     as _i603;
+import '../features/reports/data/datasources/xlsx_isolate_encoder.dart'
+    as _i969;
 import '../features/reports/data/repositories/report_export_repository_impl.dart'
     as _i959;
 import '../features/reports/data/repositories/report_repository_impl.dart'
@@ -1097,6 +1099,8 @@ import '../features/reports/domain/services/no_active_schedule_report_schedule_r
 import '../features/reports/domain/services/report_schedule_reference_checker.dart'
     as _i426;
 import '../features/reports/domain/usecases/export_report_to_csv.dart' as _i89;
+import '../features/reports/domain/usecases/export_report_to_xlsx.dart'
+    as _i847;
 import '../features/reports/domain/usecases/report_use_cases.dart' as _i565;
 import '../features/reports/domain/usecases/saved_report_use_cases.dart'
     as _i411;
@@ -1590,6 +1594,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i1008.ProductVariantFutureStockRepository(
         gh<_i795.ProductVariantRepository>(),
       ),
+    );
+    gh.lazySingleton<_i969.XlsxIsolateEncoder>(
+      () => const _i969.FlutterXlsxIsolateEncoder(),
     );
     gh.lazySingleton<_i81.OrderDraftRepository>(
       () => _i247.DriftOrderDraftRepository(
@@ -2794,13 +2801,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i957.MembershipRepository>(),
       ),
     );
-    gh.lazySingleton<_i876.ReportExportRepository>(
-      () => _i959.ReportExportRepositoryImpl(
-        gh<_i77.CsvIsolateEncoder>(),
-        gh<_i712.ReportFileSaverDataSource>(),
-        gh<_i813.ReportExportRemoteDataSource>(),
-      ),
-    );
     gh.lazySingleton<_i440.RoleRepository>(
       () => _i69.RoleRepositoryImpl(
         dataSource: gh<_i923.RoleDataSource>(),
@@ -3084,6 +3084,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i753.AuditLogRepository>(),
       ),
     );
+    gh.lazySingleton<_i876.ReportExportRepository>(
+      () => _i959.ReportExportRepositoryImpl(
+        gh<_i77.CsvIsolateEncoder>(),
+        gh<_i969.XlsxIsolateEncoder>(),
+        gh<_i712.ReportFileSaverDataSource>(),
+        gh<_i813.ReportExportRemoteDataSource>(),
+      ),
+    );
     gh.factory<_i722.GetStockTurnoverMetricsUseCase>(
       () => _i722.GetStockTurnoverMetricsUseCase(
         gh<_i503.StockTurnoverRepository>(),
@@ -3100,6 +3108,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i89.ExportReportToCsv>(
       () => _i89.ExportReportToCsv(gh<_i876.ReportExportRepository>()),
+    );
+    gh.factory<_i847.ExportReportToXlsx>(
+      () => _i847.ExportReportToXlsx(gh<_i876.ReportExportRepository>()),
     );
     gh.factory<_i268.SearchProductsUseCase>(
       () => _i268.SearchProductsUseCase(gh<_i568.ProductSearchRepository>()),
@@ -3722,6 +3733,7 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i22.ReportDraftRepository>(),
         gh<_i202.AnalyticsService>(),
         gh<_i89.ExportReportToCsv>(),
+        gh<_i847.ExportReportToXlsx>(),
         gh<_i869.FeatureFlagService>(),
       ),
     );
