@@ -583,6 +583,32 @@ class VestiProApp extends StatelessWidget {
                   companyId: companyId,
                   userId: getIt<AuthRepository>().currentUser?.uid ?? '',
                   createBloc: () => getIt<ReportBuilderBloc>(),
+                  createSavedReportsBloc: () => getIt<SavedReportsBloc>(),
+                  permissionService: getIt<PermissionService>(),
+                  onOpenSavedReports: () => context.go(
+                    SavedReportsRoute(
+                      orgId: orgId,
+                      companyId: companyId,
+                    ).location,
+                  ),
+                ),
+              ),
+          savedReportsPageBuilder: (context, orgId, companyId) =>
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId: companyId,
+                child: SavedReportsPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  permissionService: getIt<PermissionService>(),
+                  createBloc: () => getIt<SavedReportsBloc>(),
+                  onOpenReportBuilder: () => context.go(
+                    ReportBuilderRoute(
+                      orgId: orgId,
+                      companyId: companyId,
+                    ).location,
+                  ),
                 ),
               ),
           productDetailPageBuilder: (context, orgId, productId) =>

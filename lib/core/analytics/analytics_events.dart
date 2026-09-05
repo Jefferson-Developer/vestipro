@@ -136,6 +136,20 @@ final class AnalyticsEvents {
   /// before coming back online.
   static const String connectivityStatusChanged = 'connectivity_status_changed';
 
+  /// Logged by `SavedReportsBloc` (TASK-145, EPIC-18) whenever a
+  /// `ReportDefinition` from the report builder (TASK-144) is saved as a new
+  /// `SavedReport`, carrying its `visibility` as a parameter.
+  static const String reportViewSaved = 'report_view_saved';
+
+  /// Logged by `SavedReportsBloc` (TASK-145) whenever an existing
+  /// `SavedReport`'s `visibility` is changed away from `private`
+  /// (`team`/`organization`) — never for a plain rename/favorite toggle.
+  static const String reportViewShared = 'report_view_shared';
+
+  /// Logged by `SavedReportsBloc` (TASK-145) whenever a `SavedReport` is
+  /// permanently deleted.
+  static const String reportViewDeleted = 'report_view_deleted';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -203,5 +217,8 @@ final class AnalyticsEvents {
     syncCenterOpened,
     syncManualRetryTriggered,
     connectivityStatusChanged,
+    reportViewSaved,
+    reportViewShared,
+    reportViewDeleted,
   ];
 }

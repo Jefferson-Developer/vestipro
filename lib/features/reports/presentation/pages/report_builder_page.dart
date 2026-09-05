@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
+import '../../../../core/permissions/permissions.dart';
 import '../../domain/entities/report_catalog.dart';
 import '../../domain/entities/report_definition.dart';
+import '../../domain/entities/saved_report.dart';
 import '../bloc/report_builder_bloc.dart';
 import '../bloc/report_builder_event.dart';
 import '../bloc/report_builder_state.dart';
+import '../bloc/saved_reports_bloc.dart';
+import '../bloc/saved_reports_event.dart';
+import '../bloc/saved_reports_state.dart';
 
 class ReportBuilderPage extends StatelessWidget {
   const ReportBuilderPage({
@@ -13,35 +18,87 @@ class ReportBuilderPage extends StatelessWidget {
     required this.companyId,
     required this.userId,
     required this.createBloc,
+    this.createSavedReportsBloc,
+    this.permissionService,
+    this.onOpenSavedReports,
     super.key,
-  });
+  }) : assert(
+         (createSavedReportsBloc == null) == (permissionService == null),
+         'createSavedReportsBloc and permissionService must be provided '
+         'together (TASK-145 "Salvar visualização" affordance), or both '
+         'omitted.',
+       );
 
   final String organizationId;
   final String companyId;
   final String userId;
   final ReportBuilderBloc Function() createBloc;
 
+  /// When provided (together with [permissionService]), enables the "Salvar
+  /// visualização" (TASK-145) app bar action — omitted by callers/tests that
+  /// only exercise the plain TASK-144 builder.
+  final SavedReportsBloc Function()? createSavedReportsBloc;
+  final PermissionService? permissionService;
+
+  /// Navigates to `SavedReportsRoute` ("Meus relatórios"/"Compartilhados
+  /// comigo") — only shown alongside [createSavedReportsBloc].
+  final VoidCallback? onOpenSavedReports;
+
   @override
-  Widget build(BuildContext context) => BlocProvider(
-    create: (_) => createBloc()
-      ..add(
-        ReportBuilderStarted(
-          organizationId: organizationId,
-          companyId: companyId,
-          userId: userId,
+  Widget build(BuildContext context) {
+    final view = _ReportBuilderView(
+      permissionService: permissionService,
+      organizationId: organizationId,
+      userId: userId,
+      onOpenSavedReports: onOpenSavedReports,
+    );
+    final reportBuilderProvider = BlocProvider<ReportBuilderBloc>(
+      create: (_) => createBloc()
+        ..add(
+          ReportBuilderStarted(
+            organizationId: organizationId,
+            companyId: companyId,
+            userId: userId,
+          ),
         ),
-      ),
-    child: const _ReportBuilderView(),
-  );
+      child: view,
+    );
+
+    final savedReportsBlocFactory = createSavedReportsBloc;
+    if (savedReportsBlocFactory == null) return reportBuilderProvider;
+
+    return BlocProvider<SavedReportsBloc>(
+      create: (_) => savedReportsBlocFactory()
+        ..add(
+          SavedReportsStarted(
+            organizationId: organizationId,
+            companyId: companyId,
+            userId: userId,
+          ),
+        ),
+      child: reportBuilderProvider,
+    );
+  }
 }
 
 class _ReportBuilderView extends StatelessWidget {
-  const _ReportBuilderView();
+  const _ReportBuilderView({
+    required this.permissionService,
+    required this.organizationId,
+    required this.userId,
+    required this.onOpenSavedReports,
+  });
+
+  final PermissionService? permissionService;
+  final String organizationId;
+  final String userId;
+  final VoidCallback? onOpenSavedReports;
 
   @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Construtor de relatórios')),
-    body: BlocConsumer<ReportBuilderBloc, ReportBuilderState>(
+  Widget build(BuildContext context) {
+    final canSaveReports = permissionService != null;
+
+    Widget body = BlocConsumer<ReportBuilderBloc, ReportBuilderState>(
       listenWhen: (previous, current) =>
           previous.failure != current.failure && current.failure != null,
       listener: (context, state) => ScaffoldMessenger.of(
@@ -74,7 +131,177 @@ class _ReportBuilderView extends StatelessWidget {
         }
         return _BuilderContent(state: state);
       },
+    );
+
+    if (canSaveReports) {
+      body = BlocListener<SavedReportsBloc, SavedReportsState>(
+        listenWhen: (previous, current) =>
+            previous.failure != current.failure ||
+            previous.successMessage != current.successMessage,
+        listener: (context, state) {
+          if (state.failure != null) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.failure!.message)));
+            context.read<SavedReportsBloc>().add(
+              const SavedReportsMessageCleared(),
+            );
+          } else if (state.successMessage != null) {
+            ScaffoldMessenger.of(
+              context,
+            ).showSnackBar(SnackBar(content: Text(state.successMessage!)));
+            context.read<SavedReportsBloc>().add(
+              const SavedReportsMessageCleared(),
+            );
+          }
+        },
+        child: body,
+      );
+    }
+
+    return Scaffold(
+      appBar: AppBar(
+        title: const Text('Construtor de relatórios'),
+        actions: canSaveReports
+            ? <Widget>[
+                IconButton(
+                  icon: const Icon(Icons.bookmark_add_outlined),
+                  tooltip: 'Salvar visualização',
+                  onPressed: () => _showSaveDialog(context),
+                ),
+                IconButton(
+                  icon: const Icon(Icons.folder_open_outlined),
+                  tooltip: 'Meus relatórios',
+                  onPressed: onOpenSavedReports,
+                ),
+              ]
+            : null,
+      ),
+      body: body,
+    );
+  }
+
+  Future<void> _showSaveDialog(BuildContext context) async {
+    final definition = context.read<ReportBuilderBloc>().state.definition;
+    if (definition == null) return;
+
+    final result = await showDialog<_SaveReportRequest>(
+      context: context,
+      builder: (dialogContext) => _SaveReportDialog(
+        permissionService: permissionService!,
+        organizationId: organizationId,
+        userId: userId,
+      ),
+    );
+    if (result == null || !context.mounted) return;
+
+    context.read<SavedReportsBloc>().add(
+      SavedReportCreateRequested(
+        name: result.name,
+        definition: definition,
+        visibility: result.visibility,
+      ),
+    );
+  }
+}
+
+class _SaveReportRequest {
+  const _SaveReportRequest({required this.name, required this.visibility});
+  final String name;
+  final SavedReportVisibility visibility;
+}
+
+class _SaveReportDialog extends StatefulWidget {
+  const _SaveReportDialog({
+    required this.permissionService,
+    required this.organizationId,
+    required this.userId,
+  });
+
+  final PermissionService permissionService;
+  final String organizationId;
+  final String userId;
+
+  @override
+  State<_SaveReportDialog> createState() => _SaveReportDialogState();
+}
+
+class _SaveReportDialogState extends State<_SaveReportDialog> {
+  final _controller = TextEditingController();
+  SavedReportVisibility _visibility = SavedReportVisibility.private;
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Salvar visualização'),
+    content: Column(
+      mainAxisSize: MainAxisSize.min,
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        TextField(
+          key: const Key('save-report-name'),
+          controller: _controller,
+          autofocus: true,
+          decoration: const InputDecoration(labelText: 'Nome da visualização'),
+        ),
+        const SizedBox(height: 16),
+        RadioListTile<SavedReportVisibility>(
+          value: SavedReportVisibility.private,
+          groupValue: _visibility,
+          title: const Text('Privado'),
+          onChanged: (value) => setState(() => _visibility = value!),
+        ),
+        PermissionBuilder(
+          permissionService: widget.permissionService,
+          organizationId: widget.organizationId,
+          userId: widget.userId,
+          capability: Capability.reportShareTeam,
+          builder: (context, granted) => RadioListTile<SavedReportVisibility>(
+            value: SavedReportVisibility.team,
+            groupValue: _visibility,
+            title: const Text('Minha equipe'),
+            onChanged: granted
+                ? (value) => setState(() => _visibility = value!)
+                : null,
+          ),
+        ),
+        PermissionBuilder(
+          permissionService: widget.permissionService,
+          organizationId: widget.organizationId,
+          userId: widget.userId,
+          capability: Capability.reportShareOrganization,
+          builder: (context, granted) => RadioListTile<SavedReportVisibility>(
+            value: SavedReportVisibility.organization,
+            groupValue: _visibility,
+            title: const Text('Toda a organização'),
+            onChanged: granted
+                ? (value) => setState(() => _visibility = value!)
+                : null,
+          ),
+        ),
+      ],
     ),
+    actions: [
+      TextButton(
+        onPressed: () => Navigator.of(context).pop(),
+        child: const Text('Cancelar'),
+      ),
+      FilledButton(
+        onPressed: () {
+          final name = _controller.text.trim();
+          if (name.isEmpty) return;
+          Navigator.of(
+            context,
+          ).pop(_SaveReportRequest(name: name, visibility: _visibility));
+        },
+        child: const Text('Salvar'),
+      ),
+    ],
   );
 }
 

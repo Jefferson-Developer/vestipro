@@ -564,6 +564,23 @@ final class ReportBuilderRoute extends AppRoute {
   String get location => '/org/$orgId/companies/$companyId/reports/builder';
 }
 
+/// Saved/shared report views (TASK-145) — "Meus relatórios" and
+/// "Compartilhados comigo", built from a [ReportBuilderRoute] definition.
+/// Same "route only carries tenant/company scope, RBAC happens in the
+/// domain/backend layer" contract as [ReportBuilderRoute].
+final class SavedReportsRoute extends AppRoute {
+  const SavedReportsRoute({required this.orgId, required this.companyId});
+
+  final String orgId;
+  final String companyId;
+
+  static const name = 'savedReports';
+  static const pathPattern = '/org/:orgId/companies/:companyId/reports/saved';
+
+  @override
+  String get location => '/org/$orgId/companies/$companyId/reports/saved';
+}
+
 /// Standalone, read-only product detail route (TASK-078's `ProductDetailPage`
 /// reused outside the order draft flow), scoped by Organization only —
 /// `Product.companyId` itself is optional (TASK-064), so this route never

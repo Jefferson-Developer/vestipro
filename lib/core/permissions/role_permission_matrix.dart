@@ -58,6 +58,10 @@ abstract final class RolePermissionMatrix {
     // TASK-132: SALES_MANAGER acessa a Central de Oportunidades para a
     // própria carteira e a de sua equipe.
     Capability.insightView,
+    // TASK-145: SALES_MANAGER compartilha uma visualização salva com a
+    // própria equipe ou com toda a organização.
+    Capability.reportShareTeam,
+    Capability.reportShareOrganization,
   };
 
   static const Set<Capability> _salesRepCapabilities = <Capability>{
@@ -77,6 +81,10 @@ abstract final class RolePermissionMatrix {
     // TASK-132: SALES_REP acessa a Central de Oportunidades para a própria
     // carteira.
     Capability.insightView,
+    // TASK-145: SALES_REP compartilha uma visualização salva no máximo com a
+    // própria equipe — nunca com toda a organização
+    // (Capability.reportShareOrganization, deliberadamente ausente aqui).
+    Capability.reportShareTeam,
   };
 
   static const Set<Capability> _salesAssistantCapabilities = <Capability>{
@@ -96,6 +104,11 @@ abstract final class RolePermissionMatrix {
     // — OWNER and ADMIN already get it via the full/near-full capability
     // set above, FINANCE needs it added explicitly here.
     Capability.priceListManage,
+    // TASK-145: FINANCE compartilha uma visualização salva com a própria
+    // equipe ou com toda a organização, mesma amplitude de report.* já
+    // concedida acima.
+    Capability.reportShareTeam,
+    Capability.reportShareOrganization,
   };
 
   static const Set<Capability> _readOnlyCapabilities = <Capability>{};

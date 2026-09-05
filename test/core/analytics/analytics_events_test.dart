@@ -70,6 +70,9 @@ void main() {
           'sync_center_opened',
           'sync_manual_retry_triggered',
           'connectivity_status_changed',
+          'report_view_saved',
+          'report_view_shared',
+          'report_view_deleted',
         ]),
       );
 

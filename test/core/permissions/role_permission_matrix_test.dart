@@ -278,34 +278,93 @@ void main() {
       }
     });
 
-    test('OWNER/ADMIN/SALES_MANAGER/SALES_REP can view the Central de '
-        'Oportunidades (TASK-132); SALES_ASSISTANT/FINANCE/READ_ONLY cannot', () {
+    test(
+      'OWNER/ADMIN/SALES_MANAGER/SALES_REP can view the Central de '
+      'Oportunidades (TASK-132); SALES_ASSISTANT/FINANCE/READ_ONLY cannot',
+      () {
+        for (final role in <SystemRoleName>[
+          SystemRoleName.owner,
+          SystemRoleName.admin,
+          SystemRoleName.salesManager,
+          SystemRoleName.salesRep,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.insightView),
+            isTrue,
+            reason: '$role must be able to view the Central de Oportunidades.',
+          );
+        }
+
+        for (final role in <SystemRoleName>[
+          SystemRoleName.salesAssistant,
+          SystemRoleName.finance,
+          SystemRoleName.readOnly,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.insightView),
+            isFalse,
+            reason: '$role must never view the Central de Oportunidades.',
+          );
+        }
+      },
+    );
+
+    test('OWNER/ADMIN/SALES_MANAGER/FINANCE can share a saved report with '
+        'the whole organization (TASK-145); SALES_REP caps out at team-level '
+        'sharing; SALES_ASSISTANT/READ_ONLY cannot share at all', () {
       for (final role in <SystemRoleName>[
         SystemRoleName.owner,
         SystemRoleName.admin,
         SystemRoleName.salesManager,
-        SystemRoleName.salesRep,
+        SystemRoleName.finance,
       ]) {
+        final capabilities = RolePermissionMatrix.capabilitiesFor(role);
         expect(
-          RolePermissionMatrix.capabilitiesFor(
-            role,
-          ).contains(Capability.insightView),
+          capabilities.contains(Capability.reportShareTeam),
           isTrue,
-          reason: '$role must be able to view the Central de Oportunidades.',
+          reason: '$role must be able to share a saved report with a team.',
+        );
+        expect(
+          capabilities.contains(Capability.reportShareOrganization),
+          isTrue,
+          reason: '$role must be able to share a saved report org-wide.',
         );
       }
 
+      final salesRepCapabilities = RolePermissionMatrix.capabilitiesFor(
+        SystemRoleName.salesRep,
+      );
+      expect(
+        salesRepCapabilities.contains(Capability.reportShareTeam),
+        isTrue,
+        reason:
+            'SALES_REP must be able to share a saved report with a '
+            'team.',
+      );
+      expect(
+        salesRepCapabilities.contains(Capability.reportShareOrganization),
+        isFalse,
+        reason: 'SALES_REP must never share a saved report org-wide.',
+      );
+
       for (final role in <SystemRoleName>[
         SystemRoleName.salesAssistant,
-        SystemRoleName.finance,
         SystemRoleName.readOnly,
       ]) {
+        final capabilities = RolePermissionMatrix.capabilitiesFor(role);
         expect(
-          RolePermissionMatrix.capabilitiesFor(
-            role,
-          ).contains(Capability.insightView),
+          capabilities.contains(Capability.reportShareTeam),
           isFalse,
-          reason: '$role must never view the Central de Oportunidades.',
+          reason: '$role must never share a saved report with a team.',
+        );
+        expect(
+          capabilities.contains(Capability.reportShareOrganization),
+          isFalse,
+          reason: '$role must never share a saved report org-wide.',
         );
       }
     });

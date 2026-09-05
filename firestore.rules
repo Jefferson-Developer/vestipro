@@ -72,17 +72,20 @@ service cloud.firestore {
         || (roleName == 'SALES_MANAGER' && capabilityCode in [
               'customer.create', 'customer.update', 'customer.delete',
               'order.create', 'order.view', 'order.approve', 'discount.approveAboveLimit',
-              'team.manage', 'report.export', 'report.viewSensitive'
+              'team.manage', 'report.export', 'report.viewSensitive',
+              'report.share.team', 'report.share.organization'
             ])
         || (roleName == 'SALES_REP' && capabilityCode in [
-              'customer.create', 'customer.update', 'order.create', 'order.view'
+              'customer.create', 'customer.update', 'order.create', 'order.view',
+              'report.share.team'
             ])
         || (roleName == 'SALES_ASSISTANT' && capabilityCode in [
               'customer.create', 'customer.update'
             ])
         || (roleName == 'FINANCE' && capabilityCode in [
               'finance.view', 'finance.manage', 'discount.approveAboveLimit',
-              'report.export', 'report.viewSensitive', 'priceList.manage'
+              'report.export', 'report.viewSensitive', 'priceList.manage',
+              'report.share.team', 'report.share.organization'
             ]);
     }
 
@@ -1138,6 +1141,84 @@ service cloud.firestore {
 
         allow update: if false;
         allow delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/savedReports/{reportId}  (TASK-145)
+      // -------------------------------------------------------------------
+      //
+      // A `SavedReport` only ever persists the TASK-144 `ReportDefinition`
+      // plus sharing metadata — never a cached query result (`executeReportQuery`,
+      // TASK-144/TASK-133, always re-runs server-side, scoped to whoever is
+      // executing, never to `ownerId`). `visibility` gates who can even see
+      // the document: `private` (only its owner), `team` (the owner's own
+      // team(s), re-derived here from the owner's *current* real Membership,
+      // never a client-supplied list) or `organization` (every active
+      // member). Raising `visibility` above `private` requires the caller —
+      // not necessarily the owner, since an OWNER/ADMIN may also edit a
+      // shared item — to hold the matching `report.share.team`/
+      // `report.share.organization` capability (TASK-145,
+      // RolePermissionMatrix); a `SALES_REP` who only has the former caps out
+      // at `team`, exactly like the Dart matrix.
+
+      function savedReportShareCapabilityAllowed(organizationId, visibility) {
+        return visibility == 'organization'
+          ? hasCapability(organizationId, 'report.share.organization')
+          : visibility == 'team'
+            ? hasCapability(organizationId, 'report.share.team')
+            : visibility == 'private';
+      }
+
+      function canReadSavedReport(organizationId) {
+        return isActiveMember(organizationId)
+          && (
+            resource.data.ownerId == request.auth.uid
+            || resource.data.visibility == 'organization'
+            || (
+              resource.data.visibility == 'team'
+              && exists(memberPath(organizationId, resource.data.ownerId))
+              && get(memberPath(organizationId, resource.data.ownerId)).data.status == 'active'
+              && requesterTeamIds(organizationId).hasAny(
+                   get(memberPath(organizationId, resource.data.ownerId)).data.teamIds
+                 )
+            )
+          );
+      }
+
+      // Apenas o dono ou OWNER/ADMIN podem editar/excluir uma visualização
+      // salva — qualquer outro membro com acesso de leitura (via
+      // `canReadSavedReport`) só a executa/visualiza, nunca a altera.
+      function canManageSavedReport(organizationId) {
+        return isActiveMember(organizationId)
+          && (resource.data.ownerId == request.auth.uid || isOwnerOrAdmin(organizationId));
+      }
+
+      match /savedReports/{reportId} {
+        allow read: if canReadSavedReport(organizationId);
+
+        allow create: if isActiveMember(organizationId)
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.companyId is string
+          && request.resource.data.companyId.size() > 0
+          && request.resource.data.ownerId == request.auth.uid
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.visibility in ['private', 'team', 'organization']
+          && savedReportShareCapabilityAllowed(organizationId, request.resource.data.visibility)
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.updatedBy == request.auth.uid;
+
+        allow update: if canManageSavedReport(organizationId)
+          && unchanged('organizationId')
+          && unchanged('companyId')
+          && unchanged('ownerId')
+          && unchanged('createdAt')
+          && unchanged('createdBy')
+          && request.resource.data.visibility in ['private', 'team', 'organization']
+          && savedReportShareCapabilityAllowed(organizationId, request.resource.data.visibility)
+          && request.resource.data.updatedBy == request.auth.uid;
+
+        allow delete: if canManageSavedReport(organizationId);
       }
     }
   }

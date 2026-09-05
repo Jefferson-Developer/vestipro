@@ -263,7 +263,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ### EPIC-18 — Relatórios Customizados e Exportações
 - [x] [TASK-144 — Implementar construtor de relatórios](TASK-144-implementar-construtor-de-relatorios.md) — Flutter Senior + Front-end
-- [ ] [TASK-145 — Implementar visualizações salvas e compartilhadas](TASK-145-implementar-visualizacoes-salvas.md) — Flutter Senior + Front-end
+- [x] [TASK-145 — Implementar visualizações salvas e compartilhadas](TASK-145-implementar-visualizacoes-salvas.md) — Flutter Senior + Front-end
 - [ ] [TASK-146 — Implementar exportação CSV](TASK-146-implementar-exportacao-csv.md) — Flutter Senior
 - [ ] [TASK-147 — Implementar exportação XLSX](TASK-147-implementar-exportacao-xlsx.md) — Flutter Senior
 - [ ] [TASK-148 — Implementar exportação PDF](TASK-148-implementar-exportacao-pdf.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 144 / 220 tasks concluídas.
+**Progresso:** 145 / 220 tasks concluídas.

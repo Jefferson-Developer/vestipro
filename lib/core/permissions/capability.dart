@@ -77,6 +77,21 @@ enum Capability {
   /// screens gate entirely different domains and must be grantable
   /// independently.
   insightView,
+
+  /// Set a `SavedReport.visibility` (TASK-145, EPIC-18) to `team` — sharing a
+  /// saved report view built from TASK-144's `ReportDefinition` with the
+  /// owner's own team(s). Deliberately weaker than
+  /// [reportShareOrganization]: a `SALES_REP` holding only this one caps out
+  /// at team-level sharing, never organization-wide, even though every role
+  /// (including `SALES_REP`) may always save a `private` view without any
+  /// capability at all.
+  reportShareTeam,
+
+  /// Set a `SavedReport.visibility` (TASK-145, EPIC-18) to `organization` —
+  /// sharing a saved report view with every active member of the tenant.
+  /// Strictly more privileged than [reportShareTeam]; a role missing this one
+  /// can still hold [reportShareTeam] and cap out at team-level sharing.
+  reportShareOrganization,
 }
 
 extension CapabilityCode on Capability {
@@ -121,6 +136,8 @@ extension CapabilityCode on Capability {
       Capability.targetManage => 'target.manage',
       Capability.targetView => 'target.view',
       Capability.insightView => 'insight.view',
+      Capability.reportShareTeam => 'report.share.team',
+      Capability.reportShareOrganization => 'report.share.organization',
     };
   }
 }

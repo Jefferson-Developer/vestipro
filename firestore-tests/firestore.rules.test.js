@@ -208,6 +208,40 @@ function favoriteDoc({ organizationId, userId = 'rep-a', productId = 'product-a'
   };
 }
 
+function savedReportDoc({
+  organizationId,
+  companyId = 'company-a',
+  ownerId = 'rep-a',
+  name = 'Minhas vendas do mês',
+  visibility = 'private',
+  favorite = false,
+  createdBy = ownerId,
+  updatedBy = ownerId,
+}) {
+  return {
+    organizationId,
+    companyId,
+    ownerId,
+    name,
+    definition: {
+      organizationId,
+      companyId,
+      dimensions: ['seller'],
+      metrics: ['revenueGross'],
+      filters: [],
+      groupBy: ['seller'],
+      comparisonPeriod: 'none',
+    },
+    visibility,
+    favorite,
+    version: 1,
+    createdAt: now(),
+    createdBy,
+    updatedAt: now(),
+    updatedBy,
+  };
+}
+
 function catalogShareDoc({
   organizationId,
   createdBy = 'rep-a',
@@ -1719,5 +1753,129 @@ describe('organizations/{organizationId}/salesDailyAggregates/{aggregateId}  (TA
     await assertFails(
       db.doc(`organizations/${ORG_A}/salesDailyAggregates/company-a_company-a_2026-08-15`).delete(),
     );
+  });
+});
+
+describe('organizations/{organizationId}/savedReports/{reportId}  (TASK-145)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/savedReports/private-rep-a`)
+        .set(savedReportDoc({ organizationId: ORG_A, ownerId: 'rep-a', visibility: 'private' }));
+      await db
+        .doc(`organizations/${ORG_A}/savedReports/team-rep-a`)
+        .set(savedReportDoc({ organizationId: ORG_A, ownerId: 'rep-a', visibility: 'team', name: 'Compartilhado com a equipe' }));
+      await db
+        .doc(`organizations/${ORG_A}/savedReports/org-manager-a`)
+        .set(savedReportDoc({ organizationId: ORG_A, ownerId: 'manager-a', visibility: 'organization', name: 'Visão da diretoria' }));
+      await db
+        .doc(`organizations/${ORG_B}/savedReports/private-owner-b`)
+        .set(savedReportDoc({ organizationId: ORG_B, ownerId: 'owner-b', visibility: 'private' }));
+    });
+  });
+
+  test('dono lê a própria visualização privada; outro membro não', async () => {
+    const ownerDb = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(ownerDb.doc(`organizations/${ORG_A}/savedReports/private-rep-a`).get());
+
+    const otherDb = testEnv.authenticatedContext('rep-b').firestore();
+    await assertFails(otherDb.doc(`organizations/${ORG_A}/savedReports/private-rep-a`).get());
+  });
+
+  test('membro da mesma equipe do dono lê visualização compartilhada com a equipe; membro de outra equipe não', async () => {
+    // manager-a e rep-a dividem team-a.
+    const managerDb = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(managerDb.doc(`organizations/${ORG_A}/savedReports/team-rep-a`).get());
+
+    // rep-b está apenas em team-b.
+    const otherTeamDb = testEnv.authenticatedContext('rep-b').firestore();
+    await assertFails(otherTeamDb.doc(`organizations/${ORG_A}/savedReports/team-rep-a`).get());
+  });
+
+  test('qualquer membro ativo lê visualização compartilhada com toda a organização', async () => {
+    const repDb = testEnv.authenticatedContext('rep-b').firestore();
+    await assertSucceeds(repDb.doc(`organizations/${ORG_A}/savedReports/org-manager-a`).get());
+  });
+
+  test('membro da Org A não lê visualização salva da Org B, mesmo sabendo o id', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/savedReports/private-owner-b`).get());
+  });
+
+  test('qualquer membro ativo salva uma visualização privada', async () => {
+    const db = testEnv.authenticatedContext('rep-b').firestore();
+    await assertSucceeds(
+      db
+        .doc(`organizations/${ORG_A}/savedReports/private-rep-b-new`)
+        .set(savedReportDoc({ organizationId: ORG_A, ownerId: 'rep-b', visibility: 'private' })),
+    );
+  });
+
+  test('SALES_REP (report.share.team) compartilha com a própria equipe, mas não com toda a organization', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      db
+        .doc(`organizations/${ORG_A}/savedReports/team-rep-a-new`)
+        .set(savedReportDoc({ organizationId: ORG_A, ownerId: 'rep-a', visibility: 'team' })),
+    );
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/savedReports/org-rep-a-new`)
+        .set(savedReportDoc({ organizationId: ORG_A, ownerId: 'rep-a', visibility: 'organization' })),
+    );
+  });
+
+  test('SALES_MANAGER (report.share.organization) compartilha com toda a organization', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      db
+        .doc(`organizations/${ORG_A}/savedReports/org-manager-a-new`)
+        .set(savedReportDoc({ organizationId: ORG_A, ownerId: 'manager-a', visibility: 'organization' })),
+    );
+  });
+
+  test('dono renomeia a própria visualização; ADMIN edita visualização compartilhada de outro dono', async () => {
+    const ownerDb = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      ownerDb.doc(`organizations/${ORG_A}/savedReports/private-rep-a`).update({
+        name: 'Minhas vendas (renomeado)',
+        updatedBy: 'rep-a',
+      }),
+    );
+
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+    await assertSucceeds(
+      adminDb.doc(`organizations/${ORG_A}/savedReports/team-rep-a`).update({
+        name: 'Renomeado pelo admin',
+        updatedBy: 'admin-a',
+      }),
+    );
+  });
+
+  test('membro com acesso de leitura mas sem ser dono/ADMIN/OWNER não edita nem exclui visualização compartilhada', async () => {
+    const managerDb = testEnv.authenticatedContext('manager-a').firestore();
+    await assertFails(
+      managerDb.doc(`organizations/${ORG_A}/savedReports/team-rep-a`).update({
+        name: 'Tentativa indevida',
+        updatedBy: 'manager-a',
+      }),
+    );
+    await assertFails(managerDb.doc(`organizations/${ORG_A}/savedReports/team-rep-a`).delete());
+  });
+
+  test('SALES_REP não eleva a própria visualização para visibility organization via update', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/savedReports/private-rep-a`).update({
+        visibility: 'organization',
+        updatedBy: 'rep-a',
+      }),
+    );
+  });
+
+  test('dono exclui a própria visualização', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/savedReports/private-rep-a`).delete());
   });
 });

@@ -13,6 +13,7 @@ import 'package:firebase_storage/firebase_storage.dart';
 import 'package:drift_flutter/drift_flutter.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:injectable/injectable.dart';
+import 'package:uuid/uuid.dart';
 
 import '../core/analytics/configure_analytics.dart';
 import '../core/database/app_database.dart';
@@ -193,4 +194,17 @@ abstract class AppInjectionModule {
   /// every other cross-cutting policy in this module.
   @lazySingleton
   SyncRetryPolicy get syncRetryPolicy => const SyncRetryPolicy();
+
+  /// Backs every use case/service that generates its own entity id
+  /// client-side (`ConflictResolutionService`, `CloudFunctionsService`,
+  /// `SaveReportView` — TASK-145) — previously left as an unregistered
+  /// constructor default, which `injectable_generator` still happily
+  /// generated a `gh<Uuid>()` call for (see
+  /// `TASK-145-implementar-visualizacoes-salvas-CONCLUIDA.md`), throwing at
+  /// runtime the first time one of those was actually resolved through
+  /// GetIt. Registering it here, like every other shared, stateless
+  /// third-party dependency in this module, fixes that pre-existing gap for
+  /// all of them at once.
+  @lazySingleton
+  Uuid get uuid => const Uuid();
 }

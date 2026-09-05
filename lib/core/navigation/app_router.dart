@@ -55,6 +55,7 @@ class AppRouter {
     this.targetsDashboardPageBuilder,
     this.geographicDashboardPageBuilder,
     this.reportBuilderPageBuilder,
+    this.savedReportsPageBuilder,
     this.productDetailPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
@@ -300,6 +301,11 @@ class AppRouter {
 
   final Widget Function(BuildContext context, String orgId, String companyId)?
   reportBuilderPageBuilder;
+
+  /// Builds the "Meus relatórios"/"Compartilhados comigo" screen (TASK-145),
+  /// given `orgId`/`companyId` from [SavedReportsRoute].
+  final Widget Function(BuildContext context, String orgId, String companyId)?
+  savedReportsPageBuilder;
 
   /// Builds the standalone, read-only product detail screen (TASK-078 reused
   /// outside the order draft flow), given `orgId`/`productId` from
@@ -640,6 +646,19 @@ class AppRouter {
         name: ReportBuilderRoute.name,
         builder: (context, state) {
           final builder = reportBuilderPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: SavedReportsRoute.pathPattern,
+        name: SavedReportsRoute.name,
+        builder: (context, state) {
+          final builder = savedReportsPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,
