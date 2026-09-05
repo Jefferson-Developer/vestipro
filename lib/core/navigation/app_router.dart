@@ -25,6 +25,7 @@ class AppRouter {
     required this.userManagementPageBuilder,
     this.notificationCenterPageBuilder,
     this.communicationPreferencesPageBuilder,
+    this.privacyConsentsPageBuilder,
     this.policyDocumentsPageBuilder,
     this.policyAcceptancePageBuilder,
     this.targetDashboardPageBuilder,
@@ -97,6 +98,8 @@ class AppRouter {
   /// [notificationCenterPageBuilder].
   final Widget Function(BuildContext context, String orgId)?
   communicationPreferencesPageBuilder;
+  final Widget Function(BuildContext context, String orgId)?
+  privacyConsentsPageBuilder;
   final WidgetBuilder? policyDocumentsPageBuilder;
   final Widget Function(BuildContext context, String? returnTo)?
   policyAcceptancePageBuilder;
@@ -458,6 +461,18 @@ class AppRouter {
       GoRoute(
         path: PrivacySettingsRoute.pathPattern,
         name: PrivacySettingsRoute.name,
+        builder: (context, state) {
+          final consentBuilder = privacyConsentsPageBuilder;
+          if (consentBuilder != null) {
+            return consentBuilder(context, state.pathParameters['orgId']!);
+          }
+          final builder = policyDocumentsPageBuilder;
+          return builder == null ? const NotFoundPage() : builder(context);
+        },
+      ),
+      GoRoute(
+        path: PolicyDocumentsSettingsRoute.pathPattern,
+        name: PolicyDocumentsSettingsRoute.name,
         builder: (context, state) {
           final builder = policyDocumentsPageBuilder;
           return builder == null ? const NotFoundPage() : builder(context);

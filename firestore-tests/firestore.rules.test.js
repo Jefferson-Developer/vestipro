@@ -709,6 +709,65 @@ describe('policyDocuments e users/{userId}/policyAcceptances (TASK-156)', () => 
   });
 });
 
+describe('users/{userId}/consentRecords (TASK-157)', () => {
+  const consent = (organizationId, userId, granted = true) => ({
+    organizationId,
+    userId,
+    purpose: 'location',
+    granted,
+    recordedAt: serverTimestamp(),
+  });
+
+  test('membro registra concessão e revogação imutáveis para si', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    const grant = db.doc('users/owner-a/consentRecords/grant-1');
+    const revoke = db.doc('users/owner-a/consentRecords/revoke-1');
+    await assertSucceeds(grant.set(consent(ORG_A, 'owner-a')));
+    await assertSucceeds(revoke.set(consent(ORG_A, 'owner-a', false)));
+    await assertFails(grant.update({ granted: false }));
+    await assertFails(revoke.delete());
+  });
+
+  test('registro de outro usuário ou tenant sem membership é negado', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc('users/owner-b/consentRecords/forged-user').set(
+        consent(ORG_B, 'owner-b'),
+      ),
+    );
+    await assertFails(
+      db.doc('users/owner-a/consentRecords/forged-tenant').set(
+        consent(ORG_B, 'owner-a'),
+      ),
+    );
+  });
+
+  test('usuário lista apenas os próprios registros do tenant ativo', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db.doc('users/owner-a/consentRecords/a').set({
+        ...consent(ORG_A, 'owner-a'), recordedAt: now(),
+      });
+      await db.doc('users/owner-a/consentRecords/b').set({
+        ...consent(ORG_B, 'owner-a'), recordedAt: now(),
+      });
+    });
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertSucceeds(
+      db.collection('users/owner-a/consentRecords')
+        .where('organizationId', '==', ORG_A).get(),
+    );
+    await assertFails(
+      db.collection('users/owner-a/consentRecords')
+        .where('organizationId', '==', ORG_B).get(),
+    );
+    await assertFails(
+      db.collection('users/owner-b/consentRecords')
+        .where('organizationId', '==', ORG_B).get(),
+    );
+  });
+});
+
 describe('organizations/{organizationId}', () => {
   test('membro ativo consegue ler o doc da própria organization', async () => {
     const db = testEnv.authenticatedContext('owner-a').firestore();

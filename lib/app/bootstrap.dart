@@ -362,6 +362,23 @@ class VestiProApp extends StatelessWidget {
                 userId: getIt<AuthRepository>().currentUser?.uid ?? '',
                 createCubit: () => getIt<CommunicationPreferencesCubit>(),
               ),
+          privacyConsentsPageBuilder: (context, orgId) {
+            final repository = FirestoreConsentRepository(
+              getIt<FirebaseFirestore>(),
+            );
+            return PrivacyAndConsentsPage(
+              createCubit: () => ConsentManagementCubit(
+                repository: repository,
+                grantConsent: GrantConsent(repository),
+                revokeConsent: RevokeConsent(repository),
+                organizationId: orgId,
+                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+              ),
+              onPolicyDocumentsTap: () => context.push(
+                PolicyDocumentsSettingsRoute(orgId: orgId).location,
+              ),
+            );
+          },
           policyDocumentsPageBuilder: (context) => PolicyDocumentsPage(
             requireAcceptance: false,
             createCubit: () => _createPolicyAcceptanceCubit(userId: ''),

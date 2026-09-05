@@ -140,7 +140,7 @@ class _AboutAppBar extends StatelessWidget implements PreferredSizeWidget {
         if (onPrivacyTap != null)
           IconButton(
             icon: const Icon(Icons.policy_outlined),
-            tooltip: 'Privacidade e termos',
+            tooltip: 'Privacidade e consentimentos',
             onPressed: onPrivacyTap,
           ),
         if (showInsightsShortcut) const _InsightsShortcutButton(),

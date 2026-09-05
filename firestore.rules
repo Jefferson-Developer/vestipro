@@ -650,6 +650,26 @@ service cloud.firestore {
           && (request.resource.data.device == null || request.resource.data.device is string);
         allow update, delete: if false;
       }
+
+      // Immutable, tenant-scoped consent decisions (TASK-157). Grant and
+      // revocation are separate events, preserving the full audit trail.
+      match /consentRecords/{recordId} {
+        allow get, list: if isSignedIn()
+          && request.auth.uid == userId
+          && isActiveMember(resource.data.organizationId);
+        allow create: if isSignedIn()
+          && request.auth.uid == userId
+          && request.resource.data.keys().hasOnly([
+            'organizationId', 'userId', 'purpose', 'granted', 'recordedAt'
+          ])
+          && request.resource.data.userId == userId
+          && request.resource.data.organizationId is string
+          && isActiveMember(request.resource.data.organizationId)
+          && request.resource.data.purpose in ['location', 'marketing']
+          && request.resource.data.granted is bool
+          && request.resource.data.recordedAt == request.time;
+        allow update, delete: if false;
+      }
     }
 
     // Published legal documents are readable before authentication so the

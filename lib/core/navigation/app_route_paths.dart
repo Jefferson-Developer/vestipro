@@ -978,6 +978,17 @@ final class PrivacySettingsRoute extends AppRoute {
   String get location => '/org/$orgId/settings/privacy';
 }
 
+/// Read-only access to current legal documents from privacy settings.
+final class PolicyDocumentsSettingsRoute extends AppRoute {
+  const PolicyDocumentsSettingsRoute({required this.orgId});
+  final String orgId;
+  static const name = 'policyDocumentsSettings';
+  static const pathPattern = '/org/:orgId/settings/privacy/documents';
+
+  @override
+  String get location => '/org/$orgId/settings/privacy/documents';
+}
+
 /// Route reached via the deep link/token sent by e-mail when someone is
 /// invited to join an Organization (TASK-040, consuming the `Invite`
 /// created by TASK-039's `createInvite`).
