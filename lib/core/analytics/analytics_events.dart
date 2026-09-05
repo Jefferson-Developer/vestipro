@@ -162,6 +162,13 @@ final class AnalyticsEvents {
   /// is permanently deleted.
   static const String reportScheduleDeleted = 'report_schedule_deleted';
 
+  /// Logged by `ProcessCrmTaskReminderUseCase` (TASK-152, EPIC-19) whenever
+  /// an internal notification is actually dispatched for an overdue/due-soon
+  /// CRM task or follow-up — `classification` (`overdue`/`dueSoon`) and
+  /// `is_own_task` (the recipient is the task's own responsible rep vs. a
+  /// manager with team visibility) are carried as parameters.
+  static const String crmReminderTriggered = 'crm_reminder_triggered';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -235,5 +242,6 @@ final class AnalyticsEvents {
     reportScheduleCreated,
     reportSchedulePaused,
     reportScheduleDeleted,
+    crmReminderTriggered,
   ];
 }

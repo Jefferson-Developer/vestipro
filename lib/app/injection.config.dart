@@ -263,16 +263,22 @@ import '../features/crm/data/mappers/crm_activity_mapper.dart' as _i203;
 import '../features/crm/data/mappers/crm_task_mapper.dart' as _i519;
 import '../features/crm/data/repositories/shared_preferences_crm_activity_repository.dart'
     as _i699;
+import '../features/crm/data/repositories/shared_preferences_crm_reminder_dispatch_repository.dart'
+    as _i249;
 import '../features/crm/data/repositories/shared_preferences_crm_task_repository.dart'
     as _i150;
 import '../features/crm/domain/repositories/crm_activity_repository.dart'
     as _i558;
+import '../features/crm/domain/repositories/crm_reminder_dispatch_repository.dart'
+    as _i516;
 import '../features/crm/domain/repositories/crm_task_repository.dart' as _i588;
 import '../features/crm/domain/services/next_best_action_service.dart' as _i905;
 import '../features/crm/domain/usecases/complete_crm_task_use_case.dart'
     as _i96;
 import '../features/crm/domain/usecases/create_crm_task_use_case.dart'
     as _i1039;
+import '../features/crm/domain/usecases/generate_crm_task_reminders_use_case.dart'
+    as _i1058;
 import '../features/crm/domain/usecases/list_crm_activities_for_customer_use_case.dart'
     as _i489;
 import '../features/crm/domain/usecases/list_crm_activities_for_lead_use_case.dart'
@@ -285,6 +291,8 @@ import '../features/crm/domain/usecases/list_pending_tasks_for_today_use_case.da
     as _i224;
 import '../features/crm/domain/usecases/list_pending_tasks_for_week_use_case.dart'
     as _i874;
+import '../features/crm/domain/usecases/process_crm_task_reminder_use_case.dart'
+    as _i532;
 import '../features/crm/domain/usecases/register_crm_activity_use_case.dart'
     as _i924;
 import '../features/crm/domain/usecases/reschedule_crm_task_use_case.dart'
@@ -1553,6 +1561,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1036.CustomerFormDraftDataSource>(
       () => const _i292.SharedPreferencesCustomerFormDraftDataSource(),
     );
+    gh.lazySingleton<_i516.CrmReminderDispatchRepository>(
+      () => const _i249.SharedPreferencesCrmReminderDispatchRepository(),
+    );
     gh.lazySingleton<_i87.InviteAcceptanceMapper>(
       () => _i87.InviteAcceptanceMapper(gh<_i649.InviteMapper>()),
     );
@@ -2728,6 +2739,14 @@ extension GetItInjectableX on _i174.GetIt {
         cacheTtl: gh<Duration>(),
       ),
     );
+    gh.factory<_i634.CrmTaskListBloc>(
+      () => _i634.CrmTaskListBloc(
+        listPendingTasksForWeek: gh<_i874.ListPendingTasksForWeekUseCase>(),
+        completeTask: gh<_i96.CompleteCrmTaskUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+        generateCrmTaskReminders: gh<_i1058.GenerateCrmTaskRemindersUseCase>(),
+      ),
+    );
     gh.factory<_i609.GetActiveWarehousesUseCase>(
       () => _i609.GetActiveWarehousesUseCase(gh<_i62.WarehouseRepository>()),
     );
@@ -2750,13 +2769,6 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i603.ReactivateUserUseCase>(
       () => _i603.ReactivateUserUseCase(gh<_i33.UserAccessRepository>()),
-    );
-    gh.factory<_i634.CrmTaskListBloc>(
-      () => _i634.CrmTaskListBloc(
-        listPendingTasksForWeek: gh<_i874.ListPendingTasksForWeekUseCase>(),
-        completeTask: gh<_i96.CompleteCrmTaskUseCase>(),
-        analyticsService: gh<_i202.AnalyticsService>(),
-      ),
     );
     gh.lazySingleton<_i794.AboutAppRepository>(
       () => _i1060.AboutAppRepositoryImpl(
@@ -2986,6 +2998,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i335.RemoveMemberFromTeamUseCase(
         gh<_i320.TeamRepository>(),
         gh<_i957.MembershipRepository>(),
+      ),
+    );
+    gh.factory<_i532.ProcessCrmTaskReminderUseCase>(
+      () => _i532.ProcessCrmTaskReminderUseCase(
+        gh<_i516.CrmReminderDispatchRepository>(),
+        gh<_i387.NotificationInboxRepository>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i684.ListStockAlertsUseCase>(
@@ -3567,6 +3586,11 @@ extension GetItInjectableX on _i174.GetIt {
         updateCustomer: gh<_i172.UpdateCustomerUseCase>(),
         listOrganizationUsers: gh<_i220.ListOrganizationUsersUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i1058.GenerateCrmTaskRemindersUseCase>(
+      () => _i1058.GenerateCrmTaskRemindersUseCase(
+        gh<_i532.ProcessCrmTaskReminderUseCase>(),
       ),
     );
     gh.factory<_i480.LeadFormBloc>(

@@ -5,6 +5,7 @@ import '../../../../core/analytics/analytics.dart';
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/crm_task.dart';
 import '../../domain/usecases/complete_crm_task_use_case.dart';
+import '../../domain/usecases/generate_crm_task_reminders_use_case.dart';
 import '../../domain/usecases/list_pending_tasks_for_week_use_case.dart';
 import 'crm_task_list_event.dart';
 import 'crm_task_list_state.dart';
@@ -15,6 +16,7 @@ final class CrmTaskListBloc extends Bloc<CrmTaskListEvent, CrmTaskListState> {
     required this.listPendingTasksForWeek,
     required this.completeTask,
     required this.analyticsService,
+    this.generateCrmTaskReminders,
   }) : super(const CrmTaskListState()) {
     on<CrmTaskListStarted>(_onStarted);
     on<CrmTaskListRetried>(_onRetried);
@@ -25,6 +27,15 @@ final class CrmTaskListBloc extends Bloc<CrmTaskListEvent, CrmTaskListState> {
   final ListPendingTasksForWeekUseCase listPendingTasksForWeek;
   final CompleteCrmTaskUseCase completeTask;
   final AnalyticsService analyticsService;
+
+  /// Optional (defaults to `null` so existing call sites/tests that predate
+  /// TASK-152 keep compiling unchanged) — when present, dispatches
+  /// overdue/due-soon reminders (TASK-152) for every task this load just
+  /// fetched, addressed to the current viewer (`state.userId`): their own
+  /// tasks, plus their team's when `state.canManageOthers` is true, exactly
+  /// the same scope `visibleResponsibleUserIds` already restricts the list
+  /// itself to.
+  final GenerateCrmTaskRemindersUseCase? generateCrmTaskReminders;
 
   Future<void> _onStarted(
     CrmTaskListStarted event,
@@ -70,6 +81,7 @@ final class CrmTaskListBloc extends Bloc<CrmTaskListEvent, CrmTaskListState> {
             clearFailure: true,
           ),
         );
+        await _generateReminders(tasks);
       case AppFailure<List<CrmTask>>(failure: final failure):
         emit(
           state.copyWith(
@@ -78,6 +90,19 @@ final class CrmTaskListBloc extends Bloc<CrmTaskListEvent, CrmTaskListState> {
           ),
         );
     }
+  }
+
+  /// Fire-and-forget from the UI's perspective (never surfaced in
+  /// [CrmTaskListState] — it only ever populates the notification center,
+  /// TASK-151), but awaited here so tests can assert on it deterministically.
+  Future<void> _generateReminders(List<CrmTask> tasks) async {
+    final generateReminders = generateCrmTaskReminders;
+    if (generateReminders == null || tasks.isEmpty) return;
+    await generateReminders(
+      tasks: tasks,
+      recipientUserId: state.userId,
+      now: DateTime.now().toUtc(),
+    );
   }
 
   Future<void> _onTaskCompleted(

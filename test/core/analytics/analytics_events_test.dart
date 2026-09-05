@@ -76,6 +76,7 @@ void main() {
           'report_schedule_created',
           'report_schedule_paused',
           'report_schedule_deleted',
+          'crm_reminder_triggered',
         ]),
       );
 
