@@ -38,12 +38,14 @@ final class ProcessOrderCommercialAlertUseCase {
   ProcessOrderCommercialAlertUseCase(
     this._dispatchRepository,
     this._notificationInboxRepository,
+    this._shouldDispatchNotification,
     this._permissionService,
     this._analyticsService,
   ) : _uuid = const Uuid();
 
   final OrderCommercialAlertDispatchRepository _dispatchRepository;
   final NotificationInboxRepository _notificationInboxRepository;
+  final ShouldDispatchNotificationUseCase _shouldDispatchNotification;
   final PermissionService _permissionService;
   final AnalyticsService _analyticsService;
   final Uuid _uuid;
@@ -74,6 +76,15 @@ final class ProcessOrderCommercialAlertUseCase {
     // No cooldown re-arm (see repository doc): once dispatched for this
     // exact combination, it is never dispatched again.
     if (lastDispatchedAt != null) return false;
+
+    // TASK-154: never writes the central de notificações entry when the
+    // recipient turned `commercial`/central off.
+    final allowed = await _shouldDispatchNotification(
+      organizationId: order.organizationId,
+      userId: recipientUserId,
+      category: AppNotificationCategory.commercial,
+    );
+    if (!allowed) return false;
 
     final canViewFinance = await _canViewFinance(
       organizationId: order.organizationId,

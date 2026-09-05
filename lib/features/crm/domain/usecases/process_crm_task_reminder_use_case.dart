@@ -30,12 +30,14 @@ final class ProcessCrmTaskReminderUseCase {
   ProcessCrmTaskReminderUseCase(
     this._dispatchRepository,
     this._notificationInboxRepository,
+    this._shouldDispatchNotification,
     this._analyticsService,
   ) : _evaluator = const CrmTaskReminderEvaluator(),
       _uuid = const Uuid();
 
   final CrmReminderDispatchRepository _dispatchRepository;
   final NotificationInboxRepository _notificationInboxRepository;
+  final ShouldDispatchNotificationUseCase _shouldDispatchNotification;
   final AnalyticsService _analyticsService;
   final CrmTaskReminderEvaluator _evaluator;
   final Uuid _uuid;
@@ -60,6 +62,16 @@ final class ProcessCrmTaskReminderUseCase {
     // Temporary quiet-hours guard — see `CrmReminderSettings` docs for why
     // this is not yet delegated to a shared TASK-155 policy.
     if (!settings.isWithinAllowedSendingWindow(now.toLocal())) return false;
+
+    // TASK-154: never writes the central de notificações entry at all when
+    // the recipient turned `crm`/central off — checked before the cooldown
+    // read below so a muted category never even touches the dispatch log.
+    final allowed = await _shouldDispatchNotification(
+      organizationId: task.organizationId,
+      userId: recipientUserId,
+      category: AppNotificationCategory.crm,
+    );
+    if (!allowed) return false;
 
     final lastDispatchedResult = await _dispatchRepository.getLastDispatchedAt(
       organizationId: task.organizationId,

@@ -5,20 +5,25 @@ import 'package:vestipro/core/notifications/notifications.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/crm/crm.dart';
 
+import '../../../../support/fake_communication_preferences_repository.dart';
+
 void main() {
   group('ProcessCrmTaskReminderUseCase', () {
     late _FakeCrmReminderDispatchRepository dispatchRepository;
     late _FakeNotificationInboxRepository notificationInboxRepository;
+    late FakeCommunicationPreferencesRepository preferencesRepository;
     late FakeAnalyticsService analyticsService;
     late ProcessCrmTaskReminderUseCase useCase;
 
     setUp(() {
       dispatchRepository = _FakeCrmReminderDispatchRepository();
       notificationInboxRepository = _FakeNotificationInboxRepository();
+      preferencesRepository = FakeCommunicationPreferencesRepository();
       analyticsService = FakeAnalyticsService();
       useCase = ProcessCrmTaskReminderUseCase(
         dispatchRepository,
         notificationInboxRepository,
+        ShouldDispatchNotificationUseCase(preferencesRepository),
         analyticsService,
       );
     });
@@ -133,6 +138,30 @@ void main() {
           allowedSendingStartHour: 0,
           allowedSendingEndHour: 1,
         ),
+      );
+
+      expect(dispatched, isFalse);
+      expect(notificationInboxRepository.items, isEmpty);
+    });
+
+    test('does not notify when the recipient disabled the crm/central '
+        'preference (TASK-154)', () async {
+      preferencesRepository.seed(
+        CommunicationPreferences.defaults(
+          organizationId: 'org-1',
+          userId: 'rep-1',
+        ).withChannelFrequency(
+          category: AppNotificationCategory.crm,
+          channel: CommunicationChannel.inApp,
+          frequency: CommunicationFrequency.disabled,
+        ),
+      );
+      final task = _buildTask(dueAt: now.subtract(const Duration(hours: 2)));
+
+      final dispatched = await useCase(
+        task: task,
+        recipientUserId: 'rep-1',
+        now: now,
       );
 
       expect(dispatched, isFalse);

@@ -47,11 +47,13 @@ final class ProcessInsightCommercialAlertUseCase {
   ProcessInsightCommercialAlertUseCase(
     this._dispatchRepository,
     this._notificationInboxRepository,
+    this._shouldDispatchNotification,
     this._analyticsService,
   ) : _uuid = const Uuid();
 
   final InsightAlertDispatchRepository _dispatchRepository;
   final NotificationInboxRepository _notificationInboxRepository;
+  final ShouldDispatchNotificationUseCase _shouldDispatchNotification;
   final AnalyticsService _analyticsService;
   final Uuid _uuid;
 
@@ -81,6 +83,15 @@ final class ProcessInsightCommercialAlertUseCase {
             kInsightCommercialAlertCooldown) {
       return false;
     }
+
+    // TASK-154: never writes the central de notificações entry when the
+    // recipient turned `commercial`/central off.
+    final allowed = await _shouldDispatchNotification(
+      organizationId: insight.organizationId,
+      userId: recipientUserId,
+      category: AppNotificationCategory.commercial,
+    );
+    if (!allowed) return false;
 
     final notification = AppNotification(
       id: _uuid.v4(),

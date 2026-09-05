@@ -14,6 +14,7 @@ import 'package:vestipro/features/targets/targets.dart';
 import 'package:vestipro/features/users/users.dart';
 
 import '../../../../core/design_system/components/test_pump_app.dart';
+import '../../../../support/fake_communication_preferences_repository.dart';
 
 class _MockMembershipRepository extends Mock implements MembershipRepository {}
 
@@ -85,6 +86,9 @@ void main() {
           _FakeTargetAlertSettingsRepository(),
           _FakeTargetAlertDispatchRepository(),
           _FakeNotificationInboxRepository(),
+          ShouldDispatchNotificationUseCase(
+            FakeCommunicationPreferencesRepository(),
+          ),
           FakeAnalyticsService(),
         ),
       ),

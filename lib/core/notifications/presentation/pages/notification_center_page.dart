@@ -25,6 +25,7 @@ class NotificationCenterPage extends StatelessWidget {
     required this.userId,
     required this.createBloc,
     this.onOpenDeepLink,
+    this.onOpenPreferences,
     super.key,
   });
 
@@ -34,6 +35,12 @@ class NotificationCenterPage extends StatelessWidget {
 
   /// Called with a tapped notification's `deepLink` once it is non-blank.
   final ValueChanged<String>? onOpenDeepLink;
+
+  /// Called when the user taps the "Preferências" action (TASK-154's
+  /// entry point into `CommunicationPreferencesPage`). `null` hides the
+  /// action entirely, same "page takes a callback" convention as
+  /// [onOpenDeepLink].
+  final VoidCallback? onOpenPreferences;
 
   @override
   Widget build(BuildContext context) {
@@ -45,15 +52,22 @@ class NotificationCenterPage extends StatelessWidget {
             userId: userId,
           ),
         ),
-      child: _NotificationCenterScaffold(onOpenDeepLink: onOpenDeepLink),
+      child: _NotificationCenterScaffold(
+        onOpenDeepLink: onOpenDeepLink,
+        onOpenPreferences: onOpenPreferences,
+      ),
     );
   }
 }
 
 class _NotificationCenterScaffold extends StatelessWidget {
-  const _NotificationCenterScaffold({this.onOpenDeepLink});
+  const _NotificationCenterScaffold({
+    this.onOpenDeepLink,
+    this.onOpenPreferences,
+  });
 
   final ValueChanged<String>? onOpenDeepLink;
+  final VoidCallback? onOpenPreferences;
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +75,13 @@ class _NotificationCenterScaffold extends StatelessWidget {
       body: AppAdminPageLayout(
         title: 'Notificações',
         actions: <Widget>[
+          if (onOpenPreferences != null)
+            AppIconButton(
+              icon: Icons.tune,
+              semanticLabel: 'Preferências de comunicação',
+              variant: AppButtonVariant.text,
+              onPressed: onOpenPreferences,
+            ),
           BlocBuilder<NotificationCenterBloc, NotificationCenterState>(
             buildWhen: (previous, current) =>
                 previous.unreadCount != current.unreadCount ||

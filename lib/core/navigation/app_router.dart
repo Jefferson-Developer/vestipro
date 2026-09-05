@@ -23,6 +23,7 @@ class AppRouter {
     required this.auditLogPageBuilder,
     required this.userManagementPageBuilder,
     this.notificationCenterPageBuilder,
+    this.communicationPreferencesPageBuilder,
     this.targetDashboardPageBuilder,
     required this.loginPageBuilder,
     required this.signUpPageBuilder,
@@ -83,6 +84,12 @@ class AppRouter {
   /// without wiring TASK-151 keep compiling unchanged.
   final Widget Function(BuildContext context, String orgId)?
   notificationCenterPageBuilder;
+
+  /// Builds the preferências de comunicação screen (TASK-154), given `orgId`
+  /// from [CommunicationPreferencesRoute]. Optional, same rationale as
+  /// [notificationCenterPageBuilder].
+  final Widget Function(BuildContext context, String orgId)?
+  communicationPreferencesPageBuilder;
   final Widget Function(
     BuildContext context,
     String orgId,
@@ -425,6 +432,15 @@ class AppRouter {
         name: NotificationCenterRoute.name,
         builder: (context, state) {
           final builder = notificationCenterPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(context, state.pathParameters['orgId']!);
+        },
+      ),
+      GoRoute(
+        path: CommunicationPreferencesRoute.pathPattern,
+        name: CommunicationPreferencesRoute.name,
+        builder: (context, state) {
+          final builder = communicationPreferencesPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(context, state.pathParameters['orgId']!);
         },

@@ -8,12 +8,15 @@ import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/orders/orders.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
 
+import '../../../../support/fake_communication_preferences_repository.dart';
+
 class _MockMembershipRepository extends Mock implements MembershipRepository {}
 
 void main() {
   group('ProcessOrderCommercialAlertUseCase', () {
     late _FakeOrderCommercialAlertDispatchRepository dispatchRepository;
     late _FakeNotificationInboxRepository notificationInboxRepository;
+    late FakeCommunicationPreferencesRepository preferencesRepository;
     late _MockMembershipRepository membershipRepository;
     late PermissionService permissionService;
     late FakeAnalyticsService analyticsService;
@@ -22,12 +25,14 @@ void main() {
     setUp(() {
       dispatchRepository = _FakeOrderCommercialAlertDispatchRepository();
       notificationInboxRepository = _FakeNotificationInboxRepository();
+      preferencesRepository = FakeCommunicationPreferencesRepository();
       membershipRepository = _MockMembershipRepository();
       permissionService = PermissionService(membershipRepository);
       analyticsService = FakeAnalyticsService();
       useCase = ProcessOrderCommercialAlertUseCase(
         dispatchRepository,
         notificationInboxRepository,
+        ShouldDispatchNotificationUseCase(preferencesRepository),
         permissionService,
         analyticsService,
       );
@@ -157,6 +162,31 @@ void main() {
         expect(notificationInboxRepository.items, hasLength(1));
       },
     );
+
+    test('does not notify when the recipient disabled the commercial/central '
+        'preference (TASK-154)', () async {
+      mockMembership('rep-1', 'SALES_REP');
+      preferencesRepository.seed(
+        CommunicationPreferences.defaults(
+          organizationId: 'org-1',
+          userId: 'rep-1',
+        ).withChannelFrequency(
+          category: AppNotificationCategory.commercial,
+          channel: CommunicationChannel.inApp,
+          frequency: CommunicationFrequency.disabled,
+        ),
+      );
+      final order = _buildOrder(status: OrderStatus.rejected);
+
+      final dispatched = await useCase(
+        order: order,
+        recipientUserId: 'rep-1',
+        now: DateTime.utc(2026, 6, 1),
+      );
+
+      expect(dispatched, isFalse);
+      expect(notificationInboxRepository.items, isEmpty);
+    });
   });
 }
 

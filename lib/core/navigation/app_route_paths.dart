@@ -131,6 +131,24 @@ final class NotificationCenterRoute extends AppRoute {
   String get location => '/org/$orgId/notifications';
 }
 
+/// Preferências de comunicação (TASK-154), scoped by Organization only —
+/// same rationale as [NotificationCenterRoute]: `CommunicationPreferences`
+/// maps to `organizations/{organizationId}/communicationPreferences`, never
+/// to a specific company. Every authenticated member may open it (no
+/// [Capability] gate): it only ever reads/writes the current user's own
+/// preference.
+final class CommunicationPreferencesRoute extends AppRoute {
+  const CommunicationPreferencesRoute({required this.orgId});
+
+  final String orgId;
+
+  static const name = 'communicationPreferences';
+  static const pathPattern = '/org/:orgId/settings/notifications/preferences';
+
+  @override
+  String get location => '/org/$orgId/settings/notifications/preferences';
+}
+
 /// User and permission management route (TASK-042/TASK-043), scoped by
 /// Organization. Protected in [AppRouter] by `user.changeRole`.
 final class UserManagementRoute extends AppRoute {

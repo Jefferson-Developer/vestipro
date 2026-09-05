@@ -1,17 +1,27 @@
 library;
 
 export 'data/local/notification_inbox_local_cache.dart';
+export 'data/repositories/communication_preferences_repository_impl.dart';
 export 'data/repositories/notification_inbox_repository_impl.dart';
 export 'domain/entities/app_notification.dart';
+export 'domain/entities/communication_preferences.dart';
 export 'domain/entities/push_device.dart';
+export 'domain/repositories/communication_preferences_repository.dart';
 export 'domain/repositories/notification_inbox_repository.dart';
 export 'domain/repositories/push_device_repository.dart';
+export 'domain/usecases/get_communication_preferences_use_case.dart';
 export 'domain/usecases/list_notifications_for_user_use_case.dart';
 export 'domain/usecases/mark_all_notifications_as_read_use_case.dart';
 export 'domain/usecases/mark_notification_as_read_use_case.dart';
+export 'domain/usecases/save_communication_preferences_use_case.dart';
+export 'domain/usecases/should_dispatch_notification_use_case.dart';
+export 'domain/usecases/watch_communication_preferences_use_case.dart';
+export 'presentation/bloc/communication_preferences_cubit.dart';
+export 'presentation/bloc/communication_preferences_state.dart';
 export 'presentation/bloc/notification_center_bloc.dart';
 export 'presentation/bloc/notification_center_event.dart';
 export 'presentation/bloc/notification_center_state.dart';
+export 'presentation/pages/communication_preferences_page.dart';
 export 'presentation/pages/notification_center_page.dart';
 export 'push/configure_messaging.dart';
 export 'push/device_installation_id_provider.dart';

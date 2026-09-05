@@ -1175,6 +1175,41 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/communicationPreferences/{userId}
+      // (TASK-154)
+      // -------------------------------------------------------------------
+      //
+      // One document per user, keyed by the user's own `uid` (never a
+      // generated id) — the same convention `pushDevices` uses for the
+      // Firestore Rules to validate ownership straight from the path,
+      // without an extra read. `ShouldDispatchNotificationUseCase` (every
+      // notification generator's gate, TASK-152/TASK-153) reads this
+      // document server-side-equivalent from the client through the same
+      // Rules below; nothing here ever exposes another user's preference
+      // (`list` stays `if false` — a client only ever reads its own known
+      // document id, never enumerates the collection).
+
+      match /communicationPreferences/{userId} {
+        allow get: if isActiveMember(organizationId) && userId == request.auth.uid;
+
+        allow list: if false;
+
+        allow create: if isActiveMember(organizationId)
+          && userId == request.auth.uid
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.userId == request.auth.uid;
+
+        allow update: if isActiveMember(organizationId)
+          && userId == request.auth.uid
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.userId == request.auth.uid
+          && unchanged('organizationId')
+          && unchanged('userId');
+
+        allow delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/invites/{inviteId}  (TASK-039)
       // -------------------------------------------------------------------
       //

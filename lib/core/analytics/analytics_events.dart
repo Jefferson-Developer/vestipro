@@ -185,6 +185,14 @@ final class AnalyticsEvents {
   static const String commercialOpportunityAlertTriggered =
       'commercial_opportunity_alert_triggered';
 
+  /// Logged by `CommunicationPreferencesCubit` (TASK-154, EPIC-19) whenever a
+  /// user successfully changes one `(category, channel)` frequency in the
+  /// preferências de comunicação screen — `category`, `channel` and
+  /// `frequency` are carried as parameters. Never logged for a rejected
+  /// change (e.g. the system category fully-disabled guard).
+  static const String communicationPreferencesUpdated =
+      'communication_preferences_updated';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -261,5 +269,6 @@ final class AnalyticsEvents {
     crmReminderTriggered,
     commercialOrderAlertTriggered,
     commercialOpportunityAlertTriggered,
+    communicationPreferencesUpdated,
   ];
 }

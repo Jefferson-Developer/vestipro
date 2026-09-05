@@ -5,11 +5,14 @@ import 'package:vestipro/core/notifications/notifications.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/targets/targets.dart';
 
+import '../../../../support/fake_communication_preferences_repository.dart';
+
 void main() {
   group('ProcessTargetAlertUseCase', () {
     late _FakeTargetAlertSettingsRepository settingsRepository;
     late _FakeTargetAlertDispatchRepository dispatchRepository;
     late _FakeNotificationInboxRepository notificationInboxRepository;
+    late FakeCommunicationPreferencesRepository preferencesRepository;
     late FakeAnalyticsService analyticsService;
     late ProcessTargetAlertUseCase useCase;
 
@@ -30,11 +33,13 @@ void main() {
       );
       dispatchRepository = _FakeTargetAlertDispatchRepository();
       notificationInboxRepository = _FakeNotificationInboxRepository();
+      preferencesRepository = FakeCommunicationPreferencesRepository();
       analyticsService = FakeAnalyticsService();
       useCase = ProcessTargetAlertUseCase(
         settingsRepository,
         dispatchRepository,
         notificationInboxRepository,
+        ShouldDispatchNotificationUseCase(preferencesRepository),
         analyticsService,
       );
     });
@@ -119,6 +124,31 @@ void main() {
         expect(analyticsService.loggedEvents, hasLength(1));
       },
     );
+
+    test('does not queue a notification when the recipient disabled the '
+        'commercial/central preference (TASK-154)', () async {
+      preferencesRepository.seed(
+        CommunicationPreferences.defaults(
+          organizationId: 'org-1',
+          userId: 'rep-1',
+        ).withChannelFrequency(
+          category: AppNotificationCategory.commercial,
+          channel: CommunicationChannel.inApp,
+          frequency: CommunicationFrequency.disabled,
+        ),
+      );
+
+      final alert = await useCase(
+        target: target,
+        progress: progress,
+        userId: 'rep-1',
+        now: DateTime.utc(2026, 1, 16),
+      );
+
+      expect(alert, isNotNull);
+      expect(alert!.notificationQueued, isFalse);
+      expect(notificationInboxRepository.items, isEmpty);
+    });
   });
 }
 

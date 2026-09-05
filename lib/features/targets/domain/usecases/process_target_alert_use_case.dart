@@ -20,6 +20,7 @@ final class ProcessTargetAlertUseCase {
     this._settingsRepository,
     this._dispatchRepository,
     this._notificationInboxRepository,
+    this._shouldDispatchNotification,
     this._analyticsService,
   ) : _evaluator = const TargetAlertEvaluator(),
       _uuid = const Uuid();
@@ -27,6 +28,7 @@ final class ProcessTargetAlertUseCase {
   final TargetAlertSettingsRepository _settingsRepository;
   final TargetAlertDispatchRepository _dispatchRepository;
   final NotificationInboxRepository _notificationInboxRepository;
+  final ShouldDispatchNotificationUseCase _shouldDispatchNotification;
   final AnalyticsService _analyticsService;
   final TargetAlertEvaluator _evaluator;
   final Uuid _uuid;
@@ -62,13 +64,24 @@ final class ProcessTargetAlertUseCase {
       targetId: target.id,
     ).location;
     final content = _contentForAssessment(assessment);
-    final shouldDispatch = await _shouldDispatch(
+    final cooldownAllows = await _shouldDispatch(
       organizationId: target.organizationId,
       targetId: target.id,
       classification: assessment.classification,
       now: instant,
       cooldown: settings.notificationCooldown,
     );
+    // TASK-154: never writes the central de notificações entry when the
+    // recipient turned `commercial`/central off, regardless of the cooldown
+    // above.
+    final preferenceAllows = cooldownAllows
+        ? await _shouldDispatchNotification(
+            organizationId: target.organizationId,
+            userId: userId,
+            category: AppNotificationCategory.commercial,
+          )
+        : false;
+    final shouldDispatch = cooldownAllows && preferenceAllows;
 
     if (!shouldDispatch) {
       return TargetAlert(

@@ -5,20 +5,25 @@ import 'package:vestipro/core/notifications/notifications.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/insights/insights.dart';
 
+import '../../../../support/fake_communication_preferences_repository.dart';
+
 void main() {
   group('ProcessInsightCommercialAlertUseCase', () {
     late _FakeInsightAlertDispatchRepository dispatchRepository;
     late _FakeNotificationInboxRepository notificationInboxRepository;
+    late FakeCommunicationPreferencesRepository preferencesRepository;
     late FakeAnalyticsService analyticsService;
     late ProcessInsightCommercialAlertUseCase useCase;
 
     setUp(() {
       dispatchRepository = _FakeInsightAlertDispatchRepository();
       notificationInboxRepository = _FakeNotificationInboxRepository();
+      preferencesRepository = FakeCommunicationPreferencesRepository();
       analyticsService = FakeAnalyticsService();
       useCase = ProcessInsightCommercialAlertUseCase(
         dispatchRepository,
         notificationInboxRepository,
+        ShouldDispatchNotificationUseCase(preferencesRepository),
         analyticsService,
       );
     });
