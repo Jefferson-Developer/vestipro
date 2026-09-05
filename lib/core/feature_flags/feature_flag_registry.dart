@@ -47,6 +47,15 @@ final class FeatureFlagRegistry {
   static const String configCatalogHomeSectionsJson =
       'config_catalog_home_sections_json';
 
+  /// Maximum number of result rows `ReportBuilderBloc` still encodes to CSV
+  /// entirely on-device (TASK-146): above this row count, exporting is
+  /// delegated to the `exportReportToCsv` Cloud Function instead, which
+  /// re-executes the report server-side and uploads the file to Storage.
+  /// A pure UX/performance knob, never a security boundary — the callable
+  /// independently enforces its own hard ceiling regardless of this value.
+  static const String configReportExportMaxLocalRows =
+      'config_report_export_max_local_rows';
+
   static final List<FeatureFlagDefinition> _definitions =
       <FeatureFlagDefinition>[
         FeatureFlagDefinition(
@@ -111,6 +120,19 @@ final class FeatureFlagRegistry {
           reviewBy: DateTime.utc(2027, 2, 25),
           type: FeatureFlagValueType.string,
           defaultValue: '',
+        ),
+        FeatureFlagDefinition(
+          key: configReportExportMaxLocalRows,
+          description:
+              'Numero maximo de linhas de resultado que o construtor de '
+              'relatorios ainda exporta para CSV inteiramente no '
+              'dispositivo — acima disso, a exportacao e delegada para a '
+              'Cloud Function exportReportToCsv (TASK-146).',
+          owner: 'flutter-senior-architect',
+          createdAt: DateTime.utc(2026, 9, 4),
+          reviewBy: DateTime.utc(2027, 3, 4),
+          type: FeatureFlagValueType.integer,
+          defaultValue: 5000,
         ),
       ];
 

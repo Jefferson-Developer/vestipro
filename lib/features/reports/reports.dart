@@ -1,11 +1,16 @@
 export 'domain/entities/report_catalog.dart';
 export 'domain/entities/report_definition.dart';
+export 'domain/entities/report_export_result.dart';
 export 'domain/entities/report_query_result.dart';
 export 'domain/entities/saved_report.dart';
+export 'domain/repositories/report_export_repository.dart';
 export 'domain/repositories/report_repository.dart';
 export 'domain/repositories/saved_report_repository.dart';
+export 'domain/services/csv_report_encoder.dart';
 export 'domain/services/no_active_schedule_report_schedule_reference_checker.dart';
+export 'domain/services/report_export_file_name_builder.dart';
 export 'domain/services/report_schedule_reference_checker.dart';
+export 'domain/usecases/export_report_to_csv.dart';
 export 'domain/usecases/report_use_cases.dart';
 export 'domain/usecases/saved_report_use_cases.dart';
 export 'domain/usecases/validate_report_definition.dart';

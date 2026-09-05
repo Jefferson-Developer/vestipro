@@ -45,6 +45,7 @@ without an `owner` and a `reviewBy` date must not be merged (see `AGENTS.md`). C
 | `config_products_video_max_duration_seconds` | integer | `60` | Maximum accepted duration (seconds) for a product's short video in the media gallery (TASK-068) — checked client-side before any upload starts. | `flutter-senior-architect` | 2026-08-24 | 2027-02-24 |
 | `config_products_video_max_size_mb` | integer | `50` | Maximum accepted file size (MB) for a product's short video in the media gallery (TASK-068) — checked client-side before any upload starts. | `flutter-senior-architect` | 2026-08-24 | 2027-02-24 |
 | `config_catalog_home_sections_json` | string | `""` | JSON array describing the catalog home's section composition (TASK-076) — order/title/enabled/limit per section, so a manager can reorder/rename/disable a section without an app deploy. Empty = falls back to the code-defined default composition. | `flutter-senior-architect` | 2026-08-25 | 2027-02-25 |
+| `config_report_export_max_local_rows` | integer | `5000` | Maximum result row count the report builder still exports to CSV entirely on-device (TASK-146) — above it, export is delegated to the `exportReportToCsv` Cloud Function, which re-runs the aggregation server-side and uploads the file to Storage. A UX/performance knob only, never a security boundary. | `flutter-senior-architect` | 2026-09-04 | 2027-03-04 |
 
 ## Defaults and fetch policy
 

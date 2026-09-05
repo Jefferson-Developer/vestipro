@@ -1064,20 +1064,31 @@ import '../features/products/presentation/bloc/season_form_bloc.dart' as _i98;
 import '../features/products/presentation/bloc/season_list_bloc.dart' as _i986;
 import '../features/products/presentation/bloc/size_grid_template_bloc.dart'
     as _i415;
+import '../features/reports/data/datasources/cloud_functions_report_export_remote_data_source.dart'
+    as _i304;
 import '../features/reports/data/datasources/cloud_functions_report_remote_data_source.dart'
     as _i712;
+import '../features/reports/data/datasources/csv_isolate_encoder.dart' as _i77;
 import '../features/reports/data/datasources/firestore_saved_report_remote_data_source.dart'
     as _i925;
+import '../features/reports/data/datasources/report_export_remote_data_source.dart'
+    as _i813;
+import '../features/reports/data/datasources/report_file_saver_data_source.dart'
+    as _i712;
 import '../features/reports/data/datasources/report_remote_data_source.dart'
     as _i922;
 import '../features/reports/data/datasources/saved_report_remote_data_source.dart'
     as _i603;
+import '../features/reports/data/repositories/report_export_repository_impl.dart'
+    as _i959;
 import '../features/reports/data/repositories/report_repository_impl.dart'
     as _i593;
 import '../features/reports/data/repositories/saved_report_repository_impl.dart'
     as _i462;
 import '../features/reports/data/repositories/shared_preferences_report_draft_repository.dart'
     as _i940;
+import '../features/reports/domain/repositories/report_export_repository.dart'
+    as _i876;
 import '../features/reports/domain/repositories/report_repository.dart' as _i22;
 import '../features/reports/domain/repositories/saved_report_repository.dart'
     as _i117;
@@ -1085,6 +1096,7 @@ import '../features/reports/domain/services/no_active_schedule_report_schedule_r
     as _i107;
 import '../features/reports/domain/services/report_schedule_reference_checker.dart'
     as _i426;
+import '../features/reports/domain/usecases/export_report_to_csv.dart' as _i89;
 import '../features/reports/domain/usecases/report_use_cases.dart' as _i565;
 import '../features/reports/domain/usecases/saved_report_use_cases.dart'
     as _i411;
@@ -1423,6 +1435,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i611.ImageCompressor>(
       () => const _i611.FlutterImageCompressor(),
     );
+    gh.lazySingleton<_i77.CsvIsolateEncoder>(
+      () => const _i77.FlutterCsvIsolateEncoder(),
+    );
     gh.lazySingleton<_i358.PaymentTermRepository>(
       () => _i973.SharedPreferencesPaymentTermRepository(),
     );
@@ -1503,6 +1518,9 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i862.ClosingProjectionService(
         strategy: gh<_i307.ProjectionStrategy>(),
       ),
+    );
+    gh.lazySingleton<_i712.ReportFileSaverDataSource>(
+      () => const _i712.FilePickerReportFileSaverDataSource(),
     );
     gh.lazySingleton<_i999.CustomerFormDraftRepository>(
       () => _i920.CustomerFormDraftRepositoryImpl(
@@ -2725,6 +2743,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.lazySingleton<_i813.ReportExportRemoteDataSource>(
+      () => _i304.CloudFunctionsReportExportRemoteDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.factory<_i321.ListPortfolioAssignmentsUseCase>(
       () => _i321.ListPortfolioAssignmentsUseCase(
         gh<_i295.PortfolioAssignmentRepository>(),
@@ -2769,6 +2792,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i411.ListSavedReports(
         gh<_i117.SavedReportRepository>(),
         gh<_i957.MembershipRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i876.ReportExportRepository>(
+      () => _i959.ReportExportRepositoryImpl(
+        gh<_i77.CsvIsolateEncoder>(),
+        gh<_i712.ReportFileSaverDataSource>(),
+        gh<_i813.ReportExportRemoteDataSource>(),
       ),
     );
     gh.lazySingleton<_i440.RoleRepository>(
@@ -3067,6 +3097,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i820.UpdateBranchUseCase>(
       () => _i820.UpdateBranchUseCase(gh<_i160.BranchRepository>()),
+    );
+    gh.factory<_i89.ExportReportToCsv>(
+      () => _i89.ExportReportToCsv(gh<_i876.ReportExportRepository>()),
     );
     gh.factory<_i268.SearchProductsUseCase>(
       () => _i268.SearchProductsUseCase(gh<_i568.ProductSearchRepository>()),
@@ -3620,15 +3653,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i908.ValidateReportDefinition>(),
       ),
     );
-    gh.factory<_i822.ReportBuilderBloc>(
-      () => _i822.ReportBuilderBloc(
-        gh<_i565.LoadReportCatalog>(),
-        gh<_i565.ExecuteReportQuery>(),
-        gh<_i908.ValidateReportDefinition>(),
-        gh<_i22.ReportDraftRepository>(),
-        gh<_i202.AnalyticsService>(),
-      ),
-    );
     gh.factory<_i433.AssignPortfolioBloc>(
       () => _i433.AssignPortfolioBloc(
         listOrganizationUsers: gh<_i93.ListOrganizationUsersUseCase>(),
@@ -3688,6 +3712,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i325.CustomerOfflinePackageEntityLoader>(),
         gh<_i1044.PriceListOfflinePackageEntityLoader>(),
         gh<_i898.PaymentTermOfflinePackageEntityLoader>(),
+      ),
+    );
+    gh.factory<_i822.ReportBuilderBloc>(
+      () => _i822.ReportBuilderBloc(
+        gh<_i565.LoadReportCatalog>(),
+        gh<_i565.ExecuteReportQuery>(),
+        gh<_i908.ValidateReportDefinition>(),
+        gh<_i22.ReportDraftRepository>(),
+        gh<_i202.AnalyticsService>(),
+        gh<_i89.ExportReportToCsv>(),
+        gh<_i869.FeatureFlagService>(),
       ),
     );
     gh.factory<_i144.InventoryDashboardBloc>(

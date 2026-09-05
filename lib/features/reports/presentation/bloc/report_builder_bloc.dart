@@ -4,10 +4,12 @@ import 'package:bloc/bloc.dart';
 import 'package:injectable/injectable.dart';
 
 import '../../../../core/analytics/analytics.dart';
+import '../../../../core/feature_flags/feature_flags.dart';
 import '../../../../core/utils/utils.dart';
 import '../../domain/entities/report_definition.dart';
 import '../../domain/entities/report_catalog.dart';
 import '../../domain/repositories/report_repository.dart';
+import '../../domain/usecases/export_report_to_csv.dart';
 import '../../domain/usecases/report_use_cases.dart';
 import '../../domain/usecases/validate_report_definition.dart';
 import 'report_builder_event.dart';
@@ -22,6 +24,8 @@ final class ReportBuilderBloc
     this._validate,
     this._drafts,
     this._analytics,
+    this._exportToCsv,
+    this._featureFlags,
   ) : super(const ReportBuilderState()) {
     on<ReportBuilderStarted>(_onStarted);
     on<ReportDimensionToggled>(_onDimensionToggled);
@@ -31,6 +35,7 @@ final class ReportBuilderBloc
     on<ReportSortChanged>(_onSortChanged);
     on<ReportExecutionRequested>(_onExecute);
     on<ReportBuilderRetried>(_onRetry);
+    on<ReportExportRequested>(_onExport);
   }
 
   final LoadReportCatalog _loadCatalog;
@@ -38,6 +43,8 @@ final class ReportBuilderBloc
   final ValidateReportDefinition _validate;
   final ReportDraftRepository _drafts;
   final AnalyticsService _analytics;
+  final ExportReportToCsv _exportToCsv;
+  final FeatureFlagService _featureFlags;
 
   Future<void> _onStarted(
     ReportBuilderStarted event,
@@ -287,6 +294,54 @@ final class ReportBuilderBloc
       case AppFailure(failure: final failure):
         emit(
           state.copyWith(status: ReportBuilderStatus.ready, failure: failure),
+        );
+    }
+  }
+
+  Future<void> _onExport(
+    ReportExportRequested event,
+    Emitter<ReportBuilderState> emit,
+  ) async {
+    final definition = state.definition;
+    final preview = state.preview;
+    if (definition == null || preview == null) return;
+    emit(
+      state.copyWith(
+        exportStatus: ReportExportStatus.exporting,
+        clearExportFailure: true,
+        clearExportSummary: true,
+      ),
+    );
+    final maxLocalRows = _featureFlags.getInt(
+      FeatureFlagRegistry.configReportExportMaxLocalRows,
+    );
+    final result = await _exportToCsv(
+      definition: definition,
+      result: preview,
+      maxLocalRows: maxLocalRows,
+    );
+    switch (result) {
+      case AppSuccess(value: final summary):
+        emit(
+          state.copyWith(
+            exportStatus: ReportExportStatus.success,
+            exportSummary: summary,
+          ),
+        );
+        await _analytics.logEvent(
+          AnalyticsEvents.reportExported,
+          parameters: <String, Object?>{
+            'formato': 'csv',
+            'row_count': summary.rowCount,
+            'delegated_to_cloud': summary.isRemote,
+          },
+        );
+      case AppFailure(failure: final failure):
+        emit(
+          state.copyWith(
+            exportStatus: ReportExportStatus.failure,
+            exportFailure: failure,
+          ),
         );
     }
   }

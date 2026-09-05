@@ -129,8 +129,47 @@ class _ReportBuilderView extends StatelessWidget {
             ),
           );
         }
-        return _BuilderContent(state: state);
+        return _BuilderContent(
+          state: state,
+          permissionService: permissionService,
+          organizationId: organizationId,
+          userId: userId,
+        );
       },
+    );
+
+    body = BlocListener<ReportBuilderBloc, ReportBuilderState>(
+      listenWhen: (previous, current) =>
+          previous.exportStatus != current.exportStatus &&
+          current.exportStatus != ReportExportStatus.exporting,
+      listener: (context, state) {
+        final messenger = ScaffoldMessenger.of(context);
+        if (state.exportStatus == ReportExportStatus.success) {
+          final summary = state.exportSummary;
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(
+                summary == null
+                    ? 'Exportação concluída.'
+                    : summary.isRemote
+                    ? 'Exportação de ${summary.rowCount} linhas em andamento. '
+                          'Você receberá um link para baixar "${summary.fileName}".'
+                    : 'Exportado "${summary.fileName}" (${summary.rowCount} linhas).',
+              ),
+            ),
+          );
+        } else if (state.exportStatus == ReportExportStatus.failure) {
+          messenger.showSnackBar(
+            SnackBar(
+              content: Text(
+                state.exportFailure?.message ??
+                    'Não foi possível exportar o relatório.',
+              ),
+            ),
+          );
+        }
+      },
+      child: body,
     );
 
     if (canSaveReports) {
@@ -306,8 +345,16 @@ class _SaveReportDialogState extends State<_SaveReportDialog> {
 }
 
 class _BuilderContent extends StatelessWidget {
-  const _BuilderContent({required this.state});
+  const _BuilderContent({
+    required this.state,
+    required this.permissionService,
+    required this.organizationId,
+    required this.userId,
+  });
   final ReportBuilderState state;
+  final PermissionService? permissionService;
+  final String organizationId;
+  final String userId;
 
   @override
   Widget build(BuildContext context) {
@@ -318,7 +365,12 @@ class _BuilderContent extends StatelessWidget {
       definition: definition,
       state: state,
     );
-    final preview = _Preview(state: state);
+    final preview = _Preview(
+      state: state,
+      permissionService: permissionService,
+      organizationId: organizationId,
+      userId: userId,
+    );
     return LayoutBuilder(
       builder: (context, constraints) {
         if (constraints.maxWidth >= 900) {
@@ -543,8 +595,16 @@ class _Editor extends StatelessWidget {
 }
 
 class _Preview extends StatelessWidget {
-  const _Preview({required this.state});
+  const _Preview({
+    required this.state,
+    required this.permissionService,
+    required this.organizationId,
+    required this.userId,
+  });
   final ReportBuilderState state;
+  final PermissionService? permissionService;
+  final String organizationId;
+  final String userId;
 
   @override
   Widget build(BuildContext context) {
@@ -573,24 +633,65 @@ class _Preview extends StatelessWidget {
         child: Text('Nenhum dado encontrado para os filtros escolhidos.'),
       );
     }
+    final isExporting = state.exportStatus == ReportExportStatus.exporting;
+    final exportButton = OutlinedButton.icon(
+      key: const Key('export-report-csv'),
+      onPressed: isExporting
+          ? null
+          : () => context.read<ReportBuilderBloc>().add(
+              const ReportExportRequested(),
+            ),
+      icon: isExporting
+          ? const SizedBox.square(
+              dimension: 16,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            )
+          : const Icon(Icons.download_outlined),
+      label: const Text('Exportar CSV'),
+    );
+    // `Capability.reportExport` mirrors `role_permission_matrix.dart`'s own
+    // OWNER/ADMIN/SALES_MANAGER/FINANCE grant — `hasPermission == true` here
+    // is only a UX affordance: the real, authoritative boundary is
+    // `exportReportToCsv`'s own `assertCanExportReports` (small exports) and
+    // `storage.rules`' `report.export` check (large exports' download link).
+    final permissions = permissionService;
+    final exportAction = permissions == null
+        ? exportButton
+        : PermissionBuilder(
+            permissionService: permissions,
+            organizationId: organizationId,
+            userId: userId,
+            capability: Capability.reportExport,
+            builder: (context, granted) =>
+                granted ? exportButton : const SizedBox.shrink(),
+          );
     return SingleChildScrollView(
       padding: const EdgeInsets.all(24),
-      child: SingleChildScrollView(
-        scrollDirection: Axis.horizontal,
-        child: DataTable(
-          columns: result.columns
-              .map((column) => DataColumn(label: Text(column)))
-              .toList(),
-          rows: result.rows
-              .map(
-                (row) => DataRow(
-                  cells: result.columns
-                      .map((column) => DataCell(Text('${row[column] ?? '—'}')))
-                      .toList(),
-                ),
-              )
-              .toList(),
-        ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Align(alignment: Alignment.centerRight, child: exportAction),
+          const SizedBox(height: 12),
+          SingleChildScrollView(
+            scrollDirection: Axis.horizontal,
+            child: DataTable(
+              columns: result.columns
+                  .map((column) => DataColumn(label: Text(column)))
+                  .toList(),
+              rows: result.rows
+                  .map(
+                    (row) => DataRow(
+                      cells: result.columns
+                          .map(
+                            (column) => DataCell(Text('${row[column] ?? '—'}')),
+                          )
+                          .toList(),
+                    ),
+                  )
+                  .toList(),
+            ),
+          ),
+        ],
       ),
     );
   }

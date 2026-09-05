@@ -8,13 +8,75 @@ import { catalogForRole, REPORT_ROLES, type ReportFieldConfig } from './report-c
 interface FilterInput { fieldId?: unknown; operator?: unknown; value?: unknown }
 interface DefinitionInput { organizationId?: unknown; companyId?: unknown; dimensions?: unknown; metrics?: unknown; filters?: unknown; groupBy?: unknown; sortBy?: unknown; comparisonPeriod?: unknown }
 
+/** The subset of a `members/{uid}` document {@link runReportAggregation} and
+ * every caller of it needs — never the full membership record. */
+export interface ReportAggregationMember {
+  roleName: string;
+  teamIds?: string[];
+}
+
+export interface ReportAggregationParams {
+  db: FirebaseFirestore.Firestore;
+  organizationId: string;
+  companyId: string;
+  member: ReportAggregationMember;
+  authUid: string;
+  data: DefinitionInput | undefined;
+}
+
+/**
+ * Server-owned dimension/metric aggregation shared by every reporting
+ * callable that must produce exactly the same rows a report's
+ * `ReportDefinition` describes: `executeReportQuery` (interactive preview,
+ * TASK-133/TASK-144) and `exportReportToCsv` (TASK-146) — the latter never
+ * trusts a `ReportQueryResult` handed back by the client, it re-derives the
+ * same rows itself under the caller's own role/tenant scope, exactly as this
+ * function already re-validates for the interactive preview.
+ *
+ * Caller-side auth/membership/company validation is *not* repeated here —
+ * every current and future caller already did that (see `executeReportQuery`
+ * and `exportReportToCsv`) before invoking this function, so [member] is
+ * assumed to already be the caller's own active Membership.
+ */
+export async function runReportAggregation(
+  params: ReportAggregationParams,
+): Promise<{ columns: string[]; rows: Record<string, unknown>[] }> {
+  const { db, organizationId, companyId, member, authUid, data } = params;
+  const dimensions = stringArray(data?.dimensions, 'dimensions', 2);
+  const metrics = stringArray(data?.metrics, 'metrics', 6);
+  if (!dimensions.length || !metrics.length) throw new HttpsError('invalid-argument', 'Escolha dimensão e métrica.');
+  const catalog = catalogForRole(member.roleName);
+  validateSelection(dimensions, metrics, catalog);
+  const period = parsePeriod(data?.filters);
+  const source = sourceFor(dimensions);
+  const loadPeriod = async (month: string): Promise<DocumentData[]> => {
+    let query: Query = db.collection('organizations').doc(organizationId).collection(AGGREGATE_COLLECTION_BY_DIMENSION[source]).where('companyId', '==', companyId);
+    query = source === 'salesDaily'
+      ? query.where('periodKey', '>=', `${month}-01`).where('periodKey', '<=', `${month}-31`).orderBy('periodKey')
+      : query.where('periodKey', '==', month);
+    if (member.roleName === 'SALES_REP') query = query.where('scopeId', '==', authUid);
+    const snapshots = (await query.limit(500).get()).docs.map((doc) => doc.data());
+    return member.roleName === 'SALES_MANAGER'
+      ? snapshots.filter((row) => Array.isArray(member.teamIds) && member.teamIds.includes(row.labels?.teamId))
+      : snapshots;
+  };
+  let rows = aggregateRows(await loadPeriod(period), dimensions, metrics);
+  const comparison = parseComparison(data?.comparisonPeriod);
+  let columns = [...dimensions, ...metrics];
+  if (comparison !== 'none') {
+    const comparisonRows = aggregateRows(await loadPeriod(comparisonMonth(period, comparison)), dimensions, metrics);
+    rows = mergeComparison(rows, comparisonRows, dimensions, metrics);
+    columns = [...columns, ...metrics.flatMap((metric) => [`${metric}Comparison`, `${metric}ChangePercent`])];
+  }
+  const sort = data?.sortBy as { fieldId?: unknown; direction?: unknown } | undefined;
+  if (sort && typeof sort.fieldId === 'string') rows = sortRows(rows, sort.fieldId, sort.direction === 'descending');
+  return { columns, rows };
+}
+
 export const executeReportQuery = onCall<DefinitionInput>(async (request) => {
   if (!request.auth) throw new HttpsError('unauthenticated', 'Autenticação obrigatória.');
   const organizationId = requireNonEmptyString(request.data?.organizationId, 'organizationId');
   const companyId = requireNonEmptyString(request.data?.companyId, 'companyId');
-  const dimensions = stringArray(request.data?.dimensions, 'dimensions', 2);
-  const metrics = stringArray(request.data?.metrics, 'metrics', 6);
-  if (!dimensions.length || !metrics.length) throw new HttpsError('invalid-argument', 'Escolha dimensão e métrica.');
   const db = getFirestore();
   const memberSnapshot = await db.collection('organizations').doc(organizationId).collection('members').doc(request.auth.uid).get();
   const member = memberSnapshot.data();
@@ -23,31 +85,14 @@ export const executeReportQuery = onCall<DefinitionInput>(async (request) => {
   }
   const company = await db.collection('organizations').doc(organizationId).collection('companies').doc(companyId).get();
   if (!company.exists) throw new HttpsError('not-found', 'Empresa não encontrada nesta organização.');
-  const catalog = catalogForRole(member.roleName as string);
-  validateSelection(dimensions, metrics, catalog);
-  const period = parsePeriod(request.data?.filters);
-  const source = sourceFor(dimensions);
-  const loadPeriod = async (month: string): Promise<DocumentData[]> => {
-    let query: Query = db.collection('organizations').doc(organizationId).collection(AGGREGATE_COLLECTION_BY_DIMENSION[source]).where('companyId', '==', companyId);
-    query = source === 'salesDaily'
-      ? query.where('periodKey', '>=', `${month}-01`).where('periodKey', '<=', `${month}-31`).orderBy('periodKey')
-      : query.where('periodKey', '==', month);
-    if (member.roleName === 'SALES_REP') query = query.where('scopeId', '==', request.auth!.uid);
-    const snapshots = (await query.limit(500).get()).docs.map((doc) => doc.data());
-    return member.roleName === 'SALES_MANAGER'
-      ? snapshots.filter((row) => Array.isArray(member.teamIds) && member.teamIds.includes(row.labels?.teamId))
-      : snapshots;
-  };
-  let rows = aggregateRows(await loadPeriod(period), dimensions, metrics);
-  const comparison = parseComparison(request.data?.comparisonPeriod);
-  let columns = [...dimensions, ...metrics];
-  if (comparison !== 'none') {
-    const comparisonRows = aggregateRows(await loadPeriod(comparisonMonth(period, comparison)), dimensions, metrics);
-    rows = mergeComparison(rows, comparisonRows, dimensions, metrics);
-    columns = [...columns, ...metrics.flatMap((metric) => [`${metric}Comparison`, `${metric}ChangePercent`])];
-  }
-  const sort = request.data?.sortBy as { fieldId?: unknown; direction?: unknown } | undefined;
-  if (sort && typeof sort.fieldId === 'string') rows = sortRows(rows, sort.fieldId, sort.direction === 'descending');
+  const { columns, rows } = await runReportAggregation({
+    db,
+    organizationId,
+    companyId,
+    member: member as ReportAggregationMember,
+    authUid: request.auth.uid,
+    data: request.data,
+  });
   return { columns, rows, generatedAt: Timestamp.now().toDate().toISOString() };
 });
 

@@ -47,3 +47,10 @@ final class ReportExecutionRequested extends ReportBuilderEvent {
 final class ReportBuilderRetried extends ReportBuilderEvent {
   const ReportBuilderRetried();
 }
+
+/// Requests exporting `ReportBuilderState.preview` to CSV (TASK-146) — a
+/// no-op unless a preview is already loaded (`ReportExecutionRequested` must
+/// have already succeeded).
+final class ReportExportRequested extends ReportBuilderEvent {
+  const ReportExportRequested();
+}

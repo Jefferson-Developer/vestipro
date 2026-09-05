@@ -290,6 +290,49 @@ describe('organizations/{organizationId}/users/{userId}/avatar', () => {
   });
 });
 
+describe('organizations/{organizationId}/exports/{userId}/{fileName} (TASK-146)', () => {
+  const csvBytes = new Uint8Array([0xef, 0xbb, 0xbf, 0x61, 0x3b, 0x62]);
+
+  test('usuário consegue ler o próprio CSV de exportação já gerado pela Cloud Function', async () => {
+    const path = `organizations/${ORG_A}/exports/manager-a/report_org-a_20260904-120000.csv`;
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/members/manager-a`)
+        .set(membershipDoc({ organizationId: ORG_A, userId: 'manager-a', roleName: 'SALES_MANAGER' }));
+    });
+    await seedFile(path, csvBytes, 'text/csv');
+    const storage = testEnv.authenticatedContext('manager-a').storage();
+    await assertSucceeds(getBytes(ref(storage, path)));
+  });
+
+  test('SALES_REP (sem report.export) não consegue ler CSV de exportação, nem o próprio', async () => {
+    const path = `organizations/${ORG_A}/exports/rep-a/report_org-a_20260904-120000.csv`;
+    await seedFile(path, csvBytes, 'text/csv');
+    const storage = testEnv.authenticatedContext('rep-a').storage();
+    await assertFails(getBytes(ref(storage, path)));
+  });
+
+  test('usuário não consegue ler CSV de exportação gerado para outro usuário da mesma organização', async () => {
+    const path = `organizations/${ORG_A}/exports/owner-a/report_org-a_20260904-120000.csv`;
+    await seedFile(path, csvBytes, 'text/csv');
+    const storage = testEnv.authenticatedContext('assistant-a').storage();
+    await assertFails(getBytes(ref(storage, path)));
+  });
+
+  test('membro de outra organização não consegue ler CSV de exportação (cross-tenant)', async () => {
+    const path = `organizations/${ORG_A}/exports/owner-a/report_org-a_20260904-120000.csv`;
+    await seedFile(path, csvBytes, 'text/csv');
+    const storage = testEnv.authenticatedContext('owner-b').storage();
+    await assertFails(getBytes(ref(storage, path)));
+  });
+
+  test('nenhum cliente consegue escrever diretamente em um export (somente a Cloud Function via Admin SDK)', async () => {
+    const path = `organizations/${ORG_A}/exports/owner-a/report_org-a_20260904-120000.csv`;
+    await assertFails(upload('owner-a', path, csvBytes, 'text/csv'));
+  });
+});
+
 describe('deny by default', () => {
   test('path de mídia ainda não modelado nas rules é sempre negado', async () => {
     await assertFails(

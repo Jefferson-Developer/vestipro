@@ -185,6 +185,29 @@ service firebase.storage {
     }
 
     // -------------------------------------------------------------------
+    // organizations/{organizationId}/exports/{userId}/{fileName}
+    // (TASK-146: large-volume CSV export delivered by `exportReportToCsv`)
+    // -------------------------------------------------------------------
+
+    // The Cloud Function itself writes here through the Admin SDK, which
+    // bypasses these Rules entirely — `allow write: if false` below is pure
+    // defense-in-depth, so no client SDK can ever create/overwrite/delete an
+    // export object directly. Reads are restricted to the exact user the
+    // export was generated for (`userId == request.auth.uid`), holding the
+    // same `report.export` capability the callable itself re-checks
+    // (`assertCanExportReports`, `export-report-to-csv.ts`) — this branch is
+    // only ever exercised by a client following its own signed
+    // `getSignedUrl` link, or by a direct Firebase Storage SDK read attempt,
+    // never by an anonymous public URL.
+    match /organizations/{organizationId}/exports/{userId}/{fileName} {
+      allow read: if isActiveMember(organizationId)
+        && userId == request.auth.uid
+        && hasCapability(organizationId, 'report.export');
+
+      allow write: if false;
+    }
+
+    // -------------------------------------------------------------------
     // Deny by default: qualquer outro path (produto/pedido/avatar de outra
     // organização, ou qualquer path futuro ainda não modelado aqui).
     // -------------------------------------------------------------------
