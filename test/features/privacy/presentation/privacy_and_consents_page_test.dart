@@ -58,9 +58,46 @@ Widget _app(_FakeConsentRepository repository) => MaterialApp(
       organizationId: 'org-a',
       userId: 'user-a',
     ),
+    createExportCubit: () {
+      final exportRepository = _FakePersonalDataExportRepository();
+      return PersonalDataExportCubit(
+        repository: exportRepository,
+        requestExport: RequestPersonalDataExport(exportRepository),
+        getDownload: GetPersonalDataExportDownload(exportRepository),
+        organizationId: 'org-a',
+        userId: 'user-a',
+      );
+    },
     onPolicyDocumentsTap: () {},
   ),
 );
+
+final class _FakePersonalDataExportRepository
+    implements PersonalDataExportRepository {
+  @override
+  Future<AppResult<PersonalDataExportDownload>> createDownloadLink({
+    required String exportId,
+  }) async => AppSuccess<PersonalDataExportDownload>(
+    PersonalDataExportDownload(
+      url: Uri.parse('https://example.test/export'),
+      fileName: 'dados.json',
+      expiresAt: DateTime.now().add(const Duration(minutes: 15)),
+    ),
+  );
+
+  @override
+  Future<AppResult<String>> requestExport({
+    required String organizationId,
+  }) async => const AppSuccess<String>('export-1');
+
+  @override
+  Stream<AppResult<List<PersonalDataExport>>> watchExports({
+    required String organizationId,
+    required String userId,
+  }) => Stream<AppResult<List<PersonalDataExport>>>.value(
+    const AppSuccess<List<PersonalDataExport>>(<PersonalDataExport>[]),
+  );
+}
 
 final class _FakeConsentRepository implements ConsentRepository {
   final records = <ConsentRecord>[];

@@ -340,3 +340,26 @@ describe('deny by default', () => {
     );
   });
 });
+
+describe('personal-data-exports/{userId}/{fileName} (TASK-158)', () => {
+  const exportPath = 'personal-data-exports/rep-a/dados.json';
+  const jsonBytes = new TextEncoder().encode('{"subjectUserId":"rep-a"}');
+
+  beforeEach(async () => {
+    await seedFile(exportPath, jsonBytes, 'application/json');
+  });
+
+  test('somente o titular autenticado lê seu pacote', async () => {
+    const ownerStorage = testEnv.authenticatedContext('rep-a').storage();
+    await assertSucceeds(getBytes(ref(ownerStorage, exportPath)));
+
+    const otherStorage = testEnv.authenticatedContext('owner-a').storage();
+    await assertFails(getBytes(ref(otherStorage, exportPath)));
+  });
+
+  test('usuário anônimo não lê e cliente não sobrescreve o pacote', async () => {
+    const anonymousStorage = testEnv.unauthenticatedContext().storage();
+    await assertFails(getBytes(ref(anonymousStorage, exportPath)));
+    await assertFails(upload('rep-a', exportPath, jsonBytes, 'application/json'));
+  });
+});

@@ -670,6 +670,15 @@ service cloud.firestore {
           && request.resource.data.recordedAt == request.time;
         allow update, delete: if false;
       }
+
+      // Server-created personal-data portability requests (TASK-158).
+      // The owner can observe status, but every mutation remains backend-only.
+      match /personalDataExports/{exportId} {
+        allow get, list: if isSignedIn()
+          && request.auth.uid == userId
+          && resource.data.userId == userId;
+        allow create, update, delete: if false;
+      }
     }
 
     // Published legal documents are readable before authentication so the

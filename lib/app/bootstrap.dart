@@ -19,6 +19,7 @@ import '../core/design_system/design_system.dart';
 import '../core/environment/app_environment.dart';
 import '../core/errors/errors.dart';
 import '../core/feature_flags/feature_flags.dart';
+import '../core/functions/functions.dart';
 import '../core/navigation/navigation.dart';
 import '../core/notifications/notifications.dart';
 import '../core/permissions/permissions.dart';
@@ -366,11 +367,22 @@ class VestiProApp extends StatelessWidget {
             final repository = FirestoreConsentRepository(
               getIt<FirebaseFirestore>(),
             );
+            final exportRepository = FirestorePersonalDataExportRepository(
+              getIt<FirebaseFirestore>(),
+              getIt<CloudFunctionsService>(),
+            );
             return PrivacyAndConsentsPage(
               createCubit: () => ConsentManagementCubit(
                 repository: repository,
                 grantConsent: GrantConsent(repository),
                 revokeConsent: RevokeConsent(repository),
+                organizationId: orgId,
+                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+              ),
+              createExportCubit: () => PersonalDataExportCubit(
+                repository: exportRepository,
+                requestExport: RequestPersonalDataExport(exportRepository),
+                getDownload: GetPersonalDataExportDownload(exportRepository),
                 organizationId: orgId,
                 userId: getIt<AuthRepository>().currentUser?.uid ?? '',
               ),

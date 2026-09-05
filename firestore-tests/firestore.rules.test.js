@@ -2190,3 +2190,38 @@ describe('organizations/{organizationId}/reportScheduleDeliveries/{deliveryId}  
     );
   });
 });
+
+describe('users/{userId}/personalDataExports/{exportId} (TASK-158)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().doc('users/rep-a/personalDataExports/export-1').set({
+        organizationId: ORG_A,
+        userId: 'rep-a',
+        status: 'ready',
+        requestedAt: now(),
+        expiresAt: now(),
+      });
+    });
+  });
+
+  test('titular autenticado acompanha o próprio status', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc('users/rep-a/personalDataExports/export-1').get());
+  });
+
+  test('outro usuário não lê a solicitação do titular', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc('users/rep-a/personalDataExports/export-1').get());
+  });
+
+  test('cliente nunca cria nem altera status de exportação', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc('users/rep-a/personalDataExports/export-2').set({
+      organizationId: ORG_A,
+      userId: 'rep-a',
+      status: 'ready',
+      requestedAt: now(),
+    }));
+    await assertFails(db.doc('users/rep-a/personalDataExports/export-1').update({ status: 'processing' }));
+  });
+});
