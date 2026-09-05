@@ -13,6 +13,7 @@
 
 const fs = require('fs');
 const path = require('path');
+const { serverTimestamp } = require('firebase/firestore');
 const {
   initializeTestEnvironment,
   assertSucceeds,
@@ -669,6 +670,42 @@ describe('users/{userId}  (basic profile — TASK-035)', () => {
 
     const db = testEnv.authenticatedContext('owner-a').firestore();
     await assertFails(db.doc('users/owner-a').update({ name: 'Novo Nome' }));
+  });
+});
+
+describe('policyDocuments e users/{userId}/policyAcceptances (TASK-156)', () => {
+  test('documento publicado pode ser lido sem autenticação', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().doc('policyDocuments/privacy_policy_1').set({
+        type: 'privacy_policy', version: '1', content: 'Política',
+        publishedAt: now(), published: true,
+      });
+    });
+    const db = testEnv.unauthenticatedContext().firestore();
+    await assertSucceeds(db.doc('policyDocuments/privacy_policy_1').get());
+  });
+
+  test('usuário registra apenas o próprio aceite completo e imutável', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    const ref = db.doc('users/owner-a/policyAcceptances/privacy_policy_1');
+    await assertSucceeds(ref.set({
+      userId: 'owner-a', type: 'privacy_policy', version: '1',
+      acceptedAt: serverTimestamp(),
+      device: 'web',
+    }));
+    await assertFails(ref.update({ device: 'android' }));
+    await assertFails(ref.delete());
+  });
+
+  test('aceite de outro usuário e id divergente são negados', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    const payload = {
+      userId: 'owner-b', type: 'terms_of_use', version: '2',
+      acceptedAt: serverTimestamp(),
+      device: null,
+    };
+    await assertFails(db.doc('users/owner-b/policyAcceptances/terms_of_use_2').set(payload));
+    await assertFails(db.doc('users/owner-a/policyAcceptances/wrong').set({ ...payload, userId: 'owner-a' }));
   });
 });
 

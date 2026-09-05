@@ -13,6 +13,7 @@ class AboutAppPage extends StatelessWidget {
   const AboutAppPage({
     required this.createBloc,
     this.showInsightsShortcut = false,
+    this.onPrivacyTap,
     super.key,
   });
 
@@ -25,20 +26,29 @@ class AboutAppPage extends StatelessWidget {
   /// here — this widget never reads the flag itself, it only renders what
   /// it is told, same as every other constructor parameter.
   final bool showInsightsShortcut;
+  final VoidCallback? onPrivacyTap;
 
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AboutAppBloc>(
       create: (_) => createBloc()..add(const AboutAppEvent.started()),
-      child: AboutAppView(showInsightsShortcut: showInsightsShortcut),
+      child: AboutAppView(
+        showInsightsShortcut: showInsightsShortcut,
+        onPrivacyTap: onPrivacyTap,
+      ),
     );
   }
 }
 
 class AboutAppView extends StatelessWidget {
-  const AboutAppView({this.showInsightsShortcut = false, super.key});
+  const AboutAppView({
+    this.showInsightsShortcut = false,
+    this.onPrivacyTap,
+    super.key,
+  });
 
   final bool showInsightsShortcut;
+  final VoidCallback? onPrivacyTap;
 
   @override
   Widget build(BuildContext context) {
@@ -49,6 +59,7 @@ class AboutAppView extends StatelessWidget {
             appBar: _AboutAppBar(
               title: 'Sobre o app',
               showInsightsShortcut: showInsightsShortcut,
+              onPrivacyTap: onPrivacyTap,
             ),
             body: const Center(child: CircularProgressIndicator()),
           ),
@@ -66,6 +77,7 @@ class AboutAppView extends StatelessWidget {
               appBar: _AboutAppBar(
                 title: aboutApp.name,
                 showInsightsShortcut: showInsightsShortcut,
+                onPrivacyTap: onPrivacyTap,
               ),
               body: AboutAppContent(
                 aboutApp: aboutApp,
@@ -91,6 +103,7 @@ class AboutAppView extends StatelessWidget {
             appBar: _AboutAppBar(
               title: 'Sobre o app',
               showInsightsShortcut: showInsightsShortcut,
+              onPrivacyTap: onPrivacyTap,
             ),
             body: AboutAppErrorView(
               message: failure.message,
@@ -106,10 +119,15 @@ class AboutAppView extends StatelessWidget {
 }
 
 class _AboutAppBar extends StatelessWidget implements PreferredSizeWidget {
-  const _AboutAppBar({required this.title, this.showInsightsShortcut = false});
+  const _AboutAppBar({
+    required this.title,
+    this.showInsightsShortcut = false,
+    this.onPrivacyTap,
+  });
 
   final String title;
   final bool showInsightsShortcut;
+  final VoidCallback? onPrivacyTap;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -119,6 +137,12 @@ class _AboutAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(title),
       actions: [
+        if (onPrivacyTap != null)
+          IconButton(
+            icon: const Icon(Icons.policy_outlined),
+            tooltip: 'Privacidade e termos',
+            onPressed: onPrivacyTap,
+          ),
         if (showInsightsShortcut) const _InsightsShortcutButton(),
         if (kDebugMode) const _CrashlyticsTestCrashButton(),
       ],

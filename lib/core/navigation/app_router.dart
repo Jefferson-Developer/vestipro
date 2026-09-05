@@ -6,6 +6,7 @@ import 'active_organization_guard.dart';
 import 'app_route_paths.dart';
 import 'auth_guard.dart';
 import 'authorization_guard.dart';
+import 'policy_acceptance_guard.dart';
 import 'widgets/forbidden_page.dart';
 import 'widgets/not_found_page.dart';
 
@@ -24,6 +25,8 @@ class AppRouter {
     required this.userManagementPageBuilder,
     this.notificationCenterPageBuilder,
     this.communicationPreferencesPageBuilder,
+    this.policyDocumentsPageBuilder,
+    this.policyAcceptancePageBuilder,
     this.targetDashboardPageBuilder,
     required this.loginPageBuilder,
     required this.signUpPageBuilder,
@@ -62,15 +65,19 @@ class AppRouter {
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
     AuthorizationGuard? authorizationGuard,
+    PolicyAcceptanceGuard? policyAcceptanceGuard,
   }) : authGuard = authGuard ?? const AlwaysAllowAuthGuard(),
        organizationGuard =
            organizationGuard ?? const AlwaysAllowActiveOrganizationGuard(),
        authorizationGuard =
-           authorizationGuard ?? const AlwaysAllowAuthorizationGuard();
+           authorizationGuard ?? const AlwaysAllowAuthorizationGuard(),
+       policyAcceptanceGuard =
+           policyAcceptanceGuard ?? const AlwaysAllowPolicyAcceptanceGuard();
 
   final AuthGuard authGuard;
   final ActiveOrganizationGuard organizationGuard;
   final AuthorizationGuard authorizationGuard;
+  final PolicyAcceptanceGuard policyAcceptanceGuard;
   final Widget Function(BuildContext context, String orgId) aboutAppPageBuilder;
   final Widget Function(BuildContext context, String orgId, String? companyId)
   catalogHomePageBuilder;
@@ -90,6 +97,9 @@ class AppRouter {
   /// [notificationCenterPageBuilder].
   final Widget Function(BuildContext context, String orgId)?
   communicationPreferencesPageBuilder;
+  final WidgetBuilder? policyDocumentsPageBuilder;
+  final Widget Function(BuildContext context, String? returnTo)?
+  policyAcceptancePageBuilder;
   final Widget Function(
     BuildContext context,
     String orgId,
@@ -443,6 +453,14 @@ class AppRouter {
           final builder = communicationPreferencesPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(context, state.pathParameters['orgId']!);
+        },
+      ),
+      GoRoute(
+        path: PrivacySettingsRoute.pathPattern,
+        name: PrivacySettingsRoute.name,
+        builder: (context, state) {
+          final builder = policyDocumentsPageBuilder;
+          return builder == null ? const NotFoundPage() : builder(context);
         },
       ),
       GoRoute(
@@ -942,6 +960,24 @@ class AppRouter {
         builder: (context, state) => loginPageBuilder(context),
       ),
       GoRoute(
+        path: TermsOfServiceRoute.pathPattern,
+        name: TermsOfServiceRoute.name,
+        builder: (context, state) {
+          final builder = policyDocumentsPageBuilder;
+          return builder == null ? const NotFoundPage() : builder(context);
+        },
+      ),
+      GoRoute(
+        path: PolicyAcceptanceRoute.pathPattern,
+        name: PolicyAcceptanceRoute.name,
+        builder: (context, state) {
+          final builder = policyAcceptancePageBuilder;
+          return builder == null
+              ? const NotFoundPage()
+              : builder(context, state.uri.queryParameters['returnTo']);
+        },
+      ),
+      GoRoute(
         path: SignUpRoute.pathPattern,
         name: SignUpRoute.name,
         builder: (context, state) => signUpPageBuilder(context),
@@ -982,6 +1018,10 @@ class AppRouter {
   Future<String?> _redirect(BuildContext context, GoRouterState state) async {
     final authRedirect = await authGuard.redirect(context, state);
     if (authRedirect != null) return authRedirect;
+    if (!context.mounted) return null;
+
+    final policyRedirect = await policyAcceptanceGuard.redirect(context, state);
+    if (policyRedirect != null) return policyRedirect;
     if (!context.mounted) return null;
 
     return organizationGuard.redirect(context, state);

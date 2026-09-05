@@ -97,6 +97,30 @@ void main() {
       expect(find.text('Sem permissão'), findsNothing);
     });
 
+    testWidgets('policy guard blocks app routes and preserves returnTo', (
+      tester,
+    ) async {
+      String? capturedReturnTo;
+      final appRouter = _buildRouter(
+        policyAcceptanceGuard: const _RequirePolicyAcceptanceGuard(),
+        policyAcceptancePageBuilder: (context, returnTo) {
+          capturedReturnTo = returnTo;
+          return const Scaffold(body: Text('policy-acceptance'));
+        },
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      const destination = AboutAppRoute(orgId: 'acme');
+      appRouter.router.go(destination.location);
+      await tester.pumpAndSettle();
+
+      expect(find.text('policy-acceptance'), findsOneWidget);
+      expect(find.text('about-app:acme'), findsNothing);
+      expect(capturedReturnTo, destination.location);
+    });
+
     testWidgets('renders the injected login page at LoginRoute (TASK-034)', (
       tester,
     ) async {
@@ -455,6 +479,7 @@ AppRouter _buildRouter({
   AuthGuard? authGuard,
   ActiveOrganizationGuard? organizationGuard,
   AuthorizationGuard? authorizationGuard,
+  PolicyAcceptanceGuard? policyAcceptanceGuard,
   Widget Function(BuildContext context, String orgId)? aboutAppPageBuilder,
   Widget Function(BuildContext context, String orgId, String? companyId)?
   catalogHomePageBuilder,
@@ -481,6 +506,8 @@ AppRouter _buildRouter({
   )?
   catalogBrowsePageBuilder,
   WidgetBuilder? loginPageBuilder,
+  Widget Function(BuildContext context, String? returnTo)?
+  policyAcceptancePageBuilder,
   Widget Function(BuildContext context, String token)? acceptInvitePageBuilder,
   Widget Function(BuildContext context, String token)?
   catalogSharePublicPageBuilder,
@@ -489,6 +516,8 @@ AppRouter _buildRouter({
     authGuard: authGuard,
     organizationGuard: organizationGuard,
     authorizationGuard: authorizationGuard,
+    policyAcceptanceGuard: policyAcceptanceGuard,
+    policyAcceptancePageBuilder: policyAcceptancePageBuilder,
     aboutAppPageBuilder:
         aboutAppPageBuilder ??
         (context, orgId) => Scaffold(body: Text('about-app:$orgId')),
@@ -521,6 +550,19 @@ AppRouter _buildRouter({
         catalogSharePublicPageBuilder ??
         (context, token) => Scaffold(body: Text('catalog-share-public:$token')),
   );
+}
+
+final class _RequirePolicyAcceptanceGuard implements PolicyAcceptanceGuard {
+  const _RequirePolicyAcceptanceGuard();
+
+  @override
+  String? redirect(BuildContext context, GoRouterState state) {
+    if (state.uri.path == PolicyAcceptanceRoute.pathPattern) return null;
+    if (state.uri.path.startsWith('/org/')) {
+      return PolicyAcceptanceRoute(returnTo: state.uri.toString()).location;
+    }
+    return null;
+  }
 }
 
 final class _DenyOrgRoutesGuard implements AuthGuard {

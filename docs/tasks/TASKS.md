@@ -278,7 +278,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-155 — Implementar quiet hours](TASK-155-implementar-quiet-hours.md) — Flutter Senior + Front-end
 
 ### EPIC-20 — LGPD e Privacidade
-- [ ] [TASK-156 — Implementar política de privacidade e termos](TASK-156-implementar-politica-de-privacidade.md) — Flutter Senior + Front-end
+- [x] [TASK-156 — Implementar política de privacidade e termos](TASK-156-implementar-politica-de-privacidade.md) — Flutter Senior + Front-end
 - [ ] [TASK-157 — Implementar gestão de consentimentos](TASK-157-implementar-gestao-de-consentimentos.md) — Flutter Senior + Front-end
 - [ ] [TASK-158 — Implementar exportação de dados pessoais](TASK-158-implementar-exportacao-de-dados-pessoais.md) — Flutter Senior + Front-end
 - [ ] [TASK-159 — Implementar exclusão de conta e dados](TASK-159-implementar-exclusao-de-conta-e-dados.md) — Flutter Senior + Front-end
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 155 / 220 tasks concluídas.
+**Progresso:** 156 / 220 tasks concluídas.

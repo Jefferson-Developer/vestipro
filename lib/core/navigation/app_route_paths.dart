@@ -949,6 +949,35 @@ final class TermsOfServiceRoute extends AppRoute {
   String get location => pathPattern;
 }
 
+/// Blocking route used when at least one current legal document has not yet
+/// been explicitly accepted by the signed-in user.
+final class PolicyAcceptanceRoute extends AppRoute {
+  const PolicyAcceptanceRoute({this.returnTo});
+
+  final String? returnTo;
+  static const name = 'policyAcceptance';
+  static const pathPattern = '/policy-acceptance';
+
+  @override
+  String get location => Uri(
+    path: pathPattern,
+    queryParameters: returnTo == null
+        ? null
+        : <String, String>{'returnTo': returnTo!},
+  ).toString();
+}
+
+/// Authenticated settings/profile access to the same current documents.
+final class PrivacySettingsRoute extends AppRoute {
+  const PrivacySettingsRoute({required this.orgId});
+  final String orgId;
+  static const name = 'privacySettings';
+  static const pathPattern = '/org/:orgId/settings/privacy';
+
+  @override
+  String get location => '/org/$orgId/settings/privacy';
+}
+
 /// Route reached via the deep link/token sent by e-mail when someone is
 /// invited to join an Organization (TASK-040, consuming the `Invite`
 /// created by TASK-039's `createInvite`).

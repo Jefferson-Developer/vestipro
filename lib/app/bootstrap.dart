@@ -3,8 +3,10 @@ import 'dart:developer' as developer;
 import 'dart:ui' show PlatformDispatcher;
 
 import 'package:firebase_core/firebase_core.dart';
+import 'package:cloud_firestore/cloud_firestore.dart' hide Order;
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart' show defaultTargetPlatform;
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_web_plugins/url_strategy.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +39,7 @@ import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import '../features/orders/orders.dart';
 import '../features/organizations/organizations.dart';
 import '../features/products/products.dart';
+import '../features/privacy/privacy.dart';
 import '../features/reports/reports.dart';
 import '../core/sync/sync.dart';
 import '../features/settings/presentation/bloc/about_app_bloc.dart';
@@ -267,6 +270,17 @@ Future<void> _registerPushDeviceForUser(
   );
 }
 
+PolicyAcceptanceCubit _createPolicyAcceptanceCubit({required String userId}) {
+  final repository = FirestorePolicyRepository(getIt<FirebaseFirestore>());
+  return PolicyAcceptanceCubit(
+    evaluate: EvaluatePolicyAcceptanceUseCase(repository),
+    acceptCurrent: AcceptCurrentPoliciesUseCase(repository),
+    getDocuments: GetCurrentPolicyDocumentsUseCase(repository),
+    userId: userId,
+    device: defaultTargetPlatform.name,
+  );
+}
+
 class VestiProApp extends StatelessWidget {
   const VestiProApp({required this.environment, this.router, super.key});
 
@@ -288,9 +302,17 @@ class VestiProApp extends StatelessWidget {
           authGuard: SessionAuthGuard(getIt<SessionService>()),
           organizationGuard: const _LazyActiveOrganizationGuard(),
           authorizationGuard: const _LazyPermissionAuthorizationGuard(),
+          policyAcceptanceGuard: CurrentPolicyAcceptanceGuard(
+            getIt<AuthRepository>(),
+            EvaluatePolicyAcceptanceUseCase(
+              FirestorePolicyRepository(getIt<FirebaseFirestore>()),
+            ),
+          ),
           aboutAppPageBuilder: (context, orgId) => AboutAppPage(
             createBloc: () => getIt<AboutAppBloc>(),
             showInsightsShortcut: _resolveShowInsightsShortcut(),
+            onPrivacyTap: () =>
+                context.go(PrivacySettingsRoute(orgId: orgId).location),
           ),
           catalogHomePageBuilder: (context, orgId, companyId) =>
               _withConnectivityIndicator(
@@ -339,6 +361,26 @@ class VestiProApp extends StatelessWidget {
                 organizationId: orgId,
                 userId: getIt<AuthRepository>().currentUser?.uid ?? '',
                 createCubit: () => getIt<CommunicationPreferencesCubit>(),
+              ),
+          policyDocumentsPageBuilder: (context) => PolicyDocumentsPage(
+            requireAcceptance: false,
+            createCubit: () => _createPolicyAcceptanceCubit(userId: ''),
+          ),
+          policyAcceptancePageBuilder: (context, returnTo) =>
+              PolicyDocumentsPage(
+                requireAcceptance: true,
+                createCubit: () => _createPolicyAcceptanceCubit(
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                ),
+                onAccepted: () {
+                  final destination =
+                      returnTo != null && returnTo.startsWith('/')
+                      ? returnTo
+                      : const CatalogHomeRoute(
+                          orgId: kPlaceholderOrganizationId,
+                        ).location;
+                  context.go(destination);
+                },
               ),
           targetDashboardPageBuilder:
               (context, orgId, companyId, queryParameters) =>

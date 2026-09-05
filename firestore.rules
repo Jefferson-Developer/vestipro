@@ -630,6 +630,34 @@ service cloud.firestore {
 
       allow update: if false;
       allow delete: if false;
+
+      // Immutable, user-scoped compliance trail (TASK-156). Each document
+      // id includes type + version, so publishing a new version creates a
+      // distinct record and no historical acceptance can be overwritten.
+      match /policyAcceptances/{acceptanceId} {
+        allow get, list: if isSignedIn() && request.auth.uid == userId;
+        allow create: if isSignedIn()
+          && request.auth.uid == userId
+          && request.resource.data.keys().hasOnly([
+            'userId', 'type', 'version', 'acceptedAt', 'device'
+          ])
+          && request.resource.data.userId == userId
+          && request.resource.data.type in ['privacy_policy', 'terms_of_use']
+          && request.resource.data.version is string
+          && request.resource.data.version.size() > 0
+          && acceptanceId == request.resource.data.type + '_' + request.resource.data.version
+          && request.resource.data.acceptedAt == request.time
+          && (request.resource.data.device == null || request.resource.data.device is string);
+        allow update, delete: if false;
+      }
+    }
+
+    // Published legal documents are readable before authentication so the
+    // sign-up checkbox can always open their full content. Publishing is a
+    // controlled backend/admin operation; clients can never mutate history.
+    match /policyDocuments/{documentId} {
+      allow get, list: if resource.data.published == true;
+      allow create, update, delete: if false;
     }
 
     // ---------------------------------------------------------------------
