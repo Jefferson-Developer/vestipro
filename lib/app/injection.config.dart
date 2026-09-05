@@ -1064,6 +1064,20 @@ import '../features/products/presentation/bloc/season_form_bloc.dart' as _i98;
 import '../features/products/presentation/bloc/season_list_bloc.dart' as _i986;
 import '../features/products/presentation/bloc/size_grid_template_bloc.dart'
     as _i415;
+import '../features/reports/data/datasources/cloud_functions_report_remote_data_source.dart'
+    as _i712;
+import '../features/reports/data/datasources/report_remote_data_source.dart'
+    as _i922;
+import '../features/reports/data/repositories/report_repository_impl.dart'
+    as _i593;
+import '../features/reports/data/repositories/shared_preferences_report_draft_repository.dart'
+    as _i940;
+import '../features/reports/domain/repositories/report_repository.dart' as _i22;
+import '../features/reports/domain/usecases/report_use_cases.dart' as _i565;
+import '../features/reports/domain/usecases/validate_report_definition.dart'
+    as _i908;
+import '../features/reports/presentation/bloc/report_builder_bloc.dart'
+    as _i822;
 import '../features/settings/data/datasources/about_app_data_source.dart'
     as _i364;
 import '../features/settings/data/datasources/in_memory_about_app_datasource.dart'
@@ -1216,6 +1230,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i162.PaymentTermLocalMapper>(
       () => const _i162.PaymentTermLocalMapper(),
+    );
+    gh.factory<_i908.ValidateReportDefinition>(
+      () => const _i908.ValidateReportDefinition(),
     );
     gh.factory<_i444.RankingCalculationService>(
       () => const _i444.RankingCalculationService(),
@@ -1433,6 +1450,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i841.CatalogHomeCacheRepository>(
       () => const _i26.SharedPreferencesCatalogHomeCacheRepository(),
+    );
+    gh.lazySingleton<_i22.ReportDraftRepository>(
+      () => const _i940.SharedPreferencesReportDraftRepository(),
     );
     gh.lazySingleton<_i31.DiscountPolicyRepository>(
       () => const _i684.SharedPreferencesDiscountPolicyRepository(),
@@ -2689,6 +2709,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i409.ValidateInviteUseCase>(
       () => _i409.ValidateInviteUseCase(gh<_i999.InviteAcceptanceRepository>()),
     );
+    gh.lazySingleton<_i922.ReportRemoteDataSource>(
+      () => _i712.CloudFunctionsReportRemoteDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i75.InviteRepository>(
       () => _i90.InviteRepositoryImpl(
         dataSource: gh<_i814.InviteDataSource>(),
@@ -3146,6 +3171,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i68.EnsureSystemRolesUseCase>(
       () => _i68.EnsureSystemRolesUseCase(gh<_i440.RoleRepository>()),
     );
+    gh.lazySingleton<_i22.ReportRepository>(
+      () => _i593.ReportRepositoryImpl(gh<_i922.ReportRemoteDataSource>()),
+    );
+    gh.factory<_i565.LoadReportCatalog>(
+      () => _i565.LoadReportCatalog(gh<_i22.ReportRepository>()),
+    );
     gh.factory<_i461.CreateInviteUseCase>(
       () => _i461.CreateInviteUseCase(gh<_i75.InviteRepository>()),
     );
@@ -3511,6 +3542,21 @@ extension GetItInjectableX on _i174.GetIt {
         createCatalogShareLink: gh<_i990.CreateCatalogShareLinkUseCase>(),
         getCatalogShare: gh<_i795.GetCatalogShareUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i565.ExecuteReportQuery>(
+      () => _i565.ExecuteReportQuery(
+        gh<_i22.ReportRepository>(),
+        gh<_i908.ValidateReportDefinition>(),
+      ),
+    );
+    gh.factory<_i822.ReportBuilderBloc>(
+      () => _i822.ReportBuilderBloc(
+        gh<_i565.LoadReportCatalog>(),
+        gh<_i565.ExecuteReportQuery>(),
+        gh<_i908.ValidateReportDefinition>(),
+        gh<_i22.ReportDraftRepository>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i433.AssignPortfolioBloc>(

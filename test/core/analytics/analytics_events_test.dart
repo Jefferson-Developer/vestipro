@@ -28,6 +28,8 @@ void main() {
           'insight_opened',
           'insight_action_clicked',
           'report_exported',
+          'report_built',
+          'report_query_executed',
           'offline_pack_downloaded',
           'product_added_to_order',
           'password_reset_requested',

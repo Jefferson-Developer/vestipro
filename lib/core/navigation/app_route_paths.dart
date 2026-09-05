@@ -548,6 +548,22 @@ final class GeographicDashboardRoute extends AppRoute {
   ).toString();
 }
 
+/// Ad-hoc report builder (TASK-144). Authorization is field- and scope-aware
+/// and therefore happens in the report backend; the route only carries the
+/// immutable tenant/company scope used for that server-side decision.
+final class ReportBuilderRoute extends AppRoute {
+  const ReportBuilderRoute({required this.orgId, required this.companyId});
+
+  final String orgId;
+  final String companyId;
+
+  static const name = 'reportBuilder';
+  static const pathPattern = '/org/:orgId/companies/:companyId/reports/builder';
+
+  @override
+  String get location => '/org/$orgId/companies/$companyId/reports/builder';
+}
+
 /// Standalone, read-only product detail route (TASK-078's `ProductDetailPage`
 /// reused outside the order draft flow), scoped by Organization only —
 /// `Product.companyId` itself is optional (TASK-064), so this route never

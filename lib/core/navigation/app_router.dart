@@ -54,6 +54,7 @@ class AppRouter {
     this.funnelDashboardPageBuilder,
     this.targetsDashboardPageBuilder,
     this.geographicDashboardPageBuilder,
+    this.reportBuilderPageBuilder,
     this.productDetailPageBuilder,
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
@@ -296,6 +297,9 @@ class AppRouter {
     Map<String, String> queryParameters,
   )?
   geographicDashboardPageBuilder;
+
+  final Widget Function(BuildContext context, String orgId, String companyId)?
+  reportBuilderPageBuilder;
 
   /// Builds the standalone, read-only product detail screen (TASK-078 reused
   /// outside the order draft flow), given `orgId`/`productId` from
@@ -628,6 +632,19 @@ class AppRouter {
             state.pathParameters['orgId']!,
             state.pathParameters['companyId']!,
             state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: ReportBuilderRoute.pathPattern,
+        name: ReportBuilderRoute.name,
+        builder: (context, state) {
+          final builder = reportBuilderPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
           );
         },
       ),

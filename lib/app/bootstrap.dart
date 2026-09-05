@@ -35,6 +35,7 @@ import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import '../features/orders/orders.dart';
 import '../features/organizations/organizations.dart';
 import '../features/products/products.dart';
+import '../features/reports/reports.dart';
 import '../core/sync/sync.dart';
 import '../features/settings/presentation/bloc/about_app_bloc.dart';
 import '../features/settings/settings.dart';
@@ -573,6 +574,17 @@ class VestiProApp extends StatelessWidget {
                       ),
                     ),
                   ),
+          reportBuilderPageBuilder: (context, orgId, companyId) =>
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId: companyId,
+                child: ReportBuilderPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  createBloc: () => getIt<ReportBuilderBloc>(),
+                ),
+              ),
           productDetailPageBuilder: (context, orgId, productId) =>
               ProductDetailPage(
                 organizationId: orgId,

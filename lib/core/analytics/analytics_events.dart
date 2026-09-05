@@ -37,6 +37,8 @@ final class AnalyticsEvents {
   static const String insightOpened = 'insight_opened';
   static const String insightActionClicked = 'insight_action_clicked';
   static const String reportExported = 'report_exported';
+  static const String reportBuilt = 'report_built';
+  static const String reportQueryExecuted = 'report_query_executed';
   static const String offlinePackDownloaded = 'offline_pack_downloaded';
   static const String productAddedToOrder = 'product_added_to_order';
   static const String passwordResetRequested = 'password_reset_requested';
@@ -159,6 +161,8 @@ final class AnalyticsEvents {
     insightOpened,
     insightActionClicked,
     reportExported,
+    reportBuilt,
+    reportQueryExecuted,
     offlinePackDownloaded,
     productAddedToOrder,
     passwordResetRequested,
