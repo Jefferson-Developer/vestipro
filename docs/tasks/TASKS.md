@@ -287,7 +287,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 ### EPIC-21 — Qualidade, Performance e Release (fim do MVP)
 - [x] [TASK-161 — Criar testes unitários da camada de domínio](TASK-161-criar-testes-unitarios-de-dominio.md) — Flutter Senior
 - [x] [TASK-162 — Criar testes de integração com Firebase Emulator](TASK-162-criar-testes-de-integracao-com-emulator.md) — Flutter Senior
-- [ ] [TASK-163 — Criar testes offline e de sincronização](TASK-163-criar-testes-offline-e-sincronizacao.md) — Flutter Senior
+- [x] [TASK-163 — Criar testes offline e de sincronização](TASK-163-criar-testes-offline-e-sincronizacao.md) — Flutter Senior
 - [ ] [TASK-164 — Otimizar performance](TASK-164-otimizar-performance.md) — Flutter Senior
 - [ ] [TASK-165 — Criar pipeline CI/CD](TASK-165-criar-pipeline-ci-cd.md) — Flutter Senior
 - [ ] [TASK-166 — Realizar release MVP controlado](TASK-166-realizar-release-mvp-controlado.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 162 / 220 tasks concluídas.
+**Progresso:** 163 / 220 tasks concluídas.
