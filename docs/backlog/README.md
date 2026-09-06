@@ -13,3 +13,4 @@ Cada item é um arquivo `BACKLOG-XXX-titulo.md` nesta pasta.
 - [BACKLOG-002 — Rodar a suíte de testes de Firestore Rules em CI (✅ resolvido pela TASK-165)](BACKLOG-002-suite-de-testes-firestore-rules-em-ci.md)
 - [BACKLOG-003 — Reverter Firestore Rules do "modo teste" para o `firestore.rules` real (🔴 urgente)](BACKLOG-003-reverter-firestore-rules-modo-teste.md)
 - [BACKLOG-004 — Vulnerabilidade alta (`undici`) nas dependências de teste do Firebase JS SDK](BACKLOG-004-vulnerabilidade-alta-undici-testes-firebase-js.md)
+- [BACKLOG-005 — Realizar release MVP controlado (🔴 bloqueada por acesso a produção; ex-TASK-166)](BACKLOG-005-realizar-release-mvp-controlado.md)

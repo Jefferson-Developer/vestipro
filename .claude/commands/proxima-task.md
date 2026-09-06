@@ -17,4 +17,18 @@ Leia `AGENTS.md` e siga o modo economico:
 7. Nao trate criacao de testes, `flutter analyze` ou `flutter test` como etapa obrigatoria de
    encerramento. So execute essa parte se a task pedir explicitamente, se o usuario pedir ou se
    houver risco tecnico real que justifique a validacao.
-8. Se algo impedir conclusao, informe o motivo real, nao marque a task e nao invente hash.
+8. Se algo impedir conclusao por bloqueio real (acesso a infraestrutura/producao, credenciais ou
+   dispositivos que o ambiente nao tem, decisao que so um humano pode tomar):
+   - Nao marque a task, nao crie `-CONCLUIDA.md`, nao invente hash.
+   - Mova a task para o backlog: crie `docs/backlog/BACKLOG-XXX-titulo.md` (proximo numero livre)
+     explicando o motivo real e quem precisa agir; liste em `docs/backlog/README.md`.
+   - Em `docs/tasks/TASKS.md`, troque a linha `[ ] [TASK-XXX ...]` por uma linha sem checkbox
+     apontando para o BACKLOG-XXX criado (ela sai da fila obrigatoria), e ajuste o total de tasks e a
+     linha `Progresso: N / M` (M diminui em 1).
+   - No arquivo original da task, adicione uma nota no topo apontando para o BACKLOG-XXX.
+   - Faca commit dessa democao (`chore(backlog): move TASK-XXX para backlog - <motivo curto>`) e so
+     faca push se ja autorizado.
+   - Informe o motivo real ao usuario.
+   - Se o bloqueio for outro (bug de implementacao, teste falhando por erro de codigo, ambiguidade
+     que um replanejamento resolveria), NAO mova para o backlog — pare e reporte, backlog e so para
+     bloqueio real de acesso/infra.

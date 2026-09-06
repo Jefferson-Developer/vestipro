@@ -1,7 +1,14 @@
 # TASK-166 — Realizar release MVP controlado
 
+> **Movida para o backlog em 2026-09-06** — bloqueada por acesso a infraestrutura/produção que este
+> ambiente não tem (Firestore Rules em modo teste no projeto real, pipeline de CI nunca executado,
+> dispositivo físico/consoles reais indisponíveis). Não faz mais parte da fila numerada obrigatória
+> de `docs/tasks/TASKS.md`. Detalhe do bloqueio e pré-requisitos para reabrir:
+> [`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md).
+> A spec abaixo permanece válida para quando a task for reaberta.
+
 **Epic:** EPIC-21 — Qualidade, Performance e Release (fim do MVP)
-**Status:** ⬜ Pendente
+**Status:** 🔴 Bloqueada — movida para o backlog (ver nota acima)
 **Depende de:** TASK-161 (testes unitários de domínio), TASK-162 (testes de integração com
 Emulator), TASK-163 (testes offline e sincronização), TASK-164 (otimização de performance), TASK-165
 (pipeline CI/CD) — todos os pilares de qualidade do MVP precisam estar concluídos e verdes antes

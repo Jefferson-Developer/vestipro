@@ -67,6 +67,12 @@ mobile mais completo do mercado de moda — não apenas no MVP, mas na visão co
 - Nunca quebrar isolamento multi-tenant nem operação offline existente.
 - Se o commit/push não puder ser feito, o agente deve dizer isso claramente — nunca inventar hash
   nem marcar a task como concluída.
+- Se uma task não puder ser concluída por bloqueio real (acesso a infraestrutura/produção,
+  credenciais/dispositivos que este ambiente não tem, decisão que só um humano pode tomar), o
+  agente deve movê-la para `docs/backlog/` (novo `BACKLOG-XXX-titulo.md`) em vez de deixá-la
+  bloqueando a fila obrigatória, removendo-a do índice acima e ajustando o total/Progresso — nunca
+  simplesmente pulá-la ou deixá-la parada indefinidamente sem registro. Ver exemplo:
+  TASK-166 → [`BACKLOG-005`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md).
 
 ## Fases sugeridas (visão macro)
 
@@ -290,7 +296,10 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-163 — Criar testes offline e de sincronização](TASK-163-criar-testes-offline-e-sincronizacao.md) — Flutter Senior
 - [x] [TASK-164 — Otimizar performance](TASK-164-otimizar-performance.md) — Flutter Senior
 - [x] [TASK-165 — Criar pipeline CI/CD](TASK-165-criar-pipeline-ci-cd.md) — Flutter Senior
-- [ ] [TASK-166 — Realizar release MVP controlado](TASK-166-realizar-release-mvp-controlado.md) — Flutter Senior
+- 🔴 TASK-166 — Realizar release MVP controlado — **movida para o backlog** (bloqueada por acesso a
+  infraestrutura/produção que este ambiente não tem): ver
+  [`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md).
+  Não conta mais na fila obrigatória nem no total de tasks abaixo.
 
 ### EPIC-22 — Importação e Integrações de Dados
 - [x] [TASK-167 — Implementar importação de clientes via CSV/XLSX](TASK-167-implementar-importacao-de-clientes.md) — Flutter Senior + Front-end
@@ -370,4 +379,6 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 171 / 220 tasks concluídas.
+**Progresso:** 171 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
+[`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md)
+— e não conta mais no total).

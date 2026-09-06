@@ -24,8 +24,32 @@ Quando o usuário disser `/proxima-task`, "próxima task", "roda a próxima task
 5. Leia a seção relevante de `tasks.md`.
 6. Leia apenas os agentes exigidos/aplicáveis.
 7. Planeje curto, implemente, teste, documente, commit e push somente quando autorizado.
+8. Se a task não puder ser concluída por bloqueio real (acesso a infraestrutura/produção,
+   credenciais/dispositivos que o ambiente não tem, decisão que só um humano pode tomar): não marque
+   o checkbox, não invente hash, e mova a task para o backlog em vez de deixá-la travando a fila —
+   ver "Mover Task Para O Backlog" abaixo. Informe o motivo real ao usuário.
 
 Se não houver checkbox pendente, informe que o backlog atual está 100% concluído.
+
+## Mover Task Para O Backlog
+
+Quando uma task não puder ser concluída por bloqueio real (não por falta de esforço/planejamento):
+
+1. Não marque o checkbox em `docs/tasks/TASKS.md`, não crie `-CONCLUIDA.md`, não invente hash.
+2. Crie `docs/backlog/BACKLOG-XXX-titulo.md` (próximo número livre) explicando: origem (task e
+   epic), motivo real do bloqueio, o que já foi feito/aproveitável, e uma tabela de "quem precisa
+   agir" por pendência.
+3. Liste o novo item em `docs/backlog/README.md`.
+4. Em `docs/tasks/TASKS.md`: troque a linha `[ ] [TASK-XXX ...]` por uma linha sem checkbox
+   apontando para o `BACKLOG-XXX` criado (ela sai da fila obrigatória), e ajuste o total de tasks e a
+   linha `Progresso: N / M` (M diminui em 1 por task movida).
+5. No arquivo original `docs/tasks/TASK-XXX-nome-da-task.md`, adicione uma nota no topo apontando
+   para o `BACKLOG-XXX` e explicando que a spec continua válida para quando a task for reaberta.
+6. Faça commit dessa demoção (`chore(backlog): move TASK-XXX para backlog - <motivo curto>`) e só
+   faça push se já autorizado.
+7. Isso não é o mesmo que abandonar a task: quando os pré-requisitos listados no `BACKLOG-XXX` forem
+   resolvidos por alguém com o acesso necessário, o item pode ser promovido de volta a uma TASK-XXX
+   formal na fila.
 
 ## Comando De Retomada Em Lote
 
@@ -45,9 +69,18 @@ tasks" ou equivalente:
    necessário, como no modo econômico.
 5. Documente, commite e (se autorizado) faça push ao final de **cada** task, exatamente como em
    `/proxima-task` — nunca só ao final do lote inteiro.
-6. Se uma task travar (bloqueio, teste falhando, dependência faltando), pare o lote nela, não marque
-   como concluída, não invente hash e informe o motivo real antes de seguir adiante.
-7. Ao final, resuma as tasks concluídas na rodada (número, título, hash do commit, push sim/não).
+6. Se uma task não puder ser concluída por bloqueio real (infraestrutura/produção, credenciais/
+   dispositivos que faltam, decisão só de humano), mova-a para o backlog seguindo "Mover Task Para O
+   Backlog" acima — isso não conta como task concluída para N, mas libera a fila: o lote **continua**
+   para a próxima task pendente (que passa a ser a primeira depois da demovida), em vez de parar.
+   Trave de segurança: se **2 tasks seguidas** forem movidas para o backlog sem nenhuma conclusão
+   real entre elas, pare o lote e informe o usuário — pode ser sinal de um bloqueio mais amplo (ex.:
+   ambiente sem acesso a algo que várias tasks precisam), não vale continuar demovendo em série.
+   Se a task travar por outro motivo que não seja um bloqueio real e claro (teste falhando por bug
+   de implementação, ambiguidade que um replanejamento resolveria, etc.), pare o lote nela em vez de
+   demovê-la — backlog é para bloqueio de acesso/infra, não para bug a corrigir.
+7. Ao final, resuma as tasks concluídas na rodada (número, título, hash do commit, push sim/não) e,
+   se aplicável, as tasks movidas para o backlog (número, BACKLOG-XXX, motivo).
 
 ## Agentes
 
@@ -216,6 +249,7 @@ Use o template abaixo:
 - Backlog: `docs/tasks/TASKS.md`
 - Tasks: `docs/tasks/TASK-XXX-nome-da-task.md`
 - Conclusões: `docs/tasks/TASK-XXX-nome-da-task-CONCLUIDA.md`
+- Backlog (tasks bloqueadas/itens fora da fila numerada): `docs/backlog/BACKLOG-XXX-titulo.md`
 - Agentes: `.claude/agents/`
 - Comando (uma task): `.claude/commands/proxima-task.md`
 - Comando (N tasks em lote): `.claude/commands/proximas-tasks.md`
