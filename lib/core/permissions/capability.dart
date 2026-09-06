@@ -139,6 +139,22 @@ enum Capability {
   /// server-side — `erpIntegration/credentials` itself is never client-
   /// readable at all, regardless of this (or any) capability.
   erpIntegrationManage,
+
+  /// Configure an organization's outbound webhooks (TASK-170, EPIC-22) —
+  /// destination URL, subscribed events (`order.created`,
+  /// `order.status_changed`, `customer.created`, `inventory.updated`),
+  /// active/inactive toggle, secret regeneration and "send test event" —
+  /// plus read its delivery log/health status for diagnosis. Restricted to
+  /// `OWNER`/`ADMIN` (`RolePermissionMatrix`'s full/near-full sets), same
+  /// infrastructure-decision scope as [erpIntegrationManage]: never
+  /// delegated to `SALES_MANAGER`/`SALES_REP`/`SALES_ASSISTANT`/`FINANCE`.
+  /// Gates the `saveWebhookConfig`/`regenerateWebhookSecret`/
+  /// `sendTestWebhookEvent` Cloud Functions and every read of
+  /// `organizations/{organizationId}/webhooks|webhookDeliveries|
+  /// webhookDeliveryLogs` (`firestore.rules`), which independently
+  /// re-check this same boundary server-side — `webhookSecrets` itself is
+  /// never client-readable at all, regardless of this (or any) capability.
+  webhookManage,
 }
 
 extension CapabilityCode on Capability {
@@ -189,6 +205,7 @@ extension CapabilityCode on Capability {
       Capability.customerImport => 'customer.import',
       Capability.productImport => 'product.import',
       Capability.erpIntegrationManage => 'erpIntegration.manage',
+      Capability.webhookManage => 'webhook.manage',
     };
   }
 }

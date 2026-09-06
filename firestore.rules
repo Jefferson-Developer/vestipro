@@ -1122,6 +1122,45 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/webhooks/{webhookId}
+      // organizations/{organizationId}/webhookSecrets/{webhookId}
+      // organizations/{organizationId}/webhookDeliveries/{deliveryId}
+      // organizations/{organizationId}/webhookDeliveryLogs/{logId}
+      // (TASK-170, EPIC-22 — webhooks de saída)
+      // -------------------------------------------------------------------
+      //
+      // Every document below is exclusively written by this feature's own
+      // Cloud Functions (Admin SDK, bypasses these Rules) —
+      // `saveWebhookConfig`/`regenerateWebhookSecret`/`sendTestWebhookEvent`/
+      // `deliverWebhookEvent`/`retryFailedWebhookDeliveries` — same "server
+      // owns every write" shape `erpIntegration`/`erpSyncQueue` above already
+      // use, plus the same deliberately stricter rule: `webhookSecrets` is
+      // never client-readable at all, by any role, under any capability — a
+      // leaked Firestore read of that document would leak a live HMAC
+      // secret an attacker could use to forge signed payloads toward the
+      // organization's own webhook consumer (TASK-170: "Segredo HMAC nunca é
+      // reexibido em texto claro após a criação inicial").
+
+      match /webhooks/{webhookId} {
+        allow read: if hasCapability(organizationId, 'webhook.manage');
+        allow create, update, delete: if false;
+      }
+
+      match /webhookSecrets/{webhookId} {
+        allow read, write: if false;
+      }
+
+      match /webhookDeliveries/{deliveryId} {
+        allow read: if hasCapability(organizationId, 'webhook.manage');
+        allow create, update, delete: if false;
+      }
+
+      match /webhookDeliveryLogs/{logId} {
+        allow read: if hasCapability(organizationId, 'webhook.manage');
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/priceLists/{priceListId}  (TASK-083)
       // -------------------------------------------------------------------
       //

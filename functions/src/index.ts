@@ -64,6 +64,16 @@ export {
   pullErpInventoryAndPrices,
   retryFailedErpSyncItems,
 } from './erp_integration';
+export {
+  saveWebhookConfig,
+  regenerateWebhookSecret,
+  sendTestWebhookEvent,
+  deliverWebhookEvent,
+  retryFailedWebhookDeliveries,
+  enqueueOrderWebhookEvents,
+  enqueueCustomerWebhookEvents,
+  enqueueInventoryWebhookEvents,
+} from './webhooks';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é
