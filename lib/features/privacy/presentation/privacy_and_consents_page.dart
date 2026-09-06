@@ -7,6 +7,8 @@ import 'package:flutter/services.dart';
 import '../../../core/design_system/design_system.dart';
 import '../domain/entities/consent_record.dart';
 import '../domain/entities/personal_data_export.dart';
+import '../domain/usecases/request_account_deletion.dart';
+import 'account_deletion_cubit.dart';
 import 'consent_management_cubit.dart';
 import 'personal_data_export_cubit.dart';
 
@@ -14,12 +16,14 @@ class PrivacyAndConsentsPage extends StatelessWidget {
   const PrivacyAndConsentsPage({
     required this.createCubit,
     required this.createExportCubit,
+    this.createDeletionCubit,
     required this.onPolicyDocumentsTap,
     super.key,
   });
 
   final ConsentManagementCubit Function() createCubit;
   final PersonalDataExportCubit Function() createExportCubit;
+  final AccountDeletionCubit Function()? createDeletionCubit;
   final VoidCallback onPolicyDocumentsTap;
 
   @override
@@ -39,14 +43,25 @@ class PrivacyAndConsentsPage extends StatelessWidget {
           return cubit;
         },
       ),
+      if (createDeletionCubit != null)
+        BlocProvider<AccountDeletionCubit>(
+          create: (_) => createDeletionCubit!(),
+        ),
     ],
-    child: _PrivacyAndConsentsView(onPolicyDocumentsTap: onPolicyDocumentsTap),
+    child: _PrivacyAndConsentsView(
+      onPolicyDocumentsTap: onPolicyDocumentsTap,
+      showAccountDeletion: createDeletionCubit != null,
+    ),
   );
 }
 
 class _PrivacyAndConsentsView extends StatelessWidget {
-  const _PrivacyAndConsentsView({required this.onPolicyDocumentsTap});
+  const _PrivacyAndConsentsView({
+    required this.onPolicyDocumentsTap,
+    required this.showAccountDeletion,
+  });
   final VoidCallback onPolicyDocumentsTap;
+  final bool showAccountDeletion;
 
   @override
   Widget build(BuildContext context) =>
@@ -81,6 +96,7 @@ class _PrivacyAndConsentsView extends StatelessWidget {
                 ConsentManagementStatus.ready => _ConsentContent(
                   state: state,
                   onPolicyDocumentsTap: onPolicyDocumentsTap,
+                  showAccountDeletion: showAccountDeletion,
                 ),
               },
             ),
@@ -93,9 +109,11 @@ class _ConsentContent extends StatelessWidget {
   const _ConsentContent({
     required this.state,
     required this.onPolicyDocumentsTap,
+    required this.showAccountDeletion,
   });
   final ConsentManagementState state;
   final VoidCallback onPolicyDocumentsTap;
+  final bool showAccountDeletion;
 
   @override
   Widget build(BuildContext context) => Center(
@@ -169,9 +187,136 @@ class _ConsentContent extends StatelessWidget {
             builder: (context, exportState) =>
                 _PersonalDataExportSection(state: exportState),
           ),
+          if (showAccountDeletion) ...<Widget>[
+            const SizedBox(height: AppSpacing.spacing24),
+            const Divider(),
+            const SizedBox(height: AppSpacing.spacing12),
+            const _AccountDeletionSection(),
+          ],
         ],
       ),
     ),
+  );
+}
+
+class _AccountDeletionSection extends StatelessWidget {
+  const _AccountDeletionSection();
+
+  @override
+  Widget build(
+    BuildContext context,
+  ) => BlocConsumer<AccountDeletionCubit, AccountDeletionState>(
+    listener: (context, state) {
+      if (state.status == AccountDeletionStatus.completed) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Conta excluída e dados locais removidos.'),
+          ),
+        );
+      }
+    },
+    builder: (context, state) => Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: <Widget>[
+        Text(
+          'Excluir conta e dados',
+          style: AppTypography.titleLarge.copyWith(color: context.colors.error),
+        ),
+        const SizedBox(height: AppSpacing.spacing8),
+        Text(
+          'Esta ação remove seu perfil, vínculos, consentimentos, notificações, tokens e dados do dispositivo. Pedidos/documentos fiscais e auditoria são retidos apenas por obrigação legal, com sua identidade anonimizada para os demais usuários.',
+          style: AppTypography.bodyMedium.copyWith(
+            color: context.colors.outline,
+          ),
+        ),
+        const SizedBox(height: AppSpacing.spacing16),
+        AppButton(
+          key: const ValueKey<String>('request-account-deletion'),
+          label: state.status == AccountDeletionStatus.submitting
+              ? 'Excluindo…'
+              : 'Excluir minha conta',
+          variant: AppButtonVariant.secondary,
+          onPressed: state.status == AccountDeletionStatus.submitting
+              ? null
+              : () => _confirmAccountDeletion(context),
+        ),
+        if (state.failure != null) ...<Widget>[
+          const SizedBox(height: AppSpacing.spacing8),
+          Text(
+            state.failure!.message,
+            key: const ValueKey<String>('account-deletion-error'),
+            style: AppTypography.bodySmall.copyWith(
+              color: context.colors.error,
+            ),
+          ),
+        ],
+      ],
+    ),
+  );
+
+  Future<void> _confirmAccountDeletion(BuildContext context) async {
+    final phrase = await showDialog<String>(
+      context: context,
+      builder: (_) => const _AccountDeletionDialog(),
+    );
+    if (phrase != null && context.mounted) {
+      await context.read<AccountDeletionCubit>().submit(phrase);
+    }
+  }
+}
+
+class _AccountDeletionDialog extends StatefulWidget {
+  const _AccountDeletionDialog();
+
+  @override
+  State<_AccountDeletionDialog> createState() => _AccountDeletionDialogState();
+}
+
+class _AccountDeletionDialogState extends State<_AccountDeletionDialog> {
+  final _controller = TextEditingController();
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => AlertDialog(
+    title: const Text('Excluir conta permanentemente?'),
+    content: SingleChildScrollView(
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: <Widget>[
+          const Text(
+            'Entre novamente caso solicitado. Para confirmar, digite exatamente:',
+          ),
+          const SizedBox(height: AppSpacing.spacing8),
+          const SelectableText(RequestAccountDeletion.confirmationPhrase),
+          const SizedBox(height: AppSpacing.spacing12),
+          TextField(
+            key: const ValueKey<String>('account-deletion-confirmation'),
+            controller: _controller,
+            autofocus: true,
+            decoration: const InputDecoration(
+              labelText: 'Frase de confirmação',
+            ),
+          ),
+        ],
+      ),
+    ),
+    actions: <Widget>[
+      TextButton(
+        onPressed: () => Navigator.pop(context),
+        child: const Text('Cancelar'),
+      ),
+      FilledButton(
+        key: const ValueKey<String>('confirm-account-deletion'),
+        onPressed: () => Navigator.pop(context, _controller.text),
+        child: const Text('Excluir permanentemente'),
+      ),
+    ],
   );
 }
 

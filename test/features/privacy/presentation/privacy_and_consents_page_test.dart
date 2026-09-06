@@ -46,9 +46,45 @@ void main() {
     expect(repository.records.last.granted, isFalse);
     expect(find.textContaining('Revogado em'), findsOneWidget);
   });
+
+  testWidgets('exclusão exige abrir confirmação e digitar a frase exata', (
+    tester,
+  ) async {
+    final repository = _FakeConsentRepository();
+    final deletionRepository = _FakeAccountDeletionRepository();
+    await tester.pumpWidget(
+      _app(repository, deletionRepository: deletionRepository),
+    );
+    repository.emit();
+    await tester.pumpAndSettle();
+
+    final button = find.byKey(
+      const ValueKey<String>('request-account-deletion'),
+    );
+    await tester.scrollUntilVisible(button, 300);
+    await tester.tap(button);
+    await tester.pumpAndSettle();
+    expect(
+      find.text(RequestAccountDeletion.confirmationPhrase),
+      findsOneWidget,
+    );
+
+    await tester.enterText(
+      find.byKey(const ValueKey<String>('account-deletion-confirmation')),
+      RequestAccountDeletion.confirmationPhrase,
+    );
+    await tester.tap(
+      find.byKey(const ValueKey<String>('confirm-account-deletion')),
+    );
+    await tester.pumpAndSettle();
+    expect(deletionRepository.called, isTrue);
+  });
 }
 
-Widget _app(_FakeConsentRepository repository) => MaterialApp(
+Widget _app(
+  _FakeConsentRepository repository, {
+  _FakeAccountDeletionRepository? deletionRepository,
+}) => MaterialApp(
   theme: AppTheme.light,
   home: PrivacyAndConsentsPage(
     createCubit: () => ConsentManagementCubit(
@@ -68,9 +104,39 @@ Widget _app(_FakeConsentRepository repository) => MaterialApp(
         userId: 'user-a',
       );
     },
+    createDeletionCubit: deletionRepository == null
+        ? null
+        : () => AccountDeletionCubit(
+            requestAccountDeletion: RequestAccountDeletion(
+              deletionRepository,
+              _FakeLocalCleaner(),
+            ),
+            organizationId: 'org-a',
+          ),
     onPolicyDocumentsTap: () {},
   ),
 );
+
+final class _FakeAccountDeletionRepository
+    implements AccountDeletionRepository {
+  bool called = false;
+
+  @override
+  Future<AppResult<AccountDeletionReceipt>> requestDeletion({
+    required String organizationId,
+    required String confirmation,
+  }) async {
+    called = true;
+    return const AppSuccess<AccountDeletionReceipt>(
+      AccountDeletionReceipt(anonymizedRecords: 1, deletedRecords: 1),
+    );
+  }
+}
+
+final class _FakeLocalCleaner implements AccountDeletionLocalCleaner {
+  @override
+  Future<AppResult<void>> clear() async => const AppSuccess<void>(null);
+}
 
 final class _FakePersonalDataExportRepository
     implements PersonalDataExportRepository {

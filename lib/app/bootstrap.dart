@@ -16,6 +16,7 @@ import '../core/analytics/analytics.dart';
 import '../core/auth/auth.dart';
 import '../core/connectivity/connectivity.dart';
 import '../core/design_system/design_system.dart';
+import '../core/database/app_database.dart';
 import '../core/environment/app_environment.dart';
 import '../core/errors/errors.dart';
 import '../core/feature_flags/feature_flags.dart';
@@ -371,6 +372,9 @@ class VestiProApp extends StatelessWidget {
               getIt<FirebaseFirestore>(),
               getIt<CloudFunctionsService>(),
             );
+            final deletionRepository = FirebaseAccountDeletionRepository(
+              getIt<CloudFunctionsService>(),
+            );
             return PrivacyAndConsentsPage(
               createCubit: () => ConsentManagementCubit(
                 repository: repository,
@@ -385,6 +389,17 @@ class VestiProApp extends StatelessWidget {
                 getDownload: GetPersonalDataExportDownload(exportRepository),
                 organizationId: orgId,
                 userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+              ),
+              createDeletionCubit: () => AccountDeletionCubit(
+                requestAccountDeletion: RequestAccountDeletion(
+                  deletionRepository,
+                  DeviceAccountDeletionLocalCleaner(
+                    database: getIt<AppDatabase>(),
+                    pushTokenService: getIt<PushTokenService>(),
+                    sessionService: getIt<SessionService>(),
+                  ),
+                ),
+                organizationId: orgId,
               ),
               onPolicyDocumentsTap: () => context.push(
                 PolicyDocumentsSettingsRoute(orgId: orgId).location,

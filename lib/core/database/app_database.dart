@@ -125,6 +125,14 @@ class AppDatabase extends _$AppDatabase {
   @override
   int get schemaVersion => 19;
 
+  /// Removes every offline row after an account deletion. Child tables are
+  /// cleared first so foreign-key integrity remains enabled throughout.
+  Future<void> clearAllLocalData() => transaction(() async {
+    for (final table in allTables.toList().reversed) {
+      await customStatement('DELETE FROM "${table.actualTableName}"');
+    }
+  });
+
   @override
   MigrationStrategy get migration {
     return MigrationStrategy(

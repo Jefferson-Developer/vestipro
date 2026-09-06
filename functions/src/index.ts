@@ -46,6 +46,7 @@ export {
   processPersonalDataExportRequested,
   getPersonalDataExportDownloadUrl,
 } from './privacy/personal-data-export';
+export { requestAccountDeletion } from './privacy/account-deletion';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

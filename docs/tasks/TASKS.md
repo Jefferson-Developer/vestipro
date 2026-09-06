@@ -281,7 +281,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-156 — Implementar política de privacidade e termos](TASK-156-implementar-politica-de-privacidade.md) — Flutter Senior + Front-end
 - [x] [TASK-157 — Implementar gestão de consentimentos](TASK-157-implementar-gestao-de-consentimentos.md) — Flutter Senior + Front-end
 - [x] [TASK-158 — Implementar exportação de dados pessoais](TASK-158-implementar-exportacao-de-dados-pessoais.md) — Flutter Senior + Front-end
-- [ ] [TASK-159 — Implementar exclusão de conta e dados](TASK-159-implementar-exclusao-de-conta-e-dados.md) — Flutter Senior + Front-end
+- [x] [TASK-159 — Implementar exclusão de conta e dados](TASK-159-implementar-exclusao-de-conta-e-dados.md) — Flutter Senior + Front-end
 - [ ] [TASK-160 — Implementar retenção configurável e minimização de dados](TASK-160-implementar-retencao-configuravel.md) — Flutter Senior
 
 ### EPIC-21 — Qualidade, Performance e Release (fim do MVP)
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 158 / 220 tasks concluídas.
+**Progresso:** 159 / 220 tasks concluídas.
