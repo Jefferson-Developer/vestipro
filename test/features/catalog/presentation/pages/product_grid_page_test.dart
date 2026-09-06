@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/design_system/design_system.dart';
+import 'package:vestipro/core/performance/performance.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/catalog/catalog.dart';
 import 'package:vestipro/features/products/products.dart';
@@ -43,6 +44,7 @@ void main() {
                 const _FakeVariantAvailabilityRepository(),
               ),
               analyticsService: FakeAnalyticsService(),
+              performanceMonitor: FakePerformanceMonitor(),
             ),
           ),
         ),
@@ -89,6 +91,7 @@ void main() {
                 const _FakeVariantAvailabilityRepository(),
               ),
               analyticsService: analyticsService,
+              performanceMonitor: FakePerformanceMonitor(),
             ),
             onProductSelected: (product) => selected = product,
           ),
@@ -129,6 +132,7 @@ void main() {
                 const _FakeVariantAvailabilityRepository(),
               ),
               analyticsService: FakeAnalyticsService(),
+              performanceMonitor: FakePerformanceMonitor(),
             ),
           ),
         ),

@@ -197,27 +197,26 @@ final class ProductDetailBloc
       return (const <String, ResolvedVariantPrice>{}, false);
     }
 
-    final resolved = <String, ResolvedVariantPrice>{};
-    var hasWarning = false;
-    for (final variant in variants) {
-      final result = await resolvePriceForVariant!(
-        organizationId: state.organizationId,
-        companyId: companyId,
-        productId: product.id,
-        variantId: variant.id,
-      );
-      switch (result) {
-        case AppSuccess<ResolvedVariantPrice>(value: final price):
-          resolved[variant.id] = price;
-        case AppFailure<ResolvedVariantPrice>():
-          hasWarning = true;
-      }
-    }
-
-    return (
-      Map<String, ResolvedVariantPrice>.unmodifiable(resolved),
-      hasWarning,
+    // One call resolves every variant of this product at once (TASK-164): see
+    // `ResolvePriceForVariantUseCase.callForProduct`'s doc — the same
+    // fallback chain a per-variant loop would compute, but without refetching
+    // the product's applicable price lists/price-list items once per variant.
+    final result = await resolvePriceForVariant!.callForProduct(
+      organizationId: state.organizationId,
+      companyId: companyId,
+      productId: product.id,
+      variantIds: variants.map((variant) => variant.id),
     );
+    return switch (result) {
+      AppSuccess<Map<String, ResolvedVariantPrice>>(value: final prices) => (
+        prices,
+        false,
+      ),
+      AppFailure<Map<String, ResolvedVariantPrice>>() => (
+        const <String, ResolvedVariantPrice>{},
+        true,
+      ),
+    };
   }
 
   void _onColorSelected(

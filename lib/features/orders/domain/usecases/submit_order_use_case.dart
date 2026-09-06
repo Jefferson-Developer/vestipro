@@ -2,6 +2,7 @@ import 'package:injectable/injectable.dart' hide Order;
 
 import '../../../../core/analytics/analytics.dart';
 import '../../../../core/errors/errors.dart';
+import '../../../../core/performance/performance.dart';
 import '../../../../core/utils/utils.dart';
 import '../entities/order.dart';
 import '../entities/order_submission_result.dart';
@@ -21,10 +22,15 @@ import '../repositories/order_submission_repository.dart';
 /// seller intent.
 @injectable
 final class SubmitOrderUseCase {
-  const SubmitOrderUseCase(this._repository, this._analyticsService);
+  const SubmitOrderUseCase(
+    this._repository,
+    this._analyticsService,
+    this._performanceMonitor,
+  );
 
   final OrderSubmissionRepository _repository;
   final AnalyticsService _analyticsService;
+  final PerformanceMonitor _performanceMonitor;
 
   Future<AppResult<OrderSubmissionResult>> call({required Order order}) async {
     if (order.items.isEmpty) {
@@ -36,9 +42,14 @@ final class SubmitOrderUseCase {
       );
     }
 
-    final result = await _repository.submit(
-      order: order,
-      idempotencyKey: order.id,
+    // Connects `order_submit_duration` (planned in TASK-019, unwired until a
+    // real order-submission flow existed to attach it to) to the actual
+    // pricing/number/approval round-trip, from the moment the representative
+    // confirms the order to the moment the server-side pipeline answers
+    // (TASK-164).
+    final result = await _performanceMonitor.wrapAsync(
+      PerformanceTraces.orderSubmitDuration,
+      () => _repository.submit(order: order, idempotencyKey: order.id),
     );
     if (result case AppSuccess<OrderSubmissionResult>(
       value: final submission,

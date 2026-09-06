@@ -2,6 +2,7 @@ import 'package:bloc_test/bloc_test.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/errors/errors.dart';
+import 'package:vestipro/core/performance/performance.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/catalog/catalog.dart';
 import 'package:vestipro/features/products/products.dart';
@@ -24,6 +25,7 @@ void main() {
           availabilityRepository ?? const _FakeVariantAvailabilityRepository(),
         ),
         analyticsService: analyticsService,
+        performanceMonitor: FakePerformanceMonitor(),
       );
     }
 

@@ -2943,6 +2943,7 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i856.SubmitOrderUseCase(
         gh<_i202.OrderSubmissionRepository>(),
         gh<_i202.AnalyticsService>(),
+        gh<_i1008.PerformanceMonitor>(),
       ),
     );
     gh.factory<_i559.AcceptInviteUseCase>(
@@ -4185,6 +4186,7 @@ extension GetItInjectableX on _i174.GetIt {
         listVariantsByProduct: gh<_i530.ListProductVariantsByProductUseCase>(),
         resolvePriceForVariant: gh<_i352.ResolvePriceForVariantUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+        performanceMonitor: gh<_i1008.PerformanceMonitor>(),
       ),
     );
     gh.factory<_i168.StartOrderDraftForCustomerUseCase>(

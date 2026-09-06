@@ -1,6 +1,7 @@
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/errors/errors.dart';
+import 'package:vestipro/core/performance/performance.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/orders/orders.dart';
 
@@ -14,7 +15,11 @@ void main() {
           AppSuccess<OrderSubmissionResult>(_result()),
         );
         final analytics = FakeAnalyticsService();
-        final useCase = SubmitOrderUseCase(repository, analytics);
+        final useCase = SubmitOrderUseCase(
+          repository,
+          analytics,
+          FakePerformanceMonitor(),
+        );
 
         final result = await useCase(order: _order());
 
@@ -40,7 +45,11 @@ void main() {
           AppSuccess<OrderSubmissionResult>(_result()),
         );
         final analytics = FakeAnalyticsService();
-        final useCase = SubmitOrderUseCase(repository, analytics);
+        final useCase = SubmitOrderUseCase(
+          repository,
+          analytics,
+          FakePerformanceMonitor(),
+        );
 
         final result = await useCase(order: _order(items: const <OrderItem>[]));
 
@@ -66,7 +75,11 @@ void main() {
           ),
         );
         final analytics = FakeAnalyticsService();
-        final useCase = SubmitOrderUseCase(repository, analytics);
+        final useCase = SubmitOrderUseCase(
+          repository,
+          analytics,
+          FakePerformanceMonitor(),
+        );
 
         final result = await useCase(order: _order());
 
@@ -81,7 +94,11 @@ void main() {
         final repository = _FakeOrderSubmissionRepository(
           AppSuccess<OrderSubmissionResult>(_result()),
         );
-        final useCase = SubmitOrderUseCase(repository, FakeAnalyticsService());
+        final useCase = SubmitOrderUseCase(
+          repository,
+          FakeAnalyticsService(),
+          FakePerformanceMonitor(),
+        );
 
         await useCase(order: _order());
         final firstKey = repository.lastIdempotencyKey;

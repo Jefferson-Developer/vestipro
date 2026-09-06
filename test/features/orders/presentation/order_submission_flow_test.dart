@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/design_system/design_system.dart';
 import 'package:vestipro/core/errors/errors.dart';
+import 'package:vestipro/core/performance/performance.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/orders/orders.dart';
 
@@ -17,6 +18,7 @@ void main() {
         ),
       ),
       FakeAnalyticsService(),
+      FakePerformanceMonitor(),
     );
     final saveOrderDraftUseCase = SaveOrderDraftUseCase(
       _FakeOrderDraftRepository(),

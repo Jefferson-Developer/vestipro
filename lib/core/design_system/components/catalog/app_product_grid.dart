@@ -396,7 +396,7 @@ class AppProductCard extends StatelessWidget {
                   aspectRatio: 3 / 4,
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(AppRadius.radius12),
-                    child: _buildImage(colors),
+                    child: _buildImage(context, colors),
                   ),
                 ),
                 if (visibleBadges.isNotEmpty)
@@ -458,14 +458,29 @@ class AppProductCard extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(AppColors colors) {
+  /// Grid cards render at up to [_maxCardImageLogicalWidth] logical pixels
+  /// even on the largest desktop breakpoint (5 columns) — decoding/caching
+  /// the source photo at its original resolution (often a multi-megapixel
+  /// studio shot) into the in-memory image cache regardless of how small the
+  /// card actually renders is a real, measured memory/jank cost across a
+  /// catalog page's worth of cards (TASK-164). `memCacheWidth`/
+  /// `memCacheHeight` cap what `CachedNetworkImage` decodes and keeps in
+  /// memory to a size real cards never exceed, scaled by the device's actual
+  /// pixel ratio so the photo still renders crisp on high-density screens.
+  static const double _maxCardImageLogicalWidth = 400;
+
+  Widget _buildImage(BuildContext context, AppColors colors) {
     final imageUrl = product.imageUrl;
     if (imageUrl == null || imageUrl.isEmpty) {
       return _buildImageFallback(colors);
     }
+    final dpr = MediaQuery.devicePixelRatioOf(context);
+    final targetWidth = (_maxCardImageLogicalWidth * dpr).round();
     return CachedNetworkImage(
       imageUrl: imageUrl,
       fit: BoxFit.cover,
+      memCacheWidth: targetWidth,
+      memCacheHeight: (targetWidth * 4 / 3).round(),
       placeholder: (context, url) =>
           const AppSkeleton(shape: AppSkeletonShape.block),
       errorWidget: (context, url, error) => _buildImageFallback(colors),
@@ -671,7 +686,7 @@ class AppProductListRow extends StatelessWidget {
                 height: AppSpacing.spacing64,
                 child: ClipRRect(
                   borderRadius: BorderRadius.circular(AppRadius.radius8),
-                  child: _buildImage(colors),
+                  child: _buildImage(context, colors),
                 ),
               ),
               const SizedBox(width: AppSpacing.spacing12),
@@ -759,14 +774,23 @@ class AppProductListRow extends StatelessWidget {
     );
   }
 
-  Widget _buildImage(AppColors colors) {
+  /// The row's thumbnail is a fixed [AppSpacing.spacing64] square — capping
+  /// the decoded/cached bitmap to that same size (scaled by device pixel
+  /// ratio) avoids keeping a full-resolution photo in the image cache for a
+  /// thumbnail this small (same reasoning as [AppProductCard]'s own cap,
+  /// TASK-164).
+  Widget _buildImage(BuildContext context, AppColors colors) {
     final imageUrl = product.imageUrl;
     if (imageUrl == null || imageUrl.isEmpty) {
       return _buildImageFallback(colors);
     }
+    final targetSize =
+        (AppSpacing.spacing64 * MediaQuery.devicePixelRatioOf(context)).round();
     return CachedNetworkImage(
       imageUrl: imageUrl,
       fit: BoxFit.cover,
+      memCacheWidth: targetSize,
+      memCacheHeight: targetSize,
       placeholder: (context, url) =>
           const AppSkeleton(shape: AppSkeletonShape.block),
       errorWidget: (context, url, error) => _buildImageFallback(colors),

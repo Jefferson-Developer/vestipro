@@ -4,6 +4,7 @@ import 'package:injectable/injectable.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/analytics/analytics.dart';
+import '../../../../core/performance/performance.dart';
 import '../../../../core/utils/utils.dart';
 import '../../../pricing/domain/entities/resolved_variant_price.dart';
 import '../../../pricing/domain/usecases/resolve_price_for_variant_use_case.dart';
@@ -26,6 +27,7 @@ final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
     this.listVariantsByProduct,
     this.resolvePriceForVariant,
     required this.analyticsService,
+    required this.performanceMonitor,
   }) : super(const ProductGridState()) {
     on<ProductGridStarted>(_onStarted, transformer: restartable());
     on<ProductGridNextPageRequested>(
@@ -41,6 +43,7 @@ final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
   final ListProductVariantsByProductUseCase? listVariantsByProduct;
   final ResolvePriceForVariantUseCase? resolvePriceForVariant;
   final AnalyticsService analyticsService;
+  final PerformanceMonitor performanceMonitor;
 
   Future<void> _onStarted(
     ProductGridStarted event,
@@ -92,7 +95,22 @@ final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
     );
   }
 
+  /// Connects `catalog_load_duration` (planned in TASK-019, unwired until a
+  /// real catalog-loading flow existed to attach it to) to every real page
+  /// fetch of this screen — including the grade/pricing resolution the
+  /// trace's own doc promises, not just the raw products query (TASK-164).
   Future<void> _loadPage(
+    Emitter<ProductGridState> emit, {
+    required String? cursor,
+    required bool replace,
+  }) {
+    return performanceMonitor.wrapAsync(
+      PerformanceTraces.catalogLoadDuration,
+      () => _loadPageImpl(emit, cursor: cursor, replace: replace),
+    );
+  }
+
+  Future<void> _loadPageImpl(
     Emitter<ProductGridState> emit, {
     required String? cursor,
     required bool replace,
@@ -215,20 +233,24 @@ final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
         continue;
       }
 
+      // One call resolves every variant of this product at once (TASK-164):
+      // "which price lists apply" and "which price-list items exist for this
+      // product" never depend on the variant itself, so resolving them once
+      // per product instead of once per variant turns what used to be
+      // `2 * activeVariants.length` redundant data-layer reads per product
+      // into exactly 2 — the same fallback chain, just resolved in batch.
+      final pricesResult = await resolvePriceForVariant!.callForProduct(
+        organizationId: state.organizationId,
+        companyId: companyId,
+        productId: product.id,
+        variantIds: activeVariants.map((variant) => variant.id),
+      );
       final resolved = <ResolvedVariantPrice>[];
-      for (final variant in activeVariants) {
-        final priceResult = await resolvePriceForVariant!(
-          organizationId: state.organizationId,
-          companyId: companyId,
-          productId: product.id,
-          variantId: variant.id,
-        );
-        switch (priceResult) {
-          case AppSuccess<ResolvedVariantPrice>(value: final price):
-            if (price.hasPrice) resolved.add(price);
-          case AppFailure<ResolvedVariantPrice>():
-            hasWarning = true;
-        }
+      switch (pricesResult) {
+        case AppSuccess<Map<String, ResolvedVariantPrice>>(value: final prices):
+          resolved.addAll(prices.values.where((price) => price.hasPrice));
+        case AppFailure<Map<String, ResolvedVariantPrice>>():
+          hasWarning = true;
       }
 
       if (resolved.isEmpty) {

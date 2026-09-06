@@ -157,6 +157,78 @@ void main() {
       expect(resolved.priceList?.id, 'high');
       expect(resolved.price, 150);
     });
+
+    group('callForProduct (TASK-164: batches a product\'s variants)', () {
+      test('resolves every variant in one call, matching what call() would '
+          'resolve one by one, without refetching applicable price lists/items '
+          'per variant', () async {
+        final priceListRepository = _FakePriceListRepository(<PriceList>[
+          priceList(id: 'vip'),
+        ]);
+        final itemRepository = _FakePriceListItemRepository(<PriceListItem>[
+          item(
+            priceListId: 'vip',
+            productId: 'product-1',
+            variantId: 'variant-1',
+            price: 199.9,
+          ),
+          item(priceListId: 'vip', productId: 'product-1', price: 149.9),
+        ]);
+        final useCase = ResolvePriceForVariantUseCase(
+          ResolveApplicablePriceListsUseCase(priceListRepository),
+          itemRepository,
+        );
+
+        final result = await useCase.callForProduct(
+          organizationId: 'org-1',
+          companyId: 'company-1',
+          productId: 'product-1',
+          variantIds: <String>['variant-1', 'variant-missing', 'variant-2'],
+          now: now,
+        );
+
+        final resolved =
+            (result as AppSuccess<Map<String, ResolvedVariantPrice>>).value;
+        expect(resolved['variant-1']?.origin, PriceResolutionOrigin.variant);
+        expect(resolved['variant-1']?.price, 199.9);
+        expect(
+          resolved['variant-missing']?.origin,
+          PriceResolutionOrigin.product,
+        );
+        expect(resolved['variant-missing']?.price, 149.9);
+        expect(resolved['variant-2']?.origin, PriceResolutionOrigin.product);
+
+        // The regression guard for TASK-164's fix itself: three variants
+        // of the very same product resolved in exactly one round trip to
+        // each shared data source, never one per variant.
+        expect(priceListRepository.listByCompanyCallCount, 1);
+        expect(itemRepository.listByProductCallCount, 1);
+      });
+
+      test('fails validation when no variantIds are given', () async {
+        final useCase = ResolvePriceForVariantUseCase(
+          ResolveApplicablePriceListsUseCase(
+            _FakePriceListRepository(const <PriceList>[]),
+          ),
+          _FakePriceListItemRepository(const <PriceListItem>[]),
+        );
+
+        final result = await useCase.callForProduct(
+          organizationId: 'org-1',
+          companyId: 'company-1',
+          productId: 'product-1',
+          variantIds: const <String>[],
+        );
+
+        expect(result, isA<AppFailure<Map<String, ResolvedVariantPrice>>>());
+        expect(
+          (result as AppFailure<Map<String, ResolvedVariantPrice>>)
+              .failure
+              .code,
+          'invalid_resolve_variant_price_request',
+        );
+      });
+    });
   });
 }
 
@@ -164,6 +236,11 @@ final class _FakePriceListRepository implements PriceListRepository {
   _FakePriceListRepository(this._items);
 
   final List<PriceList> _items;
+
+  /// How many times [listByCompany] was actually called — the regression
+  /// guard for TASK-164's fix: resolving N variants of the same product must
+  /// call this exactly once, never once per variant.
+  int listByCompanyCallCount = 0;
 
   @override
   Future<AppResult<PriceList>> create({required PriceList priceList}) {
@@ -183,6 +260,7 @@ final class _FakePriceListRepository implements PriceListRepository {
     required String organizationId,
     required String companyId,
   }) async {
+    listByCompanyCallCount += 1;
     return AppSuccess<List<PriceList>>(
       _items
           .where(
@@ -205,6 +283,11 @@ final class _FakePriceListItemRepository implements PriceListItemRepository {
 
   final List<PriceListItem> _items;
 
+  /// Same regression guard as
+  /// [_FakePriceListRepository.listByCompanyCallCount], for the other shared
+  /// read [ResolvePriceForVariantUseCase.callForProduct] batches.
+  int listByProductCallCount = 0;
+
   @override
   Future<AppResult<List<PriceListItem>>> listByPriceList({
     required String organizationId,
@@ -220,6 +303,7 @@ final class _FakePriceListItemRepository implements PriceListItemRepository {
     required String companyId,
     required String productId,
   }) async {
+    listByProductCallCount += 1;
     return AppSuccess<List<PriceListItem>>(
       _items
           .where(
