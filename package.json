@@ -1,0 +1,12 @@
+{
+  "name": "vestipro-integration-suite",
+  "private": true,
+  "description": "Orquestra a suite completa de testes de integracao contra o Firebase Emulator Suite (TASK-162): Firestore/Storage Security Rules, Cloud Functions criticas (precificacao, numero de pedido, aprovacoes) e os testes de integracao client-side do app Flutter. Pensado para ser plugado diretamente num job de CI (TASK-165).",
+  "scripts": {
+    "test:rules:firestore": "firebase emulators:exec --only firestore \"npm --prefix firestore-tests test\"",
+    "test:rules:storage": "firebase emulators:exec --only firestore,storage \"npm --prefix storage-tests test\"",
+    "test:functions": "firebase emulators:exec --only auth,firestore \"npm --prefix functions test\"",
+    "test:flutter-integration": "firebase emulators:exec --only auth,firestore,storage,functions \"flutter test integration_test -d chrome\"",
+    "test:integration": "npm run test:rules:firestore && npm run test:rules:storage && npm run test:functions && npm run test:flutter-integration"
+  }
+}

@@ -383,6 +383,49 @@ describe('submitOrder', () => {
     expect(balanceSnapshot.data()?.physicalQuantity).toBe(8);
   }, 20000);
 
+  it(
+    'assigns unique, non-colliding sequential order numbers to two genuinely concurrent ' +
+      'submissions of two different orders (TASK-162 — unicidade sob concorrência)',
+    async () => {
+      await seedHappyPath();
+      const wrapped = testEnv.wrap(submitOrder);
+
+      const [first, second] = (await Promise.all([
+        wrapped(buildRequest(baseRequest({ orderId: 'order-1' }), authFor('rep-1'))),
+        wrapped(buildRequest(baseRequest({ orderId: 'order-2' }), authFor('rep-1'))),
+      ])) as SubmitOrderResponse[];
+      // Both submissions race on the same `orderNumberSequences/{companyId}`
+      // counter document; the emulator's real optimistic-concurrency
+      // transaction retry (not a mock) is what guarantees no duplicate is
+      // ever handed out here.
+
+      expect(first.orderId).not.toBe(second.orderId);
+      expect(first.orderNumber).not.toBe(second.orderNumber);
+      expect(new Set([first.orderNumber, second.orderNumber])).toEqual(
+        new Set(['000001', '000002']),
+      );
+
+      const ordersSnapshot = await db
+        .collection('organizations')
+        .doc('org-1')
+        .collection('orders')
+        .get();
+      expect(ordersSnapshot.docs).toHaveLength(2);
+      const orderNumbers = ordersSnapshot.docs.map((doc) => doc.data().orderNumber as string);
+      expect(new Set(orderNumbers).size).toBe(2);
+
+      const balanceSnapshot = await db
+        .collection('organizations')
+        .doc('org-1')
+        .collection('inventory')
+        .doc('variant-1_wh-1')
+        .get();
+      // Both submissions' stock consumed — 10 - 2 - 2 = 6.
+      expect(balanceSnapshot.data()?.physicalQuantity).toBe(6);
+    },
+    20000,
+  );
+
   it('rejects submission and persists nothing when the customer is not active', async () => {
     await seedOrganization('org-1');
     await seedMember('org-1', 'rep-1', 'SALES_REP');
