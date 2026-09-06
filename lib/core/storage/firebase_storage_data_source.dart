@@ -62,6 +62,22 @@ final class FirebaseStorageDataSource implements StorageDataSource {
   }
 
   @override
+  Future<Uint8List> downloadBytes({
+    required String path,
+    int maxSizeBytes = 10 * 1024 * 1024,
+  }) async {
+    try {
+      final data = await _storage.ref(path).getData(maxSizeBytes);
+      if (data == null) {
+        throw StateError('Storage object at "$path" returned no data.');
+      }
+      return data;
+    } on FirebaseException catch (exception, stackTrace) {
+      throw mapStorageExceptionToAppException(exception, stackTrace);
+    }
+  }
+
+  @override
   Future<void> deleteFile({required String path}) async {
     try {
       await _storage.ref(path).delete();

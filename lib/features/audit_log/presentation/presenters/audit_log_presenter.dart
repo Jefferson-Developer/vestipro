@@ -31,6 +31,7 @@ String auditActionLabel(AuditAction action) {
     AuditAction.promotionalCampaignUpdated => 'Campanha promocional alterada',
     AuditAction.promotionalCampaignEnded => 'Campanha promocional encerrada',
     AuditAction.targetUpdated => 'Meta alterada',
+    AuditAction.customerImportCompleted => 'Importação de clientes concluída',
   };
 }
 
@@ -50,6 +51,7 @@ String auditEntityLabel(AuditLogEntry entry) {
     'discountPolicy' => 'Política de desconto',
     'promotionalCampaign' => 'Campanha promocional',
     'target' => 'Meta',
+    'customerImportJob' => 'Importação de clientes',
     _ => entry.entityType,
   };
   return '$type ${entry.entityId}';

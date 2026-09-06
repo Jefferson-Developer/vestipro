@@ -1,0 +1,30 @@
+/// Public surface of `lib/features/customer_import/`.
+library;
+
+export 'domain/entities/customer_import_job.dart';
+export 'domain/entities/customer_import_mapping.dart';
+export 'domain/entities/customer_import_preview.dart';
+export 'domain/entities/customer_import_report.dart';
+export 'domain/entities/customer_import_row_report.dart';
+export 'domain/entities/customer_import_template.dart';
+export 'domain/repositories/customer_import_job_repository.dart';
+export 'domain/repositories/customer_import_template_repository.dart';
+export 'domain/services/customer_import_file_parser.dart';
+export 'domain/services/customer_import_mapping_validator.dart';
+export 'domain/usecases/delete_customer_import_template_use_case.dart';
+export 'domain/usecases/get_customer_import_job_report_use_case.dart';
+export 'domain/usecases/list_customer_import_jobs_use_case.dart';
+export 'domain/usecases/list_customer_import_templates_use_case.dart';
+export 'domain/usecases/parse_customer_import_file_use_case.dart';
+export 'domain/usecases/resolve_customer_import_duplicate_use_case.dart';
+export 'domain/usecases/save_customer_import_template_use_case.dart';
+export 'domain/usecases/start_customer_import_job_use_case.dart';
+export 'domain/usecases/watch_customer_import_job_use_case.dart';
+export 'domain/value_objects/customer_import_duplicate_resolution.dart';
+export 'domain/value_objects/customer_import_field.dart';
+export 'domain/value_objects/customer_import_job_status.dart';
+export 'domain/value_objects/customer_import_row_outcome.dart';
+export 'presentation/bloc/customer_import_bloc.dart';
+export 'presentation/bloc/customer_import_event.dart';
+export 'presentation/bloc/customer_import_state.dart';
+export 'presentation/pages/customer_import_page.dart';

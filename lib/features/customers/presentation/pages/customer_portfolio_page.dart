@@ -26,6 +26,7 @@ class CustomerPortfolioPage extends StatelessWidget {
     this.onCustomerSelected,
     this.onUrlStateChanged,
     this.createSegmentBloc,
+    this.onImportRequested,
     super.key,
   });
 
@@ -44,6 +45,12 @@ class CustomerPortfolioPage extends StatelessWidget {
   /// filters above the carteira filters. Kept optional so existing call
   /// sites that do not wire a [CustomerSegmentBloc] keep working unchanged.
   final CustomerSegmentBloc Function()? createSegmentBloc;
+
+  /// Navigates to `CustomerImportRoute` (TASK-167). Optional so existing
+  /// call sites keep compiling unchanged; when provided, an "Importar
+  /// clientes" action renders in the page header, itself gated by
+  /// `Capability.customerImport`.
+  final VoidCallback? onImportRequested;
 
   @override
   Widget build(BuildContext context) {
@@ -70,6 +77,9 @@ class CustomerPortfolioPage extends StatelessWidget {
             onUrlStateChanged: onUrlStateChanged,
             userId: userId,
             hasSegments: createSegmentBloc != null,
+            onImportRequested: onImportRequested,
+            permissionService: permissionService,
+            organizationId: organizationId,
           ),
         );
 
@@ -97,6 +107,9 @@ class _CustomerPortfolioScaffold extends StatelessWidget {
     required this.hasSegments,
     this.onCustomerSelected,
     this.onUrlStateChanged,
+    this.onImportRequested,
+    this.permissionService,
+    this.organizationId,
   });
 
   final String userId;
@@ -104,6 +117,15 @@ class _CustomerPortfolioScaffold extends StatelessWidget {
   final ValueChanged<Customer>? onCustomerSelected;
   final void Function(String searchQuery, CustomerPortfolioFilters filters)?
   onUrlStateChanged;
+
+  /// Navigates to `CustomerImportRoute` (TASK-167). Optional/`null`-safe so
+  /// existing call sites that do not wire it keep compiling unchanged;
+  /// gated below by `Capability.customerImport` via [permissionService]
+  /// (`AGENTS.md`: UI-side gating never replaces the server-side one, only
+  /// improves UX by hiding an action the caller cannot use anyway).
+  final VoidCallback? onImportRequested;
+  final PermissionService? permissionService;
+  final String? organizationId;
 
   @override
   Widget build(BuildContext context) {
@@ -118,6 +140,7 @@ class _CustomerPortfolioScaffold extends StatelessWidget {
           return Scaffold(
             body: AppAdminPageLayout(
               title: 'Carteira de clientes',
+              actions: _buildActions(context),
               filtersTitle: 'Filtros da carteira',
               filtersBuilder: (_) => _PortfolioFilters(
                 state: state,
@@ -133,6 +156,32 @@ class _CustomerPortfolioScaffold extends StatelessWidget {
         },
       ),
     );
+  }
+
+  List<Widget> _buildActions(BuildContext context) {
+    final onImport = onImportRequested;
+    final service = permissionService;
+    final orgId = organizationId;
+    if (onImport == null || service == null || orgId == null) {
+      return const <Widget>[];
+    }
+    return <Widget>[
+      PermissionBuilder(
+        permissionService: service,
+        organizationId: orgId,
+        userId: userId,
+        capability: Capability.customerImport,
+        builder: (context, granted) {
+          if (!granted) return const SizedBox.shrink();
+          return AppButton(
+            label: 'Importar clientes',
+            variant: AppButtonVariant.secondary,
+            leadingIcon: Icons.upload_file_outlined,
+            onPressed: onImport,
+          );
+        },
+      ),
+    ];
   }
 }
 

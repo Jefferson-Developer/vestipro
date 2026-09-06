@@ -36,6 +36,7 @@ class AppRouter {
     required this.acceptInvitePageBuilder,
     required this.catalogSharePublicPageBuilder,
     this.customerFormPageBuilder,
+    this.customerImportPageBuilder,
     this.productFormPageBuilder,
     this.customerPortfolioPageBuilder,
     this.customerDetailPageBuilder,
@@ -112,6 +113,11 @@ class AppRouter {
   targetDashboardPageBuilder;
   final Widget Function(BuildContext context, String orgId, String companyId)?
   customerFormPageBuilder;
+
+  /// Builds the customer-import wizard screen (TASK-167), given
+  /// `orgId`/`companyId` from [CustomerImportRoute].
+  final Widget Function(BuildContext context, String orgId, String companyId)?
+  customerImportPageBuilder;
   final Widget Function(BuildContext context, String orgId, String companyId)?
   productFormPageBuilder;
   final Widget Function(
@@ -943,6 +949,24 @@ class AppRouter {
         ),
         builder: (context, state) {
           final builder = customerFormPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: CustomerImportRoute.pathPattern,
+        name: CustomerImportRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.customerImport,
+        ),
+        builder: (context, state) {
+          final builder = customerImportPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,

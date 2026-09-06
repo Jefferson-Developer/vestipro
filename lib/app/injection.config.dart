@@ -126,6 +126,7 @@ import '../core/offline/domain/repositories/offline_package_status_repository.da
 import '../core/offline/presentation/cubit/offline_package_download_cubit.dart'
     as _i74;
 import '../core/performance/firebase_performance_monitor.dart' as _i387;
+import '../core/performance/performance.dart' as _i707;
 import '../core/performance/performance_monitor.dart' as _i1008;
 import '../core/permissions/permission_service.dart' as _i315;
 import '../core/permissions/permissions.dart' as _i47;
@@ -323,6 +324,58 @@ import '../features/crm/domain/usecases/register_crm_activity_use_case.dart'
 import '../features/crm/domain/usecases/reschedule_crm_task_use_case.dart'
     as _i711;
 import '../features/crm/presentation/bloc/crm_task_list_bloc.dart' as _i634;
+import '../features/customer_import/data/datasources/cloud_functions_customer_import_data_source.dart'
+    as _i524;
+import '../features/customer_import/data/datasources/customer_import_functions_data_source.dart'
+    as _i150;
+import '../features/customer_import/data/datasources/customer_import_job_data_source.dart'
+    as _i589;
+import '../features/customer_import/data/datasources/customer_import_template_data_source.dart'
+    as _i56;
+import '../features/customer_import/data/datasources/firestore_customer_import_job_data_source.dart'
+    as _i372;
+import '../features/customer_import/data/datasources/firestore_customer_import_template_data_source.dart'
+    as _i639;
+import '../features/customer_import/data/mappers/customer_import_job_mapper.dart'
+    as _i925;
+import '../features/customer_import/data/mappers/customer_import_report_mapper.dart'
+    as _i886;
+import '../features/customer_import/data/mappers/customer_import_template_mapper.dart'
+    as _i900;
+import '../features/customer_import/data/parsers/csv_customer_import_file_parser.dart'
+    as _i493;
+import '../features/customer_import/data/parsers/xlsx_customer_import_file_parser.dart'
+    as _i202;
+import '../features/customer_import/data/repositories/customer_import_job_repository_impl.dart'
+    as _i241;
+import '../features/customer_import/data/repositories/customer_import_template_repository_impl.dart'
+    as _i83;
+import '../features/customer_import/domain/repositories/customer_import_job_repository.dart'
+    as _i253;
+import '../features/customer_import/domain/repositories/customer_import_template_repository.dart'
+    as _i126;
+import '../features/customer_import/domain/services/customer_import_file_parser.dart'
+    as _i809;
+import '../features/customer_import/domain/usecases/delete_customer_import_template_use_case.dart'
+    as _i896;
+import '../features/customer_import/domain/usecases/get_customer_import_job_report_use_case.dart'
+    as _i169;
+import '../features/customer_import/domain/usecases/list_customer_import_jobs_use_case.dart'
+    as _i988;
+import '../features/customer_import/domain/usecases/list_customer_import_templates_use_case.dart'
+    as _i426;
+import '../features/customer_import/domain/usecases/parse_customer_import_file_use_case.dart'
+    as _i597;
+import '../features/customer_import/domain/usecases/resolve_customer_import_duplicate_use_case.dart'
+    as _i59;
+import '../features/customer_import/domain/usecases/save_customer_import_template_use_case.dart'
+    as _i551;
+import '../features/customer_import/domain/usecases/start_customer_import_job_use_case.dart'
+    as _i551;
+import '../features/customer_import/domain/usecases/watch_customer_import_job_use_case.dart'
+    as _i402;
+import '../features/customer_import/presentation/bloc/customer_import_bloc.dart'
+    as _i1037;
 import '../features/customers/customers.dart' as _i909;
 import '../features/customers/data/datasources/customer_form_draft_data_source.dart'
     as _i1036;
@@ -1328,6 +1381,7 @@ import '../features/users/presentation/bloc/team_list_bloc.dart' as _i831;
 import '../features/users/presentation/bloc/user_list_bloc.dart' as _i244;
 import '../features/users/presentation/bloc/user_role_edit_bloc.dart' as _i698;
 import '../features/users/users.dart' as _i220;
+import 'customer_import_parsers_module.dart' as _i405;
 import 'injection_module.dart' as _i212;
 import 'offline_package_loaders_module.dart' as _i418;
 import 'sync_module.dart' as _i350;
@@ -1345,8 +1399,18 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final appInjectionModule = _$AppInjectionModule();
     final syncModule = _$SyncModule();
+    final customerImportParsersModule = _$CustomerImportParsersModule();
     final insightModule = _$InsightModule();
     final offlinePackageLoadersModule = _$OfflinePackageLoadersModule();
+    gh.factory<_i925.CustomerImportJobMapper>(
+      () => const _i925.CustomerImportJobMapper(),
+    );
+    gh.factory<_i886.CustomerImportReportMapper>(
+      () => const _i886.CustomerImportReportMapper(),
+    );
+    gh.factory<_i900.CustomerImportTemplateMapper>(
+      () => const _i900.CustomerImportTemplateMapper(),
+    );
     gh.factory<_i588.AggregationSnapshotMapper>(
       () => const _i588.AggregationSnapshotMapper(),
     );
@@ -1419,6 +1483,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i519.CrmTaskMapper>(() => const _i519.CrmTaskMapper());
     gh.lazySingleton<_i905.NextBestActionService>(
       () => const _i905.NextBestActionService(),
+    );
+    gh.lazySingleton<_i493.CsvCustomerImportFileParser>(
+      () => const _i493.CsvCustomerImportFileParser(),
+    );
+    gh.lazySingleton<_i202.XlsxCustomerImportFileParser>(
+      () => const _i202.XlsxCustomerImportFileParser(),
     );
     gh.lazySingleton<_i258.CustomerFormDraftMapper>(
       () => const _i258.CustomerFormDraftMapper(),
@@ -1629,6 +1699,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i1015.ProductCollectionLinkRepository>(
       () => const _i654.SharedPreferencesProductCollectionLinkRepository(),
     );
+    gh.lazySingleton<List<_i809.CustomerImportFileParser>>(
+      () => customerImportParsersModule.customerImportFileParsers(
+        gh<_i493.CsvCustomerImportFileParser>(),
+        gh<_i202.XlsxCustomerImportFileParser>(),
+      ),
+    );
     gh.lazySingleton<_i836.TargetAlertDispatchRepository>(
       () => const _i369.SharedPreferencesTargetAlertDispatchRepository(),
     );
@@ -1729,6 +1805,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i639.FutureStockRepository>(
       () => _i1008.ProductVariantFutureStockRepository(
         gh<_i795.ProductVariantRepository>(),
+      ),
+    );
+    gh.factory<_i597.ParseCustomerImportFileUseCase>(
+      () => _i597.ParseCustomerImportFileUseCase(
+        gh<List<_i809.CustomerImportFileParser>>(),
       ),
     );
     gh.lazySingleton<_i969.XlsxIsolateEncoder>(
@@ -2552,6 +2633,11 @@ extension GetItInjectableX on _i174.GetIt {
       () =>
           _i980.FirestoreNotificationDataSource(gh<_i974.FirebaseFirestore>()),
     );
+    gh.lazySingleton<_i589.CustomerImportJobDataSource>(
+      () => _i372.FirestoreCustomerImportJobDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.lazySingleton<_i847.PortfolioAssignmentDataSource>(
       () => _i954.FirestorePortfolioAssignmentDataSource(
         gh<_i974.FirebaseFirestore>(),
@@ -2724,6 +2810,11 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i566.UserAccessUpdateResultMapper>(),
       ),
     );
+    gh.lazySingleton<_i56.CustomerImportTemplateDataSource>(
+      () => _i639.FirestoreCustomerImportTemplateDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.factory<_i41.CollectionListBloc>(
       () => _i41.CollectionListBloc(
         listCollections: gh<_i1023.ListCollectionsUseCase>(),
@@ -2829,6 +2920,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i603.ReactivateUserUseCase>(
       () => _i603.ReactivateUserUseCase(gh<_i33.UserAccessRepository>()),
     );
+    gh.lazySingleton<_i150.CustomerImportFunctionsDataSource>(
+      () => _i524.CloudFunctionsCustomerImportDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i794.AboutAppRepository>(
       () => _i1060.AboutAppRepositoryImpl(
         dataSource: gh<_i364.AboutAppDataSource>(),
@@ -2887,6 +2983,15 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i246.AuditLogEntryMapper>(),
       ),
     );
+    gh.lazySingleton<_i253.CustomerImportJobRepository>(
+      () => _i241.CustomerImportJobRepositoryImpl(
+        gh<_i589.CustomerImportJobDataSource>(),
+        gh<_i150.CustomerImportFunctionsDataSource>(),
+        gh<_i209.StorageDataSource>(),
+        gh<_i925.CustomerImportJobMapper>(),
+        gh<_i886.CustomerImportReportMapper>(),
+      ),
+    );
     gh.lazySingleton<_i262.UserRoleRepository>(
       () => _i53.UserRoleRepositoryImpl(
         dataSource: gh<_i176.UserRoleDataSource>(),
@@ -2939,13 +3044,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i753.AuditLogRepository>(),
       ),
     );
-    gh.factory<_i856.SubmitOrderUseCase>(
-      () => _i856.SubmitOrderUseCase(
-        gh<_i202.OrderSubmissionRepository>(),
-        gh<_i202.AnalyticsService>(),
-        gh<_i1008.PerformanceMonitor>(),
-      ),
-    );
     gh.factory<_i559.AcceptInviteUseCase>(
       () => _i559.AcceptInviteUseCase(gh<_i999.InviteAcceptanceRepository>()),
     );
@@ -2980,6 +3078,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i473.NotificationDataSource>(),
         gh<_i322.NotificationInboxLocalCache>(),
         gh<_i211.NotificationMapper>(),
+      ),
+    );
+    gh.factory<_i856.SubmitOrderUseCase>(
+      () => _i856.SubmitOrderUseCase(
+        gh<_i202.OrderSubmissionRepository>(),
+        gh<_i202.AnalyticsService>(),
+        gh<_i707.PerformanceMonitor>(),
       ),
     );
     gh.factory<_i450.CreateReportSchedule>(
@@ -3199,6 +3304,37 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i169.GetCustomerImportJobReportUseCase>(
+      () => _i169.GetCustomerImportJobReportUseCase(
+        gh<_i253.CustomerImportJobRepository>(),
+      ),
+    );
+    gh.factory<_i988.ListCustomerImportJobsUseCase>(
+      () => _i988.ListCustomerImportJobsUseCase(
+        gh<_i253.CustomerImportJobRepository>(),
+      ),
+    );
+    gh.factory<_i59.ResolveCustomerImportDuplicateUseCase>(
+      () => _i59.ResolveCustomerImportDuplicateUseCase(
+        gh<_i253.CustomerImportJobRepository>(),
+      ),
+    );
+    gh.factory<_i551.StartCustomerImportJobUseCase>(
+      () => _i551.StartCustomerImportJobUseCase(
+        gh<_i253.CustomerImportJobRepository>(),
+      ),
+    );
+    gh.factory<_i402.WatchCustomerImportJobUseCase>(
+      () => _i402.WatchCustomerImportJobUseCase(
+        gh<_i253.CustomerImportJobRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i126.CustomerImportTemplateRepository>(
+      () => _i83.CustomerImportTemplateRepositoryImpl(
+        gh<_i56.CustomerImportTemplateDataSource>(),
+        gh<_i900.CustomerImportTemplateMapper>(),
+      ),
+    );
     gh.factory<_i90.CreateAccountWithEmailAndPasswordUseCase>(
       () => _i90.CreateAccountWithEmailAndPasswordUseCase(
         gh<_i472.AuthRepository>(),
@@ -3370,6 +3506,21 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i450.PauseReportSchedule>(),
         gh<_i450.DeleteReportSchedule>(),
         gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i896.DeleteCustomerImportTemplateUseCase>(
+      () => _i896.DeleteCustomerImportTemplateUseCase(
+        gh<_i126.CustomerImportTemplateRepository>(),
+      ),
+    );
+    gh.factory<_i426.ListCustomerImportTemplatesUseCase>(
+      () => _i426.ListCustomerImportTemplatesUseCase(
+        gh<_i126.CustomerImportTemplateRepository>(),
+      ),
+    );
+    gh.factory<_i551.SaveCustomerImportTemplateUseCase>(
+      () => _i551.SaveCustomerImportTemplateUseCase(
+        gh<_i126.CustomerImportTemplateRepository>(),
       ),
     );
     gh.factory<_i98.DiscountPolicyCubit>(
@@ -3634,6 +3785,23 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i951.TargetVisibilityService(
         gh<_i220.PortfolioVisibilityService>(),
         gh<_i265.TeamRepository>(),
+      ),
+    );
+    gh.factory<_i1037.CustomerImportBloc>(
+      () => _i1037.CustomerImportBloc(
+        parseCustomerImportFile: gh<_i597.ParseCustomerImportFileUseCase>(),
+        listCustomerImportTemplates:
+            gh<_i426.ListCustomerImportTemplatesUseCase>(),
+        saveCustomerImportTemplate:
+            gh<_i551.SaveCustomerImportTemplateUseCase>(),
+        deleteCustomerImportTemplate:
+            gh<_i896.DeleteCustomerImportTemplateUseCase>(),
+        startCustomerImportJob: gh<_i551.StartCustomerImportJobUseCase>(),
+        watchCustomerImportJob: gh<_i402.WatchCustomerImportJobUseCase>(),
+        getCustomerImportJobReport:
+            gh<_i169.GetCustomerImportJobReportUseCase>(),
+        resolveCustomerImportDuplicate:
+            gh<_i59.ResolveCustomerImportDuplicateUseCase>(),
       ),
     );
     gh.factory<_i516.TeamFormBloc>(
@@ -4126,6 +4294,16 @@ extension GetItInjectableX on _i174.GetIt {
         getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
       ),
     );
+    gh.factory<_i331.ProductGridBloc>(
+      () => _i331.ProductGridBloc(
+        listCatalogProducts: gh<_i448.ListCatalogProductsUseCase>(),
+        getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
+        listVariantsByProduct: gh<_i530.ListProductVariantsByProductUseCase>(),
+        resolvePriceForVariant: gh<_i352.ResolvePriceForVariantUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+        performanceMonitor: gh<_i707.PerformanceMonitor>(),
+      ),
+    );
     gh.factory<_i293.TargetDashboardCubit>(
       () => _i293.TargetDashboardCubit(
         gh<_i951.TargetVisibilityService>(),
@@ -4177,16 +4355,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i455.PriceListRepository>(),
         gh<_i358.PaymentTermRepository>(),
         gh<_i385.GetVariantAvailabilityUseCase>(),
-      ),
-    );
-    gh.factory<_i331.ProductGridBloc>(
-      () => _i331.ProductGridBloc(
-        listCatalogProducts: gh<_i448.ListCatalogProductsUseCase>(),
-        getVariantAvailability: gh<_i385.GetVariantAvailabilityUseCase>(),
-        listVariantsByProduct: gh<_i530.ListProductVariantsByProductUseCase>(),
-        resolvePriceForVariant: gh<_i352.ResolvePriceForVariantUseCase>(),
-        analyticsService: gh<_i202.AnalyticsService>(),
-        performanceMonitor: gh<_i1008.PerformanceMonitor>(),
       ),
     );
     gh.factory<_i168.StartOrderDraftForCustomerUseCase>(
@@ -4301,6 +4469,8 @@ extension GetItInjectableX on _i174.GetIt {
 class _$AppInjectionModule extends _i212.AppInjectionModule {}
 
 class _$SyncModule extends _i350.SyncModule {}
+
+class _$CustomerImportParsersModule extends _i405.CustomerImportParsersModule {}
 
 class _$InsightModule extends _i676.InsightModule {}
 

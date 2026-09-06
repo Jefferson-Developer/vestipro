@@ -333,6 +333,61 @@ describe('organizations/{organizationId}/exports/{userId}/{fileName} (TASK-146)'
   });
 });
 
+describe('organizations/{organizationId}/customerImports/{jobId}/{fileName} (TASK-167)', () => {
+  const csvBytes = new Uint8Array([0x64, 0x6f, 0x63, 0x75, 0x6d, 0x65, 0x6e, 0x74]);
+
+  async function seedManagerA() {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/members/manager-a`)
+        .set(membershipDoc({ organizationId: ORG_A, userId: 'manager-a', roleName: 'SALES_MANAGER' }));
+    });
+  }
+
+  test('SALES_MANAGER (customer.import) envia o arquivo de origem da importação', async () => {
+    await seedManagerA();
+    const path = `organizations/${ORG_A}/customerImports/job-1/source_clientes.csv`;
+    await assertSucceeds(upload('manager-a', path, csvBytes, 'text/csv'));
+  });
+
+  test('SALES_REP (sem customer.import) não consegue enviar nem ler o arquivo de importação', async () => {
+    const path = `organizations/${ORG_A}/customerImports/job-1/source_clientes.csv`;
+    await seedFile(path, csvBytes, 'text/csv');
+    await assertFails(upload('rep-a', path, csvBytes, 'text/csv'));
+    const storage = testEnv.authenticatedContext('rep-a').storage();
+    await assertFails(getBytes(ref(storage, path)));
+  });
+
+  test('SALES_MANAGER lê o report.json gerado pela Cloud Function (Admin SDK)', async () => {
+    await seedManagerA();
+    const path = `organizations/${ORG_A}/customerImports/job-1/report.json`;
+    await seedFile(path, new Uint8Array([0x7b, 0x7d]), 'application/json');
+    const storage = testEnv.authenticatedContext('manager-a').storage();
+    await assertSucceeds(getBytes(ref(storage, path)));
+  });
+
+  test('rejeita um arquivo de importação maior que 15 MB, mesmo com content-type válido', async () => {
+    await seedManagerA();
+    const path = `organizations/${ORG_A}/customerImports/job-1/source_grande.csv`;
+    const oversized = new Uint8Array(15 * 1024 * 1024 + 1);
+    await assertFails(upload('manager-a', path, oversized, 'text/csv'));
+  });
+
+  test('rejeita um content-type fora da lista permitida (csv/xlsx)', async () => {
+    await seedManagerA();
+    const path = `organizations/${ORG_A}/customerImports/job-1/source_clientes.exe`;
+    await assertFails(upload('manager-a', path, csvBytes, 'application/x-msdownload'));
+  });
+
+  test('membro de outra organização não acessa o arquivo de importação (cross-tenant)', async () => {
+    const path = `organizations/${ORG_A}/customerImports/job-1/source_clientes.csv`;
+    await seedFile(path, csvBytes, 'text/csv');
+    const storage = testEnv.authenticatedContext('owner-b').storage();
+    await assertFails(getBytes(ref(storage, path)));
+  });
+});
+
 describe('deny by default', () => {
   test('path de mídia ainda não modelado nas rules é sempre negado', async () => {
     await assertFails(

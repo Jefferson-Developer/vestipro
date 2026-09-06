@@ -293,7 +293,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [ ] [TASK-166 — Realizar release MVP controlado](TASK-166-realizar-release-mvp-controlado.md) — Flutter Senior
 
 ### EPIC-22 — Importação e Integrações de Dados
-- [ ] [TASK-167 — Implementar importação de clientes via CSV/XLSX](TASK-167-implementar-importacao-de-clientes.md) — Flutter Senior + Front-end
+- [x] [TASK-167 — Implementar importação de clientes via CSV/XLSX](TASK-167-implementar-importacao-de-clientes.md) — Flutter Senior + Front-end
 - [ ] [TASK-168 — Implementar importação massiva de produtos](TASK-168-implementar-importacao-de-produtos.md) — Flutter Senior + Front-end
 - [ ] [TASK-169 — Criar framework de integração com ERPs](TASK-169-criar-framework-de-integracao-erp.md) — Flutter Senior
 - [ ] [TASK-170 — Implementar webhooks de saída](TASK-170-implementar-webhooks-de-saida.md) — Flutter Senior
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 165 / 220 tasks concluídas.
+**Progresso:** 166 / 220 tasks concluídas.

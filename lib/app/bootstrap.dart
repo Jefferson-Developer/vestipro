@@ -31,6 +31,7 @@ import '../features/authentication/presentation/bloc/login_bloc.dart';
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart';
 import '../features/audit_log/audit_log.dart';
 import '../features/catalog/catalog.dart';
+import '../features/customer_import/customer_import.dart';
 import '../features/customers/customers.dart';
 import '../features/catalog_share/catalog_share.dart';
 import '../features/dashboards/dashboards.dart';
@@ -862,6 +863,18 @@ class VestiProApp extends StatelessWidget {
                   createBloc: () => getIt<CustomerFormBloc>(),
                 ),
               ),
+          customerImportPageBuilder: (context, orgId, companyId) =>
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId: companyId,
+                child: CustomerImportPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  permissionService: getIt<PermissionService>(),
+                  createBloc: () => getIt<CustomerImportBloc>(),
+                ),
+              ),
           productFormPageBuilder: (context, orgId, companyId) {
             final currentUser = getIt<AuthRepository>().currentUser;
             return _withConnectivityIndicator(
@@ -909,6 +922,12 @@ class VestiProApp extends StatelessWidget {
                           queryParameters: filters.toQueryParameters(
                             search: searchQuery,
                           ),
+                        ).location,
+                      ),
+                      onImportRequested: () => context.go(
+                        CustomerImportRoute(
+                          orgId: orgId,
+                          companyId: companyId,
                         ).location,
                       ),
                     ),

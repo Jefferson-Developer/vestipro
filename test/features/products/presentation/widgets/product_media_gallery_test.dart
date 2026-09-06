@@ -196,6 +196,14 @@ final class _NoopStorageDataSource implements StorageDataSource {
   }
 
   @override
+  Future<Uint8List> downloadBytes({
+    required String path,
+    int maxSizeBytes = 10 * 1024 * 1024,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<void> deleteFile({required String path}) async {}
 }
 

@@ -104,6 +104,14 @@ enum Capability {
   /// [reportExport]-equivalent role independently at send time, never the
   /// creator's.
   reportSchedule,
+
+  /// Import a base of `Customer`s from a CSV/XLSX spreadsheet (TASK-167,
+  /// EPIC-22) — restricted to `OWNER`/`ADMIN`/`SALES_MANAGER`
+  /// (`RolePermissionMatrix`), the same "gestor" scope `tasks.md` describes
+  /// for this feature. Gates both the `CustomerImportPage` route and the
+  /// `startCustomerImportJob`/`resolveCustomerImportDuplicateRow` Cloud
+  /// Functions independently re-check server-side.
+  customerImport,
 }
 
 extension CapabilityCode on Capability {
@@ -151,6 +159,7 @@ extension CapabilityCode on Capability {
       Capability.reportShareTeam => 'report.share.team',
       Capability.reportShareOrganization => 'report.share.organization',
       Capability.reportSchedule => 'report.schedule',
+      Capability.customerImport => 'customer.import',
     };
   }
 }

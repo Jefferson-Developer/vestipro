@@ -13,7 +13,12 @@ export { validateInvite } from './invites/validate-invite';
 export { acceptInvite } from './invites/accept-invite';
 export { updateUserRole } from './admin/update-user-role';
 export { deactivateUser, reactivateUser } from './admin/update-user-access';
-export { recalculateCustomerScores } from './customers';
+export {
+  recalculateCustomerScores,
+  startCustomerImportJob,
+  processCustomerImportJob,
+  resolveCustomerImportDuplicateRow,
+} from './customers';
 export { createCatalogShareLink } from './catalog/create-catalog-share-link';
 export { getCatalogShareLink } from './catalog/get-catalog-share-link';
 export { registerCatalogShareOpen } from './catalog/register-catalog-share-open';

@@ -243,6 +243,47 @@ function savedReportDoc({
   };
 }
 
+function customerImportTemplateDoc({
+  organizationId,
+  name = 'Template padrão do ERP',
+  createdBy = 'manager-a',
+  updatedBy = createdBy,
+}) {
+  return {
+    organizationId,
+    name,
+    hasHeaderRow: true,
+    columnByField: { document: 0, legalName: 1, primaryEmail: 2 },
+    createdAt: now(),
+    createdBy,
+    updatedAt: now(),
+    updatedBy,
+  };
+}
+
+function customerImportJobDoc({ organizationId, companyId = 'company-a', createdBy = 'manager-a' }) {
+  return {
+    organizationId,
+    companyId,
+    fileName: 'clientes.csv',
+    storagePath: `organizations/${organizationId}/customerImports/job-1/source_clientes.csv`,
+    reportStoragePath: null,
+    templateId: null,
+    mapping: { hasHeaderRow: true, columnByField: { document: 0, legalName: 1 } },
+    status: 'queued',
+    totalRows: null,
+    processedRows: 0,
+    importedCount: 0,
+    rejectedCount: 0,
+    duplicateCount: 0,
+    errorMessage: null,
+    createdAt: now(),
+    createdBy,
+    startedAt: null,
+    completedAt: null,
+  };
+}
+
 function reportScheduleDoc({
   organizationId,
   companyId = 'company-a',
@@ -2223,5 +2264,128 @@ describe('users/{userId}/personalDataExports/{exportId} (TASK-158)', () => {
       requestedAt: now(),
     }));
     await assertFails(db.doc('users/rep-a/personalDataExports/export-1').update({ status: 'processing' }));
+  });
+});
+
+describe('organizations/{organizationId}/customerImportTemplates/{templateId}  (TASK-167)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/customerImportTemplates/template-a`)
+        .set(customerImportTemplateDoc({ organizationId: ORG_A }));
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_B}/customerImportTemplates/template-b`)
+        .set(customerImportTemplateDoc({ organizationId: ORG_B, createdBy: 'owner-b' }));
+    });
+  });
+
+  test('SALES_MANAGER (customer.import) lê e cria um template', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/customerImportTemplates/template-a`).get());
+    await assertSucceeds(
+      db
+        .doc(`organizations/${ORG_A}/customerImportTemplates/template-new`)
+        .set(customerImportTemplateDoc({ organizationId: ORG_A, createdBy: 'manager-a' })),
+    );
+  });
+
+  test('SALES_REP (sem customer.import) não lê nem cria um template', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/customerImportTemplates/template-a`).get());
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/customerImportTemplates/template-rep-new`)
+        .set(customerImportTemplateDoc({ organizationId: ORG_A, createdBy: 'rep-a' })),
+    );
+  });
+
+  test('membro da Org A não lê nem escreve o template da Org B, mesmo sabendo o id', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/customerImportTemplates/template-b`).get());
+  });
+
+  test('dono do template o atualiza; outro membro com a capability mas sem ser dono/ADMIN/OWNER não', async () => {
+    const ownerDb = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      ownerDb.doc(`organizations/${ORG_A}/customerImportTemplates/template-a`).update({
+        name: 'Template renomeado',
+        updatedBy: 'manager-a',
+      }),
+    );
+
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/customerImportTemplates/template-owner-a`)
+        .set(customerImportTemplateDoc({ organizationId: ORG_A, createdBy: 'owner-a' }));
+    });
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+    await assertSucceeds(
+      adminDb.doc(`organizations/${ORG_A}/customerImportTemplates/template-owner-a`).delete(),
+    );
+  });
+
+  test('SALES_MANAGER não é dono e não é OWNER/ADMIN — não edita nem exclui template de outro criador', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/customerImportTemplates/template-owner-a`)
+        .set(customerImportTemplateDoc({ organizationId: ORG_A, createdBy: 'owner-a' }));
+    });
+    const managerDb = testEnv.authenticatedContext('manager-a').firestore();
+    await assertFails(
+      managerDb.doc(`organizations/${ORG_A}/customerImportTemplates/template-owner-a`).update({
+        name: 'Tentativa indevida',
+        updatedBy: 'manager-a',
+      }),
+    );
+    await assertFails(
+      managerDb.doc(`organizations/${ORG_A}/customerImportTemplates/template-owner-a`).delete(),
+    );
+  });
+});
+
+describe('organizations/{organizationId}/customerImportJobs/{jobId}  (TASK-167)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/customerImportJobs/job-a`)
+        .set(customerImportJobDoc({ organizationId: ORG_A }));
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_B}/customerImportJobs/job-b`)
+        .set(customerImportJobDoc({ organizationId: ORG_B, createdBy: 'owner-b' }));
+    });
+  });
+
+  test('SALES_MANAGER (customer.import) lê o progresso do job', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/customerImportJobs/job-a`).get());
+  });
+
+  test('SALES_REP (sem customer.import) não lê o job', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/customerImportJobs/job-a`).get());
+  });
+
+  test('membro da Org A não lê o job da Org B, mesmo sabendo o id', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/customerImportJobs/job-b`).get());
+  });
+
+  test('nenhum papel — nem mesmo OWNER — cria, altera ou exclui um job diretamente (Admin SDK only)', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      ownerDb
+        .doc(`organizations/${ORG_A}/customerImportJobs/job-forged`)
+        .set(customerImportJobDoc({ organizationId: ORG_A, createdBy: 'owner-a' })),
+    );
+    await assertFails(
+      ownerDb.doc(`organizations/${ORG_A}/customerImportJobs/job-a`).update({ importedCount: 999999 }),
+    );
+    await assertFails(ownerDb.doc(`organizations/${ORG_A}/customerImportJobs/job-a`).delete());
   });
 });

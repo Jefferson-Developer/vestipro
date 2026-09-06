@@ -520,6 +520,18 @@ final class _InMemoryStorageDataSource implements StorageDataSource {
   }
 
   @override
+  Future<Uint8List> downloadBytes({
+    required String path,
+    int maxSizeBytes = 10 * 1024 * 1024,
+  }) async {
+    final bytes = _files[path];
+    if (bytes == null) {
+      throw StateError('No file at "$path" in this in-memory fake.');
+    }
+    return bytes;
+  }
+
+  @override
   Future<void> deleteFile({required String path}) async {
     _files.remove(path);
   }

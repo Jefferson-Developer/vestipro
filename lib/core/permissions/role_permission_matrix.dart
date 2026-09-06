@@ -66,6 +66,11 @@ abstract final class RolePermissionMatrix {
     // OWNER e ADMIN já a recebem via o conjunto completo/quase completo
     // acima.
     Capability.reportSchedule,
+    // TASK-167: SALES_MANAGER importa uma base de clientes via CSV/XLSX;
+    // OWNER e ADMIN já a recebem via o conjunto completo/quase completo
+    // acima. SALES_REP/SALES_ASSISTANT/FINANCE nunca a recebem — importação
+    // em massa é restrita ao "gestor" (tasks.md).
+    Capability.customerImport,
   };
 
   static const Set<Capability> _salesRepCapabilities = <Capability>{

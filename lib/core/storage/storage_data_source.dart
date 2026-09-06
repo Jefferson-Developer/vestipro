@@ -31,5 +31,16 @@ abstract interface class StorageDataSource {
 
   Future<String> getDownloadUrl({required String path});
 
+  /// Downloads the full contents of [path] into memory — only ever used for
+  /// small, bounded artifacts (e.g. a `CustomerImportReport` JSON file,
+  /// TASK-167), never a source spreadsheet/product media file. [maxSizeBytes]
+  /// is a hard ceiling the SDK itself enforces, so a caller mistake (or an
+  /// unexpectedly large object) fails fast instead of exhausting device
+  /// memory.
+  Future<Uint8List> downloadBytes({
+    required String path,
+    int maxSizeBytes = 10 * 1024 * 1024,
+  });
+
   Future<void> deleteFile({required String path});
 }

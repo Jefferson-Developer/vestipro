@@ -73,6 +73,12 @@ enum AuditAction {
   /// `TargetStatus.active`, so the audit trail also covers edits made while
   /// a target is still a draft.
   targetUpdated,
+
+  /// Recorded server-side by the `processCustomerImportJob` Cloud Function
+  /// (TASK-167, `functions/src/customers/process-customer-import-job.ts`)
+  /// once a `CustomerImportJob` finishes — same "never written by Dart
+  /// code, only parsed back" situation as [organizationCreated].
+  customerImportCompleted,
 }
 
 extension AuditActionCode on AuditAction {
@@ -112,6 +118,7 @@ extension AuditActionCode on AuditAction {
       AuditAction.promotionalCampaignUpdated => 'promotionalCampaign.updated',
       AuditAction.promotionalCampaignEnded => 'promotionalCampaign.ended',
       AuditAction.targetUpdated => 'target.updated',
+      AuditAction.customerImportCompleted => 'customerImport.completed',
     };
   }
 }

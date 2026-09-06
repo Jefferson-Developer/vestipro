@@ -73,7 +73,8 @@ service cloud.firestore {
               'customer.create', 'customer.update', 'customer.delete',
               'order.create', 'order.view', 'order.approve', 'discount.approveAboveLimit',
               'team.manage', 'report.export', 'report.viewSensitive',
-              'report.share.team', 'report.share.organization', 'report.schedule'
+              'report.share.team', 'report.share.organization', 'report.schedule',
+              'customer.import'
             ])
         || (roleName == 'SALES_REP' && capabilityCode in [
               'customer.create', 'customer.update', 'order.create', 'order.view',
@@ -853,6 +854,58 @@ service cloud.firestore {
         allow list: if canListCustomers(organizationId);
 
         // Customer creation/editing belongs to TASK-048/TASK-049/TASK-051.
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/customerImportTemplates/{templateId}
+      // (TASK-167) — reusable column-mapping templates. Low-risk config
+      // data (no financial/authorization impact), so — unlike
+      // `customerImportJobs` below — the client writes it directly, same
+      // "creator or admin manages, any active member with the capability
+      // may create" shape `savedReports` (TASK-145) already uses.
+      // -------------------------------------------------------------------
+
+      function canManageCustomerImportTemplate(organizationId) {
+        return isActiveMember(organizationId)
+          && (resource.data.createdBy == request.auth.uid || isOwnerOrAdmin(organizationId));
+      }
+
+      match /customerImportTemplates/{templateId} {
+        allow read: if hasCapability(organizationId, 'customer.import');
+
+        allow create: if hasCapability(organizationId, 'customer.import')
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.updatedBy == request.auth.uid;
+
+        allow update: if canManageCustomerImportTemplate(organizationId)
+          && hasCapability(organizationId, 'customer.import')
+          && unchanged('organizationId')
+          && unchanged('createdAt')
+          && unchanged('createdBy')
+          && request.resource.data.updatedBy == request.auth.uid;
+
+        allow delete: if canManageCustomerImportTemplate(organizationId)
+          && hasCapability(organizationId, 'customer.import');
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/customerImportJobs/{jobId}
+      // (TASK-167) — async customer-import job state. Exclusively written
+      // by `startCustomerImportJob`/`processCustomerImportJob`/
+      // `resolveCustomerImportDuplicateRow` (Admin SDK, bypasses these
+      // Rules), same "server owns every write" shape `invites`/
+      // `catalogShares` already use — a client-forged job document (fake
+      // `importedCount`, a `storagePath` pointing at another organization,
+      // ...) must never be possible.
+      // -------------------------------------------------------------------
+
+      match /customerImportJobs/{jobId} {
+        allow read: if hasCapability(organizationId, 'customer.import');
+
         allow create, update, delete: if false;
       }
 
