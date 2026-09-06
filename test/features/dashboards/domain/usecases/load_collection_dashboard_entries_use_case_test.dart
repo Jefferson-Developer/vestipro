@@ -106,80 +106,77 @@ void main() {
     });
   });
 
-  test(
-    'agrega faturamento/quantidade/desconto por coleção somando os meses do '
-    'seu próprio período, filtrando por collectionId',
-    () async {
-      final collection = buildCollection(
-        id: 'col-verao',
-        name: 'Verão 2026',
-        startDate: DateTime.utc(2026, 1, 1),
-        endDate: DateTime.utc(2026, 2, 28),
-        year: 2026,
-      );
-      aggregationRepository.snapshots.addAll(<AggregationSnapshot>[
-        productSnapshot(
-          periodKey: '2026-01',
-          productId: 'product-a',
-          collectionId: 'col-verao',
-          categoryId: 'cat-vestidos',
-          categoryName: 'Vestidos',
-          quantity: 10,
-          revenueGross: 1000,
-          revenueNet: 900,
-          discountAmount: 100,
-        ),
-        productSnapshot(
-          periodKey: '2026-02',
-          productId: 'product-b',
-          collectionId: 'col-verao',
-          categoryId: 'cat-camisas',
-          categoryName: 'Camisas',
-          quantity: 5,
-          revenueGross: 500,
-          revenueNet: 500,
-        ),
-        // Different coleção, must never be summed into col-verao's entry.
-        productSnapshot(
-          periodKey: '2026-01',
-          productId: 'product-c',
-          collectionId: 'col-inverno',
-          quantity: 99,
-          revenueGross: 9999,
-          revenueNet: 9999,
-        ),
-      ]);
+  test('agrega faturamento/quantidade/desconto por coleção somando os meses do '
+      'seu próprio período, filtrando por collectionId', () async {
+    final collection = buildCollection(
+      id: 'col-verao',
+      name: 'Verão 2026',
+      startDate: DateTime.utc(2026, 1, 1),
+      endDate: DateTime.utc(2026, 2, 28),
+      year: 2026,
+    );
+    aggregationRepository.snapshots.addAll(<AggregationSnapshot>[
+      productSnapshot(
+        periodKey: '2026-01',
+        productId: 'product-a',
+        collectionId: 'col-verao',
+        categoryId: 'cat-vestidos',
+        categoryName: 'Vestidos',
+        quantity: 10,
+        revenueGross: 1000,
+        revenueNet: 900,
+        discountAmount: 100,
+      ),
+      productSnapshot(
+        periodKey: '2026-02',
+        productId: 'product-b',
+        collectionId: 'col-verao',
+        categoryId: 'cat-camisas',
+        categoryName: 'Camisas',
+        quantity: 5,
+        revenueGross: 500,
+        revenueNet: 500,
+      ),
+      // Different coleção, must never be summed into col-verao's entry.
+      productSnapshot(
+        periodKey: '2026-01',
+        productId: 'product-c',
+        collectionId: 'col-inverno',
+        quantity: 99,
+        revenueGross: 9999,
+        revenueNet: 9999,
+      ),
+    ]);
 
-      final result = await useCase(
-        organizationId: organizationId,
-        companyId: companyId,
-        collections: <Collection>[collection],
-      );
-      final entries =
-          (result as AppSuccess<List<CollectionDashboardEntry>>).value;
-      expect(entries, hasLength(1));
-      final entry = entries.single;
+    final result = await useCase(
+      organizationId: organizationId,
+      companyId: companyId,
+      collections: <Collection>[collection],
+    );
+    final entries =
+        (result as AppSuccess<List<CollectionDashboardEntry>>).value;
+    expect(entries, hasLength(1));
+    final entry = entries.single;
 
-      expect(entry.hasDefinedPeriod, isTrue);
-      expect(entry.revenueGross, 1500);
-      expect(entry.revenueNet, 1400);
-      expect(entry.quantitySold, 15);
-      expect(entry.orderCount, 2);
-      expect(entry.discountAmount, 100);
-      expect(entry.hasSalesData, isTrue);
+    expect(entry.hasDefinedPeriod, isTrue);
+    expect(entry.revenueGross, 1500);
+    expect(entry.revenueNet, 1400);
+    expect(entry.quantitySold, 15);
+    expect(entry.orderCount, 2);
+    expect(entry.discountAmount, 100);
+    expect(entry.hasSalesData, isTrue);
 
-      // Mix médio de categorias soma ~100% e nunca inclui a outra coleção.
-      final totalMixPercentage = entry.categoryMix.fold<double>(
-        0,
-        (sum, mix) => sum + mix.percentage,
-      );
-      expect(totalMixPercentage, closeTo(100, 0.001));
-      expect(
-        entry.categoryMix.map((mix) => mix.categoryName),
-        containsAll(<String>['Vestidos', 'Camisas']),
-      );
-    },
-  );
+    // Mix médio de categorias soma ~100% e nunca inclui a outra coleção.
+    final totalMixPercentage = entry.categoryMix.fold<double>(
+      0,
+      (sum, mix) => sum + mix.percentage,
+    );
+    expect(totalMixPercentage, closeTo(100, 0.001));
+    expect(
+      entry.categoryMix.map((mix) => mix.categoryName),
+      containsAll(<String>['Vestidos', 'Camisas']),
+    );
+  });
 
   test(
     'compara duas ou mais coleções, cada uma sobre o seu próprio período',
@@ -248,9 +245,8 @@ void main() {
         companyId: companyId,
         collections: <Collection>[collection],
       );
-      final entry = (result as AppSuccess<List<CollectionDashboardEntry>>)
-          .value
-          .single;
+      final entry =
+          (result as AppSuccess<List<CollectionDashboardEntry>>).value.single;
       expect(entry.hasSalesData, isFalse);
       expect(entry.revenueNet, 0);
       expect(entry.quantitySold, 0);
@@ -258,29 +254,25 @@ void main() {
     },
   );
 
-  test(
-    'coleção sem startDate nunca dispara uma leitura de agregação, e vem '
-    'como período não definido',
-    () async {
-      final collection = buildCollection(id: 'col-sem-data', name: 'Rascunho');
+  test('coleção sem startDate nunca dispara uma leitura de agregação, e vem '
+      'como período não definido', () async {
+    final collection = buildCollection(id: 'col-sem-data', name: 'Rascunho');
 
-      final result = await useCase(
-        organizationId: organizationId,
-        companyId: companyId,
-        collections: <Collection>[collection],
-      );
-      final entry = (result as AppSuccess<List<CollectionDashboardEntry>>)
-          .value
-          .single;
-      expect(entry.hasDefinedPeriod, isFalse);
-      expect(entry.margin.status, ExecutiveDashboardMetricStatus.notCalculated);
-      expect(
-        entry.sellThrough.status,
-        ExecutiveDashboardMetricStatus.notCalculated,
-      );
-      expect(aggregationRepository.periodKeysQueried, isEmpty);
-    },
-  );
+    final result = await useCase(
+      organizationId: organizationId,
+      companyId: companyId,
+      collections: <Collection>[collection],
+    );
+    final entry =
+        (result as AppSuccess<List<CollectionDashboardEntry>>).value.single;
+    expect(entry.hasDefinedPeriod, isFalse);
+    expect(entry.margin.status, ExecutiveDashboardMetricStatus.notCalculated);
+    expect(
+      entry.sellThrough.status,
+      ExecutiveDashboardMetricStatus.notCalculated,
+    );
+    expect(aggregationRepository.periodKeysQueried, isEmpty);
+  });
 
   group('sell-through (TASK-090/TASK-094)', () {
     final collection = buildCollection(
@@ -301,68 +293,44 @@ void main() {
         companyId: companyId,
         collections: <Collection>[collection],
       );
-      final entry = (result as AppSuccess<List<CollectionDashboardEntry>>)
-          .value
-          .single;
-      expect(entry.sellThrough.status, ExecutiveDashboardMetricStatus.available);
+      final entry =
+          (result as AppSuccess<List<CollectionDashboardEntry>>).value.single;
+      expect(
+        entry.sellThrough.status,
+        ExecutiveDashboardMetricStatus.available,
+      );
       expect(entry.sellThrough.value, closeTo(42, 0.001));
     });
 
-    test(
-      'fica notCalculated quando não há saldo inicial de estoque '
-      '(nenhum snapshot de giro ainda gerado)',
-      () async {
-        stockTurnoverRepository.snapshot = null;
+    test('fica notCalculated quando não há saldo inicial de estoque '
+        '(nenhum snapshot de giro ainda gerado)', () async {
+      stockTurnoverRepository.snapshot = null;
 
-        final result = await useCase(
-          organizationId: organizationId,
-          companyId: companyId,
-          collections: <Collection>[collection],
-        );
-        final entry = (result as AppSuccess<List<CollectionDashboardEntry>>)
-            .value
-            .single;
-        expect(
-          entry.sellThrough.status,
-          ExecutiveDashboardMetricStatus.notCalculated,
-        );
-      },
-    );
+      final result = await useCase(
+        organizationId: organizationId,
+        companyId: companyId,
+        collections: <Collection>[collection],
+      );
+      final entry =
+          (result as AppSuccess<List<CollectionDashboardEntry>>).value.single;
+      expect(
+        entry.sellThrough.status,
+        ExecutiveDashboardMetricStatus.notCalculated,
+      );
+    });
 
-    test(
-      'fica failed (nunca bloqueia os demais KPIs) quando a leitura de giro '
-      'falha',
-      () async {
-        stockTurnoverRepository.failing = true;
-        aggregationRepository.snapshots.add(
-          productSnapshot(
-            periodKey: '2026-01',
-            productId: 'product-a',
-            collectionId: 'col-verao',
-            quantity: 10,
-            revenueGross: 1000,
-            revenueNet: 1000,
-          ),
-        );
-
-        final result = await useCase(
-          organizationId: organizationId,
-          companyId: companyId,
-          collections: <Collection>[collection],
-        );
-        final entry = (result as AppSuccess<List<CollectionDashboardEntry>>)
-            .value
-            .single;
-        expect(entry.sellThrough.status, ExecutiveDashboardMetricStatus.failed);
-        // A falha de giro (secundária) nunca zera o faturamento já lido.
-        expect(entry.revenueNet, 1000);
-      },
-    );
-
-    test('sellThroughRate zero (saldo zerado) nunca vira notCalculated', () async {
-      stockTurnoverRepository.snapshot = _turnoverSnapshot(
-        scopeId: 'col-verao',
-        sellThroughRate: 0,
+    test('fica failed (nunca bloqueia os demais KPIs) quando a leitura de giro '
+        'falha', () async {
+      stockTurnoverRepository.failing = true;
+      aggregationRepository.snapshots.add(
+        productSnapshot(
+          periodKey: '2026-01',
+          productId: 'product-a',
+          collectionId: 'col-verao',
+          quantity: 10,
+          revenueGross: 1000,
+          revenueNet: 1000,
+        ),
       );
 
       final result = await useCase(
@@ -370,12 +338,35 @@ void main() {
         companyId: companyId,
         collections: <Collection>[collection],
       );
-      final entry = (result as AppSuccess<List<CollectionDashboardEntry>>)
-          .value
-          .single;
-      expect(entry.sellThrough.status, ExecutiveDashboardMetricStatus.available);
-      expect(entry.sellThrough.value, 0);
+      final entry =
+          (result as AppSuccess<List<CollectionDashboardEntry>>).value.single;
+      expect(entry.sellThrough.status, ExecutiveDashboardMetricStatus.failed);
+      // A falha de giro (secundária) nunca zera o faturamento já lido.
+      expect(entry.revenueNet, 1000);
     });
+
+    test(
+      'sellThroughRate zero (saldo zerado) nunca vira notCalculated',
+      () async {
+        stockTurnoverRepository.snapshot = _turnoverSnapshot(
+          scopeId: 'col-verao',
+          sellThroughRate: 0,
+        );
+
+        final result = await useCase(
+          organizationId: organizationId,
+          companyId: companyId,
+          collections: <Collection>[collection],
+        );
+        final entry =
+            (result as AppSuccess<List<CollectionDashboardEntry>>).value.single;
+        expect(
+          entry.sellThrough.status,
+          ExecutiveDashboardMetricStatus.available,
+        );
+        expect(entry.sellThrough.value, 0);
+      },
+    );
   });
 
   test('propaga falha do repositório de agregação', () async {

@@ -170,9 +170,7 @@ void main() {
           asOf: asOf,
           dataset: InsightDataset(
             settings: const InsightOrganizationSettings(),
-            customerGrowthSnapshots: <InsightCustomerGrowthSnapshot>[
-              snapshot,
-            ],
+            customerGrowthSnapshots: <InsightCustomerGrowthSnapshot>[snapshot],
           ),
         );
         // Default settings require 3 consecutive growth readings (4
@@ -188,9 +186,7 @@ void main() {
               customerGrowthMinConsecutivePeriods: 2,
               customerGrowthMinimumAverageRate: 0.05,
             ),
-            customerGrowthSnapshots: <InsightCustomerGrowthSnapshot>[
-              snapshot,
-            ],
+            customerGrowthSnapshots: <InsightCustomerGrowthSnapshot>[snapshot],
           ),
         );
 

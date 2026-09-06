@@ -244,6 +244,43 @@ não foi registrado no Firebase Console para o projeto `vestipro` — enquanto i
 Web roda sem token de App Check, com Security Rules/RBAC continuando a autorizar normalmente). App
 Check é uma camada adicional, nunca um substituto do RBAC/Security Rules já existentes.
 
+## CI/CD
+
+Pipeline de CI em [`.github/workflows/ci.yml`](.github/workflows/ci.yml) (TASK-165), roda em toda
+PR contra `main` e em todo push em `main`:
+
+| Job | O que valida | Reprodução local |
+|---|---|---|
+| `quality` | `dart format`, `flutter analyze`, marcadores TODO/FIXME (`scripts/check.ps1`), `flutter test --coverage`, relatório de cobertura | `./scripts/check.ps1` e `flutter test --coverage` |
+| `functions-static` | `eslint`/`tsc` de `functions/` | `npm run lint`/`npx tsc --noEmit` dentro de `functions/` |
+| `dependency-audit` | `npm audit --audit-level=high` em `functions/`, `firestore-tests/`, `storage-tests/` | `npm audit --audit-level=high` dentro de cada pasta |
+| `integration-tests` | Firestore/Storage Security Rules, Cloud Functions críticas (preço, número de pedido, aprovações) e datasources Flutter, tudo contra o Firebase Emulator Suite real | `npm run test:integration` (raiz do repositório, TASK-162; exige Java) |
+| `build-android` | `flutter build appbundle` para os 3 flavors (dev/staging/prod) | comandos da seção [Android](#android) acima |
+| `build-web` | `flutter build web` para os 3 ambientes | comandos da seção [Web](#web) acima |
+| `all-checks-passed` | Agregador único para exigir como *required status check* na proteção da branch `main` | — |
+
+### Secrets necessários no repositório GitHub
+
+`lib/firebase_options.dart` e `android/app/google-services.json` são gitignorados (seção
+"Configuração local" acima) e por isso não existem no runner de CI por padrão — são
+reconstruídos a partir de secrets pela action `.github/actions/setup-firebase-config`:
+
+| Secret | Conteúdo | Usado por |
+|---|---|---|
+| `FIREBASE_OPTIONS_DART_BASE64` | `base64 -w0 lib/firebase_options.dart` | todos os jobs que compilam/testam Dart |
+| `GOOGLE_SERVICES_JSON_BASE64` | `base64 -w0 android/app/google-services.json` | `build-android` |
+| `FIREBASE_TOKEN` (opcional) | Token de `firebase login:ci`, só se o Firebase CLI exigir autenticação não-interativa para o projeto `vestipro` ao subir o Emulator Suite | `integration-tests` |
+
+Sem `FIREBASE_OPTIONS_DART_BASE64` configurado, todo job falha cedo com um erro explícito (a
+action recusa continuar em silêncio). Nenhum desses valores é uma credencial de produção com
+poder de escrita — são identificadores de app Firebase client-side (ver
+[chaves de API do Firebase](https://firebase.google.com/docs/projects/api-keys#api-keys-for-firebase-are-different));
+o Emulator Suite nunca toca o projeto real `vestipro` (ADR-0002).
+
+Detalhes completos, decisões e riscos conhecidos (inclusive o que este pipeline ainda não pôde ser
+validado de ponta a ponta em execução real, por limitação do ambiente que o criou):
+[`docs/tasks/TASK-165-criar-pipeline-ci-cd-CONCLUIDA.md`](docs/tasks/TASK-165-criar-pipeline-ci-cd-CONCLUIDA.md).
+
 ## Documentação
 
 - Protocolo de execução do backlog: [`AGENTS.md`](AGENTS.md)

@@ -89,8 +89,8 @@ void main() {
         dashboard.regions.single.customerIds,
         containsAll(<String>['c1', 'c2', 'c3']),
       );
-    expect(dashboard.regions.single.topProducts.first.name, 'Camisa');
-    expect(dashboard.hasMapData, isFalse);
+      expect(dashboard.regions.single.topProducts.first.name, 'Camisa');
+      expect(dashboard.hasMapData, isFalse);
     },
   );
 

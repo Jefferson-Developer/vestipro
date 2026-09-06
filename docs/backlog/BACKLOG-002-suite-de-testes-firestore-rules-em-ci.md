@@ -1,8 +1,20 @@
 # BACKLOG-002 — Rodar a suíte de testes de Firestore Rules em CI
 
-**Status:** ⬜ Pendente
+**Status:** ✅ Resolvido pela TASK-165 (pipeline de CI/CD, `.github/workflows/ci.yml`, job
+`integration-tests`).
 **Origem:** correção do bug "owner recebe 'sem permissão'" (nova regra `members.list` em
 `firestore.rules`, TASK-030).
+
+## Resolução
+
+A TASK-165 criou `.github/workflows/ci.yml` com um job `integration-tests` (Java 17 via
+`actions/setup-java`) que roda `npm run test:integration` a partir da raiz do repositório — o
+mesmo orquestrador já preparado para isso pela TASK-162 — cobrindo `firestore-tests/`,
+`storage-tests/`, `functions/test/` (Cloud Functions críticas) e `integration_test/` (client
+Flutter) contra o Firebase Emulator Suite real em toda PR e todo push em `main`. Este ambiente de
+execução (sem Java instalado) não pôde confirmar a execução real e verde desse job específico —
+ver "Riscos" em `docs/tasks/TASK-165-criar-pipeline-ci-cd-CONCLUIDA.md` — mas a automação em si
+está criada e resolve o gap descrito abaixo (suíte só rodava manualmente).
 
 ## Contexto
 

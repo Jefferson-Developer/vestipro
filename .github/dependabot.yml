@@ -1,0 +1,51 @@
+version: 2
+updates:
+  # App Flutter/Dart (lib/, pubspec.yaml).
+  - package-ecosystem: 'pub'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+    labels:
+      - 'dependencies'
+      - 'dart'
+
+  # Cloud Functions for Firebase (TASK-015).
+  - package-ecosystem: 'npm'
+    directory: '/functions'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+    labels:
+      - 'dependencies'
+      - 'functions'
+
+  # Firestore Security Rules tests (TASK-030).
+  - package-ecosystem: 'npm'
+    directory: '/firestore-tests'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+    labels:
+      - 'dependencies'
+      - 'firestore-rules'
+
+  # Storage Security Rules tests (TASK-031).
+  - package-ecosystem: 'npm'
+    directory: '/storage-tests'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 5
+    labels:
+      - 'dependencies'
+      - 'storage-rules'
+
+  # Actions usadas pelo pipeline de CI (TASK-165).
+  - package-ecosystem: 'github-actions'
+    directory: '/'
+    schedule:
+      interval: 'weekly'
+    open-pull-requests-limit: 10
+    labels:
+      - 'dependencies'
+      - 'ci'

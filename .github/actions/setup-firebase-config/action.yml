@@ -1,0 +1,39 @@
+name: 'Setup Firebase client config'
+description: >-
+  Materializes lib/firebase_options.dart and (optionally) android/app/google-services.json from
+  base64-encoded repository secrets. Both files are intentionally gitignored (ADR-0002, TASK-010):
+  they are generated locally per machine by `flutterfire configure`/the Firebase console, never
+  committed. Their content is Firebase *client-side* app configuration (apiKey/appId/projectId per
+  platform) rather than a privileged credential (see
+  https://firebase.google.com/docs/projects/api-keys#api-keys-for-firebase-are-different), but this
+  repository's own decision keeps them out of git, so CI reconstructs them from secrets instead of
+  committing them, and only for the lifetime of the job that needs them.
+
+inputs:
+  firebase-options-dart-base64:
+    description: 'Base64-encoded content of lib/firebase_options.dart. Required for every job that compiles/analyzes/tests Dart code, since lib/app/bootstrap.dart imports it.'
+    required: true
+  google-services-json-base64:
+    description: 'Base64-encoded content of android/app/google-services.json. Only required for jobs that run an Android Gradle build (flutter build apk/appbundle).'
+    required: false
+    default: ''
+
+runs:
+  using: 'composite'
+  steps:
+    - name: Write lib/firebase_options.dart
+      shell: bash
+      run: |
+        set -euo pipefail
+        if [ -z "${{ inputs.firebase-options-dart-base64 }}" ]; then
+          echo "::error::Missing secret FIREBASE_OPTIONS_DART_BASE64. See docs/tasks/TASK-165-criar-pipeline-ci-cd-CONCLUIDA.md (section 'Secrets necessarios') for how to generate and register it."
+          exit 1
+        fi
+        echo "${{ inputs.firebase-options-dart-base64 }}" | base64 --decode > lib/firebase_options.dart
+
+    - name: Write android/app/google-services.json
+      if: ${{ inputs.google-services-json-base64 != '' }}
+      shell: bash
+      run: |
+        set -euo pipefail
+        echo "${{ inputs.google-services-json-base64 }}" | base64 --decode > android/app/google-services.json
