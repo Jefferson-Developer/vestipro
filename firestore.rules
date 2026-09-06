@@ -1013,6 +1013,53 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/productImportTemplates/{templateId}
+      // (TASK-168) — reusable column-mapping templates for the product
+      // import wizard. Same low-risk, client-writable config shape as
+      // `customerImportTemplates` above.
+      // -------------------------------------------------------------------
+
+      function canManageProductImportTemplate(organizationId) {
+        return isActiveMember(organizationId)
+          && (resource.data.createdBy == request.auth.uid || isOwnerOrAdmin(organizationId));
+      }
+
+      match /productImportTemplates/{templateId} {
+        allow read: if hasCapability(organizationId, 'product.import');
+
+        allow create: if hasCapability(organizationId, 'product.import')
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.name is string
+          && request.resource.data.name.size() > 0
+          && request.resource.data.createdBy == request.auth.uid
+          && request.resource.data.updatedBy == request.auth.uid;
+
+        allow update: if canManageProductImportTemplate(organizationId)
+          && hasCapability(organizationId, 'product.import')
+          && unchanged('organizationId')
+          && unchanged('createdAt')
+          && unchanged('createdBy')
+          && request.resource.data.updatedBy == request.auth.uid;
+
+        allow delete: if canManageProductImportTemplate(organizationId)
+          && hasCapability(organizationId, 'product.import');
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/productImportJobs/{jobId}  (TASK-168)
+      // — async product-import job state. Exclusively written by
+      // `startProductImportJob`/`processProductImportJob` (Admin SDK, bypasses
+      // these Rules), same "server owns every write" shape
+      // `customerImportJobs` above already uses.
+      // -------------------------------------------------------------------
+
+      match /productImportJobs/{jobId} {
+        allow read: if hasCapability(organizationId, 'product.import');
+
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/priceLists/{priceListId}  (TASK-083)
       // -------------------------------------------------------------------
       //

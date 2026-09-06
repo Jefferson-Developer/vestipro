@@ -79,6 +79,11 @@ enum AuditAction {
   /// once a `CustomerImportJob` finishes — same "never written by Dart
   /// code, only parsed back" situation as [organizationCreated].
   customerImportCompleted,
+
+  /// Recorded server-side by the `processProductImportJob` Cloud Function
+  /// (TASK-168, `functions/src/products/process-product-import-job.ts`)
+  /// once a `ProductImportJob` finishes.
+  productImportCompleted,
 }
 
 extension AuditActionCode on AuditAction {
@@ -119,6 +124,7 @@ extension AuditActionCode on AuditAction {
       AuditAction.promotionalCampaignEnded => 'promotionalCampaign.ended',
       AuditAction.targetUpdated => 'target.updated',
       AuditAction.customerImportCompleted => 'customerImport.completed',
+      AuditAction.productImportCompleted => 'productImport.completed',
     };
   }
 }

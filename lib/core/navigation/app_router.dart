@@ -38,6 +38,7 @@ class AppRouter {
     this.customerFormPageBuilder,
     this.customerImportPageBuilder,
     this.productFormPageBuilder,
+    this.productImportPageBuilder,
     this.customerPortfolioPageBuilder,
     this.customerDetailPageBuilder,
     this.catalogBrowsePageBuilder,
@@ -120,6 +121,11 @@ class AppRouter {
   customerImportPageBuilder;
   final Widget Function(BuildContext context, String orgId, String companyId)?
   productFormPageBuilder;
+
+  /// Builds the product-import wizard screen (TASK-168), given
+  /// `orgId`/`companyId` from [ProductImportRoute].
+  final Widget Function(BuildContext context, String orgId, String companyId)?
+  productImportPageBuilder;
   final Widget Function(
     BuildContext context,
     String orgId,
@@ -967,6 +973,24 @@ class AppRouter {
         ),
         builder: (context, state) {
           final builder = customerImportPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: ProductImportRoute.pathPattern,
+        name: ProductImportRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.productImport,
+        ),
+        builder: (context, state) {
+          final builder = productImportPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,

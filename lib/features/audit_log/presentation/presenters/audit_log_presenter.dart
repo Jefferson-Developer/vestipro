@@ -32,6 +32,7 @@ String auditActionLabel(AuditAction action) {
     AuditAction.promotionalCampaignEnded => 'Campanha promocional encerrada',
     AuditAction.targetUpdated => 'Meta alterada',
     AuditAction.customerImportCompleted => 'Importação de clientes concluída',
+    AuditAction.productImportCompleted => 'Importação de produtos concluída',
   };
 }
 

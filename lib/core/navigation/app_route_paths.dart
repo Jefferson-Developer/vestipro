@@ -195,6 +195,22 @@ final class CustomerImportRoute extends AppRoute {
   String get location => '/org/$orgId/companies/$companyId/customers/import';
 }
 
+/// Product-import wizard route (TASK-168, EPIC-22), scoped by Organization
+/// and Company. Protected in [AppRouter] by `product.import`
+/// (OWNER/ADMIN only, see `RolePermissionMatrix`).
+final class ProductImportRoute extends AppRoute {
+  const ProductImportRoute({required this.orgId, required this.companyId});
+
+  final String orgId;
+  final String companyId;
+
+  static const name = 'productImport';
+  static const pathPattern = '/org/:orgId/companies/:companyId/products/import';
+
+  @override
+  String get location => '/org/$orgId/companies/$companyId/products/import';
+}
+
 /// Product creation form route (TASK-065), scoped by Organization and Company.
 /// Protected in [AppRouter] by `catalog.manage`.
 final class ProductFormRoute extends AppRoute {

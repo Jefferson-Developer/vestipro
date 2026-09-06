@@ -19,6 +19,7 @@ export {
   processCustomerImportJob,
   resolveCustomerImportDuplicateRow,
 } from './customers';
+export { startProductImportJob, processProductImportJob } from './products';
 export { createCatalogShareLink } from './catalog/create-catalog-share-link';
 export { getCatalogShareLink } from './catalog/get-catalog-share-link';
 export { registerCatalogShareOpen } from './catalog/register-catalog-share-open';

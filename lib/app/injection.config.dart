@@ -1030,6 +1030,56 @@ import '../features/pricing/presentation/cubit/price_list_item_batch_cubit.dart'
 import '../features/pricing/presentation/cubit/promotional_campaign_cubit.dart'
     as _i75;
 import '../features/pricing/pricing.dart' as _i445;
+import '../features/product_import/data/datasources/cloud_functions_product_import_data_source.dart'
+    as _i508;
+import '../features/product_import/data/datasources/firestore_product_import_job_data_source.dart'
+    as _i498;
+import '../features/product_import/data/datasources/firestore_product_import_template_data_source.dart'
+    as _i179;
+import '../features/product_import/data/datasources/product_import_functions_data_source.dart'
+    as _i327;
+import '../features/product_import/data/datasources/product_import_job_data_source.dart'
+    as _i684;
+import '../features/product_import/data/datasources/product_import_template_data_source.dart'
+    as _i205;
+import '../features/product_import/data/mappers/product_import_job_mapper.dart'
+    as _i897;
+import '../features/product_import/data/mappers/product_import_report_mapper.dart'
+    as _i962;
+import '../features/product_import/data/mappers/product_import_template_mapper.dart'
+    as _i51;
+import '../features/product_import/data/parsers/csv_product_import_file_parser.dart'
+    as _i962;
+import '../features/product_import/data/parsers/xlsx_product_import_file_parser.dart'
+    as _i888;
+import '../features/product_import/data/repositories/product_import_job_repository_impl.dart'
+    as _i671;
+import '../features/product_import/data/repositories/product_import_template_repository_impl.dart'
+    as _i679;
+import '../features/product_import/domain/repositories/product_import_job_repository.dart'
+    as _i523;
+import '../features/product_import/domain/repositories/product_import_template_repository.dart'
+    as _i1033;
+import '../features/product_import/domain/services/product_import_file_parser.dart'
+    as _i133;
+import '../features/product_import/domain/usecases/delete_product_import_template_use_case.dart'
+    as _i298;
+import '../features/product_import/domain/usecases/get_product_import_job_report_use_case.dart'
+    as _i977;
+import '../features/product_import/domain/usecases/list_product_import_jobs_use_case.dart'
+    as _i623;
+import '../features/product_import/domain/usecases/list_product_import_templates_use_case.dart'
+    as _i962;
+import '../features/product_import/domain/usecases/parse_product_import_file_use_case.dart'
+    as _i747;
+import '../features/product_import/domain/usecases/save_product_import_template_use_case.dart'
+    as _i88;
+import '../features/product_import/domain/usecases/start_product_import_job_use_case.dart'
+    as _i236;
+import '../features/product_import/domain/usecases/watch_product_import_job_use_case.dart'
+    as _i374;
+import '../features/product_import/presentation/bloc/product_import_bloc.dart'
+    as _i752;
 import '../features/products/data/datasources/drift_product_local_search_index_data_source.dart'
     as _i74;
 import '../features/products/data/datasources/firestore_product_remote_search_data_source.dart'
@@ -1384,6 +1434,7 @@ import '../features/users/users.dart' as _i220;
 import 'customer_import_parsers_module.dart' as _i405;
 import 'injection_module.dart' as _i212;
 import 'offline_package_loaders_module.dart' as _i418;
+import 'product_import_parsers_module.dart' as _i490;
 import 'sync_module.dart' as _i350;
 
 const String _dev = 'dev';
@@ -1399,6 +1450,7 @@ extension GetItInjectableX on _i174.GetIt {
     final gh = _i526.GetItHelper(this, environment, environmentFilter);
     final appInjectionModule = _$AppInjectionModule();
     final syncModule = _$SyncModule();
+    final productImportParsersModule = _$ProductImportParsersModule();
     final customerImportParsersModule = _$CustomerImportParsersModule();
     final insightModule = _$InsightModule();
     final offlinePackageLoadersModule = _$OfflinePackageLoadersModule();
@@ -1428,6 +1480,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i162.PaymentTermLocalMapper>(
       () => const _i162.PaymentTermLocalMapper(),
+    );
+    gh.factory<_i897.ProductImportJobMapper>(
+      () => const _i897.ProductImportJobMapper(),
+    );
+    gh.factory<_i962.ProductImportReportMapper>(
+      () => const _i962.ProductImportReportMapper(),
+    );
+    gh.factory<_i51.ProductImportTemplateMapper>(
+      () => const _i51.ProductImportTemplateMapper(),
     );
     gh.factory<_i908.ValidateReportDefinition>(
       () => const _i908.ValidateReportDefinition(),
@@ -1586,6 +1647,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i960.PriceListMapper>(
       () => const _i960.PriceListMapper(),
     );
+    gh.lazySingleton<_i962.CsvProductImportFileParser>(
+      () => const _i962.CsvProductImportFileParser(),
+    );
+    gh.lazySingleton<_i888.XlsxProductImportFileParser>(
+      () => const _i888.XlsxProductImportFileParser(),
+    );
     gh.lazySingleton<_i325.ProductFormDraftMapper>(
       () => const _i325.ProductFormDraftMapper(),
     );
@@ -1661,6 +1728,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i675.PushPermissionService>(
       () => _i518.FirebaseMessagingPermissionService(
         gh<_i892.FirebaseMessaging>(),
+      ),
+    );
+    gh.lazySingleton<List<_i133.ProductImportFileParser>>(
+      () => productImportParsersModule.productImportFileParsers(
+        gh<_i962.CsvProductImportFileParser>(),
+        gh<_i888.XlsxProductImportFileParser>(),
       ),
     );
     gh.lazySingleton<_i10.DeviceInstallationIdProvider>(
@@ -1801,6 +1874,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i598.UpdateCampaignUseCase>(
       () => _i598.UpdateCampaignUseCase(gh<_i150.CatalogCampaignRepository>()),
+    );
+    gh.factory<_i747.ParseProductImportFileUseCase>(
+      () => _i747.ParseProductImportFileUseCase(
+        gh<List<_i133.ProductImportFileParser>>(),
+      ),
     );
     gh.lazySingleton<_i639.FutureStockRepository>(
       () => _i1008.ProductVariantFutureStockRepository(
@@ -2579,6 +2657,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i340.CloudFunctionsService>(),
       ),
     );
+    gh.lazySingleton<_i684.ProductImportJobDataSource>(
+      () => _i498.FirestoreProductImportJobDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.lazySingleton<_i204.AggregationRemoteDataSource>(
       () => _i398.FirestoreAggregationDataSource(gh<_i974.FirebaseFirestore>()),
     );
@@ -2724,6 +2807,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i603.SavedReportRemoteDataSource>(
       () => _i925.FirestoreSavedReportRemoteDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
+    gh.lazySingleton<_i205.ProductImportTemplateDataSource>(
+      () => _i179.FirestoreProductImportTemplateDataSource(
         gh<_i974.FirebaseFirestore>(),
       ),
     );
@@ -2992,6 +3080,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i886.CustomerImportReportMapper>(),
       ),
     );
+    gh.lazySingleton<_i1033.ProductImportTemplateRepository>(
+      () => _i679.ProductImportTemplateRepositoryImpl(
+        gh<_i205.ProductImportTemplateDataSource>(),
+        gh<_i51.ProductImportTemplateMapper>(),
+      ),
+    );
     gh.lazySingleton<_i262.UserRoleRepository>(
       () => _i53.UserRoleRepositoryImpl(
         dataSource: gh<_i176.UserRoleDataSource>(),
@@ -3026,6 +3120,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i47.PermissionService>(),
         gh<_i753.AuditLogRepository>(),
         gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.lazySingleton<_i327.ProductImportFunctionsDataSource>(
+      () => _i508.CloudFunctionsProductImportDataSource(
+        gh<_i340.CloudFunctionsService>(),
       ),
     );
     gh.lazySingleton<_i813.ReportExportRemoteDataSource>(
@@ -3486,6 +3585,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i957.MembershipRepository>(),
       ),
     );
+    gh.lazySingleton<_i523.ProductImportJobRepository>(
+      () => _i671.ProductImportJobRepositoryImpl(
+        gh<_i684.ProductImportJobDataSource>(),
+        gh<_i327.ProductImportFunctionsDataSource>(),
+        gh<_i209.StorageDataSource>(),
+        gh<_i897.ProductImportJobMapper>(),
+        gh<_i962.ProductImportReportMapper>(),
+      ),
+    );
     gh.factory<_i268.SearchProductsUseCase>(
       () => _i268.SearchProductsUseCase(gh<_i568.ProductSearchRepository>()),
     );
@@ -3521,6 +3629,21 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i551.SaveCustomerImportTemplateUseCase>(
       () => _i551.SaveCustomerImportTemplateUseCase(
         gh<_i126.CustomerImportTemplateRepository>(),
+      ),
+    );
+    gh.factory<_i298.DeleteProductImportTemplateUseCase>(
+      () => _i298.DeleteProductImportTemplateUseCase(
+        gh<_i1033.ProductImportTemplateRepository>(),
+      ),
+    );
+    gh.factory<_i962.ListProductImportTemplatesUseCase>(
+      () => _i962.ListProductImportTemplatesUseCase(
+        gh<_i1033.ProductImportTemplateRepository>(),
+      ),
+    );
+    gh.factory<_i88.SaveProductImportTemplateUseCase>(
+      () => _i88.SaveProductImportTemplateUseCase(
+        gh<_i1033.ProductImportTemplateRepository>(),
       ),
     );
     gh.factory<_i98.DiscountPolicyCubit>(
@@ -4025,6 +4148,26 @@ extension GetItInjectableX on _i174.GetIt {
         sessionService: gh<_i885.SessionService>(),
       ),
     );
+    gh.factory<_i977.GetProductImportJobReportUseCase>(
+      () => _i977.GetProductImportJobReportUseCase(
+        gh<_i523.ProductImportJobRepository>(),
+      ),
+    );
+    gh.factory<_i623.ListProductImportJobsUseCase>(
+      () => _i623.ListProductImportJobsUseCase(
+        gh<_i523.ProductImportJobRepository>(),
+      ),
+    );
+    gh.factory<_i236.StartProductImportJobUseCase>(
+      () => _i236.StartProductImportJobUseCase(
+        gh<_i523.ProductImportJobRepository>(),
+      ),
+    );
+    gh.factory<_i374.WatchProductImportJobUseCase>(
+      () => _i374.WatchProductImportJobUseCase(
+        gh<_i523.ProductImportJobRepository>(),
+      ),
+    );
     gh.factory<_i936.PositivacaoSettingsCubit>(
       () => _i936.PositivacaoSettingsCubit(
         gh<_i265.GetOrganizationUseCase>(),
@@ -4142,6 +4285,25 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i565.ExecuteReportQuery(
         gh<_i22.ReportRepository>(),
         gh<_i908.ValidateReportDefinition>(),
+      ),
+    );
+    gh.factory<_i752.ProductImportBloc>(
+      () => _i752.ProductImportBloc(
+        parseProductImportFile: gh<_i747.ParseProductImportFileUseCase>(),
+        listProductImportTemplates:
+            gh<_i962.ListProductImportTemplatesUseCase>(),
+        saveProductImportTemplate: gh<_i88.SaveProductImportTemplateUseCase>(),
+        deleteProductImportTemplate:
+            gh<_i298.DeleteProductImportTemplateUseCase>(),
+        startProductImportJob: gh<_i236.StartProductImportJobUseCase>(),
+        watchProductImportJob: gh<_i374.WatchProductImportJobUseCase>(),
+        getProductImportJobReport: gh<_i977.GetProductImportJobReportUseCase>(),
+        listCategories: gh<_i435.ListCategoriesUseCase>(),
+        listCollections: gh<_i1023.ListCollectionsUseCase>(),
+        listProductColors: gh<_i789.ListProductColorsUseCase>(),
+        listSizeGridTemplates: gh<_i646.ListSizeGridTemplatesUseCase>(),
+        createCategory: gh<_i538.CreateCategoryUseCase>(),
+        createCollection: gh<_i426.CreateCollectionUseCase>(),
       ),
     );
     gh.factory<_i433.AssignPortfolioBloc>(
@@ -4469,6 +4631,8 @@ extension GetItInjectableX on _i174.GetIt {
 class _$AppInjectionModule extends _i212.AppInjectionModule {}
 
 class _$SyncModule extends _i350.SyncModule {}
+
+class _$ProductImportParsersModule extends _i490.ProductImportParsersModule {}
 
 class _$CustomerImportParsersModule extends _i405.CustomerImportParsersModule {}
 

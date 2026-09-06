@@ -112,6 +112,19 @@ enum Capability {
   /// `startCustomerImportJob`/`resolveCustomerImportDuplicateRow` Cloud
   /// Functions independently re-check server-side.
   customerImport,
+
+  /// Import a catalog of `Product`s + `ProductVariant`s from a CSV/XLSX
+  /// spreadsheet, with optional image association by SKU/referência
+  /// (TASK-168, EPIC-22) — a catalog-management action, same scope as
+  /// [catalogManage]: granted only to `OWNER`/`ADMIN` (via the
+  /// full/near-full capability set in `RolePermissionMatrix`), never to
+  /// `SALES_MANAGER`/`SALES_REP`/`SALES_ASSISTANT`/`FINANCE` — unlike
+  /// [customerImport] (a CRM action a gestor comercial may run), bulk
+  /// catalog creation stays with whoever already manages the catalog
+  /// itself. Gates both the `ProductImportPage` route and the
+  /// `startProductImportJob` Cloud Function, which independently re-checks
+  /// this same boundary server-side.
+  productImport,
 }
 
 extension CapabilityCode on Capability {
@@ -160,6 +173,7 @@ extension CapabilityCode on Capability {
       Capability.reportShareOrganization => 'report.share.organization',
       Capability.reportSchedule => 'report.schedule',
       Capability.customerImport => 'customer.import',
+      Capability.productImport => 'product.import',
     };
   }
 }

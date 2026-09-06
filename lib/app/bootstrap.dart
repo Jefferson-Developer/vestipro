@@ -32,6 +32,7 @@ import '../features/authentication/presentation/bloc/sign_up_bloc.dart';
 import '../features/audit_log/audit_log.dart';
 import '../features/catalog/catalog.dart';
 import '../features/customer_import/customer_import.dart';
+import '../features/product_import/product_import.dart';
 import '../features/customers/customers.dart';
 import '../features/catalog_share/catalog_share.dart';
 import '../features/dashboards/dashboards.dart';
@@ -892,6 +893,18 @@ class VestiProApp extends StatelessWidget {
               ),
             );
           },
+          productImportPageBuilder: (context, orgId, companyId) =>
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId: companyId,
+                child: ProductImportPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  permissionService: getIt<PermissionService>(),
+                  createBloc: () => getIt<ProductImportBloc>(),
+                ),
+              ),
           customerPortfolioPageBuilder:
               (context, orgId, companyId, queryParameters) =>
                   _withConnectivityIndicator(

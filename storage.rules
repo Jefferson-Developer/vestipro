@@ -148,6 +148,25 @@ service firebase.storage {
            ];
     }
 
+    // TASK-168: mirrors `kProductImportMaxFileSizeBytes` (Flutter) — same
+    // shape as `isValidCustomerImportSourceFile`, re-enforced server-side.
+    function isValidProductImportSourceFile() {
+      return request.resource.size <= 15 * 1024 * 1024
+        && request.resource.contentType in [
+             'text/csv',
+             'application/vnd.ms-excel',
+             'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
+           ];
+    }
+
+    // TASK-168: one image of an optional product-import image package,
+    // matched server-side by SKU/referência against the file name — same
+    // 10 MB ceiling as `isValidProductImage`.
+    function isValidProductImportImage() {
+      return request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
+    }
+
     // -------------------------------------------------------------------
     // organizations/{organizationId}/products/{productId}/{fileName}
     // (`StoragePaths.productFile`)
@@ -234,6 +253,37 @@ service firebase.storage {
 
       allow create, update: if hasCapability(organizationId, 'customer.import')
         && isValidCustomerImportSourceFile();
+
+      allow delete: if false;
+    }
+
+    // -------------------------------------------------------------------
+    // organizations/{organizationId}/productImports/{batchId}/{fileName}
+    // (TASK-168 — uploaded source spreadsheet, written by the client; and
+    // `report.json`, written only by `processProductImportJob` via the Admin
+    // SDK, which bypasses these Rules — the `allow create, update` clause
+    // below only ever matters for the client's own source-file upload.)
+    // -------------------------------------------------------------------
+
+    match /organizations/{organizationId}/productImports/{batchId}/{fileName} {
+      allow read: if hasCapability(organizationId, 'product.import');
+
+      allow create, update: if hasCapability(organizationId, 'product.import')
+        && isValidProductImportSourceFile();
+
+      allow delete: if false;
+    }
+
+    // organizations/{organizationId}/productImports/{batchId}/images/{fileName}
+    // (TASK-168 — optional image package, matched server-side by SKU/
+    // referência; a distinct match from the one above since it has one more
+    // path segment.)
+
+    match /organizations/{organizationId}/productImports/{batchId}/images/{fileName} {
+      allow read: if hasCapability(organizationId, 'product.import');
+
+      allow create, update: if hasCapability(organizationId, 'product.import')
+        && isValidProductImportImage();
 
       allow delete: if false;
     }
