@@ -471,6 +471,41 @@ void main() {
       },
     );
 
+    test(
+      'only OWNER/ADMIN can manage public API keys (TASK-171); '
+      'SALES_MANAGER/SALES_REP/SALES_ASSISTANT/FINANCE/READ_ONLY never can',
+      () {
+        for (final role in <SystemRoleName>[
+          SystemRoleName.owner,
+          SystemRoleName.admin,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.apiKeyManage),
+            isTrue,
+            reason: '$role must be able to manage public API keys.',
+          );
+        }
+
+        for (final role in <SystemRoleName>[
+          SystemRoleName.salesManager,
+          SystemRoleName.salesRep,
+          SystemRoleName.salesAssistant,
+          SystemRoleName.finance,
+          SystemRoleName.readOnly,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.apiKeyManage),
+            isFalse,
+            reason: '$role must never manage public API keys.',
+          );
+        }
+      },
+    );
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,

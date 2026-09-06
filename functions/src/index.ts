@@ -74,6 +74,13 @@ export {
   enqueueCustomerWebhookEvents,
   enqueueInventoryWebhookEvents,
 } from './webhooks';
+export {
+  generateApiKey,
+  revokeApiKey,
+  rotateApiKey,
+  listApiKeys,
+  publicApiV1,
+} from './public_api';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

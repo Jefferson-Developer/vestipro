@@ -155,6 +155,22 @@ enum Capability {
   /// re-check this same boundary server-side — `webhookSecrets` itself is
   /// never client-readable at all, regardless of this (or any) capability.
   webhookManage,
+
+  /// Generate/revoke/rotate an organization's public REST API keys
+  /// (TASK-171, EPIC-22) — plus list their metadata (name, scopes, status,
+  /// last-4 suffix, rate limit, last use) for support/billing purposes. Same
+  /// infrastructure-decision scope as [erpIntegrationManage]/[webhookManage]:
+  /// restricted to `OWNER`/`ADMIN` (`RolePermissionMatrix`'s full/near-full
+  /// sets), never delegated to
+  /// `SALES_MANAGER`/`SALES_REP`/`SALES_ASSISTANT`/`FINANCE`. Gates the
+  /// `generateApiKey`/`revokeApiKey`/`rotateApiKey`/`listApiKeys` Cloud
+  /// Functions and every read of
+  /// `organizations/{organizationId}/apiKeys|apiUsageLogs` (`firestore.rules`)
+  /// — `apiKeys` itself (and `apiKeyRateLimitBuckets`) is never client-
+  /// readable at all, regardless of this (or any) capability, since it
+  /// carries the key's `keyHash` (a leaked read would let an attacker brute
+  /// force forgeries offline).
+  apiKeyManage,
 }
 
 extension CapabilityCode on Capability {
@@ -206,6 +222,7 @@ extension CapabilityCode on Capability {
       Capability.productImport => 'product.import',
       Capability.erpIntegrationManage => 'erpIntegration.manage',
       Capability.webhookManage => 'webhook.manage',
+      Capability.apiKeyManage => 'apiKey.manage',
     };
   }
 }

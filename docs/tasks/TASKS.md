@@ -297,7 +297,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-168 — Implementar importação massiva de produtos](TASK-168-implementar-importacao-de-produtos.md) — Flutter Senior + Front-end
 - [x] [TASK-169 — Criar framework de integração com ERPs](TASK-169-criar-framework-de-integracao-erp.md) — Flutter Senior
 - [x] [TASK-170 — Implementar webhooks de saída](TASK-170-implementar-webhooks-de-saida.md) — Flutter Senior
-- [ ] [TASK-171 — Implementar API pública (REST)](TASK-171-implementar-api-publica.md) — Flutter Senior
+- [x] [TASK-171 — Implementar API pública (REST)](TASK-171-implementar-api-publica.md) — Flutter Senior
 - [ ] [TASK-172 — Criar documentação OpenAPI](TASK-172-criar-documentacao-openapi.md) — Flutter Senior
 
 ### EPIC-23 — Identidade Corporativa e Internacionalização
@@ -370,4 +370,4 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 169 / 220 tasks concluídas.
+**Progresso:** 170 / 220 tasks concluídas.

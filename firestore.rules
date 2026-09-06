@@ -1161,6 +1161,51 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/apiKeys/{keyId}
+      // organizations/{organizationId}/apiKeyRateLimitBuckets/{bucketId}
+      // organizations/{organizationId}/apiUsageLogs/{logId}
+      // (TASK-171, EPIC-22 — API pública REST)
+      // -------------------------------------------------------------------
+      //
+      // Every document below is exclusively written by this feature's own
+      // Cloud Functions (Admin SDK, bypasses these Rules) —
+      // `generateApiKey`/`revokeApiKey`/`rotateApiKey`/`listApiKeys`/the
+      // `publicApiV1` HTTPS router's own middleware — same "server owns
+      // every write" shape `webhooks`/`erpIntegration` above already use,
+      // plus the same deliberately stricter rule `webhookSecrets` already
+      // sets: `apiKeys` is never client-readable at all, by any role, under
+      // any capability — a leaked Firestore read of that document would leak
+      // a live `keyHash` an attacker could use to brute-force/replay a
+      // forged `X-Api-Key` header toward this same organization's public API
+      // (TASK-171: "API key revogada invalida requisições imediatamente...
+      // nenhuma requisição lê/escreve dados de outra organização"). Gestor-
+      // facing key metadata (name, scopes, status, last-4 suffix, rate
+      // limit, last use) is only ever read via the `listApiKeys` callable,
+      // never a direct Firestore read.
+      //
+      // `apiKeyRateLimitBuckets` is pure internal rate-limiting state, same
+      // "never read by any client" posture as `erpProcessedEvents` above.
+      //
+      // `apiUsageLogs` (endpoint/timestamp/status/latency per key, TASK-171:
+      // "para suporte e faturamento futuro") is the one exception allowed to
+      // be read directly by a gestor with `apiKey.manage` — it never carries
+      // the key itself (only `keyId`), so a read of it cannot be used to
+      // forge a request.
+
+      match /apiKeys/{keyId} {
+        allow read, write: if false;
+      }
+
+      match /apiKeyRateLimitBuckets/{bucketId} {
+        allow read, write: if false;
+      }
+
+      match /apiUsageLogs/{logId} {
+        allow read: if hasCapability(organizationId, 'apiKey.manage');
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/priceLists/{priceListId}  (TASK-083)
       // -------------------------------------------------------------------
       //
