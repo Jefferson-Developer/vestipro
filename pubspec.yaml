@@ -72,7 +72,7 @@ dependencies:
   firebase_performance: ^0.11.4+6
   firebase_messaging: ^16.5.0
   firebase_remote_config: ^6.5.6
-  firebase_app_check: ^0.4.6
+  firebase_app_check: ^0.4.7
   bloc_concurrency: ^0.3.0
   # XLSX export (TASK-147): `excel` is a pure-Dart, actively maintained
   # (2024+ releases), cross-platform (mobile/desktop/web, no native code)
