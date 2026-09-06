@@ -57,6 +57,13 @@ export {
   updateDataRetentionPolicy,
   applyDataRetentionPoliciesScheduled,
 } from './privacy/data-retention';
+export {
+  saveErpIntegrationConfig,
+  saveErpIntegrationCredentials,
+  processErpSyncQueueItem,
+  pullErpInventoryAndPrices,
+  retryFailedErpSyncItems,
+} from './erp_integration';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

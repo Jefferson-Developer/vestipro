@@ -1060,6 +1060,68 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/erpIntegration/{config|credentials}
+      // organizations/{organizationId}/erpSyncQueue/{itemId}
+      // organizations/{organizationId}/erpSyncLogs/{logId}
+      // organizations/{organizationId}/erpConflicts/{conflictId}
+      // organizations/{organizationId}/erpSyncedRecords/{recordId}
+      // organizations/{organizationId}/erpProcessedEvents/{idempotencyKey}
+      // (TASK-169, EPIC-22 — framework de integração com ERPs)
+      // -------------------------------------------------------------------
+      //
+      // Every document below is exclusively written by this feature's own
+      // Cloud Functions (Admin SDK, bypasses these Rules) —
+      // `saveErpIntegrationConfig`/`saveErpIntegrationCredentials`/
+      // `processErpSyncQueueItem`/`pullErpInventoryAndPrices`/
+      // `retryFailedErpSyncItems` — same "server owns every write" shape
+      // `productImportJobs` above already uses, plus one deliberately
+      // stricter rule: `erpIntegration/credentials` is never client-
+      // readable at all, by any role, under any capability — a leaked
+      // Firestore read of that single document would leak a live ERP
+      // secret, so there is no capability check that could ever grant it
+      // (TASK-169: "Nenhuma credencial de ERP de cliente é armazenada...
+      // usar armazenamento seguro por tenant").
+
+      match /erpIntegration/{documentId} {
+        allow read: if documentId == 'config'
+          && hasCapability(organizationId, 'erpIntegration.manage');
+        // documentId == 'credentials' (or anything else) always denies read
+        // — intentionally not `documentId == 'config' || ...`, so a typo'd
+        // future document id under this same subcollection defaults to
+        // denied, never accidentally readable.
+
+        allow create, update, delete: if false;
+      }
+
+      match /erpSyncQueue/{itemId} {
+        allow read: if hasCapability(organizationId, 'erpIntegration.manage');
+        allow create, update, delete: if false;
+      }
+
+      match /erpSyncLogs/{logId} {
+        allow read: if hasCapability(organizationId, 'erpIntegration.manage');
+        allow create, update, delete: if false;
+      }
+
+      match /erpConflicts/{conflictId} {
+        allow read: if hasCapability(organizationId, 'erpIntegration.manage');
+        allow create, update, delete: if false;
+      }
+
+      match /erpSyncedRecords/{recordId} {
+        allow read: if hasCapability(organizationId, 'erpIntegration.manage');
+        allow create, update, delete: if false;
+      }
+
+      match /erpProcessedEvents/{idempotencyKey} {
+        // Pure internal idempotency ledger — never read by any client, not
+        // even by an OWNER/ADMIN with `erpIntegration.manage`; it carries no
+        // information a human ever needs to see (`erpSyncLogs` already
+        // reports every outcome, including "skipped, already processed").
+        allow read, write: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/priceLists/{priceListId}  (TASK-083)
       // -------------------------------------------------------------------
       //

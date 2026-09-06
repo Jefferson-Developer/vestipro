@@ -401,6 +401,41 @@ void main() {
       }
     });
 
+    test(
+      'only OWNER/ADMIN can configure ERP integrations (TASK-169); '
+      'SALES_MANAGER/SALES_REP/SALES_ASSISTANT/FINANCE/READ_ONLY never can',
+      () {
+        for (final role in <SystemRoleName>[
+          SystemRoleName.owner,
+          SystemRoleName.admin,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.erpIntegrationManage),
+            isTrue,
+            reason: '$role must be able to configure ERP integrations.',
+          );
+        }
+
+        for (final role in <SystemRoleName>[
+          SystemRoleName.salesManager,
+          SystemRoleName.salesRep,
+          SystemRoleName.salesAssistant,
+          SystemRoleName.finance,
+          SystemRoleName.readOnly,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.erpIntegrationManage),
+            isFalse,
+            reason: '$role must never configure ERP integrations.',
+          );
+        }
+      },
+    );
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,

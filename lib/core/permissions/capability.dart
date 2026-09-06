@@ -125,6 +125,20 @@ enum Capability {
   /// `startProductImportJob` Cloud Function, which independently re-checks
   /// this same boundary server-side.
   productImport,
+
+  /// Configure an organization's ERP integration (TASK-169, EPIC-22) — which
+  /// adapter/entities are enabled, its field mapping and its credentials —
+  /// plus read its sync log/conflict history for diagnosis. Restricted to
+  /// `OWNER`/`ADMIN` (`RolePermissionMatrix`'s full/near-full sets), same
+  /// infrastructure-decision scope as [productImport]: never delegated to
+  /// `SALES_MANAGER`/`SALES_REP`/`SALES_ASSISTANT`/`FINANCE`. Gates the
+  /// `saveErpIntegrationConfig`/`saveErpIntegrationCredentials` Cloud
+  /// Functions and every read of
+  /// `organizations/{organizationId}/erpSyncQueue|erpSyncLogs|erpConflicts`
+  /// (`firestore.rules`), which independently re-check this same boundary
+  /// server-side — `erpIntegration/credentials` itself is never client-
+  /// readable at all, regardless of this (or any) capability.
+  erpIntegrationManage,
 }
 
 extension CapabilityCode on Capability {
@@ -174,6 +188,7 @@ extension CapabilityCode on Capability {
       Capability.reportSchedule => 'report.schedule',
       Capability.customerImport => 'customer.import',
       Capability.productImport => 'product.import',
+      Capability.erpIntegrationManage => 'erpIntegration.manage',
     };
   }
 }
