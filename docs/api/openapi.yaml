@@ -1,0 +1,963 @@
+openapi: 3.0.3
+info:
+  title: VestiPro — API pública
+  version: "1.0.0"
+  license:
+    name: Proprietary
+    url: https://vestipro.com.br/termos-api
+  description: |
+    API REST pública do VestiPro (EPIC-22, TASK-171) para parceiros/sistemas externos
+    consultarem clientes, produtos e pedidos, e enviarem novos pedidos, sem passar pelo
+    aplicativo. Documenta exatamente o comportamento implementado em
+    `functions/src/public_api/` — qualquer divergência entre esta especificação e o
+    comportamento real do endpoint é tratada como bug de documentação (TASK-172).
+
+    ## Autenticação
+
+    Toda requisição exige o cabeçalho `X-Api-Key` com uma chave gerada pelo gestor da
+    organização (callable `generateApiKey`, restrito a OWNER/ADMIN). A chave nunca é
+    reexibida em texto puro depois de gerada — apenas seu hash é persistido. Uma chave
+    ausente, desconhecida ou revogada sempre resulta em `401 unauthenticated`. Não existe
+    fluxo OAuth 2.0 client-credentials nesta versão (deliberadamente fora do escopo de
+    TASK-171).
+
+    ## Escopo por chave
+
+    Cada chave carrega uma lista de escopos entre `customers:read`, `products:read`,
+    `orders:read` e `orders:write`. Uma chave sem o escopo exigido pela rota recebe
+    `403 permission-denied`.
+
+    ## Isolamento por organização (multi-tenant)
+
+    O `organizationId` que autoriza cada requisição é **sempre** o do documento
+    `apiKeys` resolvido pelo hash da própria chave — nunca um valor enviado no corpo ou
+    na query string. Uma chave só enxerga/escreve dados da sua própria organização.
+
+    ## Rate limiting
+
+    Cada chave tem um limite de requisições por minuto (`rateLimitPerMinute`, padrão 60,
+    configurável entre 1 e 600 na emissão/rotação da chave). O limite é avaliado por
+    chave/organização — nunca compartilhado globalmente entre organizações diferentes.
+    Toda resposta, inclusive as de erro, carrega os cabeçalhos `X-RateLimit-Limit`,
+    `X-RateLimit-Remaining` e `X-RateLimit-Reset`. Ao esgotar o limite da janela de 1
+    minuto corrente, a API responde `429 rate_limited` sem incrementar o contador acima
+    do limite.
+
+    ## Paginação por cursor
+
+    Todo endpoint de listagem (`GET /v1/customers`, `GET /v1/products`, `GET /v1/orders`)
+    ordena por `(createdAt asc, __name__ asc)` e nunca usa offset. O corpo da resposta
+    sempre inclui `nextCursor`: um token opaco (base64url) apontando para o próximo
+    item, ou `null` quando não há mais páginas. Um cursor ausente ou inválido é tratado
+    como "começar do início", nunca como erro.
+
+    ## Formato de erro
+
+    Toda resposta de erro segue o formato `{ "error": { "code": string, "message":
+    string } }`. O valor de `code` não é um enum único e fechado: os erros de
+    autenticação/autorização/rate limit do middleware usam `snake_case`
+    (`unauthenticated`, `permission-denied` é a única exceção documentada abaixo,
+    `rate_limited`, `not_found`, `invalid_argument`), enquanto `POST /v1/orders`
+    repassa, sem tradução, os códigos do domínio de pedidos (`invalid-argument`,
+    `unauthenticated`, `permission-denied`, `not-found`, `already-exists`,
+    `failed-precondition`, `resource-exhausted`, `internal`) mapeados para o status
+    HTTP correspondente. Esta especificação documenta os dois formatos literalmente,
+    em vez de fingir uma consistência que o código ainda não tem.
+
+    ## Dados de exemplo
+
+    Todos os exemplos desta especificação usam dados fictícios plausíveis — nunca dados
+    reais de cliente/organização.
+servers:
+  - url: https://us-central1-vestipro.cloudfunctions.net/publicApiV1
+    description: >-
+      URL bruta da Cloud Function v2 `publicApiV1` (região padrão `us-central1`,
+      nenhuma região explícita configurada em `onRequest(app)`). Não há, até esta
+      task, um rewrite de Firebase Hosting publicando a API sob um domínio amigável
+      (ver `docs/tasks/TASK-171-implementar-api-publica-CONCLUIDA.md`, pendências).
+security:
+  - ApiKeyAuth: []
+tags:
+  - name: Customers
+    description: Consulta de clientes da organização da chave.
+  - name: Products
+    description: Consulta de produtos/variantes do catálogo da organização da chave.
+  - name: Orders
+    description: Consulta e criação de pedidos da organização da chave.
+paths:
+  /v1/customers:
+    get:
+      operationId: listCustomers
+      summary: Lista clientes da organização
+      description: >-
+        Paginado por cursor, ordenado por `createdAt` ascendente. Retorna apenas
+        clientes não excluídos (`deletedAt == null`). Exige escopo `customers:read`.
+      tags: [Customers]
+      security:
+        - ApiKeyAuth: [customers:read]
+      parameters:
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/CursorParam'
+      responses:
+        '200':
+          description: Página de clientes.
+          headers:
+            X-RateLimit-Limit: { $ref: '#/components/headers/XRateLimitLimit' }
+            X-RateLimit-Remaining: { $ref: '#/components/headers/XRateLimitRemaining' }
+            X-RateLimit-Reset: { $ref: '#/components/headers/XRateLimitReset' }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CustomerListResponse'
+              example:
+                data:
+                  - id: cst_9f3a1b2c
+                    companyId: malwee-jeans
+                    document: "12.345.678/0001-90"
+                    legalName: "Loja Fashion Comercio de Vestuario Ltda"
+                    tradeName: "Fashion Boutique"
+                    fullName: null
+                    primaryEmail: "compras@fashionboutique.com.br"
+                    primaryPhone: "+55 47 99999-0000"
+                    classification: "gold"
+                    segment: "varejo"
+                    status: "active"
+                    createdAt: "2026-01-15T13:22:00.000Z"
+                    updatedAt: "2026-03-02T09:10:00.000Z"
+                  - id: cst_4d10ee7a
+                    companyId: malwee-jeans
+                    document: "98.765.432/0001-11"
+                    legalName: "Modas Estrela Ltda"
+                    tradeName: "Estrela Modas"
+                    fullName: null
+                    primaryEmail: "financeiro@estrelamodas.com.br"
+                    primaryPhone: "+55 11 98888-0000"
+                    classification: "silver"
+                    segment: "atacado"
+                    status: "active"
+                    createdAt: "2026-01-20T10:05:00.000Z"
+                    updatedAt: "2026-01-20T10:05:00.000Z"
+                nextCursor: "eyJjcmVhdGVkQXRNcyI6MTc2OTAwMDAwMDAwMCwiaWQiOiJjc3RfNGQxMGVlN2EifQ"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/customers/{id}:
+    get:
+      operationId: getCustomerById
+      summary: Busca um cliente pelo id
+      tags: [Customers]
+      security:
+        - ApiKeyAuth: [customers:read]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          example: cst_9f3a1b2c
+      responses:
+        '200':
+          description: Cliente encontrado.
+          headers:
+            X-RateLimit-Limit: { $ref: '#/components/headers/XRateLimitLimit' }
+            X-RateLimit-Remaining: { $ref: '#/components/headers/XRateLimitRemaining' }
+            X-RateLimit-Reset: { $ref: '#/components/headers/XRateLimitReset' }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Customer'
+              example:
+                data:
+                  id: cst_9f3a1b2c
+                  companyId: malwee-jeans
+                  document: "12.345.678/0001-90"
+                  legalName: "Loja Fashion Comercio de Vestuario Ltda"
+                  tradeName: "Fashion Boutique"
+                  fullName: null
+                  primaryEmail: "compras@fashionboutique.com.br"
+                  primaryPhone: "+55 47 99999-0000"
+                  classification: "gold"
+                  segment: "varejo"
+                  status: "active"
+                  createdAt: "2026-01-15T13:22:00.000Z"
+                  updatedAt: "2026-03-02T09:10:00.000Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/products:
+    get:
+      operationId: listProducts
+      summary: Lista produtos do catálogo da organização
+      description: >-
+        Paginado por cursor, ordenado por `createdAt` ascendente. Retorna apenas
+        produtos não excluídos (`deletedAt == null`). Exige escopo `products:read`.
+      tags: [Products]
+      security:
+        - ApiKeyAuth: [products:read]
+      parameters:
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/CursorParam'
+      responses:
+        '200':
+          description: Página de produtos.
+          headers:
+            X-RateLimit-Limit: { $ref: '#/components/headers/XRateLimitLimit' }
+            X-RateLimit-Remaining: { $ref: '#/components/headers/XRateLimitRemaining' }
+            X-RateLimit-Reset: { $ref: '#/components/headers/XRateLimitReset' }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProductListResponse'
+              example:
+                data:
+                  - id: prd_7a21e4c9
+                    companyId: malwee-jeans
+                    sku: "MJ-1023-AZ-M"
+                    reference: "1023"
+                    name: "Camisa Slim Manga Longa"
+                    brand: "Malwee"
+                    collectionId: "col_verao-2026"
+                    categoryId: "cat_camisas"
+                    subcategoryId: "sub_manga-longa"
+                    status: "active"
+                    ean: "7891234567890"
+                    createdAt: "2025-11-03T08:00:00.000Z"
+                    updatedAt: "2026-02-10T17:45:00.000Z"
+                  - id: prd_2c98f011
+                    companyId: malwee-jeans
+                    sku: "MJ-2044-PT-G"
+                    reference: "2044"
+                    name: "Calça Jeans Reta"
+                    brand: "Malwee"
+                    collectionId: "col_verao-2026"
+                    categoryId: "cat_calcas"
+                    subcategoryId: null
+                    status: "active"
+                    ean: "7891234509876"
+                    createdAt: "2025-12-01T08:00:00.000Z"
+                    updatedAt: "2025-12-01T08:00:00.000Z"
+                nextCursor: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/products/{id}:
+    get:
+      operationId: getProductById
+      summary: Busca um produto pelo id
+      tags: [Products]
+      security:
+        - ApiKeyAuth: [products:read]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          example: prd_7a21e4c9
+      responses:
+        '200':
+          description: Produto encontrado.
+          headers:
+            X-RateLimit-Limit: { $ref: '#/components/headers/XRateLimitLimit' }
+            X-RateLimit-Remaining: { $ref: '#/components/headers/XRateLimitRemaining' }
+            X-RateLimit-Reset: { $ref: '#/components/headers/XRateLimitReset' }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/Product'
+              example:
+                data:
+                  id: prd_7a21e4c9
+                  companyId: malwee-jeans
+                  sku: "MJ-1023-AZ-M"
+                  reference: "1023"
+                  name: "Camisa Slim Manga Longa"
+                  brand: "Malwee"
+                  collectionId: "col_verao-2026"
+                  categoryId: "cat_camisas"
+                  subcategoryId: "sub_manga-longa"
+                  status: "active"
+                  ean: "7891234567890"
+                  createdAt: "2025-11-03T08:00:00.000Z"
+                  updatedAt: "2026-02-10T17:45:00.000Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/orders:
+    get:
+      operationId: listOrders
+      summary: Lista pedidos da organização
+      description: >-
+        Paginado por cursor, ordenado por `createdAt` ascendente. Retorna apenas
+        pedidos não excluídos (`deletedAt == null`), em formato resumido (sem os
+        itens individuais). Exige escopo `orders:read`.
+      tags: [Orders]
+      security:
+        - ApiKeyAuth: [orders:read]
+      parameters:
+        - $ref: '#/components/parameters/LimitParam'
+        - $ref: '#/components/parameters/CursorParam'
+      responses:
+        '200':
+          description: Página de pedidos.
+          headers:
+            X-RateLimit-Limit: { $ref: '#/components/headers/XRateLimitLimit' }
+            X-RateLimit-Remaining: { $ref: '#/components/headers/XRateLimitRemaining' }
+            X-RateLimit-Reset: { $ref: '#/components/headers/XRateLimitReset' }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrderListResponse'
+              example:
+                data:
+                  - id: ord_38b7f0aa
+                    companyId: malwee-jeans
+                    orderNumber: "2026-000482"
+                    status: "submitted"
+                    customerId: "cst_9f3a1b2c"
+                    sellerId: "usr_45ab12cd"
+                    discountAmount: 45.9
+                    surchargeAmount: 0
+                    shippingAmount: 32.5
+                    total: 812.4
+                    createdAt: "2026-03-01T12:30:00.000Z"
+                    updatedAt: "2026-03-01T12:30:00.000Z"
+                nextCursor: null
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+    post:
+      operationId: createOrder
+      summary: Envia um novo pedido em nome de um vendedor da organização
+      description: >-
+        Não reimplementa nenhuma regra de precificação/estoque/numeração/aprovação:
+        internamente invoca a mesma Cloud Function `submitOrder` (TASK-101) usada
+        pelo aplicativo, com o `organizationId` sempre resolvido da própria API key
+        (nunca o do corpo da requisição). `sellerId` é obrigatório e precisa
+        corresponder a um `Membership` ativo desta organização com papel `OWNER`,
+        `ADMIN`, `SALES_MANAGER` ou `SALES_REP` — caso contrário a requisição falha
+        com `400`/`403`. `orderId` é opcional e funciona como chave de idempotência:
+        reenviar a mesma requisição com o mesmo `orderId` (retry de rede, novo
+        clique) nunca cria um segundo pedido, apenas retorna o pedido já persistido.
+        Quando omitido, um `orderId` é gerado automaticamente. Exige escopo
+        `orders:write`. Limitação conhecida: diferente do app (onde o `uid` vem de
+        um ID token Firebase Auth verificado), uma chamada via API key não tem
+        credencial por usuário própria — `orders:write` mais um `sellerId` válido é
+        toda a prova de identidade que esta versão exige.
+      tags: [Orders]
+      security:
+        - ApiKeyAuth: [orders:write]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateOrderRequest'
+            example:
+              orderId: "b6f1a6d0-2f8f-4a3a-9e2a-1c9b6b7d9f10"
+              sellerId: "usr_45ab12cd"
+              branchId: "brc_matriz"
+              customerId: "cst_9f3a1b2c"
+              priceListId: "pl_verao-2026-varejo"
+              paymentTermId: "pt_30-60-90"
+              carrierId: "car_transrapido"
+              collectionId: "col_verao-2026"
+              orderType: "normal"
+              notes: "Cliente pediu entrega até dia 20."
+              shippingAmount: 32.5
+              deliveryAddress:
+                street: "Rua das Palmeiras"
+                number: "482"
+                complement: "Sala 2"
+                district: "Centro"
+                city: "Jaraguá do Sul"
+                state: "SC"
+                zipCode: "89250-000"
+                country: "BR"
+              billingAddress:
+                street: "Rua das Palmeiras"
+                number: "482"
+                complement: "Sala 2"
+                district: "Centro"
+                city: "Jaraguá do Sul"
+                state: "SC"
+                zipCode: "89250-000"
+                country: "BR"
+              items:
+                - id: "item-1"
+                  productId: "prd_7a21e4c9"
+                  variantId: "var_7a21e4c9-az-m"
+                  quantity: 12
+                  manualDiscountPercent: 5
+      responses:
+        '201':
+          description: Pedido criado (ou já existente, se `orderId` repetido).
+          headers:
+            X-RateLimit-Limit: { $ref: '#/components/headers/XRateLimitLimit' }
+            X-RateLimit-Remaining: { $ref: '#/components/headers/XRateLimitRemaining' }
+            X-RateLimit-Reset: { $ref: '#/components/headers/XRateLimitReset' }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/SubmitOrderResponse'
+              example:
+                data:
+                  correlationId: "9c3f9c2a-1e0a-4a55-8a7b-1a2b3c4d5e6f"
+                  orderId: "b6f1a6d0-2f8f-4a3a-9e2a-1c9b6b7d9f10"
+                  orderNumber: "2026-000483"
+                  status: "submitted"
+                  discountAmount: 45.9
+                  surchargeAmount: 0
+                  shippingAmount: 32.5
+                  total: 812.4
+                  submittedAt: "2026-03-01T12:31:05.000Z"
+                  items:
+                    - id: "item-1"
+                      productId: "prd_7a21e4c9"
+                      variantId: "var_7a21e4c9-az-m"
+                      quantity: 12
+                      unitPrice: 65.4
+                      discountAmount: 45.9
+                      subtotal: 738.9
+        '400':
+          description: >-
+            Corpo inválido — campo obrigatório ausente/mal formado, ou `sellerId`
+            que não corresponde a um membro ativo da organização.
+          headers:
+            X-RateLimit-Limit: { $ref: '#/components/headers/XRateLimitLimit' }
+            X-RateLimit-Remaining: { $ref: '#/components/headers/XRateLimitRemaining' }
+            X-RateLimit-Reset: { $ref: '#/components/headers/XRateLimitReset' }
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  code: invalid_argument
+                  message: "sellerId é obrigatório."
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          description: Cliente, tabela de preço ou condição de pagamento não encontrados.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  code: not-found
+                  message: "Customer not found."
+        '409':
+          description: >-
+            Conflito de domínio — ex.: tabela de preço/condição de pagamento
+            inválida para o pedido, estoque insuficiente ou pré-condição de
+            negócio não satisfeita (`failed-precondition`), ou disputa de
+            concorrência tratada como conflito (`already-exists`).
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Error'
+              example:
+                error:
+                  code: failed-precondition
+                  message: "Este cliente não está ativo. Regularize a situação para enviar o pedido."
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+  /v1/orders/{id}:
+    get:
+      operationId: getOrderById
+      summary: Busca um pedido pelo id (resumo)
+      tags: [Orders]
+      security:
+        - ApiKeyAuth: [orders:read]
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema: { type: string }
+          example: ord_38b7f0aa
+      responses:
+        '200':
+          description: Pedido encontrado.
+          headers:
+            X-RateLimit-Limit: { $ref: '#/components/headers/XRateLimitLimit' }
+            X-RateLimit-Remaining: { $ref: '#/components/headers/XRateLimitRemaining' }
+            X-RateLimit-Reset: { $ref: '#/components/headers/XRateLimitReset' }
+          content:
+            application/json:
+              schema:
+                type: object
+                required: [data]
+                properties:
+                  data:
+                    $ref: '#/components/schemas/OrderSummary'
+              example:
+                data:
+                  id: ord_38b7f0aa
+                  companyId: malwee-jeans
+                  orderNumber: "2026-000482"
+                  status: "submitted"
+                  customerId: "cst_9f3a1b2c"
+                  sellerId: "usr_45ab12cd"
+                  discountAmount: 45.9
+                  surchargeAmount: 0
+                  shippingAmount: 32.5
+                  total: 812.4
+                  createdAt: "2026-03-01T12:30:00.000Z"
+                  updatedAt: "2026-03-01T12:30:00.000Z"
+        '401':
+          $ref: '#/components/responses/Unauthorized'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '429':
+          $ref: '#/components/responses/RateLimited'
+        '500':
+          $ref: '#/components/responses/InternalError'
+components:
+  securitySchemes:
+    ApiKeyAuth:
+      type: apiKey
+      in: header
+      name: X-Api-Key
+      description: >-
+        Chave emitida pelo callable `generateApiKey` (RBAC OWNER/ADMIN), prefixada
+        com `vp_live_`. Apresentada em texto puro apenas uma vez, no momento da
+        emissão/rotação — a API nunca a reexibe depois disso.
+  headers:
+    XRateLimitLimit:
+      description: Limite de requisições por minuto configurado para esta chave.
+      schema: { type: integer, example: 60 }
+    XRateLimitRemaining:
+      description: Requisições restantes na janela de 1 minuto corrente.
+      schema: { type: integer, example: 57 }
+    XRateLimitReset:
+      description: Instante (ISO 8601) em que a janela de rate limit corrente se encerra.
+      schema: { type: string, format: date-time, example: "2026-03-01T12:31:00.000Z" }
+  parameters:
+    LimitParam:
+      name: limit
+      in: query
+      required: false
+      description: >-
+        Tamanho da página. Valores ausentes, não numéricos, não inteiros ou menores
+        que 1 usam o padrão (20). Valores acima de 100 são limitados a 100.
+      schema: { type: integer, minimum: 1, maximum: 100, default: 20 }
+    CursorParam:
+      name: cursor
+      in: query
+      required: false
+      description: >-
+        Token opaco retornado em `nextCursor` da página anterior. Ausente ou
+        inválido é tratado como "começar do início".
+      schema: { type: string }
+  responses:
+    Unauthorized:
+      description: Cabeçalho `X-Api-Key` ausente, ou chave inexistente/revogada.
+      headers:
+        X-RateLimit-Limit: { $ref: '#/components/headers/XRateLimitLimit' }
+        X-RateLimit-Remaining: { $ref: '#/components/headers/XRateLimitRemaining' }
+        X-RateLimit-Reset: { $ref: '#/components/headers/XRateLimitReset' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example:
+            error:
+              code: unauthenticated
+              message: "API key inválida ou revogada."
+    Forbidden:
+      description: A chave não tem o escopo exigido por esta rota.
+      headers:
+        X-RateLimit-Limit: { $ref: '#/components/headers/XRateLimitLimit' }
+        X-RateLimit-Remaining: { $ref: '#/components/headers/XRateLimitRemaining' }
+        X-RateLimit-Reset: { $ref: '#/components/headers/XRateLimitReset' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example:
+            error:
+              code: permission-denied
+              message: 'Esta API key não tem o escopo "customers:read".'
+    NotFound:
+      description: Recurso inexistente, excluído, ou pertencente a outra organização.
+      headers:
+        X-RateLimit-Limit: { $ref: '#/components/headers/XRateLimitLimit' }
+        X-RateLimit-Remaining: { $ref: '#/components/headers/XRateLimitRemaining' }
+        X-RateLimit-Reset: { $ref: '#/components/headers/XRateLimitReset' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example:
+            error:
+              code: not_found
+              message: "Cliente não encontrado."
+    RateLimited:
+      description: Limite de requisições por minuto desta chave excedido.
+      headers:
+        X-RateLimit-Limit: { $ref: '#/components/headers/XRateLimitLimit' }
+        X-RateLimit-Remaining: { $ref: '#/components/headers/XRateLimitRemaining' }
+        X-RateLimit-Reset: { $ref: '#/components/headers/XRateLimitReset' }
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example:
+            error:
+              code: rate_limited
+              message: "Limite de requisições excedido para esta chave."
+    InternalError:
+      description: Erro interno inesperado.
+      content:
+        application/json:
+          schema: { $ref: '#/components/schemas/Error' }
+          example:
+            error:
+              code: internal
+              message: "Erro interno."
+  schemas:
+    Error:
+      type: object
+      required: [error]
+      properties:
+        error:
+          type: object
+          required: [code, message]
+          properties:
+            code:
+              type: string
+              description: >-
+                Código de erro estável para tratamento programático. Ver nota sobre
+                convenção de nomenclatura na descrição geral desta especificação.
+              example: not_found
+            message:
+              type: string
+              description: Mensagem legível, em português, adequada para exibição/log.
+              example: "Cliente não encontrado."
+    Customer:
+      type: object
+      required: [id, status]
+      properties:
+        id: { type: string, example: cst_9f3a1b2c }
+        companyId: { type: string, nullable: true, example: malwee-jeans }
+        document: { type: string, nullable: true, example: "12.345.678/0001-90" }
+        legalName:
+          type: string
+          nullable: true
+          example: "Loja Fashion Comercio de Vestuario Ltda"
+        tradeName: { type: string, nullable: true, example: "Fashion Boutique" }
+        fullName:
+          type: string
+          nullable: true
+          description: Preenchido para clientes pessoa física; `null` para pessoa jurídica.
+        primaryEmail:
+          type: string
+          nullable: true
+          format: email
+          example: "compras@fashionboutique.com.br"
+        primaryPhone: { type: string, nullable: true, example: "+55 47 99999-0000" }
+        classification:
+          type: string
+          nullable: true
+          description: Classificação comercial livre definida pela organização (ex. "gold", "silver").
+          example: gold
+        segment:
+          type: string
+          nullable: true
+          description: Segmento comercial livre definido pela organização (ex. "varejo", "atacado").
+          example: varejo
+        status:
+          $ref: '#/components/schemas/CustomerStatus'
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+    CustomerStatus:
+      type: string
+      description: Ciclo de vida comercial do cliente.
+      enum: [active, inactive, prospect, blocked]
+    CustomerListResponse:
+      type: object
+      required: [data, nextCursor]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Customer' }
+        nextCursor:
+          type: string
+          nullable: true
+          description: Cursor opaco para a próxima página, ou `null` se não houver mais páginas.
+    Product:
+      type: object
+      required: [id, status]
+      properties:
+        id: { type: string, example: prd_7a21e4c9 }
+        companyId: { type: string, nullable: true, example: malwee-jeans }
+        sku: { type: string, nullable: true, example: "MJ-1023-AZ-M" }
+        reference: { type: string, nullable: true, example: "1023" }
+        name: { type: string, nullable: true, example: "Camisa Slim Manga Longa" }
+        brand: { type: string, nullable: true, example: "Malwee" }
+        collectionId: { type: string, nullable: true, example: "col_verao-2026" }
+        categoryId: { type: string, nullable: true, example: "cat_camisas" }
+        subcategoryId: { type: string, nullable: true, example: "sub_manga-longa" }
+        status:
+          $ref: '#/components/schemas/ProductStatus'
+        ean: { type: string, nullable: true, example: "7891234567890" }
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+    ProductStatus:
+      type: string
+      description: Ciclo de vida comercial do produto no catálogo.
+      enum: [draft, active, inactive, discontinued]
+    ProductListResponse:
+      type: object
+      required: [data, nextCursor]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/Product' }
+        nextCursor:
+          type: string
+          nullable: true
+          description: Cursor opaco para a próxima página, ou `null` se não houver mais páginas.
+    OrderStatus:
+      type: string
+      description: >-
+        Status comercial do pedido (independente do status técnico de
+        sincronização offline, que esta API não expõe).
+      enum:
+        - draft
+        - pendingSync
+        - submitted
+        - underReview
+        - approved
+        - rejected
+        - processing
+        - invoiced
+        - partiallyInvoiced
+        - shipped
+        - delivered
+        - cancelled
+    OrderSummary:
+      type: object
+      required: [id, status, discountAmount, surchargeAmount, shippingAmount, total]
+      description: >-
+        Formato resumido de pedido usado por `GET /v1/orders` e `GET
+        /v1/orders/{id}` — não inclui a lista de itens (para isso, use o `data`
+        retornado por `POST /v1/orders` no momento da criação).
+      properties:
+        id: { type: string, example: ord_38b7f0aa }
+        companyId: { type: string, nullable: true, example: malwee-jeans }
+        orderNumber: { type: string, nullable: true, example: "2026-000482" }
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        customerId: { type: string, nullable: true, example: cst_9f3a1b2c }
+        sellerId: { type: string, nullable: true, example: usr_45ab12cd }
+        discountAmount: { type: number, format: double, example: 45.9 }
+        surchargeAmount: { type: number, format: double, example: 0 }
+        shippingAmount: { type: number, format: double, example: 32.5 }
+        total:
+          type: number
+          format: double
+          description: Soma dos subtotais dos itens + acréscimo + frete, arredondada a 2 casas.
+          example: 812.4
+        createdAt: { type: string, format: date-time, nullable: true }
+        updatedAt: { type: string, format: date-time, nullable: true }
+    OrderListResponse:
+      type: object
+      required: [data, nextCursor]
+      properties:
+        data:
+          type: array
+          items: { $ref: '#/components/schemas/OrderSummary' }
+        nextCursor:
+          type: string
+          nullable: true
+          description: Cursor opaco para a próxima página, ou `null` se não houver mais páginas.
+    OrderAddress:
+      type: object
+      required: [street, city, state, zipCode]
+      properties:
+        street: { type: string, example: "Rua das Palmeiras" }
+        number: { type: string, nullable: true, example: "482" }
+        complement: { type: string, nullable: true, example: "Sala 2" }
+        district: { type: string, nullable: true, example: "Centro" }
+        city: { type: string, example: "Jaraguá do Sul" }
+        state: { type: string, example: "SC" }
+        zipCode: { type: string, example: "89250-000" }
+        country:
+          type: string
+          default: BR
+          description: Padrão `"BR"` quando omitido.
+          example: BR
+    CreateOrderItem:
+      type: object
+      required: [id, productId, variantId, quantity]
+      properties:
+        id:
+          type: string
+          description: Id de linha gerado pelo cliente (chave de idempotência da linha).
+          example: "item-1"
+        productId: { type: string, example: prd_7a21e4c9 }
+        variantId: { type: string, example: "var_7a21e4c9-az-m" }
+        quantity: { type: integer, minimum: 1, example: 12 }
+        collectionId: { type: string, nullable: true }
+        categoryId: { type: string, nullable: true }
+        reservationId:
+          type: string
+          nullable: true
+          description: >-
+            Id de uma reserva de estoque ativa (TASK-092) a ser consumida por esta
+            linha, em vez de decremento direto. Nenhum fluxo do app cria uma reserva
+            hoje; existe para integrações futuras.
+        manualDiscountPercent:
+          type: number
+          format: double
+          minimum: 0
+          maximum: 100
+          default: 0
+          description: Desconto manual da linha, revalidado contra a política de desconto do vendedor.
+          example: 5
+    CreateOrderRequest:
+      type: object
+      required:
+        - branchId
+        - customerId
+        - sellerId
+        - priceListId
+        - paymentTermId
+        - deliveryAddress
+        - billingAddress
+        - items
+      description: >-
+        `organizationId` e `companyId` **não** devem ser enviados: o
+        `organizationId` é sempre o resolvido da própria API key, ignorando
+        qualquer valor no corpo; `companyId` é resolvido a partir do
+        cliente/tabela de preço/condição de pagamento informados.
+      properties:
+        orderId:
+          type: string
+          description: >-
+            Chave de idempotência opcional. Se omitido, um novo id é gerado
+            automaticamente. Reenviar a mesma requisição com o mesmo `orderId`
+            nunca cria um segundo pedido.
+          example: "b6f1a6d0-2f8f-4a3a-9e2a-1c9b6b7d9f10"
+        branchId: { type: string, example: brc_matriz }
+        customerId: { type: string, example: cst_9f3a1b2c }
+        sellerId:
+          type: string
+          description: >-
+            Precisa corresponder a um `Membership` ativo desta organização com
+            papel `OWNER`, `ADMIN`, `SALES_MANAGER` ou `SALES_REP`.
+          example: usr_45ab12cd
+        priceListId: { type: string, example: pl_verao-2026-varejo }
+        paymentTermId: { type: string, example: pt_30-60-90 }
+        carrierId: { type: string, nullable: true, example: car_transrapido }
+        collectionId: { type: string, nullable: true, example: col_verao-2026 }
+        orderType: { type: string, nullable: true, example: normal }
+        notes: { type: string, nullable: true }
+        attachmentUrls:
+          type: array
+          items: { type: string, format: uri }
+        shippingAmount:
+          type: number
+          format: double
+          default: 0
+          example: 32.5
+        clientOrderTotal:
+          type: number
+          format: double
+          nullable: true
+          description: >-
+            Total calculado no cliente, apenas para fins de conferência/feedback —
+            nunca a fonte de verdade do total cobrado, que é sempre recalculado
+            no servidor.
+        deliveryAddress:
+          $ref: '#/components/schemas/OrderAddress'
+        billingAddress:
+          $ref: '#/components/schemas/OrderAddress'
+        items:
+          type: array
+          minItems: 1
+          items: { $ref: '#/components/schemas/CreateOrderItem' }
+    SubmitOrderResponseItem:
+      type: object
+      required: [id, productId, quantity, unitPrice, discountAmount, subtotal]
+      properties:
+        id: { type: string, example: "item-1" }
+        productId: { type: string, example: prd_7a21e4c9 }
+        variantId: { type: string, nullable: true, example: "var_7a21e4c9-az-m" }
+        quantity: { type: integer, example: 12 }
+        unitPrice: { type: number, format: double, example: 65.4 }
+        discountAmount: { type: number, format: double, example: 45.9 }
+        subtotal: { type: number, format: double, example: 738.9 }
+    SubmitOrderResponse:
+      type: object
+      required:
+        - correlationId
+        - orderId
+        - orderNumber
+        - status
+        - discountAmount
+        - surchargeAmount
+        - shippingAmount
+        - total
+        - submittedAt
+        - items
+      properties:
+        correlationId:
+          type: string
+          description: Id de correlação para suporte/rastreio, ecoado ou gerado pelo servidor.
+          example: "9c3f9c2a-1e0a-4a55-8a7b-1a2b3c4d5e6f"
+        orderId: { type: string, example: "b6f1a6d0-2f8f-4a3a-9e2a-1c9b6b7d9f10" }
+        orderNumber: { type: string, example: "2026-000483" }
+        status:
+          $ref: '#/components/schemas/OrderStatus'
+        discountAmount: { type: number, format: double, example: 45.9 }
+        surchargeAmount: { type: number, format: double, example: 0 }
+        shippingAmount: { type: number, format: double, example: 32.5 }
+        total: { type: number, format: double, example: 812.4 }
+        submittedAt: { type: string, format: date-time, example: "2026-03-01T12:31:05.000Z" }
+        items:
+          type: array
+          items: { $ref: '#/components/schemas/SubmitOrderResponseItem' }

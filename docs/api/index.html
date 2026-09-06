@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="utf-8" />
+    <title>VestiPro — Documentação da API pública</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <!--
+      Portal de documentação da API pública (TASK-172, EPIC-22).
+
+      Estático, gerado a partir do único artefato versionado desta pasta
+      (`openapi.yaml`) via Redoc standalone — nenhuma rota/endpoint interno do
+      VestiPro é exposto aqui, apenas a especificação da API pública já publicada
+      em `functions/src/public_api/` (TASK-171).
+
+      Publicado via Firebase Hosting (`firebase.json`: `hosting.public` =
+      "docs/api"), acessível por parceiros técnicos através da URL do site de
+      Hosting do projeto. Nenhum dado real de cliente/organização aparece nesta
+      página — todos os exemplos em `openapi.yaml` são fictícios.
+    -->
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <redoc spec-url="./openapi.yaml"></redoc>
+    <script src="https://cdn.redoc.ly/redoc/latest/bundles/redoc.standalone.js"></script>
+  </body>
+</html>
