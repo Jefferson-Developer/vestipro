@@ -206,7 +206,7 @@ return accessStatusChangeRequested(_that.user);case _:
 
 class UserListStarted implements UserListEvent {
   const UserListStarted(this.organizationId);
-
+  
 
  final  String organizationId;
 
@@ -272,7 +272,7 @@ as String,
 
 class UserListRefreshRequested implements UserListEvent {
   const UserListRefreshRequested();
-
+  
 
 
 
@@ -534,7 +534,7 @@ String toString() {
 
 class UserListAccessStatusChangeRequested implements UserListEvent {
   const UserListAccessStatusChangeRequested(this.user);
-
+  
 
  final  OrganizationUser user;
 
@@ -597,7 +597,7 @@ as OrganizationUser,
 @override
 @pragma('vm:prefer-inline')
 $OrganizationUserCopyWith<$Res> get user {
-
+  
   return $OrganizationUserCopyWith<$Res>(_self.user, (value) {
     return _then(_self.copyWith(user: value));
   });

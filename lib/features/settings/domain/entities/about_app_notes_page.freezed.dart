@@ -210,7 +210,7 @@ return $default(_that.items,_that.page,_that.hasMore,_that.dataOrigin);case _:
 
 class _AboutAppNotesPage implements AboutAppNotesPage {
   const _AboutAppNotesPage({required final  List<AboutAppNote> items, required this.page, required this.hasMore, required this.dataOrigin}): _items = items;
-
+  
 
  final  List<AboutAppNote> _items;
 @override List<AboutAppNote> get items {
