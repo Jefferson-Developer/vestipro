@@ -921,6 +921,23 @@ service cloud.firestore {
         allow get, list: if canReadOrder(organizationId);
 
         allow create, update, delete: if false;
+
+        // -----------------------------------------------------------------
+        // organizations/{organizationId}/orders/{orderId}/signatures/{signatureId}
+        // (TASK-180 — assinatura eletrônica de pedido: immutable evidence
+        // attachment, exclusively written by the `signOrder` Cloud Function,
+        // which uses the Admin SDK and so bypasses these Rules entirely.
+        // "Assinatura nunca pode ser removida ou substituída" is enforced
+        // here at the Rules layer too, not only inside `signOrder` itself —
+        // `create`/`update`/`delete` are all `if false` unconditionally, same
+        // shape as `orders/{orderId}` itself.)
+        // -----------------------------------------------------------------
+
+        match /signatures/{signatureId} {
+          allow get, list: if canReadOrder(organizationId);
+
+          allow create, update, delete: if false;
+        }
       }
 
       // -------------------------------------------------------------------

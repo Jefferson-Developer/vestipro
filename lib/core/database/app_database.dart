@@ -10,6 +10,7 @@ import 'tables/customers_table.dart';
 import 'tables/favorites_table.dart';
 import 'tables/offline_package_load_status_table.dart';
 import 'tables/order_items_table.dart';
+import 'tables/order_signatures_table.dart';
 import 'tables/orders_table.dart';
 import 'tables/outbox_table.dart';
 import 'tables/payment_terms_table.dart';
@@ -123,13 +124,14 @@ class OrderWithItemsRow {
     ConflictAuditLogTable,
     PositivacaoSnapshotsTable,
     VisitRoutesTable,
+    OrderSignaturesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 22;
+  int get schemaVersion => 23;
 
   /// Removes every offline row after an account deletion. Child tables are
   /// cleared first so foreign-key integrity remains enabled throughout.
@@ -376,6 +378,12 @@ class AppDatabase extends _$AppDatabase {
           // create unconditionally, no `sqlite_master`/`PRAGMA table_info`
           // guard needed.
           await migrator.createTable(visitRoutesTable);
+        }
+        if (from < 23) {
+          // TASK-180: local, offline-first cache of a pedido's own captured
+          // electronic signature — a brand-new table, same "safe to create
+          // unconditionally" precedent as the `from < 22` branch above.
+          await migrator.createTable(orderSignaturesTable);
         }
       },
       beforeOpen: (details) async {
@@ -1013,6 +1021,52 @@ class AppDatabase extends _$AppDatabase {
               ..orderBy([(row) => OrderingTerm.asc(row.position)]))
             .get();
     return OrderWithItemsRow(order: orderRow, items: itemRows);
+  }
+
+  // ---------------------------------------------------------------------
+  // TASK-180 — OrderSignatures (assinatura eletrônica de pedido)
+  // ---------------------------------------------------------------------
+
+  /// Inserts or updates exactly one `OrderSignature` row — used both for the
+  /// first offline capture and for reconciling it to `synced` once
+  /// `signOrder` confirms it, mirroring [upsertOrder]'s own upsert
+  /// semantics.
+  Future<void> upsertOrderSignature(OrderSignaturesTableCompanion row) {
+    return into(orderSignaturesTable).insertOnConflictUpdate(row);
+  }
+
+  /// The `OrderSignature` captured on this device for [orderId], scoped to
+  /// [organizationId]/[companyId], or `null` if this order has never been
+  /// signed from this device.
+  Future<OrderSignaturesTableData?> getOrderSignatureByOrderId({
+    required String organizationId,
+    required String companyId,
+    required String orderId,
+  }) {
+    return (select(orderSignaturesTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.companyId.equals(companyId) &
+              row.orderId.equals(orderId),
+        ))
+        .getSingleOrNull();
+  }
+
+  /// Every `OrderSignature` still pending sync
+  /// (`syncStatus` in `pending_sync`/`failed`) for [organizationId]/
+  /// [companyId] — the retry-sync entry point reads this the same way
+  /// [getOrdersForCompany] backs `ListLocalPendingOrdersUseCase`.
+  Future<List<OrderSignaturesTableData>> getPendingSyncOrderSignatures({
+    required String organizationId,
+    required String companyId,
+  }) {
+    return (select(orderSignaturesTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.companyId.equals(companyId) &
+              row.syncStatus.isIn(const <String>['pending_sync', 'failed']),
+        ))
+        .get();
   }
 
   // ---------------------------------------------------------------------

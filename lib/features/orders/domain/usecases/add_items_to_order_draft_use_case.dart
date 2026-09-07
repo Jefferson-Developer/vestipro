@@ -7,7 +7,9 @@ import '../../../../core/errors/errors.dart';
 import '../../../../core/utils/utils.dart';
 import '../entities/order.dart';
 import '../entities/order_item.dart';
+import '../entities/order_signature.dart';
 import '../repositories/order_draft_repository.dart';
+import '../repositories/order_signature_draft_repository.dart';
 import '../services/order_item_editor.dart';
 
 /// Adds [items] (already resolved against the pricing engine and the
@@ -25,9 +27,25 @@ import '../services/order_item_editor.dart';
 /// in-memory bloc state required across that navigation.
 @injectable
 class AddItemsToOrderDraftUseCase {
-  const AddItemsToOrderDraftUseCase(this._repository);
+  const AddItemsToOrderDraftUseCase(
+    this._repository,
+    this._signatureRepository,
+  );
 
   final OrderDraftRepository _repository;
+
+  /// TASK-180: once a valid `OrderSignature` exists for this draft, its
+  /// content is immutable — this use case is the one place this codebase
+  /// actually mutates `Order.items`, so this is where "bloquear alteração do
+  /// pedido após assinatura sem gerar uma nova versão/aditivo explícito" is
+  /// enforced client-side. This is defense-in-depth, not the real backstop:
+  /// nothing server-side lets a client write to an order document directly
+  /// either way (`firestore.rules`'s own `orders/{orderId}` — `allow create,
+  /// update, delete: if false` — every persisted mutation only ever happens
+  /// through a Cloud Function using the Admin SDK, and no Cloud Function in
+  /// this codebase mutates an order's own commercial content after
+  /// `submitOrder` created it).
+  final OrderSignatureDraftRepository _signatureRepository;
 
   Future<AppResult<Order>> call({
     required String organizationId,
@@ -86,6 +104,28 @@ class AddItemsToOrderDraftUseCase {
         const NotFoundFailure(
           'Order draft not found.',
           code: 'order_draft_not_found',
+        ),
+      );
+    }
+
+    final signatureResult = await _signatureRepository.getByOrderId(
+      organizationId: trimmedOrganizationId,
+      companyId: trimmedCompanyId,
+      orderId: trimmedDraftId,
+    );
+    if (signatureResult case AppFailure<OrderSignature?>(
+      failure: final failure,
+    )) {
+      return AppFailure<Order>(failure);
+    }
+    final existingSignature =
+        (signatureResult as AppSuccess<OrderSignature?>).value;
+    if (existingSignature != null && existingSignature.isValid) {
+      return const AppFailure<Order>(
+        ConflictFailure(
+          'This order has already been signed and can no longer be '
+          'edited — duplicate it to start a new version instead.',
+          code: 'order_draft_locked_by_signature',
         ),
       );
     }

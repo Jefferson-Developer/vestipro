@@ -9,3 +9,8 @@ export {
   type DecideOrderApprovalResponse,
   type OrderApprovalDecisionValue,
 } from './decide-order-approval';
+export {
+  signOrder,
+  type SignOrderRequest,
+  type SignOrderResponse,
+} from './sign-order';

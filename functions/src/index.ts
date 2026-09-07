@@ -33,7 +33,7 @@ export { consumeStockReservation } from './inventory/consume-stock-reservation';
 export { expireStockReservations } from './inventory/expire-stock-reservations';
 export { syncStockAlerts } from './inventory/sync-stock-alerts';
 export { recomputeStockTurnoverMetrics } from './inventory/recompute-stock-turnover-metrics';
-export { submitOrder, decideOrderApproval } from './orders';
+export { submitOrder, decideOrderApproval, signOrder } from './orders';
 export { generateInsightsScheduled } from './insights';
 export {
   recomputeSalesDailyOnOrderWrite,

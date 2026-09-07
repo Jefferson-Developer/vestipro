@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -8,13 +10,21 @@ import '../../../../core/utils/utils.dart';
 import '../../domain/entities/order.dart';
 import '../../domain/entities/order_duplication_item_issue.dart';
 import '../../domain/entities/order_duplication_result.dart';
+import '../../domain/entities/order_signature.dart';
+import '../../domain/services/order_receipt_pdf_encoder.dart';
+import '../../domain/usecases/capture_order_signature_use_case.dart'
+    show kSignableOrderStatuses;
 import '../bloc/order_duplication_cubit.dart';
 import '../bloc/order_duplication_state.dart';
 import '../bloc/order_history_bloc.dart';
 import '../bloc/order_history_event.dart';
 import '../bloc/order_history_state.dart';
+import '../bloc/order_signature_cubit.dart';
+import '../bloc/order_signature_state.dart';
 import '../widgets/order_status_history_timeline.dart';
 import 'order_list_page.dart' show OrderStatusBadge;
+import 'order_receipt_preview_page.dart';
+import 'order_signature_capture_page.dart';
 
 /// Pedido history/detail screen (TASK-104): the full, read-only status
 /// timeline of one Order plus "Repetir pedido", gated by [Capability.orderView]
@@ -29,6 +39,7 @@ class OrderHistoryPage extends StatelessWidget {
     required this.permissionService,
     required this.createBloc,
     required this.createDuplicationCubit,
+    required this.createSignatureCubit,
     this.onDuplicated,
     super.key,
   });
@@ -40,6 +51,12 @@ class OrderHistoryPage extends StatelessWidget {
   final PermissionService permissionService;
   final OrderHistoryBloc Function() createBloc;
   final OrderDuplicationCubit Function() createDuplicationCubit;
+
+  /// Builds the single `OrderSignatureCubit` behind "Assinar pedido"/"Ver
+  /// comprovante" (TASK-180) — shared as-is with the pushed
+  /// `OrderSignatureCapturePage` (`BlocProvider.value`), same factory-per-use
+  /// convention as [createDuplicationCubit].
+  final OrderSignatureCubit Function() createSignatureCubit;
 
   /// Called once "Repetir pedido" successfully creates a new draft — always
   /// navigates into the existing order draft flow (`OrderDraftRoute`,
@@ -70,6 +87,19 @@ class OrderHistoryPage extends StatelessWidget {
             ),
             BlocProvider<OrderDuplicationCubit>(
               create: (_) => createDuplicationCubit(),
+            ),
+            BlocProvider<OrderSignatureCubit>(
+              create: (_) {
+                final cubit = createSignatureCubit();
+                unawaited(
+                  cubit.loadForOrder(
+                    organizationId: organizationId,
+                    companyId: companyId,
+                    orderId: orderId,
+                  ),
+                );
+                return cubit;
+              },
             ),
           ],
           child: _OrderHistoryPermissionsGate(
@@ -176,35 +206,133 @@ class _OrderHistoryScaffold extends StatelessWidget {
                 order.items.isNotEmpty &&
                 duplicationState.status != OrderDuplicationStatus.submitting;
 
-            return Scaffold(
-              body: AppAdminPageLayout(
-                title: order == null || order.orderNumber == null
-                    ? 'Histórico do pedido'
-                    : 'Histórico do pedido ${order.orderNumber}',
-                actions: <Widget>[
-                  AppButton(
-                    label: 'Repetir pedido',
-                    leadingIcon: Icons.content_copy_outlined,
-                    isLoading:
-                        duplicationState.status ==
-                        OrderDuplicationStatus.submitting,
-                    isDisabled: !canSubmitDuplicate,
-                    onPressed: !canSubmitDuplicate
-                        ? null
-                        : () => context.read<OrderDuplicationCubit>().duplicate(
-                            organizationId: organizationId,
-                            companyId: companyId,
-                            sellerId: sellerId,
-                            sourceOrderId: order.id,
+            return BlocConsumer<OrderSignatureCubit, OrderSignatureState>(
+              listenWhen: (previous, current) =>
+                  previous.status != current.status,
+              listener: (context, signatureState) =>
+                  _handleSignatureChange(context, signatureState),
+              builder: (context, signatureState) {
+                final canSign =
+                    canDuplicate &&
+                    order != null &&
+                    kSignableOrderStatuses.contains(order.status) &&
+                    !signatureState.hasValidSignature &&
+                    signatureState.status !=
+                        OrderSignatureFlowStatus.capturing &&
+                    signatureState.status != OrderSignatureFlowStatus.syncing;
+                final canViewReceipt = order?.orderNumber != null;
+
+                return Scaffold(
+                  body: AppAdminPageLayout(
+                    title: order == null || order.orderNumber == null
+                        ? 'Histórico do pedido'
+                        : 'Histórico do pedido ${order.orderNumber}',
+                    actions: <Widget>[
+                      if (canViewReceipt)
+                        AppButton(
+                          label: 'Ver comprovante',
+                          leadingIcon: Icons.receipt_long_outlined,
+                          variant: AppButtonVariant.secondary,
+                          onPressed: () => _viewReceipt(
+                            context,
+                            order: order!,
+                            signature: signatureState.signature,
                           ),
+                        ),
+                      AppButton(
+                        label: signatureState.hasValidSignature
+                            ? 'Pedido assinado'
+                            : 'Assinar pedido',
+                        leadingIcon: Icons.draw_outlined,
+                        isDisabled: !canSign,
+                        onPressed: !canSign
+                            ? null
+                            : () => _signOrder(context, order, sellerId),
+                      ),
+                      AppButton(
+                        label: 'Repetir pedido',
+                        leadingIcon: Icons.content_copy_outlined,
+                        isLoading:
+                            duplicationState.status ==
+                            OrderDuplicationStatus.submitting,
+                        isDisabled: !canSubmitDuplicate,
+                        onPressed: !canSubmitDuplicate
+                            ? null
+                            : () => context
+                                  .read<OrderDuplicationCubit>()
+                                  .duplicate(
+                                    organizationId: organizationId,
+                                    companyId: companyId,
+                                    sellerId: sellerId,
+                                    sourceOrderId: order.id,
+                                  ),
+                      ),
+                    ],
+                    content: _OrderHistoryContent(state: historyState),
                   ),
-                ],
-                content: _OrderHistoryContent(state: historyState),
-              ),
+                );
+              },
             );
           },
         );
       },
+    );
+  }
+
+  void _handleSignatureChange(BuildContext context, OrderSignatureState state) {
+    if (state.status == OrderSignatureFlowStatus.failure) {
+      AppSnackbar.show(
+        context,
+        message:
+            state.failure?.message ??
+            'Não foi possível processar a assinatura do pedido.',
+        variant: AppSnackbarVariant.error,
+      );
+    }
+  }
+
+  Future<void> _signOrder(
+    BuildContext context,
+    Order order,
+    String sellerId,
+  ) async {
+    final cubit = context.read<OrderSignatureCubit>();
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => BlocProvider<OrderSignatureCubit>.value(
+          value: cubit,
+          child: OrderSignatureCapturePage(
+            order: order,
+            signedByUserId: sellerId,
+          ),
+        ),
+      ),
+    );
+  }
+
+  Future<void> _viewReceipt(
+    BuildContext context, {
+    required Order order,
+    required OrderSignature? signature,
+  }) async {
+    final cubit = context.read<OrderSignatureCubit>();
+    await cubit.logReceiptViewed(
+      organizationId: organizationId,
+      companyId: companyId,
+      orderId: order.id,
+    );
+    final bytes = await const OrderReceiptPdfEncoder().encodeToBytes(
+      order: order,
+      signature: signature,
+    );
+    if (!context.mounted) return;
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => OrderReceiptPreviewPage(
+          bytes: bytes,
+          fileName: 'Comprovante ${order.orderNumber}',
+        ),
+      ),
     );
   }
 

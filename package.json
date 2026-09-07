@@ -5,7 +5,7 @@
   "scripts": {
     "test:rules:firestore": "firebase emulators:exec --only firestore \"npm --prefix firestore-tests test\"",
     "test:rules:storage": "firebase emulators:exec --only firestore,storage \"npm --prefix storage-tests test\"",
-    "test:functions": "firebase emulators:exec --only auth,firestore \"npm --prefix functions test\"",
+    "test:functions": "firebase emulators:exec --only auth,firestore,storage \"npm --prefix functions test\"",
     "test:flutter-integration": "firebase emulators:exec --only auth,firestore,storage,functions \"flutter test integration_test -d chrome\"",
     "test:integration": "npm run test:rules:firestore && npm run test:rules:storage && npm run test:functions && npm run test:flutter-integration"
   }

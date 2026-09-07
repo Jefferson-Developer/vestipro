@@ -67,6 +67,15 @@ dependencies:
   package_info_plus: ^10.2.1
   device_info_plus: ^13.2.0
   uuid: ^4.6.0
+  # Pure-Dart SHA-256 (TASK-180, assinatura eletrônica de pedido): computes the
+  # order-content hash `OrderContentHasher` needs — the same well-known,
+  # actively maintained dart-lang package already implied by the "no native
+  # code, cross-platform" precedent `pdf`/`printing` set (see their own
+  # comment below). Never used for anything security-critical on its own —
+  # the server (`signOrder` Cloud Function) always recomputes/reverifies this
+  # same hash against Firestore's own truth, this package is only what
+  # produces it on both sides.
+  crypto: ^3.0.6
   # Reserved for external REST integrations (ERP/public API). Firebase access must use FlutterFire SDKs.
   dio: ^5.11.0
   firebase_core: ^4.13.0

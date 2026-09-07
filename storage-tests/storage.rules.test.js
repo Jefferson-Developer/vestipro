@@ -249,6 +249,40 @@ describe('organizations/{organizationId}/orders/{orderId}/attachments/{fileName}
   });
 });
 
+describe('organizations/{organizationId}/orders/{orderId}/signatures/{fileName} (TASK-180)', () => {
+  const PATH_A = `organizations/${ORG_A}/orders/order-1/signatures/signature-1.png`;
+  const PATH_B = `organizations/${ORG_B}/orders/order-1/signatures/signature-1.png`;
+  const validPng = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+
+  test('ninguém consegue enviar a assinatura pelo cliente, nem OWNER — signOrder (Admin SDK) é o único caminho', async () => {
+    await assertFails(upload('owner-a', PATH_A, validPng, 'image/png'));
+  });
+
+  test('membro ativo da própria organização consegue ler a assinatura já persistida', async () => {
+    await seedFile(PATH_A, validPng, 'image/png');
+    const storage = testEnv.authenticatedContext('assistant-a').storage();
+    await assertSucceeds(getBytes(ref(storage, PATH_A)));
+  });
+
+  test('usuário não autenticado não consegue ler a assinatura', async () => {
+    await seedFile(PATH_A, validPng, 'image/png');
+    const storage = testEnv.unauthenticatedContext().storage();
+    await assertFails(getBytes(ref(storage, PATH_A)));
+  });
+
+  test('membro da Org A não consegue ler assinatura sob o path da Org B (cross-tenant)', async () => {
+    await seedFile(PATH_B, validPng, 'image/png');
+    const storage = testEnv.authenticatedContext('rep-a').storage();
+    await assertFails(getBytes(ref(storage, PATH_B)));
+  });
+
+  test('ninguém consegue excluir a assinatura pelo cliente, nem OWNER', async () => {
+    await seedFile(PATH_A, validPng, 'image/png');
+    const storage = testEnv.authenticatedContext('owner-a').storage();
+    await assertFails(deleteObject(ref(storage, PATH_A)));
+  });
+});
+
 describe('organizations/{organizationId}/users/{userId}/avatar', () => {
   const PATH_OWNER_A = `organizations/${ORG_A}/users/owner-a/avatar`;
   const validImage = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);

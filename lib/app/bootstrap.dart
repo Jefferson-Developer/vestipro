@@ -1041,6 +1041,7 @@ class VestiProApp extends StatelessWidget {
                   permissionService: getIt<PermissionService>(),
                   createBloc: () => getIt<OrderHistoryBloc>(),
                   createDuplicationCubit: () => getIt<OrderDuplicationCubit>(),
+                  createSignatureCubit: () => getIt<OrderSignatureCubit>(),
                   onDuplicated: (order) => context.go(
                     OrderDraftRoute(
                       orgId: orgId,

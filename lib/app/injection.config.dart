@@ -775,6 +775,8 @@ import '../features/orders/data/datasources/cloud_functions_order_approval_data_
     as _i725;
 import '../features/orders/data/datasources/cloud_functions_order_pricing_data_source.dart'
     as _i708;
+import '../features/orders/data/datasources/cloud_functions_order_signature_submission_data_source.dart'
+    as _i920;
 import '../features/orders/data/datasources/cloud_functions_order_submission_data_source.dart'
     as _i1058;
 import '../features/orders/data/datasources/firestore_order_list_data_source.dart'
@@ -785,6 +787,8 @@ import '../features/orders/data/datasources/order_list_data_source.dart'
     as _i726;
 import '../features/orders/data/datasources/order_pricing_data_source.dart'
     as _i492;
+import '../features/orders/data/datasources/order_signature_submission_data_source.dart'
+    as _i37;
 import '../features/orders/data/datasources/order_submission_data_source.dart'
     as _i1068;
 import '../features/orders/data/mappers/order_approval_decision_mapper.dart'
@@ -792,15 +796,24 @@ import '../features/orders/data/mappers/order_approval_decision_mapper.dart'
 import '../features/orders/data/mappers/order_local_mapper.dart' as _i431;
 import '../features/orders/data/mappers/order_mapper.dart' as _i169;
 import '../features/orders/data/mappers/order_pricing_mapper.dart' as _i730;
+import '../features/orders/data/mappers/order_signature_codec.dart' as _i801;
+import '../features/orders/data/mappers/order_signature_local_mapper.dart'
+    as _i833;
+import '../features/orders/data/mappers/order_signature_submission_mapper.dart'
+    as _i889;
 import '../features/orders/data/mappers/order_submission_mapper.dart' as _i1062;
 import '../features/orders/data/repositories/drift_order_draft_repository.dart'
     as _i247;
+import '../features/orders/data/repositories/drift_order_signature_draft_repository.dart'
+    as _i13;
 import '../features/orders/data/repositories/order_approval_repository_impl.dart'
     as _i455;
 import '../features/orders/data/repositories/order_list_repository_impl.dart'
     as _i67;
 import '../features/orders/data/repositories/order_pricing_repository_impl.dart'
     as _i258;
+import '../features/orders/data/repositories/order_signature_submission_repository_impl.dart'
+    as _i316;
 import '../features/orders/data/repositories/order_submission_repository_impl.dart'
     as _i167;
 import '../features/orders/data/repositories/shared_preferences_order_commercial_alert_dispatch_repository.dart'
@@ -815,8 +828,13 @@ import '../features/orders/domain/repositories/order_list_repository.dart'
     as _i1051;
 import '../features/orders/domain/repositories/order_pricing_repository.dart'
     as _i183;
+import '../features/orders/domain/repositories/order_signature_draft_repository.dart'
+    as _i100;
+import '../features/orders/domain/repositories/order_signature_submission_repository.dart'
+    as _i463;
 import '../features/orders/domain/repositories/order_submission_repository.dart'
     as _i202;
+import '../features/orders/domain/services/order_content_hasher.dart' as _i483;
 import '../features/orders/domain/services/order_status_transition_validator.dart'
     as _i753;
 import '../features/orders/domain/services/order_submission_validator.dart'
@@ -825,6 +843,8 @@ import '../features/orders/domain/services/order_visibility_service.dart'
     as _i63;
 import '../features/orders/domain/usecases/add_items_to_order_draft_use_case.dart'
     as _i720;
+import '../features/orders/domain/usecases/capture_order_signature_use_case.dart'
+    as _i328;
 import '../features/orders/domain/usecases/decide_order_approval_use_case.dart'
     as _i828;
 import '../features/orders/domain/usecases/duplicate_order_use_case.dart'
@@ -839,11 +859,15 @@ import '../features/orders/domain/usecases/get_order_draft_use_case.dart'
     as _i485;
 import '../features/orders/domain/usecases/get_order_pricing_summary_use_case.dart'
     as _i305;
+import '../features/orders/domain/usecases/get_order_signature_use_case.dart'
+    as _i399;
 import '../features/orders/domain/usecases/get_order_submission_context_use_case.dart'
     as _i1025;
 import '../features/orders/domain/usecases/list_local_pending_orders_use_case.dart'
     as _i233;
 import '../features/orders/domain/usecases/list_orders_use_case.dart' as _i144;
+import '../features/orders/domain/usecases/list_pending_order_signatures_use_case.dart'
+    as _i878;
 import '../features/orders/domain/usecases/process_order_commercial_alert_use_case.dart'
     as _i491;
 import '../features/orders/domain/usecases/resolve_order_draft_defaults_use_case.dart'
@@ -852,6 +876,8 @@ import '../features/orders/domain/usecases/save_order_draft_use_case.dart'
     as _i1;
 import '../features/orders/domain/usecases/start_order_draft_for_customer_use_case.dart'
     as _i168;
+import '../features/orders/domain/usecases/submit_order_signature_use_case.dart'
+    as _i315;
 import '../features/orders/domain/usecases/submit_order_use_case.dart' as _i856;
 import '../features/orders/presentation/bloc/order_approval_queue_bloc.dart'
     as _i339;
@@ -868,6 +894,8 @@ import '../features/orders/presentation/bloc/order_pricing_summary_cubit.dart'
     as _i765;
 import '../features/orders/presentation/bloc/order_product_addition_cubit.dart'
     as _i15;
+import '../features/orders/presentation/bloc/order_signature_cubit.dart'
+    as _i680;
 import '../features/orders/presentation/bloc/order_submission_validation_cubit.dart'
     as _i753;
 import '../features/organizations/data/datasources/branch_data_source.dart'
@@ -1674,6 +1702,15 @@ extension GetItInjectableX on _i174.GetIt {
       () => const _i772.PipelineStageMapper(),
     );
     gh.lazySingleton<_i169.OrderMapper>(() => const _i169.OrderMapper());
+    gh.lazySingleton<_i801.OrderSignatureCodec>(
+      () => const _i801.OrderSignatureCodec(),
+    );
+    gh.lazySingleton<_i889.OrderSignatureSubmissionMapper>(
+      () => const _i889.OrderSignatureSubmissionMapper(),
+    );
+    gh.lazySingleton<_i483.OrderContentHasher>(
+      () => const _i483.OrderContentHasher(),
+    );
     gh.lazySingleton<_i753.OrderStatusTransitionValidator>(
       () => const _i753.OrderStatusTransitionValidator(),
     );
@@ -2087,6 +2124,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i527.OpportunityOutcomeReasonRepository>(),
       ),
     );
+    gh.lazySingleton<_i833.OrderSignatureLocalMapper>(
+      () => _i833.OrderSignatureLocalMapper(gh<_i801.OrderSignatureCodec>()),
+    );
     gh.lazySingleton<_i321.ProductRepository>(
       () => _i323.SharedPreferencesProductRepository(gh<_i309.ProductMapper>()),
     );
@@ -2327,9 +2367,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i932.AnalyticsService>(
       () => _i569.FirebaseAnalyticsService(gh<_i398.FirebaseAnalytics>()),
     );
-    gh.factory<_i720.AddItemsToOrderDraftUseCase>(
-      () => _i720.AddItemsToOrderDraftUseCase(gh<_i81.OrderDraftRepository>()),
-    );
     gh.factory<_i485.GetOrderDraftUseCase>(
       () => _i485.GetOrderDraftUseCase(gh<_i81.OrderDraftRepository>()),
     );
@@ -2483,11 +2520,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i56.FirebaseAppCheck>(),
       ),
     );
-    gh.factory<_i15.OrderProductAdditionCubit>(
-      () => _i15.OrderProductAdditionCubit(
-        gh<_i720.AddItemsToOrderDraftUseCase>(),
-      ),
-    );
     gh.factory<_i751.GenerateProductVariantsUseCase>(
       () => _i751.GenerateProductVariantsUseCase(
         gh<_i321.ProductRepository>(),
@@ -2536,6 +2568,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i81.SaveOnboardingProgressUseCase>(
       () => _i81.SaveOnboardingProgressUseCase(
         gh<_i886.OnboardingProgressRepository>(),
+      ),
+    );
+    gh.lazySingleton<_i100.OrderSignatureDraftRepository>(
+      () => _i13.DriftOrderSignatureDraftRepository(
+        gh<_i658.AppDatabase>(),
+        gh<_i833.OrderSignatureLocalMapper>(),
       ),
     );
     gh.factory<_i715.CreateSizeGridTemplateUseCase>(
@@ -2719,6 +2757,13 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i642.CompanyMapper>(),
       ),
     );
+    gh.factory<_i328.CaptureOrderSignatureUseCase>(
+      () => _i328.CaptureOrderSignatureUseCase(
+        gh<_i100.OrderSignatureDraftRepository>(),
+        gh<_i483.OrderContentHasher>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i339.SalesPipelineBloc>(
       () => _i339.SalesPipelineBloc(
         listStages: gh<_i879.ListPipelineStagesUseCase>(),
@@ -2748,6 +2793,16 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i176.UserRoleDataSource>(
       () => _i789.CloudFunctionsUserRoleDataSource(
         gh<_i340.CloudFunctionsService>(),
+      ),
+    );
+    gh.factory<_i399.GetOrderSignatureUseCase>(
+      () => _i399.GetOrderSignatureUseCase(
+        gh<_i100.OrderSignatureDraftRepository>(),
+      ),
+    );
+    gh.factory<_i878.ListPendingOrderSignaturesUseCase>(
+      () => _i878.ListPendingOrderSignaturesUseCase(
+        gh<_i100.OrderSignatureDraftRepository>(),
       ),
     );
     gh.lazySingleton<_i684.ProductImportJobDataSource>(
@@ -2862,6 +2917,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i455.FirestoreOrganizationDataSource(
         gh<_i974.FirebaseFirestore>(),
         gh<_i340.CloudFunctionsService>(),
+      ),
+    );
+    gh.factory<_i720.AddItemsToOrderDraftUseCase>(
+      () => _i720.AddItemsToOrderDraftUseCase(
+        gh<_i81.OrderDraftRepository>(),
+        gh<_i100.OrderSignatureDraftRepository>(),
       ),
     );
     gh.factory<_i89.CollectionFormBloc>(
@@ -3083,6 +3144,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i226.ReportScheduleRemoteDataSource>(),
       ),
     );
+    gh.lazySingleton<_i37.OrderSignatureSubmissionDataSource>(
+      () => _i920.CloudFunctionsOrderSignatureSubmissionDataSource(
+        gh<_i340.CloudFunctionsService>(),
+        gh<_i801.OrderSignatureCodec>(),
+      ),
+    );
     gh.lazySingleton<_i503.StockTurnoverRepository>(
       () => _i80.StockTurnoverRepositoryImpl(
         dataSource: gh<_i135.StockTurnoverDataSource>(),
@@ -3132,6 +3199,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i375.BranchRepositoryImpl(
         dataSource: gh<_i526.BranchDataSource>(),
         mapper: gh<_i964.BranchMapper>(),
+      ),
+    );
+    gh.factory<_i15.OrderProductAdditionCubit>(
+      () => _i15.OrderProductAdditionCubit(
+        gh<_i720.AddItemsToOrderDraftUseCase>(),
       ),
     );
     gh.factory<_i126.DeactivateUserUseCase>(
@@ -3393,6 +3465,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i684.ListStockAlertsUseCase(
         gh<_i896.StockAlertRepository>(),
         gh<_i47.PermissionService>(),
+      ),
+    );
+    gh.lazySingleton<_i463.OrderSignatureSubmissionRepository>(
+      () => _i316.OrderSignatureSubmissionRepositoryImpl(
+        dataSource: gh<_i37.OrderSignatureSubmissionDataSource>(),
+        mapper: gh<_i889.OrderSignatureSubmissionMapper>(),
       ),
     );
     gh.lazySingleton<_i756.OrganizationRepository>(
@@ -4155,6 +4233,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i47.PermissionService>(),
       ),
     );
+    gh.factory<_i315.SubmitOrderSignatureUseCase>(
+      () => _i315.SubmitOrderSignatureUseCase(
+        gh<_i463.OrderSignatureSubmissionRepository>(),
+        gh<_i100.OrderSignatureDraftRepository>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.lazySingleton<_i325.CustomerOfflinePackageEntityLoader>(
       () => _i325.CustomerOfflinePackageEntityLoader(
         gh<_i977.LoadInitialCustomerOfflineDataUseCase>(),
@@ -4441,6 +4526,14 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i565.ExecuteReportQuery(
         gh<_i22.ReportRepository>(),
         gh<_i908.ValidateReportDefinition>(),
+      ),
+    );
+    gh.factory<_i680.OrderSignatureCubit>(
+      () => _i680.OrderSignatureCubit(
+        gh<_i328.CaptureOrderSignatureUseCase>(),
+        gh<_i315.SubmitOrderSignatureUseCase>(),
+        gh<_i399.GetOrderSignatureUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i752.ProductImportBloc>(

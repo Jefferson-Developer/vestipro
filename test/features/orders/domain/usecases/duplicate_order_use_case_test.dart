@@ -12,7 +12,10 @@ void main() {
 
     setUp(() {
       orderDraftRepository = _FakeOrderDraftRepository();
-      addItemsToOrderDraft = AddItemsToOrderDraftUseCase(orderDraftRepository);
+      addItemsToOrderDraft = AddItemsToOrderDraftUseCase(
+        orderDraftRepository,
+        _FakeOrderSignatureDraftRepository(),
+      );
     });
 
     DuplicateOrderUseCase buildUseCase({
@@ -421,6 +424,31 @@ final class _FakeOrderDraftRepository implements OrderDraftRepository {
     required String companyId,
   }) async {
     return const AppSuccess<List<Order>>(<Order>[]);
+  }
+}
+
+final class _FakeOrderSignatureDraftRepository
+    implements OrderSignatureDraftRepository {
+  @override
+  Future<AppResult<void>> saveLocal({required OrderSignature signature}) async {
+    return const AppSuccess<void>(null);
+  }
+
+  @override
+  Future<AppResult<OrderSignature?>> getByOrderId({
+    required String organizationId,
+    required String companyId,
+    required String orderId,
+  }) async {
+    return const AppSuccess<OrderSignature?>(null);
+  }
+
+  @override
+  Future<AppResult<List<OrderSignature>>> getPendingSync({
+    required String organizationId,
+    required String companyId,
+  }) async {
+    return const AppSuccess<List<OrderSignature>>(<OrderSignature>[]);
   }
 }
 

@@ -199,6 +199,25 @@ service firebase.storage {
     }
 
     // -------------------------------------------------------------------
+    // organizations/{organizationId}/orders/{orderId}/signatures/{fileName}
+    // (TASK-180 — assinatura eletrônica de pedido: immutable PNG evidence,
+    // exclusively written by the `signOrder` Cloud Function via the Admin
+    // SDK, which bypasses these Rules entirely — same "server owns every
+    // write" shape `customerImportJobs`'s own `report.json`/
+    // `personal-data-exports` already use. Never a client-side upload path:
+    // `signOrder` is the only place that ever recomputes/reverifies the
+    // signature's own content hash before persisting anything, so the image
+    // itself must go through it too, never a separate, unauthenticated-by-
+    // content Storage write.)
+    // -------------------------------------------------------------------
+
+    match /organizations/{organizationId}/orders/{orderId}/signatures/{fileName} {
+      allow read: if isActiveMember(organizationId);
+
+      allow write: if false;
+    }
+
+    // -------------------------------------------------------------------
     // organizations/{organizationId}/users/{userId}/avatar
     // (`StoragePaths.userAvatar`)
     // -------------------------------------------------------------------

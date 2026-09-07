@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_test/flutter_test.dart';
 import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/utils/utils.dart';
@@ -12,7 +14,10 @@ void main() {
         final repository = _FakeOrderDraftRepository(
           existingDraft: _order(items: const <OrderItem>[]),
         );
-        final useCase = AddItemsToOrderDraftUseCase(repository);
+        final useCase = AddItemsToOrderDraftUseCase(
+          repository,
+          _FakeOrderSignatureDraftRepository(),
+        );
 
         final result = await useCase(
           organizationId: 'org-1',
@@ -50,7 +55,10 @@ void main() {
             ],
           ),
         );
-        final useCase = AddItemsToOrderDraftUseCase(repository);
+        final useCase = AddItemsToOrderDraftUseCase(
+          repository,
+          _FakeOrderSignatureDraftRepository(),
+        );
 
         final result = await useCase(
           organizationId: 'org-1',
@@ -71,7 +79,10 @@ void main() {
       'fails without saving when the draft does not exist locally',
       () async {
         final repository = _FakeOrderDraftRepository(existingDraft: null);
-        final useCase = AddItemsToOrderDraftUseCase(repository);
+        final useCase = AddItemsToOrderDraftUseCase(
+          repository,
+          _FakeOrderSignatureDraftRepository(),
+        );
 
         final result = await useCase(
           organizationId: 'org-1',
@@ -90,7 +101,10 @@ void main() {
       final repository = _FakeOrderDraftRepository(
         existingDraft: _order(items: const <OrderItem>[]),
       );
-      final useCase = AddItemsToOrderDraftUseCase(repository);
+      final useCase = AddItemsToOrderDraftUseCase(
+        repository,
+        _FakeOrderSignatureDraftRepository(),
+      );
 
       final result = await useCase(
         organizationId: 'org-1',
@@ -108,7 +122,10 @@ void main() {
       final repository = _FakeOrderDraftRepository(
         existingDraft: _order(items: const <OrderItem>[]),
       );
-      final useCase = AddItemsToOrderDraftUseCase(repository);
+      final useCase = AddItemsToOrderDraftUseCase(
+        repository,
+        _FakeOrderSignatureDraftRepository(),
+      );
 
       final result = await useCase(
         organizationId: 'org-1',
@@ -126,7 +143,10 @@ void main() {
         existingDraft: _order(items: const <OrderItem>[]),
         saveResult: const AppFailure<void>(UnexpectedFailure('disk full')),
       );
-      final useCase = AddItemsToOrderDraftUseCase(repository);
+      final useCase = AddItemsToOrderDraftUseCase(
+        repository,
+        _FakeOrderSignatureDraftRepository(),
+      );
 
       final result = await useCase(
         organizationId: 'org-1',
@@ -138,6 +158,61 @@ void main() {
       expect(result, isA<AppFailure<Order>>());
       expect((result as AppFailure<Order>).failure, isA<UnexpectedFailure>());
     });
+
+    test(
+      'TASK-180: rejects adding items to a draft that already carries a '
+      'valid electronic signature — never edits a signed pedido silently',
+      () async {
+        final order = _order(items: const <OrderItem>[]);
+        final repository = _FakeOrderDraftRepository(existingDraft: order);
+        final signatureRepository = _FakeOrderSignatureDraftRepository(
+          existing: _signature(order),
+        );
+        final useCase = AddItemsToOrderDraftUseCase(
+          repository,
+          signatureRepository,
+        );
+
+        final result = await useCase(
+          organizationId: 'org-1',
+          companyId: 'company-1',
+          draftId: 'order-1',
+          items: <OrderItem>[_newItem(variantId: 'variant-1', quantity: 1)],
+        );
+
+        expect(result, isA<AppFailure<Order>>());
+        expect((result as AppFailure<Order>).failure, isA<ConflictFailure>());
+        expect((result).failure.code, 'order_draft_locked_by_signature');
+        expect(repository.savedOrders, isEmpty);
+      },
+    );
+
+    test(
+      'still allows editing a draft whose only signature was invalidated',
+      () async {
+        final order = _order(items: const <OrderItem>[]);
+        final repository = _FakeOrderDraftRepository(existingDraft: order);
+        final signatureRepository = _FakeOrderSignatureDraftRepository(
+          existing: _signature(
+            order,
+          ).copyWith(status: OrderSignatureStatus.invalidated),
+        );
+        final useCase = AddItemsToOrderDraftUseCase(
+          repository,
+          signatureRepository,
+        );
+
+        final result = await useCase(
+          organizationId: 'org-1',
+          companyId: 'company-1',
+          draftId: 'order-1',
+          items: <OrderItem>[_newItem(variantId: 'variant-1', quantity: 1)],
+        );
+
+        expect(result, isA<AppSuccess<Order>>());
+        expect(repository.savedOrders, isNotEmpty);
+      },
+    );
   });
 }
 
@@ -186,6 +261,30 @@ Order _order({required List<OrderItem> items}) {
   );
 }
 
+OrderSignature _signature(Order order) {
+  final now = DateTime.utc(2026, 6, 1, 12);
+  return OrderSignature(
+    id: 'signature-1',
+    organizationId: order.organizationId,
+    companyId: order.companyId,
+    orderId: order.id,
+    signerRole: OrderSignerRole.customer,
+    signedByUserId: order.sellerId,
+    signedByName: 'Maria Cliente',
+    method: OrderSignatureMethod.canvasDrawn,
+    imageBytes: Uint8List.fromList(<int>[1, 2, 3]),
+    contentHash: 'hash-1',
+    orderVersionAtSignature: order.version,
+    signedAt: now,
+    createdAt: now,
+    createdBy: order.sellerId,
+    updatedAt: now,
+    updatedBy: order.sellerId,
+    version: 1,
+    syncStatus: OrderSignatureSyncStatus.synced,
+  );
+}
+
 final class _FakeOrderDraftRepository implements OrderDraftRepository {
   _FakeOrderDraftRepository({
     required this._existingDraft,
@@ -217,5 +316,34 @@ final class _FakeOrderDraftRepository implements OrderDraftRepository {
     required String companyId,
   }) async {
     return const AppSuccess<List<Order>>(<Order>[]);
+  }
+}
+
+final class _FakeOrderSignatureDraftRepository
+    implements OrderSignatureDraftRepository {
+  _FakeOrderSignatureDraftRepository({this.existing});
+
+  final OrderSignature? existing;
+
+  @override
+  Future<AppResult<void>> saveLocal({required OrderSignature signature}) async {
+    return const AppSuccess<void>(null);
+  }
+
+  @override
+  Future<AppResult<OrderSignature?>> getByOrderId({
+    required String organizationId,
+    required String companyId,
+    required String orderId,
+  }) async {
+    return AppSuccess<OrderSignature?>(existing);
+  }
+
+  @override
+  Future<AppResult<List<OrderSignature>>> getPendingSync({
+    required String organizationId,
+    required String companyId,
+  }) async {
+    return const AppSuccess<List<OrderSignature>>(<OrderSignature>[]);
   }
 }

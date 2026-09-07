@@ -32,6 +32,11 @@ final class AnalyticsEvents {
   static const String orderRejected = 'order_rejected';
   static const String orderHistoryViewed = 'order_history_viewed';
   static const String orderDuplicated = 'order_duplicated';
+  // TASK-180 — assinatura eletrônica de pedido.
+  static const String orderSignatureCaptured = 'order_signature_captured';
+  static const String orderSignatureSynced = 'order_signature_synced';
+  static const String orderSignatureSyncFailed = 'order_signature_sync_failed';
+  static const String orderReceiptViewed = 'order_receipt_viewed';
   static const String crmActivityCreated = 'crm_activity_created';
   static const String crmFollowupCompleted = 'crm_followup_completed';
   static const String insightOpened = 'insight_opened';
@@ -224,6 +229,10 @@ final class AnalyticsEvents {
     orderRejected,
     orderHistoryViewed,
     orderDuplicated,
+    orderSignatureCaptured,
+    orderSignatureSynced,
+    orderSignatureSyncFailed,
+    orderReceiptViewed,
     crmActivityCreated,
     crmFollowupCompleted,
     insightOpened,

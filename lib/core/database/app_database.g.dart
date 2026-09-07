@@ -24865,6 +24865,1484 @@ class VisitRoutesTableCompanion extends UpdateCompanion<VisitRoutesTableData> {
   }
 }
 
+class $OrderSignaturesTableTable extends OrderSignaturesTable
+    with TableInfo<$OrderSignaturesTableTable, OrderSignaturesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $OrderSignaturesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _orderIdMeta = const VerificationMeta(
+    'orderId',
+  );
+  @override
+  late final GeneratedColumn<String> orderId = GeneratedColumn<String>(
+    'order_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _orderNumberMeta = const VerificationMeta(
+    'orderNumber',
+  );
+  @override
+  late final GeneratedColumn<String> orderNumber = GeneratedColumn<String>(
+    'order_number',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _signerRoleMeta = const VerificationMeta(
+    'signerRole',
+  );
+  @override
+  late final GeneratedColumn<String> signerRole = GeneratedColumn<String>(
+    'signer_role',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _signedByUserIdMeta = const VerificationMeta(
+    'signedByUserId',
+  );
+  @override
+  late final GeneratedColumn<String> signedByUserId = GeneratedColumn<String>(
+    'signed_by_user_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _signedByNameMeta = const VerificationMeta(
+    'signedByName',
+  );
+  @override
+  late final GeneratedColumn<String> signedByName = GeneratedColumn<String>(
+    'signed_by_name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _methodMeta = const VerificationMeta('method');
+  @override
+  late final GeneratedColumn<String> method = GeneratedColumn<String>(
+    'method',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _imageBytesMeta = const VerificationMeta(
+    'imageBytes',
+  );
+  @override
+  late final GeneratedColumn<Uint8List> imageBytes = GeneratedColumn<Uint8List>(
+    'image_bytes',
+    aliasedName,
+    false,
+    type: DriftSqlType.blob,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _contentHashMeta = const VerificationMeta(
+    'contentHash',
+  );
+  @override
+  late final GeneratedColumn<String> contentHash = GeneratedColumn<String>(
+    'content_hash',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _orderVersionAtSignatureMeta =
+      const VerificationMeta('orderVersionAtSignature');
+  @override
+  late final GeneratedColumn<int> orderVersionAtSignature =
+      GeneratedColumn<int>(
+        'order_version_at_signature',
+        aliasedName,
+        false,
+        type: DriftSqlType.int,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _signedAtMeta = const VerificationMeta(
+    'signedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> signedAt = GeneratedColumn<DateTime>(
+    'signed_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deviceInfoMeta = const VerificationMeta(
+    'deviceInfo',
+  );
+  @override
+  late final GeneratedColumn<String> deviceInfo = GeneratedColumn<String>(
+    'device_info',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _ipAddressMeta = const VerificationMeta(
+    'ipAddress',
+  );
+  @override
+  late final GeneratedColumn<String> ipAddress = GeneratedColumn<String>(
+    'ip_address',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _serverReceivedAtMeta = const VerificationMeta(
+    'serverReceivedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> serverReceivedAt =
+      GeneratedColumn<DateTime>(
+        'server_received_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _remoteImageStoragePathMeta =
+      const VerificationMeta('remoteImageStoragePath');
+  @override
+  late final GeneratedColumn<String> remoteImageStoragePath =
+      GeneratedColumn<String>(
+        'remote_image_storage_path',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _invalidatedAtMeta = const VerificationMeta(
+    'invalidatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> invalidatedAt =
+      GeneratedColumn<DateTime>(
+        'invalidated_at',
+        aliasedName,
+        true,
+        type: DriftSqlType.dateTime,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _invalidatedReasonMeta = const VerificationMeta(
+    'invalidatedReason',
+  );
+  @override
+  late final GeneratedColumn<String> invalidatedReason =
+      GeneratedColumn<String>(
+        'invalidated_reason',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedByMeta = const VerificationMeta(
+    'updatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
+    'updated_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    companyId,
+    orderId,
+    orderNumber,
+    signerRole,
+    signedByUserId,
+    signedByName,
+    method,
+    imageBytes,
+    contentHash,
+    orderVersionAtSignature,
+    signedAt,
+    deviceInfo,
+    ipAddress,
+    serverReceivedAt,
+    remoteImageStoragePath,
+    status,
+    invalidatedAt,
+    invalidatedReason,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    version,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'order_signatures';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<OrderSignaturesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('order_id')) {
+      context.handle(
+        _orderIdMeta,
+        orderId.isAcceptableOrUnknown(data['order_id']!, _orderIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_orderIdMeta);
+    }
+    if (data.containsKey('order_number')) {
+      context.handle(
+        _orderNumberMeta,
+        orderNumber.isAcceptableOrUnknown(
+          data['order_number']!,
+          _orderNumberMeta,
+        ),
+      );
+    }
+    if (data.containsKey('signer_role')) {
+      context.handle(
+        _signerRoleMeta,
+        signerRole.isAcceptableOrUnknown(data['signer_role']!, _signerRoleMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_signerRoleMeta);
+    }
+    if (data.containsKey('signed_by_user_id')) {
+      context.handle(
+        _signedByUserIdMeta,
+        signedByUserId.isAcceptableOrUnknown(
+          data['signed_by_user_id']!,
+          _signedByUserIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_signedByUserIdMeta);
+    }
+    if (data.containsKey('signed_by_name')) {
+      context.handle(
+        _signedByNameMeta,
+        signedByName.isAcceptableOrUnknown(
+          data['signed_by_name']!,
+          _signedByNameMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_signedByNameMeta);
+    }
+    if (data.containsKey('method')) {
+      context.handle(
+        _methodMeta,
+        method.isAcceptableOrUnknown(data['method']!, _methodMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_methodMeta);
+    }
+    if (data.containsKey('image_bytes')) {
+      context.handle(
+        _imageBytesMeta,
+        imageBytes.isAcceptableOrUnknown(data['image_bytes']!, _imageBytesMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_imageBytesMeta);
+    }
+    if (data.containsKey('content_hash')) {
+      context.handle(
+        _contentHashMeta,
+        contentHash.isAcceptableOrUnknown(
+          data['content_hash']!,
+          _contentHashMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_contentHashMeta);
+    }
+    if (data.containsKey('order_version_at_signature')) {
+      context.handle(
+        _orderVersionAtSignatureMeta,
+        orderVersionAtSignature.isAcceptableOrUnknown(
+          data['order_version_at_signature']!,
+          _orderVersionAtSignatureMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_orderVersionAtSignatureMeta);
+    }
+    if (data.containsKey('signed_at')) {
+      context.handle(
+        _signedAtMeta,
+        signedAt.isAcceptableOrUnknown(data['signed_at']!, _signedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_signedAtMeta);
+    }
+    if (data.containsKey('device_info')) {
+      context.handle(
+        _deviceInfoMeta,
+        deviceInfo.isAcceptableOrUnknown(data['device_info']!, _deviceInfoMeta),
+      );
+    }
+    if (data.containsKey('ip_address')) {
+      context.handle(
+        _ipAddressMeta,
+        ipAddress.isAcceptableOrUnknown(data['ip_address']!, _ipAddressMeta),
+      );
+    }
+    if (data.containsKey('server_received_at')) {
+      context.handle(
+        _serverReceivedAtMeta,
+        serverReceivedAt.isAcceptableOrUnknown(
+          data['server_received_at']!,
+          _serverReceivedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('remote_image_storage_path')) {
+      context.handle(
+        _remoteImageStoragePathMeta,
+        remoteImageStoragePath.isAcceptableOrUnknown(
+          data['remote_image_storage_path']!,
+          _remoteImageStoragePathMeta,
+        ),
+      );
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('invalidated_at')) {
+      context.handle(
+        _invalidatedAtMeta,
+        invalidatedAt.isAcceptableOrUnknown(
+          data['invalidated_at']!,
+          _invalidatedAtMeta,
+        ),
+      );
+    }
+    if (data.containsKey('invalidated_reason')) {
+      context.handle(
+        _invalidatedReasonMeta,
+        invalidatedReason.isAcceptableOrUnknown(
+          data['invalidated_reason']!,
+          _invalidatedReasonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('updated_by')) {
+      context.handle(
+        _updatedByMeta,
+        updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedByMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  OrderSignaturesTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return OrderSignaturesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      orderId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_id'],
+      )!,
+      orderNumber: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}order_number'],
+      ),
+      signerRole: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}signer_role'],
+      )!,
+      signedByUserId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}signed_by_user_id'],
+      )!,
+      signedByName: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}signed_by_name'],
+      )!,
+      method: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}method'],
+      )!,
+      imageBytes: attachedDatabase.typeMapping.read(
+        DriftSqlType.blob,
+        data['${effectivePrefix}image_bytes'],
+      )!,
+      contentHash: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}content_hash'],
+      )!,
+      orderVersionAtSignature: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}order_version_at_signature'],
+      )!,
+      signedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}signed_at'],
+      )!,
+      deviceInfo: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}device_info'],
+      ),
+      ipAddress: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}ip_address'],
+      ),
+      serverReceivedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}server_received_at'],
+      ),
+      remoteImageStoragePath: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}remote_image_storage_path'],
+      ),
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      invalidatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}invalidated_at'],
+      ),
+      invalidatedReason: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}invalidated_reason'],
+      ),
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      updatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_by'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $OrderSignaturesTableTable createAlias(String alias) {
+    return $OrderSignaturesTableTable(attachedDatabase, alias);
+  }
+}
+
+class OrderSignaturesTableData extends DataClass
+    implements Insertable<OrderSignaturesTableData> {
+  final String id;
+  final String organizationId;
+  final String companyId;
+  final String orderId;
+  final String? orderNumber;
+  final String signerRole;
+  final String signedByUserId;
+  final String signedByName;
+  final String method;
+  final Uint8List imageBytes;
+  final String contentHash;
+  final int orderVersionAtSignature;
+  final DateTime signedAt;
+  final String? deviceInfo;
+  final String? ipAddress;
+  final DateTime? serverReceivedAt;
+  final String? remoteImageStoragePath;
+  final String status;
+  final DateTime? invalidatedAt;
+  final String? invalidatedReason;
+  final DateTime createdAt;
+  final String createdBy;
+  final DateTime updatedAt;
+  final String updatedBy;
+  final int version;
+  final String syncStatus;
+  const OrderSignaturesTableData({
+    required this.id,
+    required this.organizationId,
+    required this.companyId,
+    required this.orderId,
+    this.orderNumber,
+    required this.signerRole,
+    required this.signedByUserId,
+    required this.signedByName,
+    required this.method,
+    required this.imageBytes,
+    required this.contentHash,
+    required this.orderVersionAtSignature,
+    required this.signedAt,
+    this.deviceInfo,
+    this.ipAddress,
+    this.serverReceivedAt,
+    this.remoteImageStoragePath,
+    required this.status,
+    this.invalidatedAt,
+    this.invalidatedReason,
+    required this.createdAt,
+    required this.createdBy,
+    required this.updatedAt,
+    required this.updatedBy,
+    required this.version,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    map['company_id'] = Variable<String>(companyId);
+    map['order_id'] = Variable<String>(orderId);
+    if (!nullToAbsent || orderNumber != null) {
+      map['order_number'] = Variable<String>(orderNumber);
+    }
+    map['signer_role'] = Variable<String>(signerRole);
+    map['signed_by_user_id'] = Variable<String>(signedByUserId);
+    map['signed_by_name'] = Variable<String>(signedByName);
+    map['method'] = Variable<String>(method);
+    map['image_bytes'] = Variable<Uint8List>(imageBytes);
+    map['content_hash'] = Variable<String>(contentHash);
+    map['order_version_at_signature'] = Variable<int>(orderVersionAtSignature);
+    map['signed_at'] = Variable<DateTime>(signedAt);
+    if (!nullToAbsent || deviceInfo != null) {
+      map['device_info'] = Variable<String>(deviceInfo);
+    }
+    if (!nullToAbsent || ipAddress != null) {
+      map['ip_address'] = Variable<String>(ipAddress);
+    }
+    if (!nullToAbsent || serverReceivedAt != null) {
+      map['server_received_at'] = Variable<DateTime>(serverReceivedAt);
+    }
+    if (!nullToAbsent || remoteImageStoragePath != null) {
+      map['remote_image_storage_path'] = Variable<String>(
+        remoteImageStoragePath,
+      );
+    }
+    map['status'] = Variable<String>(status);
+    if (!nullToAbsent || invalidatedAt != null) {
+      map['invalidated_at'] = Variable<DateTime>(invalidatedAt);
+    }
+    if (!nullToAbsent || invalidatedReason != null) {
+      map['invalidated_reason'] = Variable<String>(invalidatedReason);
+    }
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_by'] = Variable<String>(createdBy);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_by'] = Variable<String>(updatedBy);
+    map['version'] = Variable<int>(version);
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  OrderSignaturesTableCompanion toCompanion(bool nullToAbsent) {
+    return OrderSignaturesTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      companyId: Value(companyId),
+      orderId: Value(orderId),
+      orderNumber: orderNumber == null && nullToAbsent
+          ? const Value.absent()
+          : Value(orderNumber),
+      signerRole: Value(signerRole),
+      signedByUserId: Value(signedByUserId),
+      signedByName: Value(signedByName),
+      method: Value(method),
+      imageBytes: Value(imageBytes),
+      contentHash: Value(contentHash),
+      orderVersionAtSignature: Value(orderVersionAtSignature),
+      signedAt: Value(signedAt),
+      deviceInfo: deviceInfo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deviceInfo),
+      ipAddress: ipAddress == null && nullToAbsent
+          ? const Value.absent()
+          : Value(ipAddress),
+      serverReceivedAt: serverReceivedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(serverReceivedAt),
+      remoteImageStoragePath: remoteImageStoragePath == null && nullToAbsent
+          ? const Value.absent()
+          : Value(remoteImageStoragePath),
+      status: Value(status),
+      invalidatedAt: invalidatedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(invalidatedAt),
+      invalidatedReason: invalidatedReason == null && nullToAbsent
+          ? const Value.absent()
+          : Value(invalidatedReason),
+      createdAt: Value(createdAt),
+      createdBy: Value(createdBy),
+      updatedAt: Value(updatedAt),
+      updatedBy: Value(updatedBy),
+      version: Value(version),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory OrderSignaturesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return OrderSignaturesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      orderId: serializer.fromJson<String>(json['orderId']),
+      orderNumber: serializer.fromJson<String?>(json['orderNumber']),
+      signerRole: serializer.fromJson<String>(json['signerRole']),
+      signedByUserId: serializer.fromJson<String>(json['signedByUserId']),
+      signedByName: serializer.fromJson<String>(json['signedByName']),
+      method: serializer.fromJson<String>(json['method']),
+      imageBytes: serializer.fromJson<Uint8List>(json['imageBytes']),
+      contentHash: serializer.fromJson<String>(json['contentHash']),
+      orderVersionAtSignature: serializer.fromJson<int>(
+        json['orderVersionAtSignature'],
+      ),
+      signedAt: serializer.fromJson<DateTime>(json['signedAt']),
+      deviceInfo: serializer.fromJson<String?>(json['deviceInfo']),
+      ipAddress: serializer.fromJson<String?>(json['ipAddress']),
+      serverReceivedAt: serializer.fromJson<DateTime?>(
+        json['serverReceivedAt'],
+      ),
+      remoteImageStoragePath: serializer.fromJson<String?>(
+        json['remoteImageStoragePath'],
+      ),
+      status: serializer.fromJson<String>(json['status']),
+      invalidatedAt: serializer.fromJson<DateTime?>(json['invalidatedAt']),
+      invalidatedReason: serializer.fromJson<String?>(
+        json['invalidatedReason'],
+      ),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedBy: serializer.fromJson<String>(json['updatedBy']),
+      version: serializer.fromJson<int>(json['version']),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String>(companyId),
+      'orderId': serializer.toJson<String>(orderId),
+      'orderNumber': serializer.toJson<String?>(orderNumber),
+      'signerRole': serializer.toJson<String>(signerRole),
+      'signedByUserId': serializer.toJson<String>(signedByUserId),
+      'signedByName': serializer.toJson<String>(signedByName),
+      'method': serializer.toJson<String>(method),
+      'imageBytes': serializer.toJson<Uint8List>(imageBytes),
+      'contentHash': serializer.toJson<String>(contentHash),
+      'orderVersionAtSignature': serializer.toJson<int>(
+        orderVersionAtSignature,
+      ),
+      'signedAt': serializer.toJson<DateTime>(signedAt),
+      'deviceInfo': serializer.toJson<String?>(deviceInfo),
+      'ipAddress': serializer.toJson<String?>(ipAddress),
+      'serverReceivedAt': serializer.toJson<DateTime?>(serverReceivedAt),
+      'remoteImageStoragePath': serializer.toJson<String?>(
+        remoteImageStoragePath,
+      ),
+      'status': serializer.toJson<String>(status),
+      'invalidatedAt': serializer.toJson<DateTime?>(invalidatedAt),
+      'invalidatedReason': serializer.toJson<String?>(invalidatedReason),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedBy': serializer.toJson<String>(updatedBy),
+      'version': serializer.toJson<int>(version),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  OrderSignaturesTableData copyWith({
+    String? id,
+    String? organizationId,
+    String? companyId,
+    String? orderId,
+    Value<String?> orderNumber = const Value.absent(),
+    String? signerRole,
+    String? signedByUserId,
+    String? signedByName,
+    String? method,
+    Uint8List? imageBytes,
+    String? contentHash,
+    int? orderVersionAtSignature,
+    DateTime? signedAt,
+    Value<String?> deviceInfo = const Value.absent(),
+    Value<String?> ipAddress = const Value.absent(),
+    Value<DateTime?> serverReceivedAt = const Value.absent(),
+    Value<String?> remoteImageStoragePath = const Value.absent(),
+    String? status,
+    Value<DateTime?> invalidatedAt = const Value.absent(),
+    Value<String?> invalidatedReason = const Value.absent(),
+    DateTime? createdAt,
+    String? createdBy,
+    DateTime? updatedAt,
+    String? updatedBy,
+    int? version,
+    String? syncStatus,
+  }) => OrderSignaturesTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId ?? this.companyId,
+    orderId: orderId ?? this.orderId,
+    orderNumber: orderNumber.present ? orderNumber.value : this.orderNumber,
+    signerRole: signerRole ?? this.signerRole,
+    signedByUserId: signedByUserId ?? this.signedByUserId,
+    signedByName: signedByName ?? this.signedByName,
+    method: method ?? this.method,
+    imageBytes: imageBytes ?? this.imageBytes,
+    contentHash: contentHash ?? this.contentHash,
+    orderVersionAtSignature:
+        orderVersionAtSignature ?? this.orderVersionAtSignature,
+    signedAt: signedAt ?? this.signedAt,
+    deviceInfo: deviceInfo.present ? deviceInfo.value : this.deviceInfo,
+    ipAddress: ipAddress.present ? ipAddress.value : this.ipAddress,
+    serverReceivedAt: serverReceivedAt.present
+        ? serverReceivedAt.value
+        : this.serverReceivedAt,
+    remoteImageStoragePath: remoteImageStoragePath.present
+        ? remoteImageStoragePath.value
+        : this.remoteImageStoragePath,
+    status: status ?? this.status,
+    invalidatedAt: invalidatedAt.present
+        ? invalidatedAt.value
+        : this.invalidatedAt,
+    invalidatedReason: invalidatedReason.present
+        ? invalidatedReason.value
+        : this.invalidatedReason,
+    createdAt: createdAt ?? this.createdAt,
+    createdBy: createdBy ?? this.createdBy,
+    updatedAt: updatedAt ?? this.updatedAt,
+    updatedBy: updatedBy ?? this.updatedBy,
+    version: version ?? this.version,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  OrderSignaturesTableData copyWithCompanion(
+    OrderSignaturesTableCompanion data,
+  ) {
+    return OrderSignaturesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      orderId: data.orderId.present ? data.orderId.value : this.orderId,
+      orderNumber: data.orderNumber.present
+          ? data.orderNumber.value
+          : this.orderNumber,
+      signerRole: data.signerRole.present
+          ? data.signerRole.value
+          : this.signerRole,
+      signedByUserId: data.signedByUserId.present
+          ? data.signedByUserId.value
+          : this.signedByUserId,
+      signedByName: data.signedByName.present
+          ? data.signedByName.value
+          : this.signedByName,
+      method: data.method.present ? data.method.value : this.method,
+      imageBytes: data.imageBytes.present
+          ? data.imageBytes.value
+          : this.imageBytes,
+      contentHash: data.contentHash.present
+          ? data.contentHash.value
+          : this.contentHash,
+      orderVersionAtSignature: data.orderVersionAtSignature.present
+          ? data.orderVersionAtSignature.value
+          : this.orderVersionAtSignature,
+      signedAt: data.signedAt.present ? data.signedAt.value : this.signedAt,
+      deviceInfo: data.deviceInfo.present
+          ? data.deviceInfo.value
+          : this.deviceInfo,
+      ipAddress: data.ipAddress.present ? data.ipAddress.value : this.ipAddress,
+      serverReceivedAt: data.serverReceivedAt.present
+          ? data.serverReceivedAt.value
+          : this.serverReceivedAt,
+      remoteImageStoragePath: data.remoteImageStoragePath.present
+          ? data.remoteImageStoragePath.value
+          : this.remoteImageStoragePath,
+      status: data.status.present ? data.status.value : this.status,
+      invalidatedAt: data.invalidatedAt.present
+          ? data.invalidatedAt.value
+          : this.invalidatedAt,
+      invalidatedReason: data.invalidatedReason.present
+          ? data.invalidatedReason.value
+          : this.invalidatedReason,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      version: data.version.present ? data.version.value : this.version,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OrderSignaturesTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('orderId: $orderId, ')
+          ..write('orderNumber: $orderNumber, ')
+          ..write('signerRole: $signerRole, ')
+          ..write('signedByUserId: $signedByUserId, ')
+          ..write('signedByName: $signedByName, ')
+          ..write('method: $method, ')
+          ..write('imageBytes: $imageBytes, ')
+          ..write('contentHash: $contentHash, ')
+          ..write('orderVersionAtSignature: $orderVersionAtSignature, ')
+          ..write('signedAt: $signedAt, ')
+          ..write('deviceInfo: $deviceInfo, ')
+          ..write('ipAddress: $ipAddress, ')
+          ..write('serverReceivedAt: $serverReceivedAt, ')
+          ..write('remoteImageStoragePath: $remoteImageStoragePath, ')
+          ..write('status: $status, ')
+          ..write('invalidatedAt: $invalidatedAt, ')
+          ..write('invalidatedReason: $invalidatedReason, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    organizationId,
+    companyId,
+    orderId,
+    orderNumber,
+    signerRole,
+    signedByUserId,
+    signedByName,
+    method,
+    $driftBlobEquality.hash(imageBytes),
+    contentHash,
+    orderVersionAtSignature,
+    signedAt,
+    deviceInfo,
+    ipAddress,
+    serverReceivedAt,
+    remoteImageStoragePath,
+    status,
+    invalidatedAt,
+    invalidatedReason,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    version,
+    syncStatus,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is OrderSignaturesTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.orderId == this.orderId &&
+          other.orderNumber == this.orderNumber &&
+          other.signerRole == this.signerRole &&
+          other.signedByUserId == this.signedByUserId &&
+          other.signedByName == this.signedByName &&
+          other.method == this.method &&
+          $driftBlobEquality.equals(other.imageBytes, this.imageBytes) &&
+          other.contentHash == this.contentHash &&
+          other.orderVersionAtSignature == this.orderVersionAtSignature &&
+          other.signedAt == this.signedAt &&
+          other.deviceInfo == this.deviceInfo &&
+          other.ipAddress == this.ipAddress &&
+          other.serverReceivedAt == this.serverReceivedAt &&
+          other.remoteImageStoragePath == this.remoteImageStoragePath &&
+          other.status == this.status &&
+          other.invalidatedAt == this.invalidatedAt &&
+          other.invalidatedReason == this.invalidatedReason &&
+          other.createdAt == this.createdAt &&
+          other.createdBy == this.createdBy &&
+          other.updatedAt == this.updatedAt &&
+          other.updatedBy == this.updatedBy &&
+          other.version == this.version &&
+          other.syncStatus == this.syncStatus);
+}
+
+class OrderSignaturesTableCompanion
+    extends UpdateCompanion<OrderSignaturesTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String> companyId;
+  final Value<String> orderId;
+  final Value<String?> orderNumber;
+  final Value<String> signerRole;
+  final Value<String> signedByUserId;
+  final Value<String> signedByName;
+  final Value<String> method;
+  final Value<Uint8List> imageBytes;
+  final Value<String> contentHash;
+  final Value<int> orderVersionAtSignature;
+  final Value<DateTime> signedAt;
+  final Value<String?> deviceInfo;
+  final Value<String?> ipAddress;
+  final Value<DateTime?> serverReceivedAt;
+  final Value<String?> remoteImageStoragePath;
+  final Value<String> status;
+  final Value<DateTime?> invalidatedAt;
+  final Value<String?> invalidatedReason;
+  final Value<DateTime> createdAt;
+  final Value<String> createdBy;
+  final Value<DateTime> updatedAt;
+  final Value<String> updatedBy;
+  final Value<int> version;
+  final Value<String> syncStatus;
+  final Value<int> rowid;
+  const OrderSignaturesTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.orderId = const Value.absent(),
+    this.orderNumber = const Value.absent(),
+    this.signerRole = const Value.absent(),
+    this.signedByUserId = const Value.absent(),
+    this.signedByName = const Value.absent(),
+    this.method = const Value.absent(),
+    this.imageBytes = const Value.absent(),
+    this.contentHash = const Value.absent(),
+    this.orderVersionAtSignature = const Value.absent(),
+    this.signedAt = const Value.absent(),
+    this.deviceInfo = const Value.absent(),
+    this.ipAddress = const Value.absent(),
+    this.serverReceivedAt = const Value.absent(),
+    this.remoteImageStoragePath = const Value.absent(),
+    this.status = const Value.absent(),
+    this.invalidatedAt = const Value.absent(),
+    this.invalidatedReason = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.version = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  OrderSignaturesTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    required String companyId,
+    required String orderId,
+    this.orderNumber = const Value.absent(),
+    required String signerRole,
+    required String signedByUserId,
+    required String signedByName,
+    required String method,
+    required Uint8List imageBytes,
+    required String contentHash,
+    required int orderVersionAtSignature,
+    required DateTime signedAt,
+    this.deviceInfo = const Value.absent(),
+    this.ipAddress = const Value.absent(),
+    this.serverReceivedAt = const Value.absent(),
+    this.remoteImageStoragePath = const Value.absent(),
+    required String status,
+    this.invalidatedAt = const Value.absent(),
+    this.invalidatedReason = const Value.absent(),
+    required DateTime createdAt,
+    required String createdBy,
+    required DateTime updatedAt,
+    required String updatedBy,
+    required int version,
+    required String syncStatus,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       companyId = Value(companyId),
+       orderId = Value(orderId),
+       signerRole = Value(signerRole),
+       signedByUserId = Value(signedByUserId),
+       signedByName = Value(signedByName),
+       method = Value(method),
+       imageBytes = Value(imageBytes),
+       contentHash = Value(contentHash),
+       orderVersionAtSignature = Value(orderVersionAtSignature),
+       signedAt = Value(signedAt),
+       status = Value(status),
+       createdAt = Value(createdAt),
+       createdBy = Value(createdBy),
+       updatedAt = Value(updatedAt),
+       updatedBy = Value(updatedBy),
+       version = Value(version),
+       syncStatus = Value(syncStatus);
+  static Insertable<OrderSignaturesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? orderId,
+    Expression<String>? orderNumber,
+    Expression<String>? signerRole,
+    Expression<String>? signedByUserId,
+    Expression<String>? signedByName,
+    Expression<String>? method,
+    Expression<Uint8List>? imageBytes,
+    Expression<String>? contentHash,
+    Expression<int>? orderVersionAtSignature,
+    Expression<DateTime>? signedAt,
+    Expression<String>? deviceInfo,
+    Expression<String>? ipAddress,
+    Expression<DateTime>? serverReceivedAt,
+    Expression<String>? remoteImageStoragePath,
+    Expression<String>? status,
+    Expression<DateTime>? invalidatedAt,
+    Expression<String>? invalidatedReason,
+    Expression<DateTime>? createdAt,
+    Expression<String>? createdBy,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? updatedBy,
+    Expression<int>? version,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (orderId != null) 'order_id': orderId,
+      if (orderNumber != null) 'order_number': orderNumber,
+      if (signerRole != null) 'signer_role': signerRole,
+      if (signedByUserId != null) 'signed_by_user_id': signedByUserId,
+      if (signedByName != null) 'signed_by_name': signedByName,
+      if (method != null) 'method': method,
+      if (imageBytes != null) 'image_bytes': imageBytes,
+      if (contentHash != null) 'content_hash': contentHash,
+      if (orderVersionAtSignature != null)
+        'order_version_at_signature': orderVersionAtSignature,
+      if (signedAt != null) 'signed_at': signedAt,
+      if (deviceInfo != null) 'device_info': deviceInfo,
+      if (ipAddress != null) 'ip_address': ipAddress,
+      if (serverReceivedAt != null) 'server_received_at': serverReceivedAt,
+      if (remoteImageStoragePath != null)
+        'remote_image_storage_path': remoteImageStoragePath,
+      if (status != null) 'status': status,
+      if (invalidatedAt != null) 'invalidated_at': invalidatedAt,
+      if (invalidatedReason != null) 'invalidated_reason': invalidatedReason,
+      if (createdAt != null) 'created_at': createdAt,
+      if (createdBy != null) 'created_by': createdBy,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (updatedBy != null) 'updated_by': updatedBy,
+      if (version != null) 'version': version,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  OrderSignaturesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String>? companyId,
+    Value<String>? orderId,
+    Value<String?>? orderNumber,
+    Value<String>? signerRole,
+    Value<String>? signedByUserId,
+    Value<String>? signedByName,
+    Value<String>? method,
+    Value<Uint8List>? imageBytes,
+    Value<String>? contentHash,
+    Value<int>? orderVersionAtSignature,
+    Value<DateTime>? signedAt,
+    Value<String?>? deviceInfo,
+    Value<String?>? ipAddress,
+    Value<DateTime?>? serverReceivedAt,
+    Value<String?>? remoteImageStoragePath,
+    Value<String>? status,
+    Value<DateTime?>? invalidatedAt,
+    Value<String?>? invalidatedReason,
+    Value<DateTime>? createdAt,
+    Value<String>? createdBy,
+    Value<DateTime>? updatedAt,
+    Value<String>? updatedBy,
+    Value<int>? version,
+    Value<String>? syncStatus,
+    Value<int>? rowid,
+  }) {
+    return OrderSignaturesTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      orderId: orderId ?? this.orderId,
+      orderNumber: orderNumber ?? this.orderNumber,
+      signerRole: signerRole ?? this.signerRole,
+      signedByUserId: signedByUserId ?? this.signedByUserId,
+      signedByName: signedByName ?? this.signedByName,
+      method: method ?? this.method,
+      imageBytes: imageBytes ?? this.imageBytes,
+      contentHash: contentHash ?? this.contentHash,
+      orderVersionAtSignature:
+          orderVersionAtSignature ?? this.orderVersionAtSignature,
+      signedAt: signedAt ?? this.signedAt,
+      deviceInfo: deviceInfo ?? this.deviceInfo,
+      ipAddress: ipAddress ?? this.ipAddress,
+      serverReceivedAt: serverReceivedAt ?? this.serverReceivedAt,
+      remoteImageStoragePath:
+          remoteImageStoragePath ?? this.remoteImageStoragePath,
+      status: status ?? this.status,
+      invalidatedAt: invalidatedAt ?? this.invalidatedAt,
+      invalidatedReason: invalidatedReason ?? this.invalidatedReason,
+      createdAt: createdAt ?? this.createdAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      updatedBy: updatedBy ?? this.updatedBy,
+      version: version ?? this.version,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (orderId.present) {
+      map['order_id'] = Variable<String>(orderId.value);
+    }
+    if (orderNumber.present) {
+      map['order_number'] = Variable<String>(orderNumber.value);
+    }
+    if (signerRole.present) {
+      map['signer_role'] = Variable<String>(signerRole.value);
+    }
+    if (signedByUserId.present) {
+      map['signed_by_user_id'] = Variable<String>(signedByUserId.value);
+    }
+    if (signedByName.present) {
+      map['signed_by_name'] = Variable<String>(signedByName.value);
+    }
+    if (method.present) {
+      map['method'] = Variable<String>(method.value);
+    }
+    if (imageBytes.present) {
+      map['image_bytes'] = Variable<Uint8List>(imageBytes.value);
+    }
+    if (contentHash.present) {
+      map['content_hash'] = Variable<String>(contentHash.value);
+    }
+    if (orderVersionAtSignature.present) {
+      map['order_version_at_signature'] = Variable<int>(
+        orderVersionAtSignature.value,
+      );
+    }
+    if (signedAt.present) {
+      map['signed_at'] = Variable<DateTime>(signedAt.value);
+    }
+    if (deviceInfo.present) {
+      map['device_info'] = Variable<String>(deviceInfo.value);
+    }
+    if (ipAddress.present) {
+      map['ip_address'] = Variable<String>(ipAddress.value);
+    }
+    if (serverReceivedAt.present) {
+      map['server_received_at'] = Variable<DateTime>(serverReceivedAt.value);
+    }
+    if (remoteImageStoragePath.present) {
+      map['remote_image_storage_path'] = Variable<String>(
+        remoteImageStoragePath.value,
+      );
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (invalidatedAt.present) {
+      map['invalidated_at'] = Variable<DateTime>(invalidatedAt.value);
+    }
+    if (invalidatedReason.present) {
+      map['invalidated_reason'] = Variable<String>(invalidatedReason.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (updatedBy.present) {
+      map['updated_by'] = Variable<String>(updatedBy.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('OrderSignaturesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('orderId: $orderId, ')
+          ..write('orderNumber: $orderNumber, ')
+          ..write('signerRole: $signerRole, ')
+          ..write('signedByUserId: $signedByUserId, ')
+          ..write('signedByName: $signedByName, ')
+          ..write('method: $method, ')
+          ..write('imageBytes: $imageBytes, ')
+          ..write('contentHash: $contentHash, ')
+          ..write('orderVersionAtSignature: $orderVersionAtSignature, ')
+          ..write('signedAt: $signedAt, ')
+          ..write('deviceInfo: $deviceInfo, ')
+          ..write('ipAddress: $ipAddress, ')
+          ..write('serverReceivedAt: $serverReceivedAt, ')
+          ..write('remoteImageStoragePath: $remoteImageStoragePath, ')
+          ..write('status: $status, ')
+          ..write('invalidatedAt: $invalidatedAt, ')
+          ..write('invalidatedReason: $invalidatedReason, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('version: $version, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -24914,6 +26392,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   late final $VisitRoutesTableTable visitRoutesTable = $VisitRoutesTableTable(
     this,
   );
+  late final $OrderSignaturesTableTable orderSignaturesTable =
+      $OrderSignaturesTableTable(this);
   late final Index idxCustomersOrgCompany = Index(
     'idx_customers_org_company',
     'CREATE INDEX idx_customers_org_company ON customers (organization_id, company_id)',
@@ -25046,6 +26526,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_visit_routes_org_rep_date',
     'CREATE INDEX idx_visit_routes_org_rep_date ON visit_routes (organization_id, sales_rep_id, date)',
   );
+  late final Index idxOrderSignaturesOrder = Index(
+    'idx_order_signatures_order',
+    'CREATE INDEX idx_order_signatures_order ON order_signatures (order_id)',
+  );
+  late final Index idxOrderSignaturesOrgCompany = Index(
+    'idx_order_signatures_org_company',
+    'CREATE INDEX idx_order_signatures_org_company ON order_signatures (organization_id, company_id)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -25076,6 +26564,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     conflictAuditLogTable,
     positivacaoSnapshotsTable,
     visitRoutesTable,
+    orderSignaturesTable,
     idxCustomersOrgCompany,
     idxCustomerAddressesCustomer,
     idxCustomerContactsCustomer,
@@ -25109,6 +26598,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxConflictAuditLogScope,
     idxPositivacaoSnapshotsOrgCompany,
     idxVisitRoutesOrgRepDate,
+    idxOrderSignaturesOrder,
+    idxOrderSignaturesOrgCompany,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -37449,6 +38940,649 @@ typedef $$VisitRoutesTableTableProcessedTableManager =
       VisitRoutesTableData,
       PrefetchHooks Function()
     >;
+typedef $$OrderSignaturesTableTableCreateCompanionBuilder =
+    OrderSignaturesTableCompanion Function({
+      required String id,
+      required String organizationId,
+      required String companyId,
+      required String orderId,
+      Value<String?> orderNumber,
+      required String signerRole,
+      required String signedByUserId,
+      required String signedByName,
+      required String method,
+      required Uint8List imageBytes,
+      required String contentHash,
+      required int orderVersionAtSignature,
+      required DateTime signedAt,
+      Value<String?> deviceInfo,
+      Value<String?> ipAddress,
+      Value<DateTime?> serverReceivedAt,
+      Value<String?> remoteImageStoragePath,
+      required String status,
+      Value<DateTime?> invalidatedAt,
+      Value<String?> invalidatedReason,
+      required DateTime createdAt,
+      required String createdBy,
+      required DateTime updatedAt,
+      required String updatedBy,
+      required int version,
+      required String syncStatus,
+      Value<int> rowid,
+    });
+typedef $$OrderSignaturesTableTableUpdateCompanionBuilder =
+    OrderSignaturesTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String> companyId,
+      Value<String> orderId,
+      Value<String?> orderNumber,
+      Value<String> signerRole,
+      Value<String> signedByUserId,
+      Value<String> signedByName,
+      Value<String> method,
+      Value<Uint8List> imageBytes,
+      Value<String> contentHash,
+      Value<int> orderVersionAtSignature,
+      Value<DateTime> signedAt,
+      Value<String?> deviceInfo,
+      Value<String?> ipAddress,
+      Value<DateTime?> serverReceivedAt,
+      Value<String?> remoteImageStoragePath,
+      Value<String> status,
+      Value<DateTime?> invalidatedAt,
+      Value<String?> invalidatedReason,
+      Value<DateTime> createdAt,
+      Value<String> createdBy,
+      Value<DateTime> updatedAt,
+      Value<String> updatedBy,
+      Value<int> version,
+      Value<String> syncStatus,
+      Value<int> rowid,
+    });
+
+class $$OrderSignaturesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $OrderSignaturesTableTable> {
+  $$OrderSignaturesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orderId => $composableBuilder(
+    column: $table.orderId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get orderNumber => $composableBuilder(
+    column: $table.orderNumber,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get signerRole => $composableBuilder(
+    column: $table.signerRole,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get signedByUserId => $composableBuilder(
+    column: $table.signedByUserId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get signedByName => $composableBuilder(
+    column: $table.signedByName,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get method => $composableBuilder(
+    column: $table.method,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<Uint8List> get imageBytes => $composableBuilder(
+    column: $table.imageBytes,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get contentHash => $composableBuilder(
+    column: $table.contentHash,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get orderVersionAtSignature => $composableBuilder(
+    column: $table.orderVersionAtSignature,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get signedAt => $composableBuilder(
+    column: $table.signedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get deviceInfo => $composableBuilder(
+    column: $table.deviceInfo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get ipAddress => $composableBuilder(
+    column: $table.ipAddress,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get serverReceivedAt => $composableBuilder(
+    column: $table.serverReceivedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get remoteImageStoragePath => $composableBuilder(
+    column: $table.remoteImageStoragePath,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get invalidatedAt => $composableBuilder(
+    column: $table.invalidatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get invalidatedReason => $composableBuilder(
+    column: $table.invalidatedReason,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$OrderSignaturesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $OrderSignaturesTableTable> {
+  $$OrderSignaturesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orderId => $composableBuilder(
+    column: $table.orderId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get orderNumber => $composableBuilder(
+    column: $table.orderNumber,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get signerRole => $composableBuilder(
+    column: $table.signerRole,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get signedByUserId => $composableBuilder(
+    column: $table.signedByUserId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get signedByName => $composableBuilder(
+    column: $table.signedByName,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get method => $composableBuilder(
+    column: $table.method,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<Uint8List> get imageBytes => $composableBuilder(
+    column: $table.imageBytes,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get contentHash => $composableBuilder(
+    column: $table.contentHash,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get orderVersionAtSignature => $composableBuilder(
+    column: $table.orderVersionAtSignature,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get signedAt => $composableBuilder(
+    column: $table.signedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get deviceInfo => $composableBuilder(
+    column: $table.deviceInfo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get ipAddress => $composableBuilder(
+    column: $table.ipAddress,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get serverReceivedAt => $composableBuilder(
+    column: $table.serverReceivedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get remoteImageStoragePath => $composableBuilder(
+    column: $table.remoteImageStoragePath,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get invalidatedAt => $composableBuilder(
+    column: $table.invalidatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get invalidatedReason => $composableBuilder(
+    column: $table.invalidatedReason,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$OrderSignaturesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $OrderSignaturesTableTable> {
+  $$OrderSignaturesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get orderId =>
+      $composableBuilder(column: $table.orderId, builder: (column) => column);
+
+  GeneratedColumn<String> get orderNumber => $composableBuilder(
+    column: $table.orderNumber,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get signerRole => $composableBuilder(
+    column: $table.signerRole,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get signedByUserId => $composableBuilder(
+    column: $table.signedByUserId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get signedByName => $composableBuilder(
+    column: $table.signedByName,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get method =>
+      $composableBuilder(column: $table.method, builder: (column) => column);
+
+  GeneratedColumn<Uint8List> get imageBytes => $composableBuilder(
+    column: $table.imageBytes,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get contentHash => $composableBuilder(
+    column: $table.contentHash,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<int> get orderVersionAtSignature => $composableBuilder(
+    column: $table.orderVersionAtSignature,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get signedAt =>
+      $composableBuilder(column: $table.signedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get deviceInfo => $composableBuilder(
+    column: $table.deviceInfo,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get ipAddress =>
+      $composableBuilder(column: $table.ipAddress, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get serverReceivedAt => $composableBuilder(
+    column: $table.serverReceivedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get remoteImageStoragePath => $composableBuilder(
+    column: $table.remoteImageStoragePath,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get invalidatedAt => $composableBuilder(
+    column: $table.invalidatedAt,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get invalidatedReason => $composableBuilder(
+    column: $table.invalidatedReason,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedBy =>
+      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$OrderSignaturesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $OrderSignaturesTableTable,
+          OrderSignaturesTableData,
+          $$OrderSignaturesTableTableFilterComposer,
+          $$OrderSignaturesTableTableOrderingComposer,
+          $$OrderSignaturesTableTableAnnotationComposer,
+          $$OrderSignaturesTableTableCreateCompanionBuilder,
+          $$OrderSignaturesTableTableUpdateCompanionBuilder,
+          (
+            OrderSignaturesTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $OrderSignaturesTableTable,
+              OrderSignaturesTableData
+            >,
+          ),
+          OrderSignaturesTableData,
+          PrefetchHooks Function()
+        > {
+  $$OrderSignaturesTableTableTableManager(
+    _$AppDatabase db,
+    $OrderSignaturesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$OrderSignaturesTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$OrderSignaturesTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$OrderSignaturesTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> orderId = const Value.absent(),
+                Value<String?> orderNumber = const Value.absent(),
+                Value<String> signerRole = const Value.absent(),
+                Value<String> signedByUserId = const Value.absent(),
+                Value<String> signedByName = const Value.absent(),
+                Value<String> method = const Value.absent(),
+                Value<Uint8List> imageBytes = const Value.absent(),
+                Value<String> contentHash = const Value.absent(),
+                Value<int> orderVersionAtSignature = const Value.absent(),
+                Value<DateTime> signedAt = const Value.absent(),
+                Value<String?> deviceInfo = const Value.absent(),
+                Value<String?> ipAddress = const Value.absent(),
+                Value<DateTime?> serverReceivedAt = const Value.absent(),
+                Value<String?> remoteImageStoragePath = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<DateTime?> invalidatedAt = const Value.absent(),
+                Value<String?> invalidatedReason = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> updatedBy = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => OrderSignaturesTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                orderId: orderId,
+                orderNumber: orderNumber,
+                signerRole: signerRole,
+                signedByUserId: signedByUserId,
+                signedByName: signedByName,
+                method: method,
+                imageBytes: imageBytes,
+                contentHash: contentHash,
+                orderVersionAtSignature: orderVersionAtSignature,
+                signedAt: signedAt,
+                deviceInfo: deviceInfo,
+                ipAddress: ipAddress,
+                serverReceivedAt: serverReceivedAt,
+                remoteImageStoragePath: remoteImageStoragePath,
+                status: status,
+                invalidatedAt: invalidatedAt,
+                invalidatedReason: invalidatedReason,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                required String companyId,
+                required String orderId,
+                Value<String?> orderNumber = const Value.absent(),
+                required String signerRole,
+                required String signedByUserId,
+                required String signedByName,
+                required String method,
+                required Uint8List imageBytes,
+                required String contentHash,
+                required int orderVersionAtSignature,
+                required DateTime signedAt,
+                Value<String?> deviceInfo = const Value.absent(),
+                Value<String?> ipAddress = const Value.absent(),
+                Value<DateTime?> serverReceivedAt = const Value.absent(),
+                Value<String?> remoteImageStoragePath = const Value.absent(),
+                required String status,
+                Value<DateTime?> invalidatedAt = const Value.absent(),
+                Value<String?> invalidatedReason = const Value.absent(),
+                required DateTime createdAt,
+                required String createdBy,
+                required DateTime updatedAt,
+                required String updatedBy,
+                required int version,
+                required String syncStatus,
+                Value<int> rowid = const Value.absent(),
+              }) => OrderSignaturesTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                orderId: orderId,
+                orderNumber: orderNumber,
+                signerRole: signerRole,
+                signedByUserId: signedByUserId,
+                signedByName: signedByName,
+                method: method,
+                imageBytes: imageBytes,
+                contentHash: contentHash,
+                orderVersionAtSignature: orderVersionAtSignature,
+                signedAt: signedAt,
+                deviceInfo: deviceInfo,
+                ipAddress: ipAddress,
+                serverReceivedAt: serverReceivedAt,
+                remoteImageStoragePath: remoteImageStoragePath,
+                status: status,
+                invalidatedAt: invalidatedAt,
+                invalidatedReason: invalidatedReason,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                version: version,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$OrderSignaturesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $OrderSignaturesTableTable,
+      OrderSignaturesTableData,
+      $$OrderSignaturesTableTableFilterComposer,
+      $$OrderSignaturesTableTableOrderingComposer,
+      $$OrderSignaturesTableTableAnnotationComposer,
+      $$OrderSignaturesTableTableCreateCompanionBuilder,
+      $$OrderSignaturesTableTableUpdateCompanionBuilder,
+      (
+        OrderSignaturesTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $OrderSignaturesTableTable,
+          OrderSignaturesTableData
+        >,
+      ),
+      OrderSignaturesTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -37519,4 +39653,6 @@ class $AppDatabaseManager {
       );
   $$VisitRoutesTableTableTableManager get visitRoutesTable =>
       $$VisitRoutesTableTableTableManager(_db, _db.visitRoutesTable);
+  $$OrderSignaturesTableTableTableManager get orderSignaturesTable =>
+      $$OrderSignaturesTableTableTableManager(_db, _db.orderSignaturesTable);
 }

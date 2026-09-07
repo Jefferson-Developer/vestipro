@@ -509,6 +509,34 @@ function orderDoc({
   };
 }
 
+function orderSignatureDoc({ organizationId, companyId = 'company-a', orderId, signedByUserId }) {
+  return {
+    organizationId,
+    companyId,
+    orderId,
+    orderNumber: '000001',
+    signerRole: 'customer',
+    signedByUserId,
+    signedByName: 'Cliente Teste',
+    method: 'canvas_drawn',
+    remoteImageStoragePath: `organizations/${organizationId}/orders/${orderId}/signatures/signature-a.png`,
+    contentHash: 'deadbeef',
+    orderVersionAtSignature: 1,
+    signedAt: now(),
+    deviceInfo: null,
+    ipAddress: null,
+    serverReceivedAt: now(),
+    status: 'valid',
+    invalidatedAt: null,
+    invalidatedReason: null,
+    createdAt: now(),
+    createdBy: signedByUserId,
+    updatedAt: now(),
+    updatedBy: signedByUserId,
+    version: 1,
+  };
+}
+
 function auditLogDoc({ organizationId, actorUserId, action = 'role.changed' }) {
   return {
     organizationId,
@@ -1267,6 +1295,58 @@ describe('organizations/{organizationId}/orders/{orderId}  (TASK-102 visibility 
       db.doc(`organizations/${ORG_A}/orders/order-rep-a`).update({ status: 'approved' }),
     );
     await assertFails(db.doc(`organizations/${ORG_A}/orders/order-rep-a`).delete());
+  });
+});
+
+describe('organizations/{organizationId}/orders/{orderId}/signatures/{signatureId}  (TASK-180 assinatura eletrônica)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/orders/order-rep-a`)
+        .set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/orders/order-rep-a/signatures/signature-a`)
+        .set(orderSignatureDoc({ organizationId: ORG_A, orderId: 'order-rep-a', signedByUserId: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/orders/order-rep-b`)
+        .set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-b' }));
+      await db
+        .doc(`organizations/${ORG_A}/orders/order-rep-b/signatures/signature-b`)
+        .set(orderSignatureDoc({ organizationId: ORG_A, orderId: 'order-rep-b', signedByUserId: 'rep-b' }));
+    });
+  });
+
+  test('SALES_REP lê a assinatura do próprio pedido', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/orders/order-rep-a/signatures/signature-a`).get());
+  });
+
+  test('SALES_REP não lê a assinatura de pedido de outro vendedor', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/orders/order-rep-b/signatures/signature-b`).get());
+  });
+
+  test('ADMIN e OWNER leem a assinatura de qualquer pedido da própria organization', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+    await assertSucceeds(ownerDb.doc(`organizations/${ORG_A}/orders/order-rep-a/signatures/signature-a`).get());
+    await assertSucceeds(adminDb.doc(`organizations/${ORG_A}/orders/order-rep-a/signatures/signature-a`).get());
+  });
+
+  test('ninguém escreve/atualiza/apaga a assinatura pelo cliente, nem OWNER — signOrder (Admin SDK) é o único caminho', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/orders/order-rep-a/signatures/signature-new`)
+        .set(orderSignatureDoc({ organizationId: ORG_A, orderId: 'order-rep-a', signedByUserId: 'rep-a' })),
+    );
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/orders/order-rep-a/signatures/signature-a`)
+        .update({ status: 'invalidated' }),
+    );
+    await assertFails(db.doc(`organizations/${ORG_A}/orders/order-rep-a/signatures/signature-a`).delete());
   });
 });
 
