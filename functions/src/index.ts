@@ -47,6 +47,10 @@ export {
   decideReplenishmentSuggestion,
 } from './replenishment';
 export {
+  calculateDemandForecasts,
+  evaluateDemandForecastAccuracy,
+} from './demand-forecast';
+export {
   recomputeSalesDailyOnOrderWrite,
   recomputeMonthlyAggregates,
   recomputeMonthlyAggregatesScheduled,

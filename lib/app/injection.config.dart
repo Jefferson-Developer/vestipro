@@ -540,6 +540,20 @@ import '../features/dashboards/presentation/bloc/sales_dashboard_bloc.dart'
     as _i588;
 import '../features/dashboards/presentation/bloc/targets_dashboard_bloc.dart'
     as _i659;
+import '../features/demand_forecast/data/datasources/demand_forecast_data_source.dart'
+    as _i671;
+import '../features/demand_forecast/data/datasources/firestore_demand_forecast_data_source.dart'
+    as _i849;
+import '../features/demand_forecast/data/mappers/demand_forecast_mapper.dart'
+    as _i775;
+import '../features/demand_forecast/data/repositories/demand_forecast_repository_impl.dart'
+    as _i59;
+import '../features/demand_forecast/domain/repositories/demand_forecast_repository.dart'
+    as _i160;
+import '../features/demand_forecast/domain/usecases/get_demand_forecast_use_case.dart'
+    as _i187;
+import '../features/demand_forecast/presentation/bloc/demand_forecast_bloc.dart'
+    as _i571;
 import '../features/favorites/data/datasources/favorite_remote_data_source.dart'
     as _i1002;
 import '../features/favorites/data/datasources/firestore_favorite_remote_data_source.dart'
@@ -1671,6 +1685,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i712.CustomerSegmentMapper>(
       () => const _i712.CustomerSegmentMapper(),
     );
+    gh.lazySingleton<_i775.DemandForecastMapper>(
+      () => const _i775.DemandForecastMapper(),
+    );
     gh.lazySingleton<_i963.InsightMapper>(() => const _i963.InsightMapper());
     gh.lazySingleton<_i617.AbandonedDraftOrderInsightRule>(
       () => const _i617.AbandonedDraftOrderInsightRule(),
@@ -2796,6 +2813,11 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i642.CompanyMapper>(),
       ),
     );
+    gh.lazySingleton<_i671.DemandForecastDataSource>(
+      () => _i849.FirestoreDemandForecastDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.factory<_i328.CaptureOrderSignatureUseCase>(
       () => _i328.CaptureOrderSignatureUseCase(
         gh<_i100.OrderSignatureDraftRepository>(),
@@ -3034,6 +3056,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i205.ProductImportTemplateDataSource>(
       () => _i179.FirestoreProductImportTemplateDataSource(
         gh<_i974.FirebaseFirestore>(),
+      ),
+    );
+    gh.lazySingleton<_i160.DemandForecastRepository>(
+      () => _i59.DemandForecastRepositoryImpl(
+        dataSource: gh<_i671.DemandForecastDataSource>(),
+        mapper: gh<_i775.DemandForecastMapper>(),
       ),
     );
     gh.factory<_i717.ConflictResolutionCubit>(
@@ -3402,6 +3430,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i409.ValidateInviteUseCase>(
       () => _i409.ValidateInviteUseCase(gh<_i999.InviteAcceptanceRepository>()),
+    );
+    gh.factory<_i187.GetDemandForecastUseCase>(
+      () => _i187.GetDemandForecastUseCase(
+        gh<_i160.DemandForecastRepository>(),
+        gh<_i47.PermissionService>(),
+        gh<_i202.AnalyticsService>(),
+      ),
     );
     gh.lazySingleton<_i922.ReportRemoteDataSource>(
       () => _i712.CloudFunctionsReportRemoteDataSource(
@@ -4031,6 +4066,11 @@ extension GetItInjectableX on _i174.GetIt {
         listProductColors: gh<_i789.ListProductColorsUseCase>(),
         listSizeGridTemplates: gh<_i646.ListSizeGridTemplatesUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i571.DemandForecastBloc>(
+      () => _i571.DemandForecastBloc(
+        getForecast: gh<_i187.GetDemandForecastUseCase>(),
       ),
     );
     gh.factory<_i990.CreateCatalogShareLinkUseCase>(

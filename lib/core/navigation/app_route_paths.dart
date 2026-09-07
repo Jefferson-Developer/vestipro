@@ -934,6 +934,37 @@ final class ReplenishmentSuggestionsRoute extends AppRoute {
   }
 }
 
+/// Previsão de demanda (TASK-185, EPIC-27), scoped by Organization and
+/// Company — evolves TASK-184's replenishment base into a forward-looking
+/// projection. [queryParameters] may carry `scopeType`/`scopeId` to
+/// pre-fill the escopo filter (e.g. a future deep link from a stock/BI
+/// screen); both optional, the page itself starts empty otherwise. Protected
+/// in [AppRouter] by `report.viewSensitive` — same capability
+/// [ReplenishmentSuggestionsRoute] already requires, since both read the
+/// same class of sensitive, server-computed planning data.
+final class DemandForecastRoute extends AppRoute {
+  const DemandForecastRoute({
+    required this.orgId,
+    required this.companyId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String companyId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'demandForecast';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/inventory/demand-forecast';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/companies/$companyId/inventory/demand-forecast';
+    if (queryParameters.isEmpty) return path;
+    return Uri(path: path, queryParameters: queryParameters).toString();
+  }
+}
+
 /// Customer 360 detail route (TASK-052), scoped by Organization and protected
 /// in [AppRouter] by `customer.view`.
 final class CustomerDetailRoute extends AppRoute {

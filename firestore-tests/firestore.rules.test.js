@@ -585,6 +585,38 @@ function replenishmentSuggestionDoc({ organizationId, companyId = 'company-a' })
   };
 }
 
+function demandForecastDoc({ organizationId, companyId = 'company-a' }) {
+  return {
+    organizationId,
+    companyId,
+    scopeType: 'product',
+    scopeId: 'product-1',
+    scopeLabel: 'Camisa Polo',
+    anchorMonthKey: '2026-08',
+    status: 'forecast',
+    fullyEvaluated: false,
+    insufficientDataReason: null,
+    observedPeriodsCount: 12,
+    model: 'holtLinearTrend',
+    modelVersion: 'holt-linear-trend-v1',
+    residualStdDev: 2.5,
+    history: [{ periodKey: '2026-08', quantity: 30, observed: true }],
+    forecastPeriods: [
+      {
+        periodKey: '2026-09',
+        predictedQuantity: 32,
+        lowerBound: 26,
+        upperBound: 38,
+        actualQuantity: null,
+        absolutePercentageError: null,
+      },
+    ],
+    generatedAt: now(),
+    updatedAt: now(),
+    version: 1,
+  };
+}
+
 function salesDailyAggregateDoc({ organizationId, companyId = 'company-a' }) {
   return {
     organizationId,
@@ -2198,6 +2230,73 @@ describe('organizations/{organizationId}/replenishmentSuggestions/{suggestionId}
       db
         .doc(`organizations/${ORG_A}/replenishmentSuggestions/warehouse-1_variant-1_2026-09-07`)
         .update({ status: 'accepted' }),
+    );
+  });
+});
+
+describe('organizations/{organizationId}/demandForecasts/{forecastId}  (TASK-185)', () => {
+  // Representative of both `demandForecasts`/`demandForecastModelStats`
+  // collections this task adds — same rule shape as `replenishmentSuggestions`
+  // above (gated by `report.viewSensitive` OR `inventory.adjust`, client
+  // never writes), since a demand forecast is the same class of sensitive,
+  // server-computed planning data.
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/demandForecasts/company-a_product_product-1_2026-08`)
+        .set(demandForecastDoc({ organizationId: ORG_A }));
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_B}/demandForecasts/company-b_product_product-1_2026-08`)
+        .set(demandForecastDoc({ organizationId: ORG_B, companyId: 'company-b' }));
+    });
+  });
+
+  test('OWNER (report.viewSensitive) consegue ler a previsão da própria organization', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/demandForecasts/company-a_product_product-1_2026-08`).get(),
+    );
+  });
+
+  test('SALES_MANAGER (report.viewSensitive) consegue listar previsões da própria organization', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      db.collection(`organizations/${ORG_A}/demandForecasts`).get(),
+    );
+  });
+
+  test('SALES_REP (sem report.viewSensitive nem inventory.adjust) não consegue ler nem listar previsões', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/demandForecasts/company-a_product_product-1_2026-08`).get(),
+    );
+    await assertFails(db.collection(`organizations/${ORG_A}/demandForecasts`).get());
+  });
+
+  test('OWNER da Org A não consegue ler a previsão da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_B}/demandForecasts/company-b_product_product-1_2026-08`).get(),
+    );
+  });
+
+  test('nenhum papel, nem OWNER, consegue criar uma previsão pelo client (só a Admin SDK escreve)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/demandForecasts/company-a_product_product-2_2026-08`)
+        .set(demandForecastDoc({ organizationId: ORG_A })),
+    );
+  });
+
+  test('nenhum papel, nem OWNER, consegue atualizar uma previsão pelo client (avaliação só via evaluateDemandForecastAccuracy)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/demandForecasts/company-a_product_product-1_2026-08`)
+        .update({ fullyEvaluated: true }),
     );
   });
 });

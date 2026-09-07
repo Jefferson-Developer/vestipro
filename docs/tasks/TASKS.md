@@ -330,7 +330,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ### EPIC-27 — Reposição e Previsão de Demanda
 - [x] [TASK-184 — Implementar sugestão de replenishment automático](TASK-184-implementar-replenishment-automatico.md) — Flutter Senior
-- [ ] [TASK-185 — Implementar modelo de previsão de demanda](TASK-185-implementar-previsao-de-demanda.md) — Flutter Senior
+- [x] [TASK-185 — Implementar modelo de previsão de demanda](TASK-185-implementar-previsao-de-demanda.md) — Flutter Senior
 
 ### EPIC-28 — Inteligência Artificial Generativa
 - [ ] [TASK-186 — Implementar IA generativa: resumo de carteira](TASK-186-implementar-ia-resumo-de-carteira.md) — Flutter Senior + Front-end
@@ -379,6 +379,6 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 183 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
+**Progresso:** 184 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
 [`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md)
 — e não conta mais no total).

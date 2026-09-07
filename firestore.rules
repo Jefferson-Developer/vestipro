@@ -1411,6 +1411,34 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/demandForecasts/{docId}
+      // organizations/{organizationId}/demandForecastModelStats/{modelVersion}
+      // (TASK-185 — modelo de previsão de demanda, EPIC-27)
+      //
+      // `demandForecasts`: uma previsão por produto/coleção/região/mês-âncora,
+      // sempre server-computada (`calculateDemandForecasts`, agendada
+      // mensal) e nunca escrita pelo cliente. `demandForecastModelStats`: o
+      // MAPE agregado por versão do modelo, escrito apenas por
+      // `evaluateDemandForecastAccuracy` (também agendada), usado para
+      // calibração interna — não é exibido ao usuário final hoje. Mesmo
+      // padrão de leitura de `replenishmentSuggestions` acima, já que ambos
+      // são a mesma classe de dado sensível de planejamento/estoque
+      // server-computado.
+      // -------------------------------------------------------------------
+
+      match /demandForecasts/{forecastId} {
+        allow get, list: if hasCapability(organizationId, 'report.viewSensitive')
+          || hasCapability(organizationId, 'inventory.adjust');
+        allow create, update, delete: if false;
+      }
+
+      match /demandForecastModelStats/{modelVersion} {
+        allow get, list: if hasCapability(organizationId, 'report.viewSensitive')
+          || hasCapability(organizationId, 'inventory.adjust');
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/{salesDaily,customerMonthly,
       // productMonthly,sellerMonthly,regionMonthly}Aggregates/{docId}
       // (TASK-133 — camada de agregação server-side)

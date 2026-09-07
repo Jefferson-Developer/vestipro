@@ -36,6 +36,7 @@ import '../features/customer_import/customer_import.dart';
 import '../features/product_import/product_import.dart';
 import '../features/customers/customers.dart';
 import '../features/customer_portal/customer_portal.dart';
+import '../features/demand_forecast/demand_forecast.dart';
 import '../features/visit_routes/visit_routes.dart';
 import '../features/catalog_share/catalog_share.dart';
 import '../features/cart_share/cart_share.dart';
@@ -692,6 +693,23 @@ class VestiProApp extends StatelessWidget {
                       permissionService: getIt<PermissionService>(),
                       createBloc: () => getIt<ReplenishmentSuggestionsBloc>(),
                       initialWarehouseId: queryParameters['warehouseId'],
+                    ),
+                  ),
+          demandForecastPageBuilder:
+              (context, orgId, companyId, queryParameters) =>
+                  _withConnectivityIndicator(
+                    orgId: orgId,
+                    companyId: companyId,
+                    child: DemandForecastPage(
+                      organizationId: orgId,
+                      companyId: companyId,
+                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                      permissionService: getIt<PermissionService>(),
+                      createBloc: () => getIt<DemandForecastBloc>(),
+                      initialScopeType: _parseDemandForecastScopeType(
+                        queryParameters['scopeType'],
+                      ),
+                      initialScopeId: queryParameters['scopeId'],
                     ),
                   ),
           representativeDashboardPageBuilder:
@@ -1395,6 +1413,22 @@ void _navigateForInsightAction({
         'insight para decidir o próximo passo.',
     variant: AppSnackbarVariant.info,
   );
+}
+
+/// Parses [DemandForecastRoute]'s optional `scopeType` query parameter,
+/// falling back to [DemandForecastScopeType.product] for a missing or
+/// unrecognized value — same "router hands raw params, page owns parsing,
+/// never crashes on a malformed deep link" contract every other query
+/// parameter parser in this file follows.
+DemandForecastScopeType _parseDemandForecastScopeType(String? raw) {
+  if (raw == null || raw.trim().isEmpty) {
+    return DemandForecastScopeType.product;
+  }
+  try {
+    return parseDemandForecastScopeType(raw.trim());
+  } on ArgumentError {
+    return DemandForecastScopeType.product;
+  }
 }
 
 Widget _withConnectivityIndicator({

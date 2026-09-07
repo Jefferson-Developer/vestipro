@@ -92,6 +92,7 @@ void main() {
           'app_locale_changed',
           'replenishment_suggestions_viewed',
           'replenishment_suggestion_decided',
+          'demand_forecast_viewed',
         ]),
       );
 

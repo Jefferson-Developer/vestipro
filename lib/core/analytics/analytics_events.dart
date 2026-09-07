@@ -225,6 +225,13 @@ final class AnalyticsEvents {
   static const String replenishmentSuggestionDecided =
       'replenishment_suggestion_decided';
 
+  /// Logged by `GetDemandForecastUseCase` (TASK-185, EPIC-27) whenever a
+  /// gestor successfully requests a `DemandForecast` — `scope_type`/
+  /// `scope_id`/`status` (including when no forecast has ever been
+  /// generated yet, or when the scope has insufficient history) are carried
+  /// as parameters.
+  static const String demandForecastViewed = 'demand_forecast_viewed';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -314,5 +321,6 @@ final class AnalyticsEvents {
     appLocaleChanged,
     replenishmentSuggestionsViewed,
     replenishmentSuggestionDecided,
+    demandForecastViewed,
   ];
 }

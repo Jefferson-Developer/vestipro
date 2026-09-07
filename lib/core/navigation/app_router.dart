@@ -63,6 +63,7 @@ class AppRouter {
     this.collectionDashboardPageBuilder,
     this.inventoryDashboardPageBuilder,
     this.replenishmentSuggestionsPageBuilder,
+    this.demandForecastPageBuilder,
     this.representativeDashboardPageBuilder,
     this.funnelDashboardPageBuilder,
     this.targetsDashboardPageBuilder,
@@ -340,6 +341,19 @@ class AppRouter {
     Map<String, String> queryParameters,
   )?
   replenishmentSuggestionsPageBuilder;
+
+  /// Builds the previsão de demanda screen (TASK-185, EPIC-27), given
+  /// `orgId`/`companyId` and the raw `queryParameters` of
+  /// [DemandForecastRoute] (`scopeType`/`scopeId` when pre-filling the
+  /// escopo filter) — same "router hands raw params, page owns parsing"
+  /// contract [replenishmentSuggestionsPageBuilder] already sets.
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  demandForecastPageBuilder;
 
   final Widget Function(
     BuildContext context,
@@ -696,6 +710,25 @@ class AppRouter {
         ),
         builder: (context, state) {
           final builder = replenishmentSuggestionsPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: DemandForecastRoute.pathPattern,
+        name: DemandForecastRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.reportViewSensitive,
+        ),
+        builder: (context, state) {
+          final builder = demandForecastPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,
