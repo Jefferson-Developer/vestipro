@@ -388,7 +388,7 @@ Não realizado — apenas commit local, conforme autorizado para esta rodada.
 
 ## Hash do commit
 
-Ver saída de `git log -1` após o commit (preenchido no retorno final da execução).
+`71b54c8c6bc0a1e7b5681fa4c24d9600bcf785dd`
 
 ## Branch
 
