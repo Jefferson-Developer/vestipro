@@ -1,0 +1,55 @@
+{
+  "@@locale": "en",
+  "@@last_modified": "2026-09-06",
+
+  "brandTagline": "Your sales force, your way.",
+
+  "emailFieldLabel": "Email",
+  "emailFieldSemanticLabel": "Email field",
+  "passwordFieldLabel": "Password",
+  "passwordFieldSemanticLabel": "Password field",
+  "showPasswordTooltip": "Show password",
+  "hidePasswordTooltip": "Hide password",
+
+  "loginHeadline": "Welcome back",
+  "loginSubtitle": "Sign in with your email and password to access your accounts.",
+  "loginSubmitButton": "Sign in",
+  "forgotPasswordLink": "Forgot my password",
+  "createAccountButton": "Create account",
+  "loginCreateAccountSemanticLabel": "Don't have an account yet? Create account",
+  "corporateSsoButton": "Sign in with corporate SSO",
+
+  "signUpHeadline": "Create your account",
+  "signUpSubtitle": "Start organizing your accounts and orders in minutes.",
+  "fullNameFieldLabel": "Full name",
+  "fullNameFieldSemanticLabel": "Name field",
+  "inviteEmailLockedHelperText": "This invitation is exclusive to this email.",
+  "passwordHelperText": "At least 8 characters, with letters and numbers.",
+  "confirmPasswordFieldLabel": "Confirm password",
+  "confirmPasswordFieldSemanticLabel": "Confirm password field",
+  "termsAcceptanceRichPrefix": "I have read and accept the ",
+  "termsOfServiceLinkText": "Terms of Service and Privacy Policy",
+  "termsAcceptanceLabel": "I have read and accept the Terms of Service and Privacy Policy.",
+  "termsAcceptanceSemanticLabel": "I accept the Terms of Service and Privacy Policy",
+  "alreadyHaveAccountLink": "Already have an account? Sign in",
+
+  "forgotPasswordHeadline": "Reset password",
+  "forgotPasswordSubtitle": "Enter your email and we'll send instructions to reset your password.",
+  "sendInstructionsButton": "Send instructions",
+  "backToLoginLink": "Back to sign in",
+  "passwordResetGenericMessage": "If the email you entered exists in our records, you will receive instructions to reset your password.",
+
+  "languageSettingsTooltip": "Language",
+  "languageSettingsTitle": "Language",
+  "languageSettingsDescription": "Choose the VestiPro interface language on this device. Product names, customer names and other data are never translated — only the app's own text.",
+  "languageSettingsAvailableCount": "{count, plural, one{{count} language available} other{{count} languages available}}",
+  "@languageSettingsAvailableCount": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "languageChangedConfirmation": "Language changed.",
+  "currentLanguageSemanticLabel": "Current language"
+}

@@ -25,6 +25,7 @@ class AppRouter {
     required this.userManagementPageBuilder,
     this.notificationCenterPageBuilder,
     this.communicationPreferencesPageBuilder,
+    this.localeSettingsPageBuilder,
     this.privacyConsentsPageBuilder,
     this.policyDocumentsPageBuilder,
     this.policyAcceptancePageBuilder,
@@ -100,6 +101,12 @@ class AppRouter {
   /// [notificationCenterPageBuilder].
   final Widget Function(BuildContext context, String orgId)?
   communicationPreferencesPageBuilder;
+
+  /// Builds the language selector screen (TASK-174), given `orgId` from
+  /// [LocaleSettingsRoute]. Optional, same rationale as
+  /// [communicationPreferencesPageBuilder].
+  final Widget Function(BuildContext context, String orgId)?
+  localeSettingsPageBuilder;
   final Widget Function(BuildContext context, String orgId)?
   privacyConsentsPageBuilder;
   final WidgetBuilder? policyDocumentsPageBuilder;
@@ -466,6 +473,15 @@ class AppRouter {
         name: CommunicationPreferencesRoute.name,
         builder: (context, state) {
           final builder = communicationPreferencesPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(context, state.pathParameters['orgId']!);
+        },
+      ),
+      GoRoute(
+        path: LocaleSettingsRoute.pathPattern,
+        name: LocaleSettingsRoute.name,
+        builder: (context, state) {
+          final builder = localeSettingsPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(context, state.pathParameters['orgId']!);
         },

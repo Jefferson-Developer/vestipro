@@ -1,0 +1,167 @@
+{
+  "@@locale": "pt",
+  "@@last_modified": "2026-09-06",
+
+  "brandTagline": "A força de vendas do seu jeito.",
+  "@brandTagline": {
+    "description": "Frase de marca exibida no painel lateral das telas de autenticação (login, cadastro)."
+  },
+
+  "emailFieldLabel": "E-mail",
+  "@emailFieldLabel": {
+    "description": "Rótulo do campo de e-mail, reutilizado em login, cadastro e recuperação de senha."
+  },
+  "emailFieldSemanticLabel": "Campo de e-mail",
+  "@emailFieldSemanticLabel": {
+    "description": "Rótulo de acessibilidade (leitor de tela) do campo de e-mail."
+  },
+  "passwordFieldLabel": "Senha",
+  "@passwordFieldLabel": {
+    "description": "Rótulo do campo de senha."
+  },
+  "passwordFieldSemanticLabel": "Campo de senha",
+  "@passwordFieldSemanticLabel": {
+    "description": "Rótulo de acessibilidade do campo de senha."
+  },
+  "showPasswordTooltip": "Mostrar senha",
+  "@showPasswordTooltip": {
+    "description": "Tooltip do botão que revela a senha digitada."
+  },
+  "hidePasswordTooltip": "Ocultar senha",
+  "@hidePasswordTooltip": {
+    "description": "Tooltip do botão que oculta a senha digitada."
+  },
+
+  "loginHeadline": "Bem-vindo de volta",
+  "@loginHeadline": {
+    "description": "Título da tela de login."
+  },
+  "loginSubtitle": "Entre com seu e-mail e senha para acessar sua carteira.",
+  "@loginSubtitle": {
+    "description": "Subtítulo da tela de login."
+  },
+  "loginSubmitButton": "Entrar",
+  "@loginSubmitButton": {
+    "description": "Botão de envio do formulário de login."
+  },
+  "forgotPasswordLink": "Esqueci minha senha",
+  "@forgotPasswordLink": {
+    "description": "Link para a tela de recuperação de senha."
+  },
+  "createAccountButton": "Criar conta",
+  "@createAccountButton": {
+    "description": "Botão/link para criar uma nova conta — usado tanto como link na tela de login quanto como botão de envio na tela de cadastro."
+  },
+  "loginCreateAccountSemanticLabel": "Ainda não tem conta? Criar conta",
+  "@loginCreateAccountSemanticLabel": {
+    "description": "Rótulo de acessibilidade do link \"Criar conta\" na tela de login."
+  },
+  "corporateSsoButton": "Entrar com SSO corporativo",
+  "@corporateSsoButton": {
+    "description": "Botão que abre o modal de login via SSO corporativo (SAML/OIDC)."
+  },
+
+  "signUpHeadline": "Crie sua conta",
+  "@signUpHeadline": {
+    "description": "Título da tela de cadastro."
+  },
+  "signUpSubtitle": "Comece a organizar sua carteira e seus pedidos em minutos.",
+  "@signUpSubtitle": {
+    "description": "Subtítulo da tela de cadastro."
+  },
+  "fullNameFieldLabel": "Nome completo",
+  "@fullNameFieldLabel": {
+    "description": "Rótulo do campo de nome completo no cadastro."
+  },
+  "fullNameFieldSemanticLabel": "Campo de nome",
+  "@fullNameFieldSemanticLabel": {
+    "description": "Rótulo de acessibilidade do campo de nome completo."
+  },
+  "inviteEmailLockedHelperText": "Este convite é exclusivo para este e-mail.",
+  "@inviteEmailLockedHelperText": {
+    "description": "Texto de ajuda exibido quando o e-mail do cadastro está travado por um convite."
+  },
+  "passwordHelperText": "Mínimo de 8 caracteres, com letras e números.",
+  "@passwordHelperText": {
+    "description": "Texto de ajuda sobre os requisitos de senha no cadastro."
+  },
+  "confirmPasswordFieldLabel": "Confirmar senha",
+  "@confirmPasswordFieldLabel": {
+    "description": "Rótulo do campo de confirmação de senha."
+  },
+  "confirmPasswordFieldSemanticLabel": "Campo de confirmação de senha",
+  "@confirmPasswordFieldSemanticLabel": {
+    "description": "Rótulo de acessibilidade do campo de confirmação de senha."
+  },
+  "termsAcceptanceRichPrefix": "Li e aceito os ",
+  "@termsAcceptanceRichPrefix": {
+    "description": "Trecho inicial (não clicável) do texto de aceite dos termos, antes do link."
+  },
+  "termsOfServiceLinkText": "Termos de Uso e a Política de Privacidade",
+  "@termsOfServiceLinkText": {
+    "description": "Trecho clicável (link) do texto de aceite dos termos, e também o rótulo completo usado no checkbox/label de acessibilidade."
+  },
+  "termsAcceptanceLabel": "Li e aceito os Termos de Uso e a Política de Privacidade.",
+  "@termsAcceptanceLabel": {
+    "description": "Rótulo completo do checkbox de aceite dos Termos de Uso e Política de Privacidade."
+  },
+  "termsAcceptanceSemanticLabel": "Aceito os Termos de Uso e a Política de Privacidade",
+  "@termsAcceptanceSemanticLabel": {
+    "description": "Rótulo de acessibilidade do checkbox de aceite dos termos."
+  },
+  "alreadyHaveAccountLink": "Já tem conta? Entrar",
+  "@alreadyHaveAccountLink": {
+    "description": "Link para voltar à tela de login a partir do cadastro."
+  },
+
+  "forgotPasswordHeadline": "Recuperar senha",
+  "@forgotPasswordHeadline": {
+    "description": "Título da tela de recuperação de senha."
+  },
+  "forgotPasswordSubtitle": "Informe seu e-mail e enviaremos as instruções para redefinir sua senha.",
+  "@forgotPasswordSubtitle": {
+    "description": "Subtítulo da tela de recuperação de senha."
+  },
+  "sendInstructionsButton": "Enviar instruções",
+  "@sendInstructionsButton": {
+    "description": "Botão de envio do formulário de recuperação de senha."
+  },
+  "backToLoginLink": "Voltar para o login",
+  "@backToLoginLink": {
+    "description": "Link para voltar à tela de login."
+  },
+  "passwordResetGenericMessage": "Se o e-mail informado existir em nossa base, você receberá instruções para redefinir sua senha.",
+  "@passwordResetGenericMessage": {
+    "description": "Mensagem única exibida após solicitar a redefinição de senha, independente de o e-mail existir ou não na base (evita enumeração de contas)."
+  },
+
+  "languageSettingsTooltip": "Idioma",
+  "@languageSettingsTooltip": {
+    "description": "Tooltip do atalho de idioma na barra superior de \"Sobre o app\"."
+  },
+  "languageSettingsTitle": "Idioma",
+  "@languageSettingsTitle": {
+    "description": "Título da tela de seleção de idioma."
+  },
+  "languageSettingsDescription": "Escolha o idioma da interface do VestiPro neste dispositivo. Nomes de produtos, clientes e outros dados nunca são traduzidos — apenas os textos do aplicativo.",
+  "@languageSettingsDescription": {
+    "description": "Texto explicativo da tela de seleção de idioma."
+  },
+  "languageSettingsAvailableCount": "{count, plural, one{{count} idioma disponível} other{{count} idiomas disponíveis}}",
+  "@languageSettingsAvailableCount": {
+    "description": "Contagem de idiomas disponíveis, exibida na tela de seleção de idioma.",
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "languageChangedConfirmation": "Idioma alterado.",
+  "@languageChangedConfirmation": {
+    "description": "Mensagem de confirmação exibida após trocar o idioma da interface."
+  },
+  "currentLanguageSemanticLabel": "Idioma atual",
+  "@currentLanguageSemanticLabel": {
+    "description": "Rótulo de acessibilidade indicando qual idioma está selecionado atualmente."
+  }
+}

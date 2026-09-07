@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/navigation.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../bloc/forgot_password_bloc.dart';
 import '../bloc/forgot_password_event.dart';
 import '../bloc/forgot_password_state.dart';
@@ -46,20 +47,21 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
       builder: (context, state) {
         final isSubmitting =
             state.status == ForgotPasswordSubmissionStatus.submitting;
+        final l10n = AppLocalizations.of(context);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             AppTextField(
               controller: _emailController,
-              label: 'E-mail',
+              label: l10n.emailFieldLabel,
               isRequired: true,
               isDisabled: isSubmitting,
               errorText: state.emailError,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.done,
               autofocus: true,
-              semanticLabel: 'Campo de e-mail',
+              semanticLabel: l10n.emailFieldSemanticLabel,
               prefixIcon: const Icon(Icons.mail_outline),
               onChanged: (value) => context.read<ForgotPasswordBloc>().add(
                 ForgotPasswordEvent.emailChanged(value),
@@ -68,7 +70,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
             ),
             const SizedBox(height: AppSpacing.spacing24),
             AppButton(
-              label: 'Enviar instruções',
+              label: l10n.sendInstructionsButton,
               expand: true,
               isLoading: isSubmitting,
               onPressed: isSubmitting ? null : () => _submit(context),
@@ -77,7 +79,7 @@ class _ForgotPasswordFormState extends State<ForgotPasswordForm> {
             Align(
               alignment: Alignment.center,
               child: AppButton(
-                label: 'Voltar para o login',
+                label: l10n.backToLoginLink,
                 variant: AppButtonVariant.text,
                 onPressed: isSubmitting
                     ? null

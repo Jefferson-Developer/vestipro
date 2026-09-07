@@ -1,0 +1,13 @@
+# TASK-174 — Internacionalização (i18n) do VestiPro.
+#
+# `app_pt.arb` é o arquivo modelo (template-arb-file): toda chave nova nasce
+# aqui primeiro, com sua descrição, e só depois é replicada para os demais
+# idiomas — português é o idioma nativo do produto e também o fallback
+# obrigatório (ver `AppLocale.fallback`) sempre que um idioma não suportado
+# for detectado, então ele precisa ser a fonte da verdade, nunca o inglês.
+arb-dir: lib/l10n
+template-arb-file: app_pt.arb
+output-localization-file: app_localizations.dart
+output-class: AppLocalizations
+output-dir: lib/l10n/generated
+nullable-getter: false

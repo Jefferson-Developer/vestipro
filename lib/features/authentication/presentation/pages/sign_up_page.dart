@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/navigation.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../bloc/sign_up_bloc.dart';
 import '../bloc/sign_up_state.dart';
 import '../widgets/sign_up_form.dart';
@@ -169,7 +170,7 @@ class _BrandPanel extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.spacing24),
           Text(
-            'A força de vendas do seu jeito.',
+            AppLocalizations.of(context).brandTagline,
             textAlign: TextAlign.center,
             style: AppTypography.titleLarge.copyWith(color: colors.onPrimary),
           ),
@@ -186,16 +187,18 @@ class _SignUpHeadline extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Crie sua conta',
+          l10n.signUpHeadline,
           style: AppTypography.headlineMedium.copyWith(color: colors.onSurface),
         ),
         const SizedBox(height: AppSpacing.spacing8),
         Text(
-          'Comece a organizar sua carteira e seus pedidos em minutos.',
+          l10n.signUpSubtitle,
           style: AppTypography.bodyMedium.copyWith(color: colors.onSurface),
         ),
       ],

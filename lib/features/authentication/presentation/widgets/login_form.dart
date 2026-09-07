@@ -6,6 +6,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/navigation.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../bloc/login_bloc.dart';
 import '../bloc/login_event.dart';
 import '../bloc/login_state.dart';
@@ -47,20 +48,21 @@ class _LoginFormState extends State<LoginForm> {
     return BlocBuilder<LoginBloc, LoginState>(
       builder: (context, state) {
         final isSubmitting = state.status == LoginSubmissionStatus.submitting;
+        final l10n = AppLocalizations.of(context);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             AppTextField(
               controller: _emailController,
-              label: 'E-mail',
+              label: l10n.emailFieldLabel,
               isRequired: true,
               isDisabled: isSubmitting,
               errorText: state.emailError,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
               autofocus: true,
-              semanticLabel: 'Campo de e-mail',
+              semanticLabel: l10n.emailFieldSemanticLabel,
               prefixIcon: const Icon(Icons.mail_outline),
               onChanged: (value) =>
                   context.read<LoginBloc>().add(LoginEvent.emailChanged(value)),
@@ -70,13 +72,13 @@ class _LoginFormState extends State<LoginForm> {
             AppTextField(
               controller: _passwordController,
               focusNode: _passwordFocusNode,
-              label: 'Senha',
+              label: l10n.passwordFieldLabel,
               isRequired: true,
               isDisabled: isSubmitting,
               errorText: state.passwordError,
               obscureText: state.obscurePassword,
               textInputAction: TextInputAction.done,
-              semanticLabel: 'Campo de senha',
+              semanticLabel: l10n.passwordFieldSemanticLabel,
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
@@ -85,8 +87,8 @@ class _LoginFormState extends State<LoginForm> {
                       : Icons.visibility_off_outlined,
                 ),
                 tooltip: state.obscurePassword
-                    ? 'Mostrar senha'
-                    : 'Ocultar senha',
+                    ? l10n.showPasswordTooltip
+                    : l10n.hidePasswordTooltip,
                 onPressed: isSubmitting
                     ? null
                     : () => context.read<LoginBloc>().add(
@@ -102,7 +104,7 @@ class _LoginFormState extends State<LoginForm> {
             Align(
               alignment: Alignment.centerRight,
               child: AppButton(
-                label: 'Esqueci minha senha',
+                label: l10n.forgotPasswordLink,
                 variant: AppButtonVariant.text,
                 onPressed: isSubmitting
                     ? null
@@ -111,7 +113,7 @@ class _LoginFormState extends State<LoginForm> {
             ),
             const SizedBox(height: AppSpacing.spacing8),
             AppButton(
-              label: 'Entrar',
+              label: l10n.loginSubmitButton,
               expand: true,
               isLoading: isSubmitting,
               onPressed: isSubmitting ? null : () => _submit(context),
@@ -120,8 +122,8 @@ class _LoginFormState extends State<LoginForm> {
             Align(
               alignment: Alignment.center,
               child: AppButton(
-                label: 'Criar conta',
-                semanticLabel: 'Ainda não tem conta? Criar conta',
+                label: l10n.createAccountButton,
+                semanticLabel: l10n.loginCreateAccountSemanticLabel,
                 variant: AppButtonVariant.text,
                 onPressed: isSubmitting
                     ? null
@@ -132,8 +134,8 @@ class _LoginFormState extends State<LoginForm> {
             Align(
               alignment: Alignment.center,
               child: AppButton(
-                label: 'Entrar com SSO corporativo',
-                semanticLabel: 'Entrar com SSO corporativo',
+                label: l10n.corporateSsoButton,
+                semanticLabel: l10n.corporateSsoButton,
                 variant: AppButtonVariant.text,
                 onPressed: isSubmitting
                     ? null

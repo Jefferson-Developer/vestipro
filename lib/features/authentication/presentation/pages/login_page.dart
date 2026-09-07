@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/navigation.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../bloc/login_bloc.dart';
 import '../bloc/login_state.dart';
 import '../widgets/login_form.dart';
@@ -207,7 +208,7 @@ class _BrandPanel extends StatelessWidget {
           const _LoginLogo(height: 120),
           const SizedBox(height: AppSpacing.spacing24),
           Text(
-            'A força de vendas do seu jeito.',
+            AppLocalizations.of(context).brandTagline,
             textAlign: TextAlign.center,
             style: AppTypography.titleLarge.copyWith(color: colors.onPrimary),
           ),
@@ -243,16 +244,18 @@ class _LoginHeadline extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Bem-vindo de volta',
+          l10n.loginHeadline,
           style: AppTypography.headlineMedium.copyWith(color: colors.onSurface),
         ),
         const SizedBox(height: AppSpacing.spacing8),
         Text(
-          'Entre com seu e-mail e senha para acessar sua carteira.',
+          l10n.loginSubtitle,
           style: AppTypography.bodyMedium.copyWith(color: colors.onSurface),
         ),
       ],

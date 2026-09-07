@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/services/services.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../bloc/about_app_bloc.dart';
 import '../bloc/about_app_event.dart';
 import '../bloc/about_app_state.dart';
@@ -14,6 +15,7 @@ class AboutAppPage extends StatelessWidget {
     required this.createBloc,
     this.showInsightsShortcut = false,
     this.onPrivacyTap,
+    this.onLanguageTap,
     super.key,
   });
 
@@ -28,6 +30,11 @@ class AboutAppPage extends StatelessWidget {
   final bool showInsightsShortcut;
   final VoidCallback? onPrivacyTap;
 
+  /// Opens the language selector (TASK-174, `LocaleSettingsRoute`). `null`
+  /// hides the shortcut — same "optional, composition-root-provided
+  /// callback" convention as [onPrivacyTap].
+  final VoidCallback? onLanguageTap;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<AboutAppBloc>(
@@ -35,6 +42,7 @@ class AboutAppPage extends StatelessWidget {
       child: AboutAppView(
         showInsightsShortcut: showInsightsShortcut,
         onPrivacyTap: onPrivacyTap,
+        onLanguageTap: onLanguageTap,
       ),
     );
   }
@@ -44,11 +52,13 @@ class AboutAppView extends StatelessWidget {
   const AboutAppView({
     this.showInsightsShortcut = false,
     this.onPrivacyTap,
+    this.onLanguageTap,
     super.key,
   });
 
   final bool showInsightsShortcut;
   final VoidCallback? onPrivacyTap;
+  final VoidCallback? onLanguageTap;
 
   @override
   Widget build(BuildContext context) {
@@ -60,6 +70,7 @@ class AboutAppView extends StatelessWidget {
               title: 'Sobre o app',
               showInsightsShortcut: showInsightsShortcut,
               onPrivacyTap: onPrivacyTap,
+              onLanguageTap: onLanguageTap,
             ),
             body: const Center(child: CircularProgressIndicator()),
           ),
@@ -78,6 +89,7 @@ class AboutAppView extends StatelessWidget {
                 title: aboutApp.name,
                 showInsightsShortcut: showInsightsShortcut,
                 onPrivacyTap: onPrivacyTap,
+                onLanguageTap: onLanguageTap,
               ),
               body: AboutAppContent(
                 aboutApp: aboutApp,
@@ -104,6 +116,7 @@ class AboutAppView extends StatelessWidget {
               title: 'Sobre o app',
               showInsightsShortcut: showInsightsShortcut,
               onPrivacyTap: onPrivacyTap,
+              onLanguageTap: onLanguageTap,
             ),
             body: AboutAppErrorView(
               message: failure.message,
@@ -123,11 +136,13 @@ class _AboutAppBar extends StatelessWidget implements PreferredSizeWidget {
     required this.title,
     this.showInsightsShortcut = false,
     this.onPrivacyTap,
+    this.onLanguageTap,
   });
 
   final String title;
   final bool showInsightsShortcut;
   final VoidCallback? onPrivacyTap;
+  final VoidCallback? onLanguageTap;
 
   @override
   Size get preferredSize => const Size.fromHeight(kToolbarHeight);
@@ -137,6 +152,12 @@ class _AboutAppBar extends StatelessWidget implements PreferredSizeWidget {
     return AppBar(
       title: Text(title),
       actions: [
+        if (onLanguageTap != null)
+          IconButton(
+            icon: const Icon(Icons.language_outlined),
+            tooltip: AppLocalizations.of(context).languageSettingsTooltip,
+            onPressed: onLanguageTap,
+          ),
         if (onPrivacyTap != null)
           IconButton(
             icon: const Icon(Icons.policy_outlined),

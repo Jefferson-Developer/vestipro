@@ -13,6 +13,7 @@ import 'package:vestipro/features/authentication/domain/entities/user_profile.da
 import 'package:vestipro/features/authentication/domain/repositories/user_profile_repository.dart';
 import 'package:vestipro/features/authentication/domain/usecases/create_account_with_email_and_password_use_case.dart';
 import 'package:vestipro/features/authentication/presentation/bloc/sign_up_bloc.dart';
+import 'package:vestipro/l10n/generated/app_localizations.dart';
 import 'package:vestipro/features/authentication/presentation/pages/sign_up_page.dart';
 
 const _validName = 'Ana Souza';
@@ -281,7 +282,16 @@ Widget _buildApp(_AuthRepositoryStub authRepository) {
     ],
   );
 
-  return MaterialApp.router(theme: AppTheme.light, routerConfig: router);
+  return MaterialApp.router(
+    theme: AppTheme.light,
+    routerConfig: router,
+    // TASK-174: pins the test locale to Portuguese explicitly (device/CI
+    // test locale otherwise defaults to `en_US`) so every literal PT string
+    // this suite already asserts on keeps matching.
+    locale: const Locale('pt'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+  );
 }
 
 final class _AuthRepositoryStub implements AuthRepository {

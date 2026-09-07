@@ -3,6 +3,7 @@ import 'package:firebase_core_platform_interface/test.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_test/flutter_test.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 import 'package:vestipro/app/bootstrap.dart';
 import 'package:vestipro/app/injection.dart';
 import 'package:vestipro/core/environment/app_environment.dart';
@@ -39,6 +40,16 @@ class _ThrowingFirebaseCoreHostApi implements TestFirebaseCoreHostApi {
 
 void main() {
   TestWidgetsFlutterBinding.ensureInitialized();
+
+  setUp(() {
+    // TASK-174: `bootstrap()` now awaits `LocaleCubit.loadInitial()` (reads
+    // this device's saved language) before `runApp` — same as every other
+    // `SharedPreferences`-backed repository test in this suite, the plugin
+    // needs an explicit in-memory backing store, or the very first
+    // `SharedPreferences.getInstance()` call has no host implementation to
+    // answer it.
+    SharedPreferences.setMockInitialValues(<String, Object>{});
+  });
 
   tearDown(() async {
     tearDownFakeFirebaseCore();

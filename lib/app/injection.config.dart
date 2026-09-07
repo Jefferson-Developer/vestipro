@@ -51,6 +51,21 @@ import '../core/feature_flags/firebase_feature_flag_service.dart' as _i845;
 import '../core/functions/app_client_metadata.dart' as _i465;
 import '../core/functions/cloud_functions_service.dart' as _i147;
 import '../core/functions/functions.dart' as _i340;
+import '../core/localization/data/datasources/firestore_locale_preference_data_source.dart'
+    as _i931;
+import '../core/localization/data/datasources/locale_preference_data_source.dart'
+    as _i818;
+import '../core/localization/data/local/locale_preference_local_store.dart'
+    as _i142;
+import '../core/localization/data/repositories/locale_preference_repository_impl.dart'
+    as _i909;
+import '../core/localization/domain/repositories/locale_preference_repository.dart'
+    as _i601;
+import '../core/localization/domain/usecases/get_device_locale_use_case.dart'
+    as _i254;
+import '../core/localization/domain/usecases/set_preferred_locale_use_case.dart'
+    as _i728;
+import '../core/localization/presentation/cubit/locale_cubit.dart' as _i364;
 import '../core/notifications/data/datasources/communication_preferences_data_source.dart'
     as _i694;
 import '../core/notifications/data/datasources/firestore_communication_preferences_data_source.dart'
@@ -1754,6 +1769,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i449.OpportunityMapper>(),
       ),
     );
+    gh.lazySingleton<_i142.LocalePreferenceLocalStore>(
+      () => _i142.SharedPreferencesLocalePreferenceLocalStore(),
+    );
     gh.lazySingleton<_i211.PromotionalCampaignRepository>(
       () => const _i430.SharedPreferencesPromotionalCampaignRepository(),
     );
@@ -2699,6 +2717,11 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i714.MembershipMapper>(),
       ),
     );
+    gh.lazySingleton<_i818.LocalePreferenceDataSource>(
+      () => _i931.FirestoreLocalePreferenceDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.lazySingleton<_i42.ProductLocalSearchIndexDataSource>(
       () => _i74.DriftProductLocalSearchIndexDataSource(
         gh<_i658.AppDatabase>(),
@@ -2737,6 +2760,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i847.PortfolioAssignmentDataSource>(
       () => _i954.FirestorePortfolioAssignmentDataSource(
         gh<_i974.FirebaseFirestore>(),
+      ),
+    );
+    gh.lazySingleton<_i601.LocalePreferenceRepository>(
+      () => _i909.LocalePreferenceRepositoryImpl(
+        localStore: gh<_i142.LocalePreferenceLocalStore>(),
+        dataSource: gh<_i818.LocalePreferenceDataSource>(),
       ),
     );
     gh.lazySingleton<_i1072.CatalogHomeConfigRepository>(
@@ -2882,6 +2911,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i340.CloudFunctionsService>(),
       ),
     );
+    gh.factory<_i254.GetDeviceLocaleUseCase>(
+      () =>
+          _i254.GetDeviceLocaleUseCase(gh<_i601.LocalePreferenceRepository>()),
+    );
+    gh.factory<_i728.SetPreferredLocaleUseCase>(
+      () => _i728.SetPreferredLocaleUseCase(
+        gh<_i601.LocalePreferenceRepository>(),
+      ),
+    );
     gh.factory<_i330.CreateCompanyUseCase>(
       () => _i330.CreateCompanyUseCase(gh<_i799.CompanyRepository>()),
     );
@@ -3009,6 +3047,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i472.GetWarehousesByCompanyUseCase>(
       () => _i472.GetWarehousesByCompanyUseCase(gh<_i62.WarehouseRepository>()),
+    );
+    gh.lazySingleton<_i364.LocaleCubit>(
+      () => _i364.LocaleCubit(
+        gh<_i254.GetDeviceLocaleUseCase>(),
+        gh<_i728.SetPreferredLocaleUseCase>(),
+        gh<_i202.AnalyticsService>(),
+      ),
     );
     gh.factory<_i316.GetCatalogHomeConfigUseCase>(
       () => _i316.GetCatalogHomeConfigUseCase(

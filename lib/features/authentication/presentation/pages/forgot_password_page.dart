@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/design_system/design_system.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../bloc/forgot_password_bloc.dart';
 import '../bloc/forgot_password_state.dart';
 import '../widgets/forgot_password_form.dart';
@@ -13,9 +14,9 @@ import '../widgets/forgot_password_form.dart';
 /// and the submit action are dispatched to [ForgotPasswordBloc], same
 /// rationale as `LoginPage` (TASK-034). The message shown for
 /// [ForgotPasswordSubmissionStatus.success] is always
-/// [kPasswordResetGenericMessage] — this page never has its own copy of
-/// that string, so it can never accidentally diverge into something that
-/// reveals whether the informed e-mail exists.
+/// `AppLocalizations.passwordResetGenericMessage` (TASK-174) — this page
+/// never has its own copy of that string, so it can never accidentally
+/// diverge into something that reveals whether the informed e-mail exists.
 class ForgotPasswordPage extends StatelessWidget {
   const ForgotPasswordPage({required this.createBloc, super.key});
 
@@ -46,7 +47,9 @@ class ForgotPasswordView extends StatelessWidget {
             case ForgotPasswordSubmissionStatus.success:
               AppSnackbar.show(
                 context,
-                message: kPasswordResetGenericMessage,
+                message: AppLocalizations.of(
+                  context,
+                ).passwordResetGenericMessage,
                 variant: AppSnackbarVariant.success,
               );
             case ForgotPasswordSubmissionStatus.failure:
@@ -96,17 +99,18 @@ class _ForgotPasswordHeadline extends StatelessWidget {
   Widget build(BuildContext context) {
     final colors = context.colors;
 
+    final l10n = AppLocalizations.of(context);
+
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
         Text(
-          'Recuperar senha',
+          l10n.forgotPasswordHeadline,
           style: AppTypography.headlineMedium.copyWith(color: colors.onSurface),
         ),
         const SizedBox(height: AppSpacing.spacing8),
         Text(
-          'Informe seu e-mail e enviaremos as instruções para redefinir '
-          'sua senha.',
+          l10n.forgotPasswordSubtitle,
           style: AppTypography.bodyMedium.copyWith(color: colors.onSurface),
         ),
       ],

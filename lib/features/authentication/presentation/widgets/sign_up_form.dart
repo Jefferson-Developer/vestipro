@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/navigation.dart';
+import '../../../../l10n/generated/app_localizations.dart';
 import '../bloc/sign_up_bloc.dart';
 import '../bloc/sign_up_event.dart';
 import '../bloc/sign_up_state.dart';
@@ -92,19 +93,20 @@ class _SignUpFormState extends State<SignUpForm> {
     return BlocBuilder<SignUpBloc, SignUpState>(
       builder: (context, state) {
         final isSubmitting = state.status == SignUpSubmissionStatus.submitting;
+        final l10n = AppLocalizations.of(context);
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: <Widget>[
             AppTextField(
               controller: _nameController,
-              label: 'Nome completo',
+              label: l10n.fullNameFieldLabel,
               isRequired: true,
               isDisabled: isSubmitting,
               errorText: state.nameError,
               textInputAction: TextInputAction.next,
               autofocus: true,
-              semanticLabel: 'Campo de nome',
+              semanticLabel: l10n.fullNameFieldSemanticLabel,
               prefixIcon: const Icon(Icons.person_outline),
               onChanged: (value) => context.read<SignUpBloc>().add(
                 SignUpEvent.nameChanged(value),
@@ -115,15 +117,15 @@ class _SignUpFormState extends State<SignUpForm> {
             AppTextField(
               controller: _emailController,
               focusNode: _emailFocusNode,
-              label: 'E-mail',
+              label: l10n.emailFieldLabel,
               isRequired: true,
               isDisabled: isSubmitting || widget.lockEmail,
               errorText: state.emailError,
               keyboardType: TextInputType.emailAddress,
               textInputAction: TextInputAction.next,
-              semanticLabel: 'Campo de e-mail',
+              semanticLabel: l10n.emailFieldSemanticLabel,
               helperText: widget.lockEmail
-                  ? 'Este convite é exclusivo para este e-mail.'
+                  ? l10n.inviteEmailLockedHelperText
                   : null,
               prefixIcon: const Icon(Icons.mail_outline),
               onChanged: widget.lockEmail
@@ -137,14 +139,14 @@ class _SignUpFormState extends State<SignUpForm> {
             AppTextField(
               controller: _passwordController,
               focusNode: _passwordFocusNode,
-              label: 'Senha',
+              label: l10n.passwordFieldLabel,
               isRequired: true,
               isDisabled: isSubmitting,
               errorText: state.passwordError,
               obscureText: state.obscurePassword,
               textInputAction: TextInputAction.next,
-              semanticLabel: 'Campo de senha',
-              helperText: 'Mínimo de 8 caracteres, com letras e números.',
+              semanticLabel: l10n.passwordFieldSemanticLabel,
+              helperText: l10n.passwordHelperText,
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
@@ -153,8 +155,8 @@ class _SignUpFormState extends State<SignUpForm> {
                       : Icons.visibility_off_outlined,
                 ),
                 tooltip: state.obscurePassword
-                    ? 'Mostrar senha'
-                    : 'Ocultar senha',
+                    ? l10n.showPasswordTooltip
+                    : l10n.hidePasswordTooltip,
                 onPressed: isSubmitting
                     ? null
                     : () => context.read<SignUpBloc>().add(
@@ -170,13 +172,13 @@ class _SignUpFormState extends State<SignUpForm> {
             AppTextField(
               controller: _passwordConfirmationController,
               focusNode: _passwordConfirmationFocusNode,
-              label: 'Confirmar senha',
+              label: l10n.confirmPasswordFieldLabel,
               isRequired: true,
               isDisabled: isSubmitting,
               errorText: state.passwordConfirmationError,
               obscureText: state.obscurePasswordConfirmation,
               textInputAction: TextInputAction.done,
-              semanticLabel: 'Campo de confirmação de senha',
+              semanticLabel: l10n.confirmPasswordFieldSemanticLabel,
               prefixIcon: const Icon(Icons.lock_outline),
               suffixIcon: IconButton(
                 icon: Icon(
@@ -185,8 +187,8 @@ class _SignUpFormState extends State<SignUpForm> {
                       : Icons.visibility_off_outlined,
                 ),
                 tooltip: state.obscurePasswordConfirmation
-                    ? 'Mostrar senha'
-                    : 'Ocultar senha',
+                    ? l10n.showPasswordTooltip
+                    : l10n.hidePasswordTooltip,
                 onPressed: isSubmitting
                     ? null
                     : () => context.read<SignUpBloc>().add(
@@ -203,10 +205,8 @@ class _SignUpFormState extends State<SignUpForm> {
               value: state.termsAccepted,
               isDisabled: isSubmitting,
               errorText: state.termsError,
-              label:
-                  'Li e aceito os Termos de Uso e a Política de Privacidade.',
-              semanticLabel:
-                  'Aceito os Termos de Uso e a Política de Privacidade',
+              label: l10n.termsAcceptanceLabel,
+              semanticLabel: l10n.termsAcceptanceSemanticLabel,
               labelWidget: _TermsAcceptanceLabel(isDisabled: isSubmitting),
               onChanged: isSubmitting
                   ? null
@@ -216,7 +216,7 @@ class _SignUpFormState extends State<SignUpForm> {
             ),
             const SizedBox(height: AppSpacing.spacing16),
             AppButton(
-              label: 'Criar conta',
+              label: l10n.createAccountButton,
               expand: true,
               isLoading: isSubmitting,
               onPressed: isSubmitting ? null : () => _submit(context),
@@ -226,7 +226,7 @@ class _SignUpFormState extends State<SignUpForm> {
               Align(
                 alignment: Alignment.center,
                 child: AppButton(
-                  label: 'Já tem conta? Entrar',
+                  label: l10n.alreadyHaveAccountLink,
                   variant: AppButtonVariant.text,
                   onPressed: isSubmitting
                       ? null
@@ -262,13 +262,15 @@ class _TermsAcceptanceLabel extends StatelessWidget {
       decoration: TextDecoration.underline,
     );
 
+    final l10n = AppLocalizations.of(context);
+
     return Text.rich(
       TextSpan(
         style: baseStyle,
         children: <InlineSpan>[
-          const TextSpan(text: 'Li e aceito os '),
+          TextSpan(text: l10n.termsAcceptanceRichPrefix),
           TextSpan(
-            text: 'Termos de Uso e a Política de Privacidade',
+            text: l10n.termsOfServiceLinkText,
             style: linkStyle,
             recognizer: isDisabled
                 ? null

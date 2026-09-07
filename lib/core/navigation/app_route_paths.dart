@@ -149,6 +149,21 @@ final class CommunicationPreferencesRoute extends AppRoute {
   String get location => '/org/$orgId/settings/notifications/preferences';
 }
 
+/// Language selector route (TASK-174), reached from the "Idioma" shortcut on
+/// [AboutAppRoute]'s app bar — same "optional builder, `orgId` only"
+/// convention as [CommunicationPreferencesRoute].
+final class LocaleSettingsRoute extends AppRoute {
+  const LocaleSettingsRoute({required this.orgId});
+
+  final String orgId;
+
+  static const name = 'localeSettings';
+  static const pathPattern = '/org/:orgId/settings/language';
+
+  @override
+  String get location => '/org/$orgId/settings/language';
+}
+
 /// User and permission management route (TASK-042/TASK-043), scoped by
 /// Organization. Protected in [AppRouter] by `user.changeRole`.
 final class UserManagementRoute extends AppRoute {

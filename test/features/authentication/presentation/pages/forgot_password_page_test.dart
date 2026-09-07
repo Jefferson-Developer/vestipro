@@ -11,8 +11,8 @@ import 'package:vestipro/core/navigation/navigation.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/authentication/domain/usecases/send_password_reset_email_use_case.dart';
 import 'package:vestipro/features/authentication/presentation/bloc/forgot_password_bloc.dart';
-import 'package:vestipro/features/authentication/presentation/bloc/forgot_password_state.dart';
 import 'package:vestipro/features/authentication/presentation/pages/forgot_password_page.dart';
+import 'package:vestipro/l10n/generated/app_localizations.dart';
 
 const _validEmail = 'vendedor@vestipro.com.br';
 
@@ -94,7 +94,13 @@ void main() {
           await tester.tap(find.text('Enviar instruções'));
           await tester.pumpAndSettle();
 
-          expect(find.text(kPasswordResetGenericMessage), findsOneWidget);
+          expect(
+            find.text(
+              'Se o e-mail informado existir em nossa base, você receberá '
+              'instruções para redefinir sua senha.',
+            ),
+            findsOneWidget,
+          );
         }
       },
     );
@@ -160,7 +166,16 @@ Widget _buildApp(_AuthRepositoryStub authRepository) {
     ],
   );
 
-  return MaterialApp.router(theme: AppTheme.light, routerConfig: router);
+  return MaterialApp.router(
+    theme: AppTheme.light,
+    routerConfig: router,
+    // TASK-174: pins the test locale to Portuguese explicitly (device/CI
+    // test locale otherwise defaults to `en_US`) so every literal PT string
+    // this suite already asserts on keeps matching.
+    locale: const Locale('pt'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+  );
 }
 
 final class _AuthRepositoryStub implements AuthRepository {

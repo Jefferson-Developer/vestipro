@@ -21,6 +21,7 @@ import '../core/environment/app_environment.dart';
 import '../core/errors/errors.dart';
 import '../core/feature_flags/feature_flags.dart';
 import '../core/functions/functions.dart';
+import '../core/localization/localization.dart';
 import '../core/navigation/navigation.dart';
 import '../core/notifications/notifications.dart';
 import '../core/permissions/permissions.dart';
@@ -51,6 +52,7 @@ import '../features/settings/settings.dart';
 import '../features/targets/targets.dart';
 import '../features/users/users.dart';
 import '../firebase_options.dart';
+import '../l10n/generated/app_localizations.dart';
 import 'firebase_bootstrap_error_app.dart';
 import 'injection.dart';
 import 'vestipro_bloc_observer.dart';
@@ -95,6 +97,11 @@ Future<void> bootstrap(AppEnvironment environment) async {
   configureGlobalErrorHandlers();
   configurePushNotificationLifecycle();
   configureQuietHoursTimezoneSync();
+  // TASK-174: loads whichever language this device already saved (or
+  // `AppLocale.fallback` the very first run) *before* the first frame, so
+  // `VestiProApp` never has to render a loading state — or a flash of the
+  // wrong language — just to know what to pass `MaterialApp.locale`.
+  await getIt<LocaleCubit>().loadInitial();
   runApp(VestiProApp(environment: environment));
 }
 
@@ -317,6 +324,12 @@ class VestiProApp extends StatelessWidget {
             showInsightsShortcut: _resolveShowInsightsShortcut(),
             onPrivacyTap: () =>
                 context.go(PrivacySettingsRoute(orgId: orgId).location),
+            onLanguageTap: () =>
+                context.go(LocaleSettingsRoute(orgId: orgId).location),
+          ),
+          localeSettingsPageBuilder: (context, orgId) => LocaleSettingsPage(
+            organizationId: orgId,
+            userId: getIt<AuthRepository>().currentUser?.uid ?? '',
           ),
           catalogHomePageBuilder: (context, orgId, companyId) =>
               _withConnectivityIndicator(
@@ -1168,12 +1181,29 @@ class VestiProApp extends StatelessWidget {
               ),
         );
 
-    return MaterialApp.router(
-      title: environment.appName,
-      theme: AppTheme.light,
-      darkTheme: AppTheme.dark,
-      themeMode: ThemeMode.system,
-      routerConfig: appRouter.router,
+    // TASK-174: `appRouter` above is built exactly once per `build()` call —
+    // `BlocProvider`/`BlocBuilder` below only wrap the returned
+    // `MaterialApp.router`, they never cause `VestiProApp.build` itself to
+    // re-run, so `routerConfig` stays the exact same `GoRouter` instance
+    // across every locale change. That is what makes a language switch
+    // "imediata... sem perder estado de formulário": nothing above this
+    // point (navigation stack, open forms) is ever recreated because of it.
+    return BlocProvider<LocaleCubit>.value(
+      value: getIt<LocaleCubit>(),
+      child: BlocBuilder<LocaleCubit, AppLocale>(
+        builder: (context, locale) {
+          return MaterialApp.router(
+            title: environment.appName,
+            theme: AppTheme.light,
+            darkTheme: AppTheme.dark,
+            themeMode: ThemeMode.system,
+            locale: locale.toFlutterLocale,
+            localizationsDelegates: AppLocalizations.localizationsDelegates,
+            supportedLocales: AppLocalizations.supportedLocales,
+            routerConfig: appRouter.router,
+          );
+        },
+      ),
     );
   }
 }

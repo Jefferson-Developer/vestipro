@@ -18,6 +18,7 @@ import 'package:vestipro/features/sso/domain/entities/completed_sso_login.dart';
 import 'package:vestipro/features/sso/domain/entities/sso_login_route.dart';
 import 'package:vestipro/features/sso/domain/repositories/sso_repository.dart';
 import 'package:vestipro/features/sso/domain/usecases/sign_in_with_corporate_sso_use_case.dart';
+import 'package:vestipro/l10n/generated/app_localizations.dart';
 
 const _validEmail = 'vendedor@vestipro.com.br';
 const _validPassword = 'super-secret';
@@ -409,7 +410,17 @@ Widget _buildApp(
     ],
   );
 
-  return MaterialApp.router(theme: AppTheme.light, routerConfig: router);
+  return MaterialApp.router(
+    theme: AppTheme.light,
+    routerConfig: router,
+    // TASK-174: pins the test locale to Portuguese explicitly (device/CI
+    // test locale otherwise defaults to `en_US`) so every literal PT string
+    // this suite already asserts on keeps matching, regardless of which
+    // language a developer's machine or CI resolves by default.
+    locale: const Locale('pt'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+  );
 }
 
 /// A [SsoRepository] that never resolves a connection — the widget tests in

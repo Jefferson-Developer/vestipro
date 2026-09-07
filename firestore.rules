@@ -1537,6 +1537,40 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/localePreferences/{userId}
+      // (TASK-174)
+      // -------------------------------------------------------------------
+      //
+      // Best-effort mirror of a device's chosen interface language — never
+      // the value the app itself boots from (that is always read from local
+      // storage first, see `LocalePreferenceRepository`'s own doc), so this
+      // document is safe to remain eventually-consistent/best-effort like
+      // every other write path into it. Same "one document per user, keyed
+      // by the user's own `uid`" ownership-from-the-path convention as
+      // `communicationPreferences` above — `list` stays `if false`, a
+      // client only ever reads/writes its own known document id.
+
+      match /localePreferences/{userId} {
+        allow get: if isActiveMember(organizationId) && userId == request.auth.uid;
+
+        allow list: if false;
+
+        allow create: if isActiveMember(organizationId)
+          && userId == request.auth.uid
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.userId == request.auth.uid;
+
+        allow update: if isActiveMember(organizationId)
+          && userId == request.auth.uid
+          && request.resource.data.organizationId == organizationId
+          && request.resource.data.userId == request.auth.uid
+          && unchanged('organizationId')
+          && unchanged('userId');
+
+        allow delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/invites/{inviteId}  (TASK-039)
       // -------------------------------------------------------------------
       //

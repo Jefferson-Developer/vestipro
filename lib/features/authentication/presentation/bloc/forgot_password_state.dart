@@ -11,14 +11,6 @@ part 'forgot_password_state.freezed.dart';
 /// it.
 enum ForgotPasswordSubmissionStatus { idle, submitting, success, failure }
 
-/// The single message shown for [ForgotPasswordSubmissionStatus.success],
-/// regardless of whether the informed e-mail actually matches an existing
-/// account (TASK-036) — never call [AppSnackbar.show] with any other string
-/// for this status, or the flow becomes an account-enumeration oracle.
-const String kPasswordResetGenericMessage =
-    'Se o e-mail informado existir em nossa base, você receberá instruções '
-    'para redefinir sua senha.';
-
 @freezed
 abstract class ForgotPasswordState with _$ForgotPasswordState {
   const factory ForgotPasswordState({

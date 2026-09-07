@@ -193,6 +193,12 @@ final class AnalyticsEvents {
   static const String communicationPreferencesUpdated =
       'communication_preferences_updated';
 
+  /// Logged by `LocaleCubit` (TASK-174, EPIC-23) whenever a user successfully
+  /// changes the app's interface language — the new `language_code` (e.g.
+  /// `"pt"`, `"en"`) is carried as a parameter. Not logged for the value a
+  /// device already boots with (only for an explicit change).
+  static const String appLocaleChanged = 'app_locale_changed';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -270,5 +276,6 @@ final class AnalyticsEvents {
     commercialOrderAlertTriggered,
     commercialOpportunityAlertTriggered,
     communicationPreferencesUpdated,
+    appLocaleChanged,
   ];
 }

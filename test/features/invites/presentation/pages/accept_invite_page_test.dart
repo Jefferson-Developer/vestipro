@@ -12,6 +12,7 @@ import 'package:vestipro/features/authentication/domain/usecases/create_account_
 import 'package:vestipro/features/authentication/presentation/bloc/sign_up_bloc.dart';
 import 'package:vestipro/features/invites/invites.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
+import 'package:vestipro/l10n/generated/app_localizations.dart';
 
 const _invitedEmail = 'convidado@vestipro.com.br';
 const _validPreview = InvitePreview(
@@ -208,7 +209,16 @@ Widget _buildApp({
     ],
   );
 
-  return MaterialApp.router(theme: AppTheme.light, routerConfig: router);
+  return MaterialApp.router(
+    theme: AppTheme.light,
+    routerConfig: router,
+    // TASK-174: pins the test locale to Portuguese explicitly (device/CI
+    // test locale otherwise defaults to `en_US`) so every literal PT string
+    // this suite already asserts on keeps matching.
+    locale: const Locale('pt'),
+    localizationsDelegates: AppLocalizations.localizationsDelegates,
+    supportedLocales: AppLocalizations.supportedLocales,
+  );
 }
 
 final class _InviteAcceptanceRepositoryStub
