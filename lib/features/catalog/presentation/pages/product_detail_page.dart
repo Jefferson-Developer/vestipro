@@ -24,6 +24,7 @@ class ProductDetailPage extends StatelessWidget {
     this.isFavorite = false,
     this.onFavoriteToggle,
     this.onSharePressed,
+    this.onWhatsAppPressed,
     super.key,
   });
 
@@ -36,6 +37,7 @@ class ProductDetailPage extends StatelessWidget {
   final bool isFavorite;
   final VoidCallback? onFavoriteToggle;
   final VoidCallback? onSharePressed;
+  final VoidCallback? onWhatsAppPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -53,6 +55,7 @@ class ProductDetailPage extends StatelessWidget {
         isFavorite: isFavorite,
         onFavoriteToggle: onFavoriteToggle,
         onSharePressed: onSharePressed,
+        onWhatsAppPressed: onWhatsAppPressed,
       ),
     );
   }
@@ -64,6 +67,7 @@ class _ProductDetailView extends StatelessWidget {
     this.isFavorite = false,
     this.onFavoriteToggle,
     this.onSharePressed,
+    this.onWhatsAppPressed,
   });
 
   final void Function(Product product, List<ProductDetailOrderLine> lines)?
@@ -71,6 +75,7 @@ class _ProductDetailView extends StatelessWidget {
   final bool isFavorite;
   final VoidCallback? onFavoriteToggle;
   final VoidCallback? onSharePressed;
+  final VoidCallback? onWhatsAppPressed;
 
   @override
   Widget build(BuildContext context) {
@@ -81,6 +86,12 @@ class _ProductDetailView extends StatelessWidget {
           appBar: AppBar(
             title: Text(state.product?.name ?? 'Produto'),
             actions: <Widget>[
+              if (onWhatsAppPressed != null)
+                AppIconButton(
+                  icon: Icons.message_outlined,
+                  semanticLabel: 'Enviar produto por WhatsApp',
+                  onPressed: onWhatsAppPressed,
+                ),
               if (onSharePressed != null)
                 AppIconButton(
                   icon: Icons.share_outlined,

@@ -50,6 +50,7 @@ class OrderDraftPage extends StatelessWidget {
     this.onContinueToProducts,
     this.onSubmitOrder,
     this.onShareCart,
+    this.onSendWhatsApp,
     super.key,
   });
 
@@ -103,6 +104,7 @@ class OrderDraftPage extends StatelessWidget {
   final Future<void> Function(Order order)? onSubmitOrder;
   final Future<void> Function(Order order, Map<String, String> productNames)?
   onShareCart;
+  final Future<void> Function(Order order)? onSendWhatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -136,6 +138,7 @@ class OrderDraftPage extends StatelessWidget {
             onContinueToProducts: onContinueToProducts,
             onSubmitOrder: onSubmitOrder,
             onShareCart: onShareCart,
+            onSendWhatsApp: onSendWhatsApp,
           ),
         );
       },
@@ -156,6 +159,7 @@ class _OrderDraftView extends StatelessWidget {
     this.onContinueToProducts,
     this.onSubmitOrder,
     this.onShareCart,
+    this.onSendWhatsApp,
   });
 
   final String organizationId;
@@ -171,6 +175,7 @@ class _OrderDraftView extends StatelessWidget {
   final Future<void> Function(Order order)? onSubmitOrder;
   final Future<void> Function(Order order, Map<String, String> productNames)?
   onShareCart;
+  final Future<void> Function(Order order)? onSendWhatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -245,6 +250,7 @@ class _OrderDraftView extends StatelessWidget {
           onContinueToProducts: onContinueToProducts,
           onSubmitOrder: onSubmitOrder,
           onShareCart: onShareCart,
+          onSendWhatsApp: onSendWhatsApp,
         );
       case OrderDraftLoadStatus.awaitingCustomer:
         // Handled by `_OrderDraftView.build` itself before reaching here.
@@ -263,6 +269,7 @@ class _OrderDraftSummary extends StatefulWidget {
     this.onContinueToProducts,
     this.onSubmitOrder,
     this.onShareCart,
+    this.onSendWhatsApp,
   });
 
   final OrderDraftState state;
@@ -275,6 +282,7 @@ class _OrderDraftSummary extends StatefulWidget {
   final Future<void> Function(Order order)? onSubmitOrder;
   final Future<void> Function(Order order, Map<String, String> productNames)?
   onShareCart;
+  final Future<void> Function(Order order)? onSendWhatsApp;
 
   @override
   State<_OrderDraftSummary> createState() => _OrderDraftSummaryState();
@@ -492,6 +500,15 @@ class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
                           entry.key: entry.value.name,
                       }),
               ),
+              if (widget.onSendWhatsApp != null) ...<Widget>[
+                const SizedBox(height: AppSpacing.spacing8),
+                AppButton(
+                  label: 'Enviar pedido por WhatsApp',
+                  leadingIcon: Icons.message_outlined,
+                  variant: AppButtonVariant.secondary,
+                  onPressed: () => widget.onSendWhatsApp!(order),
+                ),
+              ],
             ],
             const SizedBox(height: AppSpacing.spacing16),
             OrderSubmissionPendenciesPanel(

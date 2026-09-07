@@ -126,6 +126,7 @@ final class ProcessOrderCommercialAlertUseCase {
       createdAt: instant,
       priority: AppNotificationPriority.critical,
       deliverAt: deliverAt,
+      customerId: order.customerId,
     );
 
     final created = await _notificationInboxRepository.create(

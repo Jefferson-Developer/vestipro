@@ -266,6 +266,7 @@ final class NotificationInboxRepositoryImpl
       readAt: notification.readAt ?? readAt,
       priority: notification.priority,
       deliverAt: notification.deliverAt,
+      customerId: notification.customerId,
     );
   }
 

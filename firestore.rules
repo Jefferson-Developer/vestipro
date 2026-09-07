@@ -1044,6 +1044,26 @@ service cloud.firestore {
         allow create, update, delete: if false;
       }
 
+      // TASK-183: consent, approved templates and delivery history are
+      // mediated exclusively by Cloud Functions. This prevents a client
+      // from forging opt-in, approving its own template or changing a
+      // delivery receipt. The Admin SDK re-checks active membership and
+      // tenant ownership before every operation.
+      match /whatsappOptIns/{customerId} {
+        allow read, create, update, delete: if false;
+        match /audit/{auditId} {
+          allow read, create, update, delete: if false;
+        }
+      }
+
+      match /whatsappTemplates/{templateId} {
+        allow read, create, update, delete: if false;
+      }
+
+      match /whatsappMessages/{messageId} {
+        allow read, create, update, delete: if false;
+      }
+
       // -------------------------------------------------------------------
       // organizations/{organizationId}/productVariants/{variantId}
       // (TASK-072 generated sellable color/size variants)

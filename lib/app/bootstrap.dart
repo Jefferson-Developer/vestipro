@@ -54,6 +54,7 @@ import '../features/settings/presentation/bloc/about_app_bloc.dart';
 import '../features/settings/settings.dart';
 import '../features/targets/targets.dart';
 import '../features/users/users.dart';
+import '../features/whatsapp_business/whatsapp_business.dart';
 import '../firebase_options.dart';
 import '../l10n/generated/app_localizations.dart';
 import 'firebase_bootstrap_error_app.dart';
@@ -374,6 +375,13 @@ class VestiProApp extends StatelessWidget {
                 onOpenDeepLink: (location) => context.go(location),
                 onOpenPreferences: () => context.go(
                   CommunicationPreferencesRoute(orgId: orgId).location,
+                ),
+                onSendWhatsApp: (notification) => WhatsAppSendSheet.show(
+                  context: context,
+                  createCubit: () => getIt<WhatsAppSendCubit>(),
+                  organizationId: orgId,
+                  customerId: notification.customerId!,
+                  notificationId: notification.id,
                 ),
               ),
           communicationPreferencesPageBuilder: (context, orgId) =>
@@ -1106,6 +1114,12 @@ class VestiProApp extends StatelessWidget {
                           createCubit: () => getIt<CartShareCubit>(),
                         ),
                       ),
+                  onSendWhatsApp: (order) => WhatsAppSendSheet.show(
+                    context: context,
+                    createCubit: () => getIt<WhatsAppSendCubit>(),
+                    organizationId: order.organizationId,
+                    customerId: order.customerId,
+                  ),
                 ),
               ),
           orderProductCatalogPageBuilder:

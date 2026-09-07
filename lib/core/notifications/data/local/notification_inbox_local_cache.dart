@@ -80,6 +80,7 @@ final class NotificationInboxLocalCache {
         readAt: _optionalDate(json, 'readAt'),
         priority: _priorityFromString(json['priority']),
         deliverAt: _optionalDate(json, 'deliverAt'),
+        customerId: json['customerId'] as String?,
       );
     } catch (_) {
       return null;
@@ -101,6 +102,7 @@ final class NotificationInboxLocalCache {
       'priority': notification.priority.name,
       if (notification.deliverAt != null)
         'deliverAt': notification.deliverAt!.toUtc().toIso8601String(),
+      'customerId': ?notification.customerId,
     };
   }
 

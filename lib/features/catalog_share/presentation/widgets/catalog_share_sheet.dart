@@ -5,6 +5,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../domain/entities/catalog_share.dart';
 import '../../domain/entities/catalog_share_item.dart';
+import '../../domain/entities/issued_catalog_share.dart';
 import '../../domain/value_objects/catalog_share_scope.dart';
 import '../bloc/catalog_share_sheet_bloc.dart';
 import '../bloc/catalog_share_sheet_event.dart';
@@ -32,6 +33,8 @@ abstract final class CatalogShareSheet {
     required List<CatalogShareItem> items,
     String? collectionId,
     String? collectionName,
+    Future<void> Function(IssuedCatalogShare share, String link)?
+    onSendWhatsApp,
   }) {
     return AppBottomSheet.show<void>(
       context: context,
@@ -47,14 +50,17 @@ abstract final class CatalogShareSheet {
               collectionName: collectionName,
             ),
           ),
-        child: const _CatalogShareSheetContent(),
+        child: _CatalogShareSheetContent(onSendWhatsApp: onSendWhatsApp),
       ),
     );
   }
 }
 
 class _CatalogShareSheetContent extends StatelessWidget {
-  const _CatalogShareSheetContent();
+  const _CatalogShareSheetContent({this.onSendWhatsApp});
+
+  final Future<void> Function(IssuedCatalogShare share, String link)?
+  onSendWhatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -64,7 +70,10 @@ class _CatalogShareSheetContent extends StatelessWidget {
           CatalogShareSheetStatus.initial ||
           CatalogShareSheetStatus.submitting => const _LoadingContent(),
           CatalogShareSheetStatus.failure => _FailureContent(state: state),
-          CatalogShareSheetStatus.success => _SuccessContent(state: state),
+          CatalogShareSheetStatus.success => _SuccessContent(
+            state: state,
+            onSendWhatsApp: onSendWhatsApp,
+          ),
         };
       },
     );
@@ -102,9 +111,11 @@ class _FailureContent extends StatelessWidget {
 }
 
 class _SuccessContent extends StatelessWidget {
-  const _SuccessContent({required this.state});
+  const _SuccessContent({required this.state, this.onSendWhatsApp});
 
   final CatalogShareSheetState state;
+  final Future<void> Function(IssuedCatalogShare share, String link)?
+  onSendWhatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -151,6 +162,15 @@ class _SuccessContent extends StatelessWidget {
             }
           },
         ),
+        if (onSendWhatsApp != null) ...<Widget>[
+          const SizedBox(height: AppSpacing.spacing8),
+          AppButton(
+            label: 'Enviar por WhatsApp',
+            leadingIcon: Icons.send_outlined,
+            expand: true,
+            onPressed: () => onSendWhatsApp!(issued, link),
+          ),
+        ],
         const SizedBox(height: AppSpacing.spacing16),
         Row(
           children: <Widget>[

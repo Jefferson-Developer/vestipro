@@ -34,6 +34,7 @@ final class AppNotification {
     this.readAt,
     this.priority = AppNotificationPriority.informative,
     this.deliverAt,
+    this.customerId,
   });
 
   final String id;
@@ -62,6 +63,10 @@ final class AppNotification {
   /// when generated during quiet hours — TASK-154/TASK-155's "notificações
   /// críticas de segurança/sessão não são bloqueadas" exception.
   final DateTime? deliverAt;
+
+  /// Customer targeted by a commercial communication, when applicable.
+  /// The backend still revalidates tenant and opt-in before sending.
+  final String? customerId;
 
   /// Whether this notification is already visible to [userId] at
   /// [now] (defaults to the real current instant) — `false` only while

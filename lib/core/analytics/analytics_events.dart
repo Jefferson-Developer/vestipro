@@ -73,6 +73,8 @@ final class AnalyticsEvents {
   static const String catalogShareOpened = 'catalog_share_opened';
   static const String cartShareCreated = 'cart_share_created';
   static const String cartShareReviewed = 'cart_share_reviewed';
+  static const String whatsAppOptInRequested = 'whatsapp_opt_in_requested';
+  static const String whatsAppMessageSent = 'whatsapp_message_sent';
 
   /// Logged by the catalog branding admin screen (TASK-179, EPIC-25) whenever
   /// an OWNER/ADMIN updates the organization's catalog white-label config
@@ -271,6 +273,8 @@ final class AnalyticsEvents {
     catalogShareOpened,
     cartShareCreated,
     cartShareReviewed,
+    whatsAppOptInRequested,
+    whatsAppMessageSent,
     catalogBrandingUpdated,
     targetCreated,
     targetUpdated,

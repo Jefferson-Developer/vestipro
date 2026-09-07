@@ -237,6 +237,9 @@ final class NotificationCenterBloc
       deepLink: notification.deepLink,
       createdAt: notification.createdAt,
       readAt: readAt,
+      priority: notification.priority,
+      deliverAt: notification.deliverAt,
+      customerId: notification.customerId,
     );
   }
 }

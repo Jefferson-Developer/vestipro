@@ -19,6 +19,7 @@ final class NotificationDto {
     this.readAt,
     this.priority = 'informative',
     this.deliverAt,
+    this.customerId,
   });
 
   factory NotificationDto.fromJson(
@@ -42,6 +43,7 @@ final class NotificationDto {
     // field — `null` degrades to "already visible", the only behavior that
     // existed before quiet hours.
     final deliverAt = json['deliverAt'];
+    final customerId = json['customerId'];
 
     if (organizationId is! String ||
         userId is! String ||
@@ -52,7 +54,8 @@ final class NotificationDto {
         createdAt is! Timestamp ||
         (readAt != null && readAt is! Timestamp) ||
         (priority != null && priority is! String) ||
-        (deliverAt != null && deliverAt is! Timestamp)) {
+        (deliverAt != null && deliverAt is! Timestamp) ||
+        (customerId != null && customerId is! String)) {
       throw const ValidationException(
         'Invalid notification payload.',
         code: 'invalid_notification_payload',
@@ -71,6 +74,7 @@ final class NotificationDto {
       readAt: (readAt as Timestamp?)?.toDate(),
       priority: (priority as String?) ?? 'informative',
       deliverAt: (deliverAt as Timestamp?)?.toDate(),
+      customerId: customerId as String?,
     );
   }
 
@@ -93,6 +97,7 @@ final class NotificationDto {
 
   /// `AppNotification.deliverAt` (TASK-155) — `null` means already visible.
   final DateTime? deliverAt;
+  final String? customerId;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -106,6 +111,7 @@ final class NotificationDto {
       'readAt': readAt == null ? null : Timestamp.fromDate(readAt!),
       'priority': priority,
       'deliverAt': deliverAt == null ? null : Timestamp.fromDate(deliverAt!),
+      'customerId': ?customerId,
     };
   }
 }

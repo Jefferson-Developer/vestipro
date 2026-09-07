@@ -326,7 +326,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-182 — Implementar portal B2B self-service do cliente](TASK-182-implementar-portal-b2b-do-cliente.md) — Flutter Senior + Front-end
 
 ### EPIC-26 — Comunicação Avançada
-- [ ] [TASK-183 — Implementar integração WhatsApp Business](TASK-183-implementar-integracao-whatsapp-business.md) — Flutter Senior + Front-end
+- [x] [TASK-183 — Implementar integração WhatsApp Business](TASK-183-implementar-integracao-whatsapp-business.md) — Flutter Senior + Front-end
 
 ### EPIC-27 — Reposição e Previsão de Demanda
 - [ ] [TASK-184 — Implementar sugestão de replenishment automático](TASK-184-implementar-replenishment-automatico.md) — Flutter Senior
@@ -379,6 +379,6 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 181 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
+**Progresso:** 182 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
 [`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md)
 — e não conta mais no total).

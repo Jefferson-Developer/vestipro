@@ -1520,6 +1520,14 @@ import '../features/visit_routes/domain/usecases/reorder_visit_route_stops_use_c
     as _i514;
 import '../features/visit_routes/presentation/bloc/visit_route_bloc.dart'
     as _i999;
+import '../features/whatsapp_business/data/repositories/cloud_functions_whatsapp_repository.dart'
+    as _i271;
+import '../features/whatsapp_business/domain/repositories/whatsapp_repository.dart'
+    as _i987;
+import '../features/whatsapp_business/domain/usecases/whatsapp_use_cases.dart'
+    as _i848;
+import '../features/whatsapp_business/presentation/cubit/whatsapp_send_cubit.dart'
+    as _i603;
 import 'customer_import_parsers_module.dart' as _i405;
 import 'injection_module.dart' as _i212;
 import 'offline_package_loaders_module.dart' as _i418;
@@ -3200,6 +3208,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i472.GetWarehousesByCompanyUseCase>(
       () => _i472.GetWarehousesByCompanyUseCase(gh<_i62.WarehouseRepository>()),
     );
+    gh.lazySingleton<_i987.WhatsAppRepository>(
+      () => _i271.CloudFunctionsWhatsAppRepository(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i371.CartShareRepository>(
       () => _i200.CloudFunctionsCartShareRepository(
         gh<_i340.CloudFunctionsService>(),
@@ -3544,6 +3557,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i217.AuthRepository>(),
       ),
     );
+    gh.factory<_i848.LoadWhatsAppContextUseCase>(
+      () => _i848.LoadWhatsAppContextUseCase(gh<_i987.WhatsAppRepository>()),
+    );
+    gh.factory<_i848.UpdateWhatsAppOptInUseCase>(
+      () => _i848.UpdateWhatsAppOptInUseCase(gh<_i987.WhatsAppRepository>()),
+    );
+    gh.factory<_i848.SendWhatsAppMessageUseCase>(
+      () => _i848.SendWhatsAppMessageUseCase(gh<_i987.WhatsAppRepository>()),
+    );
     gh.factory<_i647.PublishProductUseCase>(
       () => _i647.PublishProductUseCase(
         gh<_i321.ProductRepository>(),
@@ -3615,6 +3637,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i320.TeamRepository>(),
         gh<_i957.MembershipRepository>(),
         gh<_i756.OrganizationRepository>(),
+      ),
+    );
+    gh.factory<_i603.WhatsAppSendCubit>(
+      () => _i603.WhatsAppSendCubit(
+        loadContext: gh<_i848.LoadWhatsAppContextUseCase>(),
+        updateOptIn: gh<_i848.UpdateWhatsAppOptInUseCase>(),
+        sendMessage: gh<_i848.SendWhatsAppMessageUseCase>(),
+        analytics: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i428.UpdateUserRoleUseCase>(

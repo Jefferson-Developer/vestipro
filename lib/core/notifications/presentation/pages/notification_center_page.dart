@@ -26,6 +26,7 @@ class NotificationCenterPage extends StatelessWidget {
     required this.createBloc,
     this.onOpenDeepLink,
     this.onOpenPreferences,
+    this.onSendWhatsApp,
     super.key,
   });
 
@@ -42,6 +43,12 @@ class NotificationCenterPage extends StatelessWidget {
   /// [onOpenDeepLink].
   final VoidCallback? onOpenPreferences;
 
+  /// Optional TASK-183 channel hand-off. The destination flow resolves the
+  /// customer from the commercial notification and revalidates opt-in in
+  /// `sendWhatsAppMessage`; merely showing this action never authorizes an
+  /// outbound message.
+  final ValueChanged<AppNotification>? onSendWhatsApp;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<NotificationCenterBloc>(
@@ -55,6 +62,7 @@ class NotificationCenterPage extends StatelessWidget {
       child: _NotificationCenterScaffold(
         onOpenDeepLink: onOpenDeepLink,
         onOpenPreferences: onOpenPreferences,
+        onSendWhatsApp: onSendWhatsApp,
       ),
     );
   }
@@ -64,10 +72,12 @@ class _NotificationCenterScaffold extends StatelessWidget {
   const _NotificationCenterScaffold({
     this.onOpenDeepLink,
     this.onOpenPreferences,
+    this.onSendWhatsApp,
   });
 
   final ValueChanged<String>? onOpenDeepLink;
   final VoidCallback? onOpenPreferences;
+  final ValueChanged<AppNotification>? onSendWhatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -101,16 +111,20 @@ class _NotificationCenterScaffold extends StatelessWidget {
             },
           ),
         ],
-        content: _NotificationCenterContent(onOpenDeepLink: onOpenDeepLink),
+        content: _NotificationCenterContent(
+          onOpenDeepLink: onOpenDeepLink,
+          onSendWhatsApp: onSendWhatsApp,
+        ),
       ),
     );
   }
 }
 
 class _NotificationCenterContent extends StatelessWidget {
-  const _NotificationCenterContent({this.onOpenDeepLink});
+  const _NotificationCenterContent({this.onOpenDeepLink, this.onSendWhatsApp});
 
   final ValueChanged<String>? onOpenDeepLink;
+  final ValueChanged<AppNotification>? onSendWhatsApp;
 
   @override
   Widget build(BuildContext context) {
@@ -196,16 +210,31 @@ class _NotificationCenterContent extends StatelessWidget {
           }
 
           final notification = visible[index];
-          return AppNotificationListTile(
+          return Row(
             key: Key('notification-${notification.id}'),
-            title: notification.title,
-            body: notification.body,
-            category: _tileCategory(notification.category),
-            timestampLabel: _timestampLabel(notification.createdAt),
-            isUnread: notification.readAt == null,
-            isCritical:
-                notification.priority == AppNotificationPriority.critical,
-            onTap: () => _handleTap(context, notification),
+            children: <Widget>[
+              Expanded(
+                child: AppNotificationListTile(
+                  title: notification.title,
+                  body: notification.body,
+                  category: _tileCategory(notification.category),
+                  timestampLabel: _timestampLabel(notification.createdAt),
+                  isUnread: notification.readAt == null,
+                  isCritical:
+                      notification.priority == AppNotificationPriority.critical,
+                  onTap: () => _handleTap(context, notification),
+                ),
+              ),
+              if (notification.category == AppNotificationCategory.commercial &&
+                  notification.customerId != null &&
+                  onSendWhatsApp != null)
+                AppIconButton(
+                  icon: Icons.message_outlined,
+                  semanticLabel: 'Enviar notificacao por WhatsApp',
+                  variant: AppButtonVariant.text,
+                  onPressed: () => onSendWhatsApp!(notification),
+                ),
+            ],
           );
         },
       ),

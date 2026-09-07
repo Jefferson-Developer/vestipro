@@ -63,6 +63,8 @@ void main() {
           'catalog_share_opened',
           'cart_share_created',
           'cart_share_reviewed',
+          'whatsapp_opt_in_requested',
+          'whatsapp_message_sent',
           'catalog_branding_updated',
           'target_created',
           'target_updated',
