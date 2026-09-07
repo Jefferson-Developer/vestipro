@@ -4,20 +4,28 @@ import '../../../../core/design_system/design_system.dart';
 import '../../domain/entities/visit_route_stop.dart';
 
 /// One ordered stop row of a built [VisitRoute] (TASK-177): position, name,
-/// distance/eta estimate from the previous stop, progress toggle and the
+/// distance/eta estimate from the previous stop, progress action and the
 /// "Navegar" action. Drag handle is provided by
 /// `ReorderableListView.buildDefaultDragHandles` (same precedent as
 /// `CategoriesPage`), not drawn here.
+///
+/// Progress has two distinct actions (TASK-178): a pending stop is only
+/// ever completed through [onCheckIn] (the real check-in flow — evidence +
+/// optional location + CRM timeline), while [onUndoCheckIn] only reverts an
+/// already-completed stop back to pending (correcting a mistake), never
+/// itself producing a check-in.
 class VisitRouteStopTile extends StatelessWidget {
   const VisitRouteStopTile({
     required this.stop,
-    required this.onToggleStatus,
+    required this.onCheckIn,
+    required this.onUndoCheckIn,
     required this.onNavigate,
     super.key,
   });
 
   final VisitRouteStop stop;
-  final VoidCallback onToggleStatus;
+  final VoidCallback onCheckIn;
+  final VoidCallback onUndoCheckIn;
   final VoidCallback onNavigate;
 
   @override
@@ -76,9 +84,9 @@ class VisitRouteStopTile extends StatelessWidget {
                 ? Icons.check_circle
                 : Icons.check_circle_outline,
             semanticLabel: stop.isCompleted
-                ? 'Marcar ${stop.displayName} como pendente'
-                : 'Marcar ${stop.displayName} como concluída',
-            onPressed: onToggleStatus,
+                ? 'Desfazer check-in de ${stop.displayName}'
+                : 'Fazer check-in em ${stop.displayName}',
+            onPressed: stop.isCompleted ? onUndoCheckIn : onCheckIn,
           ),
         ],
       ),

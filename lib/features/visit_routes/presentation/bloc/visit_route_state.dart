@@ -1,8 +1,15 @@
 import '../../../../core/errors/errors.dart';
 import '../../../customers/domain/entities/customer_map_pin.dart';
+import '../../../visit_checkins/domain/entities/visit_check_in_result.dart';
 import '../../domain/entities/visit_route.dart';
 
 enum VisitRouteStatus { initial, loading, ready, failure }
+
+/// Status of the last visit check-in attempt (TASK-178), independent from
+/// [VisitRouteStatus] (which tracks loading/building the route itself) —
+/// consumed by the page to show a one-shot confirmation/error, never to
+/// gate the route list itself.
+enum VisitRouteCheckInStatus { idle, submitting, success, failure }
 
 final class VisitRouteState {
   const VisitRouteState({
@@ -14,6 +21,9 @@ final class VisitRouteState {
     this.selectedCustomerIds = const <String>{},
     this.route,
     this.failure,
+    this.checkInStatus = VisitRouteCheckInStatus.idle,
+    this.lastCheckIn,
+    this.checkInFailure,
   });
 
   final VisitRouteStatus status;
@@ -32,9 +42,19 @@ final class VisitRouteState {
   final VisitRoute? route;
   final Failure? failure;
 
+  final VisitRouteCheckInStatus checkInStatus;
+
+  /// The most recently completed check-in (evidence + location outcome),
+  /// so the page can show what happened (e.g. "sem localização: permissão
+  /// negada"). `null` before any check-in this session.
+  final VisitCheckInResult? lastCheckIn;
+  final Failure? checkInFailure;
+
   bool get isLoading => status == VisitRouteStatus.loading;
 
   bool get hasRoute => route != null && route!.stops.isNotEmpty;
+
+  bool get isCheckingIn => checkInStatus == VisitRouteCheckInStatus.submitting;
 
   VisitRouteState copyWith({
     VisitRouteStatus? status,
@@ -47,6 +67,11 @@ final class VisitRouteState {
     bool clearRoute = false,
     Failure? failure,
     bool clearFailure = false,
+    VisitRouteCheckInStatus? checkInStatus,
+    VisitCheckInResult? lastCheckIn,
+    bool clearLastCheckIn = false,
+    Failure? checkInFailure,
+    bool clearCheckInFailure = false,
   }) {
     return VisitRouteState(
       status: status ?? this.status,
@@ -57,6 +82,11 @@ final class VisitRouteState {
       selectedCustomerIds: selectedCustomerIds ?? this.selectedCustomerIds,
       route: clearRoute ? null : route ?? this.route,
       failure: clearFailure ? null : failure ?? this.failure,
+      checkInStatus: checkInStatus ?? this.checkInStatus,
+      lastCheckIn: clearLastCheckIn ? null : lastCheckIn ?? this.lastCheckIn,
+      checkInFailure: clearCheckInFailure
+          ? null
+          : checkInFailure ?? this.checkInFailure,
     );
   }
 }

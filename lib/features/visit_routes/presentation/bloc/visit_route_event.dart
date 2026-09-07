@@ -47,11 +47,30 @@ final class VisitRouteStopsReordered extends VisitRouteEvent {
   final List<String> orderedCustomerIds;
 }
 
-/// Flips a stop's progress status (pending <-> completed).
+/// Reverts an already-completed stop back to pending (correcting a mistake)
+/// — never itself produces a check-in. Completing a pending stop only ever
+/// happens through [VisitRouteCheckInRequested] (TASK-178).
 final class VisitRouteStopStatusToggled extends VisitRouteEvent {
   const VisitRouteStopStatusToggled(this.customerId);
 
   final String customerId;
+}
+
+/// Registers a real visit check-in for [customerId] (TASK-178): evidence
+/// (CRM activity) + optional device location, under the seller's explicit
+/// consent for *this* action ([shareLocation]) — see `CheckInVisitUseCase`.
+/// Marks the matching stop completed as a side effect of the use case
+/// itself, not of this event.
+final class VisitRouteCheckInRequested extends VisitRouteEvent {
+  const VisitRouteCheckInRequested({
+    required this.customerId,
+    this.note,
+    this.shareLocation = false,
+  });
+
+  final String customerId;
+  final String? note;
+  final bool shareLocation;
 }
 
 /// Discards the built route from view (not from disk — rebuilding today

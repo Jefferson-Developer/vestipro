@@ -1,4 +1,11 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+    <!-- Check-in de visita (TASK-178): captura pontual de localização sob
+         consentimento explícito do vendedor por ação (nunca em segundo
+         plano) — ver `GeolocatorVisitCheckInLocationService`. Sem
+         `ACCESS_BACKGROUND_LOCATION`: este app nunca captura localização
+         fora do momento do check-in. -->
+    <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
+    <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
     <application
         android:label="${appName}"
         android:name="${applicationName}"

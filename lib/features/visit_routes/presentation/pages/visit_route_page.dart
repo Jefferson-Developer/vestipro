@@ -10,6 +10,8 @@ import '../../../customers/domain/value_objects/geo_coordinates.dart';
 import '../../../customers/presentation/bloc/customer_portfolio_bloc.dart';
 import '../../../customers/presentation/bloc/customer_portfolio_event.dart';
 import '../../../customers/presentation/bloc/customer_portfolio_state.dart';
+import '../../../visit_checkins/domain/value_objects/visit_check_in_location_status.dart';
+import '../../../visit_checkins/presentation/widgets/visit_check_in_sheet.dart';
 import '../../domain/entities/visit_route_stop.dart';
 import '../../domain/services/navigation_link_builder.dart';
 import '../../domain/value_objects/navigation_provider.dart';
@@ -89,14 +91,26 @@ class _VisitRouteScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocListener<CustomerPortfolioBloc, CustomerPortfolioState>(
-      listenWhen: (previous, current) =>
-          previous.customers != current.customers,
-      listener: (context, state) {
-        context.read<VisitRouteBloc>().add(
-          VisitRouteAvailablePinsChanged(_pinBuilder.build(state.customers)),
-        );
-      },
+    return MultiBlocListener(
+      listeners: [
+        BlocListener<CustomerPortfolioBloc, CustomerPortfolioState>(
+          listenWhen: (previous, current) =>
+              previous.customers != current.customers,
+          listener: (context, state) {
+            context.read<VisitRouteBloc>().add(
+              VisitRouteAvailablePinsChanged(
+                _pinBuilder.build(state.customers),
+              ),
+            );
+          },
+        ),
+        BlocListener<VisitRouteBloc, VisitRouteState>(
+          listenWhen: (previous, current) =>
+              previous.checkInStatus != current.checkInStatus &&
+              current.checkInStatus != VisitRouteCheckInStatus.idle,
+          listener: (context, state) => _handleCheckInFeedback(context, state),
+        ),
+      ],
       child: BlocBuilder<VisitRouteBloc, VisitRouteState>(
         builder: (context, state) {
           return Scaffold(
@@ -124,9 +138,10 @@ class _VisitRouteScaffold extends StatelessWidget {
                     stops: state.route!.stops,
                     onNavigate: (stop) =>
                         _openNavigation(context, stop.coordinates),
-                    onToggleStatus: (stop) => context
-                        .read<VisitRouteBloc>()
-                        .add(VisitRouteStopStatusToggled(stop.customerId)),
+                    onCheckIn: (stop) => _requestCheckIn(context, stop),
+                    onUndoCheckIn: (stop) => context.read<VisitRouteBloc>().add(
+                      VisitRouteStopStatusToggled(stop.customerId),
+                    ),
                     onReorder: (orderedIds) => context
                         .read<VisitRouteBloc>()
                         .add(VisitRouteStopsReordered(orderedIds)),
@@ -134,6 +149,46 @@ class _VisitRouteScaffold extends StatelessWidget {
                 : _SelectionView(state: state),
           );
         },
+      ),
+    );
+  }
+
+  void _handleCheckInFeedback(BuildContext context, VisitRouteState state) {
+    if (state.checkInStatus == VisitRouteCheckInStatus.failure) {
+      AppSnackbar.show(
+        context,
+        message:
+            state.checkInFailure?.message ??
+            'Não foi possível registrar o check-in.',
+        variant: AppSnackbarVariant.error,
+      );
+      return;
+    }
+    final lastCheckIn = state.lastCheckIn;
+    if (state.checkInStatus == VisitRouteCheckInStatus.success &&
+        lastCheckIn != null) {
+      AppSnackbar.show(
+        context,
+        message: 'Check-in registrado. ${lastCheckIn.location.status.label}',
+        variant: AppSnackbarVariant.success,
+      );
+    }
+  }
+
+  Future<void> _requestCheckIn(
+    BuildContext context,
+    VisitRouteStop stop,
+  ) async {
+    final input = await VisitCheckInSheet.show(
+      context: context,
+      customerName: stop.displayName,
+    );
+    if (input == null || !context.mounted) return;
+    context.read<VisitRouteBloc>().add(
+      VisitRouteCheckInRequested(
+        customerId: stop.customerId,
+        note: input.note,
+        shareLocation: input.shareLocation,
       ),
     );
   }
@@ -232,13 +287,15 @@ class _RouteView extends StatelessWidget {
   const _RouteView({
     required this.stops,
     required this.onNavigate,
-    required this.onToggleStatus,
+    required this.onCheckIn,
+    required this.onUndoCheckIn,
     required this.onReorder,
   });
 
   final List<VisitRouteStop> stops;
   final ValueChanged<VisitRouteStop> onNavigate;
-  final ValueChanged<VisitRouteStop> onToggleStatus;
+  final ValueChanged<VisitRouteStop> onCheckIn;
+  final ValueChanged<VisitRouteStop> onUndoCheckIn;
   final ValueChanged<List<String>> onReorder;
 
   @override
@@ -277,7 +334,8 @@ class _RouteView extends StatelessWidget {
                 child: VisitRouteStopTile(
                   stop: stop,
                   onNavigate: () => onNavigate(stop),
-                  onToggleStatus: () => onToggleStatus(stop),
+                  onCheckIn: () => onCheckIn(stop),
+                  onUndoCheckIn: () => onUndoCheckIn(stop),
                 ),
               );
             },

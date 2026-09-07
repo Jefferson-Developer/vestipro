@@ -26,6 +26,11 @@
 	<string>$(FLUTTER_BUILD_NUMBER)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- Check-in de visita (TASK-178): captura pontual de localização sob
+	     consentimento explícito do vendedor por ação, nunca em segundo plano
+	     — só "When In Use" é declarado (ver `GeolocatorVisitCheckInLocationService`). -->
+	<key>NSLocationWhenInUseUsageDescription</key>
+	<string>O VestiPro usa sua localização apenas quando você registra um check-in de visita a um cliente, para anexar a localização como evidência complementar da visita.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

@@ -117,6 +117,15 @@ dependencies:
   # declaration needed), same "no extra native wiring in this environment"
   # precedent already set for `google_maps_flutter` above.
   url_launcher: ^6.3.1
+  # Check-in de visita (TASK-178): captura pontual da localização atual do
+  # dispositivo, sempre sob consentimento explícito por ação
+  # (`VisitCheckInLocationService`/`GeolocatorVisitCheckInLocationService`),
+  # nunca em segundo plano. Ao contrário de `google_maps_flutter`/
+  # `url_launcher`, este plugin exige permissão nativa de localização
+  # (`ACCESS_FINE_LOCATION`/`NSLocationWhenInUseUsageDescription`) — ver
+  # "Riscos conhecidos" no relatório desta task para o que ainda precisa de
+  # validação em dispositivo real.
+  geolocator: ^14.0.3
 
 dev_dependencies:
   flutter_test:
