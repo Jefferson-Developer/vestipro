@@ -12,6 +12,8 @@ final class CatalogSharePreviewDto {
     required this.items,
     this.collectionName,
     this.expiresAt,
+    this.brandingLogoUrl,
+    this.brandingPrimaryColorHex,
   });
 
   factory CatalogSharePreviewDto.fromJson(Map<String, dynamic> json) {
@@ -21,13 +23,18 @@ final class CatalogSharePreviewDto {
     final rawItems = json['items'];
     final collectionName = json['collectionName'];
     final expiresAt = json['expiresAt'];
+    final brandingLogoUrl = json['brandingLogoUrl'];
+    final brandingPrimaryColorHex = json['brandingPrimaryColorHex'];
 
     if (outcome is! String ||
         (organizationName != null && organizationName is! String) ||
         (scope != null && scope is! String) ||
         rawItems is! List ||
         (collectionName != null && collectionName is! String) ||
-        (expiresAt != null && expiresAt is! String)) {
+        (expiresAt != null && expiresAt is! String) ||
+        (brandingLogoUrl != null && brandingLogoUrl is! String) ||
+        (brandingPrimaryColorHex != null &&
+            brandingPrimaryColorHex is! String)) {
       throw const ServerException(
         'Unexpected getCatalogShareLink callable response shape.',
         code: 'invalid_catalog_share_preview_response',
@@ -47,6 +54,8 @@ final class CatalogSharePreviewDto {
           .toList(growable: false),
       collectionName: collectionName as String?,
       expiresAt: expiresAt == null ? null : DateTime.parse(expiresAt as String),
+      brandingLogoUrl: brandingLogoUrl as String?,
+      brandingPrimaryColorHex: brandingPrimaryColorHex as String?,
     );
   }
 
@@ -56,4 +65,9 @@ final class CatalogSharePreviewDto {
   final List<CatalogShareItemDto> items;
   final String? collectionName;
   final DateTime? expiresAt;
+
+  /// The organization's configured catalog branding (TASK-179), `null` when
+  /// not configured or when [outcome] is not `valid`.
+  final String? brandingLogoUrl;
+  final String? brandingPrimaryColorHex;
 }

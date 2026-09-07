@@ -58,6 +58,8 @@ export const getCatalogShareLink = onCall<
       items: [],
       collectionName: null,
       expiresAt: null,
+      brandingLogoUrl: null,
+      brandingPrimaryColorHex: null,
       correlationId,
     };
   }
@@ -78,13 +80,26 @@ export const getCatalogShareLink = onCall<
       items: [],
       collectionName: null,
       expiresAt: null,
+      brandingLogoUrl: null,
+      brandingPrimaryColorHex: null,
       correlationId,
     };
   }
 
   const organizationSnapshot = await lookup.organizationRef.get();
-  const organizationName =
-    (organizationSnapshot.data()?.name as string | undefined) ?? null;
+  const organizationData = organizationSnapshot.data();
+  const organizationName = (organizationData?.name as string | undefined) ?? null;
+  // TASK-179 (catálogo white-label): the organization's own configured
+  // branding (TASK-148), resolved server-side so the anonymous visitor
+  // never has to know/query the organization's id itself.
+  const organizationSettings = organizationData?.settings as
+    | Record<string, unknown>
+    | undefined;
+  const branding = {
+    logoUrl: (organizationSettings?.brandingLogoUrl as string | undefined) ?? null,
+    primaryColorHex:
+      (organizationSettings?.brandingPrimaryColorHex as string | undefined) ?? null,
+  };
 
   logger.info('getCatalogShareLink succeeded', {
     correlationId,
@@ -93,7 +108,7 @@ export const getCatalogShareLink = onCall<
   });
 
   return {
-    ...serializeCatalogSharePreview(outcome, organizationName, lookup.data),
+    ...serializeCatalogSharePreview(outcome, organizationName, lookup.data, branding),
     correlationId,
   };
 });

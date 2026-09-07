@@ -92,6 +92,8 @@ void main() {
         ],
         collectionName: null,
         expiresAt: DateTime.utc(2026, 2, 1),
+        brandingLogoUrl: 'https://cdn.example.com/logo.png',
+        brandingPrimaryColorHex: '#1F5364',
       );
 
       final entity = mapper.previewToEntity(dto);
@@ -100,6 +102,8 @@ void main() {
       expect(entity.organizationName, 'Grupo Fashion XPTO');
       expect(entity.scope, CatalogShareScope.product);
       expect(entity.items, hasLength(1));
+      expect(entity.brandingLogoUrl, 'https://cdn.example.com/logo.png');
+      expect(entity.brandingPrimaryColorHex, '#1F5364');
     });
 
     test('previewToEntity maps an unavailable outcome with a null scope', () {

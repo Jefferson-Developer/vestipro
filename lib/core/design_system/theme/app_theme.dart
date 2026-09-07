@@ -19,11 +19,16 @@ import '../foundations/foundations.dart';
 abstract final class AppTheme {
   const AppTheme._();
 
-  static ThemeData get light => _build(AppColors.light, Brightness.light);
+  static ThemeData get light => fromColors(AppColors.light, Brightness.light);
 
-  static ThemeData get dark => _build(AppColors.dark, Brightness.dark);
+  static ThemeData get dark => fromColors(AppColors.dark, Brightness.dark);
 
-  static ThemeData _build(AppColors colors, Brightness brightness) {
+  /// Builds a full [ThemeData] from an already-resolved [colors] token set —
+  /// the single assembly [light]/[dark] delegate to, and the same one a
+  /// per-organization white-label theme (`AppBrandTheme.resolveTheme`,
+  /// TASK-179) reuses, so a customized theme is never a second, divergent
+  /// `ThemeData` construction path.
+  static ThemeData fromColors(AppColors colors, Brightness brightness) {
     // `ColorScheme.fromSeed` fills in every Material 3 role (tertiary,
     // outlineVariant, inverseSurface, scrim, ...) with values consistent
     // with `brightness`; the explicit tokens below then override the roles

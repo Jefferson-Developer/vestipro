@@ -320,7 +320,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-178 — Implementar check-in de visita](TASK-178-implementar-check-in-de-visita.md) — Flutter Senior + Front-end
 
 ### EPIC-25 — Catálogo Avançado e Portal B2B
-- [ ] [TASK-179 — Implementar catálogo white-label](TASK-179-implementar-catalogo-white-label.md) — Flutter Senior + Front-end
+- [x] [TASK-179 — Implementar catálogo white-label](TASK-179-implementar-catalogo-white-label.md) — Flutter Senior + Front-end
 - [ ] [TASK-180 — Implementar assinatura eletrônica de pedido](TASK-180-implementar-assinatura-eletronica-de-pedido.md) — Flutter Senior
 - [ ] [TASK-181 — Implementar compartilhamento de carrinho/seleção](TASK-181-implementar-compartilhamento-de-carrinho.md) — Flutter Senior + Front-end
 - [ ] [TASK-182 — Implementar portal B2B self-service do cliente](TASK-182-implementar-portal-b2b-do-cliente.md) — Flutter Senior + Front-end
@@ -379,6 +379,6 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 177 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
+**Progresso:** 178 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
 [`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md)
 — e não conta mais no total).

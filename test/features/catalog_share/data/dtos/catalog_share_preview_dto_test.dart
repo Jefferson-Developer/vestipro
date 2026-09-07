@@ -14,6 +14,8 @@ void main() {
         ],
         'collectionName': null,
         'expiresAt': '2026-02-01T00:00:00.000Z',
+        'brandingLogoUrl': 'https://cdn.example.com/logo.png',
+        'brandingPrimaryColorHex': '#1F5364',
       };
 
       final dto = CatalogSharePreviewDto.fromJson(json);
@@ -22,6 +24,21 @@ void main() {
       expect(dto.organizationName, 'Grupo Fashion XPTO');
       expect(dto.items, hasLength(1));
       expect(dto.expiresAt, DateTime.parse('2026-02-01T00:00:00.000Z'));
+      expect(dto.brandingLogoUrl, 'https://cdn.example.com/logo.png');
+      expect(dto.brandingPrimaryColorHex, '#1F5364');
+    });
+
+    test('brandingLogoUrl/brandingPrimaryColorHex default to null when '
+        'absent (TASK-179)', () {
+      final json = <String, dynamic>{
+        'outcome': 'valid',
+        'items': <Map<String, dynamic>>[],
+      };
+
+      final dto = CatalogSharePreviewDto.fromJson(json);
+
+      expect(dto.brandingLogoUrl, isNull);
+      expect(dto.brandingPrimaryColorHex, isNull);
     });
 
     test('parses a notFound outcome with empty items and null fields', () {

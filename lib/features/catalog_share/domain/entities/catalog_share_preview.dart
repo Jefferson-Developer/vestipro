@@ -15,7 +15,11 @@ part 'catalog_share_preview.freezed.dart';
 /// [outcome] is [CatalogShareOutcome.valid] — for any other outcome they are
 /// `null`/empty by construction (the callable never sends them), matching
 /// TASK-081's rule that an expired/revoked link must never leak what it used
-/// to expose.
+/// to expose. [brandingLogoUrl]/[brandingPrimaryColorHex] (TASK-179,
+/// catálogo white-label) follow the exact same rule: only ever populated for
+/// [CatalogShareOutcome.valid], the organization's own configured identity
+/// (`OrganizationSettings.brandingLogoUrl`/`brandingPrimaryColorHex`,
+/// TASK-148), `null` meaning "not configured" — never a placeholder.
 @freezed
 abstract class CatalogSharePreview with _$CatalogSharePreview {
   const factory CatalogSharePreview({
@@ -25,5 +29,7 @@ abstract class CatalogSharePreview with _$CatalogSharePreview {
     @Default(<CatalogShareItem>[]) List<CatalogShareItem> items,
     String? collectionName,
     DateTime? expiresAt,
+    String? brandingLogoUrl,
+    String? brandingPrimaryColorHex,
   }) = _CatalogSharePreview;
 }

@@ -36,6 +36,42 @@ void main() {
       expect(dark.textTheme.bodyLarge?.color, AppColors.dark.onSurface);
     });
 
+    test('fromColors is the exact assembly light/dark delegate to', () {
+      expect(
+        AppTheme.fromColors(AppColors.light, Brightness.light).colorScheme,
+        AppTheme.light.colorScheme,
+      );
+      expect(
+        AppTheme.fromColors(AppColors.dark, Brightness.dark).colorScheme,
+        AppTheme.dark.colorScheme,
+      );
+    });
+
+    test('fromColors applies an arbitrary AppColors token set', () {
+      const customColors = AppColors(
+        primary: Color(0xFF123456),
+        primaryContainer: Color(0xFFD3E6EC),
+        secondary: Color(0xFF8C6A4F),
+        secondaryContainer: Color(0xFFEDE0D3),
+        surface: Color(0xFFFFFFFF),
+        surfaceContainer: Color(0xFFF4F2EF),
+        background: Color(0xFFFBFAF8),
+        error: Color(0xFFB3261E),
+        success: Color(0xFF1E6B4E),
+        warning: Color(0xFF8A5A00),
+        info: Color(0xFF2A5DA8),
+        onPrimary: Color(0xFFFFFFFF),
+        onSurface: Color(0xFF1B1B1B),
+        outline: Color(0xFF79747E),
+        disabled: Color(0xFFBDBDBD),
+      );
+
+      final theme = AppTheme.fromColors(customColors, Brightness.light);
+
+      expect(theme.colorScheme.primary, const Color(0xFF123456));
+      expect(theme.extension<AppColors>(), customColors);
+    });
+
     testWidgets('renders a MaterialApp with light and dark theme wired', (
       tester,
     ) async {

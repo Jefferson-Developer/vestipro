@@ -255,6 +255,8 @@ export interface CatalogSharePreviewResponse {
   items: CatalogShareItemResponse[];
   collectionName: string | null;
   expiresAt: string | null;
+  brandingLogoUrl: string | null;
+  brandingPrimaryColorHex: string | null;
 }
 
 /**
@@ -266,11 +268,24 @@ export interface CatalogSharePreviewResponse {
  * or the vendor beyond the organization's display name and the shared
  * items themselves (TASK-081: "nunca expõe... informações internas da
  * organização além do escopo definido").
+ *
+ * [brandingLogoUrl]/[brandingPrimaryColorHex] (TASK-179, catálogo
+ * white-label) are the organization's own `OrganizationSettings
+ * .brandingLogoUrl`/`brandingPrimaryColorHex` (TASK-148) — a purely visual
+ * identity already scoped per organization, never inferred, `null` when the
+ * organization never configured one. Passing these through here (instead of
+ * the client resolving branding itself) keeps the visitor's request the
+ * same single call it already makes and never requires it to know the
+ * organization's id.
  */
 export function serializeCatalogSharePreview(
   outcome: CatalogShareOutcome,
   organizationName: string | null,
   data: DocumentData,
+  branding: { logoUrl: string | null; primaryColorHex: string | null } = {
+    logoUrl: null,
+    primaryColorHex: null,
+  },
 ): CatalogSharePreviewResponse {
   const expiresAt = data.expiresAt as Timestamp;
   return {
@@ -280,5 +295,7 @@ export function serializeCatalogSharePreview(
     items: serializeItems(data),
     collectionName: (data.collectionName as string | null | undefined) ?? null,
     expiresAt: expiresAt.toDate().toISOString(),
+    brandingLogoUrl: branding.logoUrl,
+    brandingPrimaryColorHex: branding.primaryColorHex,
   };
 }

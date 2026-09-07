@@ -7,7 +7,9 @@ import '../repositories/organization_repository.dart';
 import '../value_objects/organization_settings.dart';
 
 /// Updates an Organization's [OrganizationSettings] (currency, country,
-/// default language).
+/// default language, and every other configurable setting, including the
+/// catalog white-label branding — [brandingLogoUrl]/[brandingPrimaryColorHex],
+/// TASK-148/TASK-179).
 ///
 /// This use case has no parameter that could rewrite [Organization.id] —
 /// only [id] to select which Organization to update, never to change it —
@@ -35,6 +37,8 @@ final class UpdateOrganizationSettingsUseCase {
         defaultPositivacaoEligibleOrderStatuses,
     double? positivacaoMinOrderValue,
     String rankingVisibilityMode = defaultRankingVisibilityMode,
+    String? brandingLogoUrl,
+    String? brandingPrimaryColorHex,
   }) async {
     final trimmedId = id.trim();
     final trimmedUpdatedBy = updatedBy.trim();
@@ -70,6 +74,8 @@ final class UpdateOrganizationSettingsUseCase {
         positivacaoEligibleOrderStatuses: positivacaoEligibleOrderStatuses,
         positivacaoMinOrderValue: positivacaoMinOrderValue,
         rankingVisibilityMode: rankingVisibilityMode,
+        brandingLogoUrl: brandingLogoUrl,
+        brandingPrimaryColorHex: brandingPrimaryColorHex,
       );
     } on ValidationException catch (exception) {
       return AppFailure<Organization>(mapAppExceptionToFailure(exception));

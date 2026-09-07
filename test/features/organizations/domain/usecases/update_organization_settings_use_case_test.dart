@@ -198,6 +198,69 @@ void main() {
       ).called(1);
     });
 
+    test('passes a custom catalog branding config through to the repository '
+        '(TASK-179)', () async {
+      const settingsWithBranding = OrganizationSettings(
+        currency: 'USD',
+        country: 'US',
+        defaultLanguage: 'en-US',
+        brandingLogoUrl: 'https://cdn.example.com/logo.png',
+        brandingPrimaryColorHex: '#1F5364',
+      );
+      when(
+        () => repository.updateSettings(
+          id: any(named: 'id'),
+          settings: any(named: 'settings'),
+          updatedBy: any(named: 'updatedBy'),
+        ),
+      ).thenAnswer((_) async => AppSuccess<Organization>(updatedOrganization));
+
+      await useCase.call(
+        id: 'org-1',
+        currency: 'USD',
+        country: 'US',
+        defaultLanguage: 'en-US',
+        updatedBy: 'user-2',
+        brandingLogoUrl: 'https://cdn.example.com/logo.png',
+        brandingPrimaryColorHex: '#1F5364',
+      );
+
+      verify(
+        () => repository.updateSettings(
+          id: 'org-1',
+          settings: settingsWithBranding,
+          updatedBy: 'user-2',
+        ),
+      ).called(1);
+    });
+
+    test('returns a ValidationFailure without calling the repository for a '
+        'malformed branding color (TASK-179)', () async {
+      final result = await useCase.call(
+        id: 'org-1',
+        currency: 'USD',
+        country: 'US',
+        defaultLanguage: 'en-US',
+        updatedBy: 'user-2',
+        brandingPrimaryColorHex: 'not-a-color',
+      );
+
+      expect(result, isA<AppFailure<Organization>>());
+      final failure = (result as AppFailure<Organization>).failure;
+      expect(failure, isA<ValidationFailure>());
+      expect(
+        (failure as ValidationFailure).fieldErrors.keys,
+        contains('brandingPrimaryColorHex'),
+      );
+      verifyNever(
+        () => repository.updateSettings(
+          id: any(named: 'id'),
+          settings: any(named: 'settings'),
+          updatedBy: any(named: 'updatedBy'),
+        ),
+      );
+    });
+
     test('propagates a conflict failure from the repository', () async {
       when(
         () => repository.updateSettings(

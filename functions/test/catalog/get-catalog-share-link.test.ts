@@ -38,18 +38,30 @@ async function clearFirestore(): Promise<void> {
   await Promise.all(collections.map((collection) => db.recursiveDelete(collection)));
 }
 
-async function seedOrganization(organizationId: string, name: string): Promise<void> {
+async function seedOrganization(
+  organizationId: string,
+  name: string,
+  settingsOverrides: Record<string, unknown> = {},
+): Promise<void> {
   const now = Timestamp.now();
-  await db.collection('organizations').doc(organizationId).set({
-    name,
-    slug: organizationId,
-    settings: { currency: 'BRL', country: 'BR', defaultLanguage: 'pt-BR' },
-    status: 'active',
-    createdAt: now,
-    createdBy: 'seed',
-    updatedAt: now,
-    updatedBy: 'seed',
-  });
+  await db
+    .collection('organizations')
+    .doc(organizationId)
+    .set({
+      name,
+      slug: organizationId,
+      settings: {
+        currency: 'BRL',
+        country: 'BR',
+        defaultLanguage: 'pt-BR',
+        ...settingsOverrides,
+      },
+      status: 'active',
+      createdAt: now,
+      createdBy: 'seed',
+      updatedAt: now,
+      updatedBy: 'seed',
+    });
 }
 
 async function seedShare(
@@ -112,6 +124,55 @@ describe('getCatalogShareLink', () => {
     expect(result.organizationId).toBeUndefined();
     expect(result.createdBy).toBeUndefined();
     expect(result.tokenHash).toBeUndefined();
+    expect(result.brandingLogoUrl).toBeNull();
+    expect(result.brandingPrimaryColorHex).toBeNull();
+  });
+
+  it('reports the organization branding configured for the catalog (TASK-179)', async () => {
+    await seedOrganization('org-1', 'Grupo Fashion XPTO', {
+      brandingLogoUrl: 'https://cdn.example.com/logo.png',
+      brandingPrimaryColorHex: '#1F5364',
+    });
+    await seedShare('org-1', 'share-1', 'token-1');
+    const wrapped = testEnv.wrap(getCatalogShareLink);
+
+    const result = (await wrapped(
+      buildRequest({ token: 'token-1' }),
+    )) as GetCatalogShareLinkResponse;
+
+    expect(result.outcome).toBe('valid');
+    expect(result.brandingLogoUrl).toBe('https://cdn.example.com/logo.png');
+    expect(result.brandingPrimaryColorHex).toBe('#1F5364');
+  });
+
+  it('reports no branding when the organization never configured one', async () => {
+    await seedOrganization('org-1', 'Grupo Fashion XPTO');
+    await seedShare('org-1', 'share-1', 'token-1');
+    const wrapped = testEnv.wrap(getCatalogShareLink);
+
+    const result = (await wrapped(
+      buildRequest({ token: 'token-1' }),
+    )) as GetCatalogShareLinkResponse;
+
+    expect(result.brandingLogoUrl).toBeNull();
+    expect(result.brandingPrimaryColorHex).toBeNull();
+  });
+
+  it('never leaks branding for a revoked/expired/notFound share', async () => {
+    await seedOrganization('org-1', 'Grupo Fashion XPTO', {
+      brandingLogoUrl: 'https://cdn.example.com/logo.png',
+      brandingPrimaryColorHex: '#1F5364',
+    });
+    await seedShare('org-1', 'share-1', 'token-1', { status: 'revoked' });
+    const wrapped = testEnv.wrap(getCatalogShareLink);
+
+    const result = (await wrapped(
+      buildRequest({ token: 'token-1' }),
+    )) as GetCatalogShareLinkResponse;
+
+    expect(result.outcome).toBe('revoked');
+    expect(result.brandingLogoUrl).toBeNull();
+    expect(result.brandingPrimaryColorHex).toBeNull();
   });
 
   it('reports an unknown token as notFound, without leaking data', async () => {

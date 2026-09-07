@@ -67,6 +67,11 @@ final class AnalyticsEvents {
   static const String catalogShareCreated = 'catalog_share_created';
   static const String catalogShareOpened = 'catalog_share_opened';
 
+  /// Logged by the catalog branding admin screen (TASK-179, EPIC-25) whenever
+  /// an OWNER/ADMIN updates the organization's catalog white-label config
+  /// (`OrganizationSettings.brandingLogoUrl`/`brandingPrimaryColorHex`).
+  static const String catalogBrandingUpdated = 'catalog_branding_updated';
+
   /// Logged by `CreateTargetUseCase`/`UpdateTargetUseCase` (TASK-115,
   /// EPIC-15) whenever a meta comercial is created or edited.
   static const String targetCreated = 'target_created';
@@ -253,6 +258,7 @@ final class AnalyticsEvents {
     campaignProductClicked,
     catalogShareCreated,
     catalogShareOpened,
+    catalogBrandingUpdated,
     targetCreated,
     targetUpdated,
     targetDashboardViewed,

@@ -1,3 +1,4 @@
+import 'package:cached_network_image/cached_network_image.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
@@ -44,22 +45,37 @@ class _CatalogSharePublicView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      appBar: AppBar(title: const Text('Catálogo compartilhado')),
-      body: SafeArea(
-        child: BlocBuilder<CatalogSharePublicBloc, CatalogSharePublicState>(
-          builder: (context, state) {
-            return switch (state.status) {
-              CatalogSharePublicStatus.loading => const _LoadingView(),
-              CatalogSharePublicStatus.valid => _ValidView(state: state),
-              CatalogSharePublicStatus.unavailable => _UnavailableView(
-                state: state,
-              ),
-              CatalogSharePublicStatus.error => _ErrorView(state: state),
-            };
-          },
-        ),
-      ),
+    return BlocBuilder<CatalogSharePublicBloc, CatalogSharePublicState>(
+      builder: (context, state) {
+        // TASK-179 (catálogo white-label): the organization's own branding
+        // — resolved server-side, only ever populated for a valid preview
+        // (see `CatalogSharePreview`'s own doc) — is applied *on top of* the
+        // exact same `AppTheme` assembly the rest of the app uses
+        // (`AppBrandTheme.resolveTheme`), never a second widget tree per
+        // organization. A theme with no configured branding renders
+        // pixel-identical to the Design System default.
+        final brandTheme = AppBrandTheme.resolveTheme(
+          brightness: Theme.of(context).brightness,
+          primaryColorHex: state.preview?.brandingPrimaryColorHex,
+        );
+
+        return Theme(
+          data: brandTheme,
+          child: Scaffold(
+            appBar: AppBar(title: const Text('Catálogo compartilhado')),
+            body: SafeArea(
+              child: switch (state.status) {
+                CatalogSharePublicStatus.loading => const _LoadingView(),
+                CatalogSharePublicStatus.valid => _ValidView(state: state),
+                CatalogSharePublicStatus.unavailable => _UnavailableView(
+                  state: state,
+                ),
+                CatalogSharePublicStatus.error => _ErrorView(state: state),
+              },
+            ),
+          ),
+        );
+      },
     );
   }
 }
@@ -142,6 +158,10 @@ class _ValidView extends StatelessWidget {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         children: <Widget>[
+          if (preview.brandingLogoUrl != null) ...<Widget>[
+            _BrandLogo(logoUrl: preview.brandingLogoUrl!),
+            const SizedBox(height: AppSpacing.spacing12),
+          ],
           if (preview.organizationName != null) ...<Widget>[
             Text(
               preview.organizationName!,
@@ -172,6 +192,37 @@ class _ValidView extends StatelessWidget {
             onProductTap: (_) {},
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// The organization's catalog logo (TASK-179, `CatalogSharePreview
+/// .brandingLogoUrl`), reserved at a fixed height so the page never shifts
+/// layout while it loads. A broken/unreachable URL never shows a "broken
+/// image" glyph to the visitor — it just collapses back to the same empty,
+/// fixed-height box a not-yet-loaded logo already reserves, so nothing about
+/// a misconfigured logo ever looks like an app bug.
+class _BrandLogo extends StatelessWidget {
+  const _BrandLogo({required this.logoUrl});
+
+  final String logoUrl;
+
+  static const double _height = 56;
+
+  @override
+  Widget build(BuildContext context) {
+    return SizedBox(
+      height: _height,
+      child: Align(
+        alignment: Alignment.centerLeft,
+        child: CachedNetworkImage(
+          imageUrl: logoUrl,
+          height: _height,
+          fit: BoxFit.contain,
+          placeholder: (context, url) => const SizedBox.shrink(),
+          errorWidget: (context, url, error) => const SizedBox.shrink(),
+        ),
       ),
     );
   }

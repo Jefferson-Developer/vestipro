@@ -42,6 +42,8 @@ final class CatalogShareMapper {
       items: dto.items.map(itemToEntity).toList(growable: false),
       collectionName: dto.collectionName,
       expiresAt: dto.expiresAt,
+      brandingLogoUrl: dto.brandingLogoUrl,
+      brandingPrimaryColorHex: dto.brandingPrimaryColorHex,
     );
   }
 

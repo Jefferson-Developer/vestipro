@@ -964,6 +964,8 @@ import '../features/organizations/domain/usecases/update_organization_settings_u
 import '../features/organizations/domain/usecases/update_team_use_case.dart'
     as _i207;
 import '../features/organizations/organizations.dart' as _i265;
+import '../features/organizations/presentation/cubit/branding_settings_cubit.dart'
+    as _i267;
 import '../features/pricing/data/mappers/payment_term_local_mapper.dart'
     as _i162;
 import '../features/pricing/data/mappers/price_list_item_local_mapper.dart'
@@ -3952,6 +3954,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i68.EnsureSystemRolesUseCase>(
       () => _i68.EnsureSystemRolesUseCase(gh<_i440.RoleRepository>()),
+    );
+    gh.factory<_i267.BrandingSettingsCubit>(
+      () => _i267.BrandingSettingsCubit(
+        gh<_i966.GetOrganizationUseCase>(),
+        gh<_i270.UpdateOrganizationSettingsUseCase>(),
+        gh<_i202.AnalyticsService>(),
+      ),
     );
     gh.lazySingleton<_i22.ReportRepository>(
       () => _i593.ReportRepositoryImpl(gh<_i922.ReportRemoteDataSource>()),

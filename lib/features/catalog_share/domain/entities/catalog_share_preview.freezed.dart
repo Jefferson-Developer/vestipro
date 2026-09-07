@@ -14,7 +14,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CatalogSharePreview {
 
- CatalogShareOutcome get outcome; String? get organizationName; CatalogShareScope? get scope; List<CatalogShareItem> get items; String? get collectionName; DateTime? get expiresAt;
+ CatalogShareOutcome get outcome; String? get organizationName; CatalogShareScope? get scope; List<CatalogShareItem> get items; String? get collectionName; DateTime? get expiresAt; String? get brandingLogoUrl; String? get brandingPrimaryColorHex;
 /// Create a copy of CatalogSharePreview
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +25,16 @@ $CatalogSharePreviewCopyWith<CatalogSharePreview> get copyWith => _$CatalogShare
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CatalogSharePreview&&(identical(other.outcome, outcome) || other.outcome == outcome)&&(identical(other.organizationName, organizationName) || other.organizationName == organizationName)&&(identical(other.scope, scope) || other.scope == scope)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.collectionName, collectionName) || other.collectionName == collectionName)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CatalogSharePreview&&(identical(other.outcome, outcome) || other.outcome == outcome)&&(identical(other.organizationName, organizationName) || other.organizationName == organizationName)&&(identical(other.scope, scope) || other.scope == scope)&&const DeepCollectionEquality().equals(other.items, items)&&(identical(other.collectionName, collectionName) || other.collectionName == collectionName)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.brandingLogoUrl, brandingLogoUrl) || other.brandingLogoUrl == brandingLogoUrl)&&(identical(other.brandingPrimaryColorHex, brandingPrimaryColorHex) || other.brandingPrimaryColorHex == brandingPrimaryColorHex));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,outcome,organizationName,scope,const DeepCollectionEquality().hash(items),collectionName,expiresAt);
+int get hashCode => Object.hash(runtimeType,outcome,organizationName,scope,const DeepCollectionEquality().hash(items),collectionName,expiresAt,brandingLogoUrl,brandingPrimaryColorHex);
 
 @override
 String toString() {
-  return 'CatalogSharePreview(outcome: $outcome, organizationName: $organizationName, scope: $scope, items: $items, collectionName: $collectionName, expiresAt: $expiresAt)';
+  return 'CatalogSharePreview(outcome: $outcome, organizationName: $organizationName, scope: $scope, items: $items, collectionName: $collectionName, expiresAt: $expiresAt, brandingLogoUrl: $brandingLogoUrl, brandingPrimaryColorHex: $brandingPrimaryColorHex)';
 }
 
 
@@ -45,7 +45,7 @@ abstract mixin class $CatalogSharePreviewCopyWith<$Res>  {
   factory $CatalogSharePreviewCopyWith(CatalogSharePreview value, $Res Function(CatalogSharePreview) _then) = _$CatalogSharePreviewCopyWithImpl;
 @useResult
 $Res call({
- CatalogShareOutcome outcome, String? organizationName, CatalogShareScope? scope, List<CatalogShareItem> items, String? collectionName, DateTime? expiresAt
+ CatalogShareOutcome outcome, String? organizationName, CatalogShareScope? scope, List<CatalogShareItem> items, String? collectionName, DateTime? expiresAt, String? brandingLogoUrl, String? brandingPrimaryColorHex
 });
 
 
@@ -62,7 +62,7 @@ class _$CatalogSharePreviewCopyWithImpl<$Res>
 
 /// Create a copy of CatalogSharePreview
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? outcome = null,Object? organizationName = freezed,Object? scope = freezed,Object? items = null,Object? collectionName = freezed,Object? expiresAt = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? outcome = null,Object? organizationName = freezed,Object? scope = freezed,Object? items = null,Object? collectionName = freezed,Object? expiresAt = freezed,Object? brandingLogoUrl = freezed,Object? brandingPrimaryColorHex = freezed,}) {
   return _then(_self.copyWith(
 outcome: null == outcome ? _self.outcome : outcome // ignore: cast_nullable_to_non_nullable
 as CatalogShareOutcome,organizationName: freezed == organizationName ? _self.organizationName : organizationName // ignore: cast_nullable_to_non_nullable
@@ -70,7 +70,9 @@ as String?,scope: freezed == scope ? _self.scope : scope // ignore: cast_nullabl
 as CatalogShareScope?,items: null == items ? _self.items : items // ignore: cast_nullable_to_non_nullable
 as List<CatalogShareItem>,collectionName: freezed == collectionName ? _self.collectionName : collectionName // ignore: cast_nullable_to_non_nullable
 as String?,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,brandingLogoUrl: freezed == brandingLogoUrl ? _self.brandingLogoUrl : brandingLogoUrl // ignore: cast_nullable_to_non_nullable
+as String?,brandingPrimaryColorHex: freezed == brandingPrimaryColorHex ? _self.brandingPrimaryColorHex : brandingPrimaryColorHex // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -155,10 +157,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( CatalogShareOutcome outcome,  String? organizationName,  CatalogShareScope? scope,  List<CatalogShareItem> items,  String? collectionName,  DateTime? expiresAt)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( CatalogShareOutcome outcome,  String? organizationName,  CatalogShareScope? scope,  List<CatalogShareItem> items,  String? collectionName,  DateTime? expiresAt,  String? brandingLogoUrl,  String? brandingPrimaryColorHex)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CatalogSharePreview() when $default != null:
-return $default(_that.outcome,_that.organizationName,_that.scope,_that.items,_that.collectionName,_that.expiresAt);case _:
+return $default(_that.outcome,_that.organizationName,_that.scope,_that.items,_that.collectionName,_that.expiresAt,_that.brandingLogoUrl,_that.brandingPrimaryColorHex);case _:
   return orElse();
 
 }
@@ -176,10 +178,10 @@ return $default(_that.outcome,_that.organizationName,_that.scope,_that.items,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( CatalogShareOutcome outcome,  String? organizationName,  CatalogShareScope? scope,  List<CatalogShareItem> items,  String? collectionName,  DateTime? expiresAt)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( CatalogShareOutcome outcome,  String? organizationName,  CatalogShareScope? scope,  List<CatalogShareItem> items,  String? collectionName,  DateTime? expiresAt,  String? brandingLogoUrl,  String? brandingPrimaryColorHex)  $default,) {final _that = this;
 switch (_that) {
 case _CatalogSharePreview():
-return $default(_that.outcome,_that.organizationName,_that.scope,_that.items,_that.collectionName,_that.expiresAt);case _:
+return $default(_that.outcome,_that.organizationName,_that.scope,_that.items,_that.collectionName,_that.expiresAt,_that.brandingLogoUrl,_that.brandingPrimaryColorHex);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -196,10 +198,10 @@ return $default(_that.outcome,_that.organizationName,_that.scope,_that.items,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( CatalogShareOutcome outcome,  String? organizationName,  CatalogShareScope? scope,  List<CatalogShareItem> items,  String? collectionName,  DateTime? expiresAt)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( CatalogShareOutcome outcome,  String? organizationName,  CatalogShareScope? scope,  List<CatalogShareItem> items,  String? collectionName,  DateTime? expiresAt,  String? brandingLogoUrl,  String? brandingPrimaryColorHex)?  $default,) {final _that = this;
 switch (_that) {
 case _CatalogSharePreview() when $default != null:
-return $default(_that.outcome,_that.organizationName,_that.scope,_that.items,_that.collectionName,_that.expiresAt);case _:
+return $default(_that.outcome,_that.organizationName,_that.scope,_that.items,_that.collectionName,_that.expiresAt,_that.brandingLogoUrl,_that.brandingPrimaryColorHex);case _:
   return null;
 
 }
@@ -211,7 +213,7 @@ return $default(_that.outcome,_that.organizationName,_that.scope,_that.items,_th
 
 
 class _CatalogSharePreview implements CatalogSharePreview {
-  const _CatalogSharePreview({required this.outcome, this.organizationName, this.scope, final  List<CatalogShareItem> items = const <CatalogShareItem>[], this.collectionName, this.expiresAt}): _items = items;
+  const _CatalogSharePreview({required this.outcome, this.organizationName, this.scope, final  List<CatalogShareItem> items = const <CatalogShareItem>[], this.collectionName, this.expiresAt, this.brandingLogoUrl, this.brandingPrimaryColorHex}): _items = items;
   
 
 @override final  CatalogShareOutcome outcome;
@@ -226,6 +228,8 @@ class _CatalogSharePreview implements CatalogSharePreview {
 
 @override final  String? collectionName;
 @override final  DateTime? expiresAt;
+@override final  String? brandingLogoUrl;
+@override final  String? brandingPrimaryColorHex;
 
 /// Create a copy of CatalogSharePreview
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +241,16 @@ _$CatalogSharePreviewCopyWith<_CatalogSharePreview> get copyWith => __$CatalogSh
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CatalogSharePreview&&(identical(other.outcome, outcome) || other.outcome == outcome)&&(identical(other.organizationName, organizationName) || other.organizationName == organizationName)&&(identical(other.scope, scope) || other.scope == scope)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.collectionName, collectionName) || other.collectionName == collectionName)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CatalogSharePreview&&(identical(other.outcome, outcome) || other.outcome == outcome)&&(identical(other.organizationName, organizationName) || other.organizationName == organizationName)&&(identical(other.scope, scope) || other.scope == scope)&&const DeepCollectionEquality().equals(other._items, _items)&&(identical(other.collectionName, collectionName) || other.collectionName == collectionName)&&(identical(other.expiresAt, expiresAt) || other.expiresAt == expiresAt)&&(identical(other.brandingLogoUrl, brandingLogoUrl) || other.brandingLogoUrl == brandingLogoUrl)&&(identical(other.brandingPrimaryColorHex, brandingPrimaryColorHex) || other.brandingPrimaryColorHex == brandingPrimaryColorHex));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,outcome,organizationName,scope,const DeepCollectionEquality().hash(_items),collectionName,expiresAt);
+int get hashCode => Object.hash(runtimeType,outcome,organizationName,scope,const DeepCollectionEquality().hash(_items),collectionName,expiresAt,brandingLogoUrl,brandingPrimaryColorHex);
 
 @override
 String toString() {
-  return 'CatalogSharePreview(outcome: $outcome, organizationName: $organizationName, scope: $scope, items: $items, collectionName: $collectionName, expiresAt: $expiresAt)';
+  return 'CatalogSharePreview(outcome: $outcome, organizationName: $organizationName, scope: $scope, items: $items, collectionName: $collectionName, expiresAt: $expiresAt, brandingLogoUrl: $brandingLogoUrl, brandingPrimaryColorHex: $brandingPrimaryColorHex)';
 }
 
 
@@ -257,7 +261,7 @@ abstract mixin class _$CatalogSharePreviewCopyWith<$Res> implements $CatalogShar
   factory _$CatalogSharePreviewCopyWith(_CatalogSharePreview value, $Res Function(_CatalogSharePreview) _then) = __$CatalogSharePreviewCopyWithImpl;
 @override @useResult
 $Res call({
- CatalogShareOutcome outcome, String? organizationName, CatalogShareScope? scope, List<CatalogShareItem> items, String? collectionName, DateTime? expiresAt
+ CatalogShareOutcome outcome, String? organizationName, CatalogShareScope? scope, List<CatalogShareItem> items, String? collectionName, DateTime? expiresAt, String? brandingLogoUrl, String? brandingPrimaryColorHex
 });
 
 
@@ -274,7 +278,7 @@ class __$CatalogSharePreviewCopyWithImpl<$Res>
 
 /// Create a copy of CatalogSharePreview
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? outcome = null,Object? organizationName = freezed,Object? scope = freezed,Object? items = null,Object? collectionName = freezed,Object? expiresAt = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? outcome = null,Object? organizationName = freezed,Object? scope = freezed,Object? items = null,Object? collectionName = freezed,Object? expiresAt = freezed,Object? brandingLogoUrl = freezed,Object? brandingPrimaryColorHex = freezed,}) {
   return _then(_CatalogSharePreview(
 outcome: null == outcome ? _self.outcome : outcome // ignore: cast_nullable_to_non_nullable
 as CatalogShareOutcome,organizationName: freezed == organizationName ? _self.organizationName : organizationName // ignore: cast_nullable_to_non_nullable
@@ -282,7 +286,9 @@ as String?,scope: freezed == scope ? _self.scope : scope // ignore: cast_nullabl
 as CatalogShareScope?,items: null == items ? _self._items : items // ignore: cast_nullable_to_non_nullable
 as List<CatalogShareItem>,collectionName: freezed == collectionName ? _self.collectionName : collectionName // ignore: cast_nullable_to_non_nullable
 as String?,expiresAt: freezed == expiresAt ? _self.expiresAt : expiresAt // ignore: cast_nullable_to_non_nullable
-as DateTime?,
+as DateTime?,brandingLogoUrl: freezed == brandingLogoUrl ? _self.brandingLogoUrl : brandingLogoUrl // ignore: cast_nullable_to_non_nullable
+as String?,brandingPrimaryColorHex: freezed == brandingPrimaryColorHex ? _self.brandingPrimaryColorHex : brandingPrimaryColorHex // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
