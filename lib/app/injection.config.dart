@@ -1550,6 +1550,14 @@ import '../features/visit_routes/domain/usecases/reorder_visit_route_stops_use_c
     as _i514;
 import '../features/visit_routes/presentation/bloc/visit_route_bloc.dart'
     as _i999;
+import '../features/wallet_summary/data/repositories/cloud_functions_wallet_summary_repository.dart'
+    as _i204;
+import '../features/wallet_summary/domain/repositories/wallet_summary_repository.dart'
+    as _i542;
+import '../features/wallet_summary/domain/usecases/generate_wallet_summary_use_case.dart'
+    as _i910;
+import '../features/wallet_summary/presentation/cubit/wallet_summary_cubit.dart'
+    as _i86;
 import '../features/whatsapp_business/data/repositories/cloud_functions_whatsapp_repository.dart'
     as _i271;
 import '../features/whatsapp_business/domain/repositories/whatsapp_repository.dart'
@@ -3254,6 +3262,11 @@ extension GetItInjectableX on _i174.GetIt {
         generateCrmTaskReminders: gh<_i1058.GenerateCrmTaskRemindersUseCase>(),
       ),
     );
+    gh.lazySingleton<_i542.WalletSummaryRepository>(
+      () => _i204.CloudFunctionsWalletSummaryRepository(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.factory<_i609.GetActiveWarehousesUseCase>(
       () => _i609.GetActiveWarehousesUseCase(gh<_i62.WarehouseRepository>()),
     );
@@ -4663,6 +4676,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i910.GenerateWalletSummaryUseCase>(
+      () => _i910.GenerateWalletSummaryUseCase(
+        gh<_i542.WalletSummaryRepository>(),
+        gh<_i372.RepresentativeDashboardVisibilityService>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.lazySingleton<_i876.ReportExportRepository>(
       () => _i959.ReportExportRepositoryImpl(
         gh<_i77.CsvIsolateEncoder>(),
@@ -4873,6 +4893,9 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
         performanceMonitor: gh<_i707.PerformanceMonitor>(),
       ),
+    );
+    gh.factory<_i86.WalletSummaryCubit>(
+      () => _i86.WalletSummaryCubit(gh<_i910.GenerateWalletSummaryUseCase>()),
     );
     gh.factory<_i293.TargetDashboardCubit>(
       () => _i293.TargetDashboardCubit(

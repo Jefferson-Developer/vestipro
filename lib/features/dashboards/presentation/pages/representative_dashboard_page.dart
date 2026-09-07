@@ -5,6 +5,8 @@ import 'package:intl/intl.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../crm/domain/entities/crm_task.dart';
 import '../../../insights/domain/entities/insight.dart';
+import '../../../wallet_summary/presentation/cubit/wallet_summary_cubit.dart';
+import '../../../wallet_summary/presentation/widgets/wallet_summary_card.dart';
 import '../../domain/entities/executive_dashboard_metric.dart';
 import '../../domain/entities/representative_customer_highlight.dart';
 import '../../domain/entities/representative_dashboard_filters.dart';
@@ -20,6 +22,7 @@ class RepresentativeDashboardPage extends StatelessWidget {
     required this.requesterUserId,
     required this.initialFilters,
     required this.createBloc,
+    required this.createWalletSummaryCubit,
     required this.onOpenCrmActivity,
     required this.onOpenCustomer,
     required this.onOpenInsight,
@@ -29,21 +32,29 @@ class RepresentativeDashboardPage extends StatelessWidget {
   final String requesterUserId;
   final RepresentativeDashboardFilters initialFilters;
   final RepresentativeDashboardBloc Function() createBloc;
+  final WalletSummaryCubit Function() createWalletSummaryCubit;
   final ValueChanged<CrmTask> onOpenCrmActivity;
   final ValueChanged<String> onOpenCustomer;
   final ValueChanged<Insight> onOpenInsight;
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider<RepresentativeDashboardBloc>(
-      create: (_) => createBloc()
-        ..add(
-          RepresentativeDashboardStarted(
-            organizationId: organizationId,
-            requesterUserId: requesterUserId,
-            initialFilters: initialFilters,
-          ),
+    return MultiBlocProvider(
+      providers: <BlocProvider<dynamic>>[
+        BlocProvider<RepresentativeDashboardBloc>(
+          create: (_) => createBloc()
+            ..add(
+              RepresentativeDashboardStarted(
+                organizationId: organizationId,
+                requesterUserId: requesterUserId,
+                initialFilters: initialFilters,
+              ),
+            ),
         ),
+        BlocProvider<WalletSummaryCubit>(
+          create: (_) => createWalletSummaryCubit(),
+        ),
+      ],
       child: _RepresentativeDashboardView(
         onOpenCrmActivity: onOpenCrmActivity,
         onOpenCustomer: onOpenCustomer,
@@ -91,6 +102,10 @@ class _RepresentativeDashboardView extends StatelessWidget {
             ),
             RepresentativeDashboardStatus.ready => _DashboardBody(
               snapshot: state.snapshot!,
+              organizationId: state.organizationId,
+              companyId: state.filters.companyId,
+              sellerId: state.filters.sellerId,
+              requesterUserId: state.requesterUserId,
               onOpenCrmActivity: onOpenCrmActivity,
               onOpenCustomer: onOpenCustomer,
               onOpenInsight: onOpenInsight,
@@ -105,12 +120,20 @@ class _RepresentativeDashboardView extends StatelessWidget {
 class _DashboardBody extends StatelessWidget {
   const _DashboardBody({
     required this.snapshot,
+    required this.organizationId,
+    required this.companyId,
+    required this.sellerId,
+    required this.requesterUserId,
     required this.onOpenCrmActivity,
     required this.onOpenCustomer,
     required this.onOpenInsight,
   });
 
   final RepresentativeDashboardSnapshot snapshot;
+  final String organizationId;
+  final String companyId;
+  final String sellerId;
+  final String requesterUserId;
   final ValueChanged<CrmTask> onOpenCrmActivity;
   final ValueChanged<String> onOpenCustomer;
   final ValueChanged<Insight> onOpenInsight;
@@ -163,6 +186,13 @@ class _DashboardBody extends StatelessWidget {
                   ],
                 );
               },
+            ),
+            const SizedBox(height: AppSpacing.spacing24),
+            WalletSummaryCard(
+              organizationId: organizationId,
+              companyId: companyId,
+              requesterUserId: requesterUserId,
+              sellerId: sellerId,
             ),
             const SizedBox(height: AppSpacing.spacing24),
             Text('Ações de agora', style: AppTypography.titleLarge),

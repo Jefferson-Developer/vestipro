@@ -7,11 +7,31 @@ import 'package:vestipro/core/design_system/design_system.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/crm/crm.dart';
 import 'package:vestipro/features/dashboards/dashboards.dart';
+import 'package:vestipro/features/organizations/organizations.dart';
+import 'package:vestipro/features/wallet_summary/wallet_summary.dart';
 
 import '../../../../core/design_system/components/test_pump_app.dart';
 
 class _LoadDashboard extends Mock
     implements LoadRepresentativeDashboardUseCase {}
+
+class _MockMembershipRepository extends Mock implements MembershipRepository {}
+
+class _MockTeamRepository extends Mock implements TeamRepository {}
+
+/// Never actually invoked by any test in this file (none of them tap the
+/// "Gerar resumo" button) — only exists so `RepresentativeDashboardPage`'s
+/// required `createWalletSummaryCubit` has something real to construct.
+class _UncalledWalletSummaryRepository implements WalletSummaryRepository {
+  @override
+  Future<AppResult<WalletSummary>> generate({
+    required String organizationId,
+    required String companyId,
+    required String sellerId,
+  }) => throw UnimplementedError(
+    'WalletSummaryRepository.generate should never be called in these tests.',
+  );
+}
 
 void main() {
   late _LoadDashboard loadDashboard;
@@ -76,6 +96,16 @@ void main() {
       initialFilters: filters,
       createBloc: () =>
           RepresentativeDashboardBloc(loadDashboard, FakeAnalyticsService()),
+      createWalletSummaryCubit: () => WalletSummaryCubit(
+        GenerateWalletSummaryUseCase(
+          _UncalledWalletSummaryRepository(),
+          RepresentativeDashboardVisibilityService(
+            _MockMembershipRepository(),
+            _MockTeamRepository(),
+          ),
+          FakeAnalyticsService(),
+        ),
+      ),
       onOpenCrmActivity: onOpenCrmActivity,
       onOpenCustomer: (_) {},
       onOpenInsight: (_) {},

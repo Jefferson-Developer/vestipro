@@ -93,6 +93,8 @@ void main() {
           'replenishment_suggestions_viewed',
           'replenishment_suggestion_decided',
           'demand_forecast_viewed',
+          'wallet_summary_generated',
+          'wallet_summary_generation_failed',
         ]),
       );
 

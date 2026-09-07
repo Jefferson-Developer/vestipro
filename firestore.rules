@@ -1186,6 +1186,25 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/walletSummaries/{summaryId}
+      // (TASK-186, EPIC-28 — IA generativa: resumo de carteira)
+      // -------------------------------------------------------------------
+      //
+      // The LLM-generated wallet summary cache is exclusively written by
+      // `generateWalletSummary` (Admin SDK, bypasses these Rules) — a client
+      // never reads this collection directly; the only way to obtain a
+      // summary (fresh or cached) is that callable's own response, which
+      // already re-checks RBAC (self, OWNER/ADMIN, or SALES_MANAGER sharing
+      // a team with the seller) on every call before returning anything.
+      // Deny-all here is not just the implicit default: it also guarantees a
+      // stale/incomplete cache document (e.g. an `error` status entry with
+      // no `summaryText`) can never be read out-of-band and mistaken for a
+      // real result.
+      match /walletSummaries/{summaryId} {
+        allow read, write: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/webhooks/{webhookId}
       // organizations/{organizationId}/webhookSecrets/{webhookId}
       // organizations/{organizationId}/webhookDeliveries/{deliveryId}

@@ -109,6 +109,7 @@ export {
   sendWhatsAppMessage,
   handleWhatsAppStatus,
 } from './whatsapp';
+export { generateWalletSummary } from './wallet_summary';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

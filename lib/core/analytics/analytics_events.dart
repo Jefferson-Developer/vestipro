@@ -232,6 +232,21 @@ final class AnalyticsEvents {
   /// as parameters.
   static const String demandForecastViewed = 'demand_forecast_viewed';
 
+  /// Logged by `WalletSummaryCubit` (TASK-186, EPIC-28) whenever a
+  /// `generateWalletSummary` call successfully returns a summary (fresh or
+  /// from cache) — `from_cache` and `seller_id` are carried as parameters.
+  /// Never logged for a failed/rejected generation (see
+  /// `walletSummaryGenerationFailed`), and the summary text itself is never
+  /// carried as a parameter (same "no free-text/PII in analytics" rule every
+  /// other event in this catalog already follows).
+  static const String walletSummaryGenerated = 'wallet_summary_generated';
+
+  /// Logged by `WalletSummaryCubit` (TASK-186, EPIC-28) whenever a
+  /// `generateWalletSummary` call fails (provider unavailable, validation
+  /// rejected, rate-limited) — `failure_code` is carried as a parameter.
+  static const String walletSummaryGenerationFailed =
+      'wallet_summary_generation_failed';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -322,5 +337,7 @@ final class AnalyticsEvents {
     replenishmentSuggestionsViewed,
     replenishmentSuggestionDecided,
     demandForecastViewed,
+    walletSummaryGenerated,
+    walletSummaryGenerationFailed,
   ];
 }
