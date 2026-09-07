@@ -341,7 +341,7 @@ Não realizado nesta rodada — push não autorizado.
 
 ## Hash do commit
 
-(preenchido após commit)
+`8c6d3741adad26758b20d45d4ddeb6e6e4eed4d3`
 
 ## Branch
 
