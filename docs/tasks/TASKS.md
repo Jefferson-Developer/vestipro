@@ -315,7 +315,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-175 — Implementar suporte a multi-moeda](TASK-175-implementar-suporte-multi-moeda.md) — Flutter Senior
 
 ### EPIC-24 — Geolocalização e Roteirização
-- [ ] [TASK-176 — Implementar mapa de clientes](TASK-176-implementar-mapa-de-clientes.md) — Flutter Senior + Front-end
+- [x] [TASK-176 — Implementar mapa de clientes](TASK-176-implementar-mapa-de-clientes.md) — Flutter Senior + Front-end
 - [ ] [TASK-177 — Implementar roteirização de visitas](TASK-177-implementar-roteirizacao-de-visitas.md) — Flutter Senior + Front-end
 - [ ] [TASK-178 — Implementar check-in de visita](TASK-178-implementar-check-in-de-visita.md) — Flutter Senior + Front-end
 
@@ -379,6 +379,6 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 174 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
+**Progresso:** 175 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
 [`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md)
 — e não conta mais no total).

@@ -9,3 +9,15 @@ export {
 export { startCustomerImportJob } from './start-customer-import-job';
 export { processCustomerImportJob } from './process-customer-import-job';
 export { resolveCustomerImportDuplicateRow } from './resolve-customer-import-duplicate-row';
+export {
+  buildGeocodableAddressQuery,
+  geocodeAddress,
+} from './geocoding-service';
+export {
+  GEOCODE_BACKFILL_SCHEDULE_DESCRIPTION,
+  buildGoogleGeocodeFetcher,
+  geocodeCustomerAddresses,
+  geocodeCustomerAddressesForAllOrganizations,
+  geocodeCustomerAddressesForOrganization,
+  googleMapsGeocodingApiKey,
+} from './geocode-customer-addresses';

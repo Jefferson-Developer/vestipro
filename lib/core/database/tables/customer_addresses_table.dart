@@ -32,6 +32,16 @@ class CustomerAddressesTable extends Table {
   BoolColumn get isPrimary => boolean().withDefault(const Constant(false))();
   IntColumn get position => integer().withDefault(const Constant(0))();
 
+  // TASK-176: geocoded pin location for the customer map. `latitude`/
+  // `longitude` are only meaningful when `geocodingStatusCode == 'geocoded'`;
+  // an address created before this feature existed reads back as 'pending'
+  // (eligible for the backfill job), never as a silent failure.
+  RealColumn get latitude => real().nullable()();
+  RealColumn get longitude => real().nullable()();
+  TextColumn get geocodingStatusCode =>
+      text().withDefault(const Constant('pending'))();
+  DateTimeColumn get geocodedAt => dateTime().nullable()();
+
   @override
   Set<Column<Object>> get primaryKey => {id};
 }

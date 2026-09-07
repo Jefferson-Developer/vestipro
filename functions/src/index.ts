@@ -18,6 +18,7 @@ export {
   startCustomerImportJob,
   processCustomerImportJob,
   resolveCustomerImportDuplicateRow,
+  geocodeCustomerAddresses,
 } from './customers';
 export { startProductImportJob, processProductImportJob } from './products';
 export { createCatalogShareLink } from './catalog/create-catalog-share-link';

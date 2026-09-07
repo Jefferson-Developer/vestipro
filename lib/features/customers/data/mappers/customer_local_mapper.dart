@@ -13,6 +13,8 @@ import '../../domain/value_objects/cep.dart';
 import '../../domain/value_objects/cnpj_cpf.dart';
 import '../../domain/value_objects/customer_address_type.dart';
 import '../../domain/value_objects/customer_contact_type.dart';
+import '../../domain/value_objects/customer_geocoding_status.dart';
+import '../../domain/value_objects/geo_coordinates.dart';
 import 'customer_mapper.dart';
 
 /// Maps `Customer` (and its embedded addresses/contacts) to/from the Drift
@@ -118,6 +120,10 @@ final class CustomerLocalMapper {
       country: address.country,
       isPrimary: Value(address.isPrimary),
       position: Value(position),
+      latitude: Value(address.coordinates?.latitude),
+      longitude: Value(address.coordinates?.longitude),
+      geocodingStatusCode: Value(address.geocodingStatus.code),
+      geocodedAt: Value(address.geocodedAt?.toUtc()),
     );
   }
 
@@ -196,6 +202,8 @@ final class CustomerLocalMapper {
     final type =
         customerAddressTypeFromCode(row.typeCode, label: row.typeLabel) ??
         CustomerAddressType.custom(row.typeCode, label: row.typeLabel);
+    final latitude = row.latitude;
+    final longitude = row.longitude;
     return CustomerAddress(
       id: row.id,
       type: type,
@@ -208,6 +216,11 @@ final class CustomerLocalMapper {
       zipCode: Cep.parse(row.zipCode),
       country: row.country,
       isPrimary: row.isPrimary,
+      coordinates: latitude == null || longitude == null
+          ? null
+          : GeoCoordinates.validated(latitude: latitude, longitude: longitude),
+      geocodingStatus: customerGeocodingStatusFromCode(row.geocodingStatusCode),
+      geocodedAt: row.geocodedAt?.toUtc(),
     );
   }
 

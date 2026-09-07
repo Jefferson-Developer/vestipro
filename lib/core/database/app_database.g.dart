@@ -2083,6 +2083,51 @@ class $CustomerAddressesTableTable extends CustomerAddressesTable
     requiredDuringInsert: false,
     defaultValue: const Constant(0),
   );
+  static const VerificationMeta _latitudeMeta = const VerificationMeta(
+    'latitude',
+  );
+  @override
+  late final GeneratedColumn<double> latitude = GeneratedColumn<double>(
+    'latitude',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _longitudeMeta = const VerificationMeta(
+    'longitude',
+  );
+  @override
+  late final GeneratedColumn<double> longitude = GeneratedColumn<double>(
+    'longitude',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _geocodingStatusCodeMeta =
+      const VerificationMeta('geocodingStatusCode');
+  @override
+  late final GeneratedColumn<String> geocodingStatusCode =
+      GeneratedColumn<String>(
+        'geocoding_status_code',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('pending'),
+      );
+  static const VerificationMeta _geocodedAtMeta = const VerificationMeta(
+    'geocodedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> geocodedAt = GeneratedColumn<DateTime>(
+    'geocoded_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
   @override
   List<GeneratedColumn> get $columns => [
     id,
@@ -2101,6 +2146,10 @@ class $CustomerAddressesTableTable extends CustomerAddressesTable
     country,
     isPrimary,
     position,
+    latitude,
+    longitude,
+    geocodingStatusCode,
+    geocodedAt,
   ];
   @override
   String get aliasedName => _alias ?? actualTableName;
@@ -2232,6 +2281,33 @@ class $CustomerAddressesTableTable extends CustomerAddressesTable
         position.isAcceptableOrUnknown(data['position']!, _positionMeta),
       );
     }
+    if (data.containsKey('latitude')) {
+      context.handle(
+        _latitudeMeta,
+        latitude.isAcceptableOrUnknown(data['latitude']!, _latitudeMeta),
+      );
+    }
+    if (data.containsKey('longitude')) {
+      context.handle(
+        _longitudeMeta,
+        longitude.isAcceptableOrUnknown(data['longitude']!, _longitudeMeta),
+      );
+    }
+    if (data.containsKey('geocoding_status_code')) {
+      context.handle(
+        _geocodingStatusCodeMeta,
+        geocodingStatusCode.isAcceptableOrUnknown(
+          data['geocoding_status_code']!,
+          _geocodingStatusCodeMeta,
+        ),
+      );
+    }
+    if (data.containsKey('geocoded_at')) {
+      context.handle(
+        _geocodedAtMeta,
+        geocodedAt.isAcceptableOrUnknown(data['geocoded_at']!, _geocodedAtMeta),
+      );
+    }
     return context;
   }
 
@@ -2308,6 +2384,22 @@ class $CustomerAddressesTableTable extends CustomerAddressesTable
         DriftSqlType.int,
         data['${effectivePrefix}position'],
       )!,
+      latitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}latitude'],
+      ),
+      longitude: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}longitude'],
+      ),
+      geocodingStatusCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}geocoding_status_code'],
+      )!,
+      geocodedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}geocoded_at'],
+      ),
     );
   }
 
@@ -2335,6 +2427,10 @@ class CustomerAddressesTableData extends DataClass
   final String country;
   final bool isPrimary;
   final int position;
+  final double? latitude;
+  final double? longitude;
+  final String geocodingStatusCode;
+  final DateTime? geocodedAt;
   const CustomerAddressesTableData({
     required this.id,
     required this.customerId,
@@ -2352,6 +2448,10 @@ class CustomerAddressesTableData extends DataClass
     required this.country,
     required this.isPrimary,
     required this.position,
+    this.latitude,
+    this.longitude,
+    required this.geocodingStatusCode,
+    this.geocodedAt,
   });
   @override
   Map<String, Expression> toColumns(bool nullToAbsent) {
@@ -2378,6 +2478,16 @@ class CustomerAddressesTableData extends DataClass
     map['country'] = Variable<String>(country);
     map['is_primary'] = Variable<bool>(isPrimary);
     map['position'] = Variable<int>(position);
+    if (!nullToAbsent || latitude != null) {
+      map['latitude'] = Variable<double>(latitude);
+    }
+    if (!nullToAbsent || longitude != null) {
+      map['longitude'] = Variable<double>(longitude);
+    }
+    map['geocoding_status_code'] = Variable<String>(geocodingStatusCode);
+    if (!nullToAbsent || geocodedAt != null) {
+      map['geocoded_at'] = Variable<DateTime>(geocodedAt);
+    }
     return map;
   }
 
@@ -2405,6 +2515,16 @@ class CustomerAddressesTableData extends DataClass
       country: Value(country),
       isPrimary: Value(isPrimary),
       position: Value(position),
+      latitude: latitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(latitude),
+      longitude: longitude == null && nullToAbsent
+          ? const Value.absent()
+          : Value(longitude),
+      geocodingStatusCode: Value(geocodingStatusCode),
+      geocodedAt: geocodedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(geocodedAt),
     );
   }
 
@@ -2430,6 +2550,12 @@ class CustomerAddressesTableData extends DataClass
       country: serializer.fromJson<String>(json['country']),
       isPrimary: serializer.fromJson<bool>(json['isPrimary']),
       position: serializer.fromJson<int>(json['position']),
+      latitude: serializer.fromJson<double?>(json['latitude']),
+      longitude: serializer.fromJson<double?>(json['longitude']),
+      geocodingStatusCode: serializer.fromJson<String>(
+        json['geocodingStatusCode'],
+      ),
+      geocodedAt: serializer.fromJson<DateTime?>(json['geocodedAt']),
     );
   }
   @override
@@ -2452,6 +2578,10 @@ class CustomerAddressesTableData extends DataClass
       'country': serializer.toJson<String>(country),
       'isPrimary': serializer.toJson<bool>(isPrimary),
       'position': serializer.toJson<int>(position),
+      'latitude': serializer.toJson<double?>(latitude),
+      'longitude': serializer.toJson<double?>(longitude),
+      'geocodingStatusCode': serializer.toJson<String>(geocodingStatusCode),
+      'geocodedAt': serializer.toJson<DateTime?>(geocodedAt),
     };
   }
 
@@ -2472,6 +2602,10 @@ class CustomerAddressesTableData extends DataClass
     String? country,
     bool? isPrimary,
     int? position,
+    Value<double?> latitude = const Value.absent(),
+    Value<double?> longitude = const Value.absent(),
+    String? geocodingStatusCode,
+    Value<DateTime?> geocodedAt = const Value.absent(),
   }) => CustomerAddressesTableData(
     id: id ?? this.id,
     customerId: customerId ?? this.customerId,
@@ -2489,6 +2623,10 @@ class CustomerAddressesTableData extends DataClass
     country: country ?? this.country,
     isPrimary: isPrimary ?? this.isPrimary,
     position: position ?? this.position,
+    latitude: latitude.present ? latitude.value : this.latitude,
+    longitude: longitude.present ? longitude.value : this.longitude,
+    geocodingStatusCode: geocodingStatusCode ?? this.geocodingStatusCode,
+    geocodedAt: geocodedAt.present ? geocodedAt.value : this.geocodedAt,
   );
   CustomerAddressesTableData copyWithCompanion(
     CustomerAddressesTableCompanion data,
@@ -2516,6 +2654,14 @@ class CustomerAddressesTableData extends DataClass
       country: data.country.present ? data.country.value : this.country,
       isPrimary: data.isPrimary.present ? data.isPrimary.value : this.isPrimary,
       position: data.position.present ? data.position.value : this.position,
+      latitude: data.latitude.present ? data.latitude.value : this.latitude,
+      longitude: data.longitude.present ? data.longitude.value : this.longitude,
+      geocodingStatusCode: data.geocodingStatusCode.present
+          ? data.geocodingStatusCode.value
+          : this.geocodingStatusCode,
+      geocodedAt: data.geocodedAt.present
+          ? data.geocodedAt.value
+          : this.geocodedAt,
     );
   }
 
@@ -2537,7 +2683,11 @@ class CustomerAddressesTableData extends DataClass
           ..write('zipCode: $zipCode, ')
           ..write('country: $country, ')
           ..write('isPrimary: $isPrimary, ')
-          ..write('position: $position')
+          ..write('position: $position, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('geocodingStatusCode: $geocodingStatusCode, ')
+          ..write('geocodedAt: $geocodedAt')
           ..write(')'))
         .toString();
   }
@@ -2560,6 +2710,10 @@ class CustomerAddressesTableData extends DataClass
     country,
     isPrimary,
     position,
+    latitude,
+    longitude,
+    geocodingStatusCode,
+    geocodedAt,
   );
   @override
   bool operator ==(Object other) =>
@@ -2580,7 +2734,11 @@ class CustomerAddressesTableData extends DataClass
           other.zipCode == this.zipCode &&
           other.country == this.country &&
           other.isPrimary == this.isPrimary &&
-          other.position == this.position);
+          other.position == this.position &&
+          other.latitude == this.latitude &&
+          other.longitude == this.longitude &&
+          other.geocodingStatusCode == this.geocodingStatusCode &&
+          other.geocodedAt == this.geocodedAt);
 }
 
 class CustomerAddressesTableCompanion
@@ -2601,6 +2759,10 @@ class CustomerAddressesTableCompanion
   final Value<String> country;
   final Value<bool> isPrimary;
   final Value<int> position;
+  final Value<double?> latitude;
+  final Value<double?> longitude;
+  final Value<String> geocodingStatusCode;
+  final Value<DateTime?> geocodedAt;
   final Value<int> rowid;
   const CustomerAddressesTableCompanion({
     this.id = const Value.absent(),
@@ -2619,6 +2781,10 @@ class CustomerAddressesTableCompanion
     this.country = const Value.absent(),
     this.isPrimary = const Value.absent(),
     this.position = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.geocodingStatusCode = const Value.absent(),
+    this.geocodedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   });
   CustomerAddressesTableCompanion.insert({
@@ -2638,6 +2804,10 @@ class CustomerAddressesTableCompanion
     required String country,
     this.isPrimary = const Value.absent(),
     this.position = const Value.absent(),
+    this.latitude = const Value.absent(),
+    this.longitude = const Value.absent(),
+    this.geocodingStatusCode = const Value.absent(),
+    this.geocodedAt = const Value.absent(),
     this.rowid = const Value.absent(),
   }) : id = Value(id),
        customerId = Value(customerId),
@@ -2667,6 +2837,10 @@ class CustomerAddressesTableCompanion
     Expression<String>? country,
     Expression<bool>? isPrimary,
     Expression<int>? position,
+    Expression<double>? latitude,
+    Expression<double>? longitude,
+    Expression<String>? geocodingStatusCode,
+    Expression<DateTime>? geocodedAt,
     Expression<int>? rowid,
   }) {
     return RawValuesInsertable({
@@ -2686,6 +2860,11 @@ class CustomerAddressesTableCompanion
       if (country != null) 'country': country,
       if (isPrimary != null) 'is_primary': isPrimary,
       if (position != null) 'position': position,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      if (geocodingStatusCode != null)
+        'geocoding_status_code': geocodingStatusCode,
+      if (geocodedAt != null) 'geocoded_at': geocodedAt,
       if (rowid != null) 'rowid': rowid,
     });
   }
@@ -2707,6 +2886,10 @@ class CustomerAddressesTableCompanion
     Value<String>? country,
     Value<bool>? isPrimary,
     Value<int>? position,
+    Value<double?>? latitude,
+    Value<double?>? longitude,
+    Value<String>? geocodingStatusCode,
+    Value<DateTime?>? geocodedAt,
     Value<int>? rowid,
   }) {
     return CustomerAddressesTableCompanion(
@@ -2726,6 +2909,10 @@ class CustomerAddressesTableCompanion
       country: country ?? this.country,
       isPrimary: isPrimary ?? this.isPrimary,
       position: position ?? this.position,
+      latitude: latitude ?? this.latitude,
+      longitude: longitude ?? this.longitude,
+      geocodingStatusCode: geocodingStatusCode ?? this.geocodingStatusCode,
+      geocodedAt: geocodedAt ?? this.geocodedAt,
       rowid: rowid ?? this.rowid,
     );
   }
@@ -2781,6 +2968,20 @@ class CustomerAddressesTableCompanion
     if (position.present) {
       map['position'] = Variable<int>(position.value);
     }
+    if (latitude.present) {
+      map['latitude'] = Variable<double>(latitude.value);
+    }
+    if (longitude.present) {
+      map['longitude'] = Variable<double>(longitude.value);
+    }
+    if (geocodingStatusCode.present) {
+      map['geocoding_status_code'] = Variable<String>(
+        geocodingStatusCode.value,
+      );
+    }
+    if (geocodedAt.present) {
+      map['geocoded_at'] = Variable<DateTime>(geocodedAt.value);
+    }
     if (rowid.present) {
       map['rowid'] = Variable<int>(rowid.value);
     }
@@ -2806,6 +3007,10 @@ class CustomerAddressesTableCompanion
           ..write('country: $country, ')
           ..write('isPrimary: $isPrimary, ')
           ..write('position: $position, ')
+          ..write('latitude: $latitude, ')
+          ..write('longitude: $longitude, ')
+          ..write('geocodingStatusCode: $geocodingStatusCode, ')
+          ..write('geocodedAt: $geocodedAt, ')
           ..write('rowid: $rowid')
           ..write(')'))
         .toString();
@@ -25445,6 +25650,10 @@ typedef $$CustomerAddressesTableTableCreateCompanionBuilder =
       required String country,
       Value<bool> isPrimary,
       Value<int> position,
+      Value<double?> latitude,
+      Value<double?> longitude,
+      Value<String> geocodingStatusCode,
+      Value<DateTime?> geocodedAt,
       Value<int> rowid,
     });
 typedef $$CustomerAddressesTableTableUpdateCompanionBuilder =
@@ -25465,6 +25674,10 @@ typedef $$CustomerAddressesTableTableUpdateCompanionBuilder =
       Value<String> country,
       Value<bool> isPrimary,
       Value<int> position,
+      Value<double?> latitude,
+      Value<double?> longitude,
+      Value<String> geocodingStatusCode,
+      Value<DateTime?> geocodedAt,
       Value<int> rowid,
     });
 
@@ -25584,6 +25797,26 @@ class $$CustomerAddressesTableTableFilterComposer
     builder: (column) => ColumnFilters(column),
   );
 
+  ColumnFilters<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get geocodingStatusCode => $composableBuilder(
+    column: $table.geocodingStatusCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get geocodedAt => $composableBuilder(
+    column: $table.geocodedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
   $$CustomersTableTableFilterComposer get customerId {
     final $$CustomersTableTableFilterComposer composer = $composerBuilder(
       composer: this,
@@ -25692,6 +25925,26 @@ class $$CustomerAddressesTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<double> get latitude => $composableBuilder(
+    column: $table.latitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get longitude => $composableBuilder(
+    column: $table.longitude,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get geocodingStatusCode => $composableBuilder(
+    column: $table.geocodingStatusCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get geocodedAt => $composableBuilder(
+    column: $table.geocodedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   $$CustomersTableTableOrderingComposer get customerId {
     final $$CustomersTableTableOrderingComposer composer = $composerBuilder(
       composer: this,
@@ -25774,6 +26027,22 @@ class $$CustomerAddressesTableTableAnnotationComposer
   GeneratedColumn<int> get position =>
       $composableBuilder(column: $table.position, builder: (column) => column);
 
+  GeneratedColumn<double> get latitude =>
+      $composableBuilder(column: $table.latitude, builder: (column) => column);
+
+  GeneratedColumn<double> get longitude =>
+      $composableBuilder(column: $table.longitude, builder: (column) => column);
+
+  GeneratedColumn<String> get geocodingStatusCode => $composableBuilder(
+    column: $table.geocodingStatusCode,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get geocodedAt => $composableBuilder(
+    column: $table.geocodedAt,
+    builder: (column) => column,
+  );
+
   $$CustomersTableTableAnnotationComposer get customerId {
     final $$CustomersTableTableAnnotationComposer composer = $composerBuilder(
       composer: this,
@@ -25853,6 +26122,10 @@ class $$CustomerAddressesTableTableTableManager
                 Value<String> country = const Value.absent(),
                 Value<bool> isPrimary = const Value.absent(),
                 Value<int> position = const Value.absent(),
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
+                Value<String> geocodingStatusCode = const Value.absent(),
+                Value<DateTime?> geocodedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CustomerAddressesTableCompanion(
                 id: id,
@@ -25871,6 +26144,10 @@ class $$CustomerAddressesTableTableTableManager
                 country: country,
                 isPrimary: isPrimary,
                 position: position,
+                latitude: latitude,
+                longitude: longitude,
+                geocodingStatusCode: geocodingStatusCode,
+                geocodedAt: geocodedAt,
                 rowid: rowid,
               ),
           createCompanionCallback:
@@ -25891,6 +26168,10 @@ class $$CustomerAddressesTableTableTableManager
                 required String country,
                 Value<bool> isPrimary = const Value.absent(),
                 Value<int> position = const Value.absent(),
+                Value<double?> latitude = const Value.absent(),
+                Value<double?> longitude = const Value.absent(),
+                Value<String> geocodingStatusCode = const Value.absent(),
+                Value<DateTime?> geocodedAt = const Value.absent(),
                 Value<int> rowid = const Value.absent(),
               }) => CustomerAddressesTableCompanion.insert(
                 id: id,
@@ -25909,6 +26190,10 @@ class $$CustomerAddressesTableTableTableManager
                 country: country,
                 isPrimary: isPrimary,
                 position: position,
+                latitude: latitude,
+                longitude: longitude,
+                geocodingStatusCode: geocodingStatusCode,
+                geocodedAt: geocodedAt,
                 rowid: rowid,
               ),
           withReferenceMapper: (p0) => p0

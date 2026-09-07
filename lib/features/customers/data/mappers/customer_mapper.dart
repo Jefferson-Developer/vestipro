@@ -13,8 +13,10 @@ import '../../domain/value_objects/customer_contact_type.dart';
 import '../../domain/value_objects/customer_health_score_band.dart';
 import '../../domain/value_objects/customer_score_data_coverage.dart';
 import '../../domain/value_objects/customer_status.dart';
+import '../../domain/value_objects/customer_geocoding_status.dart';
 import '../../domain/value_objects/customer_sync_status.dart';
 import '../../domain/value_objects/customer_type.dart';
+import '../../domain/value_objects/geo_coordinates.dart';
 import '../dtos/customer_dto.dart';
 
 @lazySingleton
@@ -235,6 +237,8 @@ final class CustomerMapper {
     final type =
         customerAddressTypeFromCode(dto.typeCode, label: dto.typeLabel) ??
         CustomerAddressType.custom(dto.typeCode, label: dto.typeLabel);
+    final latitude = dto.latitude;
+    final longitude = dto.longitude;
     return CustomerAddress(
       id: dto.id,
       type: type,
@@ -247,6 +251,11 @@ final class CustomerMapper {
       zipCode: Cep.parse(dto.zipCode),
       country: dto.country,
       isPrimary: dto.isPrimary,
+      coordinates: latitude == null || longitude == null
+          ? null
+          : GeoCoordinates.validated(latitude: latitude, longitude: longitude),
+      geocodingStatus: customerGeocodingStatusFromCode(dto.geocodingStatusCode),
+      geocodedAt: dto.geocodedAt,
     );
   }
 
@@ -264,6 +273,10 @@ final class CustomerMapper {
       zipCode: address.zipCode.digits,
       country: address.country,
       isPrimary: address.isPrimary,
+      latitude: address.coordinates?.latitude,
+      longitude: address.coordinates?.longitude,
+      geocodingStatusCode: address.geocodingStatus.code,
+      geocodedAt: address.geocodedAt,
     );
   }
 

@@ -146,6 +146,16 @@ Customer _fullCustomer() {
         city: 'Blumenau',
         state: 'SC',
         zipCode: Cep.parse('89010-200'),
+        // TASK-176: exercises the local mapper's `latitude`/`longitude`/
+        // `geocodingStatusCode`/`geocodedAt` columns end to end, not just
+        // the remote DTO's JSON shape already covered by
+        // `customer_mapper_test.dart`.
+        coordinates: GeoCoordinates.validated(
+          latitude: -26.9194,
+          longitude: -49.0661,
+        ),
+        geocodingStatus: CustomerGeocodingStatus.geocoded,
+        geocodedAt: DateTime.utc(2026, 1, 5),
       ),
     ],
     contacts: <CustomerContact>[

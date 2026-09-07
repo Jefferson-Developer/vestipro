@@ -14,7 +14,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$CustomerAddress {
 
- String get id; CustomerAddressType get type; String get street; String? get number; String? get complement; String? get district; String get city; String get state; Cep get zipCode; String get country; bool get isPrimary;
+ String get id; CustomerAddressType get type; String get street; String? get number; String? get complement; String? get district; String get city; String get state; Cep get zipCode; String get country; bool get isPrimary;// TASK-176: geocoded pin location for the customer map, derived from the
+// fields above. Never set directly from a form field — always the
+// output of a geocoding attempt (client best-effort or server backfill).
+ GeoCoordinates? get coordinates; CustomerGeocodingStatus get geocodingStatus; DateTime? get geocodedAt;
 /// Create a copy of CustomerAddress
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -25,16 +28,16 @@ $CustomerAddressCopyWith<CustomerAddress> get copyWith => _$CustomerAddressCopyW
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CustomerAddress&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.street, street) || other.street == street)&&(identical(other.number, number) || other.number == number)&&(identical(other.complement, complement) || other.complement == complement)&&(identical(other.district, district) || other.district == district)&&(identical(other.city, city) || other.city == city)&&(identical(other.state, state) || other.state == state)&&(identical(other.zipCode, zipCode) || other.zipCode == zipCode)&&(identical(other.country, country) || other.country == country)&&(identical(other.isPrimary, isPrimary) || other.isPrimary == isPrimary));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CustomerAddress&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.street, street) || other.street == street)&&(identical(other.number, number) || other.number == number)&&(identical(other.complement, complement) || other.complement == complement)&&(identical(other.district, district) || other.district == district)&&(identical(other.city, city) || other.city == city)&&(identical(other.state, state) || other.state == state)&&(identical(other.zipCode, zipCode) || other.zipCode == zipCode)&&(identical(other.country, country) || other.country == country)&&(identical(other.isPrimary, isPrimary) || other.isPrimary == isPrimary)&&(identical(other.coordinates, coordinates) || other.coordinates == coordinates)&&(identical(other.geocodingStatus, geocodingStatus) || other.geocodingStatus == geocodingStatus)&&(identical(other.geocodedAt, geocodedAt) || other.geocodedAt == geocodedAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,type,street,number,complement,district,city,state,zipCode,country,isPrimary);
+int get hashCode => Object.hash(runtimeType,id,type,street,number,complement,district,city,state,zipCode,country,isPrimary,coordinates,geocodingStatus,geocodedAt);
 
 @override
 String toString() {
-  return 'CustomerAddress(id: $id, type: $type, street: $street, number: $number, complement: $complement, district: $district, city: $city, state: $state, zipCode: $zipCode, country: $country, isPrimary: $isPrimary)';
+  return 'CustomerAddress(id: $id, type: $type, street: $street, number: $number, complement: $complement, district: $district, city: $city, state: $state, zipCode: $zipCode, country: $country, isPrimary: $isPrimary, coordinates: $coordinates, geocodingStatus: $geocodingStatus, geocodedAt: $geocodedAt)';
 }
 
 
@@ -45,7 +48,7 @@ abstract mixin class $CustomerAddressCopyWith<$Res>  {
   factory $CustomerAddressCopyWith(CustomerAddress value, $Res Function(CustomerAddress) _then) = _$CustomerAddressCopyWithImpl;
 @useResult
 $Res call({
- String id, CustomerAddressType type, String street, String? number, String? complement, String? district, String city, String state, Cep zipCode, String country, bool isPrimary
+ String id, CustomerAddressType type, String street, String? number, String? complement, String? district, String city, String state, Cep zipCode, String country, bool isPrimary, GeoCoordinates? coordinates, CustomerGeocodingStatus geocodingStatus, DateTime? geocodedAt
 });
 
 
@@ -62,7 +65,7 @@ class _$CustomerAddressCopyWithImpl<$Res>
 
 /// Create a copy of CustomerAddress
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? street = null,Object? number = freezed,Object? complement = freezed,Object? district = freezed,Object? city = null,Object? state = null,Object? zipCode = null,Object? country = null,Object? isPrimary = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? type = null,Object? street = null,Object? number = freezed,Object? complement = freezed,Object? district = freezed,Object? city = null,Object? state = null,Object? zipCode = null,Object? country = null,Object? isPrimary = null,Object? coordinates = freezed,Object? geocodingStatus = null,Object? geocodedAt = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -75,7 +78,10 @@ as String,state: null == state ? _self.state : state // ignore: cast_nullable_to
 as String,zipCode: null == zipCode ? _self.zipCode : zipCode // ignore: cast_nullable_to_non_nullable
 as Cep,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
 as String,isPrimary: null == isPrimary ? _self.isPrimary : isPrimary // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,coordinates: freezed == coordinates ? _self.coordinates : coordinates // ignore: cast_nullable_to_non_nullable
+as GeoCoordinates?,geocodingStatus: null == geocodingStatus ? _self.geocodingStatus : geocodingStatus // ignore: cast_nullable_to_non_nullable
+as CustomerGeocodingStatus,geocodedAt: freezed == geocodedAt ? _self.geocodedAt : geocodedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 
@@ -160,10 +166,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  CustomerAddressType type,  String street,  String? number,  String? complement,  String? district,  String city,  String state,  Cep zipCode,  String country,  bool isPrimary)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  CustomerAddressType type,  String street,  String? number,  String? complement,  String? district,  String city,  String state,  Cep zipCode,  String country,  bool isPrimary,  GeoCoordinates? coordinates,  CustomerGeocodingStatus geocodingStatus,  DateTime? geocodedAt)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CustomerAddress() when $default != null:
-return $default(_that.id,_that.type,_that.street,_that.number,_that.complement,_that.district,_that.city,_that.state,_that.zipCode,_that.country,_that.isPrimary);case _:
+return $default(_that.id,_that.type,_that.street,_that.number,_that.complement,_that.district,_that.city,_that.state,_that.zipCode,_that.country,_that.isPrimary,_that.coordinates,_that.geocodingStatus,_that.geocodedAt);case _:
   return orElse();
 
 }
@@ -181,10 +187,10 @@ return $default(_that.id,_that.type,_that.street,_that.number,_that.complement,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  CustomerAddressType type,  String street,  String? number,  String? complement,  String? district,  String city,  String state,  Cep zipCode,  String country,  bool isPrimary)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  CustomerAddressType type,  String street,  String? number,  String? complement,  String? district,  String city,  String state,  Cep zipCode,  String country,  bool isPrimary,  GeoCoordinates? coordinates,  CustomerGeocodingStatus geocodingStatus,  DateTime? geocodedAt)  $default,) {final _that = this;
 switch (_that) {
 case _CustomerAddress():
-return $default(_that.id,_that.type,_that.street,_that.number,_that.complement,_that.district,_that.city,_that.state,_that.zipCode,_that.country,_that.isPrimary);case _:
+return $default(_that.id,_that.type,_that.street,_that.number,_that.complement,_that.district,_that.city,_that.state,_that.zipCode,_that.country,_that.isPrimary,_that.coordinates,_that.geocodingStatus,_that.geocodedAt);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -201,10 +207,10 @@ return $default(_that.id,_that.type,_that.street,_that.number,_that.complement,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  CustomerAddressType type,  String street,  String? number,  String? complement,  String? district,  String city,  String state,  Cep zipCode,  String country,  bool isPrimary)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  CustomerAddressType type,  String street,  String? number,  String? complement,  String? district,  String city,  String state,  Cep zipCode,  String country,  bool isPrimary,  GeoCoordinates? coordinates,  CustomerGeocodingStatus geocodingStatus,  DateTime? geocodedAt)?  $default,) {final _that = this;
 switch (_that) {
 case _CustomerAddress() when $default != null:
-return $default(_that.id,_that.type,_that.street,_that.number,_that.complement,_that.district,_that.city,_that.state,_that.zipCode,_that.country,_that.isPrimary);case _:
+return $default(_that.id,_that.type,_that.street,_that.number,_that.complement,_that.district,_that.city,_that.state,_that.zipCode,_that.country,_that.isPrimary,_that.coordinates,_that.geocodingStatus,_that.geocodedAt);case _:
   return null;
 
 }
@@ -216,7 +222,7 @@ return $default(_that.id,_that.type,_that.street,_that.number,_that.complement,_
 
 
 class _CustomerAddress extends CustomerAddress {
-  const _CustomerAddress({required this.id, required this.type, required this.street, this.number, this.complement, this.district, required this.city, required this.state, required this.zipCode, this.country = 'BR', this.isPrimary = false}): super._();
+  const _CustomerAddress({required this.id, required this.type, required this.street, this.number, this.complement, this.district, required this.city, required this.state, required this.zipCode, this.country = 'BR', this.isPrimary = false, this.coordinates, this.geocodingStatus = CustomerGeocodingStatus.pending, this.geocodedAt}): super._();
   
 
 @override final  String id;
@@ -230,6 +236,12 @@ class _CustomerAddress extends CustomerAddress {
 @override final  Cep zipCode;
 @override@JsonKey() final  String country;
 @override@JsonKey() final  bool isPrimary;
+// TASK-176: geocoded pin location for the customer map, derived from the
+// fields above. Never set directly from a form field — always the
+// output of a geocoding attempt (client best-effort or server backfill).
+@override final  GeoCoordinates? coordinates;
+@override@JsonKey() final  CustomerGeocodingStatus geocodingStatus;
+@override final  DateTime? geocodedAt;
 
 /// Create a copy of CustomerAddress
 /// with the given fields replaced by the non-null parameter values.
@@ -241,16 +253,16 @@ _$CustomerAddressCopyWith<_CustomerAddress> get copyWith => __$CustomerAddressCo
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CustomerAddress&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.street, street) || other.street == street)&&(identical(other.number, number) || other.number == number)&&(identical(other.complement, complement) || other.complement == complement)&&(identical(other.district, district) || other.district == district)&&(identical(other.city, city) || other.city == city)&&(identical(other.state, state) || other.state == state)&&(identical(other.zipCode, zipCode) || other.zipCode == zipCode)&&(identical(other.country, country) || other.country == country)&&(identical(other.isPrimary, isPrimary) || other.isPrimary == isPrimary));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _CustomerAddress&&(identical(other.id, id) || other.id == id)&&(identical(other.type, type) || other.type == type)&&(identical(other.street, street) || other.street == street)&&(identical(other.number, number) || other.number == number)&&(identical(other.complement, complement) || other.complement == complement)&&(identical(other.district, district) || other.district == district)&&(identical(other.city, city) || other.city == city)&&(identical(other.state, state) || other.state == state)&&(identical(other.zipCode, zipCode) || other.zipCode == zipCode)&&(identical(other.country, country) || other.country == country)&&(identical(other.isPrimary, isPrimary) || other.isPrimary == isPrimary)&&(identical(other.coordinates, coordinates) || other.coordinates == coordinates)&&(identical(other.geocodingStatus, geocodingStatus) || other.geocodingStatus == geocodingStatus)&&(identical(other.geocodedAt, geocodedAt) || other.geocodedAt == geocodedAt));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,type,street,number,complement,district,city,state,zipCode,country,isPrimary);
+int get hashCode => Object.hash(runtimeType,id,type,street,number,complement,district,city,state,zipCode,country,isPrimary,coordinates,geocodingStatus,geocodedAt);
 
 @override
 String toString() {
-  return 'CustomerAddress(id: $id, type: $type, street: $street, number: $number, complement: $complement, district: $district, city: $city, state: $state, zipCode: $zipCode, country: $country, isPrimary: $isPrimary)';
+  return 'CustomerAddress(id: $id, type: $type, street: $street, number: $number, complement: $complement, district: $district, city: $city, state: $state, zipCode: $zipCode, country: $country, isPrimary: $isPrimary, coordinates: $coordinates, geocodingStatus: $geocodingStatus, geocodedAt: $geocodedAt)';
 }
 
 
@@ -261,7 +273,7 @@ abstract mixin class _$CustomerAddressCopyWith<$Res> implements $CustomerAddress
   factory _$CustomerAddressCopyWith(_CustomerAddress value, $Res Function(_CustomerAddress) _then) = __$CustomerAddressCopyWithImpl;
 @override @useResult
 $Res call({
- String id, CustomerAddressType type, String street, String? number, String? complement, String? district, String city, String state, Cep zipCode, String country, bool isPrimary
+ String id, CustomerAddressType type, String street, String? number, String? complement, String? district, String city, String state, Cep zipCode, String country, bool isPrimary, GeoCoordinates? coordinates, CustomerGeocodingStatus geocodingStatus, DateTime? geocodedAt
 });
 
 
@@ -278,7 +290,7 @@ class __$CustomerAddressCopyWithImpl<$Res>
 
 /// Create a copy of CustomerAddress
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? street = null,Object? number = freezed,Object? complement = freezed,Object? district = freezed,Object? city = null,Object? state = null,Object? zipCode = null,Object? country = null,Object? isPrimary = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? type = null,Object? street = null,Object? number = freezed,Object? complement = freezed,Object? district = freezed,Object? city = null,Object? state = null,Object? zipCode = null,Object? country = null,Object? isPrimary = null,Object? coordinates = freezed,Object? geocodingStatus = null,Object? geocodedAt = freezed,}) {
   return _then(_CustomerAddress(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
@@ -291,7 +303,10 @@ as String,state: null == state ? _self.state : state // ignore: cast_nullable_to
 as String,zipCode: null == zipCode ? _self.zipCode : zipCode // ignore: cast_nullable_to_non_nullable
 as Cep,country: null == country ? _self.country : country // ignore: cast_nullable_to_non_nullable
 as String,isPrimary: null == isPrimary ? _self.isPrimary : isPrimary // ignore: cast_nullable_to_non_nullable
-as bool,
+as bool,coordinates: freezed == coordinates ? _self.coordinates : coordinates // ignore: cast_nullable_to_non_nullable
+as GeoCoordinates?,geocodingStatus: null == geocodingStatus ? _self.geocodingStatus : geocodingStatus // ignore: cast_nullable_to_non_nullable
+as CustomerGeocodingStatus,geocodedAt: freezed == geocodedAt ? _self.geocodedAt : geocodedAt // ignore: cast_nullable_to_non_nullable
+as DateTime?,
   ));
 }
 

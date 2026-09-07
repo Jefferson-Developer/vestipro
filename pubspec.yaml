@@ -103,6 +103,13 @@ dependencies:
   # (`ReportPdfPreviewPage`) — `PdfReportEncoder` itself never imports it.
   pdf: ^3.11.5
   printing: ^5.13.4
+  # Mapa de clientes (TASK-176): federated plugin with Android/iOS/Web
+  # implementations bundled transitively (`google_maps_flutter_android/_ios/
+  # _web`) — no extra per-platform package needed. Requires a real Google
+  # Maps API key configured per platform in production (AndroidManifest.xml,
+  # AppDelegate.swift/Info.plist, web/index.html) — not available in this
+  # environment; see TASK-176 "Riscos conhecidos".
+  google_maps_flutter: ^2.18.0
 
 dev_dependencies:
   flutter_test:

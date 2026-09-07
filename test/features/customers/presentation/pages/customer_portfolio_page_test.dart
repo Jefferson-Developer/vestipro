@@ -93,6 +93,72 @@ void main() {
       expect(find.byType(ForbiddenPage), findsOneWidget);
       expect(useCase.calls, isEmpty);
     });
+
+    group('customer map (TASK-176)', () {
+      testWidgets(
+        'on mobile, shows only the list until the map toggle is tapped, and '
+        'both views share the exact same filtered customers (parity)',
+        (tester) async {
+          _grantRole(membershipRepository, 'SALES_REP');
+          final useCase = _FakeListCustomerPortfolioUseCase(
+            AppSuccess<CustomerPortfolioPageResult>(
+              CustomerPortfolioPageResult(
+                customers: <Customer>[_customer, _customerWithoutLocation],
+                hasMore: false,
+              ),
+            ),
+          );
+
+          await tester.binding.setSurfaceSize(const Size(390, 820));
+          addTearDown(() => tester.binding.setSurfaceSize(null));
+          await _pumpPage(tester, permissionService, useCase);
+          await tester.pumpAndSettle();
+
+          expect(find.text('Atacado Alfa'), findsOneWidget);
+          expect(find.byType(CustomerPortfolioMapView), findsNothing);
+
+          await tester.tap(find.byIcon(Icons.map_outlined));
+          await tester.pumpAndSettle();
+
+          expect(find.byType(CustomerPortfolioMapView), findsOneWidget);
+          // Same carteira the list view showed: the customer without a
+          // geocoded address does not become a pin, but still surfaces the
+          // "sem localizacao" notice instead of silently disappearing.
+          expect(
+            find.text('1 cliente sem localizacao nao aparece no mapa.'),
+            findsOneWidget,
+          );
+        },
+      );
+
+      testWidgets('on tablet, the list and the map render side by side without '
+          'needing the toggle', (tester) async {
+        _grantRole(membershipRepository, 'SALES_REP');
+        final useCase = _FakeListCustomerPortfolioUseCase(
+          AppSuccess<CustomerPortfolioPageResult>(
+            CustomerPortfolioPageResult(
+              customers: <Customer>[_customer],
+              hasMore: false,
+            ),
+          ),
+        );
+
+        // Tablet width (< desktop's 1024, where `AppAdminPageLayout`
+        // switches the filters entry point from a button to a permanent
+        // side panel — unrelated to this test's scope).
+        await tester.binding.setSurfaceSize(const Size(900, 900));
+        addTearDown(() => tester.binding.setSurfaceSize(null));
+        await _pumpPage(tester, permissionService, useCase);
+        await tester.pumpAndSettle();
+
+        expect(find.text('Atacado Alfa'), findsOneWidget);
+        expect(find.byType(CustomerPortfolioMapView), findsOneWidget);
+        // No view-mode toggle to find at this breakpoint: both views are
+        // always visible together.
+        expect(find.byIcon(Icons.map_outlined), findsNothing);
+        expect(find.byIcon(Icons.view_list_outlined), findsNothing);
+      });
+    });
   });
 }
 
@@ -148,6 +214,45 @@ final _customer = Customer(
   potential: 'Alto',
   registeredAt: DateTime.utc(2026, 1, 1),
   lastPurchaseAt: DateTime.utc(2026, 8, 10),
+  // TASK-176: geocoded so this customer becomes a pin on the map instead of
+  // being counted in the "sem localizacao" notice.
+  addresses: <CustomerAddress>[
+    CustomerAddress(
+      id: 'address-a',
+      type: CustomerAddressType.shipping,
+      street: 'Rua das Colecoes',
+      city: 'Blumenau',
+      state: 'SC',
+      zipCode: Cep.parse('89010-100'),
+      isPrimary: true,
+      coordinates: GeoCoordinates.validated(
+        latitude: -26.9194,
+        longitude: -49.0661,
+      ),
+      geocodingStatus: CustomerGeocodingStatus.geocoded,
+      geocodedAt: DateTime.utc(2026, 1, 1),
+    ),
+  ],
+  createdAt: DateTime.utc(2026, 1, 1),
+  createdBy: 'rep-1',
+  updatedAt: DateTime.utc(2026, 1, 1),
+  updatedBy: 'rep-1',
+  version: 1,
+  syncStatus: CustomerSyncStatus.pending,
+);
+
+/// TASK-176: a second carteira customer with no geocodable/geocoded
+/// address, so `CustomerPortfolioMapView` skips it as a pin while still
+/// showing it in the list — used to assert the map/list parity notice.
+final _customerWithoutLocation = Customer(
+  id: 'customer-b',
+  organizationId: 'org-1',
+  companyId: 'company-1',
+  type: CustomerType.individual,
+  document: CnpjCpf.parse('529.982.247-25'),
+  fullName: 'Atacado Beta',
+  status: CustomerStatus.active,
+  registeredAt: DateTime.utc(2026, 1, 1),
   createdAt: DateTime.utc(2026, 1, 1),
   createdBy: 'rep-1',
   updatedAt: DateTime.utc(2026, 1, 1),

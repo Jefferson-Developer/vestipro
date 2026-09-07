@@ -123,7 +123,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 20;
+  int get schemaVersion => 21;
 
   /// Removes every offline row after an account deletion. Child tables are
   /// cleared first so foreign-key integrity remains enabled throughout.
@@ -309,6 +309,57 @@ class AppDatabase extends _$AppDatabase {
             ).map((row) => row.read<String>('name')).get();
             if (!orderColumns.contains('currency')) {
               await migrator.addColumn(ordersTable, ordersTable.currency);
+            }
+          }
+        }
+        if (from < 21) {
+          // TASK-176: geocoded pin location for the customer map, one per
+          // address row. `geocodingStatusCode` defaults to 'pending' so
+          // every pre-existing address is picked up by the server backfill
+          // job instead of silently staying invisible on the map.
+          //
+          // Guarded by an actual `sqlite_master`/`PRAGMA table_info` read,
+          // same precedent as the `from < 20` orders migration above: a
+          // handful of this codebase's own tests seed a raw "already at
+          // schema version N" sqlite file without ever creating
+          // `customer_addresses` at all, purely to exercise a later
+          // migration step in isolation — blindly altering a table that
+          // never existed on that particular (test-only) device state would
+          // fail the whole migration. No real device can ever reach this
+          // branch without `customer_addresses` already existing: it is
+          // unconditionally created by `onCreate`/the initial schema, which
+          // every real upgrade path already has.
+          final addressTableNames = await customSelect(
+            "SELECT name FROM sqlite_master WHERE type = 'table' "
+            "AND name = 'customer_addresses'",
+          ).map((row) => row.read<String>('name')).get();
+          if (addressTableNames.isNotEmpty) {
+            final addressColumns = await customSelect(
+              "PRAGMA table_info('customer_addresses')",
+            ).map((row) => row.read<String>('name')).get();
+            if (!addressColumns.contains('latitude')) {
+              await migrator.addColumn(
+                customerAddressesTable,
+                customerAddressesTable.latitude,
+              );
+            }
+            if (!addressColumns.contains('longitude')) {
+              await migrator.addColumn(
+                customerAddressesTable,
+                customerAddressesTable.longitude,
+              );
+            }
+            if (!addressColumns.contains('geocoding_status_code')) {
+              await migrator.addColumn(
+                customerAddressesTable,
+                customerAddressesTable.geocodingStatusCode,
+              );
+            }
+            if (!addressColumns.contains('geocoded_at')) {
+              await migrator.addColumn(
+                customerAddressesTable,
+                customerAddressesTable.geocodedAt,
+              );
             }
           }
         }

@@ -28,7 +28,7 @@ void main() {
       final database = AppDatabase(NativeDatabase.memory());
       addTearDown(() => database.close());
 
-      expect(database.schemaVersion, 20);
+      expect(database.schemaVersion, 21);
       await database.customStatement('SELECT 1');
 
       final columnNames = await database

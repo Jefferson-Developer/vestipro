@@ -12,7 +12,14 @@ import '../bloc/customer_portfolio_event.dart';
 import '../bloc/customer_portfolio_state.dart';
 import '../bloc/customer_segment_bloc.dart';
 import '../bloc/customer_segment_event.dart';
+import '../widgets/customer_portfolio_map_view.dart';
 import '../widgets/customer_segment_quick_filters.dart';
+
+/// Local UI preference (TASK-176), never persisted/synced: which
+/// visualization of the same carteira the mobile breakpoint currently shows.
+/// Tablet/desktop always render both side by side (see
+/// `_CustomerPortfolioScaffoldState.build`), so this only matters on mobile.
+enum _CustomerPortfolioViewMode { list, map }
 
 class CustomerPortfolioPage extends StatelessWidget {
   const CustomerPortfolioPage({
@@ -101,7 +108,7 @@ class CustomerPortfolioPage extends StatelessWidget {
   }
 }
 
-class _CustomerPortfolioScaffold extends StatelessWidget {
+class _CustomerPortfolioScaffold extends StatefulWidget {
   const _CustomerPortfolioScaffold({
     required this.userId,
     required this.hasSegments,
@@ -128,48 +135,90 @@ class _CustomerPortfolioScaffold extends StatelessWidget {
   final String? organizationId;
 
   @override
+  State<_CustomerPortfolioScaffold> createState() =>
+      _CustomerPortfolioScaffoldState();
+}
+
+class _CustomerPortfolioScaffoldState
+    extends State<_CustomerPortfolioScaffold> {
+  var _viewMode = _CustomerPortfolioViewMode.list;
+
+  @override
   Widget build(BuildContext context) {
     return BlocListener<CustomerPortfolioBloc, CustomerPortfolioState>(
       listenWhen: (previous, current) =>
           previous.searchQuery != current.searchQuery ||
           previous.filters != current.filters,
       listener: (context, state) =>
-          onUrlStateChanged?.call(state.searchQuery, state.filters),
+          widget.onUrlStateChanged?.call(state.searchQuery, state.filters),
       child: BlocBuilder<CustomerPortfolioBloc, CustomerPortfolioState>(
         builder: (context, state) {
-          return Scaffold(
-            body: AppAdminPageLayout(
-              title: 'Carteira de clientes',
-              actions: _buildActions(context),
-              filtersTitle: 'Filtros da carteira',
-              filtersBuilder: (_) => _PortfolioFilters(
-                state: state,
-                userId: userId,
-                hasSegments: hasSegments,
-              ),
-              content: _PortfolioContent(
-                state: state,
-                onCustomerSelected: onCustomerSelected,
-              ),
-            ),
+          // TASK-176: a single `AppResponsiveBuilder` (this page's own
+          // available width, not the window) is the one source of truth
+          // both the header toggle and the content area resolve against —
+          // never two independent breakpoint reads that could disagree.
+          return AppResponsiveBuilder(
+            builder: (context, breakpoint) {
+              return Scaffold(
+                body: AppAdminPageLayout(
+                  title: 'Carteira de clientes',
+                  actions: _buildActions(breakpoint),
+                  filtersTitle: 'Filtros da carteira',
+                  filtersBuilder: (_) => _PortfolioFilters(
+                    state: state,
+                    userId: widget.userId,
+                    hasSegments: widget.hasSegments,
+                  ),
+                  content: _PortfolioAndMapContent(
+                    state: state,
+                    breakpoint: breakpoint,
+                    viewMode: _viewMode,
+                    onCustomerSelected: widget.onCustomerSelected,
+                  ),
+                ),
+              );
+            },
           );
         },
       ),
     );
   }
 
-  List<Widget> _buildActions(BuildContext context) {
-    final onImport = onImportRequested;
-    final service = permissionService;
-    final orgId = organizationId;
-    if (onImport == null || service == null || orgId == null) {
-      return const <Widget>[];
+  List<Widget> _buildActions(AppBreakpoint breakpoint) {
+    final actions = <Widget>[];
+    // TASK-176: the mobile breakpoint shows one view at a time (tela cheia),
+    // so it needs an explicit toggle. Tablet/desktop always render list and
+    // map side by side (`_PortfolioAndMapContent`), so the toggle would have
+    // nothing to switch between and stays hidden there.
+    if (breakpoint == AppBreakpoint.mobile) {
+      final showsMap = _viewMode == _CustomerPortfolioViewMode.map;
+      actions.add(
+        AppIconButton(
+          icon: showsMap ? Icons.view_list_outlined : Icons.map_outlined,
+          semanticLabel: showsMap
+              ? 'Ver carteira em lista'
+              : 'Ver carteira no mapa',
+          onPressed: () => setState(() {
+            _viewMode = showsMap
+                ? _CustomerPortfolioViewMode.list
+                : _CustomerPortfolioViewMode.map;
+          }),
+        ),
+      );
+      actions.add(const SizedBox(width: AppSpacing.spacing8));
     }
-    return <Widget>[
+
+    final onImport = widget.onImportRequested;
+    final service = widget.permissionService;
+    final orgId = widget.organizationId;
+    if (onImport == null || service == null || orgId == null) {
+      return actions;
+    }
+    actions.add(
       PermissionBuilder(
         permissionService: service,
         organizationId: orgId,
-        userId: userId,
+        userId: widget.userId,
         capability: Capability.customerImport,
         builder: (context, granted) {
           if (!granted) return const SizedBox.shrink();
@@ -181,8 +230,103 @@ class _CustomerPortfolioScaffold extends StatelessWidget {
           );
         },
       ),
-    ];
+    );
+    return actions;
   }
+}
+
+/// TASK-176: decides — from the [breakpoint] the page's own
+/// `AppResponsiveBuilder` already resolved (same source the header toggle
+/// reads, so the two can never disagree) — whether the carteira map renders
+/// as its own full-screen mode (mobile, following [viewMode]) or permanently
+/// side by side with the list (tablet/desktop/large desktop).
+class _PortfolioAndMapContent extends StatelessWidget {
+  const _PortfolioAndMapContent({
+    required this.state,
+    required this.breakpoint,
+    required this.viewMode,
+    this.onCustomerSelected,
+  });
+
+  final CustomerPortfolioState state;
+  final AppBreakpoint breakpoint;
+  final _CustomerPortfolioViewMode viewMode;
+  final ValueChanged<Customer>? onCustomerSelected;
+
+  @override
+  Widget build(BuildContext context) {
+    final list = _PortfolioContent(
+      state: state,
+      onCustomerSelected: onCustomerSelected,
+    );
+    final map = _CustomerMapAutoLoader(
+      state: state,
+      child: CustomerPortfolioMapView(
+        customers: state.customers,
+        onCustomerSelected: onCustomerSelected,
+      ),
+    );
+
+    if (breakpoint == AppBreakpoint.mobile) {
+      return viewMode == _CustomerPortfolioViewMode.map ? map : list;
+    }
+    return Row(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: <Widget>[
+        Expanded(child: list),
+        const SizedBox(width: AppSpacing.spacing16),
+        Expanded(child: map),
+      ],
+    );
+  }
+}
+
+/// TASK-176: the map wants the *whole* filtered carteira plotted at once —
+/// unlike the list, it cannot meaningfully paginate by scroll. Reuses the
+/// same `CustomerPortfolioBloc`/`ListCustomerPortfolioUseCase` the list view
+/// already drives (never a second query): while mounted, it keeps
+/// dispatching [CustomerPortfolioNextPageRequested] until [state.hasMore] is
+/// `false`, exactly like scrolling the list to the bottom would.
+class _CustomerMapAutoLoader extends StatefulWidget {
+  const _CustomerMapAutoLoader({required this.state, required this.child});
+
+  final CustomerPortfolioState state;
+  final Widget child;
+
+  @override
+  State<_CustomerMapAutoLoader> createState() => _CustomerMapAutoLoaderState();
+}
+
+class _CustomerMapAutoLoaderState extends State<_CustomerMapAutoLoader> {
+  @override
+  void initState() {
+    super.initState();
+    _requestNextPageIfNeeded();
+  }
+
+  @override
+  void didUpdateWidget(covariant _CustomerMapAutoLoader oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    _requestNextPageIfNeeded();
+  }
+
+  void _requestNextPageIfNeeded() {
+    final state = widget.state;
+    if (!state.hasMore || state.isLoadingMore || state.isInitialLoading) {
+      return;
+    }
+    // Deferred to the next frame so this never dispatches a bloc event from
+    // within another widget's build phase.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (!mounted) return;
+      context.read<CustomerPortfolioBloc>().add(
+        const CustomerPortfolioNextPageRequested(),
+      );
+    });
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class _PortfolioContent extends StatefulWidget {

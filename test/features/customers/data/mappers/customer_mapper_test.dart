@@ -206,6 +206,71 @@ void main() {
       );
     });
 
+    test('toEntity maps a geocoded address to CustomerAddress.coordinates '
+        '(TASK-176)', () {
+      final dto = buildLegalEntityDto();
+      final geocodedDto = CustomerDto(
+        id: dto.id,
+        organizationId: dto.organizationId,
+        companyId: dto.companyId,
+        type: dto.type,
+        document: dto.document,
+        legalName: dto.legalName,
+        tradeName: dto.tradeName,
+        status: dto.status,
+        registeredAt: dto.registeredAt,
+        addresses: <CustomerAddressDto>[
+          CustomerAddressDto(
+            id: 'address-1',
+            typeCode: 'shipping',
+            typeLabel: 'Entrega',
+            street: 'Rua das Colecoes',
+            city: 'Blumenau',
+            state: 'SC',
+            zipCode: '89010100',
+            country: 'BR',
+            isPrimary: true,
+            latitude: -26.9194,
+            longitude: -49.0661,
+            geocodingStatusCode: 'geocoded',
+            geocodedAt: DateTime.utc(2026, 3),
+          ),
+        ],
+        createdAt: dto.createdAt,
+        createdBy: dto.createdBy,
+        updatedAt: dto.updatedAt,
+        updatedBy: dto.updatedBy,
+        version: dto.version,
+        syncStatus: dto.syncStatus,
+      );
+
+      final entity = mapper.toEntity(geocodedDto);
+      final address = entity.addresses.single;
+
+      expect(address.hasCoordinates, isTrue);
+      expect(address.coordinates?.latitude, -26.9194);
+      expect(address.coordinates?.longitude, -49.0661);
+      expect(address.geocodingStatus, CustomerGeocodingStatus.geocoded);
+      expect(address.geocodedAt, DateTime.utc(2026, 3));
+
+      final roundTrippedDto = mapper.toDto(entity).addresses.single;
+      expect(roundTrippedDto.latitude, -26.9194);
+      expect(roundTrippedDto.longitude, -49.0661);
+      expect(roundTrippedDto.geocodingStatusCode, 'geocoded');
+      expect(roundTrippedDto.geocodedAt, DateTime.utc(2026, 3));
+    });
+
+    test('toEntity defaults an address without geocoding data to pending, no '
+        'coordinates (TASK-176)', () {
+      final entity = mapper.toEntity(buildLegalEntityDto());
+      final address = entity.addresses.single;
+
+      expect(address.coordinates, isNull);
+      expect(address.hasCoordinates, isFalse);
+      expect(address.geocodingStatus, CustomerGeocodingStatus.pending);
+      expect(address.geocodedAt, isNull);
+    });
+
     test('toEntity throws for unknown status or sync status', () {
       expect(
         () => mapper.toEntity(buildLegalEntityDto(status: 'archived')),

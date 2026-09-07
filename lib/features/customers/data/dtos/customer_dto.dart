@@ -269,6 +269,13 @@ final class CustomerAddressDto {
     required this.zipCode,
     required this.country,
     required this.isPrimary,
+    this.latitude,
+    this.longitude,
+    // TASK-176: defaults to 'pending' so every address written before this
+    // field existed (remote or local) reads back as eligible for the
+    // geocoding backfill job, never as a silent failure.
+    this.geocodingStatusCode = 'pending',
+    this.geocodedAt,
   });
 
   factory CustomerAddressDto.fromJson(Map<String, dynamic> json) {
@@ -285,6 +292,11 @@ final class CustomerAddressDto {
       zipCode: _requiredString(json, 'zipCode'),
       country: _requiredString(json, 'country'),
       isPrimary: _requiredBool(json, 'isPrimary'),
+      latitude: _optionalDouble(json, 'latitude'),
+      longitude: _optionalDouble(json, 'longitude'),
+      geocodingStatusCode:
+          _optionalString(json, 'geocodingStatus') ?? 'pending',
+      geocodedAt: (json['geocodedAt'] as Timestamp?)?.toDate(),
     );
   }
 
@@ -300,6 +312,10 @@ final class CustomerAddressDto {
   final String zipCode;
   final String country;
   final bool isPrimary;
+  final double? latitude;
+  final double? longitude;
+  final String geocodingStatusCode;
+  final DateTime? geocodedAt;
 
   Map<String, dynamic> toJson() {
     return <String, dynamic>{
@@ -315,6 +331,10 @@ final class CustomerAddressDto {
       'zipCode': zipCode,
       'country': country,
       'isPrimary': isPrimary,
+      if (latitude != null) 'latitude': latitude,
+      if (longitude != null) 'longitude': longitude,
+      'geocodingStatus': geocodingStatusCode,
+      if (geocodedAt != null) 'geocodedAt': Timestamp.fromDate(geocodedAt!),
     };
   }
 }
@@ -452,6 +472,16 @@ String? _optionalString(Map<String, dynamic> json, String field) {
 bool _requiredBool(Map<String, dynamic> json, String field) {
   final value = json[field];
   if (value is bool) return value;
+  throw const ValidationException(
+    'Invalid customer nested payload.',
+    code: 'invalid_customer_payload',
+  );
+}
+
+double? _optionalDouble(Map<String, dynamic> json, String field) {
+  final value = json[field];
+  if (value == null) return null;
+  if (value is num) return value.toDouble();
   throw const ValidationException(
     'Invalid customer nested payload.',
     code: 'invalid_customer_payload',
