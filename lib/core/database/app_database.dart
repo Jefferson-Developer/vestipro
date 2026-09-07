@@ -23,6 +23,7 @@ import 'tables/size_grids_table.dart';
 import 'tables/sync_cursors_table.dart';
 import 'tables/targets_table.dart';
 import 'tables/variant_stock_balances_table.dart';
+import 'tables/visit_routes_table.dart';
 import 'tables/warehouses_table.dart';
 
 part 'app_database.g.dart';
@@ -91,6 +92,10 @@ class OrderWithItemsRow {
 /// TASK-117 adds [PositivacaoSnapshotsTable], the narrow server-computed
 /// cache the positivação de carteira dashboard reads — same "no pipeline
 /// populates it yet" precedent as [TargetsTable.achievedValueCache].
+/// TASK-176 adds `latitude`/`longitude`/`geocodingStatusCode`/`geocodedAt`
+/// columns to [CustomerAddressesTable] (customer map pins).
+/// TASK-177 adds [VisitRoutesTable], the seller's local daily visit route
+/// (roteirização de visitas).
 @DriftDatabase(
   tables: [
     CustomersTable,
@@ -117,13 +122,14 @@ class OrderWithItemsRow {
     ConflictRecordsTable,
     ConflictAuditLogTable,
     PositivacaoSnapshotsTable,
+    VisitRoutesTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 21;
+  int get schemaVersion => 22;
 
   /// Removes every offline row after an account deletion. Child tables are
   /// cleared first so foreign-key integrity remains enabled throughout.
@@ -362,6 +368,14 @@ class AppDatabase extends _$AppDatabase {
               );
             }
           }
+        }
+        if (from < 22) {
+          // TASK-177: seller's local daily visit route (roteirização de
+          // visitas) — a brand-new table, so (same precedent as the
+          // `from < 4` favoritesTable branch above) it is always safe to
+          // create unconditionally, no `sqlite_master`/`PRAGMA table_info`
+          // guard needed.
+          await migrator.createTable(visitRoutesTable);
         }
       },
       beforeOpen: (details) async {
@@ -1849,6 +1863,34 @@ class AppDatabase extends _$AppDatabase {
           ..where((row) => row.organizationId.equals(organizationId))
           ..orderBy([(row) => OrderingTerm.desc(row.performedAt)]))
         .get();
+  }
+
+  /// Upserts the seller's visit route (TASK-177). `insertOnConflictUpdate`
+  /// on [VisitRoutesTable.id] (a deterministic
+  /// `organizationId`/`salesRepId`/day key) is what makes rebuilding
+  /// "today's route" always replace the same row instead of accumulating a
+  /// second one for the same day — same idempotent-upsert precedent as
+  /// `upsertFavorite`.
+  Future<void> upsertVisitRoute(VisitRoutesTableCompanion row) {
+    return into(visitRoutesTable).insertOnConflictUpdate(row);
+  }
+
+  /// The seller's visit route for [organizationId]/[salesRepId]/[date]
+  /// (already normalized to a UTC-midnight day key by
+  /// `VisitRoute.dateKey`/callers), if one has been built yet — what makes
+  /// the route survive an app close/reopen.
+  Future<VisitRoutesTableData?> getVisitRoute({
+    required String organizationId,
+    required String salesRepId,
+    required DateTime date,
+  }) {
+    return (select(visitRoutesTable)..where(
+          (row) =>
+              row.organizationId.equals(organizationId) &
+              row.salesRepId.equals(salesRepId) &
+              row.date.equals(date),
+        ))
+        .getSingleOrNull();
   }
 }
 

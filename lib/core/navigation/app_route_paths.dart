@@ -735,6 +735,24 @@ final class CustomerPortfolioRoute extends AppRoute {
   }
 }
 
+/// Roteirização de visitas route (TASK-177, EPIC-24), scoped by
+/// Organization and Company. Protected in [AppRouter] by `customer.view` —
+/// the same capability [CustomerPortfolioRoute] already requires, since a
+/// visit route is just a planning tool over the seller's own visible
+/// carteira, not a distinct admin capability.
+final class VisitRouteRoute extends AppRoute {
+  const VisitRouteRoute({required this.orgId, required this.companyId});
+
+  final String orgId;
+  final String companyId;
+
+  static const name = 'visitRoute';
+  static const pathPattern = '/org/:orgId/companies/:companyId/visit-route';
+
+  @override
+  String get location => '/org/$orgId/companies/$companyId/visit-route';
+}
+
 /// "Novo pedido" (order draft) route (TASK-096, EPIC-13), scoped by
 /// Organization and Company. Protected in [AppRouter] by `order.create`.
 ///

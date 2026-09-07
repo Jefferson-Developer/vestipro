@@ -1454,6 +1454,24 @@ import '../features/users/presentation/bloc/team_list_bloc.dart' as _i831;
 import '../features/users/presentation/bloc/user_list_bloc.dart' as _i244;
 import '../features/users/presentation/bloc/user_role_edit_bloc.dart' as _i698;
 import '../features/users/users.dart' as _i220;
+import '../features/visit_routes/data/mappers/visit_route_local_mapper.dart'
+    as _i58;
+import '../features/visit_routes/data/repositories/drift_visit_route_repository.dart'
+    as _i652;
+import '../features/visit_routes/domain/repositories/visit_route_repository.dart'
+    as _i860;
+import '../features/visit_routes/domain/services/route_optimization_service.dart'
+    as _i833;
+import '../features/visit_routes/domain/usecases/build_visit_route_use_case.dart'
+    as _i981;
+import '../features/visit_routes/domain/usecases/get_active_visit_route_use_case.dart'
+    as _i222;
+import '../features/visit_routes/domain/usecases/mark_visit_route_stop_status_use_case.dart'
+    as _i540;
+import '../features/visit_routes/domain/usecases/reorder_visit_route_stops_use_case.dart'
+    as _i514;
+import '../features/visit_routes/presentation/bloc/visit_route_bloc.dart'
+    as _i999;
 import 'customer_import_parsers_module.dart' as _i405;
 import 'injection_module.dart' as _i212;
 import 'offline_package_loaders_module.dart' as _i418;
@@ -1698,6 +1716,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i958.UserRoleUpdateResultMapper>(
       () => const _i958.UserRoleUpdateResultMapper(),
     );
+    gh.lazySingleton<_i58.VisitRouteLocalMapper>(
+      () => const _i58.VisitRouteLocalMapper(),
+    );
     gh.lazySingleton<_i465.AppClientMetadataProvider>(
       () => _i465.PackageInfoClientMetadataProvider(),
     );
@@ -1793,6 +1814,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i31.DiscountPolicyRepository>(
       () => const _i684.SharedPreferencesDiscountPolicyRepository(),
     );
+    gh.lazySingleton<_i860.VisitRouteRepository>(
+      () => _i652.DriftVisitRouteRepository(
+        gh<_i658.AppDatabase>(),
+        gh<_i58.VisitRouteLocalMapper>(),
+      ),
+    );
     gh.lazySingleton<_i453.InsightAlertDispatchRepository>(
       () => const _i909.SharedPreferencesInsightAlertDispatchRepository(),
     );
@@ -1886,6 +1913,18 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i150.CatalogCampaignRepository>(
       () => const _i565.SharedPreferencesCatalogCampaignRepository(),
+    );
+    gh.factory<_i222.GetActiveVisitRouteUseCase>(
+      () => _i222.GetActiveVisitRouteUseCase(gh<_i860.VisitRouteRepository>()),
+    );
+    gh.factory<_i540.MarkVisitRouteStopStatusUseCase>(
+      () => _i540.MarkVisitRouteStopStatusUseCase(
+        gh<_i860.VisitRouteRepository>(),
+      ),
+    );
+    gh.factory<_i514.ReorderVisitRouteStopsUseCase>(
+      () =>
+          _i514.ReorderVisitRouteStopsUseCase(gh<_i860.VisitRouteRepository>()),
     );
     gh.factory<_i169.CreateCampaignUseCase>(
       () => _i169.CreateCampaignUseCase(gh<_i150.CatalogCampaignRepository>()),
@@ -2002,6 +2041,12 @@ extension GetItInjectableX on _i174.GetIt {
         listCategories: gh<_i435.ListCategoriesUseCase>(),
         createCategory: gh<_i538.CreateCategoryUseCase>(),
         updateCategory: gh<_i328.UpdateCategoryUseCase>(),
+      ),
+    );
+    gh.factory<_i833.RouteOptimizationService>(
+      () => _i833.RouteOptimizationService(
+        averageSpeedKmh: gh<double>(),
+        maxStops: gh<int>(),
       ),
     );
     gh.factory<_i411.OpenSavedReportInBuilder>(
@@ -2401,6 +2446,12 @@ extension GetItInjectableX on _i174.GetIt {
         updateProductColor: gh<_i657.UpdateProductColorUseCase>(),
         markProductColorUnavailable:
             gh<_i76.MarkProductColorUnavailableUseCase>(),
+      ),
+    );
+    gh.factory<_i981.BuildVisitRouteUseCase>(
+      () => _i981.BuildVisitRouteUseCase(
+        gh<_i860.VisitRouteRepository>(),
+        gh<_i833.RouteOptimizationService>(),
       ),
     );
     gh.lazySingleton<_i974.FirebaseFirestore>(
@@ -2953,6 +3004,14 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i591.UserAccessRepositoryImpl(
         dataSource: gh<_i681.UserAccessDataSource>(),
         mapper: gh<_i566.UserAccessUpdateResultMapper>(),
+      ),
+    );
+    gh.factory<_i999.VisitRouteBloc>(
+      () => _i999.VisitRouteBloc(
+        getActiveVisitRoute: gh<_i222.GetActiveVisitRouteUseCase>(),
+        buildVisitRoute: gh<_i981.BuildVisitRouteUseCase>(),
+        reorderVisitRouteStops: gh<_i514.ReorderVisitRouteStopsUseCase>(),
+        markVisitRouteStopStatus: gh<_i540.MarkVisitRouteStopStatusUseCase>(),
       ),
     );
     gh.lazySingleton<_i56.CustomerImportTemplateDataSource>(

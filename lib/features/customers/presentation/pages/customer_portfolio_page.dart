@@ -34,6 +34,7 @@ class CustomerPortfolioPage extends StatelessWidget {
     this.onUrlStateChanged,
     this.createSegmentBloc,
     this.onImportRequested,
+    this.onPlanVisitRouteRequested,
     super.key,
   });
 
@@ -58,6 +59,14 @@ class CustomerPortfolioPage extends StatelessWidget {
   /// clientes" action renders in the page header, itself gated by
   /// `Capability.customerImport`.
   final VoidCallback? onImportRequested;
+
+  /// Navigates to `VisitRouteRoute` (TASK-177). Optional/`null`-safe so
+  /// existing call sites keep compiling unchanged; when provided, a
+  /// "Roteirizar visitas" action renders in the page header, gated by the
+  /// same `Capability.customerView` the carteira itself already requires
+  /// (planning a visit route is just another view over the seller's own
+  /// visible carteira, not a distinct admin capability).
+  final VoidCallback? onPlanVisitRouteRequested;
 
   @override
   Widget build(BuildContext context) {
@@ -85,6 +94,7 @@ class CustomerPortfolioPage extends StatelessWidget {
             userId: userId,
             hasSegments: createSegmentBloc != null,
             onImportRequested: onImportRequested,
+            onPlanVisitRouteRequested: onPlanVisitRouteRequested,
             permissionService: permissionService,
             organizationId: organizationId,
           ),
@@ -115,6 +125,7 @@ class _CustomerPortfolioScaffold extends StatefulWidget {
     this.onCustomerSelected,
     this.onUrlStateChanged,
     this.onImportRequested,
+    this.onPlanVisitRouteRequested,
     this.permissionService,
     this.organizationId,
   });
@@ -124,6 +135,7 @@ class _CustomerPortfolioScaffold extends StatefulWidget {
   final ValueChanged<Customer>? onCustomerSelected;
   final void Function(String searchQuery, CustomerPortfolioFilters filters)?
   onUrlStateChanged;
+  final VoidCallback? onPlanVisitRouteRequested;
 
   /// Navigates to `CustomerImportRoute` (TASK-167). Optional/`null`-safe so
   /// existing call sites that do not wire it keep compiling unchanged;
@@ -203,6 +215,19 @@ class _CustomerPortfolioScaffoldState
                 ? _CustomerPortfolioViewMode.list
                 : _CustomerPortfolioViewMode.map;
           }),
+        ),
+      );
+      actions.add(const SizedBox(width: AppSpacing.spacing8));
+    }
+
+    final onPlanVisitRoute = widget.onPlanVisitRouteRequested;
+    if (onPlanVisitRoute != null) {
+      actions.add(
+        AppButton(
+          label: 'Roteirizar visitas',
+          variant: AppButtonVariant.secondary,
+          leadingIcon: Icons.alt_route,
+          onPressed: onPlanVisitRoute,
         ),
       );
       actions.add(const SizedBox(width: AppSpacing.spacing8));

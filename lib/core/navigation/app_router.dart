@@ -42,6 +42,7 @@ class AppRouter {
     this.productImportPageBuilder,
     this.customerPortfolioPageBuilder,
     this.customerDetailPageBuilder,
+    this.visitRoutePageBuilder,
     this.catalogBrowsePageBuilder,
     this.orderListPageBuilder,
     this.orderApprovalQueuePageBuilder,
@@ -142,6 +143,11 @@ class AppRouter {
   customerPortfolioPageBuilder;
   final Widget Function(BuildContext context, String orgId, String customerId)?
   customerDetailPageBuilder;
+
+  /// Builds the roteirização de visitas screen (TASK-177), given
+  /// `orgId`/`companyId` from [VisitRouteRoute].
+  final Widget Function(BuildContext context, String orgId, String companyId)?
+  visitRoutePageBuilder;
 
   /// Builds the pedidos listing/tracking screen (TASK-102), given
   /// `orgId`/`companyId` and the raw `queryParameters` of [OrderListRoute] —
@@ -846,6 +852,24 @@ class AppRouter {
             state.pathParameters['orgId']!,
             state.pathParameters['companyId']!,
             state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: VisitRouteRoute.pathPattern,
+        name: VisitRouteRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.customerView,
+        ),
+        builder: (context, state) {
+          final builder = visitRoutePageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
           );
         },
       ),

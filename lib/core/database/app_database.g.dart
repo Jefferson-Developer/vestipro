@@ -24344,6 +24344,527 @@ class PositivacaoSnapshotsTableCompanion
   }
 }
 
+class $VisitRoutesTableTable extends VisitRoutesTable
+    with TableInfo<$VisitRoutesTableTable, VisitRoutesTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $VisitRoutesTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _salesRepIdMeta = const VerificationMeta(
+    'salesRepId',
+  );
+  @override
+  late final GeneratedColumn<String> salesRepId = GeneratedColumn<String>(
+    'sales_rep_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dateMeta = const VerificationMeta('date');
+  @override
+  late final GeneratedColumn<DateTime> date = GeneratedColumn<DateTime>(
+    'date',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _stopsJsonMeta = const VerificationMeta(
+    'stopsJson',
+  );
+  @override
+  late final GeneratedColumn<String> stopsJson = GeneratedColumn<String>(
+    'stops_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    companyId,
+    salesRepId,
+    date,
+    stopsJson,
+    createdAt,
+    updatedAt,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'visit_routes';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<VisitRoutesTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_companyIdMeta);
+    }
+    if (data.containsKey('sales_rep_id')) {
+      context.handle(
+        _salesRepIdMeta,
+        salesRepId.isAcceptableOrUnknown(
+          data['sales_rep_id']!,
+          _salesRepIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_salesRepIdMeta);
+    }
+    if (data.containsKey('date')) {
+      context.handle(
+        _dateMeta,
+        date.isAcceptableOrUnknown(data['date']!, _dateMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_dateMeta);
+    }
+    if (data.containsKey('stops_json')) {
+      context.handle(
+        _stopsJsonMeta,
+        stopsJson.isAcceptableOrUnknown(data['stops_json']!, _stopsJsonMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_stopsJsonMeta);
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  VisitRoutesTableData map(Map<String, dynamic> data, {String? tablePrefix}) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return VisitRoutesTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      )!,
+      salesRepId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sales_rep_id'],
+      )!,
+      date: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}date'],
+      )!,
+      stopsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stops_json'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+    );
+  }
+
+  @override
+  $VisitRoutesTableTable createAlias(String alias) {
+    return $VisitRoutesTableTable(attachedDatabase, alias);
+  }
+}
+
+class VisitRoutesTableData extends DataClass
+    implements Insertable<VisitRoutesTableData> {
+  final String id;
+  final String organizationId;
+  final String companyId;
+  final String salesRepId;
+  final DateTime date;
+  final String stopsJson;
+  final DateTime createdAt;
+  final DateTime updatedAt;
+  const VisitRoutesTableData({
+    required this.id,
+    required this.organizationId,
+    required this.companyId,
+    required this.salesRepId,
+    required this.date,
+    required this.stopsJson,
+    required this.createdAt,
+    required this.updatedAt,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    map['company_id'] = Variable<String>(companyId);
+    map['sales_rep_id'] = Variable<String>(salesRepId);
+    map['date'] = Variable<DateTime>(date);
+    map['stops_json'] = Variable<String>(stopsJson);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    return map;
+  }
+
+  VisitRoutesTableCompanion toCompanion(bool nullToAbsent) {
+    return VisitRoutesTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      companyId: Value(companyId),
+      salesRepId: Value(salesRepId),
+      date: Value(date),
+      stopsJson: Value(stopsJson),
+      createdAt: Value(createdAt),
+      updatedAt: Value(updatedAt),
+    );
+  }
+
+  factory VisitRoutesTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return VisitRoutesTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String>(json['companyId']),
+      salesRepId: serializer.fromJson<String>(json['salesRepId']),
+      date: serializer.fromJson<DateTime>(json['date']),
+      stopsJson: serializer.fromJson<String>(json['stopsJson']),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String>(companyId),
+      'salesRepId': serializer.toJson<String>(salesRepId),
+      'date': serializer.toJson<DateTime>(date),
+      'stopsJson': serializer.toJson<String>(stopsJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+    };
+  }
+
+  VisitRoutesTableData copyWith({
+    String? id,
+    String? organizationId,
+    String? companyId,
+    String? salesRepId,
+    DateTime? date,
+    String? stopsJson,
+    DateTime? createdAt,
+    DateTime? updatedAt,
+  }) => VisitRoutesTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId ?? this.companyId,
+    salesRepId: salesRepId ?? this.salesRepId,
+    date: date ?? this.date,
+    stopsJson: stopsJson ?? this.stopsJson,
+    createdAt: createdAt ?? this.createdAt,
+    updatedAt: updatedAt ?? this.updatedAt,
+  );
+  VisitRoutesTableData copyWithCompanion(VisitRoutesTableCompanion data) {
+    return VisitRoutesTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      salesRepId: data.salesRepId.present
+          ? data.salesRepId.value
+          : this.salesRepId,
+      date: data.date.present ? data.date.value : this.date,
+      stopsJson: data.stopsJson.present ? data.stopsJson.value : this.stopsJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VisitRoutesTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('salesRepId: $salesRepId, ')
+          ..write('date: $date, ')
+          ..write('stopsJson: $stopsJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hash(
+    id,
+    organizationId,
+    companyId,
+    salesRepId,
+    date,
+    stopsJson,
+    createdAt,
+    updatedAt,
+  );
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is VisitRoutesTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.salesRepId == this.salesRepId &&
+          other.date == this.date &&
+          other.stopsJson == this.stopsJson &&
+          other.createdAt == this.createdAt &&
+          other.updatedAt == this.updatedAt);
+}
+
+class VisitRoutesTableCompanion extends UpdateCompanion<VisitRoutesTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String> companyId;
+  final Value<String> salesRepId;
+  final Value<DateTime> date;
+  final Value<String> stopsJson;
+  final Value<DateTime> createdAt;
+  final Value<DateTime> updatedAt;
+  final Value<int> rowid;
+  const VisitRoutesTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.salesRepId = const Value.absent(),
+    this.date = const Value.absent(),
+    this.stopsJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  VisitRoutesTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    required String companyId,
+    required String salesRepId,
+    required DateTime date,
+    required String stopsJson,
+    required DateTime createdAt,
+    required DateTime updatedAt,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       companyId = Value(companyId),
+       salesRepId = Value(salesRepId),
+       date = Value(date),
+       stopsJson = Value(stopsJson),
+       createdAt = Value(createdAt),
+       updatedAt = Value(updatedAt);
+  static Insertable<VisitRoutesTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? salesRepId,
+    Expression<DateTime>? date,
+    Expression<String>? stopsJson,
+    Expression<DateTime>? createdAt,
+    Expression<DateTime>? updatedAt,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (salesRepId != null) 'sales_rep_id': salesRepId,
+      if (date != null) 'date': date,
+      if (stopsJson != null) 'stops_json': stopsJson,
+      if (createdAt != null) 'created_at': createdAt,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  VisitRoutesTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String>? companyId,
+    Value<String>? salesRepId,
+    Value<DateTime>? date,
+    Value<String>? stopsJson,
+    Value<DateTime>? createdAt,
+    Value<DateTime>? updatedAt,
+    Value<int>? rowid,
+  }) {
+    return VisitRoutesTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      salesRepId: salesRepId ?? this.salesRepId,
+      date: date ?? this.date,
+      stopsJson: stopsJson ?? this.stopsJson,
+      createdAt: createdAt ?? this.createdAt,
+      updatedAt: updatedAt ?? this.updatedAt,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (salesRepId.present) {
+      map['sales_rep_id'] = Variable<String>(salesRepId.value);
+    }
+    if (date.present) {
+      map['date'] = Variable<DateTime>(date.value);
+    }
+    if (stopsJson.present) {
+      map['stops_json'] = Variable<String>(stopsJson.value);
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('VisitRoutesTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('salesRepId: $salesRepId, ')
+          ..write('date: $date, ')
+          ..write('stopsJson: $stopsJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -24390,6 +24911,9 @@ abstract class _$AppDatabase extends GeneratedDatabase {
       $ConflictAuditLogTableTable(this);
   late final $PositivacaoSnapshotsTableTable positivacaoSnapshotsTable =
       $PositivacaoSnapshotsTableTable(this);
+  late final $VisitRoutesTableTable visitRoutesTable = $VisitRoutesTableTable(
+    this,
+  );
   late final Index idxCustomersOrgCompany = Index(
     'idx_customers_org_company',
     'CREATE INDEX idx_customers_org_company ON customers (organization_id, company_id)',
@@ -24518,6 +25042,10 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_positivacao_snapshots_org_company',
     'CREATE INDEX idx_positivacao_snapshots_org_company ON positivacao_snapshots (organization_id, company_id)',
   );
+  late final Index idxVisitRoutesOrgRepDate = Index(
+    'idx_visit_routes_org_rep_date',
+    'CREATE INDEX idx_visit_routes_org_rep_date ON visit_routes (organization_id, sales_rep_id, date)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -24547,6 +25075,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     conflictRecordsTable,
     conflictAuditLogTable,
     positivacaoSnapshotsTable,
+    visitRoutesTable,
     idxCustomersOrgCompany,
     idxCustomerAddressesCustomer,
     idxCustomerContactsCustomer,
@@ -24579,6 +25108,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxConflictRecordsScopeStatus,
     idxConflictAuditLogScope,
     idxPositivacaoSnapshotsOrgCompany,
+    idxVisitRoutesOrgRepDate,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -36648,6 +37178,277 @@ typedef $$PositivacaoSnapshotsTableTableProcessedTableManager =
       PositivacaoSnapshotsTableData,
       PrefetchHooks Function()
     >;
+typedef $$VisitRoutesTableTableCreateCompanionBuilder =
+    VisitRoutesTableCompanion Function({
+      required String id,
+      required String organizationId,
+      required String companyId,
+      required String salesRepId,
+      required DateTime date,
+      required String stopsJson,
+      required DateTime createdAt,
+      required DateTime updatedAt,
+      Value<int> rowid,
+    });
+typedef $$VisitRoutesTableTableUpdateCompanionBuilder =
+    VisitRoutesTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String> companyId,
+      Value<String> salesRepId,
+      Value<DateTime> date,
+      Value<String> stopsJson,
+      Value<DateTime> createdAt,
+      Value<DateTime> updatedAt,
+      Value<int> rowid,
+    });
+
+class $$VisitRoutesTableTableFilterComposer
+    extends Composer<_$AppDatabase, $VisitRoutesTableTable> {
+  $$VisitRoutesTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get salesRepId => $composableBuilder(
+    column: $table.salesRepId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stopsJson => $composableBuilder(
+    column: $table.stopsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$VisitRoutesTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $VisitRoutesTableTable> {
+  $$VisitRoutesTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get salesRepId => $composableBuilder(
+    column: $table.salesRepId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get date => $composableBuilder(
+    column: $table.date,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stopsJson => $composableBuilder(
+    column: $table.stopsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$VisitRoutesTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $VisitRoutesTableTable> {
+  $$VisitRoutesTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get salesRepId => $composableBuilder(
+    column: $table.salesRepId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get date =>
+      $composableBuilder(column: $table.date, builder: (column) => column);
+
+  GeneratedColumn<String> get stopsJson =>
+      $composableBuilder(column: $table.stopsJson, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+}
+
+class $$VisitRoutesTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $VisitRoutesTableTable,
+          VisitRoutesTableData,
+          $$VisitRoutesTableTableFilterComposer,
+          $$VisitRoutesTableTableOrderingComposer,
+          $$VisitRoutesTableTableAnnotationComposer,
+          $$VisitRoutesTableTableCreateCompanionBuilder,
+          $$VisitRoutesTableTableUpdateCompanionBuilder,
+          (
+            VisitRoutesTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $VisitRoutesTableTable,
+              VisitRoutesTableData
+            >,
+          ),
+          VisitRoutesTableData,
+          PrefetchHooks Function()
+        > {
+  $$VisitRoutesTableTableTableManager(
+    _$AppDatabase db,
+    $VisitRoutesTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$VisitRoutesTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$VisitRoutesTableTableOrderingComposer($db: db, $table: table),
+          createComputedFieldComposer: () =>
+              $$VisitRoutesTableTableAnnotationComposer($db: db, $table: table),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String> companyId = const Value.absent(),
+                Value<String> salesRepId = const Value.absent(),
+                Value<DateTime> date = const Value.absent(),
+                Value<String> stopsJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => VisitRoutesTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                salesRepId: salesRepId,
+                date: date,
+                stopsJson: stopsJson,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                required String companyId,
+                required String salesRepId,
+                required DateTime date,
+                required String stopsJson,
+                required DateTime createdAt,
+                required DateTime updatedAt,
+                Value<int> rowid = const Value.absent(),
+              }) => VisitRoutesTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                salesRepId: salesRepId,
+                date: date,
+                stopsJson: stopsJson,
+                createdAt: createdAt,
+                updatedAt: updatedAt,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$VisitRoutesTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $VisitRoutesTableTable,
+      VisitRoutesTableData,
+      $$VisitRoutesTableTableFilterComposer,
+      $$VisitRoutesTableTableOrderingComposer,
+      $$VisitRoutesTableTableAnnotationComposer,
+      $$VisitRoutesTableTableCreateCompanionBuilder,
+      $$VisitRoutesTableTableUpdateCompanionBuilder,
+      (
+        VisitRoutesTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $VisitRoutesTableTable,
+          VisitRoutesTableData
+        >,
+      ),
+      VisitRoutesTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -36716,4 +37517,6 @@ class $AppDatabaseManager {
         _db,
         _db.positivacaoSnapshotsTable,
       );
+  $$VisitRoutesTableTableTableManager get visitRoutesTable =>
+      $$VisitRoutesTableTableTableManager(_db, _db.visitRoutesTable);
 }

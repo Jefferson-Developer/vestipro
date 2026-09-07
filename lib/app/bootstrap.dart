@@ -35,6 +35,7 @@ import '../features/catalog/catalog.dart';
 import '../features/customer_import/customer_import.dart';
 import '../features/product_import/product_import.dart';
 import '../features/customers/customers.dart';
+import '../features/visit_routes/visit_routes.dart';
 import '../features/catalog_share/catalog_share.dart';
 import '../features/dashboards/dashboards.dart';
 import '../features/insights/insights.dart';
@@ -956,8 +957,27 @@ class VestiProApp extends StatelessWidget {
                           companyId: companyId,
                         ).location,
                       ),
+                      onPlanVisitRouteRequested: () => context.go(
+                        VisitRouteRoute(
+                          orgId: orgId,
+                          companyId: companyId,
+                        ).location,
+                      ),
                     ),
                   ),
+          visitRoutePageBuilder: (context, orgId, companyId) =>
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId: companyId,
+                child: VisitRoutePage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  salesRepId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  permissionService: getIt<PermissionService>(),
+                  createBloc: () => getIt<VisitRouteBloc>(),
+                  createPortfolioBloc: () => getIt<CustomerPortfolioBloc>(),
+                ),
+              ),
           orderListPageBuilder: (context, orgId, companyId, queryParameters) =>
               _withConnectivityIndicator(
                 orgId: orgId,

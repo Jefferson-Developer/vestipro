@@ -110,6 +110,13 @@ dependencies:
   # AppDelegate.swift/Info.plist, web/index.html) — not available in this
   # environment; see TASK-176 "Riscos conhecidos".
   google_maps_flutter: ^2.18.0
+  # Roteirização de visitas (TASK-177): opens the seller's chosen external
+  # navigation app (Google Maps/Waze/Apple Maps) with a validated
+  # destination — see `NavigationLinkBuilder`. Universal `https://` links
+  # only (no custom URL scheme/`<queries>`/`LSApplicationQueriesSchemes`
+  # declaration needed), same "no extra native wiring in this environment"
+  # precedent already set for `google_maps_flutter` above.
+  url_launcher: ^6.3.1
 
 dev_dependencies:
   flutter_test:
