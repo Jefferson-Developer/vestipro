@@ -1111,6 +1111,16 @@ final class CartSharePublicRoute extends AppRoute {
   String get location => '/cart-share/$token';
 }
 
+/// Authenticated self-service area for a customer linked to one tenant.
+final class CustomerPortalRoute extends AppRoute {
+  const CustomerPortalRoute({required this.orgId});
+  final String orgId;
+  static const name = 'customerPortal';
+  static const pathPattern = '/customer-portal/:orgId';
+  @override
+  String get location => '/customer-portal/$orgId';
+}
+
 /// Route shown when a guard denies access to the requested location.
 final class ForbiddenRoute extends AppRoute {
   const ForbiddenRoute();

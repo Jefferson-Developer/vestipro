@@ -47,6 +47,7 @@ const ROLES_ALLOWED_TO_SUBMIT_ORDER: ReadonlySet<string> = new Set<string>([
   'ADMIN',
   'SALES_MANAGER',
   'SALES_REP',
+  'CUSTOMER_PORTAL',
 ]);
 
 const ACTIVE_CUSTOMER_STATUS = 'active';
@@ -217,7 +218,7 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
     const orderId = requireNonEmptyString(request.data?.orderId, 'orderId');
     const branchId = requireNonEmptyString(request.data?.branchId, 'branchId');
     const customerId = requireNonEmptyString(request.data?.customerId, 'customerId');
-    const sellerId = requireNonEmptyString(request.data?.sellerId, 'sellerId');
+    let sellerId = requireNonEmptyString(request.data?.sellerId, 'sellerId');
     const priceListId = requireNonEmptyString(request.data?.priceListId, 'priceListId');
     const paymentTermId = requireNonEmptyString(request.data?.paymentTermId, 'paymentTermId');
     const carrierId = optionalString(request.data?.carrierId);
@@ -230,15 +231,22 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
     const billingAddress = requireAddress(request.data?.billingAddress, 'billingAddress');
     const items = requireItems(request.data?.items);
 
-    if (sellerId !== uid) {
+    const db = getFirestore();
+    const membership = await loadActiveMembership(db, organizationId, uid);
+    if (membership.roleName === 'CUSTOMER_PORTAL') {
+      const portalMember = await db.doc(`organizations/${organizationId}/members/${uid}`).get();
+      if (portalMember.data()?.customerId !== customerId) {
+        throw new HttpsError('permission-denied', 'O portal só pode enviar pedidos do próprio cliente.');
+      }
+      const portalCustomer = await db.doc(`organizations/${organizationId}/customers/${customerId}`).get();
+      sellerId = requireNonEmptyString(portalCustomer.data()?.primarySalesRepId, 'primarySalesRepId');
+    } else if (sellerId !== uid) {
       throw new HttpsError(
         'permission-denied',
         'O pedido só pode ser enviado pelo próprio vendedor responsável.',
       );
     }
 
-    const db = getFirestore();
-    const membership = await loadActiveMembership(db, organizationId, uid);
     if (!ROLES_ALLOWED_TO_SUBMIT_ORDER.has(membership.roleName)) {
       throw new HttpsError(
         'permission-denied',
@@ -384,8 +392,13 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
       // the very first `statusHistory` entry already carrying *why*
       // (`buildApprovalReason`), so the approval queue (`decideOrderApproval`)
       // never has to reverse-engineer the reason from raw pricing internals.
-      const initialStatus = pricing.approvalRequired ? 'under_review' : 'submitted';
-      const approvalReason = pricing.approvalRequired ? buildApprovalReason(pricing) : null;
+      const portalApprovalRequired = membership.roleName === 'CUSTOMER_PORTAL';
+      const initialStatus = pricing.approvalRequired || portalApprovalRequired
+        ? 'under_review'
+        : 'submitted';
+      const approvalReason = portalApprovalRequired
+        ? 'Pedido realizado pelo portal do cliente'
+        : pricing.approvalRequired ? buildApprovalReason(pricing) : null;
 
       const orderData: DocumentData = {
         organizationId,
@@ -436,7 +449,8 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
         approvedBy: null,
         approvedAt: null,
         rejectionReason: null,
-        pricingApprovalRequired: pricing.approvalRequired,
+        pricingApprovalRequired: pricing.approvalRequired || portalApprovalRequired,
+        submittedVia: portalApprovalRequired ? 'customer_portal' : 'internal',
         idempotencyKey: orderId,
         createdAt: now,
         createdBy: uid,

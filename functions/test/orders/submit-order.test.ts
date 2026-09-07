@@ -60,6 +60,7 @@ async function seedMember(
   organizationId: string,
   uid: string,
   roleName: string,
+  customerId?: string,
 ): Promise<void> {
   const now = Timestamp.now();
   await db
@@ -80,6 +81,7 @@ async function seedMember(
       updatedAt: now,
       updatedBy: uid,
       deletedAt: null,
+      ...(customerId ? { customerId } : {}),
     });
 }
 
@@ -88,6 +90,7 @@ async function seedCustomer(
   companyId: string,
   customerId: string,
   status = 'active',
+  primarySalesRepId = 'rep-1',
 ): Promise<void> {
   await db
     .collection('organizations')
@@ -99,6 +102,7 @@ async function seedCustomer(
       companyId,
       status,
       segment: 'varejo',
+      primarySalesRepId,
     });
 }
 
@@ -304,6 +308,22 @@ describe('submitOrder', () => {
     expect(auditSnapshot.docs.filter((doc) => doc.data().action === 'order.submitted')).toHaveLength(
       1,
     );
+  });
+
+  it('submits a customer portal order through the same pipeline and requires approval (TASK-182)', async () => {
+    await seedHappyPath();
+    await seedMember('org-1', 'buyer-1', 'CUSTOMER_PORTAL', 'customer-1');
+    const wrapped = testEnv.wrap(submitOrder);
+    const result = (await wrapped(buildRequest(
+      baseRequest({ orderId: 'portal-order-1', sellerId: 'forged-seller' }),
+      authFor('buyer-1', { email: 'buyer@store.com' }),
+    ))) as SubmitOrderResponse;
+    expect(result.status).toBe('under_review');
+    const persisted = await db.doc('organizations/org-1/orders/portal-order-1').get();
+    expect(persisted.data()).toMatchObject({
+      customerId: 'customer-1', sellerId: 'rep-1',
+      submittedVia: 'customer_portal', pricingApprovalRequired: true,
+    });
   });
 
   it('generates the next sequential order number for a second, different order', async () => {

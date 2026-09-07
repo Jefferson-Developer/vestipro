@@ -399,6 +399,10 @@ import '../features/customer_import/domain/usecases/watch_customer_import_job_us
     as _i402;
 import '../features/customer_import/presentation/bloc/customer_import_bloc.dart'
     as _i1037;
+import '../features/customer_portal/data/cloud_functions_customer_portal_repository.dart'
+    as _i967;
+import '../features/customer_portal/domain/repositories/customer_portal_repository.dart'
+    as _i783;
 import '../features/customers/customers.dart' as _i909;
 import '../features/customers/data/datasources/customer_form_draft_data_source.dart'
     as _i1036;
@@ -2942,6 +2946,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i726.OrderListDataSource>(
       () => _i937.FirestoreOrderListDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.lazySingleton<_i783.CustomerPortalRepository>(
+      () => _i967.CloudFunctionsCustomerPortalRepository(
+        gh<_i809.FirebaseFunctions>(),
+      ),
     );
     gh.lazySingleton<_i999.InviteAcceptanceRepository>(
       () => _i371.InviteAcceptanceRepositoryImpl(

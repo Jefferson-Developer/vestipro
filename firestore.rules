@@ -112,6 +112,16 @@ service cloud.firestore {
         && currentRoleName(organizationId) == 'SALES_REP';
     }
 
+    function isCustomerPortal(organizationId) {
+      return isActiveMember(organizationId)
+        && currentRoleName(organizationId) == 'CUSTOMER_PORTAL'
+        && get(membershipPath(organizationId)).data.customerId is string;
+    }
+
+    function portalCustomerId(organizationId) {
+      return get(membershipPath(organizationId)).data.customerId;
+    }
+
     function requesterTeamIds(organizationId) {
       return get(membershipPath(organizationId)).data.teamIds;
     }
@@ -182,19 +192,22 @@ service cloud.firestore {
     }
 
     function canReadCustomer(organizationId) {
-      return validCustomerVisibilityPayload(organizationId)
+      return resource.data.organizationId == organizationId
         && (
+          (isCustomerPortal(organizationId) && resource.id == portalCustomerId(organizationId))
+          || (validCustomerVisibilityPayload(organizationId) && (
           isOwnerOrAdmin(organizationId)
           || managerCanReadCustomer(organizationId)
           || (
             isSalesRep(organizationId)
             && resource.data.primarySalesRepId == request.auth.uid
-          )
+          ))
         );
     }
 
     function canListCustomers(organizationId) {
-      return isOwnerOrAdmin(organizationId)
+      return (isCustomerPortal(organizationId) && resource.id == portalCustomerId(organizationId))
+        || isOwnerOrAdmin(organizationId)
         || (
           customerIsActive()
           && (
@@ -219,6 +232,7 @@ service cloud.firestore {
           'organizationId',
           'companyId',
           'sellerId',
+          'customerId',
           'deletedAt'
         ])
         && resource.data.organizationId == organizationId
@@ -226,6 +240,8 @@ service cloud.firestore {
         && resource.data.companyId.size() > 0
         && resource.data.sellerId is string
         && resource.data.sellerId.size() > 0
+        && resource.data.customerId is string
+        && resource.data.customerId.size() > 0
         && resource.data.deletedAt == null;
     }
 
@@ -248,6 +264,8 @@ service cloud.firestore {
       return validOrderVisibilityPayload(organizationId)
         && (
           isOwnerOrAdmin(organizationId)
+          || (isCustomerPortal(organizationId)
+            && resource.data.customerId == portalCustomerId(organizationId))
           || (isSalesRep(organizationId) && resource.data.sellerId == request.auth.uid)
           || managerCanReadOrder(organizationId)
         );

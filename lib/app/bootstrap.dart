@@ -35,6 +35,7 @@ import '../features/catalog/catalog.dart';
 import '../features/customer_import/customer_import.dart';
 import '../features/product_import/product_import.dart';
 import '../features/customers/customers.dart';
+import '../features/customer_portal/customer_portal.dart';
 import '../features/visit_routes/visit_routes.dart';
 import '../features/catalog_share/catalog_share.dart';
 import '../features/cart_share/cart_share.dart';
@@ -1230,6 +1231,16 @@ class VestiProApp extends StatelessWidget {
             token: token,
             createCubit: () => getIt<CartShareCubit>(),
           ),
+          customerPortalPageBuilder: (context, orgId) {
+            final repository = getIt<CustomerPortalRepository>();
+            return CustomerPortalPage(
+              organizationId: orgId,
+              cubit: CustomerPortalCubit(
+                LoadCustomerPortalUseCase(repository),
+                RepeatCustomerPortalOrderUseCase(repository),
+              ),
+            );
+          },
         );
 
     // TASK-174: `appRouter` above is built exactly once per `build()` call —

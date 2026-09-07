@@ -37,6 +37,7 @@ class AppRouter {
     required this.acceptInvitePageBuilder,
     required this.catalogSharePublicPageBuilder,
     this.cartSharePublicPageBuilder,
+    this.customerPortalPageBuilder,
     this.customerFormPageBuilder,
     this.customerImportPageBuilder,
     this.productFormPageBuilder,
@@ -92,6 +93,8 @@ class AppRouter {
   userManagementPageBuilder;
   final Widget Function(BuildContext context, String token)?
   cartSharePublicPageBuilder;
+  final Widget Function(BuildContext context, String orgId)?
+  customerPortalPageBuilder;
 
   /// Builds the central de notificações internas screen (TASK-151), given
   /// `orgId` from [NotificationCenterRoute]. Optional (like most feature
@@ -1119,6 +1122,16 @@ class AppRouter {
             cartSharePublicPageBuilder?.call(
               context,
               state.pathParameters['token']!,
+            ) ??
+            const NotFoundPage(),
+      ),
+      GoRoute(
+        path: CustomerPortalRoute.pathPattern,
+        name: CustomerPortalRoute.name,
+        builder: (context, state) =>
+            customerPortalPageBuilder?.call(
+              context,
+              state.pathParameters['orgId']!,
             ) ??
             const NotFoundPage(),
       ),

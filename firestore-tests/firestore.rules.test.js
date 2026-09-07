@@ -475,6 +475,7 @@ function orderDoc({
   organizationId,
   companyId = 'company-a',
   sellerId,
+  customerId = 'customer-a',
   status = 'submitted',
   deletedAt = null,
 }) {
@@ -482,7 +483,7 @@ function orderDoc({
     organizationId,
     companyId,
     branchId: 'branch-a',
-    customerId: 'customer-a',
+    customerId,
     sellerId,
     orderNumber: '000001',
     deliveryAddress: { street: 'Rua A', city: 'Jaraguá do Sul', state: 'SC', zipCode: '89250-000', country: 'BR' },
@@ -2568,5 +2569,36 @@ describe('organizations/{organizationId}/ssoConnections/{connectionId}  (TASK-17
       ownerDb.doc(`organizations/${ORG_A}/ssoConnections/conn-a`).update({ defaultRoleName: 'ADMIN' }),
     );
     await assertFails(ownerDb.doc(`organizations/${ORG_A}/ssoConnections/conn-a`).delete());
+  });
+});
+
+describe('customer portal isolation (TASK-182)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db.doc(`organizations/${ORG_A}/members/portal-a`).set({
+        ...membershipDoc({ organizationId: ORG_A, userId: 'portal-a', roleId: 'CUSTOMER_PORTAL', roleName: 'CUSTOMER_PORTAL' }),
+        customerId: 'customer-a',
+      });
+      await db.doc(`organizations/${ORG_A}/customers/customer-a`).set(customerDoc({ organizationId: ORG_A, primarySalesRepId: 'rep-a', teamId: 'team-a' }));
+      await db.doc(`organizations/${ORG_A}/customers/customer-other`).set(customerDoc({ organizationId: ORG_A, primarySalesRepId: 'rep-b', teamId: 'team-b' }));
+      await db.doc(`organizations/${ORG_A}/orders/order-a`).set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-a', customerId: 'customer-a' }));
+      await db.doc(`organizations/${ORG_A}/orders/order-other`).set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-b', customerId: 'customer-other' }));
+      await db.doc(`organizations/${ORG_B}/customers/customer-a`).set(customerDoc({ organizationId: ORG_B, companyId: 'company-b', primarySalesRepId: 'owner-b', teamId: 'team-b' }));
+    });
+  });
+
+  test('cliente externo lê somente seu cliente e seus pedidos', async () => {
+    const db = testEnv.authenticatedContext('portal-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/customers/customer-a`).get());
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/orders/order-a`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/customers/customer-other`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/orders/order-other`).get());
+  });
+
+  test('cliente externo não escreve diretamente nem usa vínculo de outro tenant', async () => {
+    const db = testEnv.authenticatedContext('portal-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/orders/order-forged`).set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-a' })));
+    await assertFails(db.doc(`organizations/${ORG_B}/customers/customer-a`).get());
   });
 });
