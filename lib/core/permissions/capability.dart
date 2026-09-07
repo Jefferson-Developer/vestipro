@@ -171,6 +171,25 @@ enum Capability {
   /// carries the key's `keyHash` (a leaked read would let an attacker brute
   /// force forgeries offline).
   apiKeyManage,
+
+  /// Configure an organization's corporate SSO connection (TASK-173,
+  /// EPIC-23) — SAML/OIDC IdP metadata, the e-mail domains that route to
+  /// this organization and the `defaultRoleName` a brand-new user is
+  /// just-in-time provisioned with on first login. Same infrastructure-
+  /// decision scope as [erpIntegrationManage]/[webhookManage]/[apiKeyManage]:
+  /// restricted to `OWNER`/`ADMIN` (`RolePermissionMatrix`'s full/near-full
+  /// sets), never delegated to
+  /// `SALES_MANAGER`/`SALES_REP`/`SALES_ASSISTANT`/`FINANCE`. Gates the
+  /// `configureSsoConnection` Cloud Function — `organizations/{organizationId}/
+  /// ssoConnections` itself is never client-readable at all, regardless of
+  /// this (or any) capability, since it carries enough of the organization's
+  /// own IdP configuration (SAML `x509Certificates`, OIDC `clientId`/
+  /// `issuer`) that a leaked read would help an attacker probe/impersonate it
+  /// (`firestore.rules`). Deliberately never gates the login-time
+  /// `resolveSsoForEmail`/`completeSsoLogin` callables — those must work for
+  /// *any* user signing in, including one with no capability at all yet
+  /// (their very first login).
+  ssoManage,
 }
 
 extension CapabilityCode on Capability {
@@ -223,6 +242,7 @@ extension CapabilityCode on Capability {
       Capability.erpIntegrationManage => 'erpIntegration.manage',
       Capability.webhookManage => 'webhook.manage',
       Capability.apiKeyManage => 'apiKey.manage',
+      Capability.ssoManage => 'sso.manage',
     };
   }
 }

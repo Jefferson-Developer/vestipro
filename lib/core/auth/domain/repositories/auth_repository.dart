@@ -38,6 +38,26 @@ abstract interface class AuthRepository {
   /// itself, which must go through [signInWithEmailAndPassword] instead.
   Future<AppResult<SessionUser>> signInWithProvider(AuthProviderType provider);
 
+  /// Signs in against a federated SAML/OIDC provider registered with
+  /// Identity Platform for a specific organization's corporate SSO
+  /// connection (TASK-173) — [providerId] is the exact
+  /// `SsoConnectionDoc.providerId` `resolveSsoForEmail` resolved at runtime
+  /// (`saml.<connectionId>`/`oidc.<connectionId>`), never a hardcoded value.
+  ///
+  /// Deliberately a separate method from [signInWithProvider] (which only
+  /// ever covers a fixed, compile-time-known [AuthProviderType] such as
+  /// Google/Apple): a corporate SSO connection's `providerId` is dynamic,
+  /// resolved per organization at runtime, so it cannot be expressed as an
+  /// enum value. Only ever authenticates the caller with Firebase Auth —
+  /// completing the just-in-time provisioning/RBAC decision is always
+  /// `completeSsoLogin`'s (a separate, subsequent Cloud Function call), same
+  /// "authentication vs. authorization are different concerns" boundary
+  /// this repository already keeps for `signInWithEmailAndPassword`.
+  Future<AppResult<SessionUser>> signInWithFederatedProvider({
+    required String providerId,
+    required bool isSaml,
+  });
+
   Future<AppResult<void>> signOut();
 
   Future<AppResult<void>> sendPasswordResetEmail({required String email});

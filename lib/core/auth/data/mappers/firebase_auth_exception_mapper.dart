@@ -63,6 +63,18 @@ AppException mapFirebaseAuthExceptionToAppException(
         cause: exception,
         stackTrace: stackTrace,
       );
+    // Raised by `signInWithProvider` (TASK-173, corporate SSO) when the
+    // federated IdP asserts an e-mail already tied to a different sign-in
+    // method (e.g. an existing e-mail/senha account) — a genuinely ordinary
+    // outcome the user needs a clear, actionable message for, never a raw
+    // Firebase error string.
+    case 'account-exists-with-different-credential':
+      return ConflictException(
+        'Já existe uma conta com este e-mail usando outro método de login.',
+        code: exception.code,
+        cause: exception,
+        stackTrace: stackTrace,
+      );
     // Raised by `User.getIdToken(true)` (TASK-041's session-refresh check)
     // when the account was disabled/deleted or its refresh token was
     // revoked remotely after the app already had a locally cached session.

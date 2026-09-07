@@ -101,6 +101,29 @@ final class FirebaseAuthDataSource implements AuthDataSource {
   }
 
   @override
+  Future<AuthUserDto> signInWithFederatedProvider({
+    required String providerId,
+    required bool isSaml,
+  }) async {
+    try {
+      final provider = isSaml
+          ? SAMLAuthProvider(providerId)
+          : OAuthProvider(providerId);
+      final credential = await _firebaseAuth.signInWithProvider(provider);
+      final user = credential.user;
+      if (user == null) {
+        throw const UnknownException(
+          'Firebase returned an empty user after federated sign-in.',
+          code: 'auth_empty_user',
+        );
+      }
+      return _toDto(user)!;
+    } on FirebaseAuthException catch (exception, stackTrace) {
+      throw mapFirebaseAuthExceptionToAppException(exception, stackTrace);
+    }
+  }
+
+  @override
   Future<void> signOut() async {
     try {
       await _firebaseAuth.signOut();

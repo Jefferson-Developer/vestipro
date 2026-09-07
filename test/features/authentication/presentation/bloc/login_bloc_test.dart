@@ -9,6 +9,11 @@ import 'package:vestipro/features/authentication/presentation/bloc/login_bloc.da
 import 'package:vestipro/features/authentication/presentation/bloc/login_event.dart';
 import 'package:vestipro/features/authentication/presentation/bloc/login_state.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
+import 'package:vestipro/features/sso/domain/entities/completed_sso_login.dart';
+import 'package:vestipro/features/sso/domain/entities/sso_login_route.dart';
+import 'package:vestipro/features/sso/domain/repositories/sso_repository.dart';
+import 'package:vestipro/features/sso/domain/usecases/sign_in_with_corporate_sso_use_case.dart';
+import 'package:vestipro/features/sso/domain/value_objects/sso_protocol.dart';
 
 void main() {
   group('LoginBloc', () {
@@ -312,6 +317,123 @@ void main() {
         expect(analyticsService.loggedEvents, hasLength(1));
       },
     );
+
+    blocTest<LoginBloc, LoginState>(
+      'clears the field error and resets a stale failure as soon as the '
+      'corporate SSO e-mail changes',
+      build: () => _buildBloc(
+        authRepository: _AuthRepositoryStub(
+          result: const AppSuccess<SessionUser>(signedInUser),
+        ),
+        analyticsService: analyticsService,
+      ),
+      seed: () => const LoginState(
+        corporateSsoEmailError: 'Informe um e-mail válido.',
+        status: LoginSubmissionStatus.failure,
+        failure: NotFoundFailure('Nenhum provedor de SSO encontrado.'),
+      ),
+      act: (bloc) => bloc.add(
+        const LoginEvent.corporateSsoEmailChanged('ana@malwee.com.br'),
+      ),
+      expect: () => <LoginState>[
+        const LoginState(corporateSsoEmail: 'ana@malwee.com.br'),
+      ],
+    );
+
+    blocTest<LoginBloc, LoginState>(
+      'rejects a corporate SSO submit with an empty e-mail without '
+      'resolving any connection',
+      build: () => _buildBloc(
+        authRepository: _AuthRepositoryStub(
+          result: const AppSuccess<SessionUser>(signedInUser),
+        ),
+        analyticsService: analyticsService,
+      ),
+      act: (bloc) => bloc.add(const LoginEvent.corporateSsoSubmitted()),
+      expect: () => <LoginState>[
+        const LoginState(corporateSsoEmailError: 'Informe seu e-mail.'),
+      ],
+      verify: (_) {
+        expect(analyticsService.loggedEvents, isEmpty);
+      },
+    );
+
+    blocTest<LoginBloc, LoginState>(
+      'completes the corporate SSO login end to end: resolves the '
+      'connection, authenticates, then finishes JIT provisioning',
+      build: () => _buildBloc(
+        authRepository: _AuthRepositoryStub(
+          result: const AppSuccess<SessionUser>(signedInUser),
+        ),
+        ssoRepository: _SsoRepositoryStub(
+          route: const SsoLoginRoute(
+            organizationId: 'org-sso',
+            organizationName: 'Grupo Fashion XPTO',
+            protocol: SsoProtocol.oidc,
+            providerId: 'oidc.conn-1',
+          ),
+          completion: const CompletedSsoLogin(
+            organizationId: 'org-sso',
+            organizationName: 'Grupo Fashion XPTO',
+            roleName: 'SALES_REP',
+            provisioned: true,
+          ),
+        ),
+        analyticsService: analyticsService,
+      ),
+      seed: () => const LoginState(corporateSsoEmail: 'ana@malwee.com.br'),
+      act: (bloc) => bloc.add(const LoginEvent.corporateSsoSubmitted()),
+      expect: () => <LoginState>[
+        const LoginState(
+          corporateSsoEmail: 'ana@malwee.com.br',
+          status: LoginSubmissionStatus.submitting,
+        ),
+        const LoginState(
+          corporateSsoEmail: 'ana@malwee.com.br',
+          status: LoginSubmissionStatus.success,
+          organizationId: 'org-sso',
+        ),
+      ],
+      verify: (_) {
+        expect(analyticsService.loggedEvents, hasLength(1));
+        final event = analyticsService.loggedEvents.single;
+        expect(event.name, AnalyticsEvents.loginCompleted);
+        expect(event.parameters, containsPair('method', 'sso'));
+        expect(event.parameters, isNot(contains('email')));
+      },
+    );
+
+    blocTest<LoginBloc, LoginState>(
+      'surfaces a NotFoundFailure when no corporate SSO connection is '
+      'registered for the e-mail',
+      build: () => _buildBloc(
+        authRepository: _AuthRepositoryStub(
+          result: const AppSuccess<SessionUser>(signedInUser),
+        ),
+        ssoRepository: const _SsoRepositoryStub(route: null),
+        analyticsService: analyticsService,
+      ),
+      seed: () =>
+          const LoginState(corporateSsoEmail: 'ana@dominio-pessoal.com'),
+      act: (bloc) => bloc.add(const LoginEvent.corporateSsoSubmitted()),
+      expect: () => <LoginState>[
+        const LoginState(
+          corporateSsoEmail: 'ana@dominio-pessoal.com',
+          status: LoginSubmissionStatus.submitting,
+        ),
+        const LoginState(
+          corporateSsoEmail: 'ana@dominio-pessoal.com',
+          status: LoginSubmissionStatus.failure,
+          failure: NotFoundFailure(
+            'Nenhum provedor de SSO corporativo está configurado para este e-mail.',
+            code: 'sso_connection_not_found',
+          ),
+        ),
+      ],
+      verify: (_) {
+        expect(analyticsService.loggedEvents, isEmpty);
+      },
+    );
   });
 }
 
@@ -320,9 +442,14 @@ LoginBloc _buildBloc({
   required AnalyticsService analyticsService,
   List<Membership>? activeMemberships,
   MembershipRepository? membershipRepository,
+  SsoRepository? ssoRepository,
 }) {
   return LoginBloc(
     signInWithEmailAndPassword: SignInWithEmailAndPasswordUseCase(
+      authRepository,
+    ),
+    signInWithCorporateSso: SignInWithCorporateSsoUseCase(
+      ssoRepository ?? const _SsoRepositoryStub(route: null),
       authRepository,
     ),
     resolveActiveOrganizationId: ResolveActiveOrganizationIdUseCase(
@@ -333,6 +460,34 @@ LoginBloc _buildBloc({
     ),
     analyticsService: analyticsService,
   );
+}
+
+/// Never calls [AuthRepository.signInWithFederatedProvider] itself — it is
+/// `_AuthRepositoryStub` (already injected into [SignInWithCorporateSsoUseCase]
+/// by [_buildBloc]) that resolves whatever `_AuthRepositoryStub`'s own
+/// `result` was configured with, exactly as [SignInWithCorporateSsoUseCase]
+/// expects.
+final class _SsoRepositoryStub implements SsoRepository {
+  const _SsoRepositoryStub({required this.route, this.completion});
+
+  final SsoLoginRoute? route;
+  final CompletedSsoLogin? completion;
+
+  @override
+  Future<AppResult<SsoLoginRoute?>> resolveConnectionForEmail({
+    required String email,
+  }) async {
+    return AppSuccess<SsoLoginRoute?>(route);
+  }
+
+  @override
+  Future<AppResult<CompletedSsoLogin>> completeSsoLogin() async {
+    final result = completion;
+    if (result == null) {
+      throw UnimplementedError();
+    }
+    return AppSuccess<CompletedSsoLogin>(result);
+  }
 }
 
 final _ownedMembership = Membership(
@@ -487,6 +642,17 @@ final class _AuthRepositoryStub implements AuthRepository {
   @override
   Future<AppResult<SessionUser>> signInWithProvider(AuthProviderType provider) {
     throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<SessionUser>> signInWithFederatedProvider({
+    required String providerId,
+    required bool isSaml,
+  }) async {
+    if (delay > Duration.zero) {
+      await Future<void>.delayed(delay);
+    }
+    return result;
   }
 
   @override

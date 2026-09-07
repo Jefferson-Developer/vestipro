@@ -13,4 +13,19 @@ sealed class LoginEvent with _$LoginEvent {
       LoginPasswordVisibilityToggled;
 
   const factory LoginEvent.submitted() = LoginSubmitted;
+
+  /// Edits the "e-mail corporativo" field of the "Entrar com SSO
+  /// corporativo" section (TASK-173) — kept entirely separate from
+  /// [LoginEmailChanged]/[email] (the e-mail/senha form's own field): the two
+  /// flows never share a single e-mail input, so switching between them
+  /// never clears what the user already typed in the other one.
+  const factory LoginEvent.corporateSsoEmailChanged(String email) =
+      LoginCorporateSsoEmailChanged;
+
+  /// Submits the corporate SSO login flow (TASK-173) — resolves which
+  /// organization [LoginState.corporateSsoEmail]'s domain routes to,
+  /// authenticates against that organization's registered IdP, then
+  /// completes the just-in-time provisioning/RBAC decision, in that order
+  /// (`SignInWithCorporateSsoUseCase`).
+  const factory LoginEvent.corporateSsoSubmitted() = LoginCorporateSsoSubmitted;
 }

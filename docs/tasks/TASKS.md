@@ -310,7 +310,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-172 — Criar documentação OpenAPI](TASK-172-criar-documentacao-openapi.md) — Flutter Senior
 
 ### EPIC-23 — Identidade Corporativa e Internacionalização
-- [ ] [TASK-173 — Implementar SSO corporativo (SAML/OIDC)](TASK-173-implementar-sso-corporativo.md) — Flutter Senior
+- [x] [TASK-173 — Implementar SSO corporativo (SAML/OIDC)](TASK-173-implementar-sso-corporativo.md) — Flutter Senior
 - [ ] [TASK-174 — Implementar suporte a multi-idioma](TASK-174-implementar-suporte-multi-idioma.md) — Flutter Senior + Front-end
 - [ ] [TASK-175 — Implementar suporte a multi-moeda](TASK-175-implementar-suporte-multi-moeda.md) — Flutter Senior
 
@@ -379,6 +379,6 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 171 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
+**Progresso:** 172 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
 [`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md)
 — e não conta mais no total).

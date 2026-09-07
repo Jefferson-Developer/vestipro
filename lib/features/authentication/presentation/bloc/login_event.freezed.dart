@@ -55,14 +55,16 @@ extension LoginEventPatterns on LoginEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LoginEmailChanged value)?  emailChanged,TResult Function( LoginPasswordChanged value)?  passwordChanged,TResult Function( LoginPasswordVisibilityToggled value)?  passwordVisibilityToggled,TResult Function( LoginSubmitted value)?  submitted,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( LoginEmailChanged value)?  emailChanged,TResult Function( LoginPasswordChanged value)?  passwordChanged,TResult Function( LoginPasswordVisibilityToggled value)?  passwordVisibilityToggled,TResult Function( LoginSubmitted value)?  submitted,TResult Function( LoginCorporateSsoEmailChanged value)?  corporateSsoEmailChanged,TResult Function( LoginCorporateSsoSubmitted value)?  corporateSsoSubmitted,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case LoginEmailChanged() when emailChanged != null:
 return emailChanged(_that);case LoginPasswordChanged() when passwordChanged != null:
 return passwordChanged(_that);case LoginPasswordVisibilityToggled() when passwordVisibilityToggled != null:
 return passwordVisibilityToggled(_that);case LoginSubmitted() when submitted != null:
-return submitted(_that);case _:
+return submitted(_that);case LoginCorporateSsoEmailChanged() when corporateSsoEmailChanged != null:
+return corporateSsoEmailChanged(_that);case LoginCorporateSsoSubmitted() when corporateSsoSubmitted != null:
+return corporateSsoSubmitted(_that);case _:
   return orElse();
 
 }
@@ -80,14 +82,16 @@ return submitted(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LoginEmailChanged value)  emailChanged,required TResult Function( LoginPasswordChanged value)  passwordChanged,required TResult Function( LoginPasswordVisibilityToggled value)  passwordVisibilityToggled,required TResult Function( LoginSubmitted value)  submitted,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( LoginEmailChanged value)  emailChanged,required TResult Function( LoginPasswordChanged value)  passwordChanged,required TResult Function( LoginPasswordVisibilityToggled value)  passwordVisibilityToggled,required TResult Function( LoginSubmitted value)  submitted,required TResult Function( LoginCorporateSsoEmailChanged value)  corporateSsoEmailChanged,required TResult Function( LoginCorporateSsoSubmitted value)  corporateSsoSubmitted,}){
 final _that = this;
 switch (_that) {
 case LoginEmailChanged():
 return emailChanged(_that);case LoginPasswordChanged():
 return passwordChanged(_that);case LoginPasswordVisibilityToggled():
 return passwordVisibilityToggled(_that);case LoginSubmitted():
-return submitted(_that);}
+return submitted(_that);case LoginCorporateSsoEmailChanged():
+return corporateSsoEmailChanged(_that);case LoginCorporateSsoSubmitted():
+return corporateSsoSubmitted(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -101,14 +105,16 @@ return submitted(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LoginEmailChanged value)?  emailChanged,TResult? Function( LoginPasswordChanged value)?  passwordChanged,TResult? Function( LoginPasswordVisibilityToggled value)?  passwordVisibilityToggled,TResult? Function( LoginSubmitted value)?  submitted,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( LoginEmailChanged value)?  emailChanged,TResult? Function( LoginPasswordChanged value)?  passwordChanged,TResult? Function( LoginPasswordVisibilityToggled value)?  passwordVisibilityToggled,TResult? Function( LoginSubmitted value)?  submitted,TResult? Function( LoginCorporateSsoEmailChanged value)?  corporateSsoEmailChanged,TResult? Function( LoginCorporateSsoSubmitted value)?  corporateSsoSubmitted,}){
 final _that = this;
 switch (_that) {
 case LoginEmailChanged() when emailChanged != null:
 return emailChanged(_that);case LoginPasswordChanged() when passwordChanged != null:
 return passwordChanged(_that);case LoginPasswordVisibilityToggled() when passwordVisibilityToggled != null:
 return passwordVisibilityToggled(_that);case LoginSubmitted() when submitted != null:
-return submitted(_that);case _:
+return submitted(_that);case LoginCorporateSsoEmailChanged() when corporateSsoEmailChanged != null:
+return corporateSsoEmailChanged(_that);case LoginCorporateSsoSubmitted() when corporateSsoSubmitted != null:
+return corporateSsoSubmitted(_that);case _:
   return null;
 
 }
@@ -125,13 +131,15 @@ return submitted(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String email)?  emailChanged,TResult Function( String password)?  passwordChanged,TResult Function()?  passwordVisibilityToggled,TResult Function()?  submitted,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( String email)?  emailChanged,TResult Function( String password)?  passwordChanged,TResult Function()?  passwordVisibilityToggled,TResult Function()?  submitted,TResult Function( String email)?  corporateSsoEmailChanged,TResult Function()?  corporateSsoSubmitted,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case LoginEmailChanged() when emailChanged != null:
 return emailChanged(_that.email);case LoginPasswordChanged() when passwordChanged != null:
 return passwordChanged(_that.password);case LoginPasswordVisibilityToggled() when passwordVisibilityToggled != null:
 return passwordVisibilityToggled();case LoginSubmitted() when submitted != null:
-return submitted();case _:
+return submitted();case LoginCorporateSsoEmailChanged() when corporateSsoEmailChanged != null:
+return corporateSsoEmailChanged(_that.email);case LoginCorporateSsoSubmitted() when corporateSsoSubmitted != null:
+return corporateSsoSubmitted();case _:
   return orElse();
 
 }
@@ -149,13 +157,15 @@ return submitted();case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String email)  emailChanged,required TResult Function( String password)  passwordChanged,required TResult Function()  passwordVisibilityToggled,required TResult Function()  submitted,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( String email)  emailChanged,required TResult Function( String password)  passwordChanged,required TResult Function()  passwordVisibilityToggled,required TResult Function()  submitted,required TResult Function( String email)  corporateSsoEmailChanged,required TResult Function()  corporateSsoSubmitted,}) {final _that = this;
 switch (_that) {
 case LoginEmailChanged():
 return emailChanged(_that.email);case LoginPasswordChanged():
 return passwordChanged(_that.password);case LoginPasswordVisibilityToggled():
 return passwordVisibilityToggled();case LoginSubmitted():
-return submitted();}
+return submitted();case LoginCorporateSsoEmailChanged():
+return corporateSsoEmailChanged(_that.email);case LoginCorporateSsoSubmitted():
+return corporateSsoSubmitted();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -169,13 +179,15 @@ return submitted();}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String email)?  emailChanged,TResult? Function( String password)?  passwordChanged,TResult? Function()?  passwordVisibilityToggled,TResult? Function()?  submitted,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( String email)?  emailChanged,TResult? Function( String password)?  passwordChanged,TResult? Function()?  passwordVisibilityToggled,TResult? Function()?  submitted,TResult? Function( String email)?  corporateSsoEmailChanged,TResult? Function()?  corporateSsoSubmitted,}) {final _that = this;
 switch (_that) {
 case LoginEmailChanged() when emailChanged != null:
 return emailChanged(_that.email);case LoginPasswordChanged() when passwordChanged != null:
 return passwordChanged(_that.password);case LoginPasswordVisibilityToggled() when passwordVisibilityToggled != null:
 return passwordVisibilityToggled();case LoginSubmitted() when submitted != null:
-return submitted();case _:
+return submitted();case LoginCorporateSsoEmailChanged() when corporateSsoEmailChanged != null:
+return corporateSsoEmailChanged(_that.email);case LoginCorporateSsoSubmitted() when corporateSsoSubmitted != null:
+return corporateSsoSubmitted();case _:
   return null;
 
 }
@@ -371,6 +383,104 @@ int get hashCode => runtimeType.hashCode;
 @override
 String toString() {
   return 'LoginEvent.submitted()';
+}
+
+
+}
+
+
+
+
+/// @nodoc
+
+
+class LoginCorporateSsoEmailChanged implements LoginEvent {
+  const LoginCorporateSsoEmailChanged(this.email);
+  
+
+ final  String email;
+
+/// Create a copy of LoginEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$LoginCorporateSsoEmailChangedCopyWith<LoginCorporateSsoEmailChanged> get copyWith => _$LoginCorporateSsoEmailChangedCopyWithImpl<LoginCorporateSsoEmailChanged>(this, _$identity);
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginCorporateSsoEmailChanged&&(identical(other.email, email) || other.email == email));
+}
+
+
+@override
+int get hashCode => Object.hash(runtimeType,email);
+
+@override
+String toString() {
+  return 'LoginEvent.corporateSsoEmailChanged(email: $email)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $LoginCorporateSsoEmailChangedCopyWith<$Res> implements $LoginEventCopyWith<$Res> {
+  factory $LoginCorporateSsoEmailChangedCopyWith(LoginCorporateSsoEmailChanged value, $Res Function(LoginCorporateSsoEmailChanged) _then) = _$LoginCorporateSsoEmailChangedCopyWithImpl;
+@useResult
+$Res call({
+ String email
+});
+
+
+
+
+}
+/// @nodoc
+class _$LoginCorporateSsoEmailChangedCopyWithImpl<$Res>
+    implements $LoginCorporateSsoEmailChangedCopyWith<$Res> {
+  _$LoginCorporateSsoEmailChangedCopyWithImpl(this._self, this._then);
+
+  final LoginCorporateSsoEmailChanged _self;
+  final $Res Function(LoginCorporateSsoEmailChanged) _then;
+
+/// Create a copy of LoginEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? email = null,}) {
+  return _then(LoginCorporateSsoEmailChanged(
+null == email ? _self.email : email // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+
+}
+
+/// @nodoc
+
+
+class LoginCorporateSsoSubmitted implements LoginEvent {
+  const LoginCorporateSsoSubmitted();
+  
+
+
+
+
+
+
+@override
+bool operator ==(Object other) {
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is LoginCorporateSsoSubmitted);
+}
+
+
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+  return 'LoginEvent.corporateSsoSubmitted()';
 }
 
 

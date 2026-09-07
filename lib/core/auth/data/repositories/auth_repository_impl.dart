@@ -89,6 +89,30 @@ final class AuthRepositoryImpl implements AuthRepository {
   }
 
   @override
+  Future<AppResult<SessionUser>> signInWithFederatedProvider({
+    required String providerId,
+    required bool isSaml,
+  }) async {
+    try {
+      final dto = await dataSource.signInWithFederatedProvider(
+        providerId: providerId,
+        isSaml: isSaml,
+      );
+      return AppSuccess<SessionUser>(mapper.toEntity(dto));
+    } on AppException catch (exception) {
+      return AppFailure<SessionUser>(mapAppExceptionToFailure(exception));
+    } catch (exception) {
+      return AppFailure<SessionUser>(
+        UnexpectedFailure(
+          'Unexpected error signing in via corporate SSO.',
+          code: 'auth_sso_sign_in_unexpected',
+          cause: exception,
+        ),
+      );
+    }
+  }
+
+  @override
   Future<AppResult<void>> signOut() async {
     try {
       await dataSource.signOut();

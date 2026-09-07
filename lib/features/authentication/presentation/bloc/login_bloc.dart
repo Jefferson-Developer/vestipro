@@ -7,28 +7,36 @@ import '../../../../core/analytics/analytics.dart';
 import '../../../../core/auth/auth.dart';
 import '../../../../core/utils/utils.dart';
 import '../../../organizations/domain/usecases/resolve_active_organization_id_use_case.dart';
+import '../../../sso/domain/entities/corporate_sso_login_result.dart';
+import '../../../sso/domain/usecases/sign_in_with_corporate_sso_use_case.dart';
 import '../../domain/usecases/sign_in_with_email_and_password_use_case.dart';
 import '../../domain/validators/login_form_validators.dart';
 import 'login_event.dart';
 import 'login_state.dart';
 
 /// Drives the login screen (TASK-034): field edits, the password visibility
-/// toggle and the submit flow against [SignInWithEmailAndPasswordUseCase].
+/// toggle and the submit flow against [SignInWithEmailAndPasswordUseCase] —
+/// plus, since TASK-173, the alternate "Entrar com SSO corporativo" flow
+/// against [SignInWithCorporateSsoUseCase].
 ///
 /// [LoginPage]/[LoginForm] never call [AuthRepository]/`firebase_auth`
 /// directly — every state transition goes through this bloc, which is the
 /// only place that decides when a field is invalid, when a submission is in
 /// flight and what the resulting [LoginState.failure] message is.
 ///
-/// A successful sign-in also resolves the real Organization to land on
-/// ([resolveActiveOrganizationId] — replaces the `kPlaceholderOrganizationId`
-/// every post-login navigation used to hardcode) — never leaving that
-/// decision to `LoginPage`, same rationale as every other business decision
-/// this bloc already owns.
+/// A successful e-mail/senha sign-in also resolves the real Organization to
+/// land on ([resolveActiveOrganizationId] — replaces the
+/// `kPlaceholderOrganizationId` every post-login navigation used to
+/// hardcode) — never leaving that decision to `LoginPage`, same rationale as
+/// every other business decision this bloc already owns. A successful
+/// corporate SSO sign-in already carries its own confirmed
+/// [CorporateSsoLoginResult.organizationId] (`completeSsoLogin`'s own
+/// response), so it never needs this extra resolution step.
 @injectable
 final class LoginBloc extends Bloc<LoginEvent, LoginState> {
   LoginBloc({
     required this.signInWithEmailAndPassword,
+    required this.signInWithCorporateSso,
     required this.resolveActiveOrganizationId,
     required this.analyticsService,
   }) : super(const LoginState()) {
@@ -39,9 +47,15 @@ final class LoginBloc extends Bloc<LoginEvent, LoginState> {
     // ignored at the bloc level too — defense in depth on top of
     // `AppButton`'s own tap-lock/`isLoading` guard on the widget side.
     on<LoginSubmitted>(_onSubmitted, transformer: droppable());
+    on<LoginCorporateSsoEmailChanged>(_onCorporateSsoEmailChanged);
+    on<LoginCorporateSsoSubmitted>(
+      _onCorporateSsoSubmitted,
+      transformer: droppable(),
+    );
   }
 
   final SignInWithEmailAndPasswordUseCase signInWithEmailAndPassword;
+  final SignInWithCorporateSsoUseCase signInWithCorporateSso;
   final ResolveActiveOrganizationIdUseCase resolveActiveOrganizationId;
   final AnalyticsService analyticsService;
 
@@ -154,6 +168,89 @@ final class LoginBloc extends Bloc<LoginEvent, LoginState> {
               emit(state.copyWith(status: LoginSubmissionStatus.success)),
         );
       case AppFailure<SessionUser>(failure: final failure):
+        emit(
+          state.copyWith(
+            status: LoginSubmissionStatus.failure,
+            failure: failure,
+          ),
+        );
+    }
+  }
+
+  void _onCorporateSsoEmailChanged(
+    LoginCorporateSsoEmailChanged event,
+    Emitter<LoginState> emit,
+  ) {
+    emit(
+      state.copyWith(
+        corporateSsoEmail: event.email,
+        corporateSsoEmailError: null,
+        status: LoginSubmissionStatus.idle,
+        failure: null,
+      ),
+    );
+  }
+
+  /// Submits the "Entrar com SSO corporativo" flow
+  /// ([SignInWithCorporateSsoUseCase]) — reuses [LoginState.status]/
+  /// [LoginState.failure]/[LoginState.organizationId] verbatim, the exact
+  /// same fields [_onSubmitted] (e-mail/senha) already drives `LoginPage`'s
+  /// `BlocListener` with, so a successful corporate SSO login lands on the
+  /// same post-login destination through the same, single navigation
+  /// decision — never a second, SSO-only code path.
+  Future<void> _onCorporateSsoSubmitted(
+    LoginCorporateSsoSubmitted event,
+    Emitter<LoginState> emit,
+  ) async {
+    final email = state.corporateSsoEmail.trim();
+    final emailError = validateLoginEmail(email);
+
+    if (emailError != null) {
+      emit(
+        state.copyWith(
+          corporateSsoEmailError: emailError,
+          status: LoginSubmissionStatus.idle,
+        ),
+      );
+      return;
+    }
+
+    emit(
+      state.copyWith(
+        status: LoginSubmissionStatus.submitting,
+        corporateSsoEmailError: null,
+        failure: null,
+      ),
+    );
+
+    final result = await signInWithCorporateSso(email: email);
+    if (emit.isDone) {
+      return;
+    }
+
+    switch (result) {
+      case AppSuccess<CorporateSsoLoginResult>(value: final loginResult):
+        // Only technical metadata — never the e-mail/uid/organizationId —
+        // per the LGPD restriction on `AnalyticsService.logEvent` (see
+        // `AGENTS.md`).
+        await analyticsService.logEvent(
+          AnalyticsEvents.loginCompleted,
+          parameters: <String, Object?>{
+            'method': 'sso',
+            'platform': defaultTargetPlatform.name,
+          },
+        );
+        if (emit.isDone) {
+          return;
+        }
+        emit(
+          state.copyWith(
+            status: LoginSubmissionStatus.success,
+            organizationId: loginResult.organizationId,
+            requiresOnboarding: false,
+          ),
+        );
+      case AppFailure<CorporateSsoLoginResult>(failure: final failure):
         emit(
           state.copyWith(
             status: LoginSubmissionStatus.failure,

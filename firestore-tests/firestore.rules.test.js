@@ -261,6 +261,31 @@ function customerImportTemplateDoc({
   };
 }
 
+function ssoConnectionDoc({
+  organizationId,
+  protocol = 'oidc',
+  providerId = 'oidc.conn-a',
+  emailDomains = ['malwee.com.br'],
+  defaultRoleName = 'SALES_REP',
+  status = 'active',
+}) {
+  return {
+    organizationId,
+    protocol,
+    providerId,
+    displayName: 'Azure AD',
+    emailDomains,
+    defaultRoleName,
+    status,
+    lastConfigError: null,
+    createdAt: now(),
+    createdBy: 'owner-a',
+    updatedAt: now(),
+    updatedBy: 'owner-a',
+    version: 1,
+  };
+}
+
 function customerImportJobDoc({ organizationId, companyId = 'company-a', createdBy = 'manager-a' }) {
   return {
     organizationId,
@@ -2387,5 +2412,52 @@ describe('organizations/{organizationId}/customerImportJobs/{jobId}  (TASK-167)'
       ownerDb.doc(`organizations/${ORG_A}/customerImportJobs/job-a`).update({ importedCount: 999999 }),
     );
     await assertFails(ownerDb.doc(`organizations/${ORG_A}/customerImportJobs/job-a`).delete());
+  });
+});
+
+describe('organizations/{organizationId}/ssoConnections/{connectionId}  (TASK-173)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/ssoConnections/conn-a`)
+        .set(ssoConnectionDoc({ organizationId: ORG_A }));
+    });
+  });
+
+  test('nem mesmo OWNER (com sso.manage) consegue ler uma conexão de SSO diretamente — '
+    + 'exclusivo das Cloud Functions', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/ssoConnections/conn-a`).get());
+  });
+
+  test('SALES_REP também não consegue ler', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/ssoConnections/conn-a`).get());
+  });
+
+  test('membro da Org A não lê a conexão de SSO da Org B, mesmo sabendo o id (isolamento)', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_B}/ssoConnections/conn-b`)
+        .set(ssoConnectionDoc({ organizationId: ORG_B, providerId: 'oidc.conn-b', emailDomains: ['outra.com.br'] }));
+    });
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/ssoConnections/conn-b`).get());
+  });
+
+  test('nenhum papel — nem mesmo OWNER — cria, altera ou exclui uma conexão de SSO diretamente '
+    + '(Admin SDK only, via configureSsoConnection)', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      ownerDb
+        .doc(`organizations/${ORG_A}/ssoConnections/conn-forged`)
+        .set(ssoConnectionDoc({ organizationId: ORG_A, providerId: 'oidc.conn-forged' })),
+    );
+    await assertFails(
+      ownerDb.doc(`organizations/${ORG_A}/ssoConnections/conn-a`).update({ defaultRoleName: 'ADMIN' }),
+    );
+    await assertFails(ownerDb.doc(`organizations/${ORG_A}/ssoConnections/conn-a`).delete());
   });
 });

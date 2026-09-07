@@ -233,6 +233,75 @@ void main() {
       );
     });
 
+    group('signInWithFederatedProvider', () {
+      test('returns a success mapping the DTO to a SessionUser', () async {
+        when(
+          () => dataSource.signInWithFederatedProvider(
+            providerId: 'oidc.conn-1',
+            isSaml: false,
+          ),
+        ).thenAnswer((_) async => dto);
+
+        final result = await repository.signInWithFederatedProvider(
+          providerId: 'oidc.conn-1',
+          isSaml: false,
+        );
+
+        expect(result, isA<AppSuccess<SessionUser>>());
+        expect((result as AppSuccess<SessionUser>).value.uid, 'user-1');
+      });
+
+      test(
+        'maps an AppException thrown by the datasource to a Failure',
+        () async {
+          when(
+            () => dataSource.signInWithFederatedProvider(
+              providerId: 'saml.conn-1',
+              isSaml: true,
+            ),
+          ).thenThrow(
+            const ConflictException(
+              'Já existe uma conta com este e-mail usando outro método de login.',
+              code: 'account-exists-with-different-credential',
+            ),
+          );
+
+          final result = await repository.signInWithFederatedProvider(
+            providerId: 'saml.conn-1',
+            isSaml: true,
+          );
+
+          expect(result, isA<AppFailure<SessionUser>>());
+          expect(
+            (result as AppFailure<SessionUser>).failure,
+            isA<ConflictFailure>(),
+          );
+        },
+      );
+
+      test(
+        'maps a generic exception thrown by the datasource to an UnexpectedFailure',
+        () async {
+          when(
+            () => dataSource.signInWithFederatedProvider(
+              providerId: 'oidc.conn-1',
+              isSaml: false,
+            ),
+          ).thenThrow(StateError('boom'));
+
+          final result = await repository.signInWithFederatedProvider(
+            providerId: 'oidc.conn-1',
+            isSaml: false,
+          );
+
+          expect(result, isA<AppFailure<SessionUser>>());
+          final failure = (result as AppFailure<SessionUser>).failure;
+          expect(failure, isA<UnexpectedFailure>());
+          expect(failure.code, 'auth_sso_sign_in_unexpected');
+        },
+      );
+    });
+
     group('signOut', () {
       test('returns a success when the datasource signs out', () async {
         when(() => dataSource.signOut()).thenAnswer((_) async {});

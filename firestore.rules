@@ -1206,6 +1206,30 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/ssoConnections/{connectionId}
+      // (TASK-173, EPIC-23 — SSO corporativo SAML/OIDC)
+      // -------------------------------------------------------------------
+      //
+      // Exclusively written by this feature's own Cloud Functions (Admin
+      // SDK, bypasses these Rules) — `configureSsoConnection` is the only
+      // writer; `resolveSsoForEmail`/`completeSsoLogin` only ever read it
+      // server-side. Same deliberately stricter rule `webhookSecrets`/
+      // `apiKeys` already set: never client-readable at all, by any role,
+      // under any capability — a leaked read would expose enough of the
+      // organization's own IdP configuration (SAML `x509Certificates`, OIDC
+      // `clientId`/`issuer`) to help an attacker probe/impersonate it
+      // (TASK-173: "Configuração de um IdP pertence exclusivamente à
+      // organização que o cadastrou; nunca é compartilhada nem reaproveitada
+      // por outra organização"). A gestor-facing configuration screen (not
+      // built in this round, see the task's own "Pendências") would need a
+      // dedicated read-only callable, never a direct Firestore read, same
+      // precedent `listApiKeys` already sets for `apiKeys`.
+
+      match /ssoConnections/{connectionId} {
+        allow read, write: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/priceLists/{priceListId}  (TASK-083)
       // -------------------------------------------------------------------
       //

@@ -19,6 +19,18 @@ abstract interface class AuthDataSource {
     required String displayName,
   });
 
+  /// Signs in against a federated SAML/OIDC provider (TASK-173) —
+  /// [providerId] is `SsoConnectionDoc.providerId`
+  /// (`saml.<connectionId>`/`oidc.<connectionId>`), resolved at runtime by
+  /// `resolveSsoForEmail`. [isSaml] picks which `AuthProvider` subtype to
+  /// build (`SAMLAuthProvider`/`OAuthProvider`) — both are driven through
+  /// `FirebaseAuth.signInWithProvider`, which works uniformly across
+  /// Web/Android/iOS in this SDK version, no per-platform branching needed.
+  Future<AuthUserDto> signInWithFederatedProvider({
+    required String providerId,
+    required bool isSaml,
+  });
+
   Future<void> signOut();
 
   Future<void> sendPasswordResetEmail({required String email});

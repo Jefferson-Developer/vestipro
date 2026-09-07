@@ -1333,6 +1333,14 @@ import '../features/settings/domain/usecases/search_about_app_notes_use_case.dar
 import '../features/settings/domain/usecases/submit_about_app_diagnostics_use_case.dart'
     as _i226;
 import '../features/settings/presentation/bloc/about_app_bloc.dart' as _i398;
+import '../features/sso/data/datasources/cloud_functions_sso_data_source.dart'
+    as _i282;
+import '../features/sso/data/datasources/sso_data_source.dart' as _i513;
+import '../features/sso/data/mappers/sso_mapper.dart' as _i437;
+import '../features/sso/data/repositories/sso_repository_impl.dart' as _i970;
+import '../features/sso/domain/repositories/sso_repository.dart' as _i164;
+import '../features/sso/domain/usecases/sign_in_with_corporate_sso_use_case.dart'
+    as _i412;
 import '../features/targets/data/mappers/target_mapper.dart' as _i730;
 import '../features/targets/data/repositories/drift_positivacao_repository.dart'
     as _i8;
@@ -1664,6 +1672,7 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i370.AboutAppNotesMapper>(
       () => const _i370.AboutAppNotesMapper(),
     );
+    gh.lazySingleton<_i437.SsoMapper>(() => const _i437.SsoMapper());
     gh.lazySingleton<_i730.TargetMapper>(() => const _i730.TargetMapper());
     gh.lazySingleton<_i708.PortfolioAssignmentMapper>(
       () => const _i708.PortfolioAssignmentMapper(),
@@ -2643,6 +2652,10 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i80.WarehouseRemoteDataSource>(
       () => _i504.FirestoreWarehouseDataSource(gh<_i974.FirebaseFirestore>()),
     );
+    gh.lazySingleton<_i513.SsoDataSource>(
+      () =>
+          _i282.CloudFunctionsSsoDataSource(gh<_i340.CloudFunctionsService>()),
+    );
     gh.lazySingleton<_i361.MembershipDataSource>(
       () => _i201.FirestoreMembershipDataSource(gh<_i974.FirebaseFirestore>()),
     );
@@ -2774,6 +2787,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i371.InviteAcceptanceRepositoryImpl(
         dataSource: gh<_i336.InviteAcceptanceDataSource>(),
         mapper: gh<_i87.InviteAcceptanceMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i164.SsoRepository>(
+      () => _i970.SsoRepositoryImpl(
+        dataSource: gh<_i513.SsoDataSource>(),
+        mapper: gh<_i437.SsoMapper>(),
       ),
     );
     gh.lazySingleton<_i1068.OrderSubmissionDataSource>(
@@ -3024,15 +3043,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i667.PortfolioAssignmentRepositoryImpl(
         dataSource: gh<_i847.PortfolioAssignmentDataSource>(),
         mapper: gh<_i708.PortfolioAssignmentMapper>(),
-      ),
-    );
-    gh.factory<_i776.LoginBloc>(
-      () => _i776.LoginBloc(
-        signInWithEmailAndPassword:
-            gh<_i185.SignInWithEmailAndPasswordUseCase>(),
-        resolveActiveOrganizationId:
-            gh<_i267.ResolveActiveOrganizationIdUseCase>(),
-        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.lazySingleton<_i292.SyncEngine>(
@@ -3294,6 +3304,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i754.LoadSalesDashboardSnapshotUseCase>(
       () => _i754.LoadSalesDashboardSnapshotUseCase(
         gh<_i649.AggregationRepository>(),
+      ),
+    );
+    gh.factory<_i412.SignInWithCorporateSsoUseCase>(
+      () => _i412.SignInWithCorporateSsoUseCase(
+        gh<_i164.SsoRepository>(),
+        gh<_i217.AuthRepository>(),
       ),
     );
     gh.factory<_i647.PublishProductUseCase>(
@@ -3932,6 +3948,16 @@ extension GetItInjectableX on _i174.GetIt {
         listOrganizationUsers: gh<_i93.ListOrganizationUsersUseCase>(),
         createTeam: gh<_i265.CreateTeamUseCase>(),
         updateTeam: gh<_i265.UpdateTeamUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i776.LoginBloc>(
+      () => _i776.LoginBloc(
+        signInWithEmailAndPassword:
+            gh<_i185.SignInWithEmailAndPasswordUseCase>(),
+        signInWithCorporateSso: gh<_i412.SignInWithCorporateSsoUseCase>(),
+        resolveActiveOrganizationId:
+            gh<_i267.ResolveActiveOrganizationIdUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );

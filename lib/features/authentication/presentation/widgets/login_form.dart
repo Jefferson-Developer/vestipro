@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
@@ -7,6 +9,7 @@ import '../../../../core/navigation/navigation.dart';
 import '../bloc/login_bloc.dart';
 import '../bloc/login_event.dart';
 import '../bloc/login_state.dart';
+import 'corporate_sso_login_modal.dart';
 
 /// The e-mail/password fields, submit button and "Esqueci minha senha" link
 /// (TASK-034).
@@ -123,6 +126,18 @@ class _LoginFormState extends State<LoginForm> {
                 onPressed: isSubmitting
                     ? null
                     : () => context.go(const SignUpRoute().location),
+              ),
+            ),
+            const SizedBox(height: AppSpacing.spacing8),
+            Align(
+              alignment: Alignment.center,
+              child: AppButton(
+                label: 'Entrar com SSO corporativo',
+                semanticLabel: 'Entrar com SSO corporativo',
+                variant: AppButtonVariant.text,
+                onPressed: isSubmitting
+                    ? null
+                    : () => unawaited(CorporateSsoLoginModal.show(context)),
               ),
             ),
           ],

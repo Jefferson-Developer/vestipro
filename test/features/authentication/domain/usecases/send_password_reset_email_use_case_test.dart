@@ -172,6 +172,14 @@ final class _AuthRepositoryStub implements AuthRepository {
   }
 
   @override
+  Future<AppResult<SessionUser>> signInWithFederatedProvider({
+    required String providerId,
+    required bool isSaml,
+  }) {
+    throw UnimplementedError();
+  }
+
+  @override
   Future<AppResult<void>> signOut() {
     throw UnimplementedError();
   }

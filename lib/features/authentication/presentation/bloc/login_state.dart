@@ -45,5 +45,11 @@ abstract class LoginState with _$LoginState {
     /// onboarding, so `LoginPage` sends them to `OnboardingWizardRoute`
     /// instead of a placeholder Organization scope.
     @Default(false) bool requiresOnboarding,
+
+    /// The "e-mail corporativo" field of the "Entrar com SSO corporativo"
+    /// section (TASK-173) — deliberately separate from [email], see
+    /// `LoginEvent.corporateSsoEmailChanged`'s own doc.
+    @Default('') String corporateSsoEmail,
+    String? corporateSsoEmailError,
   }) = _LoginState;
 }

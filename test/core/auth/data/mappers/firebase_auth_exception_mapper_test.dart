@@ -87,6 +87,21 @@ void main() {
       expect(result, isA<ForbiddenException>());
     });
 
+    test('maps account-exists-with-different-credential to ConflictException '
+        '(TASK-173: federated SSO asserting an e-mail already tied to '
+        'another sign-in method)', () {
+      final result = mapFirebaseAuthExceptionToAppException(
+        FirebaseAuthException(code: 'account-exists-with-different-credential'),
+        StackTrace.empty,
+      );
+
+      expect(result, isA<ConflictException>());
+      expect(
+        result.message,
+        'Já existe uma conta com este e-mail usando outro método de login.',
+      );
+    });
+
     test('maps an unknown code to UnknownException', () {
       final result = mapFirebaseAuthExceptionToAppException(
         FirebaseAuthException(
@@ -114,6 +129,7 @@ void main() {
           'email-already-in-use',
           'weak-password',
           'operation-not-allowed',
+          'account-exists-with-different-credential',
           'unmapped',
         ];
 

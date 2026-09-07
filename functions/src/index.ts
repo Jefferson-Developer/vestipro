@@ -81,6 +81,11 @@ export {
   listApiKeys,
   publicApiV1,
 } from './public_api';
+export {
+  configureSsoConnection,
+  resolveSsoForEmail,
+  completeSsoLogin,
+} from './sso';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

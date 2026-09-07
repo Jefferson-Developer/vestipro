@@ -506,6 +506,41 @@ void main() {
       },
     );
 
+    test(
+      'only OWNER/ADMIN can manage corporate SSO connections (TASK-173); '
+      'SALES_MANAGER/SALES_REP/SALES_ASSISTANT/FINANCE/READ_ONLY never can',
+      () {
+        for (final role in <SystemRoleName>[
+          SystemRoleName.owner,
+          SystemRoleName.admin,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.ssoManage),
+            isTrue,
+            reason: '$role must be able to configure corporate SSO.',
+          );
+        }
+
+        for (final role in <SystemRoleName>[
+          SystemRoleName.salesManager,
+          SystemRoleName.salesRep,
+          SystemRoleName.salesAssistant,
+          SystemRoleName.finance,
+          SystemRoleName.readOnly,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.ssoManage),
+            isFalse,
+            reason: '$role must never configure corporate SSO.',
+          );
+        }
+      },
+    );
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,

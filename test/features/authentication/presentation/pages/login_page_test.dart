@@ -14,6 +14,10 @@ import 'package:vestipro/features/authentication/domain/usecases/sign_in_with_em
 import 'package:vestipro/features/authentication/presentation/bloc/login_bloc.dart';
 import 'package:vestipro/features/authentication/presentation/pages/login_page.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
+import 'package:vestipro/features/sso/domain/entities/completed_sso_login.dart';
+import 'package:vestipro/features/sso/domain/entities/sso_login_route.dart';
+import 'package:vestipro/features/sso/domain/repositories/sso_repository.dart';
+import 'package:vestipro/features/sso/domain/usecases/sign_in_with_corporate_sso_use_case.dart';
 
 const _validEmail = 'vendedor@vestipro.com.br';
 const _validPassword = 'super-secret';
@@ -308,6 +312,38 @@ void main() {
         expect(passwordEditable.focusNode.hasFocus, isTrue);
       },
     );
+
+    testWidgets(
+      'opens the "Entrar com SSO corporativo" modal with an e-mail field, '
+      'closable via Cancelar without submitting anything',
+      (tester) async {
+        await tester.pumpWidget(
+          _buildApp(
+            _AuthRepositoryStub(
+              result: const AppSuccess<SessionUser>(_signedInUser),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.ensureVisible(find.text('Entrar com SSO corporativo'));
+        await tester.tap(find.text('Entrar com SSO corporativo'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.bySemanticsLabel('Campo de e-mail corporativo'),
+          findsOneWidget,
+        );
+
+        await tester.tap(find.text('Cancelar'));
+        await tester.pumpAndSettle();
+
+        expect(
+          find.bySemanticsLabel('Campo de e-mail corporativo'),
+          findsNothing,
+        );
+      },
+    );
   });
 }
 
@@ -325,6 +361,10 @@ Widget _buildApp(
         builder: (context, state) => LoginPage(
           createBloc: () => LoginBloc(
             signInWithEmailAndPassword: SignInWithEmailAndPasswordUseCase(
+              authRepository,
+            ),
+            signInWithCorporateSso: SignInWithCorporateSsoUseCase(
+              const _SsoRepositoryStub(),
               authRepository,
             ),
             resolveActiveOrganizationId: ResolveActiveOrganizationIdUseCase(
@@ -370,6 +410,25 @@ Widget _buildApp(
   );
 
   return MaterialApp.router(theme: AppTheme.light, routerConfig: router);
+}
+
+/// A [SsoRepository] that never resolves a connection — the widget tests in
+/// this file only exercise the e-mail/senha flow; wiring `LoginBloc` still
+/// requires a [SignInWithCorporateSsoUseCase] since TASK-173.
+final class _SsoRepositoryStub implements SsoRepository {
+  const _SsoRepositoryStub();
+
+  @override
+  Future<AppResult<SsoLoginRoute?>> resolveConnectionForEmail({
+    required String email,
+  }) async {
+    return const AppSuccess<SsoLoginRoute?>(null);
+  }
+
+  @override
+  Future<AppResult<CompletedSsoLogin>> completeSsoLogin() {
+    throw UnimplementedError();
+  }
 }
 
 final class _MembershipRepositoryStub implements MembershipRepository {
@@ -466,6 +525,14 @@ final class _AuthRepositoryStub implements AuthRepository {
 
   @override
   Future<AppResult<SessionUser>> signInWithProvider(AuthProviderType provider) {
+    throw UnimplementedError();
+  }
+
+  @override
+  Future<AppResult<SessionUser>> signInWithFederatedProvider({
+    required String providerId,
+    required bool isSaml,
+  }) {
     throw UnimplementedError();
   }
 
