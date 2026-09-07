@@ -349,7 +349,7 @@ relacionado a TASK-179.
 
 ## Commit
 
-Ver seção "Commit" da resposta final — mensagem/hash reais do `git commit`, nunca inventados.
+`feat(catalogo): implementa catalogo white-label (TASK-179)`
 
 ## Push
 
@@ -357,7 +357,7 @@ Não realizado nesta rodada (não autorizado).
 
 ## Hash do commit
 
-Ver seção "Commit" da resposta final — hash real do `git commit`, nunca inventado.
+`1b89ae331061d59a278c18bc8d371241dc05d2f6`
 
 ## Branch
 
