@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../../core/utils/utils.dart';
 import '../../domain/entities/customer_dashboard_filters.dart';
 import '../../domain/entities/customer_dashboard_ranking_row.dart';
 import '../../domain/entities/customer_dashboard_snapshot.dart';
@@ -14,9 +15,12 @@ import '../bloc/customer_dashboard_bloc.dart';
 import '../bloc/customer_dashboard_event.dart';
 import '../bloc/customer_dashboard_state.dart';
 
-final NumberFormat _currencyFormat = NumberFormat.currency(
-  locale: 'pt_BR',
-  symbol: r'R$',
+// TASK-175: see `sales_dashboard_page.dart`'s own `_currencyFormat` doc
+// comment — every dashboard/report in this codebase still assumes a single
+// organization-wide currency for aggregate totals today.
+String _currencyFormat(double value) => CurrencyFormatter.formatWithCode(
+  value,
+  CurrencyFormatter.legacyDefaultCurrency,
 );
 final DateFormat _monthLabelFormat = DateFormat('MMMM/yyyy', 'pt_BR');
 
@@ -573,7 +577,7 @@ class _CustomerDashboardRankingTable extends StatelessWidget {
               numeric: true,
               sortable: true,
               cellBuilder: (context, row) =>
-                  Text(_currencyFormat.format(row.revenueNet)),
+                  Text(_currencyFormat(row.revenueNet)),
             ),
             AppDataColumn(
               label: 'Pedidos',
@@ -586,7 +590,7 @@ class _CustomerDashboardRankingTable extends StatelessWidget {
               numeric: true,
               sortable: true,
               cellBuilder: (context, row) =>
-                  Text(_currencyFormat.format(row.averageTicket)),
+                  Text(_currencyFormat(row.averageTicket)),
             ),
             AppDataColumn(
               label: 'Segmento',

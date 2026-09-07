@@ -10480,6 +10480,18 @@ class $OrdersTableTable extends OrdersTable
     type: DriftSqlType.string,
     requiredDuringInsert: true,
   );
+  static const VerificationMeta _currencyMeta = const VerificationMeta(
+    'currency',
+  );
+  @override
+  late final GeneratedColumn<String> currency = GeneratedColumn<String>(
+    'currency',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('BRL'),
+  );
   static const VerificationMeta _paymentTermIdMeta = const VerificationMeta(
     'paymentTermId',
   );
@@ -10756,6 +10768,7 @@ class $OrdersTableTable extends OrdersTable
     deliveryAddressJson,
     billingAddressJson,
     priceListId,
+    currency,
     paymentTermId,
     carrierId,
     collectionId,
@@ -10882,6 +10895,12 @@ class $OrdersTableTable extends OrdersTable
       );
     } else if (isInserting) {
       context.missing(_priceListIdMeta);
+    }
+    if (data.containsKey('currency')) {
+      context.handle(
+        _currencyMeta,
+        currency.isAcceptableOrUnknown(data['currency']!, _currencyMeta),
+      );
     }
     if (data.containsKey('payment_term_id')) {
       context.handle(
@@ -11122,6 +11141,10 @@ class $OrdersTableTable extends OrdersTable
         DriftSqlType.string,
         data['${effectivePrefix}price_list_id'],
       )!,
+      currency: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}currency'],
+      )!,
       paymentTermId: attachedDatabase.typeMapping.read(
         DriftSqlType.string,
         data['${effectivePrefix}payment_term_id'],
@@ -11238,6 +11261,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
   final String deliveryAddressJson;
   final String billingAddressJson;
   final String priceListId;
+  final String currency;
   final String paymentTermId;
   final String? carrierId;
   final String? collectionId;
@@ -11273,6 +11297,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     required this.deliveryAddressJson,
     required this.billingAddressJson,
     required this.priceListId,
+    required this.currency,
     required this.paymentTermId,
     this.carrierId,
     this.collectionId,
@@ -11313,6 +11338,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     map['delivery_address_json'] = Variable<String>(deliveryAddressJson);
     map['billing_address_json'] = Variable<String>(billingAddressJson);
     map['price_list_id'] = Variable<String>(priceListId);
+    map['currency'] = Variable<String>(currency);
     map['payment_term_id'] = Variable<String>(paymentTermId);
     if (!nullToAbsent || carrierId != null) {
       map['carrier_id'] = Variable<String>(carrierId);
@@ -11382,6 +11408,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
       deliveryAddressJson: Value(deliveryAddressJson),
       billingAddressJson: Value(billingAddressJson),
       priceListId: Value(priceListId),
+      currency: Value(currency),
       paymentTermId: Value(paymentTermId),
       carrierId: carrierId == null && nullToAbsent
           ? const Value.absent()
@@ -11456,6 +11483,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
         json['billingAddressJson'],
       ),
       priceListId: serializer.fromJson<String>(json['priceListId']),
+      currency: serializer.fromJson<String>(json['currency']),
       paymentTermId: serializer.fromJson<String>(json['paymentTermId']),
       carrierId: serializer.fromJson<String?>(json['carrierId']),
       collectionId: serializer.fromJson<String?>(json['collectionId']),
@@ -11504,6 +11532,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
       'deliveryAddressJson': serializer.toJson<String>(deliveryAddressJson),
       'billingAddressJson': serializer.toJson<String>(billingAddressJson),
       'priceListId': serializer.toJson<String>(priceListId),
+      'currency': serializer.toJson<String>(currency),
       'paymentTermId': serializer.toJson<String>(paymentTermId),
       'carrierId': serializer.toJson<String?>(carrierId),
       'collectionId': serializer.toJson<String?>(collectionId),
@@ -11546,6 +11575,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     String? deliveryAddressJson,
     String? billingAddressJson,
     String? priceListId,
+    String? currency,
     String? paymentTermId,
     Value<String?> carrierId = const Value.absent(),
     Value<String?> collectionId = const Value.absent(),
@@ -11581,6 +11611,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     deliveryAddressJson: deliveryAddressJson ?? this.deliveryAddressJson,
     billingAddressJson: billingAddressJson ?? this.billingAddressJson,
     priceListId: priceListId ?? this.priceListId,
+    currency: currency ?? this.currency,
     paymentTermId: paymentTermId ?? this.paymentTermId,
     carrierId: carrierId.present ? carrierId.value : this.carrierId,
     collectionId: collectionId.present ? collectionId.value : this.collectionId,
@@ -11640,6 +11671,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
       priceListId: data.priceListId.present
           ? data.priceListId.value
           : this.priceListId,
+      currency: data.currency.present ? data.currency.value : this.currency,
       paymentTermId: data.paymentTermId.present
           ? data.paymentTermId.value
           : this.paymentTermId,
@@ -11706,6 +11738,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
           ..write('deliveryAddressJson: $deliveryAddressJson, ')
           ..write('billingAddressJson: $billingAddressJson, ')
           ..write('priceListId: $priceListId, ')
+          ..write('currency: $currency, ')
           ..write('paymentTermId: $paymentTermId, ')
           ..write('carrierId: $carrierId, ')
           ..write('collectionId: $collectionId, ')
@@ -11746,6 +11779,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
     deliveryAddressJson,
     billingAddressJson,
     priceListId,
+    currency,
     paymentTermId,
     carrierId,
     collectionId,
@@ -11785,6 +11819,7 @@ class OrdersTableData extends DataClass implements Insertable<OrdersTableData> {
           other.deliveryAddressJson == this.deliveryAddressJson &&
           other.billingAddressJson == this.billingAddressJson &&
           other.priceListId == this.priceListId &&
+          other.currency == this.currency &&
           other.paymentTermId == this.paymentTermId &&
           other.carrierId == this.carrierId &&
           other.collectionId == this.collectionId &&
@@ -11822,6 +11857,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
   final Value<String> deliveryAddressJson;
   final Value<String> billingAddressJson;
   final Value<String> priceListId;
+  final Value<String> currency;
   final Value<String> paymentTermId;
   final Value<String?> carrierId;
   final Value<String?> collectionId;
@@ -11858,6 +11894,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     this.deliveryAddressJson = const Value.absent(),
     this.billingAddressJson = const Value.absent(),
     this.priceListId = const Value.absent(),
+    this.currency = const Value.absent(),
     this.paymentTermId = const Value.absent(),
     this.carrierId = const Value.absent(),
     this.collectionId = const Value.absent(),
@@ -11895,6 +11932,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     required String deliveryAddressJson,
     required String billingAddressJson,
     required String priceListId,
+    this.currency = const Value.absent(),
     required String paymentTermId,
     this.carrierId = const Value.absent(),
     this.collectionId = const Value.absent(),
@@ -11948,6 +11986,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     Expression<String>? deliveryAddressJson,
     Expression<String>? billingAddressJson,
     Expression<String>? priceListId,
+    Expression<String>? currency,
     Expression<String>? paymentTermId,
     Expression<String>? carrierId,
     Expression<String>? collectionId,
@@ -11987,6 +12026,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
       if (billingAddressJson != null)
         'billing_address_json': billingAddressJson,
       if (priceListId != null) 'price_list_id': priceListId,
+      if (currency != null) 'currency': currency,
       if (paymentTermId != null) 'payment_term_id': paymentTermId,
       if (carrierId != null) 'carrier_id': carrierId,
       if (collectionId != null) 'collection_id': collectionId,
@@ -12029,6 +12069,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     Value<String>? deliveryAddressJson,
     Value<String>? billingAddressJson,
     Value<String>? priceListId,
+    Value<String>? currency,
     Value<String>? paymentTermId,
     Value<String?>? carrierId,
     Value<String?>? collectionId,
@@ -12066,6 +12107,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
       deliveryAddressJson: deliveryAddressJson ?? this.deliveryAddressJson,
       billingAddressJson: billingAddressJson ?? this.billingAddressJson,
       priceListId: priceListId ?? this.priceListId,
+      currency: currency ?? this.currency,
       paymentTermId: paymentTermId ?? this.paymentTermId,
       carrierId: carrierId ?? this.carrierId,
       collectionId: collectionId ?? this.collectionId,
@@ -12130,6 +12172,9 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
     }
     if (priceListId.present) {
       map['price_list_id'] = Variable<String>(priceListId.value);
+    }
+    if (currency.present) {
+      map['currency'] = Variable<String>(currency.value);
     }
     if (paymentTermId.present) {
       map['payment_term_id'] = Variable<String>(paymentTermId.value);
@@ -12226,6 +12271,7 @@ class OrdersTableCompanion extends UpdateCompanion<OrdersTableData> {
           ..write('deliveryAddressJson: $deliveryAddressJson, ')
           ..write('billingAddressJson: $billingAddressJson, ')
           ..write('priceListId: $priceListId, ')
+          ..write('currency: $currency, ')
           ..write('paymentTermId: $paymentTermId, ')
           ..write('carrierId: $carrierId, ')
           ..write('collectionId: $collectionId, ')
@@ -29601,6 +29647,7 @@ typedef $$OrdersTableTableCreateCompanionBuilder =
       required String deliveryAddressJson,
       required String billingAddressJson,
       required String priceListId,
+      Value<String> currency,
       required String paymentTermId,
       Value<String?> carrierId,
       Value<String?> collectionId,
@@ -29639,6 +29686,7 @@ typedef $$OrdersTableTableUpdateCompanionBuilder =
       Value<String> deliveryAddressJson,
       Value<String> billingAddressJson,
       Value<String> priceListId,
+      Value<String> currency,
       Value<String> paymentTermId,
       Value<String?> carrierId,
       Value<String?> collectionId,
@@ -29747,6 +29795,11 @@ class $$OrdersTableTableFilterComposer
 
   ColumnFilters<String> get priceListId => $composableBuilder(
     column: $table.priceListId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get currency => $composableBuilder(
+    column: $table.currency,
     builder: (column) => ColumnFilters(column),
   );
 
@@ -29955,6 +30008,11 @@ class $$OrdersTableTableOrderingComposer
     builder: (column) => ColumnOrderings(column),
   );
 
+  ColumnOrderings<String> get currency => $composableBuilder(
+    column: $table.currency,
+    builder: (column) => ColumnOrderings(column),
+  );
+
   ColumnOrderings<String> get paymentTermId => $composableBuilder(
     column: $table.paymentTermId,
     builder: (column) => ColumnOrderings(column),
@@ -30127,6 +30185,9 @@ class $$OrdersTableTableAnnotationComposer
     builder: (column) => column,
   );
 
+  GeneratedColumn<String> get currency =>
+      $composableBuilder(column: $table.currency, builder: (column) => column);
+
   GeneratedColumn<String> get paymentTermId => $composableBuilder(
     column: $table.paymentTermId,
     builder: (column) => column,
@@ -30289,6 +30350,7 @@ class $$OrdersTableTableTableManager
                 Value<String> deliveryAddressJson = const Value.absent(),
                 Value<String> billingAddressJson = const Value.absent(),
                 Value<String> priceListId = const Value.absent(),
+                Value<String> currency = const Value.absent(),
                 Value<String> paymentTermId = const Value.absent(),
                 Value<String?> carrierId = const Value.absent(),
                 Value<String?> collectionId = const Value.absent(),
@@ -30325,6 +30387,7 @@ class $$OrdersTableTableTableManager
                 deliveryAddressJson: deliveryAddressJson,
                 billingAddressJson: billingAddressJson,
                 priceListId: priceListId,
+                currency: currency,
                 paymentTermId: paymentTermId,
                 carrierId: carrierId,
                 collectionId: collectionId,
@@ -30363,6 +30426,7 @@ class $$OrdersTableTableTableManager
                 required String deliveryAddressJson,
                 required String billingAddressJson,
                 required String priceListId,
+                Value<String> currency = const Value.absent(),
                 required String paymentTermId,
                 Value<String?> carrierId = const Value.absent(),
                 Value<String?> collectionId = const Value.absent(),
@@ -30399,6 +30463,7 @@ class $$OrdersTableTableTableManager
                 deliveryAddressJson: deliveryAddressJson,
                 billingAddressJson: billingAddressJson,
                 priceListId: priceListId,
+                currency: currency,
                 paymentTermId: paymentTermId,
                 carrierId: carrierId,
                 collectionId: collectionId,

@@ -20,6 +20,7 @@ function fact(overrides: Partial<OrderAggregationFact> = {}): OrderAggregationFa
     region: overrides.region ?? 'SC',
     status: overrides.status ?? 'submitted',
     createdAt: overrides.createdAt ?? Timestamp.fromDate(new Date('2026-08-15T10:00:00.000Z')),
+    currency: overrides.currency ?? 'BRL',
     itemsSubtotal: overrides.itemsSubtotal ?? 1000,
     discountAmount: overrides.discountAmount ?? 100,
     surchargeAmount: overrides.surchargeAmount ?? 0,
@@ -91,6 +92,32 @@ describe('buildSalesDailySnapshots', () => {
     expect(
       buildSalesDailySnapshots({ organizationId: 'org-1', dayKey: '2026-08-15', facts: [] }),
     ).toEqual([]);
+  });
+
+  it('stamps the snapshot with the currency every contributing order shares (TASK-175)', () => {
+    const snapshots = buildSalesDailySnapshots({
+      organizationId: 'org-1',
+      dayKey: '2026-08-15',
+      facts: [
+        fact({ id: 'order-1', currency: 'USD' }),
+        fact({ id: 'order-2', currency: 'USD' }),
+      ],
+    });
+    expect(snapshots).toHaveLength(1);
+    expect(snapshots[0].currency).toBe('USD');
+  });
+
+  it('refuses to blend two currencies into a single total (TASK-175 — never soma BRL e USD)', () => {
+    expect(() =>
+      buildSalesDailySnapshots({
+        organizationId: 'org-1',
+        dayKey: '2026-08-15',
+        facts: [
+          fact({ id: 'order-1', currency: 'BRL' }),
+          fact({ id: 'order-2', currency: 'USD' }),
+        ],
+      }),
+    ).toThrow(/mixes more than one currency/);
   });
 });
 
@@ -242,5 +269,26 @@ describe('buildProductMonthlySnapshots', () => {
     });
     expect(first).toHaveLength(2);
     expect(second).toEqual(first);
+  });
+
+  it('refuses to blend two currencies for the same product/month into one total (TASK-175)', () => {
+    expect(() =>
+      buildProductMonthlySnapshots({
+        organizationId: 'org-1',
+        monthKey: '2026-08',
+        facts: [
+          fact({
+            id: 'order-1',
+            currency: 'BRL',
+            items: [{ productId: 'product-1', quantity: 1, subtotal: 100 }],
+          }),
+          fact({
+            id: 'order-2',
+            currency: 'USD',
+            items: [{ productId: 'product-1', quantity: 1, subtotal: 100 }],
+          }),
+        ],
+      }),
+    ).toThrow(/mixes more than one currency/);
   });
 });

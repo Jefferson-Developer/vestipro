@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../../core/utils/utils.dart';
 import '../../domain/entities/collection_dashboard_category_mix.dart';
 import '../../domain/entities/collection_dashboard_entry.dart';
 import '../../domain/entities/collection_dashboard_filters.dart';
@@ -13,9 +14,12 @@ import '../bloc/collection_dashboard_bloc.dart';
 import '../bloc/collection_dashboard_event.dart';
 import '../bloc/collection_dashboard_state.dart';
 
-final NumberFormat _currencyFormat = NumberFormat.currency(
-  locale: 'pt_BR',
-  symbol: r'R$',
+// TASK-175: see `sales_dashboard_page.dart`'s own `_currencyFormat` doc
+// comment — every dashboard/report in this codebase still assumes a single
+// organization-wide currency for aggregate totals today.
+String _currencyFormat(double value) => CurrencyFormatter.formatWithCode(
+  value,
+  CurrencyFormatter.legacyDefaultCurrency,
 );
 final DateFormat _dateFormat = DateFormat('dd/MM/yyyy', 'pt_BR');
 
@@ -341,13 +345,10 @@ class _CollectionDashboardCard extends StatelessWidget {
             else ...<Widget>[
               _kpiRow(
                 'Faturamento (líquido)',
-                _currencyFormat.format(entry.revenueNet),
+                _currencyFormat(entry.revenueNet),
               ),
               _kpiRow('Quantidade vendida', '${entry.quantitySold}'),
-              _kpiRow(
-                'Ticket médio',
-                _currencyFormat.format(entry.averageTicket),
-              ),
+              _kpiRow('Ticket médio', _currencyFormat(entry.averageTicket)),
               _kpiRow(
                 'Desconto médio',
                 '${entry.discountPercentage.toStringAsFixed(1)}%',

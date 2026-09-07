@@ -11,6 +11,7 @@ final class OrderSubmissionResultDto {
     required this.orderId,
     required this.orderNumber,
     required this.status,
+    required this.currency,
     required this.discountAmount,
     required this.surchargeAmount,
     required this.shippingAmount,
@@ -22,6 +23,7 @@ final class OrderSubmissionResultDto {
     final orderId = json['orderId'];
     final orderNumber = json['orderNumber'];
     final status = json['status'];
+    final currency = json['currency'];
     final discountAmount = json['discountAmount'];
     final surchargeAmount = json['surchargeAmount'];
     final shippingAmount = json['shippingAmount'];
@@ -54,6 +56,11 @@ final class OrderSubmissionResultDto {
       orderId: orderId,
       orderNumber: orderNumber,
       status: status,
+      // TASK-175: tolerant of an older cached/older-backend response shape
+      // without `currency` — falls back to VestiPro's original single-market
+      // currency instead of throwing, same precedent `OrderDto.fromJson`
+      // already follows for the exact same field.
+      currency: currency is String ? currency : 'BRL',
       discountAmount: discountAmount.toDouble(),
       surchargeAmount: surchargeAmount.toDouble(),
       shippingAmount: shippingAmount.toDouble(),
@@ -65,6 +72,7 @@ final class OrderSubmissionResultDto {
   final String orderId;
   final String orderNumber;
   final String status;
+  final String currency;
   final double discountAmount;
   final double surchargeAmount;
   final double shippingAmount;

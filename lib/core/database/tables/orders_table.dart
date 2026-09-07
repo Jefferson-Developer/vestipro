@@ -35,6 +35,10 @@ class OrdersTable extends Table {
   TextColumn get deliveryAddressJson => text()();
   TextColumn get billingAddressJson => text()();
   TextColumn get priceListId => text()();
+  // ISO 4217 code (TASK-175, multi-moeda) denormalized from the Price List
+  // used — defaults to `'BRL'` for any row cached before this column
+  // existed (matches `Order.currency`'s own default).
+  TextColumn get currency => text().withDefault(const Constant('BRL'))();
   TextColumn get paymentTermId => text()();
   TextColumn get carrierId => text().nullable()();
   TextColumn get collectionId => text().nullable()();

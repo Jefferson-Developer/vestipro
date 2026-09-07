@@ -16,6 +16,7 @@ final class OrderSubmissionResult {
     required this.orderId,
     required this.orderNumber,
     required this.status,
+    required this.currency,
     required this.discountAmount,
     required this.surchargeAmount,
     required this.shippingAmount,
@@ -26,6 +27,10 @@ final class OrderSubmissionResult {
   final String orderId;
   final String orderNumber;
   final OrderStatus status;
+
+  /// ISO 4217 code (TASK-175) — server-authoritative, resolved from the
+  /// Price List `submitOrder` actually used, exactly like [orderNumber].
+  final String currency;
   final double discountAmount;
   final double surchargeAmount;
   final double shippingAmount;

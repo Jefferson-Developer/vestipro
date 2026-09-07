@@ -25,6 +25,7 @@ final class OrderSubmissionMapper {
       orderId: dto.orderId,
       orderNumber: dto.orderNumber,
       status: _orderMapper.statusToEntity(dto.status),
+      currency: dto.currency,
       discountAmount: dto.discountAmount,
       surchargeAmount: dto.surchargeAmount,
       shippingAmount: dto.shippingAmount,

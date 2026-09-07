@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../../core/utils/utils.dart';
 import '../../domain/entities/target.dart';
 import '../../domain/entities/target_alert.dart';
 import '../../domain/entities/target_alert_assessment.dart';
@@ -17,9 +18,13 @@ import '../../domain/value_objects/target_metric_type.dart';
 import '../cubit/target_dashboard_cubit.dart';
 import '../cubit/target_dashboard_state.dart';
 
-final NumberFormat _currencyFormat = NumberFormat.currency(
-  locale: 'pt_BR',
-  symbol: r'R$',
+// TASK-175: see `dashboards/presentation/pages/sales_dashboard_page.dart`'s
+// own `_currencyFormat` doc comment — every dashboard/report in this
+// codebase still assumes a single organization-wide currency for aggregate
+// totals today.
+String _currencyFormat(double value) => CurrencyFormatter.formatWithCode(
+  value,
+  CurrencyFormatter.legacyDefaultCurrency,
 );
 final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
 final DateFormat _dateTimeFormat = DateFormat('dd/MM/yyyy HH:mm');
@@ -359,7 +364,7 @@ class _TargetDashboardBody extends StatelessWidget {
           AppManagementChart(
             type: AppChartType.line,
             series: _chartSeries(target, progress),
-            valueFormatter: (value) => _currencyFormat.format(value),
+            valueFormatter: (value) => _currencyFormat(value),
           ),
         ],
       ),
@@ -368,7 +373,7 @@ class _TargetDashboardBody extends StatelessWidget {
 
   List<Widget> _kpiCards(Target target, TargetProgressViewModel? progress) {
     final currencyOrCount = target.metricType == TargetMetricType.revenue
-        ? _currencyFormat.format
+        ? _currencyFormat
         : (double value) => value.toStringAsFixed(0);
 
     return <Widget>[
@@ -546,7 +551,7 @@ class _ClosingProjectionCard extends StatelessWidget {
 
     final colors = context.colors;
     final currencyOrCount = target.metricType == TargetMetricType.revenue
-        ? _currencyFormat.format
+        ? _currencyFormat
         : (double value) => value.toStringAsFixed(0);
 
     return Container(

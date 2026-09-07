@@ -25,6 +25,7 @@ final class AggregationSnapshotMapper {
       labels: Map<String, String>.unmodifiable(dto.labels),
       generatedAt: dto.generatedAt,
       version: dto.version,
+      currency: dto.currency,
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/design_system/design_system.dart';
+import '../../../../core/utils/utils.dart';
 import '../../../pricing/domain/entities/resolved_variant_price.dart';
 import '../../../products/domain/entities/product.dart';
 import '../../../products/domain/entities/product_color.dart';
@@ -385,7 +386,9 @@ class _ProductDetailContent extends StatelessWidget {
       ),
       VariantAvailabilityStatus.unavailable => 'Indisponível',
     };
-    return '${_formatPrice(price!.price!)} · $stockLabel';
+    final currency =
+        price!.priceList?.currency ?? CurrencyFormatter.legacyDefaultCurrency;
+    return '${_formatPrice(price.price!, currency)} · $stockLabel';
   }
 
   VariantAvailability? _selectedFutureAvailability(ProductDetailState state) {
@@ -416,12 +419,8 @@ class _ProductDetailContent extends StatelessWidget {
     ).format(DateTime(date.year, date.month, date.day));
   }
 
-  String _formatPrice(double value) {
-    return NumberFormat.currency(
-      locale: 'pt_BR',
-      symbol: 'R\$',
-      decimalDigits: 2,
-    ).format(value);
+  String _formatPrice(double value, String currency) {
+    return CurrencyFormatter.formatWithCode(value, currency);
   }
 
   Color _colorFromHex(ProductColor? color) {
@@ -446,11 +445,10 @@ class _PriceStatusBadge extends StatelessWidget {
         icon: Icons.sell_outlined,
       );
     }
-    final formatted = NumberFormat.currency(
-      locale: 'pt_BR',
-      symbol: 'R\$',
-      decimalDigits: 2,
-    ).format(price);
+    final formatted = CurrencyFormatter.formatWithCode(
+      price,
+      state.lowestResolvedPriceCurrency,
+    );
     final hasVariantException = state.pricesByVariantId.values.any(
       (item) => item.isVariantException,
     );

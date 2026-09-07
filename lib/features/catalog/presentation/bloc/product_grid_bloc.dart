@@ -1,7 +1,6 @@
 import 'package:bloc/bloc.dart';
 import 'package:bloc_concurrency/bloc_concurrency.dart';
 import 'package:injectable/injectable.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/analytics/analytics.dart';
 import '../../../../core/performance/performance.dart';
@@ -199,11 +198,6 @@ final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
       return (const <String, String>{}, const <String>{}, false);
     }
 
-    final formatter = NumberFormat.currency(
-      locale: 'pt_BR',
-      symbol: 'R\$',
-      decimalDigits: 2,
-    );
     final labels = <String, String>{};
     final unpriced = <String>{};
     var hasWarning = false;
@@ -261,9 +255,21 @@ final class ProductGridBloc extends Bloc<ProductGridEvent, ProductGridState> {
       final distinctPrices =
           resolved.map((item) => item.price!).toSet().toList(growable: false)
             ..sort();
+      // Every entry in `resolved` came from the very same
+      // `resolvePriceForVariant.callForProduct` batch call, so they all
+      // resolve against this product's one applicable Price List — reading
+      // the currency off the first entry is exactly the same table every
+      // other entry used (TASK-175).
+      final currency =
+          resolved.first.priceList?.currency ??
+          CurrencyFormatter.legacyDefaultCurrency;
+      final lowest = CurrencyFormatter.formatWithCode(
+        distinctPrices.first,
+        currency,
+      );
       labels[product.id] = distinctPrices.length == 1
-          ? formatter.format(distinctPrices.first)
-          : 'A partir de ${formatter.format(distinctPrices.first)}';
+          ? lowest
+          : 'A partir de $lowest';
     }
 
     return (

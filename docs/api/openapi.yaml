@@ -346,6 +346,7 @@ paths:
                     status: "submitted"
                     customerId: "cst_9f3a1b2c"
                     sellerId: "usr_45ab12cd"
+                    currency: "BRL"
                     discountAmount: 45.9
                     surchargeAmount: 0
                     shippingAmount: 32.5
@@ -445,6 +446,7 @@ paths:
                   orderId: "b6f1a6d0-2f8f-4a3a-9e2a-1c9b6b7d9f10"
                   orderNumber: "2026-000483"
                   status: "submitted"
+                  currency: "BRL"
                   discountAmount: 45.9
                   surchargeAmount: 0
                   shippingAmount: 32.5
@@ -542,6 +544,7 @@ paths:
                   status: "submitted"
                   customerId: "cst_9f3a1b2c"
                   sellerId: "usr_45ab12cd"
+                  currency: "BRL"
                   discountAmount: 45.9
                   surchargeAmount: 0
                   shippingAmount: 32.5
@@ -780,7 +783,7 @@ components:
         - cancelled
     OrderSummary:
       type: object
-      required: [id, status, discountAmount, surchargeAmount, shippingAmount, total]
+      required: [id, status, currency, discountAmount, surchargeAmount, shippingAmount, total]
       description: >-
         Formato resumido de pedido usado por `GET /v1/orders` e `GET
         /v1/orders/{id}` — não inclui a lista de itens (para isso, use o `data`
@@ -793,6 +796,14 @@ components:
           $ref: '#/components/schemas/OrderStatus'
         customerId: { type: string, nullable: true, example: cst_9f3a1b2c }
         sellerId: { type: string, nullable: true, example: usr_45ab12cd }
+        currency:
+          type: string
+          description: >-
+            Código ISO 4217 (TASK-175) da tabela de preço usada neste pedido —
+            todo valor monetário abaixo (`discountAmount`, `surchargeAmount`,
+            `shippingAmount`, `total`) está expresso nesta moeda. VestiPro
+            nunca converte entre moedas: um pedido é sempre uma única moeda.
+          example: BRL
         discountAmount: { type: number, format: double, example: 45.9 }
         surchargeAmount: { type: number, format: double, example: 0 }
         shippingAmount: { type: number, format: double, example: 32.5 }
@@ -938,6 +949,7 @@ components:
         - orderId
         - orderNumber
         - status
+        - currency
         - discountAmount
         - surchargeAmount
         - shippingAmount
@@ -953,6 +965,14 @@ components:
         orderNumber: { type: string, example: "2026-000483" }
         status:
           $ref: '#/components/schemas/OrderStatus'
+        currency:
+          type: string
+          description: >-
+            Código ISO 4217 (TASK-175) da tabela de preço efetivamente usada
+            para precificar este pedido — resolvido/validado no servidor,
+            nunca aceito do corpo da requisição. Todo valor monetário abaixo
+            está expresso nesta moeda.
+          example: BRL
         discountAmount: { type: number, format: double, example: 45.9 }
         surchargeAmount: { type: number, format: double, example: 0 }
         shippingAmount: { type: number, format: double, example: 32.5 }

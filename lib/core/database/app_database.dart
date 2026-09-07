@@ -123,7 +123,7 @@ class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 19;
+  int get schemaVersion => 20;
 
   /// Removes every offline row after an account deletion. Child tables are
   /// cleared first so foreign-key integrity remains enabled throughout.
@@ -279,6 +279,38 @@ class AppDatabase extends _$AppDatabase {
         if (from < 19) {
           // TASK-117: cache local do snapshot de positivação de carteira.
           await migrator.createTable(positivacaoSnapshotsTable);
+        }
+        if (from < 20) {
+          // TASK-175: moeda (ISO 4217) do pedido, denormalizada da tabela de
+          // preço usada — necessária para formatar e nunca somar valores de
+          // moedas distintas.
+          //
+          // Guarded by an actual `sqlite_master`/`PRAGMA table_info` read
+          // (rather than running unconditionally), same precedent the
+          // `from < 18` targets migration above already sets: a handful of
+          // this codebase's own tests seed a raw "already at schema version
+          // N" sqlite file without ever creating `orders` at all (see
+          // `app_database_task_106_schema_test.dart`'s own
+          // `_RawSchemaVersionSeed` doc comment) purely to exercise a later
+          // migration step in isolation — blindly altering a table that
+          // never existed on that particular (test-only) device state would
+          // fail the whole migration and could leave the local database
+          // unusable. No real device can ever reach this branch without
+          // `orders` already existing: it is unconditionally created by the
+          // `from < 10` branch above, which every real upgrade path already
+          // ran at some earlier version.
+          final orderTableNames = await customSelect(
+            "SELECT name FROM sqlite_master WHERE type = 'table' "
+            "AND name = 'orders'",
+          ).map((row) => row.read<String>('name')).get();
+          if (orderTableNames.isNotEmpty) {
+            final orderColumns = await customSelect(
+              "PRAGMA table_info('orders')",
+            ).map((row) => row.read<String>('name')).get();
+            if (!orderColumns.contains('currency')) {
+              await migrator.addColumn(ordersTable, ordersTable.currency);
+            }
+          }
         }
       },
       beforeOpen: (details) async {

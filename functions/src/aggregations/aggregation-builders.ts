@@ -1,6 +1,7 @@
 import { Timestamp } from 'firebase-admin/firestore';
 
 import {
+  assertSingleCurrency,
   isRevenueRecognized,
   netRevenueOf,
   roundCurrency,
@@ -48,6 +49,10 @@ export function buildSalesDailySnapshots(params: {
       companyId,
       scopeId: companyId,
       periodKey: params.dayKey,
+      currency: assertSingleCurrency(
+        `salesDaily/${companyId}/${params.dayKey}`,
+        companyFacts,
+      ),
       facts: companyFacts,
       labels: {},
       generatedAt,
@@ -76,6 +81,10 @@ export function buildSellerDailySnapshots(params: {
       companyId: first.companyId,
       scopeId: first.sellerId,
       periodKey: params.dayKey,
+      currency: assertSingleCurrency(
+        `sellerDaily/${first.companyId}/${first.sellerId}/${params.dayKey}`,
+        sellerFacts,
+      ),
       facts: sellerFacts,
       labels: {},
       generatedAt,
@@ -105,6 +114,10 @@ export function buildCustomerMonthlySnapshots(params: {
       companyId: first.companyId,
       scopeId: first.customerId,
       periodKey: params.monthKey,
+      currency: assertSingleCurrency(
+        `customerMonthly/${first.companyId}/${first.customerId}/${params.monthKey}`,
+        companyFacts,
+      ),
       facts: companyFacts,
       labels: {
         ...(label?.name ? { customerName: label.name } : {}),
@@ -137,6 +150,10 @@ export function buildSellerMonthlySnapshots(params: {
       companyId: first.companyId,
       scopeId: first.sellerId,
       periodKey: params.monthKey,
+      currency: assertSingleCurrency(
+        `sellerMonthly/${first.companyId}/${first.sellerId}/${params.monthKey}`,
+        companyFacts,
+      ),
       facts: companyFacts,
       labels: label?.name ? { sellerName: label.name } : {},
       generatedAt,
@@ -193,12 +210,18 @@ export function buildRegionMonthlySnapshots(params: {
       .slice(0, 3)
       .map(([name, quantity]) => `${name.replace(/[|:]/g, ' ')}:${quantity}`)
       .join('|');
+    const scopeId =
+      city === 'UNKNOWN' ? first.region : `${first.region}:${city}`;
     return buildOrderLevelSnapshot({
       organizationId: params.organizationId,
       dimension: 'regionMonthly',
       companyId: first.companyId,
-      scopeId: city === 'UNKNOWN' ? first.region : `${first.region}:${city}`,
+      scopeId,
       periodKey: params.monthKey,
+      currency: assertSingleCurrency(
+        `regionMonthly/${first.companyId}/${scopeId}/${params.monthKey}`,
+        companyFacts,
+      ),
       facts: companyFacts,
       labels: {
         region: first.region,
@@ -239,6 +262,7 @@ export function buildProductMonthlySnapshots(params: {
   interface ProductAccumulator {
     companyId: string;
     productId: string;
+    currencies: Set<string>;
     revenue: number;
     quantity: number;
     orderIds: Set<string>;
@@ -250,10 +274,12 @@ export function buildProductMonthlySnapshots(params: {
       const accumulator = accumulators.get(key) ?? {
         companyId: fact.companyId,
         productId: item.productId,
+        currencies: new Set<string>(),
         revenue: 0,
         quantity: 0,
         orderIds: new Set<string>(),
       };
+      accumulator.currencies.add(fact.currency);
       accumulator.revenue += item.subtotal;
       accumulator.quantity += item.quantity;
       accumulator.orderIds.add(fact.id);
@@ -264,12 +290,17 @@ export function buildProductMonthlySnapshots(params: {
   return [...accumulators.values()].map((accumulator) => {
     const label = params.productLabels?.get(accumulator.productId);
     const revenue = roundCurrency(accumulator.revenue);
+    const currency = assertSingleCurrency(
+      `productMonthly/${accumulator.companyId}/${accumulator.productId}/${params.monthKey}`,
+      [...accumulator.currencies].map((value) => ({ currency: value })),
+    );
     return {
       organizationId: params.organizationId,
       companyId: accumulator.companyId,
       dimension: 'productMonthly',
       scopeId: accumulator.productId,
       periodKey: params.monthKey,
+      currency,
       revenueGross: revenue,
       revenueNet: revenue,
       discountAmount: 0,
@@ -296,6 +327,7 @@ function buildOrderLevelSnapshot(params: {
   companyId: string;
   scopeId: string;
   periodKey: string;
+  currency: string;
   facts: readonly OrderAggregationFact[];
   labels: Readonly<Record<string, string>>;
   generatedAt: Timestamp;
@@ -319,6 +351,7 @@ function buildOrderLevelSnapshot(params: {
     dimension: params.dimension,
     scopeId: params.scopeId,
     periodKey: params.periodKey,
+    currency: params.currency,
     revenueGross,
     revenueNet,
     discountAmount,

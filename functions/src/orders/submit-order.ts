@@ -137,6 +137,11 @@ export interface SubmitOrderResponse {
   orderId: string;
   orderNumber: string;
   status: string;
+  /** ISO 4217 code of the Price List this order was priced from (TASK-175)
+   * — server-authoritative, exactly like [orderNumber]: never trusted from
+   * the client, always the `selectedPriceList.currency` this same
+   * transaction already resolved/revalidated. */
+  currency: string;
   discountAmount: number;
   surchargeAmount: number;
   shippingAmount: number;
@@ -392,6 +397,12 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
         deliveryAddress,
         billingAddress,
         priceListId,
+        // ISO 4217 code (TASK-175) denormalized from the selected Price
+        // List — resolved/validated server-side above (`mapPriceList`),
+        // never accepted directly from `SubmitOrderRequest`, so a client can
+        // never make an order claim a currency its own Price List does not
+        // actually carry.
+        currency: selectedPriceList.currency,
         paymentTermId,
         carrierId: carrierId ?? null,
         collectionId: collectionId ?? null,
@@ -766,6 +777,10 @@ function serializeOrder(
     orderId,
     orderNumber: data.orderNumber as string,
     status: data.status as string,
+    currency:
+      typeof data.currency === 'string' && data.currency.length > 0
+        ? data.currency
+        : 'BRL',
     discountAmount: asNumber(data.discountAmount),
     surchargeAmount: asNumber(data.surchargeAmount),
     shippingAmount: asNumber(data.shippingAmount),

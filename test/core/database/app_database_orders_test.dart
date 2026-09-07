@@ -91,4 +91,72 @@ void main() {
       },
     );
   });
+
+  group('AppDatabase orders currency column (TASK-175)', () {
+    late AppDatabase database;
+
+    setUp(() {
+      database = AppDatabase(NativeDatabase.memory());
+    });
+
+    tearDown(() async {
+      await database.close();
+    });
+
+    OrdersTableCompanion buildOrderRow({
+      required String id,
+      Value<String> currency = const Value.absent(),
+    }) {
+      final now = DateTime.utc(2026, 1, 1);
+      return OrdersTableCompanion.insert(
+        id: id,
+        organizationId: 'org-1',
+        companyId: 'company-1',
+        branchId: 'branch-1',
+        customerId: 'customer-1',
+        sellerId: 'seller-1',
+        deliveryAddressJson: '{}',
+        billingAddressJson: '{}',
+        priceListId: 'price-list-1',
+        currency: currency,
+        paymentTermId: 'payment-term-1',
+        status: 'submitted',
+        createdAt: now,
+        createdBy: 'seller-1',
+        updatedAt: now,
+        updatedBy: 'seller-1',
+        version: 1,
+        syncStatus: 'synced',
+      );
+    }
+
+    test(
+      'defaults to BRL when a caller omits currency (legacy/local-only row)',
+      () async {
+        await database.upsertOrder(buildOrderRow(id: 'order-brl-default'));
+
+        final row = await database.getOrderById(
+          organizationId: 'org-1',
+          companyId: 'company-1',
+          id: 'order-brl-default',
+        );
+
+        expect(row?.order.currency, 'BRL');
+      },
+    );
+
+    test('persists and reads back a non-BRL Price List currency', () async {
+      await database.upsertOrder(
+        buildOrderRow(id: 'order-usd', currency: const Value('USD')),
+      );
+
+      final row = await database.getOrderById(
+        organizationId: 'org-1',
+        companyId: 'company-1',
+        id: 'order-usd',
+      );
+
+      expect(row?.order.currency, 'USD');
+    });
+  });
 }

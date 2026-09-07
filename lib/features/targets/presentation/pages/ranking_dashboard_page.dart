@@ -7,6 +7,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../../core/utils/utils.dart';
 import '../../domain/entities/ranking_board.dart';
 import '../../domain/entities/ranking_entry.dart';
 import '../../domain/value_objects/ranking_access_level.dart';
@@ -16,9 +17,13 @@ import '../cubit/ranking_dashboard_cubit.dart';
 import '../cubit/ranking_dashboard_state.dart';
 
 final DateFormat _dateFormat = DateFormat('dd/MM/yyyy');
-final NumberFormat _currencyFormat = NumberFormat.currency(
-  locale: 'pt_BR',
-  symbol: r'R$',
+// TASK-175: see `dashboards/presentation/pages/sales_dashboard_page.dart`'s
+// own `_currencyFormat` doc comment — every dashboard/report in this
+// codebase still assumes a single organization-wide currency for aggregate
+// totals today.
+String _currencyFormat(double value) => CurrencyFormatter.formatWithCode(
+  value,
+  CurrencyFormatter.legacyDefaultCurrency,
 );
 
 /// Ranking comercial (TASK-118, EPIC-15/VESTI-088): compara vendedores/
@@ -302,7 +307,7 @@ class _RankingDashboardBody extends StatelessWidget {
                   label: 'Realizado',
                   numeric: true,
                   cellBuilder: (context, entry) =>
-                      Text(_currencyFormat.format(entry.realizedValue)),
+                      Text(_currencyFormat(entry.realizedValue)),
                 ),
               ],
             ),

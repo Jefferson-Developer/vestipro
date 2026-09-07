@@ -168,6 +168,7 @@ OrderSubmissionResult _result() {
     orderId: 'order-1',
     orderNumber: '000001',
     status: OrderStatus.submitted,
+    currency: 'BRL',
     discountAmount: 0,
     surchargeAmount: 0,
     shippingAmount: 0,

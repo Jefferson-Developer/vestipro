@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../../core/utils/utils.dart';
 import '../../domain/entities/order.dart';
 import '../../domain/entities/order_duplication_item_issue.dart';
 import '../../domain/entities/order_duplication_result.dart';
@@ -422,8 +422,8 @@ class _OrderDuplicationSummaryDialog extends StatelessWidget {
                     padding: const EdgeInsets.only(bottom: AppSpacing.spacing4),
                     child: Text(
                       '• ${change.productId}: '
-                      '${_formatCurrency(change.previousUnitPrice)} → '
-                      '${_formatCurrency(change.newUnitPrice)}',
+                      '${_formatCurrency(change.previousUnitPrice, result.draft.currency)} → '
+                      '${_formatCurrency(change.newUnitPrice, result.draft.currency)}',
                       style: AppTypography.bodyMedium.copyWith(
                         color: colors.onSurface,
                       ),
@@ -455,11 +455,7 @@ class _OrderDuplicationSummaryDialog extends StatelessWidget {
     };
   }
 
-  String _formatCurrency(double value) {
-    return NumberFormat.currency(
-      locale: 'pt_BR',
-      symbol: 'R\$',
-      decimalDigits: 2,
-    ).format(value);
+  String _formatCurrency(double value, String currency) {
+    return CurrencyFormatter.formatWithCode(value, currency);
   }
 }

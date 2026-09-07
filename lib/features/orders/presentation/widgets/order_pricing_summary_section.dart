@@ -2,9 +2,9 @@ import 'dart:async' show Timer, unawaited;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/design_system/design_system.dart';
+import '../../../../core/utils/utils.dart';
 import '../../domain/entities/order.dart';
 import '../../domain/entities/order_pricing_summary.dart';
 import '../bloc/order_pricing_summary_cubit.dart';
@@ -106,17 +106,29 @@ class _OrderPricingSummarySectionState
       value: _cubit,
       child: BlocConsumer<OrderPricingSummaryCubit, OrderPricingSummaryState>(
         listener: (context, state) => widget.onStateChanged?.call(state),
-        builder: (context, state) =>
-            _OrderPricingSummaryCardContent(state: state),
+        builder: (context, state) => _OrderPricingSummaryCardContent(
+          state: state,
+          fallbackCurrency: widget.order.currency,
+        ),
       ),
     );
   }
 }
 
 class _OrderPricingSummaryCardContent extends StatelessWidget {
-  const _OrderPricingSummaryCardContent({required this.state});
+  const _OrderPricingSummaryCardContent({
+    required this.state,
+    required this.fallbackCurrency,
+  });
 
   final OrderPricingSummaryState state;
+
+  /// The draft's own `Order.currency` (TASK-175) — used only while
+  /// [OrderPricingSummaryStatus.offlineEstimate] has no server-confirmed
+  /// [OrderPricingSummary] to read a currency from yet; every other status
+  /// formats from [OrderPricingSummary.currency] itself, the actual Price
+  /// List the pricing engine used for that specific calculation.
+  final String fallbackCurrency;
 
   static const _title = 'Resumo comercial';
 
@@ -160,15 +172,24 @@ class _OrderPricingSummaryCardContent extends StatelessWidget {
           lines: <AppCommercialSummaryLine>[
             AppCommercialSummaryLine(
               label: 'Subtotal',
-              value: _formatCurrency(state.localEstimateSubtotal ?? 0),
+              value: _formatCurrency(
+                state.localEstimateSubtotal ?? 0,
+                fallbackCurrency,
+              ),
             ),
             AppCommercialSummaryLine(
               label: 'Frete',
-              value: _formatCurrency(state.localEstimateShippingAmount ?? 0),
+              value: _formatCurrency(
+                state.localEstimateShippingAmount ?? 0,
+                fallbackCurrency,
+              ),
             ),
             AppCommercialSummaryLine(
               label: 'Total (estimativa local)',
-              value: _formatCurrency(state.localEstimateTotal ?? 0),
+              value: _formatCurrency(
+                state.localEstimateTotal ?? 0,
+                fallbackCurrency,
+              ),
               emphasis: true,
             ),
           ],
@@ -210,17 +231,18 @@ class _OrderPricingSummaryCardContent extends StatelessWidget {
   }
 
   List<AppCommercialSummaryLine> _linesFor(OrderPricingSummary summary) {
+    final currency = summary.currency;
     final lines = <AppCommercialSummaryLine>[
       AppCommercialSummaryLine(
         label: 'Subtotal',
-        value: _formatCurrency(summary.subtotal),
+        value: _formatCurrency(summary.subtotal, currency),
       ),
     ];
     if (summary.discountTotal > 0) {
       lines.add(
         AppCommercialSummaryLine(
           label: 'Desconto',
-          value: '- ${_formatCurrency(summary.discountTotal)}',
+          value: '- ${_formatCurrency(summary.discountTotal, currency)}',
           tone: AppCommercialSummaryLineTone.positive,
         ),
       );
@@ -229,7 +251,7 @@ class _OrderPricingSummaryCardContent extends StatelessWidget {
       lines.add(
         AppCommercialSummaryLine(
           label: 'Acréscimo',
-          value: _formatCurrency(summary.paymentTermAdjustmentTotal),
+          value: _formatCurrency(summary.paymentTermAdjustmentTotal, currency),
           tone: AppCommercialSummaryLineTone.negative,
         ),
       );
@@ -238,13 +260,13 @@ class _OrderPricingSummaryCardContent extends StatelessWidget {
       ..add(
         AppCommercialSummaryLine(
           label: 'Frete',
-          value: _formatCurrency(summary.shippingAmount),
+          value: _formatCurrency(summary.shippingAmount, currency),
         ),
       )
       ..add(
         AppCommercialSummaryLine(
           label: 'Total',
-          value: _formatCurrency(summary.total),
+          value: _formatCurrency(summary.total, currency),
           emphasis: true,
         ),
       );
@@ -252,10 +274,6 @@ class _OrderPricingSummaryCardContent extends StatelessWidget {
   }
 }
 
-String _formatCurrency(double value) {
-  return NumberFormat.currency(
-    locale: 'pt_BR',
-    symbol: 'R\$',
-    decimalDigits: 2,
-  ).format(value);
+String _formatCurrency(double value, String currency) {
+  return CurrencyFormatter.formatWithCode(value, currency);
 }

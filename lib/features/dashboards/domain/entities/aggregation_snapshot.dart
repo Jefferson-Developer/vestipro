@@ -23,11 +23,22 @@ final class AggregationSnapshot {
     required this.generatedAt,
     required this.version,
     this.isFromLocalCache = false,
+    this.currency = 'BRL',
   });
 
   final String organizationId;
   final String companyId;
   final AggregationDimension dimension;
+
+  /// ISO 4217 code (TASK-175) — every fact `aggregation-builders.ts` summed
+  /// into this one row is guaranteed to already share this exact currency
+  /// (`assertSingleCurrency`, `functions/src/aggregations/aggregation-
+  /// builders.ts`), so no dashboard ever has to re-check for a blended
+  /// total. Defaults to `'BRL'` only so the many existing tests/fixtures
+  /// across this codebase that construct one without it keep compiling
+  /// unchanged — every value actually read from Firestore/cache always
+  /// carries its own real value (`AggregationSnapshotDto`).
+  final String currency;
 
   /// `companyId` itself for [AggregationDimension.salesDaily] (company-wide,
   /// no sub-scope); customerId/productId/sellerId/region (delivery address
@@ -73,6 +84,7 @@ final class AggregationSnapshot {
       generatedAt: generatedAt,
       version: version,
       isFromLocalCache: isFromLocalCache ?? this.isFromLocalCache,
+      currency: currency,
     );
   }
 }

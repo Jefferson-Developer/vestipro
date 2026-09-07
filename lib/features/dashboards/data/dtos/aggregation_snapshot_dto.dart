@@ -27,6 +27,7 @@ final class AggregationSnapshotDto {
     required this.labels,
     required this.generatedAt,
     required this.version,
+    required this.currency,
   });
 
   factory AggregationSnapshotDto.fromJson(
@@ -84,6 +85,12 @@ final class AggregationSnapshotDto {
       labels: labels,
       generatedAt: generatedAt,
       version: intOrZero('version'),
+      // TASK-175: tolerant of a pre-existing snapshot document written
+      // before `aggregation-builders.ts` started stamping `currency` —
+      // falls back to VestiPro's original single-market currency instead of
+      // throwing, same precedent `OrderDto.fromJson` already follows for
+      // the exact same field.
+      currency: json['currency'] is String ? json['currency'] as String : 'BRL',
     );
   }
 
@@ -101,4 +108,5 @@ final class AggregationSnapshotDto {
   final Map<String, String> labels;
   final DateTime generatedAt;
   final int version;
+  final String currency;
 }

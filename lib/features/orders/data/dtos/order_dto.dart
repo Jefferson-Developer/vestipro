@@ -25,6 +25,7 @@ final class OrderDto {
     required this.deliveryAddress,
     required this.billingAddress,
     required this.priceListId,
+    required this.currency,
     required this.paymentTermId,
     this.carrierId,
     this.collectionId,
@@ -60,6 +61,14 @@ final class OrderDto {
     final deliveryAddress = json['deliveryAddress'];
     final billingAddress = json['billingAddress'];
     final priceListId = json['priceListId'];
+    // TASK-175: tolerant of a pre-existing order document written before
+    // `submitOrder` started persisting `currency` — falls back to VestiPro's
+    // original single-market currency instead of throwing, same precedent
+    // `extractOrderFact` (`functions/src/aggregations/aggregation-shared.ts`)
+    // already follows for the exact same field.
+    final currency = json['currency'] is String
+        ? json['currency'] as String
+        : 'BRL';
     final paymentTermId = json['paymentTermId'];
     final carrierId = json['carrierId'];
     final collectionId = json['collectionId'];
@@ -130,6 +139,7 @@ final class OrderDto {
       deliveryAddress: OrderAddressDto.fromJson(deliveryAddress),
       billingAddress: OrderAddressDto.fromJson(billingAddress),
       priceListId: priceListId,
+      currency: currency,
       paymentTermId: paymentTermId,
       carrierId: carrierId as String?,
       collectionId: collectionId as String?,
@@ -166,6 +176,7 @@ final class OrderDto {
   final OrderAddressDto deliveryAddress;
   final OrderAddressDto billingAddress;
   final String priceListId;
+  final String currency;
   final String paymentTermId;
   final String? carrierId;
   final String? collectionId;
@@ -201,6 +212,7 @@ final class OrderDto {
       'deliveryAddress': deliveryAddress.toJson(),
       'billingAddress': billingAddress.toJson(),
       'priceListId': priceListId,
+      'currency': currency,
       'paymentTermId': paymentTermId,
       'carrierId': carrierId,
       'collectionId': collectionId,

@@ -200,6 +200,12 @@ function serializeOrderSummary(
     status: data.status ?? null,
     customerId: data.customerId ?? null,
     sellerId: data.sellerId ?? null,
+    // ISO 4217 code (TASK-175) — every monetary field below is expressed in
+    // this currency (the order's own Price List), so an integration
+    // consuming this API never has to guess/assume BRL. Falls back to
+    // VestiPro's original single-market currency only for an order
+    // submitted before `submitOrder` started persisting this field.
+    currency: typeof data.currency === 'string' ? data.currency : 'BRL',
     discountAmount: asNumber(data.discountAmount),
     surchargeAmount: asNumber(data.surchargeAmount),
     shippingAmount: asNumber(data.shippingAmount),

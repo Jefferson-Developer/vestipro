@@ -48,6 +48,19 @@ abstract class Order with _$Order {
     required OrderAddress deliveryAddress,
     required OrderAddress billingAddress,
     required String priceListId,
+    // ISO 4217 code (TASK-175, multi-moeda) — denormalized from
+    // `PriceList.currency` at draft creation
+    // (`StartOrderDraftForCustomerUseCase`, from the already-resolved
+    // Price List) and re-confirmed server-side by `submitOrder`
+    // (`SubmitOrderSubmissionResult.currency`), never trusted from the
+    // client alone for the persisted order. Defaults to `'BRL'` (mirrors
+    // `CurrencyFormatter.legacyDefaultCurrency` — not imported here, domain
+    // entities stay free of presentation-layer concerns) only so the many
+    // existing tests/fixtures across this codebase that construct an
+    // `Order` without it keep compiling unchanged — every real draft always
+    // sets it explicitly from its own Price List, exactly like `priceListId`
+    // itself.
+    @Default('BRL') String currency,
     required String paymentTermId,
     String? carrierId,
     // "coleção" — the product collection this order was placed against, if

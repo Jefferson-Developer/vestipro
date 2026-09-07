@@ -62,7 +62,16 @@ export async function runReportAggregation(
   };
   let rows = aggregateRows(await loadPeriod(period), dimensions, metrics);
   const comparison = parseComparison(data?.comparisonPeriod);
-  let columns = [...dimensions, ...metrics];
+  // TASK-175: expose the ISO 4217 `currency` column whenever the report
+  // includes at least one monetary metric — `aggregateRows` already refuses
+  // (never blends) a mix of currencies within one row, so this column is the
+  // "indicação visual clara de qual moeda" every value in it is expressed in.
+  const hasCurrencyMetric = metrics.some(
+    (id) => catalog.find((field) => field.id === id)?.valueType === 'currency',
+  );
+  let columns = hasCurrencyMetric
+    ? [...dimensions, 'currency', ...metrics]
+    : [...dimensions, ...metrics];
   if (comparison !== 'none') {
     const comparisonRows = aggregateRows(await loadPeriod(comparisonMonth(period, comparison)), dimensions, metrics);
     rows = mergeComparison(rows, comparisonRows, dimensions, metrics);
@@ -120,17 +129,37 @@ function sourceFor(dimensions: string[]) {
   return 'productMonthly' as const;
 }
 
-function aggregateRows(snapshots: DocumentData[], dimensions: string[], metrics: string[]): Record<string, unknown>[] {
-  const groups = new Map<string, { dimensions: Record<string, string>; revenueNet: number; revenueGross: number; discountAmount: number; orderCount: number; itemQuantity: number }>();
+/**
+ * Groups pre-aggregated snapshot rows by the report's own dimension values,
+ * summing `revenueNet`/`revenueGross`/`discountAmount`/etc within each group
+ * — same as before TASK-175, except the currency (`AggregateSnapshotDoc
+ * .currency`, itself already guaranteed single-currency per row by
+ * `assertSingleCurrency` in `aggregation-builders.ts`) is now part of the
+ * grouping key too and is refused, never blended, the moment one dimension
+ * combination (e.g. "cliente X, período Y") is fed rows in more than one
+ * currency: mirrors `assertSingleCurrency`'s "fail loudly instead of adding
+ * BRL to USD" rule, just surfaced as a caller-facing `HttpsError` here since
+ * this runs synchronously inside an interactive callable/export, not a
+ * background recompute job.
+ */
+export function aggregateRows(snapshots: DocumentData[], dimensions: string[], metrics: string[]): Record<string, unknown>[] {
+  const groups = new Map<string, { dimensions: Record<string, string>; currency: string; revenueNet: number; revenueGross: number; discountAmount: number; orderCount: number; itemQuantity: number }>();
   for (const snapshot of snapshots) {
     const values = Object.fromEntries(dimensions.map((id) => [id, dimensionValue(id, snapshot)]));
     const key = JSON.stringify(values);
-    const current = groups.get(key) ?? { dimensions: values, revenueNet: 0, revenueGross: 0, discountAmount: 0, orderCount: 0, itemQuantity: 0 };
+    const currency = typeof snapshot.currency === 'string' && snapshot.currency.length > 0 ? snapshot.currency : 'BRL';
+    const current = groups.get(key) ?? { dimensions: values, currency, revenueNet: 0, revenueGross: 0, discountAmount: 0, orderCount: 0, itemQuantity: 0 };
+    if (current.currency !== currency) {
+      throw new HttpsError(
+        'failed-precondition',
+        `Não é possível somar valores em ${current.currency} e ${currency} na mesma linha do relatório. Filtre por moeda antes de gerar este relatório.`,
+      );
+    }
     current.revenueNet += number(snapshot.revenueNet); current.revenueGross += number(snapshot.revenueGross);
     current.discountAmount += number(snapshot.discountAmount); current.orderCount += number(snapshot.orderCount); current.itemQuantity += number(snapshot.itemQuantity);
     groups.set(key, current);
   }
-  return [...groups.values()].map((group) => ({ ...group.dimensions, ...Object.fromEntries(metrics.map((id) => [id, metricValue(id, group)])) }));
+  return [...groups.values()].map((group) => ({ ...group.dimensions, currency: group.currency, ...Object.fromEntries(metrics.map((id) => [id, metricValue(id, group)])) }));
 }
 
 export function mergeComparison(current: Record<string, unknown>[], previous: Record<string, unknown>[], dimensions: string[], metrics: string[]): Record<string, unknown>[] {

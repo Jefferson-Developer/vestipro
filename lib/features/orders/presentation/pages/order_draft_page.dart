@@ -2,11 +2,11 @@ import 'dart:async' show Timer, unawaited;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../../core/utils/utils.dart';
 import '../../../customers/customers.dart';
 import '../../../products/domain/entities/product.dart';
 import '../../domain/entities/order.dart';
@@ -570,6 +570,7 @@ class _OrderItemsSection extends StatelessWidget {
               items: entry.value,
               product: state.productsById[entry.key],
               organizationId: organizationId,
+              currency: order.currency,
               createOrderItemsGridCubit: createOrderItemsGridCubit,
             ),
             const SizedBox(height: AppSpacing.spacing8),
@@ -586,7 +587,7 @@ class _OrderItemsSection extends StatelessWidget {
                 ),
               ),
               Text(
-                _formatCurrency(order.itemsSubtotal),
+                _formatCurrency(order.itemsSubtotal, order.currency),
                 style: AppTypography.titleMedium.copyWith(
                   color: colors.onSurface,
                 ),
@@ -613,6 +614,7 @@ class _OrderProductItemsCard extends StatelessWidget {
     required this.items,
     required this.product,
     required this.organizationId,
+    required this.currency,
     required this.createOrderItemsGridCubit,
   });
 
@@ -620,6 +622,11 @@ class _OrderProductItemsCard extends StatelessWidget {
   final List<OrderItem> items;
   final Product? product;
   final String organizationId;
+
+  /// The owning `Order.currency` (TASK-175) — every item price/subtotal
+  /// this card (or its plain-row fallback) shows belongs to this one order,
+  /// so this one currency applies to every value rendered here.
+  final String currency;
   final OrderItemsGridCubit Function() createOrderItemsGridCubit;
 
   @override
@@ -640,7 +647,11 @@ class _OrderProductItemsCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 for (final item in items) ...<Widget>[
-                  _OrderItemRow(item: item, productName: productId),
+                  _OrderItemRow(
+                    item: item,
+                    productName: productId,
+                    currency: currency,
+                  ),
                   const SizedBox(height: AppSpacing.spacing8),
                 ],
               ],
@@ -665,10 +676,15 @@ class _OrderProductItemsCard extends StatelessWidget {
 }
 
 class _OrderItemRow extends StatelessWidget {
-  const _OrderItemRow({required this.item, required this.productName});
+  const _OrderItemRow({
+    required this.item,
+    required this.productName,
+    required this.currency,
+  });
 
   final OrderItem item;
   final String productName;
+  final String currency;
 
   @override
   Widget build(BuildContext context) {
@@ -694,8 +710,8 @@ class _OrderItemRow extends StatelessWidget {
                 ),
                 const SizedBox(height: AppSpacing.spacing4),
                 Text(
-                  '${_formatCurrency(item.unitPrice)} · un.  ·  '
-                  'Subtotal: ${_formatCurrency(item.subtotal)}',
+                  '${_formatCurrency(item.unitPrice, currency)} · un.  ·  '
+                  'Subtotal: ${_formatCurrency(item.subtotal, currency)}',
                   style: AppTypography.bodySmall.copyWith(
                     color: colors.outline,
                   ),
@@ -728,12 +744,8 @@ class _OrderItemRow extends StatelessWidget {
   }
 }
 
-String _formatCurrency(double value) {
-  return NumberFormat.currency(
-    locale: 'pt_BR',
-    symbol: 'R\$',
-    decimalDigits: 2,
-  ).format(value);
+String _formatCurrency(double value, String currency) {
+  return CurrencyFormatter.formatWithCode(value, currency);
 }
 
 class _SummaryRow extends StatelessWidget {

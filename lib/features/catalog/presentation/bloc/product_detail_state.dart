@@ -1,4 +1,5 @@
 import '../../../../core/errors/errors.dart';
+import '../../../../core/utils/utils.dart';
 import '../../../pricing/domain/entities/resolved_variant_price.dart';
 import '../../../products/domain/entities/product.dart';
 import '../../../products/domain/entities/product_color.dart';
@@ -182,6 +183,22 @@ final class ProductDetailState {
     if (prices.isEmpty) return null;
     prices.sort();
     return prices.first;
+  }
+
+  /// ISO 4217 code (TASK-175) of the Price List [lowestResolvedPrice] itself
+  /// came from — the currency every price on this product's own catalog
+  /// page must be formatted/labeled in, never a hardcoded one. Falls back to
+  /// [CurrencyFormatter.legacyDefaultCurrency] only when no price resolved
+  /// at all (nothing to format anyway in that case).
+  String get lowestResolvedPriceCurrency {
+    final withPrice =
+        pricesByVariantId.values
+            .where((resolved) => resolved.price != null)
+            .toList(growable: false)
+          ..sort((a, b) => a.price!.compareTo(b.price!));
+    if (withPrice.isEmpty) return CurrencyFormatter.legacyDefaultCurrency;
+    return withPrice.first.priceList?.currency ??
+        CurrencyFormatter.legacyDefaultCurrency;
   }
 
   int get totalQuantity =>

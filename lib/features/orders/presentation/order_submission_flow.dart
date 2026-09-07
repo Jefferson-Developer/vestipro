@@ -28,6 +28,12 @@ Future<AppResult<OrderSubmissionResult>> submitOrderFromDraft({
         status: submission.status,
         syncStatus: OrderSyncStatus.synced,
         orderNumber: submission.orderNumber,
+        // TASK-175: reconciles the local draft's own best-effort currency
+        // (resolved client-side at draft creation) with whatever `submitOrder`
+        // actually persisted server-side — exactly the same "servidor é quem
+        // decide" precedent every other line here (`status`/`orderNumber`)
+        // already follows.
+        currency: submission.currency,
         discountAmount: submission.discountAmount,
         surchargeAmount: submission.surchargeAmount,
         shippingAmount: submission.shippingAmount,

@@ -1,7 +1,6 @@
 import 'dart:async';
 
 import 'package:flutter_test/flutter_test.dart';
-import 'package:intl/intl.dart';
 import 'package:vestipro/core/design_system/design_system.dart';
 import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/utils/utils.dart';
@@ -195,13 +194,12 @@ void main() {
 /// Same formatting `OrderPricingSummarySection`'s own private `_formatCurrency`
 /// uses — kept here instead of hardcoded string literals so this test never
 /// silently breaks over an `intl` locale/whitespace detail (e.g. the
-/// non-breaking space `NumberFormat.currency` inserts after the symbol).
+/// non-breaking space `NumberFormat.currency` inserts after the symbol), nor
+/// over TASK-175's own "BRL" suffix (the explicit currency indicator).
+/// Every fixture in this file prices in BRL — the section's own fallback
+/// (`Order.currency`) and every `OrderPricingSummary.currency` below.
 String _fmt(double value) {
-  return NumberFormat.currency(
-    locale: 'pt_BR',
-    symbol: 'R\$',
-    decimalDigits: 2,
-  ).format(value);
+  return CurrencyFormatter.formatWithCode(value, 'BRL');
 }
 
 Future<void> _pumpSection(

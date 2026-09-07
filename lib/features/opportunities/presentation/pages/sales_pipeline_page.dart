@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:collection/collection.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../../core/utils/utils.dart';
 import '../../domain/entities/opportunity.dart';
 import '../../domain/entities/opportunity_outcome_reason.dart';
 import '../../domain/entities/pipeline_column.dart';
@@ -17,9 +17,13 @@ import '../bloc/sales_pipeline_event.dart';
 import '../bloc/sales_pipeline_state.dart';
 import 'pipeline_stage_admin_page.dart' show pipelineStageTerminalTypeLabel;
 
-final NumberFormat _currencyFormat = NumberFormat.currency(
-  locale: 'pt_BR',
-  symbol: r'R$',
+// TASK-175: see `dashboards/presentation/pages/sales_dashboard_page.dart`'s
+// own `_currencyFormat` doc comment — every dashboard/report in this
+// codebase still assumes a single organization-wide currency for aggregate
+// totals today.
+String _currencyFormat(double value) => CurrencyFormatter.formatWithCode(
+  value,
+  CurrencyFormatter.legacyDefaultCurrency,
 );
 
 /// Sales pipeline/funnel board (TASK-058): configurable [PipelineStage]
@@ -538,7 +542,7 @@ class _ColumnHeader extends StatelessWidget {
       key: Key('pipeline-column-header-${stage.id}'),
       label:
           '${stage.name}: ${column.activeCount} oportunidades, '
-          '${_currencyFormat.format(column.activeValueTotal)}',
+          '${_currencyFormat(column.activeValueTotal)}',
       container: true,
       child: Row(
         children: <Widget>[
@@ -566,7 +570,7 @@ class _ColumnHeader extends StatelessWidget {
                 ),
                 Text(
                   '${column.activeCount} oportunidades - '
-                  '${_currencyFormat.format(column.activeValueTotal)}',
+                  '${_currencyFormat(column.activeValueTotal)}',
                   style: AppTypography.bodySmall.copyWith(
                     color: colors.outline,
                   ),
@@ -612,7 +616,7 @@ class _OpportunityCard extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.spacing4),
           Text(
-            _currencyFormat.format(opportunity.estimatedValue),
+            _currencyFormat(opportunity.estimatedValue),
             style: AppTypography.labelMedium.copyWith(color: colors.outline),
           ),
           if (isPending) ...<Widget>[

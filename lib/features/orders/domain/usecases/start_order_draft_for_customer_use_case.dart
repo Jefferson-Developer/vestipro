@@ -161,6 +161,11 @@ class StartOrderDraftForCustomerUseCase {
         preferredType: CustomerAddressType.billing,
       ),
       priceListId: defaults.priceList.id,
+      // TASK-175: resolved once, right here, from the same Price List
+      // `priceListId` above already points to — `submitOrder` re-confirms it
+      // server-side from its own resolved Price List at submission time
+      // (never trusts this client-side value for the persisted order).
+      currency: defaults.priceList.currency,
       paymentTermId: defaults.paymentTerm.id,
       status: OrderStatus.draft,
       statusHistory: <OrderStatusHistoryEntry>[

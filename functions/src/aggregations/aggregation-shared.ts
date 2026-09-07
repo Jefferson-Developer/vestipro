@@ -66,6 +66,17 @@ export interface OrderAggregationItemFact {
 }
 
 /**
+ * Historical fallback ISO 4217 currency for any order/aggregate written
+ * before TASK-175 (multi-moeda) started denormalizing `currency` onto every
+ * `Order` document — every order this codebase ever persisted until then was
+ * implicitly BRL (VestiPro's original single-market deployment), so treating
+ * a missing `currency` field as `'BRL'` here reproduces exactly the totals
+ * every dashboard/report already showed before this field existed, instead
+ * of silently coercing to `'undefined'` or throwing on old data.
+ */
+export const LEGACY_DEFAULT_CURRENCY = 'BRL';
+
+/**
  * The subset of an `organizations/{orgId}/orders/{orderId}` document this
  * module needs, extracted once per order and shared by every aggregator
  * (salesDaily, customerMonthly, productMonthly, sellerMonthly,
@@ -86,6 +97,11 @@ export interface OrderAggregationFact {
   city?: string;
   status: string;
   createdAt: Timestamp;
+  /** ISO 4217 code (TASK-175) — denormalized from the `Order.currency`
+   * `submitOrder` (TASK-101) persists from its own resolved Price List, never
+   * re-derived here. Falls back to {@link LEGACY_DEFAULT_CURRENCY} for any
+   * order written before that field existed. */
+  currency: string;
   itemsSubtotal: number;
   discountAmount: number;
   surchargeAmount: number;
@@ -139,6 +155,11 @@ export function extractOrderFact(
       ? (data.deliveryAddress.city as string).trim()
       : 'UNKNOWN';
 
+  const currency =
+    typeof data.currency === 'string' && data.currency.trim().length > 0
+      ? data.currency.trim().toUpperCase()
+      : LEGACY_DEFAULT_CURRENCY;
+
   return {
     id,
     organizationId: data.organizationId,
@@ -149,6 +170,7 @@ export function extractOrderFact(
     city,
     status: data.status,
     createdAt: data.createdAt,
+    currency,
     itemsSubtotal: sumField(items, 'subtotal'),
     discountAmount: numberOrZero(data.discountAmount),
     surchargeAmount: numberOrZero(data.surchargeAmount),
@@ -191,6 +213,11 @@ export interface AggregateSnapshotDoc {
   scopeId: string;
   /** `YYYY-MM-DD` for daily dimensions, `YYYY-MM` for monthly dimensions. */
   periodKey: string;
+  /** ISO 4217 code every fact this snapshot summed actually shares (TASK-175)
+   * — {@link assertSingleCurrency} guarantees this row is never a blend of
+   * more than one currency, so `revenueGross`/`revenueNet`/`discountAmount`
+   * below are always expressed in this single currency. */
+  currency: string;
   revenueGross: number;
   revenueNet: number;
   discountAmount: number;
@@ -235,6 +262,36 @@ export function dayRange(dayKey: string): { start: Date; end: Date } {
   const start = new Date(`${dayKey}T00:00:00.000Z`);
   const end = new Date(`${dayKey}T23:59:59.999Z`);
   return { start, end };
+}
+
+/**
+ * Guarantees every fact contributing to one snapshot row shares the exact
+ * same {@link OrderAggregationFact.currency} (TASK-175's "dashboards e
+ * relatórios... nunca somam valores de moedas distintas em um único total"
+ * rule) — returns that common currency for the caller to stamp on the
+ * resulting `AggregateSnapshotDoc`.
+ *
+ * Throws instead of silently picking one side or blending the sums: today
+ * every company operates in a single currency in practice (one Price List
+ * currency per company/channel is the norm), so this should never actually
+ * trigger — if it ever does, that means a company started operating two
+ * Price List currencies for the same scope/period, and the aggregation
+ * pipeline must fail loudly (visible in Cloud Functions logs/alerts) rather
+ * than corrupt a financial total by adding, say, BRL and USD together.
+ */
+export function assertSingleCurrency(
+  scopeDescription: string,
+  facts: readonly { currency: string }[],
+): string {
+  const distinct = new Set(facts.map((fact) => fact.currency));
+  if (distinct.size > 1) {
+    throw new Error(
+      `Aggregation for ${scopeDescription} mixes more than one currency ` +
+        `(${[...distinct].sort().join(', ')}) — refusing to sum them into a ` +
+        'single total. Segregate by currency before recomputing this scope.',
+    );
+  }
+  return facts[0]?.currency ?? LEGACY_DEFAULT_CURRENCY;
 }
 
 export function roundCurrency(value: number): number {

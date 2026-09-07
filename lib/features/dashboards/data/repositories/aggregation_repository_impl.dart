@@ -220,6 +220,7 @@ final class AggregationRepositoryImpl implements AggregationRepository {
         'labels': snapshot.labels,
         'generatedAt': snapshot.generatedAt.toUtc().toIso8601String(),
         'version': snapshot.version,
+        'currency': snapshot.currency,
       }),
     );
   }
@@ -246,6 +247,9 @@ final class AggregationRepositoryImpl implements AggregationRepository {
         generatedAt: DateTime.parse(json['generatedAt'] as String),
         version: (json['version'] as num).toInt(),
         isFromLocalCache: true,
+        currency: json['currency'] is String
+            ? json['currency'] as String
+            : 'BRL',
       );
     } catch (_) {
       return null;

@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../../core/utils/utils.dart';
 import '../../../insights/domain/entities/insight.dart';
 import '../../domain/entities/executive_dashboard_filters.dart';
 import '../../domain/entities/executive_dashboard_metric.dart';
@@ -13,9 +14,12 @@ import '../bloc/executive_dashboard_bloc.dart';
 import '../bloc/executive_dashboard_event.dart';
 import '../bloc/executive_dashboard_state.dart';
 
-final NumberFormat _currencyFormat = NumberFormat.currency(
-  locale: 'pt_BR',
-  symbol: r'R$',
+// TASK-175: see `sales_dashboard_page.dart`'s own `_currencyFormat` doc
+// comment — every dashboard/report in this codebase still assumes a single
+// organization-wide currency for aggregate totals today.
+String _currencyFormat(double value) => CurrencyFormatter.formatWithCode(
+  value,
+  CurrencyFormatter.legacyDefaultCurrency,
 );
 final DateFormat _monthLabelFormat = DateFormat('MMMM/yyyy', 'pt_BR');
 final DateFormat _dayLabelFormat = DateFormat('dd/MM');
@@ -335,7 +339,7 @@ class _ExecutiveDashboardBody extends StatelessWidget {
                 ],
               ),
             ],
-            valueFormatter: (value) => _currencyFormat.format(value),
+            valueFormatter: (value) => _currencyFormat(value),
             emptyDescription:
                 'Ainda não há faturamento registrado neste período.',
           ),
@@ -354,7 +358,7 @@ class _ExecutiveDashboardBody extends StatelessWidget {
       _metricCard(
         label: 'Faturamento',
         metric: snapshot.revenue,
-        format: _currencyFormat.format,
+        format: _currencyFormat,
         icon: Icons.payments_outlined,
         trendLabel: 'vs. mês anterior',
       ),
@@ -368,7 +372,7 @@ class _ExecutiveDashboardBody extends StatelessWidget {
       _metricCard(
         label: 'Ticket médio',
         metric: snapshot.averageTicket,
-        format: _currencyFormat.format,
+        format: _currencyFormat,
         icon: Icons.local_offer_outlined,
         trendLabel: 'vs. mês anterior',
       ),
@@ -531,7 +535,7 @@ class _OpportunityShortcutCard extends StatelessWidget {
   String _impactLabel(Insight insight) {
     final impact = insight.estimatedImpact;
     if (impact.amount != null) {
-      return _currencyFormat.format(impact.amount);
+      return _currencyFormat(impact.amount!);
     }
     if (impact.percentage != null) {
       return '${impact.percentage!.toStringAsFixed(1)}%';

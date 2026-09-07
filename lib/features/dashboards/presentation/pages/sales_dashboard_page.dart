@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../../core/utils/utils.dart';
 import '../../../orders/domain/entities/order_list_filters.dart';
 import '../../domain/entities/sales_dashboard_filters.dart';
 import '../../domain/entities/sales_dashboard_group_row.dart';
@@ -17,9 +18,20 @@ import '../bloc/sales_dashboard_bloc.dart';
 import '../bloc/sales_dashboard_event.dart';
 import '../bloc/sales_dashboard_state.dart';
 
-final NumberFormat _currencyFormat = NumberFormat.currency(
-  locale: 'pt_BR',
-  symbol: r'R$',
+// TASK-175: every dashboard/relatório in this codebase still assumes a
+// single organization-wide currency for aggregate totals (the underlying
+// `AggregateSnapshotDoc`/`AggregationSnapshot` these pages read never blends
+// two currencies into one row — `assertSingleCurrency` in
+// `functions/src/aggregations/aggregation-builders.ts` guarantees that even
+// for a multi-currency organization), so this still shows
+// `CurrencyFormatter.legacyDefaultCurrency` explicitly (never a bare, symbol
+// -only "R$") instead of a hardcoded `NumberFormat.currency` — a real
+// per-scope currency wired from `AggregationSnapshot.currency`/
+// `OrganizationSettings.currency` is a documented follow-up (see this
+// task's `-CONCLUIDA.md`), not something this dashboard already reads today.
+String _currencyFormat(double value) => CurrencyFormatter.formatWithCode(
+  value,
+  CurrencyFormatter.legacyDefaultCurrency,
 );
 final NumberFormat _integerFormat = NumberFormat.decimalPattern('pt_BR');
 final DateFormat _monthLabelFormat = DateFormat('MMMM/yyyy', 'pt_BR');
@@ -466,7 +478,7 @@ class _SalesDashboardBody extends StatelessWidget {
                 ],
               ),
             ],
-            valueFormatter: (value) => _currencyFormat.format(value),
+            valueFormatter: (value) => _currencyFormat(value),
             emptyDescription:
                 'Ainda não há faturamento registrado neste período.',
           ),
@@ -497,7 +509,7 @@ class _SalesDashboardBody extends StatelessWidget {
       _SalesKpiCard(
         label: 'Faturamento',
         kpi: snapshot.revenue,
-        format: _currencyFormat.format,
+        format: _currencyFormat,
         icon: Icons.payments_outlined,
       ),
       _SalesKpiCard(
@@ -509,7 +521,7 @@ class _SalesDashboardBody extends StatelessWidget {
       _SalesKpiCard(
         label: 'Ticket médio',
         kpi: snapshot.averageTicket,
-        format: _currencyFormat.format,
+        format: _currencyFormat,
         icon: Icons.local_offer_outlined,
       ),
       _SalesKpiCard(
@@ -753,8 +765,7 @@ class _SalesDashboardGroupTable extends StatelessWidget {
           label: 'Faturamento',
           numeric: true,
           sortable: true,
-          cellBuilder: (context, row) =>
-              Text(_currencyFormat.format(row.revenueNet)),
+          cellBuilder: (context, row) => Text(_currencyFormat(row.revenueNet)),
         ),
         AppDataColumn(
           label: 'Pedidos',
@@ -774,13 +785,13 @@ class _SalesDashboardGroupTable extends StatelessWidget {
           label: 'Ticket médio',
           numeric: true,
           cellBuilder: (context, row) =>
-              Text(_currencyFormat.format(row.averageTicket)),
+              Text(_currencyFormat(row.averageTicket)),
         ),
         AppDataColumn(
           label: 'Desconto',
           numeric: true,
           cellBuilder: (context, row) =>
-              Text(_currencyFormat.format(row.discountAmount)),
+              Text(_currencyFormat(row.discountAmount)),
         ),
         AppDataColumn(
           label: 'Crescimento ($comparisonLabel)',
@@ -845,7 +856,7 @@ class _GrowthCell extends StatelessWidget {
           style: AppTypography.labelMedium.copyWith(color: color),
         ),
         Text(
-          '$sign${_currencyFormat.format(absolute)}',
+          '$sign${_currencyFormat(absolute)}',
           style: AppTypography.bodySmall.copyWith(color: color),
         ),
       ],
