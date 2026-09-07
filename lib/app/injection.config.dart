@@ -212,6 +212,14 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart'
 import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
+import '../features/cart_share/data/repositories/cloud_functions_cart_share_repository.dart'
+    as _i200;
+import '../features/cart_share/domain/repositories/cart_share_repository.dart'
+    as _i371;
+import '../features/cart_share/domain/usecases/cart_share_use_cases.dart'
+    as _i138;
+import '../features/cart_share/presentation/bloc/cart_share_cubit.dart'
+    as _i957;
 import '../features/catalog/data/repositories/remote_config_catalog_home_config_repository.dart'
     as _i288;
 import '../features/catalog/data/repositories/shared_preferences_catalog_campaign_repository.dart'
@@ -3183,6 +3191,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i472.GetWarehousesByCompanyUseCase>(
       () => _i472.GetWarehousesByCompanyUseCase(gh<_i62.WarehouseRepository>()),
     );
+    gh.lazySingleton<_i371.CartShareRepository>(
+      () => _i200.CloudFunctionsCartShareRepository(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i364.LocaleCubit>(
       () => _i364.LocaleCubit(
         gh<_i254.GetDeviceLocaleUseCase>(),
@@ -3478,6 +3491,15 @@ extension GetItInjectableX on _i174.GetIt {
         dataSource: gh<_i268.OrganizationDataSource>(),
         mapper: gh<_i719.OrganizationMapper>(),
       ),
+    );
+    gh.factory<_i138.CreateCartShareUseCase>(
+      () => _i138.CreateCartShareUseCase(gh<_i371.CartShareRepository>()),
+    );
+    gh.factory<_i138.PreviewCartShareUseCase>(
+      () => _i138.PreviewCartShareUseCase(gh<_i371.CartShareRepository>()),
+    );
+    gh.factory<_i138.ReviewCartShareUseCase>(
+      () => _i138.ReviewCartShareUseCase(gh<_i371.CartShareRepository>()),
     );
     gh.lazySingleton<_i693.CommunicationPreferencesRepository>(
       () => _i548.CommunicationPreferencesRepositoryImpl(
@@ -4038,6 +4060,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i966.GetOrganizationUseCase>(),
         gh<_i270.UpdateOrganizationSettingsUseCase>(),
         gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i957.CartShareCubit>(
+      () => _i957.CartShareCubit(
+        createCartShare: gh<_i138.CreateCartShareUseCase>(),
+        previewCartShare: gh<_i138.PreviewCartShareUseCase>(),
+        reviewCartShare: gh<_i138.ReviewCartShareUseCase>(),
+        analytics: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.lazySingleton<_i22.ReportRepository>(

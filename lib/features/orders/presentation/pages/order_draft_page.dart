@@ -49,6 +49,7 @@ class OrderDraftPage extends StatelessWidget {
     this.draftId,
     this.onContinueToProducts,
     this.onSubmitOrder,
+    this.onShareCart,
     super.key,
   });
 
@@ -100,6 +101,8 @@ class OrderDraftPage extends StatelessWidget {
   /// `null`-means-"not wired yet" precedent [onContinueToProducts] already
   /// sets for this screen.
   final Future<void> Function(Order order)? onSubmitOrder;
+  final Future<void> Function(Order order, Map<String, String> productNames)?
+  onShareCart;
 
   @override
   Widget build(BuildContext context) {
@@ -132,6 +135,7 @@ class OrderDraftPage extends StatelessWidget {
                 createOrderSubmissionValidationCubit,
             onContinueToProducts: onContinueToProducts,
             onSubmitOrder: onSubmitOrder,
+            onShareCart: onShareCart,
           ),
         );
       },
@@ -151,6 +155,7 @@ class _OrderDraftView extends StatelessWidget {
     required this.createOrderSubmissionValidationCubit,
     this.onContinueToProducts,
     this.onSubmitOrder,
+    this.onShareCart,
   });
 
   final String organizationId;
@@ -164,6 +169,8 @@ class _OrderDraftView extends StatelessWidget {
   createOrderSubmissionValidationCubit;
   final Future<void> Function(Order order)? onContinueToProducts;
   final Future<void> Function(Order order)? onSubmitOrder;
+  final Future<void> Function(Order order, Map<String, String> productNames)?
+  onShareCart;
 
   @override
   Widget build(BuildContext context) {
@@ -237,6 +244,7 @@ class _OrderDraftView extends StatelessWidget {
               createOrderSubmissionValidationCubit,
           onContinueToProducts: onContinueToProducts,
           onSubmitOrder: onSubmitOrder,
+          onShareCart: onShareCart,
         );
       case OrderDraftLoadStatus.awaitingCustomer:
         // Handled by `_OrderDraftView.build` itself before reaching here.
@@ -254,6 +262,7 @@ class _OrderDraftSummary extends StatefulWidget {
     required this.createOrderSubmissionValidationCubit,
     this.onContinueToProducts,
     this.onSubmitOrder,
+    this.onShareCart,
   });
 
   final OrderDraftState state;
@@ -264,6 +273,8 @@ class _OrderDraftSummary extends StatefulWidget {
   createOrderSubmissionValidationCubit;
   final Future<void> Function(Order order)? onContinueToProducts;
   final Future<void> Function(Order order)? onSubmitOrder;
+  final Future<void> Function(Order order, Map<String, String> productNames)?
+  onShareCart;
 
   @override
   State<_OrderDraftSummary> createState() => _OrderDraftSummaryState();
@@ -469,6 +480,17 @@ class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
                   createCubit: widget.createOrderPricingSummaryCubit,
                   onStateChanged: _onPricingSummaryStateChanged,
                 ),
+              ),
+              const SizedBox(height: AppSpacing.spacing12),
+              AppButton(
+                label: 'Compartilhar seleção com o cliente',
+                leadingIcon: Icons.share_outlined,
+                onPressed: widget.onShareCart == null
+                    ? null
+                    : () => widget.onShareCart!(order, <String, String>{
+                        for (final entry in widget.state.productsById.entries)
+                          entry.key: entry.value.name,
+                      }),
               ),
             ],
             const SizedBox(height: AppSpacing.spacing16),

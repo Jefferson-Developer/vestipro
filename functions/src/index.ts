@@ -25,6 +25,7 @@ export { createCatalogShareLink } from './catalog/create-catalog-share-link';
 export { getCatalogShareLink } from './catalog/get-catalog-share-link';
 export { registerCatalogShareOpen } from './catalog/register-catalog-share-open';
 export { revokeCatalogShareLink } from './catalog/revoke-catalog-share-link';
+export { createCartShareLink, getCartShareLink, reviewCartShare } from './cart_shares';
 export { calculatePricing } from './pricing';
 export { applyStockBalanceAdjustment } from './inventory/apply-stock-balance-adjustment';
 export { createStockReservation } from './inventory/create-stock-reservation';

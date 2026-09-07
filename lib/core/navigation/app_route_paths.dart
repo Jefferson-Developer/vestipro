@@ -1100,6 +1100,17 @@ final class CatalogSharePublicRoute extends AppRoute {
   String get location => '/share/$token';
 }
 
+/// Anonymous review route for a cart snapshot (TASK-181). The organization
+/// is resolved exclusively from the server-issued token.
+final class CartSharePublicRoute extends AppRoute {
+  const CartSharePublicRoute({required this.token});
+  final String token;
+  static const name = 'cartSharePublic';
+  static const pathPattern = '/cart-share/:token';
+  @override
+  String get location => '/cart-share/$token';
+}
+
 /// Route shown when a guard denies access to the requested location.
 final class ForbiddenRoute extends AppRoute {
   const ForbiddenRoute();

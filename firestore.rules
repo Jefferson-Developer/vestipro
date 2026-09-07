@@ -1017,6 +1017,15 @@ service cloud.firestore {
         allow create, update, delete: if false;
       }
 
+      // TASK-181: public recipients only use callable Functions. Direct
+      // reads are limited to the creator or catalog managers; all writes are
+      // Admin SDK-only so a client cannot forge a review or expose prices.
+      match /cartShares/{shareId} {
+        allow read: if hasCapability(organizationId, 'catalog.manage') ||
+          (isActiveMember(organizationId) && resource.data.createdBy == request.auth.uid);
+        allow create, update, delete: if false;
+      }
+
       // -------------------------------------------------------------------
       // organizations/{organizationId}/productVariants/{variantId}
       // (TASK-072 generated sellable color/size variants)

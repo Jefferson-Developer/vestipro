@@ -37,6 +37,7 @@ import '../features/product_import/product_import.dart';
 import '../features/customers/customers.dart';
 import '../features/visit_routes/visit_routes.dart';
 import '../features/catalog_share/catalog_share.dart';
+import '../features/cart_share/cart_share.dart';
 import '../features/dashboards/dashboards.dart';
 import '../features/insights/insights.dart';
 import '../features/invites/invites.dart';
@@ -1079,6 +1080,31 @@ class VestiProApp extends StatelessWidget {
                     );
                   },
                   onSubmitOrder: (order) => _submitOrder(context, order),
+                  onShareCart: (order, productNames) =>
+                      showModalBottomSheet<void>(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (_) => CartShareSheet(
+                          organizationId: order.organizationId,
+                          sourceCartId: order.id,
+                          sourceCartVersion: order.version,
+                          items: order.items
+                              .map(
+                                (item) => CartShareDraftItem(
+                                  itemId: item.id,
+                                  productId: item.productId,
+                                  productName:
+                                      productNames[item.productId] ??
+                                      item.productId,
+                                  variantId: item.variantId,
+                                  quantity: item.quantity,
+                                  unitPrice: item.unitPrice,
+                                ),
+                              )
+                              .toList(growable: false),
+                          createCubit: () => getIt<CartShareCubit>(),
+                        ),
+                      ),
                 ),
               ),
           orderProductCatalogPageBuilder:
@@ -1200,6 +1226,10 @@ class VestiProApp extends StatelessWidget {
                 token: token,
                 createBloc: () => getIt<CatalogSharePublicBloc>(),
               ),
+          cartSharePublicPageBuilder: (context, token) => CartSharePublicPage(
+            token: token,
+            createCubit: () => getIt<CartShareCubit>(),
+          ),
         );
 
     // TASK-174: `appRouter` above is built exactly once per `build()` call —

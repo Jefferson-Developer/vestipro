@@ -1529,6 +1529,35 @@ describe('organizations/{organizationId}/catalogShares/{shareId}  (TASK-081 cata
   });
 });
 
+describe('organizations/{organizationId}/cartShares/{shareId} (TASK-181)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context.firestore().doc(`organizations/${ORG_A}/cartShares/cart-rep-a`).set(
+        catalogShareDoc({ organizationId: ORG_A, createdBy: 'rep-a' }),
+      );
+    });
+  });
+
+  test('criador lê o snapshot, mas visitante anônimo não acessa nem este nem outro carrinho', async () => {
+    const creator = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(creator.doc(`organizations/${ORG_A}/cartShares/cart-rep-a`).get());
+    const anonymous = testEnv.unauthenticatedContext().firestore();
+    await assertFails(anonymous.doc(`organizations/${ORG_A}/cartShares/cart-rep-a`).get());
+    await assertFails(anonymous.collection(`organizations/${ORG_A}/cartShares`).get());
+  });
+
+  test('nenhum cliente forja criação, aprovação ou exclusão', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/cartShares/new`).set(
+      catalogShareDoc({ organizationId: ORG_A, createdBy: 'rep-a' }),
+    ));
+    await assertFails(db.doc(`organizations/${ORG_A}/cartShares/cart-rep-a`).update({
+      review: { decision: 'approved' },
+    }));
+    await assertFails(db.doc(`organizations/${ORG_A}/cartShares/cart-rep-a`).delete());
+  });
+});
+
 describe('organizations/{organizationId}/priceLists/{priceListId}  (TASK-083)', () => {
   beforeEach(async () => {
     await testEnv.withSecurityRulesDisabled(async (context) => {

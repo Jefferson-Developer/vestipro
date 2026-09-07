@@ -71,6 +71,8 @@ final class AnalyticsEvents {
   static const String campaignProductClicked = 'campaign_product_clicked';
   static const String catalogShareCreated = 'catalog_share_created';
   static const String catalogShareOpened = 'catalog_share_opened';
+  static const String cartShareCreated = 'cart_share_created';
+  static const String cartShareReviewed = 'cart_share_reviewed';
 
   /// Logged by the catalog branding admin screen (TASK-179, EPIC-25) whenever
   /// an OWNER/ADMIN updates the organization's catalog white-label config
@@ -267,6 +269,8 @@ final class AnalyticsEvents {
     campaignProductClicked,
     catalogShareCreated,
     catalogShareOpened,
+    cartShareCreated,
+    cartShareReviewed,
     catalogBrandingUpdated,
     targetCreated,
     targetUpdated,
