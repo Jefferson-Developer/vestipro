@@ -1379,6 +1379,38 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/{replenishmentSuggestions,
+      // replenishmentSettings,replenishmentDraftOrders}/{docId}  (TASK-184)
+      //
+      // Same class of sensitive, server-computed stock data as
+      // `stockAlerts`/`stockTurnoverMetrics` above — gated by the same
+      // `report.viewSensitive` OR `inventory.adjust` combo, never written by
+      // the client: `calculateReplenishmentSuggestions` (weekly scheduled
+      // Cloud Function) and `decideReplenishmentSuggestion` (onCall,
+      // OWNER/ADMIN/SALES_MANAGER only, re-validated server-side from the
+      // caller's own Membership) are the only writers, both via the Admin
+      // SDK.
+      // -------------------------------------------------------------------
+
+      match /replenishmentSuggestions/{suggestionId} {
+        allow get, list: if hasCapability(organizationId, 'report.viewSensitive')
+          || hasCapability(organizationId, 'inventory.adjust');
+        allow create, update, delete: if false;
+      }
+
+      match /replenishmentSettings/{settingsId} {
+        allow get, list: if hasCapability(organizationId, 'report.viewSensitive')
+          || hasCapability(organizationId, 'inventory.adjust');
+        allow create, update, delete: if false;
+      }
+
+      match /replenishmentDraftOrders/{draftOrderId} {
+        allow get, list: if hasCapability(organizationId, 'report.viewSensitive')
+          || hasCapability(organizationId, 'inventory.adjust');
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/{salesDaily,customerMonthly,
       // productMonthly,sellerMonthly,regionMonthly}Aggregates/{docId}
       // (TASK-133 — camada de agregação server-side)

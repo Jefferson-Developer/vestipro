@@ -62,6 +62,7 @@ class AppRouter {
     this.productDashboardPageBuilder,
     this.collectionDashboardPageBuilder,
     this.inventoryDashboardPageBuilder,
+    this.replenishmentSuggestionsPageBuilder,
     this.representativeDashboardPageBuilder,
     this.funnelDashboardPageBuilder,
     this.targetsDashboardPageBuilder,
@@ -324,6 +325,21 @@ class AppRouter {
     Map<String, String> queryParameters,
   )?
   inventoryDashboardPageBuilder;
+
+  /// Builds the sugestões de reposição screen (TASK-184, EPIC-27), given
+  /// `orgId`/`companyId` and the raw `queryParameters` of
+  /// [ReplenishmentSuggestionsRoute] (`productId`/`variantId` when reached
+  /// via an `Insight`'s `notifyReplenishment` deep link) — the caller
+  /// decides how to turn those into the page's `initialWarehouseId`, same
+  /// "router hands raw params, page owns parsing" contract
+  /// [inventoryDashboardPageBuilder] already sets.
+  final Widget Function(
+    BuildContext context,
+    String orgId,
+    String companyId,
+    Map<String, String> queryParameters,
+  )?
+  replenishmentSuggestionsPageBuilder;
 
   final Widget Function(
     BuildContext context,
@@ -661,6 +677,25 @@ class AppRouter {
         ),
         builder: (context, state) {
           final builder = inventoryDashboardPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+            state.uri.queryParameters,
+          );
+        },
+      ),
+      GoRoute(
+        path: ReplenishmentSuggestionsRoute.pathPattern,
+        name: ReplenishmentSuggestionsRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.reportViewSensitive,
+        ),
+        builder: (context, state) {
+          final builder = replenishmentSuggestionsPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,

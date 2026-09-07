@@ -1311,6 +1311,22 @@ import '../features/products/presentation/bloc/season_form_bloc.dart' as _i98;
 import '../features/products/presentation/bloc/season_list_bloc.dart' as _i986;
 import '../features/products/presentation/bloc/size_grid_template_bloc.dart'
     as _i415;
+import '../features/replenishment/data/datasources/firestore_replenishment_suggestion_data_source.dart'
+    as _i923;
+import '../features/replenishment/data/datasources/replenishment_suggestion_data_source.dart'
+    as _i598;
+import '../features/replenishment/data/mappers/replenishment_suggestion_mapper.dart'
+    as _i1024;
+import '../features/replenishment/data/repositories/replenishment_repository_impl.dart'
+    as _i225;
+import '../features/replenishment/domain/repositories/replenishment_repository.dart'
+    as _i337;
+import '../features/replenishment/domain/usecases/decide_replenishment_suggestion_use_case.dart'
+    as _i27;
+import '../features/replenishment/domain/usecases/list_replenishment_suggestions_use_case.dart'
+    as _i96;
+import '../features/replenishment/presentation/bloc/replenishment_suggestions_bloc.dart'
+    as _i139;
 import '../features/reports/data/datasources/cloud_functions_report_export_remote_data_source.dart'
     as _i304;
 import '../features/reports/data/datasources/cloud_functions_report_remote_data_source.dart'
@@ -1765,6 +1781,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i309.ProductMapper>(() => const _i309.ProductMapper());
     gh.lazySingleton<_i8.ProductColorSimilarityService>(
       () => const _i8.ProductColorSimilarityService(),
+    );
+    gh.lazySingleton<_i1024.ReplenishmentSuggestionMapper>(
+      () => const _i1024.ReplenishmentSuggestionMapper(),
     );
     gh.lazySingleton<_i847.AboutAppMapper>(() => const _i847.AboutAppMapper());
     gh.lazySingleton<_i370.AboutAppNotesMapper>(
@@ -3114,6 +3133,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
+    gh.lazySingleton<_i598.ReplenishmentSuggestionDataSource>(
+      () => _i923.FirestoreReplenishmentSuggestionDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.factory<_i41.CollectionListBloc>(
       () => _i41.CollectionListBloc(
         listCollections: gh<_i1023.ListCollectionsUseCase>(),
@@ -3604,6 +3628,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i706.Uuid>(),
       ),
     );
+    gh.lazySingleton<_i337.ReplenishmentRepository>(
+      () => _i225.ReplenishmentRepositoryImpl(
+        dataSource: gh<_i598.ReplenishmentSuggestionDataSource>(),
+        mapper: gh<_i1024.ReplenishmentSuggestionMapper>(),
+        functions: gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.factory<_i825.GetCustomerFormConfigUseCase>(
       () => _i825.GetCustomerFormConfigUseCase(
         gh<_i756.OrganizationRepository>(),
@@ -4024,6 +4055,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i305.GetOrderPricingSummaryUseCase>(),
       ),
     );
+    gh.factory<_i96.ListReplenishmentSuggestionsUseCase>(
+      () => _i96.ListReplenishmentSuggestionsUseCase(
+        gh<_i337.ReplenishmentRepository>(),
+        gh<_i47.PermissionService>(),
+      ),
+    );
     gh.factory<_i954.PaymentTermsCubit>(
       () => _i954.PaymentTermsCubit(
         gh<_i358.PaymentTermRepository>(),
@@ -4033,6 +4070,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i756.UpdateInsightStatusUseCase>(
       () => _i756.UpdateInsightStatusUseCase(gh<_i644.InsightRepository>()),
+    );
+    gh.factory<_i27.DecideReplenishmentSuggestionUseCase>(
+      () => _i27.DecideReplenishmentSuggestionUseCase(
+        gh<_i337.ReplenishmentRepository>(),
+        gh<_i47.PermissionService>(),
+        gh<_i202.AnalyticsService>(),
+      ),
     );
     gh.factory<_i658.AddMemberToTeamUseCase>(
       () => _i658.AddMemberToTeamUseCase(
@@ -4126,6 +4170,12 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i334.RevokeInviteUseCase>(
       () => _i334.RevokeInviteUseCase(gh<_i75.InviteRepository>()),
+    );
+    gh.factory<_i139.ReplenishmentSuggestionsBloc>(
+      () => _i139.ReplenishmentSuggestionsBloc(
+        listSuggestions: gh<_i96.ListReplenishmentSuggestionsUseCase>(),
+        decideSuggestion: gh<_i27.DecideReplenishmentSuggestionUseCase>(),
+      ),
     );
     gh.factory<_i846.ExecutiveDashboardVisibilityService>(
       () => _i846.ExecutiveDashboardVisibilityService(

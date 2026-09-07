@@ -213,6 +213,18 @@ final class AnalyticsEvents {
   /// device already boots with (only for an explicit change).
   static const String appLocaleChanged = 'app_locale_changed';
 
+  /// Logged by `ReplenishmentSuggestionsCubit` (TASK-184, EPIC-27) whenever
+  /// a gestor opens the sugestões de reposição screen.
+  static const String replenishmentSuggestionsViewed =
+      'replenishment_suggestions_viewed';
+
+  /// Logged by `DecideReplenishmentSuggestionUseCase` (TASK-184, EPIC-27)
+  /// whenever a gestor successfully accepts/adjusts/discards one
+  /// `ReplenishmentSuggestion` — `action` and `final_quantity` are carried
+  /// as parameters.
+  static const String replenishmentSuggestionDecided =
+      'replenishment_suggestion_decided';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -300,5 +312,7 @@ final class AnalyticsEvents {
     commercialOpportunityAlertTriggered,
     communicationPreferencesUpdated,
     appLocaleChanged,
+    replenishmentSuggestionsViewed,
+    replenishmentSuggestionDecided,
   ];
 }

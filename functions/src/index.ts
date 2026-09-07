@@ -43,6 +43,10 @@ export { recomputeStockTurnoverMetrics } from './inventory/recompute-stock-turno
 export { submitOrder, decideOrderApproval, signOrder } from './orders';
 export { generateInsightsScheduled } from './insights';
 export {
+  calculateReplenishmentSuggestions,
+  decideReplenishmentSuggestion,
+} from './replenishment';
+export {
   recomputeSalesDailyOnOrderWrite,
   recomputeMonthlyAggregates,
   recomputeMonthlyAggregatesScheduled,

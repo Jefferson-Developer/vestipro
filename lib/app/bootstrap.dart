@@ -48,6 +48,7 @@ import '../features/orders/orders.dart';
 import '../features/organizations/organizations.dart';
 import '../features/products/products.dart';
 import '../features/privacy/privacy.dart';
+import '../features/replenishment/replenishment.dart';
 import '../features/reports/reports.dart';
 import '../core/sync/sync.dart';
 import '../features/settings/presentation/bloc/about_app_bloc.dart';
@@ -678,6 +679,19 @@ class VestiProApp extends StatelessWidget {
                           productId: productId,
                         ).location,
                       ),
+                    ),
+                  ),
+          replenishmentSuggestionsPageBuilder:
+              (context, orgId, companyId, queryParameters) =>
+                  _withConnectivityIndicator(
+                    orgId: orgId,
+                    companyId: companyId,
+                    child: ReplenishmentSuggestionsPage(
+                      organizationId: orgId,
+                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                      permissionService: getIt<PermissionService>(),
+                      createBloc: () => getIt<ReplenishmentSuggestionsBloc>(),
+                      initialWarehouseId: queryParameters['warehouseId'],
                     ),
                   ),
           representativeDashboardPageBuilder:
@@ -1323,13 +1337,14 @@ Future<void> _submitOrder(BuildContext context, Order order) async {
 /// hub that already hosts CRM activities/follow-ups (TASK-059/060), order
 /// history and "próxima melhor ação" (TASK-063) for that customer — never a
 /// second, bespoke screen per insight type. `resumeOrder` resolves to the
-/// abandoned draft itself via [OrderDraftRoute]. Action types with neither
-/// (pure product/seller-level insights, e.g. `suggestCampaign`/
-/// `notifyReplenishment`/`viewSellerDetail`) have no dedicated destination
-/// page registered in [AppRouter] yet — a real, documented gap (see
-/// `docs/tasks/TASK-132-implementar-central-de-oportunidades-CONCLUIDA.md`)
-/// — so they only surface an [AppSnackbar] instead of silently doing
-/// nothing or crashing.
+/// abandoned draft itself via [OrderDraftRoute]. `notifyReplenishment`
+/// resolves to [ReplenishmentSuggestionsRoute] (TASK-184, EPIC-27) — closing
+/// the gap `docs/tasks/TASK-132-implementar-central-de-oportunidades-CONCLUIDA.md`
+/// documented for it. Every remaining action type with neither a
+/// `customerId` nor one of these two special cases (pure seller-level
+/// insights, e.g. `suggestCampaign`/`viewSellerDetail`) still has no
+/// dedicated destination page registered in [AppRouter] — so those only
+/// surface an [AppSnackbar] instead of silently doing nothing or crashing.
 void _navigateForInsightAction({
   required BuildContext context,
   required String orgId,
@@ -1349,6 +1364,23 @@ void _navigateForInsightAction({
       );
       return;
     }
+  }
+  if (action.type == InsightActionType.notifyReplenishment) {
+    final productId = action.productId;
+    final variantId = action.payload['variantId'] as String?;
+    context.go(
+      ReplenishmentSuggestionsRoute(
+        orgId: orgId,
+        companyId: companyId,
+        queryParameters: <String, String>{
+          if (productId != null && productId.trim().isNotEmpty)
+            'productId': productId,
+          if (variantId != null && variantId.trim().isNotEmpty)
+            'variantId': variantId,
+        },
+      ).location,
+    );
+    return;
   }
   if (customerId != null && customerId.trim().isNotEmpty) {
     context.go(

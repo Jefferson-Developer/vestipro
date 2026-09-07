@@ -552,6 +552,39 @@ function auditLogDoc({ organizationId, actorUserId, action = 'role.changed' }) {
   };
 }
 
+function replenishmentSuggestionDoc({ organizationId, companyId = 'company-a' }) {
+  return {
+    organizationId,
+    companyId,
+    warehouseId: 'warehouse-1',
+    variantId: 'variant-1',
+    productId: 'product-1',
+    periodStart: '2026-08-01',
+    periodEnd: '2026-09-07',
+    status: 'suggested',
+    insufficientDataReason: null,
+    suggestedQuantity: 30,
+    targetStockQuantity: 30,
+    finalQuantity: null,
+    currentSellableQuantity: 5,
+    futureStockQuantity: 0,
+    turnoverEvidence: {
+      averageDailySalesQuantity: 2,
+      stockCoverageDays: 2.5,
+      turnoverRate: 0.4,
+      coverageStatus: 'ready',
+    },
+    parametersSnapshot: { coverageTargetDays: 30, safetyStockQuantity: 0, seasonalityFactor: 1 },
+    decidedBy: null,
+    decidedByName: null,
+    decidedAt: null,
+    decisionAudit: [],
+    generatedAt: now(),
+    updatedAt: now(),
+    version: 1,
+  };
+}
+
 function salesDailyAggregateDoc({ organizationId, companyId = 'company-a' }) {
   return {
     organizationId,
@@ -2097,6 +2130,74 @@ describe('organizations/{organizationId}/salesDailyAggregates/{aggregateId}  (TA
     );
     await assertFails(
       db.doc(`organizations/${ORG_A}/salesDailyAggregates/company-a_company-a_2026-08-15`).delete(),
+    );
+  });
+});
+
+describe('organizations/{organizationId}/replenishmentSuggestions/{suggestionId}  (TASK-184)', () => {
+  // Representative of all three `replenishment*` collections this task adds
+  // (`replenishmentSuggestions`/`replenishmentSettings`/
+  // `replenishmentDraftOrders`) — they share the exact same rule (gated by
+  // `report.viewSensitive` OR `inventory.adjust`, client never writes), same
+  // "one representative collection" precedent already set above for the
+  // five `*Aggregates` collections (TASK-133).
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/replenishmentSuggestions/warehouse-1_variant-1_2026-09-07`)
+        .set(replenishmentSuggestionDoc({ organizationId: ORG_A }));
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_B}/replenishmentSuggestions/warehouse-1_variant-1_2026-09-07`)
+        .set(replenishmentSuggestionDoc({ organizationId: ORG_B, companyId: 'company-b' }));
+    });
+  });
+
+  test('OWNER (report.viewSensitive) consegue ler a sugestão da própria organization', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/replenishmentSuggestions/warehouse-1_variant-1_2026-09-07`).get(),
+    );
+  });
+
+  test('SALES_MANAGER (report.viewSensitive) consegue listar sugestões da própria organization', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      db.collection(`organizations/${ORG_A}/replenishmentSuggestions`).get(),
+    );
+  });
+
+  test('SALES_REP (sem report.viewSensitive nem inventory.adjust) não consegue ler nem listar sugestões', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/replenishmentSuggestions/warehouse-1_variant-1_2026-09-07`).get(),
+    );
+    await assertFails(db.collection(`organizations/${ORG_A}/replenishmentSuggestions`).get());
+  });
+
+  test('OWNER da Org A não consegue ler a sugestão da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_B}/replenishmentSuggestions/warehouse-1_variant-1_2026-09-07`).get(),
+    );
+  });
+
+  test('nenhum papel, nem OWNER, consegue criar uma sugestão pelo client (só a Admin SDK escreve)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/replenishmentSuggestions/warehouse-1_variant-2_2026-09-07`)
+        .set(replenishmentSuggestionDoc({ organizationId: ORG_A })),
+    );
+  });
+
+  test('nenhum papel, nem OWNER, consegue atualizar uma sugestão pelo client (decisão só via decideReplenishmentSuggestion)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/replenishmentSuggestions/warehouse-1_variant-1_2026-09-07`)
+        .update({ status: 'accepted' }),
     );
   });
 });

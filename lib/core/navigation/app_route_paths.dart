@@ -902,6 +902,38 @@ final class SyncCenterRoute extends AppRoute {
   String get location => '/org/$orgId/companies/$companyId/sync';
 }
 
+/// Sugestões de reposição (TASK-184, EPIC-27), scoped by Organization and
+/// Company. [queryParameters] carries `productId`/`variantId`/
+/// `suggestedReason` when reached via an `Insight`'s `notifyReplenishment`
+/// deep link (TASK-128's `ReplenishmentSuggestionInsightRule`, which had no
+/// registered destination until this route existed — see
+/// `_navigateForInsightAction` in `lib/app/bootstrap.dart`). Protected in
+/// [AppRouter] by `report.viewSensitive` — same capability
+/// [InventoryDashboardRoute] already requires, since both read the same
+/// class of sensitive, server-computed stock data.
+final class ReplenishmentSuggestionsRoute extends AppRoute {
+  const ReplenishmentSuggestionsRoute({
+    required this.orgId,
+    required this.companyId,
+    this.queryParameters = const <String, String>{},
+  });
+
+  final String orgId;
+  final String companyId;
+  final Map<String, String> queryParameters;
+
+  static const name = 'replenishmentSuggestions';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/inventory/replenishment';
+
+  @override
+  String get location {
+    final path = '/org/$orgId/companies/$companyId/inventory/replenishment';
+    if (queryParameters.isEmpty) return path;
+    return Uri(path: path, queryParameters: queryParameters).toString();
+  }
+}
+
 /// Customer 360 detail route (TASK-052), scoped by Organization and protected
 /// in [AppRouter] by `customer.view`.
 final class CustomerDetailRoute extends AppRoute {

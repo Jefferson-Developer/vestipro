@@ -90,6 +90,8 @@ void main() {
           'commercial_opportunity_alert_triggered',
           'communication_preferences_updated',
           'app_locale_changed',
+          'replenishment_suggestions_viewed',
+          'replenishment_suggestion_decided',
         ]),
       );
 
