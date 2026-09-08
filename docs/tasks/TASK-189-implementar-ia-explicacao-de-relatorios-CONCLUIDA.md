@@ -255,8 +255,7 @@ Não realizado nesta rodada — push não autorizado.
 
 ## Hash do commit
 
-Ver commit real registrado após `git commit` (não inventar hash — conferir com
-`git log -1 --format="%H"`).
+`ac6f4e6ea059209d46c4c9bb0003696392871597`
 
 ## Branch
 
