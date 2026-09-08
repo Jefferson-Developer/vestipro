@@ -1357,6 +1357,14 @@ import '../features/replenishment/domain/usecases/list_replenishment_suggestions
     as _i96;
 import '../features/replenishment/presentation/bloc/replenishment_suggestions_bloc.dart'
     as _i139;
+import '../features/report_explanation/data/repositories/cloud_functions_report_explanation_repository.dart'
+    as _i449;
+import '../features/report_explanation/domain/repositories/report_explanation_repository.dart'
+    as _i316;
+import '../features/report_explanation/domain/usecases/explain_report_use_case.dart'
+    as _i1015;
+import '../features/report_explanation/presentation/cubit/report_explanation_cubit.dart'
+    as _i58;
 import '../features/reports/data/datasources/cloud_functions_report_export_remote_data_source.dart'
     as _i304;
 import '../features/reports/data/datasources/cloud_functions_report_remote_data_source.dart'
@@ -2809,6 +2817,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i465.AppClientMetadataProvider>(),
       ),
     );
+    gh.lazySingleton<_i316.ReportExplanationRepository>(
+      () => _i449.CloudFunctionsReportExplanationRepository(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i885.SessionService>(
       () => _i520.SessionServiceImpl(
         authRepository: gh<_i217.AuthRepository>(),
@@ -3088,6 +3101,12 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i775.DemandForecastMapper>(),
       ),
     );
+    gh.factory<_i1015.ExplainReportUseCase>(
+      () => _i1015.ExplainReportUseCase(
+        gh<_i316.ReportExplanationRepository>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i717.ConflictResolutionCubit>(
       () => _i717.ConflictResolutionCubit(
         gh<_i814.ConflictRecordRepository>(),
@@ -3269,6 +3288,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i588.AggregationSnapshotMapper>(),
         cacheTtl: gh<Duration>(),
       ),
+    );
+    gh.factory<_i58.ReportExplanationCubit>(
+      () => _i58.ReportExplanationCubit(gh<_i1015.ExplainReportUseCase>()),
     );
     gh.factory<_i634.CrmTaskListBloc>(
       () => _i634.CrmTaskListBloc(

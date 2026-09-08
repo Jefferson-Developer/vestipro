@@ -278,6 +278,22 @@ final class AnalyticsEvents {
   static const String dailyRepSummaryLoadFailed =
       'daily_rep_summary_load_failed';
 
+  /// Logged by `ExplainReportUseCase` (TASK-189, EPIC-28) whenever an
+  /// `explainReport` call successfully returns an explanation (fresh or from
+  /// cache) — `from_cache` is carried as a parameter. Never logged for a
+  /// failed/rejected generation (see `reportExplanationGenerationFailed`),
+  /// and the explanation text itself is never carried as a parameter, same
+  /// rule as `walletSummaryGenerated`.
+  static const String reportExplanationGenerated =
+      'report_explanation_generated';
+
+  /// Logged by `ExplainReportUseCase` (TASK-189, EPIC-28) whenever an
+  /// `explainReport` call fails (provider unavailable, validation rejected,
+  /// insufficient data, rate-limited) — `failure_code` is carried as a
+  /// parameter.
+  static const String reportExplanationGenerationFailed =
+      'report_explanation_generation_failed';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -374,5 +390,7 @@ final class AnalyticsEvents {
     approachSuggestionGenerationFailed,
     dailyRepSummaryViewed,
     dailyRepSummaryLoadFailed,
+    reportExplanationGenerated,
+    reportExplanationGenerationFailed,
   ];
 }

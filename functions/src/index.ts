@@ -112,6 +112,7 @@ export {
 export { generateWalletSummary } from './wallet_summary';
 export { suggestApproach } from './approach_suggestion';
 export { generateDailyRepSummary, getDailyRepSummary } from './daily_rep_summary';
+export { explainReport } from './report_explanation';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

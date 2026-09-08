@@ -1241,6 +1241,25 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/reportExplanations/{cacheKey}
+      // (TASK-189, EPIC-28 — IA generativa: explicação de relatórios)
+      // -------------------------------------------------------------------
+      //
+      // Same "server owns every write, deny-all is not just the implicit
+      // default" shape as `walletSummaries`/`approachSuggestions`/
+      // `dailyRepSummaries` above: every entry is exclusively written by
+      // `explainReport` (Admin SDK, bypasses these Rules) — a client never
+      // reads this collection directly; the only way to obtain a report
+      // explanation is `explainReport`'s own response, which already
+      // re-derives the report's rows via `runReportAggregation` under the
+      // caller's own role/tenant scope before generating or reusing anything
+      // — a cache entry keyed by another user's uid can never be read even
+      // indirectly, since this collection is never client-readable at all.
+      match /reportExplanations/{cacheKey} {
+        allow read, write: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/webhooks/{webhookId}
       // organizations/{organizationId}/webhookSecrets/{webhookId}
       // organizations/{organizationId}/webhookDeliveries/{deliveryId}

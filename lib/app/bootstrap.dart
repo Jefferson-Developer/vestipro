@@ -58,6 +58,7 @@ import '../features/targets/targets.dart';
 import '../features/users/users.dart';
 import '../features/approach_suggestion/approach_suggestion.dart';
 import '../features/daily_rep_summary/daily_rep_summary.dart';
+import '../features/report_explanation/report_explanation.dart';
 import '../features/wallet_summary/wallet_summary.dart';
 import '../features/whatsapp_business/whatsapp_business.dart';
 import '../firebase_options.dart';
@@ -884,6 +885,8 @@ class VestiProApp extends StatelessWidget {
                   userId: getIt<AuthRepository>().currentUser?.uid ?? '',
                   createBloc: () => getIt<ReportBuilderBloc>(),
                   createSavedReportsBloc: () => getIt<SavedReportsBloc>(),
+                  createReportExplanationCubit: () =>
+                      getIt<ReportExplanationCubit>(),
                   permissionService: getIt<PermissionService>(),
                   onOpenSavedReports: () => context.go(
                     SavedReportsRoute(

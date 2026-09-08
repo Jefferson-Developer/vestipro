@@ -191,7 +191,12 @@ function metricValue(id: string, row: { revenueNet: number; revenueGross: number
   return row[id as keyof typeof row] as number;
 }
 
-function parsePeriod(raw: unknown): string {
+/** Exported for `../report_explanation/explain-report.ts` (TASK-189, EPIC-28)
+ * — `explainReport` reuses this exact parsing so the period it declares as
+ * "período de referência" in its generated text is always the same value
+ * `executeReportQuery`/`exportReportToCsv` already validated for the
+ * identical filter, never a second, possibly-divergent implementation. */
+export function parsePeriod(raw: unknown): string {
   const filters = Array.isArray(raw) ? raw as FilterInput[] : [];
   const value = filters.find((filter) => filter.fieldId === 'period')?.value;
   if (typeof value !== 'string' || !/^\d{4}-(0[1-9]|1[0-2])$/.test(value)) throw new HttpsError('invalid-argument', 'Informe o período no formato AAAA-MM.');

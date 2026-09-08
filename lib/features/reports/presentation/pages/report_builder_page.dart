@@ -4,6 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/permissions/permissions.dart';
+import '../../../report_explanation/report_explanation.dart';
 import '../../domain/entities/report_catalog.dart';
 import '../../domain/entities/report_definition.dart';
 import '../../domain/entities/report_export_result.dart';
@@ -23,6 +24,7 @@ class ReportBuilderPage extends StatelessWidget {
     required this.userId,
     required this.createBloc,
     this.createSavedReportsBloc,
+    this.createReportExplanationCubit,
     this.permissionService,
     this.onOpenSavedReports,
     super.key,
@@ -44,6 +46,11 @@ class ReportBuilderPage extends StatelessWidget {
   final SavedReportsBloc Function()? createSavedReportsBloc;
   final PermissionService? permissionService;
 
+  /// When provided, enables the "Explicar este relatório" panel (TASK-189,
+  /// EPIC-28) shown alongside the preview once a query returns rows —
+  /// omitted by callers/tests that only exercise the plain TASK-144 builder.
+  final ReportExplanationCubit Function()? createReportExplanationCubit;
+
   /// Navigates to `SavedReportsRoute` ("Meus relatórios"/"Compartilhados
   /// comigo") — only shown alongside [createSavedReportsBloc].
   final VoidCallback? onOpenSavedReports;
@@ -55,6 +62,7 @@ class ReportBuilderPage extends StatelessWidget {
       organizationId: organizationId,
       userId: userId,
       onOpenSavedReports: onOpenSavedReports,
+      createReportExplanationCubit: createReportExplanationCubit,
     );
     final reportBuilderProvider = BlocProvider<ReportBuilderBloc>(
       create: (_) => createBloc()
@@ -91,12 +99,14 @@ class _ReportBuilderView extends StatelessWidget {
     required this.organizationId,
     required this.userId,
     required this.onOpenSavedReports,
+    required this.createReportExplanationCubit,
   });
 
   final PermissionService? permissionService;
   final String organizationId;
   final String userId;
   final VoidCallback? onOpenSavedReports;
+  final ReportExplanationCubit Function()? createReportExplanationCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -138,6 +148,7 @@ class _ReportBuilderView extends StatelessWidget {
           permissionService: permissionService,
           organizationId: organizationId,
           userId: userId,
+          createReportExplanationCubit: createReportExplanationCubit,
         );
       },
     );
@@ -384,11 +395,13 @@ class _BuilderContent extends StatelessWidget {
     required this.permissionService,
     required this.organizationId,
     required this.userId,
+    required this.createReportExplanationCubit,
   });
   final ReportBuilderState state;
   final PermissionService? permissionService;
   final String organizationId;
   final String userId;
+  final ReportExplanationCubit Function()? createReportExplanationCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -404,6 +417,7 @@ class _BuilderContent extends StatelessWidget {
       permissionService: permissionService,
       organizationId: organizationId,
       userId: userId,
+      createReportExplanationCubit: createReportExplanationCubit,
     );
     return LayoutBuilder(
       builder: (context, constraints) {
@@ -634,11 +648,13 @@ class _Preview extends StatelessWidget {
     required this.permissionService,
     required this.organizationId,
     required this.userId,
+    required this.createReportExplanationCubit,
   });
   final ReportBuilderState state;
   final PermissionService? permissionService;
   final String organizationId;
   final String userId;
+  final ReportExplanationCubit Function()? createReportExplanationCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -762,6 +778,14 @@ class _Preview extends StatelessWidget {
                   .toList(),
             ),
           ),
+          if (createReportExplanationCubit != null &&
+              state.definition != null) ...[
+            const SizedBox(height: 16),
+            BlocProvider<ReportExplanationCubit>(
+              create: (_) => createReportExplanationCubit!(),
+              child: ReportExplanationPanel(definition: state.definition!),
+            ),
+          ],
         ],
       ),
     );

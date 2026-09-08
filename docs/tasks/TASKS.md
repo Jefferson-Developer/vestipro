@@ -336,7 +336,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-186 — Implementar IA generativa: resumo de carteira](TASK-186-implementar-ia-resumo-de-carteira.md) — Flutter Senior + Front-end
 - [x] [TASK-187 — Implementar IA generativa: sugestão de abordagem comercial](TASK-187-implementar-ia-sugestao-de-abordagem.md) — Flutter Senior + Front-end
 - [x] [TASK-188 — Implementar IA generativa: resumo diário do vendedor](TASK-188-implementar-ia-resumo-diario-do-vendedor.md) — Flutter Senior + Front-end
-- [ ] [TASK-189 — Implementar IA generativa: explicação de relatórios](TASK-189-implementar-ia-explicacao-de-relatorios.md) — Flutter Senior + Front-end
+- [x] [TASK-189 — Implementar IA generativa: explicação de relatórios](TASK-189-implementar-ia-explicacao-de-relatorios.md) — Flutter Senior + Front-end
 - [ ] [TASK-190 — Implementar recomendação de produtos baseada em comportamento](TASK-190-implementar-recomendacao-comportamental.md) — Flutter Senior
 - [ ] [TASK-191 — Implementar reconhecimento de produto por imagem](TASK-191-implementar-reconhecimento-de-produto-por-imagem.md) — Flutter Senior
 - [ ] [TASK-192 — Implementar criação assistida de coleção/campanha (IA)](TASK-192-implementar-criacao-assistida-de-campanha.md) — Flutter Senior + Front-end
@@ -379,6 +379,6 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 187 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
+**Progresso:** 188 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
 [`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md)
 — e não conta mais no total).
