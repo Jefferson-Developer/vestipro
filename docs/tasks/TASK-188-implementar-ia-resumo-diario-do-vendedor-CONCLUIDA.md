@@ -315,7 +315,7 @@ Não realizado — não autorizado nesta rodada.
 
 ## Hash do commit
 
-Ver `docs/tasks/TASKS.md` (linha do commit) / saída de `git log -1` logo após o commit desta task.
+`4423d244457ceab949ce73fd1bf5e30888876403`
 
 ## Branch
 
