@@ -97,6 +97,8 @@ void main() {
           'wallet_summary_generation_failed',
           'approach_suggestion_generated',
           'approach_suggestion_generation_failed',
+          'daily_rep_summary_viewed',
+          'daily_rep_summary_load_failed',
         ]),
       );
 

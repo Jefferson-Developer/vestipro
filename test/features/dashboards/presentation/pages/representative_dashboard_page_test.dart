@@ -6,6 +6,7 @@ import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/design_system/design_system.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/crm/crm.dart';
+import 'package:vestipro/features/daily_rep_summary/daily_rep_summary.dart';
 import 'package:vestipro/features/dashboards/dashboards.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
 import 'package:vestipro/features/wallet_summary/wallet_summary.dart';
@@ -33,8 +34,29 @@ class _UncalledWalletSummaryRepository implements WalletSummaryRepository {
   );
 }
 
+/// Unlike `_UncalledWalletSummaryRepository` above, `DailyRepSummaryCard`
+/// loads automatically on creation (TASK-188 — it never costs an LLM call,
+/// so there is no "Gerar resumo" gate), so this fake really is called by
+/// every test in this file; it always resolves to the same harmless
+/// "not generated yet" state, which none of these tests assert on.
+class _FakeDailyRepSummaryRepository implements DailyRepSummaryRepository {
+  @override
+  Future<AppResult<DailyRepSummary>> load({
+    required String organizationId,
+    required String sellerId,
+    String? dateKey,
+  }) async => const AppSuccess<DailyRepSummary>(
+    DailyRepSummary(
+      status: DailyRepSummaryResultStatus.notGeneratedYet,
+      dateKey: '2026-09-04',
+    ),
+  );
+}
+
 void main() {
   late _LoadDashboard loadDashboard;
+  final _MockMembershipRepository dailyRepSummaryMembershipRepository =
+      _MockMembershipRepository();
   const filters = RepresentativeDashboardFilters(
     companyId: 'company-1',
     sellerId: 'rep-1',
@@ -80,6 +102,34 @@ void main() {
 
   setUp(() {
     loadDashboard = _LoadDashboard();
+    // `DailyRepSummaryCard` auto-loads via a real `LoadDailyRepSummaryUseCase`
+    // + `RepresentativeDashboardVisibilityService` (see `page()` below), so
+    // the self-access membership lookup it triggers must be stubbed in every
+    // test, mirroring `generate_wallet_summary_use_case_test.dart`'s own
+    // "seller requesting their own wallet" setup.
+    when(
+      () => dailyRepSummaryMembershipRepository.getByUser(
+        organizationId: 'org-1',
+        userId: 'rep-1',
+      ),
+    ).thenAnswer(
+      (_) async => AppSuccess<Membership>(
+        Membership(
+          id: 'rep-1',
+          organizationId: 'org-1',
+          userId: 'rep-1',
+          roleId: 'SALES_REP',
+          roleName: 'SALES_REP',
+          teamIds: const <String>[],
+          status: MembershipStatus.active,
+          version: 1,
+          createdAt: DateTime.utc(2026, 1, 1),
+          createdBy: 'rep-1',
+          updatedAt: DateTime.utc(2026, 1, 1),
+          updatedBy: 'rep-1',
+        ),
+      ),
+    );
   });
 
   void setWidth(WidgetTester tester, double width) {
@@ -101,6 +151,16 @@ void main() {
           _UncalledWalletSummaryRepository(),
           RepresentativeDashboardVisibilityService(
             _MockMembershipRepository(),
+            _MockTeamRepository(),
+          ),
+          FakeAnalyticsService(),
+        ),
+      ),
+      createDailyRepSummaryCubit: () => DailyRepSummaryCubit(
+        LoadDailyRepSummaryUseCase(
+          _FakeDailyRepSummaryRepository(),
+          RepresentativeDashboardVisibilityService(
+            dailyRepSummaryMembershipRepository,
             _MockTeamRepository(),
           ),
           FakeAnalyticsService(),

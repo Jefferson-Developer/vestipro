@@ -57,6 +57,7 @@ import '../features/settings/settings.dart';
 import '../features/targets/targets.dart';
 import '../features/users/users.dart';
 import '../features/approach_suggestion/approach_suggestion.dart';
+import '../features/daily_rep_summary/daily_rep_summary.dart';
 import '../features/wallet_summary/wallet_summary.dart';
 import '../features/whatsapp_business/whatsapp_business.dart';
 import '../firebase_options.dart';
@@ -734,6 +735,8 @@ class VestiProApp extends StatelessWidget {
                       createBloc: () => getIt<RepresentativeDashboardBloc>(),
                       createWalletSummaryCubit: () =>
                           getIt<WalletSummaryCubit>(),
+                      createDailyRepSummaryCubit: () =>
+                          getIt<DailyRepSummaryCubit>(),
                       onOpenCrmActivity: (task) {
                         final customerId = task.customerId;
                         if (customerId != null) {

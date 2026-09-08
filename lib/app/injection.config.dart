@@ -482,6 +482,14 @@ import '../features/customers/presentation/bloc/customer_portfolio_bloc.dart'
     as _i522;
 import '../features/customers/presentation/bloc/customer_segment_bloc.dart'
     as _i901;
+import '../features/daily_rep_summary/data/repositories/cloud_functions_daily_rep_summary_repository.dart'
+    as _i692;
+import '../features/daily_rep_summary/domain/repositories/daily_rep_summary_repository.dart'
+    as _i78;
+import '../features/daily_rep_summary/domain/usecases/load_daily_rep_summary_use_case.dart'
+    as _i51;
+import '../features/daily_rep_summary/presentation/cubit/daily_rep_summary_cubit.dart'
+    as _i863;
 import '../features/dashboards/data/datasources/aggregation_remote_data_source.dart'
     as _i204;
 import '../features/dashboards/data/datasources/firestore_aggregation_data_source.dart'
@@ -3343,6 +3351,11 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i708.PortfolioAssignmentMapper>(),
       ),
     );
+    gh.lazySingleton<_i78.DailyRepSummaryRepository>(
+      () => _i692.CloudFunctionsDailyRepSummaryRepository(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i292.SyncEngine>(
       () => _i292.SyncEngine(
         gh<_i234.OutboxRepository>(),
@@ -4284,6 +4297,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i265.TeamRepository>(),
       ),
     );
+    gh.factory<_i51.LoadDailyRepSummaryUseCase>(
+      () => _i51.LoadDailyRepSummaryUseCase(
+        gh<_i78.DailyRepSummaryRepository>(),
+        gh<_i372.RepresentativeDashboardVisibilityService>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i977.LoadInitialCustomerOfflineDataUseCase>(
       () => _i977.LoadInitialCustomerOfflineDataUseCase(
         gh<_i857.CustomerRepository>(),
@@ -4690,6 +4710,9 @@ extension GetItInjectableX on _i174.GetIt {
         getCatalogShare: gh<_i795.GetCatalogShareUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
+    );
+    gh.factory<_i863.DailyRepSummaryCubit>(
+      () => _i863.DailyRepSummaryCubit(gh<_i51.LoadDailyRepSummaryUseCase>()),
     );
     gh.factory<_i591.ProcessInsightCommercialAlertUseCase>(
       () => _i591.ProcessInsightCommercialAlertUseCase(

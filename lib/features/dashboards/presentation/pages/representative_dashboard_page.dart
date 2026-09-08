@@ -1,9 +1,13 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../crm/domain/entities/crm_task.dart';
+import '../../../daily_rep_summary/presentation/cubit/daily_rep_summary_cubit.dart';
+import '../../../daily_rep_summary/presentation/widgets/daily_rep_summary_card.dart';
 import '../../../insights/domain/entities/insight.dart';
 import '../../../wallet_summary/presentation/cubit/wallet_summary_cubit.dart';
 import '../../../wallet_summary/presentation/widgets/wallet_summary_card.dart';
@@ -23,6 +27,7 @@ class RepresentativeDashboardPage extends StatelessWidget {
     required this.initialFilters,
     required this.createBloc,
     required this.createWalletSummaryCubit,
+    required this.createDailyRepSummaryCubit,
     required this.onOpenCrmActivity,
     required this.onOpenCustomer,
     required this.onOpenInsight,
@@ -33,6 +38,7 @@ class RepresentativeDashboardPage extends StatelessWidget {
   final RepresentativeDashboardFilters initialFilters;
   final RepresentativeDashboardBloc Function() createBloc;
   final WalletSummaryCubit Function() createWalletSummaryCubit;
+  final DailyRepSummaryCubit Function() createDailyRepSummaryCubit;
   final ValueChanged<CrmTask> onOpenCrmActivity;
   final ValueChanged<String> onOpenCustomer;
   final ValueChanged<Insight> onOpenInsight;
@@ -53,6 +59,19 @@ class RepresentativeDashboardPage extends StatelessWidget {
         ),
         BlocProvider<WalletSummaryCubit>(
           create: (_) => createWalletSummaryCubit(),
+        ),
+        BlocProvider<DailyRepSummaryCubit>(
+          create: (_) {
+            final cubit = createDailyRepSummaryCubit();
+            unawaited(
+              cubit.load(
+                organizationId: organizationId,
+                requesterUserId: requesterUserId,
+                sellerId: requesterUserId,
+              ),
+            );
+            return cubit;
+          },
         ),
       ],
       child: _RepresentativeDashboardView(
@@ -146,6 +165,8 @@ class _DashboardBody extends StatelessWidget {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: <Widget>[
+            const DailyRepSummaryCard(),
+            const SizedBox(height: AppSpacing.spacing16),
             _FreshnessBanner(snapshot: snapshot),
             const SizedBox(height: AppSpacing.spacing16),
             AppResponsiveBuilder(

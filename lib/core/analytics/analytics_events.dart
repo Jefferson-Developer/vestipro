@@ -264,6 +264,20 @@ final class AnalyticsEvents {
   static const String approachSuggestionGenerationFailed =
       'approach_suggestion_generation_failed';
 
+  /// Logged by `DailyRepSummaryCubit` (TASK-188, EPIC-28) whenever
+  /// `getDailyRepSummary` returns a `ready` summary — `status` (`ready`,
+  /// `empty`) is carried as a parameter. Never logged for `error`/
+  /// `not_generated_yet` (see `dailyRepSummaryLoadFailed`), and the summary
+  /// text itself is never carried as a parameter, same rule as
+  /// `walletSummaryGenerated`.
+  static const String dailyRepSummaryViewed = 'daily_rep_summary_viewed';
+
+  /// Logged by `DailyRepSummaryCubit` (TASK-188, EPIC-28) whenever
+  /// `getDailyRepSummary` fails outright (network/permission error) —
+  /// `failure_code` is carried as a parameter.
+  static const String dailyRepSummaryLoadFailed =
+      'daily_rep_summary_load_failed';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -358,5 +372,7 @@ final class AnalyticsEvents {
     walletSummaryGenerationFailed,
     approachSuggestionGenerated,
     approachSuggestionGenerationFailed,
+    dailyRepSummaryViewed,
+    dailyRepSummaryLoadFailed,
   ];
 }
