@@ -1205,6 +1205,24 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/approachSuggestions/{customerId}
+      // (TASK-187, EPIC-28 — IA generativa: sugestão de abordagem comercial)
+      // -------------------------------------------------------------------
+      //
+      // Same "server owns every write, deny-all is not just the implicit
+      // default" shape as `walletSummaries` above (TASK-186): the LLM-
+      // generated approach-suggestion cache is exclusively written by
+      // `suggestApproach` (Admin SDK, bypasses these Rules) — a client never
+      // reads this collection directly; the only way to obtain a suggestion
+      // (fresh or cached) is that callable's own response, which already
+      // re-checks RBAC (customer's own responsible seller, OWNER/ADMIN, or a
+      // SALES_MANAGER sharing a team with that seller) on every call before
+      // returning anything.
+      match /approachSuggestions/{customerId} {
+        allow read, write: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/webhooks/{webhookId}
       // organizations/{organizationId}/webhookSecrets/{webhookId}
       // organizations/{organizationId}/webhookDeliveries/{deliveryId}

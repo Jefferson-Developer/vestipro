@@ -6,12 +6,31 @@ import 'package:vestipro/core/design_system/design_system.dart';
 import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/permissions/permissions.dart';
 import 'package:vestipro/core/utils/utils.dart';
+import 'package:vestipro/features/approach_suggestion/approach_suggestion.dart';
 import 'package:vestipro/features/crm/crm.dart';
 import 'package:vestipro/features/customers/customers.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
 import 'package:vestipro/features/users/users.dart';
 
 class _MockMembershipRepository extends Mock implements MembershipRepository {}
+
+/// Never actually invoked by any test in this file (none of them tap
+/// "Sugerir abordagem" through to a real generation) — only exists so
+/// `CustomerDetailPage`'s required `createApproachSuggestionCubit` has
+/// something real to construct (same pattern as
+/// `representative_dashboard_page_test.dart`'s
+/// `_UncalledWalletSummaryRepository`, TASK-186).
+class _UncalledApproachSuggestionRepository
+    implements ApproachSuggestionRepository {
+  @override
+  Future<AppResult<ApproachSuggestion>> generate({
+    required String organizationId,
+    required String companyId,
+    required String customerId,
+  }) => throw UnimplementedError(
+    'ApproachSuggestionRepository.generate should never be called in these tests.',
+  );
+}
 
 void main() {
   group('CustomerDetailPage', () {
@@ -305,6 +324,12 @@ Future<void> _pumpPage(
           registerActivity: RegisterCrmActivityUseCase(activityRepository),
           permissionService: permissionService,
           analyticsService: analyticsService,
+        ),
+        createApproachSuggestionCubit: () => ApproachSuggestionCubit(
+          GenerateApproachSuggestionUseCase(
+            _UncalledApproachSuggestionRepository(),
+            analyticsService,
+          ),
         ),
       ),
     ),

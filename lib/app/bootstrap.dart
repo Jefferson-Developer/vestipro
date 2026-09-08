@@ -56,6 +56,7 @@ import '../features/settings/presentation/bloc/about_app_bloc.dart';
 import '../features/settings/settings.dart';
 import '../features/targets/targets.dart';
 import '../features/users/users.dart';
+import '../features/approach_suggestion/approach_suggestion.dart';
 import '../features/wallet_summary/wallet_summary.dart';
 import '../features/whatsapp_business/whatsapp_business.dart';
 import '../firebase_options.dart';
@@ -480,6 +481,8 @@ class VestiProApp extends StatelessWidget {
                       userId: getIt<AuthRepository>().currentUser?.uid ?? '',
                       permissionService: getIt<PermissionService>(),
                       createBloc: () => getIt<OpportunityCenterBloc>(),
+                      createApproachSuggestionCubit: () =>
+                          getIt<ApproachSuggestionCubit>(),
                       initialFilters:
                           OpportunityCenterFilters.fromQueryParameters(
                             queryParameters,
@@ -1257,6 +1260,8 @@ class VestiProApp extends StatelessWidget {
                 userId: getIt<AuthRepository>().currentUser?.uid ?? '',
                 permissionService: getIt<PermissionService>(),
                 createBloc: () => getIt<CustomerDetailBloc>(),
+                createApproachSuggestionCubit: () =>
+                    getIt<ApproachSuggestionCubit>(),
               ),
           loginPageBuilder: (context) =>
               LoginPage(createBloc: () => getIt<LoginBloc>()),

@@ -233,6 +233,14 @@
       ]
     },
     {
+      "collectionGroup": "crmActivities",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "customerId", "order": "ASCENDING" },
+        { "fieldPath": "occurredAt", "order": "DESCENDING" }
+      ]
+    },
+    {
       "collectionGroup": "demandForecasts",
       "queryScope": "COLLECTION",
       "fields": [

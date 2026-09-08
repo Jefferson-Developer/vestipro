@@ -95,6 +95,8 @@ void main() {
           'demand_forecast_viewed',
           'wallet_summary_generated',
           'wallet_summary_generation_failed',
+          'approach_suggestion_generated',
+          'approach_suggestion_generation_failed',
         ]),
       );
 

@@ -1,9 +1,12 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../approach_suggestion/approach_suggestion.dart';
 import '../../../crm/crm.dart';
 import '../../domain/entities/customer.dart';
 import '../../domain/entities/customer_address.dart';
@@ -23,6 +26,7 @@ class CustomerDetailPage extends StatelessWidget {
     required this.userId,
     required this.permissionService,
     required this.createBloc,
+    required this.createApproachSuggestionCubit,
     super.key,
   });
 
@@ -31,6 +35,11 @@ class CustomerDetailPage extends StatelessWidget {
   final String userId;
   final PermissionService permissionService;
   final CustomerDetailBloc Function() createBloc;
+
+  /// Factory for TASK-187's "Sugerir abordagem" sheet cubit — a fresh
+  /// instance is created every time the sheet opens (mirrors
+  /// `RepresentativeDashboardPage.createWalletSummaryCubit`, TASK-186).
+  final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -54,6 +63,7 @@ class CustomerDetailPage extends StatelessWidget {
             organizationId: organizationId,
             userId: userId,
             permissionService: permissionService,
+            createApproachSuggestionCubit: createApproachSuggestionCubit,
           ),
         );
       },
@@ -67,12 +77,14 @@ class CustomerDetailView extends StatelessWidget {
     required this.organizationId,
     required this.userId,
     required this.permissionService,
+    required this.createApproachSuggestionCubit,
     super.key,
   });
 
   final String organizationId;
   final String userId;
   final PermissionService permissionService;
+  final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -116,6 +128,7 @@ class CustomerDetailView extends StatelessWidget {
                 organizationId: organizationId,
                 userId: userId,
                 permissionService: permissionService,
+                createApproachSuggestionCubit: createApproachSuggestionCubit,
               ),
             ),
           );
@@ -131,12 +144,14 @@ class _CustomerDetailBody extends StatelessWidget {
     required this.organizationId,
     required this.userId,
     required this.permissionService,
+    required this.createApproachSuggestionCubit,
   });
 
   final CustomerDetailState state;
   final String organizationId;
   final String userId;
   final PermissionService permissionService;
+  final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -160,6 +175,7 @@ class _CustomerDetailBody extends StatelessWidget {
       organizationId: organizationId,
       userId: userId,
       permissionService: permissionService,
+      createApproachSuggestionCubit: createApproachSuggestionCubit,
     );
   }
 }
@@ -170,6 +186,7 @@ class _CustomerDetailContent extends StatelessWidget {
     required this.nextBestAction,
     required this.organizationId,
     required this.userId,
+    required this.createApproachSuggestionCubit,
     required this.permissionService,
   });
 
@@ -178,6 +195,7 @@ class _CustomerDetailContent extends StatelessWidget {
   final String organizationId;
   final String userId;
   final PermissionService permissionService;
+  final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -198,6 +216,7 @@ class _CustomerDetailContent extends StatelessWidget {
                 organizationId: organizationId,
                 userId: userId,
                 permissionService: permissionService,
+                createApproachSuggestionCubit: createApproachSuggestionCubit,
               )
             : _StackedCustomerDetail(
                 customer: customer,
@@ -205,6 +224,7 @@ class _CustomerDetailContent extends StatelessWidget {
                 organizationId: organizationId,
                 userId: userId,
                 permissionService: permissionService,
+                createApproachSuggestionCubit: createApproachSuggestionCubit,
               );
 
         return SingleChildScrollView(key: key, child: content);
@@ -220,6 +240,7 @@ class _StackedCustomerDetail extends StatelessWidget {
     required this.organizationId,
     required this.userId,
     required this.permissionService,
+    required this.createApproachSuggestionCubit,
   });
 
   final Customer customer;
@@ -227,6 +248,7 @@ class _StackedCustomerDetail extends StatelessWidget {
   final String organizationId;
   final String userId;
   final PermissionService permissionService;
+  final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -236,6 +258,12 @@ class _StackedCustomerDetail extends StatelessWidget {
         _CustomerHeader(
           customer: customer,
           onRegisterActivity: () => _showRegisterActivitySheet(context),
+          onSuggestApproach: () => _showApproachSuggestionSheet(
+            context,
+            organizationId: organizationId,
+            customer: customer,
+            createCubit: createApproachSuggestionCubit,
+          ),
         ),
         const SizedBox(height: AppSpacing.spacing16),
         _RegistrationSection(customer: customer),
@@ -267,6 +295,7 @@ class _DesktopCustomerDetail extends StatelessWidget {
     required this.organizationId,
     required this.userId,
     required this.permissionService,
+    required this.createApproachSuggestionCubit,
   });
 
   final Customer customer;
@@ -274,6 +303,7 @@ class _DesktopCustomerDetail extends StatelessWidget {
   final String organizationId;
   final String userId;
   final PermissionService permissionService;
+  final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -283,6 +313,12 @@ class _DesktopCustomerDetail extends StatelessWidget {
         _CustomerHeader(
           customer: customer,
           onRegisterActivity: () => _showRegisterActivitySheet(context),
+          onSuggestApproach: () => _showApproachSuggestionSheet(
+            context,
+            organizationId: organizationId,
+            customer: customer,
+            createCubit: createApproachSuggestionCubit,
+          ),
         ),
         const SizedBox(height: AppSpacing.spacing16),
         Row(
@@ -330,10 +366,12 @@ class _CustomerHeader extends StatelessWidget {
   const _CustomerHeader({
     required this.customer,
     required this.onRegisterActivity,
+    required this.onSuggestApproach,
   });
 
   final Customer customer;
   final VoidCallback onRegisterActivity;
+  final VoidCallback onSuggestApproach;
 
   @override
   Widget build(BuildContext context) {
@@ -374,6 +412,7 @@ class _CustomerHeader extends StatelessWidget {
           _QuickActions(
             customer: customer,
             onRegisterActivity: onRegisterActivity,
+            onSuggestApproach: onSuggestApproach,
           ),
         ],
       ),
@@ -385,10 +424,12 @@ class _QuickActions extends StatelessWidget {
   const _QuickActions({
     required this.customer,
     required this.onRegisterActivity,
+    required this.onSuggestApproach,
   });
 
   final Customer customer;
   final VoidCallback onRegisterActivity;
+  final VoidCallback onSuggestApproach;
 
   @override
   Widget build(BuildContext context) {
@@ -430,6 +471,13 @@ class _QuickActions extends StatelessWidget {
           semanticLabel: 'Registrar atividade',
           onPressed: onRegisterActivity,
         ),
+        AppButton(
+          label: 'Abordagem',
+          leadingIcon: Icons.auto_awesome,
+          variant: AppButtonVariant.secondary,
+          semanticLabel: 'Sugerir abordagem comercial com IA',
+          onPressed: onSuggestApproach,
+        ),
       ],
     );
   }
@@ -439,6 +487,48 @@ class _QuickActions extends StatelessWidget {
       context,
     ).showSnackBar(SnackBar(content: Text(message)));
   }
+}
+
+/// Opens TASK-187's "Sugerir abordagem" sheet for [customer]. When the
+/// seller taps "Usar como atividade" inside the sheet, this closes the
+/// suggestion sheet and reopens the existing "Registrar atividade" sheet
+/// (`_showRegisterActivitySheet`) pre-filled with the (possibly edited)
+/// draft, clearly marked as IA-generated — the same rastreabilidade
+/// mechanism the CRM timeline already provides for every other activity,
+/// never a new persistence path invented just for this feature
+/// (`tasks.md`/TASK-187: "Registrar no histórico do cliente... quando uma
+/// sugestão foi usada como base de uma atividade").
+Future<void> _showApproachSuggestionSheet(
+  BuildContext context, {
+  required String organizationId,
+  required Customer customer,
+  required ApproachSuggestionCubit Function() createCubit,
+}) {
+  return AppBottomSheet.show<void>(
+    context: context,
+    title: 'Sugerir abordagem',
+    contentKey: const Key('approach-suggestion-sheet'),
+    builder: (sheetContext) => BlocProvider<ApproachSuggestionCubit>(
+      create: (_) => createCubit(),
+      child: ApproachSuggestionSheet(
+        organizationId: organizationId,
+        companyId: customer.companyId,
+        customerId: customer.id,
+        customerName: customer.displayName,
+        onUseAsActivity: (editedText) {
+          Navigator.of(sheetContext).pop();
+          unawaited(
+            _showRegisterActivitySheet(
+              context,
+              initialType: CrmActivityType.note,
+              initialDescription:
+                  'Abordagem sugerida por IA (revisada pelo vendedor): $editedText',
+            ),
+          );
+        },
+      ),
+    ),
+  );
 }
 
 Future<void> _showRegisterActivitySheet(

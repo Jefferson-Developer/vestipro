@@ -4,6 +4,7 @@ import 'package:mocktail/mocktail.dart';
 import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/permissions/permissions.dart';
 import 'package:vestipro/core/utils/utils.dart';
+import 'package:vestipro/features/approach_suggestion/approach_suggestion.dart';
 import 'package:vestipro/features/insights/insights.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
 import 'package:vestipro/features/users/users.dart';
@@ -13,6 +14,22 @@ import '../../../../core/design_system/components/test_pump_app.dart';
 class _MockMembershipRepository extends Mock implements MembershipRepository {}
 
 class _MockTeamRepository extends Mock implements TeamRepository {}
+
+/// Never actually invoked by any test in this file (none of them tap
+/// "Sugerir abordagem" through to a real generation) — same pattern as
+/// `customer_detail_page_test.dart`'s
+/// `_UncalledApproachSuggestionRepository` (TASK-187).
+class _UncalledApproachSuggestionRepository
+    implements ApproachSuggestionRepository {
+  @override
+  Future<AppResult<ApproachSuggestion>> generate({
+    required String organizationId,
+    required String companyId,
+    required String customerId,
+  }) => throw UnimplementedError(
+    'ApproachSuggestionRepository.generate should never be called in these tests.',
+  );
+}
 
 void main() {
   late _MockMembershipRepository membershipRepository;
@@ -96,6 +113,12 @@ void main() {
         analytics,
       ),
       onActionExecuted: (_, _) {},
+      createApproachSuggestionCubit: () => ApproachSuggestionCubit(
+        GenerateApproachSuggestionUseCase(
+          _UncalledApproachSuggestionRepository(),
+          analytics,
+        ),
+      ),
     );
   }
 

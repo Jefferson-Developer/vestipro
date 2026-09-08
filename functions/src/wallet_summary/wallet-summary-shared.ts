@@ -5,6 +5,12 @@ import type { DocumentData, Firestore } from 'firebase-admin/firestore';
 
 import { buildAggregateDocId, formatMonthKey } from '../aggregations/aggregation-shared';
 import { addMonthsToMonthKey } from '../demand-forecast/demand-forecast-shared';
+import {
+  extractCitedDataPointCodes,
+  findHallucinatedNumberToken,
+  parseFlexibleNumber,
+} from '../shared/citation-validation';
+import { membersShareTeam } from '../shared/team-membership';
 import type {
   WalletSummaryDataPoint,
   WalletSummaryInsightHighlight,
@@ -136,14 +142,12 @@ export async function assertCanAccessSellerWallet(params: {
   if (requesterRoleName === 'OWNER' || requesterRoleName === 'ADMIN') return;
 
   if (requesterRoleName === 'SALES_MANAGER') {
-    const organizationRef = db.collection('organizations').doc(organizationId);
-    const [requesterSnapshot, sellerSnapshot] = await Promise.all([
-      organizationRef.collection('members').doc(requesterUid).get(),
-      organizationRef.collection('members').doc(sellerId).get(),
-    ]);
-    const requesterTeamIds = normalizeTeamIds(requesterSnapshot.data()?.teamIds);
-    const sellerTeamIds = normalizeTeamIds(sellerSnapshot.data()?.teamIds);
-    const sharesTeam = sellerTeamIds.some((teamId) => requesterTeamIds.includes(teamId));
+    const sharesTeam = await membersShareTeam({
+      db,
+      organizationId,
+      uidA: requesterUid,
+      uidB: sellerId,
+    });
     if (sharesTeam) return;
   }
 
@@ -151,11 +155,6 @@ export async function assertCanAccessSellerWallet(params: {
     'permission-denied',
     'Você só pode gerar o resumo da sua própria carteira ou da carteira de vendedores da sua equipe.',
   );
-}
-
-function normalizeTeamIds(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((entry): entry is string => typeof entry === 'string');
 }
 
 /**
@@ -439,59 +438,12 @@ export function buildWalletSummaryPrompt(payload: WalletSummaryPayload): {
   return { systemPrompt, userPrompt };
 }
 
-const REFERENCE_BLOCK_PATTERN = /\[refs:\s*([^\]]+)\]/gi;
-// Matches any digit run that may contain "." and/or "," as internal
-// separators (pt-BR grouped thousands + comma-decimal, e.g. "12.500,50";
-// plain comma-decimal with no thousands grouping, e.g. "12500,50"; or plain
-// dot-decimal, e.g. "12500.50"), optionally preceded by "R$" and/or followed
-// by "%". The captured group always starts and ends on an actual digit —
-// `(?:[\d.,]*\d)?` forces the engine to backtrack off any trailing "."/","
-// picked up from surrounding punctuation (e.g. a sentence-ending comma right
-// before a citation block), so a token like "9800,00," from
-// "...9800,00, ..." is never captured with its trailing separator glued on.
-// Deliberately does not try to match ordinals/dates — those never appear in
-// this feature's numeric vocabulary (revenue, order counts, percentages).
-const NUMBER_TOKEN_PATTERN = /(?:R\$\s*)?(\d(?:[\d.,]*\d)?)\s*%?/g;
-
-/**
- * Extracts every citation block (`[refs: a, b]`) from [text], returning the
- * distinct set of codes cited.
- */
-export function extractCitedDataPointCodes(text: string): string[] {
-  const codes = new Set<string>();
-  for (const match of text.matchAll(REFERENCE_BLOCK_PATTERN)) {
-    match[1]
-      .split(',')
-      .map((code) => code.trim())
-      .filter((code) => code.length > 0)
-      .forEach((code) => codes.add(code));
-  }
-  return [...codes];
-}
-
-/** Parses a pt-BR or plain-decimal numeric token into a `number`, tolerating
- * both `"1.234,56"` (thousands `.`, decimal `,`) and `"1234.56"` (plain
- * decimal `.`, no thousands separator) — the two shapes this feature's own
- * {@link WalletSummaryDataPoint.value} formatting
- * (`Number.prototype.toFixed`) and a Portuguese-writing LLM are each likely
- * to produce. */
-export function parseFlexibleNumber(token: string): number | null {
-  const trimmed = token.trim();
-  if (trimmed.length === 0) return null;
-  const hasComma = trimmed.includes(',');
-  const hasDot = trimmed.includes('.');
-  let normalized = trimmed;
-  if (hasComma && hasDot) {
-    // pt-BR thousands+decimal: strip '.', decimal is ','.
-    normalized = trimmed.replace(/\./g, '').replace(',', '.');
-  } else if (hasComma) {
-    normalized = trimmed.replace(',', '.');
-  }
-  const value = Number(normalized);
-  return Number.isFinite(value) ? value : null;
-}
-
-const NUMBER_MATCH_TOLERANCE = 0.01;
+// `extractCitedDataPointCodes`/`parseFlexibleNumber` moved to
+// `../shared/citation-validation.ts` (TASK-187, so the second "IA
+// generativa" feature never had to copy them) — re-exported here so this
+// module's own public API, and every existing import of them from
+// `wallet-summary-shared`, stays unchanged.
+export { extractCitedDataPointCodes, parseFlexibleNumber };
 
 /**
  * Validates a raw LLM-generated summary against the exact
@@ -508,9 +460,11 @@ const NUMBER_MATCH_TOLERANCE = 0.01;
  *    `unknown_reference` otherwise, since a fabricated citation code is just
  *    as untrustworthy as a fabricated number.
  * 3. Every numeric token found anywhere in the free text (not just inside a
- *    citation) must match, within {@link NUMBER_MATCH_TOLERANCE}, at least
+ *    citation) must match, within
+ *    `../shared/citation-validation.ts`'s `NUMBER_MATCH_TOLERANCE`, at least
  *    one [WalletSummaryDataPoint.numericValue] in the payload —
- *    `hallucinated_number` otherwise. This is the core anti-hallucination
+ *    `hallucinated_number` otherwise (checked by that module's
+ *    `findHallucinatedNumberToken`). This is the core anti-hallucination
  *    guard: prompt-engineering (rule 1 in
  *    {@link buildWalletSummaryPrompt}) is never trusted alone.
  */
@@ -546,20 +500,13 @@ export function validateGeneratedSummary(
     .map((point) => point.numericValue)
     .filter((value): value is number => typeof value === 'number');
 
-  const textWithoutCitations = trimmed.replace(REFERENCE_BLOCK_PATTERN, ' ');
-  for (const match of textWithoutCitations.matchAll(NUMBER_TOKEN_PATTERN)) {
-    const parsed = parseFlexibleNumber(match[1]);
-    if (parsed == null) continue;
-    const matchesKnownValue = knownNumericValues.some(
-      (known) => Math.abs(known - parsed) <= NUMBER_MATCH_TOLERANCE,
-    );
-    if (!matchesKnownValue) {
-      return {
-        ok: false,
-        reason: 'hallucinated_number',
-        detail: `Número "${match[0].trim()}" não corresponde a nenhum dado do payload.`,
-      };
-    }
+  const hallucinatedToken = findHallucinatedNumberToken(trimmed, knownNumericValues);
+  if (hallucinatedToken) {
+    return {
+      ok: false,
+      reason: 'hallucinated_number',
+      detail: `Número "${hallucinatedToken}" não corresponde a nenhum dado do payload.`,
+    };
   }
 
   return { ok: true, citedDataPointCodes: citedCodes };

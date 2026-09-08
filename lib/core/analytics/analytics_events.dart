@@ -247,6 +247,23 @@ final class AnalyticsEvents {
   static const String walletSummaryGenerationFailed =
       'wallet_summary_generation_failed';
 
+  /// Logged by `GenerateApproachSuggestionUseCase` (TASK-187, EPIC-28)
+  /// whenever a `suggestApproach` call successfully returns a suggestion
+  /// (fresh or from cache) — `from_cache` and `customer_id` are carried as
+  /// parameters. Never logged for a failed/rejected generation (see
+  /// `approachSuggestionGenerationFailed`), and the suggested text itself is
+  /// never carried as a parameter (same "no free-text/PII in analytics"
+  /// rule every other event in this catalog already follows).
+  static const String approachSuggestionGenerated =
+      'approach_suggestion_generated';
+
+  /// Logged by `GenerateApproachSuggestionUseCase` (TASK-187, EPIC-28)
+  /// whenever a `suggestApproach` call fails (provider unavailable,
+  /// validation rejected, rate-limited) — `failure_code` is carried as a
+  /// parameter.
+  static const String approachSuggestionGenerationFailed =
+      'approach_suggestion_generation_failed';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -339,5 +356,7 @@ final class AnalyticsEvents {
     demandForecastViewed,
     walletSummaryGenerated,
     walletSummaryGenerationFailed,
+    approachSuggestionGenerated,
+    approachSuggestionGenerationFailed,
   ];
 }

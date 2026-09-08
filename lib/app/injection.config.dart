@@ -177,6 +177,14 @@ import '../core/sync/presentation/cubit/conflict_resolution_cubit.dart'
     as _i717;
 import '../core/sync/presentation/cubit/outbox_watcher_cubit.dart' as _i866;
 import '../core/sync/presentation/cubit/sync_center_cubit.dart' as _i542;
+import '../features/approach_suggestion/data/repositories/cloud_functions_approach_suggestion_repository.dart'
+    as _i73;
+import '../features/approach_suggestion/domain/repositories/approach_suggestion_repository.dart'
+    as _i737;
+import '../features/approach_suggestion/domain/usecases/generate_approach_suggestion_use_case.dart'
+    as _i219;
+import '../features/approach_suggestion/presentation/cubit/approach_suggestion_cubit.dart'
+    as _i836;
 import '../features/audit_log/data/datasources/audit_log_data_source.dart'
     as _i432;
 import '../features/audit_log/data/datasources/firestore_audit_log_data_source.dart'
@@ -3306,6 +3314,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i720.AddItemsToOrderDraftUseCase>(),
       ),
     );
+    gh.lazySingleton<_i737.ApproachSuggestionRepository>(
+      () => _i73.CloudFunctionsApproachSuggestionRepository(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.factory<_i126.DeactivateUserUseCase>(
       () => _i126.DeactivateUserUseCase(gh<_i33.UserAccessRepository>()),
     );
@@ -3420,6 +3433,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i327.ProductImportFunctionsDataSource>(
       () => _i508.CloudFunctionsProductImportDataSource(
         gh<_i340.CloudFunctionsService>(),
+      ),
+    );
+    gh.factory<_i219.GenerateApproachSuggestionUseCase>(
+      () => _i219.GenerateApproachSuggestionUseCase(
+        gh<_i737.ApproachSuggestionRepository>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.lazySingleton<_i813.ReportExportRemoteDataSource>(
@@ -3795,6 +3814,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i90.CreateAccountWithEmailAndPasswordUseCase(
         gh<_i472.AuthRepository>(),
         gh<_i488.UserProfileRepository>(),
+      ),
+    );
+    gh.factory<_i836.ApproachSuggestionCubit>(
+      () => _i836.ApproachSuggestionCubit(
+        gh<_i219.GenerateApproachSuggestionUseCase>(),
       ),
     );
     gh.lazySingleton<_i344.CatalogShareLookupRepository>(

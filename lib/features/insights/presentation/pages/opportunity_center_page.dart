@@ -1,11 +1,13 @@
 import 'dart:async';
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../approach_suggestion/approach_suggestion.dart';
 import '../../domain/entities/insight.dart';
 import '../../domain/entities/insight_action.dart';
 import '../../domain/entities/opportunity_center_filters.dart';
@@ -44,6 +46,7 @@ class OpportunityCenterPage extends StatelessWidget {
     required this.permissionService,
     required this.createBloc,
     required this.onActionExecuted,
+    required this.createApproachSuggestionCubit,
     this.initialFilters = OpportunityCenterFilters.empty,
     this.onUrlStateChanged,
     super.key,
@@ -54,6 +57,11 @@ class OpportunityCenterPage extends StatelessWidget {
   final String userId;
   final PermissionService permissionService;
   final OpportunityCenterBloc Function() createBloc;
+
+  /// Factory for TASK-187's "Sugerir abordagem" sheet cubit, reused as-is
+  /// from `CustomerDetailPage` — a fresh instance is created every time the
+  /// sheet opens.
+  final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
 
   /// Called right after logging `insight_action_clicked` for [action] on
   /// [insight] — always the same fluxo already validated on the insight's
@@ -89,6 +97,7 @@ class OpportunityCenterPage extends StatelessWidget {
             ),
           child: _OpportunityCenterView(
             onActionExecuted: onActionExecuted,
+            createApproachSuggestionCubit: createApproachSuggestionCubit,
             onUrlStateChanged: onUrlStateChanged,
           ),
         );
@@ -100,10 +109,12 @@ class OpportunityCenterPage extends StatelessWidget {
 class _OpportunityCenterView extends StatelessWidget {
   const _OpportunityCenterView({
     required this.onActionExecuted,
+    required this.createApproachSuggestionCubit,
     this.onUrlStateChanged,
   });
 
   final void Function(Insight insight, InsightAction action) onActionExecuted;
+  final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
   final void Function(OpportunityCenterFilters filters)? onUrlStateChanged;
 
   @override
@@ -147,6 +158,7 @@ class _OpportunityCenterView extends StatelessWidget {
             content: _OpportunityCenterContent(
               state: state,
               onActionExecuted: onActionExecuted,
+              createApproachSuggestionCubit: createApproachSuggestionCubit,
             ),
           ),
         );
@@ -159,10 +171,12 @@ class _OpportunityCenterContent extends StatelessWidget {
   const _OpportunityCenterContent({
     required this.state,
     required this.onActionExecuted,
+    required this.createApproachSuggestionCubit,
   });
 
   final OpportunityCenterState state;
   final void Function(Insight insight, InsightAction action) onActionExecuted;
+  final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -253,6 +267,30 @@ class _OpportunityCenterContent extends StatelessWidget {
                 onPressed: (insight) {
                   bloc.add(OpportunityCenterInsightOpened(insight.id));
                   _showEvidenceModal(context, insight, onActionExecuted, bloc);
+                },
+              ),
+              AppDataTableAction<Insight>(
+                icon: Icons.auto_awesome,
+                semanticLabel: 'Sugerir abordagem comercial com IA',
+                onPressed: (insight) {
+                  final customerId = insight.customerId;
+                  if (customerId == null) {
+                    AppSnackbar.show(
+                      context,
+                      message:
+                          'Este insight não está vinculado a um cliente específico.',
+                      variant: AppSnackbarVariant.info,
+                    );
+                    return;
+                  }
+                  _showApproachSuggestionSheet(
+                    context,
+                    organizationId: insight.organizationId,
+                    companyId: insight.companyId,
+                    customerId: customerId,
+                    customerLabel: insight.title,
+                    createCubit: createApproachSuggestionCubit,
+                  );
                 },
               ),
               AppDataTableAction<Insight>(
@@ -351,6 +389,52 @@ class _OpportunityCenterContent extends StatelessWidget {
           label: 'Fechar',
           variant: AppButtonVariant.secondary,
           onPressed: () => Navigator.of(context).pop(),
+        ),
+      ),
+    );
+  }
+
+  /// Opens TASK-187's "Sugerir abordagem" sheet for the customer behind one
+  /// insight row. Unlike `CustomerDetailPage` (which can pre-fill its own
+  /// existing "Registrar atividade" sheet), the central de oportunidades has
+  /// no activity-registration flow of its own — "Usar como atividade" here
+  /// copies the edited draft to the clipboard and points the seller to the
+  /// cliente 360, where registering it keeps the same CRM-timeline
+  /// rastreabilidade this task requires, without this screen inventing a
+  /// second, parallel path to create a `CrmActivity`.
+  void _showApproachSuggestionSheet(
+    BuildContext context, {
+    required String organizationId,
+    required String companyId,
+    required String customerId,
+    required String customerLabel,
+    required ApproachSuggestionCubit Function() createCubit,
+  }) {
+    unawaited(
+      AppBottomSheet.show<void>(
+        context: context,
+        title: 'Sugerir abordagem',
+        contentKey: const Key('approach-suggestion-sheet'),
+        builder: (sheetContext) => BlocProvider<ApproachSuggestionCubit>(
+          create: (_) => createCubit(),
+          child: ApproachSuggestionSheet(
+            organizationId: organizationId,
+            companyId: companyId,
+            customerId: customerId,
+            customerName: customerLabel,
+            onUseAsActivity: (editedText) async {
+              await Clipboard.setData(ClipboardData(text: editedText));
+              if (!sheetContext.mounted) return;
+              Navigator.of(sheetContext).pop();
+              if (!context.mounted) return;
+              AppSnackbar.show(
+                context,
+                message:
+                    'Texto copiado. Abra o cliente 360 para registrar a atividade.',
+                variant: AppSnackbarVariant.success,
+              );
+            },
+          ),
         ),
       ),
     );
