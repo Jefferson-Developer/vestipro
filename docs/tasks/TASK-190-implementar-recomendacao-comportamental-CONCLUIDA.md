@@ -453,8 +453,7 @@ Não realizado nesta rodada — sem autorização explícita para push nesta con
 
 ## Hash do commit
 
-Ver `git log -1` logo após o commit desta task (registrado em commit de documentação seguinte,
-mesmo padrão já usado em TASK-186/187/188/189).
+`4c0ea7c3d074a3ed5067c174027600496a4e5124`
 
 ## Branch
 
