@@ -1438,6 +1438,38 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/paymentProviders/{providerId}
+      // organizations/{organizationId}/paymentWebhookSecrets/{providerId}
+      // organizations/{organizationId}/paymentTransactions/{transactionId}
+      // organizations/{organizationId}/paymentWebhookEvents/{eventId}
+      // (TASK-193, EPIC-29 — gateways de pagamento)
+      // -------------------------------------------------------------------
+      //
+      // Escritas e reconciliacao sao exclusivas de Cloud Functions/Admin SDK:
+      // `createPaymentCharge`, `handlePaymentWebhook` e
+      // `reconcilePaymentTransactionToOrder`. O cliente nunca recebe segredo
+      // do gateway nem decide sozinho que um pagamento foi confirmado.
+
+      match /paymentProviders/{providerId} {
+        allow read: if hasCapability(organizationId, 'finance.manage');
+        allow create, update, delete: if false;
+      }
+
+      match /paymentWebhookSecrets/{providerId} {
+        allow read, write: if false;
+      }
+
+      match /paymentTransactions/{transactionId} {
+        allow read: if hasCapability(organizationId, 'finance.view')
+          || hasCapability(organizationId, 'finance.manage');
+        allow create, update, delete: if false;
+      }
+
+      match /paymentWebhookEvents/{eventId} {
+        allow read, write: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/ssoConnections/{connectionId}
       // (TASK-173, EPIC-23 — SSO corporativo SAML/OIDC)
       // -------------------------------------------------------------------

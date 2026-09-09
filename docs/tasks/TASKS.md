@@ -342,7 +342,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-192 — Implementar criação assistida de coleção/campanha (IA)](TASK-192-implementar-criacao-assistida-de-campanha.md) — Flutter Senior + Front-end
 
 ### EPIC-29 — Pagamentos e Regras Comerciais Avançadas
-- [ ] [TASK-193 — Implementar integração com gateways de pagamento](TASK-193-implementar-gateways-de-pagamento.md) — Flutter Senior
+- [x] [TASK-193 — Implementar integração com gateways de pagamento](TASK-193-implementar-gateways-de-pagamento.md) — Flutter Senior
 - [ ] [TASK-194 — Implementar aprovação multinível de pedidos/descontos](TASK-194-implementar-aprovacao-multinivel.md) — Flutter Senior + Front-end
 - [ ] [TASK-195 — Implementar comissionamento de vendedores](TASK-195-implementar-comissionamento.md) — Flutter Senior + Front-end
 - [ ] [TASK-196 — Implementar políticas comerciais avançadas](TASK-196-implementar-politicas-comerciais-avancadas.md) — Flutter Senior
@@ -379,6 +379,6 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 191 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
+**Progresso:** 192 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
 [`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md)
 — e não conta mais no total).
