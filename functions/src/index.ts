@@ -47,6 +47,7 @@ export {
   generateQuote,
   convertQuoteToOrder,
   expireQuotes,
+  processRecurringOrders,
 } from './orders';
 export { generateInsightsScheduled } from './insights';
 export {

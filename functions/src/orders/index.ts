@@ -24,3 +24,8 @@ export {
   type ConvertQuoteToOrderResponse,
 } from './convert-quote-to-order';
 export { expireQuotes } from './expire-quotes';
+export {
+  processRecurringOrders,
+  processRecurringOrdersHandler,
+  type ProcessRecurringOrdersSummary,
+} from './process-recurring-orders';
