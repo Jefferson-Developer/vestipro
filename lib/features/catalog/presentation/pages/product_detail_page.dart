@@ -5,6 +5,7 @@ import 'package:intl/intl.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/utils/utils.dart';
 import '../../../pricing/domain/entities/resolved_variant_price.dart';
+import '../../../product_recommendations/product_recommendations.dart';
 import '../../../products/domain/entities/product.dart';
 import '../../../products/domain/entities/product_color.dart';
 import '../../../products/domain/entities/variant_availability.dart';
@@ -25,6 +26,9 @@ class ProductDetailPage extends StatelessWidget {
     this.onFavoriteToggle,
     this.onSharePressed,
     this.onWhatsAppPressed,
+    this.userId,
+    this.createRecommendationsBloc,
+    this.onRecommendationTap,
     super.key,
   });
 
@@ -39,6 +43,14 @@ class ProductDetailPage extends StatelessWidget {
   final VoidCallback? onSharePressed;
   final VoidCallback? onWhatsAppPressed;
 
+  /// Required (together with [createRecommendationsBloc]) for TASK-190's
+  /// "comprado com frequência junto" section to render at all — both are
+  /// optional so every other caller of this page (order draft flow, tests)
+  /// keeps working unchanged without the feature.
+  final String? userId;
+  final ProductRecommendationsBloc Function()? createRecommendationsBloc;
+  final void Function(String productId)? onRecommendationTap;
+
   @override
   Widget build(BuildContext context) {
     return BlocProvider<ProductDetailBloc>(
@@ -51,11 +63,15 @@ class ProductDetailPage extends StatelessWidget {
           ),
         ),
       child: _ProductDetailView(
+        organizationId: organizationId,
+        userId: userId,
         onAddToOrder: onAddToOrder,
         isFavorite: isFavorite,
         onFavoriteToggle: onFavoriteToggle,
         onSharePressed: onSharePressed,
         onWhatsAppPressed: onWhatsAppPressed,
+        createRecommendationsBloc: createRecommendationsBloc,
+        onRecommendationTap: onRecommendationTap,
       ),
     );
   }
@@ -63,19 +79,27 @@ class ProductDetailPage extends StatelessWidget {
 
 class _ProductDetailView extends StatelessWidget {
   const _ProductDetailView({
+    required this.organizationId,
+    this.userId,
     this.onAddToOrder,
     this.isFavorite = false,
     this.onFavoriteToggle,
     this.onSharePressed,
     this.onWhatsAppPressed,
+    this.createRecommendationsBloc,
+    this.onRecommendationTap,
   });
 
+  final String organizationId;
+  final String? userId;
   final void Function(Product product, List<ProductDetailOrderLine> lines)?
   onAddToOrder;
   final bool isFavorite;
   final VoidCallback? onFavoriteToggle;
   final VoidCallback? onSharePressed;
   final VoidCallback? onWhatsAppPressed;
+  final ProductRecommendationsBloc Function()? createRecommendationsBloc;
+  final void Function(String productId)? onRecommendationTap;
 
   @override
   Widget build(BuildContext context) {
@@ -108,7 +132,9 @@ class _ProductDetailView extends StatelessWidget {
                 ),
             ],
           ),
-          body: SafeArea(child: _buildBody(context, bloc, state)),
+          body: SafeArea(
+            child: _buildBody(context, bloc, state, organizationId),
+          ),
           bottomNavigationBar: state.status == ProductDetailLoadStatus.success
               ? _AddToOrderBar(state: state, onAddToOrder: onAddToOrder)
               : null,
@@ -121,6 +147,7 @@ class _ProductDetailView extends StatelessWidget {
     BuildContext context,
     ProductDetailBloc bloc,
     ProductDetailState state,
+    String organizationId,
   ) {
     return switch (state.status) {
       ProductDetailLoadStatus.initial ||
@@ -131,7 +158,13 @@ class _ProductDetailView extends StatelessWidget {
         retryLabel: 'Tentar novamente',
         onRetry: () => bloc.add(const ProductDetailRetried()),
       ),
-      ProductDetailLoadStatus.success => _ProductDetailContent(state: state),
+      ProductDetailLoadStatus.success => _ProductDetailContent(
+        state: state,
+        organizationId: organizationId,
+        userId: userId,
+        createRecommendationsBloc: createRecommendationsBloc,
+        onRecommendationTap: onRecommendationTap,
+      ),
     };
   }
 }
@@ -160,9 +193,19 @@ class _LoadingView extends StatelessWidget {
 }
 
 class _ProductDetailContent extends StatelessWidget {
-  const _ProductDetailContent({required this.state});
+  const _ProductDetailContent({
+    required this.state,
+    required this.organizationId,
+    this.userId,
+    this.createRecommendationsBloc,
+    this.onRecommendationTap,
+  });
 
   final ProductDetailState state;
+  final String organizationId;
+  final String? userId;
+  final ProductRecommendationsBloc Function()? createRecommendationsBloc;
+  final void Function(String productId)? onRecommendationTap;
 
   @override
   Widget build(BuildContext context) {
@@ -263,10 +306,49 @@ class _ProductDetailContent extends StatelessWidget {
                   ),
                 const SizedBox(height: AppSpacing.spacing8),
                 _buildSizeGrid(context, bloc, state),
+                if (_buildRecommendationsSection(product)
+                    case final section?) ...<Widget>[
+                  const SizedBox(height: AppSpacing.spacing24),
+                  section,
+                ],
               ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  /// "Comprado com frequência junto" (TASK-190, EPIC-28) — only renders when
+  /// the caller wired both [createRecommendationsBloc]/[userId] and the
+  /// product itself carries a [Product.companyId] (required to scope the
+  /// query); every other caller of this page (order draft flow, tests that
+  /// never pass these optional params) keeps working exactly as before.
+  Widget? _buildRecommendationsSection(Product product) {
+    final createBloc = createRecommendationsBloc;
+    final requestedByUserId = userId;
+    final companyId = product.companyId;
+    if (createBloc == null ||
+        requestedByUserId == null ||
+        requestedByUserId.isEmpty ||
+        companyId == null ||
+        companyId.isEmpty) {
+      return null;
+    }
+    return BlocProvider<ProductRecommendationsBloc>(
+      create: (_) => createBloc()
+        ..add(
+          ProductRecommendationsRequested(
+            organizationId: organizationId,
+            companyId: companyId,
+            userId: requestedByUserId,
+            scopeType: ProductRecommendationScopeType.product,
+            scopeId: product.id,
+          ),
+        ),
+      child: ProductRecommendationsSection(
+        title: 'Comprado com frequência junto',
+        onProductTap: onRecommendationTap,
       ),
     );
   }

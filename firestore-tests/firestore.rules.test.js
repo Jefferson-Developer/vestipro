@@ -617,6 +617,44 @@ function demandForecastDoc({ organizationId, companyId = 'company-a' }) {
   };
 }
 
+function productRecommendationDoc({
+  organizationId,
+  companyId = 'company-a',
+  scopeType = 'product',
+  scopeId = 'product-1',
+  primarySalesRepId,
+  teamId,
+}) {
+  const doc = {
+    organizationId,
+    companyId,
+    scopeType,
+    scopeId,
+    items: [
+      {
+        productId: 'product-2',
+        productName: 'Camisa Polo',
+        score: 0.5,
+        reasonCode: scopeType === 'customer' ? 'purchaseHistorySimilarity' : 'boughtTogether',
+        reasonLabel: 'Clientes que compraram product-1 também compraram product-2.',
+        relatedProductId: 'product-1',
+        relatedProductName: 'Camiseta Basica',
+      },
+    ],
+    fallbackApplied: false,
+    insufficientData: false,
+    signalsUsed: ['order_submitted_item_co_occurrence'],
+    lookbackDays: 180,
+    model: 'itemCoOccurrenceV1',
+    modelVersion: 'co-occurrence-v1',
+    generatedAt: now(),
+    version: 1,
+  };
+  if (primarySalesRepId != null) doc.primarySalesRepId = primarySalesRepId;
+  if (teamId != null) doc.teamId = teamId;
+  return doc;
+}
+
 function salesDailyAggregateDoc({ organizationId, companyId = 'company-a' }) {
   return {
     organizationId,
@@ -2297,6 +2335,120 @@ describe('organizations/{organizationId}/demandForecasts/{forecastId}  (TASK-185
       db
         .doc(`organizations/${ORG_A}/demandForecasts/company-a_product_product-1_2026-08`)
         .update({ fullyEvaluated: true }),
+    );
+  });
+});
+
+describe('organizations/{organizationId}/productRecommendations/{recommendationId}  (TASK-190)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      // `product`/`segment` scope: no customer data, readable by any active
+      // member of the organization.
+      await db
+        .doc(`organizations/${ORG_A}/productRecommendations/company-a_product_product-1`)
+        .set(productRecommendationDoc({ organizationId: ORG_A }));
+      await db
+        .doc(`organizations/${ORG_A}/productRecommendations/company-a_segment_company-best-sellers`)
+        .set(
+          productRecommendationDoc({
+            organizationId: ORG_A,
+            scopeType: 'segment',
+            scopeId: 'company-best-sellers',
+          }),
+        );
+      // `customer` scope: same carteira-visibility fields as `customers`
+      // itself — customer-a belongs to rep-a/team-a (same fixture as the
+      // `customers` visibility describe block above).
+      await db
+        .doc(`organizations/${ORG_A}/productRecommendations/company-a_customer_customer-a`)
+        .set(
+          productRecommendationDoc({
+            organizationId: ORG_A,
+            scopeType: 'customer',
+            scopeId: 'customer-a',
+            primarySalesRepId: 'rep-a',
+            teamId: 'team-a',
+          }),
+        );
+      await db
+        .doc(`organizations/${ORG_A}/productRecommendations/company-a_customer_customer-b`)
+        .set(
+          productRecommendationDoc({
+            organizationId: ORG_A,
+            scopeType: 'customer',
+            scopeId: 'customer-b',
+            primarySalesRepId: 'rep-b',
+            teamId: 'team-b',
+          }),
+        );
+      await db
+        .doc(`organizations/${ORG_B}/productRecommendations/company-b_product_product-1`)
+        .set(productRecommendationDoc({ organizationId: ORG_B, companyId: 'company-b' }));
+    });
+  });
+
+  test('qualquer membro ativo lê a recomendação de escopo product/segment', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/productRecommendations/company-a_product_product-1`).get(),
+    );
+    await assertSucceeds(
+      db
+        .doc(`organizations/${ORG_A}/productRecommendations/company-a_segment_company-best-sellers`)
+        .get(),
+    );
+  });
+
+  test('SALES_REP lê a recomendação de escopo customer da própria carteira, mas não a de outra', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/productRecommendations/company-a_customer_customer-a`).get(),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/productRecommendations/company-a_customer_customer-b`).get(),
+    );
+  });
+
+  test('SALES_MANAGER lê a recomendação de escopo customer das suas equipes por teamId', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/productRecommendations/company-a_customer_customer-a`).get(),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/productRecommendations/company-a_customer_customer-b`).get(),
+    );
+  });
+
+  test('ADMIN e OWNER leem qualquer recomendação de escopo customer da própria organization', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+    await assertSucceeds(
+      ownerDb.doc(`organizations/${ORG_A}/productRecommendations/company-a_customer_customer-b`).get(),
+    );
+    await assertSucceeds(
+      adminDb.doc(`organizations/${ORG_A}/productRecommendations/company-a_customer_customer-b`).get(),
+    );
+  });
+
+  test('membro da Org A não lê recomendação da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_B}/productRecommendations/company-b_product_product-1`).get(),
+    );
+  });
+
+  test('nenhum papel, nem OWNER, consegue criar/atualizar uma recomendação pelo client (só a Admin SDK escreve)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/productRecommendations/company-a_product_product-2`)
+        .set(productRecommendationDoc({ organizationId: ORG_A, scopeId: 'product-2' })),
+    );
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/productRecommendations/company-a_product_product-1`)
+        .update({ fallbackApplied: true }),
     );
   });
 });

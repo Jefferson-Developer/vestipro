@@ -8,6 +8,7 @@ import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
 import '../../../approach_suggestion/approach_suggestion.dart';
 import '../../../crm/crm.dart';
+import '../../../product_recommendations/product_recommendations.dart';
 import '../../domain/entities/customer.dart';
 import '../../domain/entities/customer_address.dart';
 import '../../domain/entities/customer_contact.dart';
@@ -27,6 +28,7 @@ class CustomerDetailPage extends StatelessWidget {
     required this.permissionService,
     required this.createBloc,
     required this.createApproachSuggestionCubit,
+    this.createProductRecommendationsBloc,
     super.key,
   });
 
@@ -40,6 +42,13 @@ class CustomerDetailPage extends StatelessWidget {
   /// instance is created every time the sheet opens (mirrors
   /// `RepresentativeDashboardPage.createWalletSummaryCubit`, TASK-186).
   final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
+
+  /// Factory for TASK-190's "Recomendações" sheet bloc — same
+  /// "fresh instance per sheet open" shape as
+  /// [createApproachSuggestionCubit]. Optional: when `null`, the
+  /// "Recomendações" quick action is not shown at all (keeps every existing
+  /// caller/test of this page working unchanged without the feature).
+  final ProductRecommendationsBloc Function()? createProductRecommendationsBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -64,6 +73,7 @@ class CustomerDetailPage extends StatelessWidget {
             userId: userId,
             permissionService: permissionService,
             createApproachSuggestionCubit: createApproachSuggestionCubit,
+            createProductRecommendationsBloc: createProductRecommendationsBloc,
           ),
         );
       },
@@ -78,6 +88,7 @@ class CustomerDetailView extends StatelessWidget {
     required this.userId,
     required this.permissionService,
     required this.createApproachSuggestionCubit,
+    this.createProductRecommendationsBloc,
     super.key,
   });
 
@@ -85,6 +96,7 @@ class CustomerDetailView extends StatelessWidget {
   final String userId;
   final PermissionService permissionService;
   final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
+  final ProductRecommendationsBloc Function()? createProductRecommendationsBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -129,6 +141,8 @@ class CustomerDetailView extends StatelessWidget {
                 userId: userId,
                 permissionService: permissionService,
                 createApproachSuggestionCubit: createApproachSuggestionCubit,
+                createProductRecommendationsBloc:
+                    createProductRecommendationsBloc,
               ),
             ),
           );
@@ -145,6 +159,7 @@ class _CustomerDetailBody extends StatelessWidget {
     required this.userId,
     required this.permissionService,
     required this.createApproachSuggestionCubit,
+    this.createProductRecommendationsBloc,
   });
 
   final CustomerDetailState state;
@@ -152,6 +167,7 @@ class _CustomerDetailBody extends StatelessWidget {
   final String userId;
   final PermissionService permissionService;
   final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
+  final ProductRecommendationsBloc Function()? createProductRecommendationsBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -176,6 +192,7 @@ class _CustomerDetailBody extends StatelessWidget {
       userId: userId,
       permissionService: permissionService,
       createApproachSuggestionCubit: createApproachSuggestionCubit,
+      createProductRecommendationsBloc: createProductRecommendationsBloc,
     );
   }
 }
@@ -188,6 +205,7 @@ class _CustomerDetailContent extends StatelessWidget {
     required this.userId,
     required this.createApproachSuggestionCubit,
     required this.permissionService,
+    this.createProductRecommendationsBloc,
   });
 
   final Customer customer;
@@ -196,6 +214,7 @@ class _CustomerDetailContent extends StatelessWidget {
   final String userId;
   final PermissionService permissionService;
   final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
+  final ProductRecommendationsBloc Function()? createProductRecommendationsBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -217,6 +236,8 @@ class _CustomerDetailContent extends StatelessWidget {
                 userId: userId,
                 permissionService: permissionService,
                 createApproachSuggestionCubit: createApproachSuggestionCubit,
+                createProductRecommendationsBloc:
+                    createProductRecommendationsBloc,
               )
             : _StackedCustomerDetail(
                 customer: customer,
@@ -225,6 +246,8 @@ class _CustomerDetailContent extends StatelessWidget {
                 userId: userId,
                 permissionService: permissionService,
                 createApproachSuggestionCubit: createApproachSuggestionCubit,
+                createProductRecommendationsBloc:
+                    createProductRecommendationsBloc,
               );
 
         return SingleChildScrollView(key: key, child: content);
@@ -241,6 +264,7 @@ class _StackedCustomerDetail extends StatelessWidget {
     required this.userId,
     required this.permissionService,
     required this.createApproachSuggestionCubit,
+    this.createProductRecommendationsBloc,
   });
 
   final Customer customer;
@@ -249,6 +273,7 @@ class _StackedCustomerDetail extends StatelessWidget {
   final String userId;
   final PermissionService permissionService;
   final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
+  final ProductRecommendationsBloc Function()? createProductRecommendationsBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -264,6 +289,15 @@ class _StackedCustomerDetail extends StatelessWidget {
             customer: customer,
             createCubit: createApproachSuggestionCubit,
           ),
+          onShowRecommendations: createProductRecommendationsBloc == null
+              ? null
+              : () => _showProductRecommendationsSheet(
+                  context,
+                  organizationId: organizationId,
+                  userId: userId,
+                  customer: customer,
+                  createBloc: createProductRecommendationsBloc!,
+                ),
         ),
         const SizedBox(height: AppSpacing.spacing16),
         _RegistrationSection(customer: customer),
@@ -296,6 +330,7 @@ class _DesktopCustomerDetail extends StatelessWidget {
     required this.userId,
     required this.permissionService,
     required this.createApproachSuggestionCubit,
+    this.createProductRecommendationsBloc,
   });
 
   final Customer customer;
@@ -304,6 +339,7 @@ class _DesktopCustomerDetail extends StatelessWidget {
   final String userId;
   final PermissionService permissionService;
   final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
+  final ProductRecommendationsBloc Function()? createProductRecommendationsBloc;
 
   @override
   Widget build(BuildContext context) {
@@ -319,6 +355,15 @@ class _DesktopCustomerDetail extends StatelessWidget {
             customer: customer,
             createCubit: createApproachSuggestionCubit,
           ),
+          onShowRecommendations: createProductRecommendationsBloc == null
+              ? null
+              : () => _showProductRecommendationsSheet(
+                  context,
+                  organizationId: organizationId,
+                  userId: userId,
+                  customer: customer,
+                  createBloc: createProductRecommendationsBloc!,
+                ),
         ),
         const SizedBox(height: AppSpacing.spacing16),
         Row(
@@ -367,11 +412,17 @@ class _CustomerHeader extends StatelessWidget {
     required this.customer,
     required this.onRegisterActivity,
     required this.onSuggestApproach,
+    this.onShowRecommendations,
   });
 
   final Customer customer;
   final VoidCallback onRegisterActivity;
   final VoidCallback onSuggestApproach;
+
+  /// `null` hides the "Recomendações" quick action entirely (TASK-190,
+  /// EPIC-28) — same optional-seam shape already used elsewhere on this
+  /// page.
+  final VoidCallback? onShowRecommendations;
 
   @override
   Widget build(BuildContext context) {
@@ -413,6 +464,7 @@ class _CustomerHeader extends StatelessWidget {
             customer: customer,
             onRegisterActivity: onRegisterActivity,
             onSuggestApproach: onSuggestApproach,
+            onShowRecommendations: onShowRecommendations,
           ),
         ],
       ),
@@ -425,11 +477,13 @@ class _QuickActions extends StatelessWidget {
     required this.customer,
     required this.onRegisterActivity,
     required this.onSuggestApproach,
+    this.onShowRecommendations,
   });
 
   final Customer customer;
   final VoidCallback onRegisterActivity;
   final VoidCallback onSuggestApproach;
+  final VoidCallback? onShowRecommendations;
 
   @override
   Widget build(BuildContext context) {
@@ -478,6 +532,14 @@ class _QuickActions extends StatelessWidget {
           semanticLabel: 'Sugerir abordagem comercial com IA',
           onPressed: onSuggestApproach,
         ),
+        if (onShowRecommendations != null)
+          AppButton(
+            label: 'Recomendações',
+            leadingIcon: Icons.recommend_outlined,
+            variant: AppButtonVariant.secondary,
+            semanticLabel: 'Ver recomendações de produtos para este cliente',
+            onPressed: onShowRecommendations,
+          ),
       ],
     );
   }
@@ -526,6 +588,41 @@ Future<void> _showApproachSuggestionSheet(
             ),
           );
         },
+      ),
+    ),
+  );
+}
+
+/// Opens TASK-190's "Recomendações de produtos" sheet, scoped to [customer]
+/// (`ProductRecommendationScopeType.customer`) — same
+/// "fresh bloc per sheet open" shape as [_showApproachSuggestionSheet].
+Future<void> _showProductRecommendationsSheet(
+  BuildContext context, {
+  required String organizationId,
+  required String userId,
+  required Customer customer,
+  required ProductRecommendationsBloc Function() createBloc,
+}) {
+  return AppBottomSheet.show<void>(
+    context: context,
+    title: 'Recomendações de produtos',
+    contentKey: const Key('product-recommendations-sheet'),
+    builder: (sheetContext) => BlocProvider<ProductRecommendationsBloc>(
+      create: (_) => createBloc()
+        ..add(
+          ProductRecommendationsRequested(
+            organizationId: organizationId,
+            companyId: customer.companyId,
+            userId: userId,
+            scopeType: ProductRecommendationScopeType.customer,
+            scopeId: customer.id,
+          ),
+        ),
+      child: Padding(
+        padding: const EdgeInsets.all(AppSpacing.spacing16),
+        child: ProductRecommendationsSection(
+          title: 'Recomendado para ${customer.displayName}',
+        ),
       ),
     ),
   );

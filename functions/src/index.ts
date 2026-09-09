@@ -50,6 +50,7 @@ export {
   calculateDemandForecasts,
   evaluateDemandForecastAccuracy,
 } from './demand-forecast';
+export { calculateProductRecommendations } from './recommendations';
 export {
   recomputeSalesDailyOnOrderWrite,
   recomputeMonthlyAggregates,

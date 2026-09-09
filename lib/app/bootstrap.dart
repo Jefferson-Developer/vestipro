@@ -49,6 +49,7 @@ import '../features/orders/orders.dart';
 import '../features/organizations/organizations.dart';
 import '../features/products/products.dart';
 import '../features/privacy/privacy.dart';
+import '../features/product_recommendations/product_recommendations.dart';
 import '../features/replenishment/replenishment.dart';
 import '../features/reports/reports.dart';
 import '../core/sync/sync.dart';
@@ -919,6 +920,15 @@ class VestiProApp extends StatelessWidget {
                 organizationId: orgId,
                 productId: productId,
                 createBloc: () => getIt<ProductDetailBloc>(),
+                userId: getIt<AuthRepository>().currentUser?.uid,
+                createRecommendationsBloc: () =>
+                    getIt<ProductRecommendationsBloc>(),
+                onRecommendationTap: (recommendedProductId) => context.go(
+                  ProductDetailRoute(
+                    orgId: orgId,
+                    productId: recommendedProductId,
+                  ).location,
+                ),
               ),
           customerFormPageBuilder: (context, orgId, companyId) =>
               _withConnectivityIndicator(
@@ -1268,6 +1278,8 @@ class VestiProApp extends StatelessWidget {
                 createBloc: () => getIt<CustomerDetailBloc>(),
                 createApproachSuggestionCubit: () =>
                     getIt<ApproachSuggestionCubit>(),
+                createProductRecommendationsBloc: () =>
+                    getIt<ProductRecommendationsBloc>(),
               ),
           loginPageBuilder: (context) =>
               LoginPage(createBloc: () => getIt<LoginBloc>()),

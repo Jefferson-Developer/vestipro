@@ -1167,6 +1167,20 @@ import '../features/product_import/domain/usecases/watch_product_import_job_use_
     as _i374;
 import '../features/product_import/presentation/bloc/product_import_bloc.dart'
     as _i752;
+import '../features/product_recommendations/data/datasources/firestore_product_recommendation_data_source.dart'
+    as _i933;
+import '../features/product_recommendations/data/datasources/product_recommendation_data_source.dart'
+    as _i619;
+import '../features/product_recommendations/data/mappers/product_recommendation_mapper.dart'
+    as _i609;
+import '../features/product_recommendations/data/repositories/product_recommendation_repository_impl.dart'
+    as _i548;
+import '../features/product_recommendations/domain/repositories/product_recommendation_repository.dart'
+    as _i1022;
+import '../features/product_recommendations/domain/usecases/get_product_recommendations_use_case.dart'
+    as _i78;
+import '../features/product_recommendations/presentation/bloc/product_recommendations_bloc.dart'
+    as _i261;
 import '../features/products/data/datasources/drift_product_local_search_index_data_source.dart'
     as _i74;
 import '../features/products/data/datasources/firestore_product_remote_search_data_source.dart'
@@ -1823,6 +1837,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i888.XlsxProductImportFileParser>(
       () => const _i888.XlsxProductImportFileParser(),
+    );
+    gh.lazySingleton<_i609.ProductRecommendationMapper>(
+      () => const _i609.ProductRecommendationMapper(),
     );
     gh.lazySingleton<_i325.ProductFormDraftMapper>(
       () => const _i325.ProductFormDraftMapper(),
@@ -2937,6 +2954,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
+    gh.lazySingleton<_i619.ProductRecommendationDataSource>(
+      () => _i933.FirestoreProductRecommendationDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.lazySingleton<_i42.ProductLocalSearchIndexDataSource>(
       () => _i74.DriftProductLocalSearchIndexDataSource(
         gh<_i658.AppDatabase>(),
@@ -3048,6 +3070,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i139.CheckInVisitUseCase(
         gh<_i205.RegisterCrmActivityUseCase>(),
         gh<_i809.VisitCheckInLocationService>(),
+      ),
+    );
+    gh.lazySingleton<_i1022.ProductRecommendationRepository>(
+      () => _i548.ProductRecommendationRepositoryImpl(
+        dataSource: gh<_i619.ProductRecommendationDataSource>(),
+        mapper: gh<_i609.ProductRecommendationMapper>(),
       ),
     );
     gh.lazySingleton<_i164.SsoRepository>(
@@ -3337,6 +3365,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i375.BranchRepositoryImpl(
         dataSource: gh<_i526.BranchDataSource>(),
         mapper: gh<_i964.BranchMapper>(),
+      ),
+    );
+    gh.factory<_i78.GetProductRecommendationsUseCase>(
+      () => _i78.GetProductRecommendationsUseCase(
+        gh<_i1022.ProductRecommendationRepository>(),
+        gh<_i47.PermissionService>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i15.OrderProductAdditionCubit>(
@@ -3660,6 +3695,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i876.TargetRepository>(),
         gh<_i47.PermissionService>(),
         gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i261.ProductRecommendationsBloc>(
+      () => _i261.ProductRecommendationsBloc(
+        getRecommendations: gh<_i78.GetProductRecommendationsUseCase>(),
       ),
     );
     gh.factory<_i899.LoadCustomerDashboardRankingUseCase>(

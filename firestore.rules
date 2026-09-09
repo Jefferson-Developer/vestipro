@@ -202,7 +202,7 @@ service cloud.firestore {
             isSalesRep(organizationId)
             && resource.data.primarySalesRepId == request.auth.uid
           ))
-        );
+        ));
     }
 
     function canListCustomers(organizationId) {
@@ -215,6 +215,38 @@ service cloud.firestore {
             || (
               isSalesRep(organizationId)
               && resource.data.primarySalesRepId == request.auth.uid
+            )
+          )
+        );
+    }
+
+    // `productRecommendations` (TASK-190) denormalizes the exact same
+    // `primarySalesRepId`/`teamId` visibility fields onto every
+    // `scopeType: 'customer'` document (never onto `product`/`segment`
+    // documents, which carry no customer data at all) so this rule can reuse
+    // `managerCanReadCustomer` unchanged instead of a second `get()` lookup
+    // of the referenced customer.
+    function validRecommendationCustomerVisibilityPayload() {
+      return resource.data.keys().hasAll(['primarySalesRepId', 'teamId'])
+        && resource.data.primarySalesRepId is string
+        && resource.data.primarySalesRepId.size() > 0
+        && resource.data.teamId is string
+        && resource.data.teamId.size() > 0;
+    }
+
+    function canReadProductRecommendation(organizationId) {
+      return resource.data.organizationId == organizationId
+        && (
+          resource.data.scopeType != 'customer'
+          ? isActiveMember(organizationId)
+          : (
+            validRecommendationCustomerVisibilityPayload() && (
+              isOwnerOrAdmin(organizationId)
+              || managerCanReadCustomer(organizationId)
+              || (
+                isSalesRep(organizationId)
+                && resource.data.primarySalesRepId == request.auth.uid
+              )
             )
           )
         );
@@ -1509,6 +1541,26 @@ service cloud.firestore {
       match /demandForecastModelStats/{modelVersion} {
         allow get, list: if hasCapability(organizationId, 'report.viewSensitive')
           || hasCapability(organizationId, 'inventory.adjust');
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/productRecommendations/{docId}
+      // (TASK-190 — recomendação de produtos baseada em comportamento,
+      // EPIC-28)
+      //
+      // One document per `{companyId}_{scopeType}_{scopeId}`, always
+      // server-computed by the weekly `calculateProductRecommendations`
+      // Cloud Function, never written by the client. `scopeType: 'product'`/
+      // `'segment'` carry no customer data (readable by any active member,
+      // same as `products` above); `scopeType: 'customer'` carries a
+      // specific customer's purchase-derived recommendation and is gated by
+      // the exact same carteira-visibility rule as the `customers`
+      // collection itself (`canReadProductRecommendation`, above).
+      // -------------------------------------------------------------------
+
+      match /productRecommendations/{recommendationId} {
+        allow get, list: if canReadProductRecommendation(organizationId);
         allow create, update, delete: if false;
       }
 

@@ -99,6 +99,9 @@ void main() {
           'approach_suggestion_generation_failed',
           'daily_rep_summary_viewed',
           'daily_rep_summary_load_failed',
+          'report_explanation_generated',
+          'report_explanation_generation_failed',
+          'product_recommendations_viewed',
         ]),
       );
 

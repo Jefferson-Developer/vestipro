@@ -294,6 +294,15 @@ final class AnalyticsEvents {
   static const String reportExplanationGenerationFailed =
       'report_explanation_generation_failed';
 
+  /// Logged by `GetProductRecommendationsUseCase` (TASK-190, EPIC-28)
+  /// whenever a `getRecommendation` call succeeds (including when no
+  /// recommendation has ever been generated yet for the scope) —
+  /// `scope_type`/`scope_id`/`fallback_applied`/`insufficient_data` are
+  /// carried as parameters, never the recommended product names/ids
+  /// themselves.
+  static const String productRecommendationsViewed =
+      'product_recommendations_viewed';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -392,5 +401,6 @@ final class AnalyticsEvents {
     dailyRepSummaryLoadFailed,
     reportExplanationGenerated,
     reportExplanationGenerationFailed,
+    productRecommendationsViewed,
   ];
 }

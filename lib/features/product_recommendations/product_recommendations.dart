@@ -1,0 +1,12 @@
+export 'data/dtos/product_recommendation_dto.dart';
+export 'data/mappers/product_recommendation_mapper.dart';
+export 'domain/entities/product_recommendation.dart';
+export 'domain/entities/product_recommendation_item.dart';
+export 'domain/repositories/product_recommendation_repository.dart';
+export 'domain/usecases/get_product_recommendations_use_case.dart';
+export 'domain/value_objects/product_recommendation_reason_code.dart';
+export 'domain/value_objects/product_recommendation_scope_type.dart';
+export 'presentation/bloc/product_recommendations_bloc.dart';
+export 'presentation/bloc/product_recommendations_event.dart';
+export 'presentation/bloc/product_recommendations_state.dart';
+export 'presentation/widgets/product_recommendations_section.dart';
