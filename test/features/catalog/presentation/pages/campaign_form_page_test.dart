@@ -2,9 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:mocktail/mocktail.dart';
 import 'package:network_image_mock/network_image_mock.dart';
+import 'package:vestipro/core/analytics/analytics.dart';
+import 'package:vestipro/core/design_system/design_system.dart';
 import 'package:vestipro/core/permissions/permissions.dart';
 import 'package:vestipro/core/storage/storage.dart';
 import 'package:vestipro/core/utils/utils.dart';
+import 'package:vestipro/features/campaign_assist/campaign_assist.dart';
 import 'package:vestipro/features/catalog/catalog.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
 import 'package:vestipro/features/products/products.dart';
@@ -15,6 +18,22 @@ import '../../catalog_test_fakes.dart';
 class _MockMembershipRepository extends Mock implements MembershipRepository {}
 
 class _StubStorageDataSource extends Fake implements StorageDataSource {}
+
+class _FakeCampaignAssistRepository implements CampaignAssistRepository {
+  _FakeCampaignAssistRepository(this._draft);
+
+  final CampaignCreationDraft _draft;
+
+  @override
+  Future<AppResult<CampaignCreationDraft>> generate({
+    required String organizationId,
+    required List<String> productIds,
+    required String audienceDescription,
+    required String tone,
+    DateTime? startAt,
+    DateTime? endAt,
+  }) async => AppSuccess<CampaignCreationDraft>(_draft);
+}
 
 class _ThrowingProductSearchRepository implements ProductSearchRepository {
   @override
@@ -260,5 +279,119 @@ void main() {
         'Verão em Movimento',
       );
     });
+
+    testWidgets(
+      'hides "Gerar sugestão com IA" when no cubit factory is supplied',
+      (tester) async {
+        when(
+          () => membershipRepository.getByUser(
+            organizationId: 'org-1',
+            userId: 'current-user',
+          ),
+        ).thenAnswer((_) async => AppSuccess<Membership>(ownerMembership()));
+
+        await pumpApp(tester, buildPage());
+        await tester.pumpAndSettle();
+
+        expect(find.text('Gerar sugestão com IA'), findsNothing);
+      },
+    );
+
+    testWidgets(
+      'generates a draft with IA and fills title/subtitle/description on '
+      '"Usar sugestão"',
+      (tester) async {
+        when(
+          () => membershipRepository.getByUser(
+            organizationId: 'org-1',
+            userId: 'current-user',
+          ),
+        ).thenAnswer((_) async => AppSuccess<Membership>(ownerMembership()));
+
+        final draft = CampaignCreationDraft(
+          title: 'Verão em Movimento',
+          subtitle: 'Leveza para a nova estação',
+          description: 'Uma narrativa editorial gerada por IA.',
+          citedProductIds: const <String>[],
+          generatedAt: DateTime.utc(2026, 9, 7, 10),
+          expiresAt: DateTime.utc(2026, 9, 7, 11),
+          fromCache: false,
+        );
+
+        await pumpApp(
+          tester,
+          CampaignFormPage(
+            organizationId: 'org-1',
+            userId: 'current-user',
+            permissionService: permissionService,
+            createBloc: () => CampaignFormBloc(
+              storage: _StubStorageDataSource(),
+              createCampaign: CreateCampaignUseCase(campaignRepository),
+              updateCampaign: UpdateCampaignUseCase(campaignRepository),
+              listRelatedProducts: ListCampaignRelatedProductsUseCase(
+                productRepository,
+              ),
+            ),
+            createProductSearchBloc: () => ProductSearchBloc(
+              searchProducts: SearchProductsUseCase(
+                _ThrowingProductSearchRepository(),
+              ),
+              getVariantAvailability: GetVariantAvailabilityUseCase(
+                _ThrowingVariantAvailabilityRepository(),
+              ),
+            ),
+            createCampaignAssistCubit: () => CampaignAssistCubit(
+              GenerateCampaignCreationDraftUseCase(
+                _FakeCampaignAssistRepository(draft),
+                FakeAnalyticsService(),
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.tap(find.text('Gerar sugestão com IA'));
+        await tester.pumpAndSettle();
+
+        final sheetContent = find.byKey(const Key('campaign-assist-sheet'));
+        final sheetFields = find.descendant(
+          of: sheetContent,
+          matching: find.byType(AppTextField),
+        );
+
+        await tester.enterText(
+          sheetFields.at(0),
+          'Clientes urbanos que buscam moda casual premium',
+        );
+        await tester.enterText(sheetFields.at(1), 'sofisticado e aspiracional');
+        await tester.pump();
+        await tester.tap(
+          find.descendant(
+            of: sheetContent,
+            matching: find.text('Gerar sugestão'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(
+          find.descendant(
+            of: sheetContent,
+            matching: find.text('Verão em Movimento'),
+          ),
+          findsOneWidget,
+        );
+
+        await tester.tap(
+          find.descendant(
+            of: sheetContent,
+            matching: find.text('Usar sugestão'),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        expect(find.text('Gerar sugestão com IA'), findsOneWidget);
+        expect(find.text('Verão em Movimento'), findsOneWidget);
+      },
+    );
   });
 }

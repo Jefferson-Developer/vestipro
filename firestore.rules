@@ -1329,6 +1329,31 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/campaignAssistDrafts/{cacheKey}
+      // (TASK-192, EPIC-28 — IA generativa: criação assistida de
+      // coleção/campanha)
+      // -------------------------------------------------------------------
+      //
+      // Same "server owns every write, deny-all is not just the implicit
+      // default" shape as `walletSummaries`/`approachSuggestions`/
+      // `dailyRepSummaries`/`reportExplanations`/`productImageEmbeddings`
+      // above: every entry is exclusively written by
+      // `assistCampaignCreation` (Admin SDK, bypasses these Rules) — a
+      // client never reads this collection directly; the only way to obtain
+      // a campaign-creation draft is `assistCampaignCreation`'s own
+      // response, which already re-checks the caller's active Membership
+      // and role (OWNER/ADMIN only, same scope as `Capability.catalogManage`)
+      // on every call before generating or reusing anything, and never
+      // returns a draft that names a product outside the ids the caller
+      // itself supplied and that really exist in this organization's own
+      // `products` collection.
+      // -------------------------------------------------------------------
+
+      match /campaignAssistDrafts/{cacheKey} {
+        allow read, write: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/webhooks/{webhookId}
       // organizations/{organizationId}/webhookSecrets/{webhookId}
       // organizations/{organizationId}/webhookDeliveries/{deliveryId}

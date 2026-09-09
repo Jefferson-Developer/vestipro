@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../campaign_assist/presentation/cubit/campaign_assist_cubit.dart';
 import '../../domain/entities/catalog_campaign.dart';
 import '../../../products/presentation/bloc/product_search_bloc.dart';
 import '../bloc/campaign_form_bloc.dart';
@@ -26,6 +27,7 @@ class CampaignsPage extends StatelessWidget {
     required this.createBloc,
     required this.createFormBloc,
     required this.createProductSearchBloc,
+    this.createCampaignAssistCubit,
     super.key,
   });
 
@@ -35,6 +37,11 @@ class CampaignsPage extends StatelessWidget {
   final CampaignListBloc Function() createBloc;
   final CampaignFormBloc Function() createFormBloc;
   final ProductSearchBloc Function() createProductSearchBloc;
+
+  /// Factory for TASK-192's "Gerar sugestão com IA" sheet cubit, threaded
+  /// through to `CampaignFormPage`. Optional: when `null`, the feature is
+  /// simply not shown (see `CampaignFormPage.createCampaignAssistCubit`).
+  final CampaignAssistCubit Function()? createCampaignAssistCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -61,6 +68,7 @@ class CampaignsPage extends StatelessWidget {
             permissionService: permissionService,
             createFormBloc: createFormBloc,
             createProductSearchBloc: createProductSearchBloc,
+            createCampaignAssistCubit: createCampaignAssistCubit,
           ),
         );
       },
@@ -75,6 +83,7 @@ class _CampaignListView extends StatelessWidget {
     required this.permissionService,
     required this.createFormBloc,
     required this.createProductSearchBloc,
+    this.createCampaignAssistCubit,
   });
 
   final String organizationId;
@@ -82,6 +91,7 @@ class _CampaignListView extends StatelessWidget {
   final PermissionService permissionService;
   final CampaignFormBloc Function() createFormBloc;
   final ProductSearchBloc Function() createProductSearchBloc;
+  final CampaignAssistCubit Function()? createCampaignAssistCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -239,6 +249,7 @@ class _CampaignListView extends StatelessWidget {
       permissionService: permissionService,
       createBloc: createFormBloc,
       createProductSearchBloc: createProductSearchBloc,
+      createCampaignAssistCubit: createCampaignAssistCubit,
       initialCampaign: campaign,
     );
     if (saved != null && context.mounted) {

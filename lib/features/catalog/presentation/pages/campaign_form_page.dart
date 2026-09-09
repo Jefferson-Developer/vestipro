@@ -1,3 +1,5 @@
+import 'dart:async' show unawaited;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:image_picker/image_picker.dart';
@@ -5,6 +7,8 @@ import 'package:image_picker/image_picker.dart';
 import '../../../../core/design_system/design_system.dart';
 import '../../../../core/navigation/widgets/forbidden_page.dart';
 import '../../../../core/permissions/permissions.dart';
+import '../../../campaign_assist/presentation/cubit/campaign_assist_cubit.dart';
+import '../../../campaign_assist/presentation/widgets/campaign_assist_sheet.dart';
 import '../../../products/domain/entities/product.dart';
 import '../../../products/presentation/bloc/product_search_bloc.dart';
 import '../../../products/presentation/pages/product_search_page.dart';
@@ -30,6 +34,7 @@ class CampaignFormPage extends StatelessWidget {
     required this.permissionService,
     required this.createBloc,
     required this.createProductSearchBloc,
+    this.createCampaignAssistCubit,
     this.initialCampaign,
     super.key,
   });
@@ -39,6 +44,14 @@ class CampaignFormPage extends StatelessWidget {
   final PermissionService permissionService;
   final CampaignFormBloc Function() createBloc;
   final ProductSearchBloc Function() createProductSearchBloc;
+
+  /// Factory for TASK-192's "Gerar sugestão com IA" sheet cubit — a fresh
+  /// instance is created every time the sheet opens (mirrors
+  /// `CustomerDetailPage.createApproachSuggestionCubit`, TASK-187).
+  /// Optional: when `null`, the "Gerar sugestão com IA" action is not shown
+  /// at all (keeps every existing caller/test of this page working
+  /// unchanged without the feature).
+  final CampaignAssistCubit Function()? createCampaignAssistCubit;
   final CatalogCampaign? initialCampaign;
 
   static Future<CatalogCampaign?> push({
@@ -48,6 +61,7 @@ class CampaignFormPage extends StatelessWidget {
     required PermissionService permissionService,
     required CampaignFormBloc Function() createBloc,
     required ProductSearchBloc Function() createProductSearchBloc,
+    CampaignAssistCubit Function()? createCampaignAssistCubit,
     CatalogCampaign? initialCampaign,
   }) {
     return Navigator.of(context).push<CatalogCampaign>(
@@ -58,6 +72,7 @@ class CampaignFormPage extends StatelessWidget {
           permissionService: permissionService,
           createBloc: createBloc,
           createProductSearchBloc: createProductSearchBloc,
+          createCampaignAssistCubit: createCampaignAssistCubit,
           initialCampaign: initialCampaign,
         ),
       ),
@@ -89,6 +104,7 @@ class CampaignFormPage extends StatelessWidget {
                   : 'Editar campanha',
               content: _CampaignFormView(
                 createProductSearchBloc: createProductSearchBloc,
+                createCampaignAssistCubit: createCampaignAssistCubit,
               ),
             ),
           ),
@@ -99,9 +115,13 @@ class CampaignFormPage extends StatelessWidget {
 }
 
 class _CampaignFormView extends StatelessWidget {
-  const _CampaignFormView({required this.createProductSearchBloc});
+  const _CampaignFormView({
+    required this.createProductSearchBloc,
+    this.createCampaignAssistCubit,
+  });
 
   final ProductSearchBloc Function() createProductSearchBloc;
+  final CampaignAssistCubit Function()? createCampaignAssistCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -141,6 +161,27 @@ class _CampaignFormView extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               mainAxisSize: MainAxisSize.min,
               children: <Widget>[
+                if (createCampaignAssistCubit != null) ...<Widget>[
+                  Align(
+                    alignment: Alignment.centerLeft,
+                    child: AppButton(
+                      label: 'Gerar sugestão com IA',
+                      leadingIcon: Icons.auto_awesome,
+                      variant: AppButtonVariant.secondary,
+                      isDisabled: state.isSubmitting,
+                      onPressed: state.isSubmitting
+                          ? null
+                          : () => unawaited(
+                              _showCampaignAssistSheet(
+                                context,
+                                state: state,
+                                createCubit: createCampaignAssistCubit!,
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: AppSpacing.spacing16),
+                ],
                 _CampaignTitleField(state: state),
                 const SizedBox(height: AppSpacing.spacing16),
                 _CampaignSubtitleField(state: state),
@@ -692,4 +733,48 @@ class _CampaignRelatedProducts extends StatelessWidget {
       bloc.add(CampaignFormRelatedProductAdded(selected));
     }
   }
+}
+
+/// Opens TASK-192's "Gerar sugestão com IA" sheet, pre-fed with what is
+/// already selected in the form itself (produtos relacionados, período) —
+/// never re-asks for those. The `CampaignFormBloc` is captured from
+/// [context] *before* the sheet opens (same "capture the ancestor provider,
+/// use it inside a nested route's callback" shape
+/// `CustomerDetailPage._showApproachSuggestionSheet`, TASK-187, already
+/// establishes) since the sheet's own `BuildContext` sits in a separate
+/// route pushed onto the Navigator, not as a literal widget-tree descendant
+/// of `BlocProvider<CampaignFormBloc>`.
+Future<void> _showCampaignAssistSheet(
+  BuildContext context, {
+  required CampaignFormState state,
+  required CampaignAssistCubit Function() createCubit,
+}) {
+  final bloc = context.read<CampaignFormBloc>();
+  return AppBottomSheet.show<void>(
+    context: context,
+    title: 'Gerar sugestão com IA',
+    contentKey: const Key('campaign-assist-sheet'),
+    builder: (sheetContext) => BlocProvider<CampaignAssistCubit>(
+      create: (_) => createCubit(),
+      child: CampaignAssistSheet(
+        organizationId: state.organizationId,
+        productIds: state.relatedProductIds,
+        productCount: state.relatedProducts.length,
+        startAt: state.startAt,
+        endAt: state.endAt,
+        onUseSuggestion:
+            ({
+              required String title,
+              required String subtitle,
+              required String description,
+            }) {
+              bloc
+                ..add(CampaignFormTitleChanged(title))
+                ..add(CampaignFormSubtitleChanged(subtitle))
+                ..add(CampaignFormDescriptionChanged(description));
+              Navigator.of(sheetContext).pop();
+            },
+      ),
+    ),
+  );
 }

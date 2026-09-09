@@ -220,6 +220,14 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart'
 import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
+import '../features/campaign_assist/data/repositories/cloud_functions_campaign_assist_repository.dart'
+    as _i800;
+import '../features/campaign_assist/domain/repositories/campaign_assist_repository.dart'
+    as _i804;
+import '../features/campaign_assist/domain/usecases/generate_campaign_creation_draft_use_case.dart'
+    as _i579;
+import '../features/campaign_assist/presentation/cubit/campaign_assist_cubit.dart'
+    as _i515;
 import '../features/cart_share/data/repositories/cloud_functions_cart_share_repository.dart'
     as _i200;
 import '../features/cart_share/domain/repositories/cart_share_repository.dart'
@@ -3461,6 +3469,11 @@ extension GetItInjectableX on _i174.GetIt {
         deleteSeason: gh<_i389.DeleteSeasonUseCase>(),
       ),
     );
+    gh.lazySingleton<_i804.CampaignAssistRepository>(
+      () => _i800.CloudFunctionsCampaignAssistRepository(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i592.OrderApprovalRepository>(
       () => _i455.OrderApprovalRepositoryImpl(
         dataSource: gh<_i1039.OrderApprovalDataSource>(),
@@ -4190,6 +4203,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i579.GenerateCampaignCreationDraftUseCase>(
+      () => _i579.GenerateCampaignCreationDraftUseCase(
+        gh<_i804.CampaignAssistRepository>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i530.ResolveOrderDraftDefaultsUseCase>(
       () => _i530.ResolveOrderDraftDefaultsUseCase(
         gh<_i265.ListBranchesByCompanyUseCase>(),
@@ -4215,6 +4234,11 @@ extension GetItInjectableX on _i174.GetIt {
         listProductColors: gh<_i789.ListProductColorsUseCase>(),
         listSizeGridTemplates: gh<_i646.ListSizeGridTemplatesUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i515.CampaignAssistCubit>(
+      () => _i515.CampaignAssistCubit(
+        gh<_i579.GenerateCampaignCreationDraftUseCase>(),
       ),
     );
     gh.factory<_i571.DemandForecastBloc>(

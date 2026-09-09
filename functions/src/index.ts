@@ -120,6 +120,7 @@ export {
   indexProductImageEmbedding,
   removeProductImageEmbeddingOnDelete,
 } from './product_recognition';
+export { assistCampaignCreation } from './campaign_assist';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

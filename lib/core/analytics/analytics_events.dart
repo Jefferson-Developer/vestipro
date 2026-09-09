@@ -325,6 +325,22 @@ final class AnalyticsEvents {
   static const String productRecognitionFeedbackSubmitted =
       'product_recognition_feedback_submitted';
 
+  /// Logged by `GenerateCampaignCreationDraftUseCase` (TASK-192, EPIC-28)
+  /// whenever an `assistCampaignCreation` call successfully returns a draft
+  /// (fresh or from cache) — `product_count`/`from_cache` are carried as
+  /// parameters, never the generated title/subtitle/description text
+  /// itself. Never logged for a failed/rejected generation (see
+  /// `campaignAssistDraftGenerationFailed`).
+  static const String campaignAssistDraftGenerated =
+      'campaign_assist_draft_generated';
+
+  /// Logged by `GenerateCampaignCreationDraftUseCase` (TASK-192, EPIC-28)
+  /// whenever an `assistCampaignCreation` call fails (provider unavailable,
+  /// validation rejected, rate-limited) — `failure_code` is carried as a
+  /// parameter.
+  static const String campaignAssistDraftGenerationFailed =
+      'campaign_assist_draft_generation_failed';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -427,5 +443,7 @@ final class AnalyticsEvents {
     productRecognitionCompleted,
     productRecognitionFailed,
     productRecognitionFeedbackSubmitted,
+    campaignAssistDraftGenerated,
+    campaignAssistDraftGenerationFailed,
   ];
 }
