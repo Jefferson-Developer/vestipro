@@ -87,6 +87,10 @@ void main() {
         find.text('Desconto manual de 12.00% excede o limite.'),
         findsOneWidget,
       );
+      expect(
+        find.text('Pendente: Desconto manual de 12.00% excede o limite.'),
+        findsOneWidget,
+      );
     });
 
     testWidgets(

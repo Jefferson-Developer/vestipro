@@ -89,7 +89,7 @@ async function seedOrderUnderReview(
   companyId: string,
   orderId: string,
   sellerId: string,
-  overrides: { status?: string } = {},
+  overrides: { status?: string; approvalChain?: Record<string, unknown> } = {},
 ): Promise<void> {
   const now = Timestamp.now();
   await db
@@ -155,6 +155,7 @@ async function seedOrderUnderReview(
       approvedAt: null,
       rejectionReason: null,
       pricingApprovalRequired: true,
+      approvalChain: overrides.approvalChain ?? null,
       idempotencyKey: orderId,
       createdAt: now,
       createdBy: sellerId,
@@ -422,4 +423,126 @@ describe('decideOrderApproval', () => {
       auditSnapshot.docs.filter((doc) => doc.data().action === 'order.approved'),
     ).toHaveLength(1);
   });
+
+  it('advances a multilevel approval chain and notifies the next approver without final approval', async () => {
+    await seedOrganization('org-1');
+    await seedMember('org-1', 'manager-1', 'SALES_MANAGER', ['team-1']);
+    await seedMember('org-1', 'admin-1', 'ADMIN');
+    await seedMember('org-1', 'rep-1', 'SALES_REP', ['team-1']);
+    await seedOrderUnderReview('org-1', 'company-1', 'order-1', 'rep-1', {
+      approvalChain: _chain(),
+    });
+    const wrapped = testEnv.wrap(decideOrderApproval);
+
+    const result = (await wrapped(
+      buildRequest(
+        {
+          organizationId: 'org-1',
+          companyId: 'company-1',
+          orderId: 'order-1',
+          decision: 'approved',
+        },
+        authFor('manager-1'),
+      ),
+    )) as DecideOrderApprovalResponse;
+
+    expect(result.approvalChainStatus).toBe('pending');
+    expect(result.currentLevelIndex).toBe(1);
+    expect(result.nextApproverRole).toBe('ADMIN');
+
+    const orderData = (await db
+      .collection('organizations')
+      .doc('org-1')
+      .collection('orders')
+      .doc('order-1')
+      .get()).data();
+    expect(orderData?.status).toBe('under_review');
+    expect(orderData?.approvedBy).toBeNull();
+    expect(orderData?.approvalChain.currentLevelIndex).toBe(1);
+    expect(orderData?.approvalChain.decisions).toHaveLength(1);
+
+    const notifications = await db
+      .collection('organizations')
+      .doc('org-1')
+      .collection('notifications')
+      .get();
+    expect(notifications.docs.map((doc) => doc.data().userId)).toContain('admin-1');
+  });
+
+  it('blocks a user whose role is not the current multilevel approval role', async () => {
+    await seedOrganization('org-1');
+    await seedMember('org-1', 'admin-1', 'ADMIN');
+    await seedMember('org-1', 'finance-1', 'FINANCE');
+    await seedMember('org-1', 'rep-1', 'SALES_REP', ['team-1']);
+    await seedOrderUnderReview('org-1', 'company-1', 'order-1', 'rep-1', {
+      approvalChain: _chain({ firstRole: 'SALES_MANAGER' }),
+    });
+    const wrapped = testEnv.wrap(decideOrderApproval);
+
+    await expect(
+      wrapped(
+        buildRequest(
+          {
+            organizationId: 'org-1',
+            companyId: 'company-1',
+            orderId: 'order-1',
+            decision: 'approved',
+          },
+          authFor('finance-1'),
+        ),
+      ),
+    ).rejects.toMatchObject({ code: 'permission-denied' });
+  });
+
+  it('rejects at an intermediate multilevel approval level and closes the chain', async () => {
+    await seedOrganization('org-1');
+    await seedMember('org-1', 'manager-1', 'SALES_MANAGER', ['team-1']);
+    await seedMember('org-1', 'rep-1', 'SALES_REP', ['team-1']);
+    await seedOrderUnderReview('org-1', 'company-1', 'order-1', 'rep-1', {
+      approvalChain: _chain(),
+    });
+    const wrapped = testEnv.wrap(decideOrderApproval);
+
+    const result = (await wrapped(
+      buildRequest(
+        {
+          organizationId: 'org-1',
+          companyId: 'company-1',
+          orderId: 'order-1',
+          decision: 'rejected',
+          reason: 'Margem insuficiente para a colecao.',
+        },
+        authFor('manager-1'),
+      ),
+    )) as DecideOrderApprovalResponse;
+
+    expect(result.status).toBe('rejected');
+    expect(result.approvalChainStatus).toBe('rejected');
+
+    const orderData = (await db
+      .collection('organizations')
+      .doc('org-1')
+      .collection('orders')
+      .doc('order-1')
+      .get()).data();
+    expect(orderData?.status).toBe('rejected');
+    expect(orderData?.approvalChain.status).toBe('rejected');
+    expect(orderData?.rejectionReason).toBe('Margem insuficiente para a colecao.');
+  });
 });
+
+function _chain({ firstRole = 'SALES_MANAGER' }: { firstRole?: string } = {}): Record<string, unknown> {
+  return {
+    policyId: 'approval-policy-1',
+    policyVersion: 1,
+    reason: 'Desconto manual de 18.00% excede a faixa gerencial.',
+    discountPercent: 18,
+    currentLevelIndex: 0,
+    status: 'pending',
+    levels: [
+      { index: 0, role: firstRole, label: 'Gestor direto' },
+      { index: 1, role: 'ADMIN', label: 'Diretoria comercial' },
+    ],
+    decisions: [],
+  };
+}

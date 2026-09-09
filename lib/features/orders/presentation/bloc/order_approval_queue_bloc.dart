@@ -142,15 +142,16 @@ final class OrderApprovalQueueBloc
     if (emit.isDone) return;
 
     switch (result) {
-      case AppSuccess<OrderApprovalDecisionResult>():
-        // A decided pedido is no longer `underReview` — it simply leaves the
-        // queue instead of a full page reload, same "optimistic removal"
-        // precedent `LeadListBloc` sets after disqualifying a lead.
+      case AppSuccess<OrderApprovalDecisionResult>(value: final decided):
+        // A multilevel approval can keep the pedido underReview for the next
+        // configured role; only terminal decisions leave the queue.
         emit(
           state.copyWith(
-            orders: state.orders
-                .where((order) => order.id != event.orderId)
-                .toList(growable: false),
+            orders: decided.keepsApprovalQueuePending
+                ? state.orders
+                : state.orders
+                      .where((order) => order.id != event.orderId)
+                      .toList(growable: false),
             clearDecidingOrderId: true,
             clearDecisionFailure: true,
           ),

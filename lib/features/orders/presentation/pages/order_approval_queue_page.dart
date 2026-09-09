@@ -143,6 +143,11 @@ class _OrderApprovalQueueContent extends StatelessWidget {
                     Text(order.approvalReason ?? '—'),
               ),
               AppDataColumn(
+                label: 'Cadeia',
+                cellBuilder: (context, order) =>
+                    _ApprovalChainSummary(order: order),
+              ),
+              AppDataColumn(
                 label: 'Enviado em',
                 cellBuilder: (context, order) =>
                     Text(_dateTimeLabel(order.createdAt)),
@@ -337,6 +342,54 @@ class _RejectReasonDialogState extends State<_RejectReasonDialog> {
         ),
       ),
     );
+  }
+}
+
+class _ApprovalChainSummary extends StatelessWidget {
+  const _ApprovalChainSummary({required this.order});
+
+  final Order order;
+
+  @override
+  Widget build(BuildContext context) {
+    final entries = order.statusHistory
+        .where(
+          (entry) => entry.reason != null && entry.reason!.trim().isNotEmpty,
+        )
+        .toList(growable: false);
+    if (entries.isEmpty) {
+      return Text(
+        'Aguardando primeiro nÃ­vel',
+        style: AppTypography.bodySmall.copyWith(color: context.colors.outline),
+      );
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: <Widget>[
+        for (final entry in entries.take(3))
+          Padding(
+            padding: const EdgeInsets.only(bottom: AppSpacing.spacing4),
+            child: Text(
+              _approvalEntryLabel(entry.newStatus.name, entry.reason!),
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+              style: AppTypography.bodySmall,
+            ),
+          ),
+      ],
+    );
+  }
+
+  String _approvalEntryLabel(String statusName, String reason) {
+    final status = switch (statusName) {
+      'underReview' => 'Pendente',
+      'approved' => 'Aprovado',
+      'rejected' => 'Rejeitado',
+      _ => 'Atualizado',
+    };
+    return '$status: $reason';
   }
 }
 

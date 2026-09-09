@@ -12,6 +12,9 @@ final class OrderApprovalDecisionResultDto {
     required this.approverId,
     required this.decidedAt,
     this.reason,
+    this.approvalChainStatus,
+    this.currentLevelIndex,
+    this.nextApproverRole,
   });
 
   factory OrderApprovalDecisionResultDto.fromJson(Map<String, dynamic> json) {
@@ -20,12 +23,18 @@ final class OrderApprovalDecisionResultDto {
     final approverId = json['approverId'];
     final decidedAt = json['decidedAt'];
     final reason = json['reason'];
+    final approvalChainStatus = json['approvalChainStatus'];
+    final currentLevelIndex = json['currentLevelIndex'];
+    final nextApproverRole = json['nextApproverRole'];
 
     if (orderId is! String ||
         status is! String ||
         approverId is! String ||
         decidedAt is! String ||
-        (reason != null && reason is! String)) {
+        (reason != null && reason is! String) ||
+        (approvalChainStatus != null && approvalChainStatus is! String) ||
+        (currentLevelIndex != null && currentLevelIndex is! int) ||
+        (nextApproverRole != null && nextApproverRole is! String)) {
       throw const ServerException(
         'Unexpected decideOrderApproval callable response shape.',
         code: 'invalid_order_approval_decision_response',
@@ -46,6 +55,9 @@ final class OrderApprovalDecisionResultDto {
       approverId: approverId,
       decidedAt: parsedDecidedAt,
       reason: reason as String?,
+      approvalChainStatus: approvalChainStatus as String?,
+      currentLevelIndex: currentLevelIndex as int?,
+      nextApproverRole: nextApproverRole as String?,
     );
   }
 
@@ -54,4 +66,7 @@ final class OrderApprovalDecisionResultDto {
   final String approverId;
   final DateTime decidedAt;
   final String? reason;
+  final String? approvalChainStatus;
+  final int? currentLevelIndex;
+  final String? nextApproverRole;
 }

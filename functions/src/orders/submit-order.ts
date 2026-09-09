@@ -32,6 +32,10 @@ import {
   optionalString,
 } from '../pricing/calculate-pricing';
 import { asInt, requirePositiveInteger } from '../inventory/stock-reservation-shared';
+import {
+  buildApprovalChainInstance,
+  enqueueApprovalNotifications,
+} from './approval-chain';
 
 /**
  * Only these roles may ever submit an order (TASK-101) — mirrors exactly
@@ -366,6 +370,9 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
       }
 
       // ---- availability (reads only — writes staged further below) ------
+      const approvalPolicySnapshots = await transaction.get(
+        organizationRef.collection('approvalPolicies'),
+      );
       const availability = await resolveItemAvailability(transaction, organizationRef, items);
 
       // ---- order number (transactional per-company sequence) ------------
@@ -373,15 +380,9 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
       const sequenceSnapshot = await transaction.get(sequenceRef);
       const nextSequence = asInt(sequenceSnapshot.data()?.lastValue) + 1;
       const orderNumber = formatOrderNumber(nextSequence);
+      const now = Timestamp.now();
 
       // ---- writes ---------------------------------------------------------
-      const now = Timestamp.now();
-      transaction.set(
-        sequenceRef,
-        { organizationId, companyId, lastValue: nextSequence, updatedAt: now, updatedBy: uid },
-        { merge: true },
-      );
-
       const responseItems = pricing.items.map((item, index) =>
         buildResponseItem(items[index]!, item),
       );
@@ -399,6 +400,32 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
       const approvalReason = portalApprovalRequired
         ? 'Pedido realizado pelo portal do cliente'
         : pricing.approvalRequired ? buildApprovalReason(pricing) : null;
+      const approvalChain = approvalReason
+        ? buildApprovalChainInstance(
+            approvalPolicySnapshots.docs.map((doc) => ({ id: doc.id, data: doc.data() })),
+            companyId,
+            pricing,
+            approvalReason,
+          )
+        : null;
+      const firstApprovalLevel = approvalChain?.levels[0];
+      if (initialStatus === 'under_review' && firstApprovalLevel) {
+        await enqueueApprovalNotifications(transaction, organizationRef, {
+          organizationId,
+          companyId,
+          orderId,
+          orderNumber,
+          level: firstApprovalLevel,
+          now,
+          actorId: uid,
+        });
+      }
+
+      transaction.set(
+        sequenceRef,
+        { organizationId, companyId, lastValue: nextSequence, updatedAt: now, updatedBy: uid },
+        { merge: true },
+      );
 
       const orderData: DocumentData = {
         organizationId,
@@ -450,6 +477,7 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
         approvedAt: null,
         rejectionReason: null,
         pricingApprovalRequired: pricing.approvalRequired || portalApprovalRequired,
+        approvalChain,
         submittedVia: portalApprovalRequired ? 'customer_portal' : 'internal',
         idempotencyKey: orderId,
         createdAt: now,

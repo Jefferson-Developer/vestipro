@@ -13,6 +13,9 @@ final class OrderApprovalDecisionResult {
     required this.approverId,
     required this.decidedAt,
     this.reason,
+    this.approvalChainStatus,
+    this.currentLevelIndex,
+    this.nextApproverRole,
   });
 
   final String orderId;
@@ -24,4 +27,9 @@ final class OrderApprovalDecisionResult {
   final String approverId;
   final DateTime decidedAt;
   final String? reason;
+  final String? approvalChainStatus;
+  final int? currentLevelIndex;
+  final String? nextApproverRole;
+
+  bool get keepsApprovalQueuePending => approvalChainStatus == 'pending';
 }

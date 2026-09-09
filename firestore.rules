@@ -960,6 +960,21 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/approvalPolicies/{policyId}
+      // (TASK-194) — approval-policy configuration is read by commercial
+      // governance roles and applied only by Cloud Functions. Client writes
+      // are denied so a seller cannot weaken levels/faixas from the app.
+      // -------------------------------------------------------------------
+
+      match /approvalPolicies/{policyId} {
+        allow get, list: if isOwnerOrAdmin(organizationId)
+          || isSalesManager(organizationId)
+          || hasCapability(organizationId, 'finance.manage');
+
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/orders/{orderId}
       // (TASK-102 visibility contract for the pedidos listing/tracking
       // screen — writes remain the exclusive concern of the `submitOrder`

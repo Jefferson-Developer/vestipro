@@ -23,6 +23,9 @@ final class OrderApprovalDecisionMapper {
       approverId: dto.approverId,
       decidedAt: dto.decidedAt,
       reason: dto.reason,
+      approvalChainStatus: dto.approvalChainStatus,
+      currentLevelIndex: dto.currentLevelIndex,
+      nextApproverRole: dto.nextApproverRole,
     );
   }
 }

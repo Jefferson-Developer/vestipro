@@ -13,6 +13,12 @@ import {
   resolveActorName,
 } from '../invites/invite-shared';
 import { optionalString } from '../pricing/calculate-pricing';
+import {
+  enqueueApprovalNotifications,
+  parseApprovalChain,
+  type ApprovalChainDecision,
+  type ApprovalChainInstance,
+} from './approval-chain';
 
 /**
  * Only these roles may ever decide a pedido's approval (TASK-103) — mirrors
@@ -47,6 +53,9 @@ export interface DecideOrderApprovalResponse {
   approverId: string;
   decidedAt: string;
   reason: string | null;
+  approvalChainStatus?: 'pending' | 'approved' | 'rejected';
+  currentLevelIndex?: number;
+  nextApproverRole?: string | null;
 }
 
 /**
@@ -164,6 +173,127 @@ export const decideOrderApproval = onCall<
     }
 
     const now = Timestamp.now();
+    const chain = parseApprovalChain(order.approvalChain);
+    if (chain) {
+      if (chain.status !== 'pending') {
+        throw new HttpsError(
+          'failed-precondition',
+          'Esta cadeia de aprovacao ja foi encerrada.',
+        );
+      }
+      const currentLevel = chain.levels[chain.currentLevelIndex];
+      if (!currentLevel) {
+        throw new HttpsError(
+          'failed-precondition',
+          'A cadeia de aprovacao nao possui nivel atual valido.',
+        );
+      }
+      if (
+        membership.roleName !== currentLevel.role &&
+        membership.roleName !== 'OWNER' &&
+        membership.roleName !== 'ADMIN'
+      ) {
+        throw new HttpsError(
+          'permission-denied',
+          'Seu perfil nao corresponde ao nivel atual de aprovacao.',
+        );
+      }
+
+      const chainDecision: ApprovalChainDecision = {
+        levelIndex: currentLevel.index,
+        role: currentLevel.role,
+        decision,
+        actorId: uid,
+        actorName,
+        reason: reason ?? null,
+        decidedAt: now,
+      };
+      const nextIndex = chain.currentLevelIndex + 1;
+      const nextLevel = decision === 'approved' ? chain.levels[nextIndex] : undefined;
+      const finalStatus: OrderApprovalDecisionValue | 'under_review' =
+        decision === 'rejected' || !nextLevel ? decision : 'under_review';
+      const nextChain: ApprovalChainInstance = {
+        ...chain,
+        status: finalStatus === 'under_review' ? 'pending' : decision,
+        currentLevelIndex: finalStatus === 'under_review' ? nextIndex : chain.currentLevelIndex,
+        decisions: [...chain.decisions, chainDecision],
+      };
+
+      if (nextLevel) {
+        await enqueueApprovalNotifications(transaction, organizationRef, {
+          organizationId,
+          companyId,
+          orderId,
+          orderNumber: typeof order.orderNumber === 'string' ? order.orderNumber : orderId,
+          level: nextLevel,
+          now,
+          actorId: uid,
+        });
+      }
+
+      const historyEntry = {
+        previousStatus: order.status,
+        newStatus: finalStatus,
+        changedAt: now,
+        actorId: uid,
+        reason: reason ?? `Nivel ${currentLevel.label} aprovado.`,
+        approvalLevelIndex: currentLevel.index,
+        approvalRole: currentLevel.role,
+      };
+      const updates: DocumentData = {
+        status: finalStatus,
+        approvalChain: nextChain,
+        statusHistory: FieldValue.arrayUnion(historyEntry),
+        updatedAt: now,
+        updatedBy: uid,
+        version: FieldValue.increment(1),
+      };
+      if (finalStatus === 'approved') {
+        updates.approvedBy = uid;
+        updates.approvedAt = now;
+        updates.rejectionReason = null;
+      } else if (finalStatus === 'rejected') {
+        updates.approvedBy = null;
+        updates.approvedAt = null;
+        updates.rejectionReason = reason;
+      }
+      transaction.update(orderRef, updates);
+
+      transaction.set(organizationRef.collection('auditLogs').doc(), {
+        organizationId,
+        actorUserId: uid,
+        actorName,
+        action: decision === 'approved'
+          ? 'order.approvalLevelApproved'
+          : 'order.approvalLevelRejected',
+        entityType: 'order',
+        entityId: orderId,
+        previousValue: {
+          status: order.status,
+          currentLevelIndex: chain.currentLevelIndex,
+        },
+        newValue: {
+          status: finalStatus,
+          currentLevelIndex: nextChain.currentLevelIndex,
+          approvalRole: currentLevel.role,
+          reason: reason ?? null,
+        },
+        timestamp: now,
+      });
+
+      return {
+        correlationId,
+        orderId,
+        status: finalStatus === 'under_review' ? 'approved' : finalStatus,
+        approverId: uid,
+        decidedAt: now.toDate().toISOString(),
+        reason: reason ?? null,
+        approvalChainStatus: nextChain.status,
+        currentLevelIndex: nextChain.currentLevelIndex,
+        nextApproverRole: nextLevel?.role ?? null,
+      };
+    }
+
     const historyEntry = {
       previousStatus: order.status,
       newStatus: decision,
