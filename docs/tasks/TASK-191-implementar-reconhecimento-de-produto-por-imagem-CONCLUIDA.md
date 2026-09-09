@@ -281,7 +281,7 @@ Não realizado nesta rodada — push não autorizado.
 
 ## Hash do commit
 
-Ver seção final da resposta do agente (obtido via `git log -1 --format="%H"` após o commit real).
+`f74f49afe28303280a66fa98864139a9895f2ad8`
 
 ## Branch
 
