@@ -53,7 +53,7 @@ dependencies:
   shared_preferences: ^2.5.5
   flutter_secure_storage: 10.0.0
   connectivity_plus: ^7.3.1
-  cached_network_image: ^3.4.1
+  cached_network_image: ^4.0.0
   flutter_svg: ^2.3.0
   # Pinned to match `flutter_localizations`' own transitive `intl` constraint
   # (TASK-174) — Flutter SDK's `flutter_localizations` requires exactly
