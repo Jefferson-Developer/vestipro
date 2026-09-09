@@ -49,6 +49,7 @@ class OrderDraftPage extends StatelessWidget {
     this.draftId,
     this.onContinueToProducts,
     this.onSubmitOrder,
+    this.onGenerateQuote,
     this.onShareCart,
     this.onSendWhatsApp,
     super.key,
@@ -102,6 +103,7 @@ class OrderDraftPage extends StatelessWidget {
   /// `null`-means-"not wired yet" precedent [onContinueToProducts] already
   /// sets for this screen.
   final Future<void> Function(Order order)? onSubmitOrder;
+  final Future<void> Function(Order order)? onGenerateQuote;
   final Future<void> Function(Order order, Map<String, String> productNames)?
   onShareCart;
   final Future<void> Function(Order order)? onSendWhatsApp;
@@ -137,6 +139,7 @@ class OrderDraftPage extends StatelessWidget {
                 createOrderSubmissionValidationCubit,
             onContinueToProducts: onContinueToProducts,
             onSubmitOrder: onSubmitOrder,
+            onGenerateQuote: onGenerateQuote,
             onShareCart: onShareCart,
             onSendWhatsApp: onSendWhatsApp,
           ),
@@ -158,6 +161,7 @@ class _OrderDraftView extends StatelessWidget {
     required this.createOrderSubmissionValidationCubit,
     this.onContinueToProducts,
     this.onSubmitOrder,
+    this.onGenerateQuote,
     this.onShareCart,
     this.onSendWhatsApp,
   });
@@ -173,6 +177,7 @@ class _OrderDraftView extends StatelessWidget {
   createOrderSubmissionValidationCubit;
   final Future<void> Function(Order order)? onContinueToProducts;
   final Future<void> Function(Order order)? onSubmitOrder;
+  final Future<void> Function(Order order)? onGenerateQuote;
   final Future<void> Function(Order order, Map<String, String> productNames)?
   onShareCart;
   final Future<void> Function(Order order)? onSendWhatsApp;
@@ -249,6 +254,7 @@ class _OrderDraftView extends StatelessWidget {
               createOrderSubmissionValidationCubit,
           onContinueToProducts: onContinueToProducts,
           onSubmitOrder: onSubmitOrder,
+          onGenerateQuote: onGenerateQuote,
           onShareCart: onShareCart,
           onSendWhatsApp: onSendWhatsApp,
         );
@@ -268,6 +274,7 @@ class _OrderDraftSummary extends StatefulWidget {
     required this.createOrderSubmissionValidationCubit,
     this.onContinueToProducts,
     this.onSubmitOrder,
+    this.onGenerateQuote,
     this.onShareCart,
     this.onSendWhatsApp,
   });
@@ -280,6 +287,7 @@ class _OrderDraftSummary extends StatefulWidget {
   createOrderSubmissionValidationCubit;
   final Future<void> Function(Order order)? onContinueToProducts;
   final Future<void> Function(Order order)? onSubmitOrder;
+  final Future<void> Function(Order order)? onGenerateQuote;
   final Future<void> Function(Order order, Map<String, String> productNames)?
   onShareCart;
   final Future<void> Function(Order order)? onSendWhatsApp;
@@ -509,6 +517,21 @@ class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
                   onPressed: () => widget.onSendWhatsApp!(order),
                 ),
               ],
+              const SizedBox(height: AppSpacing.spacing8),
+              AppButton(
+                label: 'Gerar orcamento',
+                leadingIcon: Icons.request_quote_outlined,
+                variant: AppButtonVariant.secondary,
+                onPressed: widget.onGenerateQuote == null
+                    ? null
+                    : () => widget.onGenerateQuote!(order),
+              ),
+              const SizedBox(height: AppSpacing.spacing8),
+              Text(
+                'O orcamento nao reserva estoque e os precos serao '
+                'revalidados se o cliente confirmar depois da validade.',
+                style: AppTypography.bodySmall.copyWith(color: colors.outline),
+              ),
             ],
             const SizedBox(height: AppSpacing.spacing16),
             OrderSubmissionPendenciesPanel(

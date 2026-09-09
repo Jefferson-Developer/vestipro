@@ -346,7 +346,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-194 — Implementar aprovação multinível de pedidos/descontos](TASK-194-implementar-aprovacao-multinivel.md) — Flutter Senior + Front-end
 - [x] [TASK-195 — Implementar comissionamento de vendedores](TASK-195-implementar-comissionamento.md) — Flutter Senior + Front-end
 - [x] [TASK-196 — Implementar políticas comerciais avançadas](TASK-196-implementar-politicas-comerciais-avancadas.md) — Flutter Senior
-- [ ] [TASK-197 — Implementar orçamento (cotação) antes do pedido](TASK-197-implementar-orcamento-antes-do-pedido.md) — Flutter Senior + Front-end
+- [x] [TASK-197 — Implementar orçamento (cotação) antes do pedido](TASK-197-implementar-orcamento-antes-do-pedido.md) — Flutter Senior + Front-end
 - [ ] [TASK-198 — Implementar pedido recorrente](TASK-198-implementar-pedido-recorrente.md) — Flutter Senior + Front-end
 
 ### EPIC-30 — Pós-venda
@@ -379,6 +379,6 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 195 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
+**Progresso:** 196 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
 [`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md)
 — e não conta mais no total).

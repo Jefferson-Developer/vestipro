@@ -1160,6 +1160,7 @@ class VestiProApp extends StatelessWidget {
                     );
                   },
                   onSubmitOrder: (order) => _submitOrder(context, order),
+                  onGenerateQuote: (order) => _generateQuote(context, order),
                   onShareCart: (order, productNames) =>
                       showModalBottomSheet<void>(
                         context: context,
@@ -1382,6 +1383,20 @@ Future<void> _submitOrder(BuildContext context, Order order) async {
     submitOrderUseCase: getIt<SubmitOrderUseCase>(),
     saveOrderDraftUseCase: getIt<SaveOrderDraftUseCase>(),
     navigateTo: (location) => context.go(location),
+  );
+}
+
+Future<void> _generateQuote(BuildContext context, Order order) async {
+  final repository = OrderQuoteRepositoryImpl(
+    CloudFunctionsOrderQuoteDataSource(getIt<CloudFunctionsService>()),
+  );
+  await generateQuoteFromDraft(
+    context: context,
+    order: order,
+    generateQuoteUseCase: GenerateOrderQuoteUseCase(
+      repository,
+      getIt<AnalyticsService>(),
+    ),
   );
 }
 
