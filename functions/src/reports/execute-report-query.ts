@@ -48,6 +48,9 @@ export async function runReportAggregation(
   const catalog = catalogForRole(member.roleName);
   validateSelection(dimensions, metrics, catalog);
   const period = parsePeriod(data?.filters);
+  if (metrics.some((metric) => metric.startsWith('commission'))) {
+    return runCommissionReport({ db, organizationId, companyId, member, authUid, period, dimensions, metrics });
+  }
   const source = sourceFor(dimensions);
   const loadPeriod = async (month: string): Promise<DocumentData[]> => {
     let query: Query = db.collection('organizations').doc(organizationId).collection(AGGREGATE_COLLECTION_BY_DIMENSION[source]).where('companyId', '==', companyId);
@@ -227,3 +230,55 @@ function sortRows(rows: Record<string, unknown>[], field: string, descending: bo
 }
 function number(value: unknown): number { return typeof value === 'number' && Number.isFinite(value) ? value : 0; }
 function round(value: number): number { return Math.round(value * 100) / 100; }
+
+async function runCommissionReport(input: {
+  db: FirebaseFirestore.Firestore;
+  organizationId: string;
+  companyId: string;
+  member: ReportAggregationMember;
+  authUid: string;
+  period: string;
+  dimensions: string[];
+  metrics: string[];
+}): Promise<{ columns: string[]; rows: Record<string, unknown>[] }> {
+  if (input.metrics.some((metric) => !metric.startsWith('commission'))) {
+    throw new HttpsError('invalid-argument', 'Métricas de comissão não podem ser combinadas com métricas de vendas.');
+  }
+  if (input.dimensions.some((dimension) => dimension !== 'period' && dimension !== 'seller')) {
+    throw new HttpsError('invalid-argument', 'Comissões podem ser agrupadas por período e vendedor.');
+  }
+  let query: Query = input.db.collection('organizations').doc(input.organizationId)
+    .collection('commissionEntries')
+    .where('companyId', '==', input.companyId)
+    .where('periodKey', '==', input.period);
+  if (input.member.roleName === 'SALES_REP') query = query.where('sellerId', '==', input.authUid);
+  const docs = (await query.limit(500).get()).docs.map((doc) => doc.data());
+  const visible = input.member.roleName === 'SALES_MANAGER'
+    ? docs.filter((row) => Array.isArray(row.teamIds) && row.teamIds.some((teamId: unknown) => Array.isArray(input.member.teamIds) && input.member.teamIds.includes(teamId as string)))
+    : docs;
+  const groups = new Map<string, { values: Record<string, string>; currency: string; commissionAmount: number; commissionBaseAmount: number; commissionEntryCount: number }>();
+  for (const row of visible) {
+    const values: Record<string, string> = {};
+    for (const dimension of input.dimensions) {
+      values[dimension] = dimension === 'period'
+        ? input.period
+        : (typeof row.sellerName === 'string' && row.sellerName.length > 0 ? row.sellerName : row.sellerId as string);
+    }
+    const key = JSON.stringify(values);
+    const currency = typeof row.currency === 'string' ? row.currency : 'BRL';
+    const current = groups.get(key) ?? { values, currency, commissionAmount: 0, commissionBaseAmount: 0, commissionEntryCount: 0 };
+    if (current.currency !== currency) {
+      throw new HttpsError('failed-precondition', 'Não é possível somar comissões em moedas diferentes na mesma linha.');
+    }
+    current.commissionAmount += number(row.commissionAmount);
+    current.commissionBaseAmount += number(row.baseAmount);
+    current.commissionEntryCount += 1;
+    groups.set(key, current);
+  }
+  const rows = [...groups.values()].map((group) => ({
+    ...group.values,
+    currency: group.currency,
+    ...Object.fromEntries(input.metrics.map((metric) => [metric, round(number(group[metric as keyof typeof group]))])),
+  }));
+  return { columns: [...input.dimensions, 'currency', ...input.metrics], rows };
+}

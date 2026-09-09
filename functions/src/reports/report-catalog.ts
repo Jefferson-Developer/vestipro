@@ -29,6 +29,9 @@ export const REPORT_FIELDS: readonly ReportFieldConfig[] = [
   { id: 'averageTicket', label: 'Ticket médio', type: 'metric', valueType: 'currency', compatibleDimensions: ['period', 'customer', 'seller', 'region'], isSensitive: true },
   { id: 'averageDiscount', label: 'Desconto médio', type: 'metric', valueType: 'percentage', compatibleDimensions: ALL_DIMENSIONS, isSensitive: true },
   { id: 'piecesPerOrder', label: 'Peças por pedido', type: 'metric', valueType: 'number', compatibleDimensions: ['period', 'customer', 'seller', 'region'] },
+  { id: 'commissionAmount', label: 'Comissão', type: 'metric', valueType: 'currency', compatibleDimensions: ['period', 'seller'], isSensitive: true },
+  { id: 'commissionBaseAmount', label: 'Base de comissão', type: 'metric', valueType: 'currency', compatibleDimensions: ['period', 'seller'], isSensitive: true },
+  { id: 'commissionEntryCount', label: 'Lançamentos de comissão', type: 'metric', valueType: 'number', compatibleDimensions: ['period', 'seller'], isSensitive: true },
   // KPIs specified in tasks.md but not derivable from TASK-133's current
   // snapshots remain in the server-owned catalog as unavailable. A later
   // aggregation can enable them without shipping a new Flutter UI.

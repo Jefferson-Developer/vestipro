@@ -1485,6 +1485,37 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/commissionRules/{ruleId}
+      // organizations/{organizationId}/commissionEntries/{entryId}
+      // (TASK-195, EPIC-29 - comissionamento)
+      // -------------------------------------------------------------------
+
+      match /commissionRules/{ruleId} {
+        allow read: if isOwnerOrAdmin(organizationId)
+          || isSalesManager(organizationId)
+          || hasCapability(organizationId, 'finance.manage');
+        allow create, update, delete: if false;
+      }
+
+      function managerCanReadCommissionEntry(organizationId) {
+        return isSalesManager(organizationId)
+          && resource.data.teamIds is list
+          && requesterTeamIds(organizationId).hasAny(resource.data.teamIds);
+      }
+
+      match /commissionEntries/{entryId} {
+        allow get, list: if resource.data.organizationId == organizationId
+          && (
+            (isSalesRep(organizationId) && resource.data.sellerId == request.auth.uid)
+            || managerCanReadCommissionEntry(organizationId)
+            || isOwnerOrAdmin(organizationId)
+            || hasCapability(organizationId, 'finance.view')
+            || hasCapability(organizationId, 'finance.manage')
+          );
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/ssoConnections/{connectionId}
       // (TASK-173, EPIC-23 — SSO corporativo SAML/OIDC)
       // -------------------------------------------------------------------
