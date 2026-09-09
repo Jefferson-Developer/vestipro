@@ -125,6 +125,7 @@ jest.mock('firebase-admin/firestore', () => {
 
 import {
   calculatePricing,
+  simulateCommercialRule,
   type CalculatePricingRequest,
   type CalculatePricingResponse,
 } from '../../src/pricing';
@@ -296,6 +297,112 @@ describe('calculatePricing', () => {
     expect(result.items[0].appliedDiscounts[0].campaignId).toBe('campaign-2');
     expect(result.approvalRequired).toBe(true);
     expect(result.blocked).toBe(false);
+  });
+
+  it('loads active commercial rules into calculatePricing without bypassing campaigns or manual policies', async () => {
+    await seedBasePricingData();
+    const orgRef = fakeDb.collection('organizations').doc('org-1');
+    await orgRef.collection('commercialRules').doc('rule-1').set({
+      companyId: 'company-1',
+      name: 'Volume VIP',
+      type: 'progressiveDiscount',
+      priority: 10,
+      status: 'active',
+      validFrom: Timestamp.fromDate(new Date('2026-08-01T00:00:00.000Z')),
+      validTo: Timestamp.fromDate(new Date('2026-12-31T23:59:59.000Z')),
+      conditions: {
+        customerSegments: ['vip'],
+        productIds: ['product-1'],
+        channels: ['internal'],
+        minimumQuantity: 2,
+      },
+      effect: { type: 'percentage', value: 8 },
+      stackable: true,
+    });
+
+    const wrapped = testEnv.wrap(calculatePricing);
+    const result = (await wrapped(
+      buildRequest(
+        {
+          organizationId: 'org-1',
+          companyId: 'company-1',
+          customerId: 'customer-1',
+          customerSegment: 'vip',
+          channel: 'internal',
+          priceListId: 'price-list-1',
+          paymentTermId: 'term-1',
+          idempotencyKey: 'key-rules-1',
+          items: [{ productId: 'product-1', quantity: 2 }],
+        },
+        authFor('rep-1'),
+      ),
+    )) as CalculatePricingResponse;
+
+    expect(result.commercialRuleDiscountTotal).toBe(16);
+    expect(result.total).toBe(184);
+    expect(result.commercialRuleTrace).toEqual([
+      expect.objectContaining({
+        ruleId: 'rule-1',
+        applied: true,
+        reason: 'discount_effect',
+      }),
+    ]);
+  });
+
+  it('simulates a commercial rule without persisting pricing cache or real rule documents', async () => {
+    await seedBasePricingData();
+    await fakeDb.collection('organizations').doc('org-1').collection('members').doc('manager-1').set({
+      roleName: 'SALES_MANAGER',
+    });
+    const wrapped = testEnv.wrap(simulateCommercialRule);
+
+    const result = (await wrapped(
+      buildRequest(
+        {
+          organizationId: 'org-1',
+          companyId: 'company-1',
+          customerSegment: 'vip',
+          channel: 'internal',
+          priceListId: 'price-list-1',
+          paymentTermId: 'term-1',
+          idempotencyKey: 'simulation-key-1',
+          items: [{ productId: 'product-1', quantity: 2 }],
+          commercialRule: {
+            companyId: 'company-1',
+            name: 'Simulacao VIP',
+            type: 'segmentCondition',
+            priority: 1,
+            status: 'active',
+            validFrom: Timestamp.fromDate(new Date('2026-08-01T00:00:00.000Z')),
+            validTo: Timestamp.fromDate(new Date('2026-12-31T23:59:59.000Z')),
+            conditions: {
+              customerSegments: ['vip'],
+              productIds: ['product-1'],
+              channels: ['internal'],
+            },
+            effect: { type: 'fixedAmount', value: 5 },
+            stackable: true,
+          },
+        } as CalculatePricingRequest & { commercialRule: unknown },
+        authFor('manager-1'),
+      ),
+    )) as CalculatePricingResponse;
+
+    const pricingCache = await fakeDb
+      .collection('organizations')
+      .doc('org-1')
+      .collection('pricingCalculations')
+      .get();
+    const persistedRules = await fakeDb
+      .collection('organizations')
+      .doc('org-1')
+      .collection('commercialRules')
+      .get();
+
+    expect(result.commercialRuleDiscountTotal).toBe(10);
+    expect(result.total).toBe(190);
+    expect(pricingCache.docs).toHaveLength(0);
+    expect(persistedRules.docs).toHaveLength(0);
   });
 
   it('blocks a manual discount above the maximum policy limit', async () => {

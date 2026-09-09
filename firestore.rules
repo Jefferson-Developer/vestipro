@@ -975,6 +975,22 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/commercialRules/{ruleId}
+      // (TASK-196) — advanced commercial policy catalog. Rules are consumed
+      // only by `calculatePricing`/`submitOrder` and may be simulated by
+      // `simulateCommercialRule`; client writes are denied so no app surface
+      // can weaken price/discount governance outside the server pipeline.
+      // -------------------------------------------------------------------
+
+      match /commercialRules/{ruleId} {
+        allow get, list: if isOwnerOrAdmin(organizationId)
+          || isSalesManager(organizationId)
+          || hasCapability(organizationId, 'finance.manage');
+
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/orders/{orderId}
       // (TASK-102 visibility contract for the pedidos listing/tracking
       // screen — writes remain the exclusive concern of the `submitOrder`

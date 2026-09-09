@@ -2,6 +2,7 @@ import {
   calculatePricingEngine,
   exceedsPricingTolerance,
   type PricingEngineCampaign,
+  type PricingEngineCommercialRule,
   type PricingEngineDiscountPolicy,
   type PricingEngineInput,
 } from '../../src/pricing/pricing-engine';
@@ -72,6 +73,33 @@ function buildCampaign(
     status: 'active',
     validFrom: '2026-08-01T00:00:00.000Z',
     validTo: '2026-12-31T23:59:59.000Z',
+    ...overrides,
+  };
+}
+
+function buildCommercialRule(
+  overrides: Partial<PricingEngineCommercialRule> = {},
+): PricingEngineCommercialRule {
+  return {
+    id: 'rule-1',
+    companyId: 'company-1',
+    name: 'Volume VIP',
+    type: 'progressiveDiscount',
+    priority: 10,
+    status: 'active',
+    validFrom: '2026-08-01T00:00:00.000Z',
+    validTo: '2026-12-31T23:59:59.000Z',
+    conditions: {
+      customerSegments: ['vip'],
+      productIds: ['product-1'],
+      minimumQuantity: 2,
+      channels: ['internal'],
+    },
+    effect: {
+      type: 'percentage',
+      value: 8,
+    },
+    stackable: true,
     ...overrides,
   };
 }
@@ -235,6 +263,110 @@ describe('calculatePricingEngine', () => {
     expect(result.manualDiscountTotal).toBe(17);
     expect(result.paymentTermAdjustmentTotal).toBe(0);
     expect(result.total).toBe(173);
+  });
+
+  it('applies an advanced commercial rule inside the same deterministic pricing pipeline', () => {
+    const result = calculatePricingEngine(
+      buildInput({
+        campaigns: [buildCampaign({ discountValue: 10, priority: 2 })],
+        commercialRules: [buildCommercialRule()],
+        channel: 'internal',
+        items: [{ productId: 'product-1', quantity: 2 }],
+        shippingAmount: 0,
+        effectiveAt: '2026-09-09T12:00:00.000Z',
+      }),
+    );
+
+    expect(result.campaignDiscountTotal).toBe(20);
+    expect(result.commercialRuleDiscountTotal).toBe(14.4);
+    expect(result.manualDiscountTotal).toBe(0);
+    expect(result.items[0].finalUnitPrice).toBe(82.8);
+    expect(result.items[0].appliedDiscounts.map((discount) => discount.origin)).toEqual([
+      'campaign',
+      'commercial_rule',
+    ]);
+    expect(result.commercialRuleTrace).toEqual([
+      expect.objectContaining({
+        ruleId: 'rule-1',
+        applied: true,
+        reason: 'discount_effect',
+      }),
+    ]);
+  });
+
+  it('uses priority and id as a deterministic tie-breaker for overlapping commercial rules', () => {
+    const result = calculatePricingEngine(
+      buildInput({
+        commercialRules: [
+          buildCommercialRule({ id: 'rule-low', priority: 1, stackable: false }),
+          buildCommercialRule({ id: 'rule-high', priority: 9, stackable: false }),
+          buildCommercialRule({ id: 'rule-high-b', priority: 9, stackable: false }),
+        ],
+        channel: 'internal',
+        items: [{ productId: 'product-1', quantity: 2 }],
+        shippingAmount: 0,
+        effectiveAt: '2026-09-09T12:00:00.000Z',
+      }),
+    );
+
+    expect(result.items[0].appliedDiscounts).toHaveLength(1);
+    expect(result.items[0].appliedDiscounts[0].commercialRuleId).toBe('rule-high');
+  });
+
+  it('ignores expired commercial rules', () => {
+    const result = calculatePricingEngine(
+      buildInput({
+        commercialRules: [
+          buildCommercialRule({
+            validFrom: '2026-01-01T00:00:00.000Z',
+            validTo: '2026-01-31T23:59:59.000Z',
+          }),
+        ],
+        channel: 'internal',
+        items: [{ productId: 'product-1', quantity: 2 }],
+        shippingAmount: 0,
+        effectiveAt: '2026-09-09T12:00:00.000Z',
+      }),
+    );
+
+    expect(result.commercialRuleDiscountTotal).toBe(0);
+    expect(result.total).toBe(200);
+  });
+
+  it('ignores channel-specific commercial rules for a different channel', () => {
+    const result = calculatePricingEngine(
+      buildInput({
+        commercialRules: [buildCommercialRule({ conditions: { channels: ['customer_portal'] } })],
+        channel: 'internal',
+        items: [{ productId: 'product-1', quantity: 2 }],
+        shippingAmount: 0,
+        effectiveAt: '2026-09-09T12:00:00.000Z',
+      }),
+    );
+
+    expect(result.commercialRuleDiscountTotal).toBe(0);
+    expect(result.total).toBe(200);
+  });
+
+  it('keeps existing campaign and discount-policy behavior when no advanced rules are configured', () => {
+    const result = calculatePricingEngine(
+      buildInput({
+        campaigns: [buildCampaign({ discountValue: 10 })],
+        items: [
+          {
+            productId: 'product-1',
+            quantity: 1,
+            manualDiscountPercent: 12,
+          },
+        ],
+        shippingAmount: 0,
+      }),
+    );
+
+    expect(result.commercialRuleDiscountTotal).toBe(0);
+    expect(result.items[0].priceAfterCampaigns).toBe(90);
+    expect(result.items[0].finalUnitPrice).toBe(79.2);
+    expect(result.approvalRequired).toBe(true);
   });
 });
 

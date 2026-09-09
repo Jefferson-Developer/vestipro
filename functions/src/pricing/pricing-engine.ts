@@ -27,6 +27,43 @@ export interface PricingEngineCampaign {
   validTo: string;
 }
 
+export type PricingEngineCommercialRuleType =
+  | 'progressiveDiscount'
+  | 'segmentCondition'
+  | 'productCombo'
+  | 'channelSpecific';
+
+export interface PricingEngineCommercialRuleCondition {
+  customerIds?: string[];
+  customerSegments?: string[];
+  productIds?: string[];
+  collectionIds?: string[];
+  categoryIds?: string[];
+  channels?: string[];
+  minimumQuantity?: number;
+  comboProductIds?: string[];
+}
+
+export interface PricingEngineCommercialRuleEffect {
+  type: 'percentage' | 'fixedAmount' | 'paymentTerm';
+  value?: number;
+  paymentTermId?: string;
+}
+
+export interface PricingEngineCommercialRule {
+  id: string;
+  companyId?: string;
+  name: string;
+  type: PricingEngineCommercialRuleType;
+  priority: number;
+  status: 'draft' | 'active' | 'ended' | 'inactive';
+  validFrom: string;
+  validTo: string;
+  conditions: PricingEngineCommercialRuleCondition;
+  effect: PricingEngineCommercialRuleEffect;
+  stackable: boolean;
+}
+
 export interface PricingEnginePriceList {
   id: string;
   companyId?: string;
@@ -62,10 +99,21 @@ export interface PricingEngineItemInput {
 }
 
 export interface PricingEngineAppliedDiscount {
-  origin: 'campaign' | 'manual';
+  origin: 'campaign' | 'commercial_rule' | 'manual';
   amount: number;
   description: string;
   campaignId?: string;
+  commercialRuleId?: string;
+}
+
+export interface PricingEngineCommercialRuleTrace {
+  ruleId: string;
+  ruleName: string;
+  priority: number;
+  status: PricingEngineCommercialRule['status'];
+  evaluated: boolean;
+  applied: boolean;
+  reason: string;
 }
 
 export interface PricingEngineItemOutput {
@@ -85,6 +133,7 @@ export interface PricingEngineItemOutput {
     maxDiscountPercent: number;
   };
   appliedDiscounts: PricingEngineAppliedDiscount[];
+  commercialRuleTrace: PricingEngineCommercialRuleTrace[];
 }
 
 export interface PricingEngineInput {
@@ -93,22 +142,29 @@ export interface PricingEngineInput {
   paymentTerm: PricingEnginePaymentTerm;
   discountPolicy?: PricingEngineDiscountPolicy;
   campaigns: PricingEngineCampaign[];
+  commercialRules?: PricingEngineCommercialRule[];
+  customerId?: string;
   customerSegment: string;
+  channel?: string;
   items: PricingEngineItemInput[];
   shippingAmount: number;
+  effectiveAt?: string;
 }
 
 export interface PricingEngineOutput {
   currency: string;
   subtotal: number;
   campaignDiscountTotal: number;
+  commercialRuleDiscountTotal: number;
   manualDiscountTotal: number;
   paymentTermAdjustmentTotal: number;
+  appliedPaymentTermRuleId?: string;
   shippingAmount: number;
   total: number;
   blocked: boolean;
   approvalRequired: boolean;
   items: PricingEngineItemOutput[];
+  commercialRuleTrace: PricingEngineCommercialRuleTrace[];
 }
 
 const roundingTolerance = 0.01;
@@ -141,6 +197,16 @@ export function calculatePricingEngine(
       0,
     ),
   );
+  const commercialRuleDiscountTotal = roundCurrency(
+    items.reduce(
+      (sum, item) =>
+        sum +
+        item.appliedDiscounts
+          .filter((discount) => discount.origin === 'commercial_rule')
+          .reduce((lineSum, discount) => lineSum + discount.amount, 0),
+      0,
+    ),
+  );
   const manualDiscountTotal = roundCurrency(
     items.reduce(
       (sum, item) =>
@@ -151,13 +217,19 @@ export function calculatePricingEngine(
       0,
     ),
   );
+  const commercialRuleTrace = items.flatMap((item) => item.commercialRuleTrace);
+  const paymentTermRule = commercialRuleTrace.find((trace) =>
+    trace.applied && trace.reason === 'payment_term_effect',
+  );
 
   return {
     currency: input.selectedPriceList.currency,
     subtotal,
     campaignDiscountTotal,
+    commercialRuleDiscountTotal,
     manualDiscountTotal,
     paymentTermAdjustmentTotal: 0,
+    appliedPaymentTermRuleId: paymentTermRule?.ruleId,
     shippingAmount: roundCurrency(input.shippingAmount),
     total: roundCurrency(
       items.reduce((sum, item) => sum + item.lineTotal, 0) +
@@ -168,6 +240,7 @@ export function calculatePricingEngine(
       (item) => item.validationStatus === 'requires_approval',
     ),
     items,
+    commercialRuleTrace,
   };
 }
 
@@ -183,7 +256,9 @@ function calculatePricingItem(
   const quantity = item.quantity;
   const lineSubtotal = roundCurrency(baseUnitPrice * quantity);
   const campaigns = resolveApplicableCampaigns(item, input.campaigns, input.customerSegment);
+  const commercialRules = resolveCommercialRulesForItem(item, input);
   const appliedDiscounts: PricingEngineAppliedDiscount[] = [];
+  const commercialRuleTrace: PricingEngineCommercialRuleTrace[] = [];
 
   let runningUnitPrice = baseUnitPrice;
   for (const campaign of campaigns) {
@@ -195,6 +270,27 @@ function calculatePricingItem(
       description: `Campaign ${campaign.name} applied.`,
       campaignId: campaign.id,
     });
+  }
+
+  for (const rule of commercialRules) {
+    const effect = rule.effect;
+    if (effect.type === 'paymentTerm') {
+      commercialRuleTrace.push(buildCommercialRuleTrace(rule, true, 'payment_term_effect'));
+      continue;
+    }
+
+    const discountValue = effect.value ?? 0;
+    const amount = effect.type === 'percentage'
+      ? runningUnitPrice * (discountValue / 100)
+      : Math.min(runningUnitPrice, discountValue);
+    runningUnitPrice = roundCurrency(Math.max(0, runningUnitPrice - amount));
+    appliedDiscounts.push({
+      origin: 'commercial_rule',
+      amount: roundCurrency(amount * quantity),
+      description: `Commercial rule ${rule.name} applied.`,
+      commercialRuleId: rule.id,
+    });
+    commercialRuleTrace.push(buildCommercialRuleTrace(rule, true, 'discount_effect'));
   }
 
   const discountPolicy = input.discountPolicy;
@@ -240,6 +336,7 @@ function calculatePricingItem(
     validationStatus: validation.status,
     approvalRequest,
     appliedDiscounts,
+    commercialRuleTrace,
   };
 }
 
@@ -308,6 +405,94 @@ function resolveCampaignDiscountAmount(
     return baseUnitPrice * (campaign.discountValue / 100);
   }
   return Math.min(baseUnitPrice, campaign.discountValue);
+}
+
+function resolveCommercialRulesForItem(
+  item: PricingEngineItemInput,
+  input: PricingEngineInput,
+): PricingEngineCommercialRule[] {
+  const effectiveAt = new Date(input.effectiveAt ?? new Date().toISOString());
+  const rules = input.commercialRules ?? [];
+  const eligible = rules
+    .filter((rule) => rule.status === 'active')
+    .filter((rule) => new Date(rule.validFrom) <= effectiveAt && new Date(rule.validTo) >= effectiveAt)
+    .filter((rule) => matchesCommercialRuleConditions(rule, item, input))
+    .sort((left, right) => {
+      const byPriority = right.priority - left.priority;
+      if (byPriority !== 0) return byPriority;
+      return left.id.localeCompare(right.id);
+    });
+
+  const nonStackable = eligible.filter((rule) => !rule.stackable);
+  if (nonStackable.length > 0) return [nonStackable[0]];
+  return eligible;
+}
+
+function matchesCommercialRuleConditions(
+  rule: PricingEngineCommercialRule,
+  item: PricingEngineItemInput,
+  input: PricingEngineInput,
+): boolean {
+  const conditions = rule.conditions;
+  if (conditions.customerIds?.length && !conditions.customerIds.includes(input.customerId ?? '')) {
+    return false;
+  }
+  if (
+    conditions.customerSegments?.length &&
+    !conditions.customerSegments
+      .map((segment) => segment.trim().toLowerCase())
+      .includes(input.customerSegment.trim().toLowerCase())
+  ) {
+    return false;
+  }
+  if (
+    conditions.channels?.length &&
+    !conditions.channels
+      .map((channel) => channel.trim().toLowerCase())
+      .includes((input.channel ?? 'internal').trim().toLowerCase())
+  ) {
+    return false;
+  }
+  if (
+    conditions.minimumQuantity !== undefined &&
+    item.quantity < conditions.minimumQuantity
+  ) {
+    return false;
+  }
+  if (conditions.comboProductIds?.length) {
+    const presentProductIds = new Set(input.items.map((candidate) => candidate.productId));
+    if (!conditions.comboProductIds.every((productId) => presentProductIds.has(productId))) {
+      return false;
+    }
+  }
+  if (
+    !conditions.productIds?.length &&
+    !conditions.collectionIds?.length &&
+    !conditions.categoryIds?.length
+  ) {
+    return true;
+  }
+  return (
+    conditions.productIds?.includes(item.productId) === true ||
+    (!!item.collectionId && conditions.collectionIds?.includes(item.collectionId) === true) ||
+    (!!item.categoryId && conditions.categoryIds?.includes(item.categoryId) === true)
+  );
+}
+
+function buildCommercialRuleTrace(
+  rule: PricingEngineCommercialRule,
+  applied: boolean,
+  reason: string,
+): PricingEngineCommercialRuleTrace {
+  return {
+    ruleId: rule.id,
+    ruleName: rule.name,
+    priority: rule.priority,
+    status: rule.status,
+    evaluated: true,
+    applied,
+    reason,
+  };
 }
 
 function validateManualDiscount(

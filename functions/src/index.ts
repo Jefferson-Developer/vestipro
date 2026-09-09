@@ -32,7 +32,7 @@ export {
   loadCustomerPortal,
   repeatCustomerPortalOrder,
 } from './customer_portal';
-export { calculatePricing } from './pricing';
+export { calculatePricing, simulateCommercialRule } from './pricing';
 export { applyStockBalanceAdjustment } from './inventory/apply-stock-balance-adjustment';
 export { createStockReservation } from './inventory/create-stock-reservation';
 export { releaseStockReservation } from './inventory/release-stock-reservation';

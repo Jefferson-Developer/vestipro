@@ -1,1 +1,7 @@
-export { calculatePricing, type CalculatePricingRequest, type CalculatePricingResponse } from './calculate-pricing';
+export {
+  calculatePricing,
+  simulateCommercialRule,
+  type CalculatePricingRequest,
+  type CalculatePricingResponse,
+  type SimulateCommercialRuleRequest,
+} from './calculate-pricing';

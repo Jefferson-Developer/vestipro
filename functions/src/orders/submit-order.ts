@@ -24,6 +24,7 @@ import {
   ensureCompanyScope,
   ensureValidPaymentTerm,
   mapCampaign,
+  mapCommercialRule,
   mapDiscountPolicy,
   mapPaymentTerm,
   mapPriceList,
@@ -344,6 +345,14 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
       const campaigns = campaignSnapshots.docs.map((doc) => mapCampaign(doc.id, doc.data()));
       campaigns.forEach((campaign) => ensureCompanyScope(companyId, 'Campaign', campaign));
 
+      const commercialRuleSnapshots = await transaction.get(
+        organizationRef.collection('commercialRules'),
+      );
+      const commercialRules = commercialRuleSnapshots.docs.map((doc) =>
+        mapCommercialRule(doc.id, doc.data()),
+      );
+      commercialRules.forEach((rule) => ensureCompanyScope(companyId, 'Commercial rule', rule));
+
       const pricingItems: PricingEngineItemInput[] = items.map((item) => ({
         productId: item.productId,
         variantId: item.variantId,
@@ -358,7 +367,10 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
         paymentTerm,
         discountPolicy,
         campaigns,
+        commercialRules,
+        customerId,
         customerSegment,
+        channel: portalApprovalRequiredChannel(membership.roleName),
         items: pricingItems,
         shippingAmount,
       });
@@ -457,7 +469,14 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
           surchargeAmount: 0,
           subtotal: item.subtotal,
         })),
-        discountAmount: roundCurrency(pricing.campaignDiscountTotal + pricing.manualDiscountTotal),
+        discountAmount: roundCurrency(
+          pricing.campaignDiscountTotal +
+            pricing.commercialRuleDiscountTotal +
+            pricing.manualDiscountTotal,
+        ),
+        commercialRuleDiscountAmount: roundCurrency(pricing.commercialRuleDiscountTotal),
+        pricingCommercialRuleTrace: pricing.commercialRuleTrace,
+        pricingAppliedPaymentTermRuleId: pricing.appliedPaymentTermRuleId ?? null,
         surchargeAmount: roundCurrency(pricing.paymentTermAdjustmentTotal),
         shippingAmount: roundCurrency(pricing.shippingAmount),
         taxAmount: null,
@@ -504,7 +523,14 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
         entityType: 'order',
         entityId: orderId,
         previousValue: null,
-        newValue: { orderNumber, customerId, total: pricing.total },
+        newValue: {
+          orderNumber,
+          customerId,
+          total: pricing.total,
+          commercialRuleIds: pricing.commercialRuleTrace
+            .filter((trace) => trace.applied)
+            .map((trace) => trace.ruleId),
+        },
         timestamp: now,
       });
 
@@ -776,6 +802,10 @@ function buildResponseItem(
     discountAmount: roundCurrency(pricingItem.lineSubtotal - pricingItem.lineTotal),
     subtotal: pricingItem.lineTotal,
   };
+}
+
+function portalApprovalRequiredChannel(roleName: string): string {
+  return roleName === 'CUSTOMER_PORTAL' ? 'customer_portal' : 'internal';
 }
 
 /**

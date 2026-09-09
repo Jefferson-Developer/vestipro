@@ -7,6 +7,7 @@ import {
   calculatePricingEngine,
   exceedsPricingTolerance,
   type PricingEngineCampaign,
+  type PricingEngineCommercialRule,
   type PricingEngineDiscountPolicy,
   type PricingEngineItemInput,
   type PricingEnginePaymentTerm,
@@ -18,6 +19,8 @@ export interface CalculatePricingRequest extends RequestWithMeta {
   organizationId?: string;
   companyId?: string;
   customerSegment?: string;
+  customerId?: string;
+  channel?: string;
   priceListId?: string;
   paymentTermId?: string;
   idempotencyKey?: string;
@@ -32,8 +35,10 @@ export interface CalculatePricingResponse {
   currency: string;
   subtotal: number;
   campaignDiscountTotal: number;
+  commercialRuleDiscountTotal: number;
   manualDiscountTotal: number;
   paymentTermAdjustmentTotal: number;
+  appliedPaymentTermRuleId?: string;
   shippingAmount: number;
   total: number;
   blocked: boolean;
@@ -41,6 +46,7 @@ export interface CalculatePricingResponse {
   clientTotalDiverged: boolean;
   tolerance: number;
   items: ReturnType<typeof calculatePricingEngine>['items'];
+  commercialRuleTrace: ReturnType<typeof calculatePricingEngine>['commercialRuleTrace'];
 }
 
 const tolerance = 0.01;
@@ -59,7 +65,9 @@ export const calculatePricing = onCall<
 
   const organizationId = requireNonEmptyString(request.data?.organizationId, 'organizationId');
   const companyId = requireNonEmptyString(request.data?.companyId, 'companyId');
+  const customerId = optionalString(request.data?.customerId);
   const customerSegment = requireNonEmptyString(request.data?.customerSegment, 'customerSegment');
+  const channel = optionalString(request.data?.channel) ?? 'internal';
   const priceListId = requireNonEmptyString(request.data?.priceListId, 'priceListId');
   const paymentTermId = requireNonEmptyString(request.data?.paymentTermId, 'paymentTermId');
   const idempotencyKey = requireNonEmptyString(
@@ -91,7 +99,9 @@ export const calculatePricing = onCall<
       JSON.stringify({
         organizationId,
         companyId,
+        customerId,
         customerSegment,
+        channel,
         priceListId,
         paymentTermId,
         shippingAmount,
@@ -155,13 +165,22 @@ export const calculatePricing = onCall<
   );
   campaigns.forEach((campaign) => ensureCompanyScope(companyId, 'Campaign', campaign));
 
+  const commercialRuleSnapshots = await orgRef.collection('commercialRules').get();
+  const commercialRules = commercialRuleSnapshots.docs.map((doc) =>
+    mapCommercialRule(doc.id, doc.data()),
+  );
+  commercialRules.forEach((rule) => ensureCompanyScope(companyId, 'Commercial rule', rule));
+
   const pricing = calculatePricingEngine({
     selectedPriceList,
     priceListItems,
     paymentTerm,
     discountPolicy,
     campaigns,
+    commercialRules,
+    customerId,
     customerSegment,
+    channel,
     items: normalizedItems,
     shippingAmount,
   });
@@ -172,8 +191,10 @@ export const calculatePricing = onCall<
     currency: pricing.currency,
     subtotal: pricing.subtotal,
     campaignDiscountTotal: pricing.campaignDiscountTotal,
+    commercialRuleDiscountTotal: pricing.commercialRuleDiscountTotal,
     manualDiscountTotal: pricing.manualDiscountTotal,
     paymentTermAdjustmentTotal: pricing.paymentTermAdjustmentTotal,
+    appliedPaymentTermRuleId: pricing.appliedPaymentTermRuleId,
     shippingAmount: pricing.shippingAmount,
     total: pricing.total,
     blocked: pricing.blocked,
@@ -184,6 +205,7 @@ export const calculatePricing = onCall<
         : exceedsPricingTolerance(clientOrderTotal, pricing.total, tolerance),
     tolerance,
     items: pricing.items,
+    commercialRuleTrace: pricing.commercialRuleTrace,
   };
 
   await persistIdempotentResponse(cacheRef, requestHash, response, request.auth.uid);
@@ -198,6 +220,7 @@ export const calculatePricing = onCall<
     idempotencyKey,
     itemCount: response.items.length,
     campaignDiscountTotal: response.campaignDiscountTotal,
+    commercialRuleDiscountTotal: response.commercialRuleDiscountTotal,
     manualDiscountTotal: response.manualDiscountTotal,
     paymentTermAdjustmentTotal: response.paymentTermAdjustmentTotal,
     clientTotalDiverged: response.clientTotalDiverged,
@@ -207,6 +230,123 @@ export const calculatePricing = onCall<
   });
 
   return response;
+});
+
+export interface SimulateCommercialRuleRequest extends CalculatePricingRequest {
+  commercialRule?: unknown;
+}
+
+export const simulateCommercialRule = onCall<
+  SimulateCommercialRuleRequest,
+  Promise<CalculatePricingResponse>
+>(async (request) => {
+  if (!request.auth) {
+    throw new HttpsError('unauthenticated', 'AutenticaÃ§Ã£o obrigatÃ³ria.');
+  }
+
+  const organizationId = requireNonEmptyString(request.data?.organizationId, 'organizationId');
+  const companyId = requireNonEmptyString(request.data?.companyId, 'companyId');
+  const customerId = optionalString(request.data?.customerId);
+  const customerSegment = requireNonEmptyString(request.data?.customerSegment, 'customerSegment');
+  const channel = optionalString(request.data?.channel) ?? 'simulation';
+  const priceListId = requireNonEmptyString(request.data?.priceListId, 'priceListId');
+  const paymentTermId = requireNonEmptyString(request.data?.paymentTermId, 'paymentTermId');
+  const idempotencyKey = requireNonEmptyString(request.data?.idempotencyKey, 'idempotencyKey');
+  const normalizedItems = (request.data?.items ?? []).map((item, index) =>
+    normalizeItem(item, index),
+  );
+  if (normalizedItems.length === 0) {
+    throw new HttpsError('invalid-argument', 'items is required.');
+  }
+  const simulatedRule = mapCommercialRule(
+    'simulation-rule',
+    request.data?.commercialRule as FirebaseFirestore.DocumentData | undefined,
+  );
+  ensureCompanyScope(companyId, 'Commercial rule', simulatedRule);
+
+  const db = getFirestore();
+  const orgRef = db.collection('organizations').doc(organizationId);
+  const membershipSnapshot = await orgRef.collection('members').doc(request.auth.uid).get();
+  if (!membershipSnapshot.exists) {
+    throw new HttpsError('permission-denied', 'Membership not found for pricing simulation.');
+  }
+  const roleName = requireNonEmptyString(membershipSnapshot.data()?.roleName, 'roleName');
+  if (!['OWNER', 'ADMIN', 'SALES_MANAGER'].includes(roleName)) {
+    throw new HttpsError('permission-denied', 'Seu perfil nÃ£o pode simular regra comercial.');
+  }
+
+  const priceListSnapshot = await orgRef.collection('priceLists').doc(priceListId).get();
+  const selectedPriceList = mapPriceList(priceListId, priceListSnapshot.data());
+  ensureCompanyScope(companyId, 'Price list', selectedPriceList);
+  ensureActivePriceList(selectedPriceList);
+
+  const paymentTermSnapshot = await orgRef.collection('paymentTerms').doc(paymentTermId).get();
+  const paymentTerm = mapPaymentTerm(paymentTermId, paymentTermSnapshot.data());
+  ensureCompanyScope(companyId, 'Payment term', paymentTerm);
+  ensureValidPaymentTerm(paymentTerm, priceListId);
+
+  const priceItemSnapshots = await orgRef
+    .collection('priceLists')
+    .doc(priceListId)
+    .collection('items')
+    .get();
+  const priceListItems = priceItemSnapshots.docs.map((doc) =>
+    mapPriceListItem(doc.data()),
+  );
+  priceListItems.forEach((item) => ensureCompanyScope(companyId, 'Price list item', item));
+
+  const policiesSnapshot = await orgRef.collection('discountPolicies').get();
+  const discountPolicy = policiesSnapshot.docs
+    .map((doc) => mapDiscountPolicy(doc.id, doc.data()))
+    .find(
+      (policy) =>
+        (policy.companyId === undefined || policy.companyId === companyId) &&
+        policy.role === roleName &&
+        policy.status === 'active' &&
+        (policy.priceListIds === undefined ||
+          policy.priceListIds.length === 0 ||
+          policy.priceListIds.includes(priceListId)),
+    );
+
+  const campaignSnapshots = await orgRef.collection('promotionalCampaigns').get();
+  const campaigns = campaignSnapshots.docs.map((doc) =>
+    mapCampaign(doc.id, doc.data()),
+  );
+  campaigns.forEach((campaign) => ensureCompanyScope(companyId, 'Campaign', campaign));
+
+  const pricing = calculatePricingEngine({
+    selectedPriceList,
+    priceListItems,
+    paymentTerm,
+    discountPolicy,
+    campaigns,
+    commercialRules: [simulatedRule],
+    customerId,
+    customerSegment,
+    channel,
+    items: normalizedItems,
+    shippingAmount: normalizeCurrency(request.data?.shippingAmount ?? 0, 'shippingAmount'),
+  });
+
+  return {
+    correlationId: resolveCorrelationId(request.data?._meta),
+    idempotencyKey,
+    currency: pricing.currency,
+    subtotal: pricing.subtotal,
+    campaignDiscountTotal: pricing.campaignDiscountTotal,
+    commercialRuleDiscountTotal: pricing.commercialRuleDiscountTotal,
+    manualDiscountTotal: pricing.manualDiscountTotal,
+    paymentTermAdjustmentTotal: pricing.paymentTermAdjustmentTotal,
+    appliedPaymentTermRuleId: pricing.appliedPaymentTermRuleId,
+    shippingAmount: pricing.shippingAmount,
+    total: pricing.total,
+    blocked: pricing.blocked,
+    approvalRequired: pricing.approvalRequired,
+    clientTotalDiverged: false,
+    tolerance,
+    items: pricing.items,
+    commercialRuleTrace: pricing.commercialRuleTrace,
+  };
 });
 
 /**
@@ -418,6 +558,54 @@ export function mapCampaign(
     validFrom: serializeDate(data.validFrom),
     validTo: serializeDate(data.validTo),
   };
+}
+
+export function mapCommercialRule(
+  id: string,
+  data: FirebaseFirestore.DocumentData | undefined,
+): PricingEngineCommercialRule {
+  if (!data) throw new HttpsError('failed-precondition', 'Commercial rule payload missing.');
+  const rawConditions = typeof data.conditions === 'object' && data.conditions !== null
+    ? data.conditions as FirebaseFirestore.DocumentData
+    : {};
+  const rawEffect = typeof data.effect === 'object' && data.effect !== null
+    ? data.effect as FirebaseFirestore.DocumentData
+    : {};
+  return {
+    id,
+    companyId: optionalString(data.companyId),
+    name: requireNonEmptyString(data.name, 'name'),
+    type: requireNonEmptyString(data.type, 'type') as PricingEngineCommercialRule['type'],
+    priority: Number(data.priority ?? 0),
+    status: requireNonEmptyString(data.status, 'status') as PricingEngineCommercialRule['status'],
+    validFrom: serializeDate(data.validFrom),
+    validTo: serializeDate(data.validTo),
+    conditions: {
+      customerIds: stringArray(rawConditions.customerIds),
+      customerSegments: stringArray(rawConditions.customerSegments),
+      productIds: stringArray(rawConditions.productIds),
+      collectionIds: stringArray(rawConditions.collectionIds),
+      categoryIds: stringArray(rawConditions.categoryIds),
+      channels: stringArray(rawConditions.channels),
+      minimumQuantity:
+        rawConditions.minimumQuantity === undefined
+          ? undefined
+          : Number(rawConditions.minimumQuantity),
+      comboProductIds: stringArray(rawConditions.comboProductIds),
+    },
+    effect: {
+      type: requireNonEmptyString(rawEffect.type, 'effect.type') as PricingEngineCommercialRule['effect']['type'],
+      value: rawEffect.value === undefined ? undefined : Number(rawEffect.value),
+      paymentTermId: optionalString(rawEffect.paymentTermId),
+    },
+    stackable: Boolean(data.stackable),
+  };
+}
+
+function stringArray(value: unknown): string[] {
+  return Array.isArray(value)
+    ? value.filter((entry): entry is string => typeof entry === 'string')
+    : [];
 }
 
 export function ensureCompanyScope(
