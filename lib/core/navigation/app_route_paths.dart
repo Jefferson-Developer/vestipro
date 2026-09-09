@@ -965,6 +965,27 @@ final class DemandForecastRoute extends AppRoute {
   }
 }
 
+/// "Identificar produto por foto" (TASK-191, EPIC-28), scoped by
+/// Organization and Company. No [Capability] gate — same "operational tool
+/// over the catalog, not a distinct admin capability" precedent
+/// [VisitRouteRoute] already sets for `customer.view`, except this route
+/// needs none at all: recognizing a product from a photo is no more
+/// sensitive than browsing the catalog itself
+/// ([CatalogHomeRoute]/[CatalogBrowseRoute], also ungated).
+final class ProductRecognitionRoute extends AppRoute {
+  const ProductRecognitionRoute({required this.orgId, required this.companyId});
+
+  final String orgId;
+  final String companyId;
+
+  static const name = 'productRecognition';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/products/recognize';
+
+  @override
+  String get location => '/org/$orgId/companies/$companyId/products/recognize';
+}
+
 /// Customer 360 detail route (TASK-052), scoped by Organization and protected
 /// in [AppRouter] by `customer.view`.
 final class CustomerDetailRoute extends AppRoute {

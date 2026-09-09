@@ -236,6 +236,32 @@ service firebase.storage {
     }
 
     // -------------------------------------------------------------------
+    // organizations/{organizationId}/productRecognitionQueries/{userId}/{fileName}
+    // (`StoragePaths.productRecognitionQuery`, TASK-191, EPIC-28 —
+    // reconhecimento de produto por imagem)
+    // -------------------------------------------------------------------
+    //
+    // A transient query photo, owned by the exact user who captured it
+    // (`userId == request.auth.uid`) — same "own resource, no RBAC
+    // capability needed" shape as `users/{userId}/avatar` above, not a
+    // catalog asset gated by `catalog.manage`. The `recognizeProductImage`
+    // callable (Admin SDK, bypasses these Rules) reads and then deletes this
+    // same object once processed; the `allow delete` clause below only
+    // matters for a client-side cleanup fallback (e.g. the user cancels
+    // before the callable ever runs).
+    // -------------------------------------------------------------------
+
+    match /organizations/{organizationId}/productRecognitionQueries/{userId}/{fileName} {
+      allow read: if isActiveMember(organizationId) && userId == request.auth.uid;
+
+      allow create, update: if isActiveMember(organizationId)
+        && userId == request.auth.uid
+        && isValidProductImage();
+
+      allow delete: if isActiveMember(organizationId) && userId == request.auth.uid;
+    }
+
+    // -------------------------------------------------------------------
     // organizations/{organizationId}/exports/{userId}/{fileName}
     // (TASK-146: large-volume CSV export delivered by `exportReportToCsv`)
     // -------------------------------------------------------------------

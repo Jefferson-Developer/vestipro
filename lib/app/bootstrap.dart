@@ -50,6 +50,7 @@ import '../features/organizations/organizations.dart';
 import '../features/products/products.dart';
 import '../features/privacy/privacy.dart';
 import '../features/product_recommendations/product_recommendations.dart';
+import '../features/product_recognition/product_recognition.dart';
 import '../features/replenishment/replenishment.dart';
 import '../features/reports/reports.dart';
 import '../core/sync/sync.dart';
@@ -1040,6 +1041,22 @@ class VestiProApp extends StatelessWidget {
                   permissionService: getIt<PermissionService>(),
                   createBloc: () => getIt<VisitRouteBloc>(),
                   createPortfolioBloc: () => getIt<CustomerPortfolioBloc>(),
+                ),
+              ),
+          productRecognitionPageBuilder: (context, orgId, companyId) =>
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId: companyId,
+                child: ProductRecognitionPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  createCubit: () => getIt<ProductRecognitionCubit>(),
+                  onProductSelected: (productId) => context.go(
+                    ProductDetailRoute(
+                      orgId: orgId,
+                      productId: productId,
+                    ).location,
+                  ),
                 ),
               ),
           orderListPageBuilder: (context, orgId, companyId, queryParameters) =>

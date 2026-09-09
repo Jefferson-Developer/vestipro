@@ -102,6 +102,9 @@ void main() {
           'report_explanation_generated',
           'report_explanation_generation_failed',
           'product_recommendations_viewed',
+          'product_recognition_completed',
+          'product_recognition_failed',
+          'product_recognition_feedback_submitted',
         ]),
       );
 

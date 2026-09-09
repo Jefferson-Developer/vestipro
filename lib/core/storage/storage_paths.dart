@@ -67,6 +67,26 @@ final class StoragePaths {
     return 'organizations/$organizationId/users/$userId/avatar';
   }
 
+  /// A transient query photo for TASK-191's "identificar produto por foto"
+  /// (EPIC-28) — uploaded by [userId] just before calling the
+  /// `recognizeProductImage` callable, and deleted by that same callable
+  /// once processed (retention policy: never kept longer than the single
+  /// recognition attempt it was uploaded for). Scoped under [userId] (unlike
+  /// [productFile]/[orderAttachment], which are scoped by entity id) since
+  /// this is always one user's own in-flight capture, never a shared/
+  /// persisted product asset — same "own resource, no RBAC capability
+  /// needed" shape as [userAvatar].
+  static String productRecognitionQuery({
+    required String organizationId,
+    required String userId,
+    required String fileName,
+  }) {
+    _requireNonEmpty(organizationId, 'organizationId');
+    _requireNonEmpty(userId, 'userId');
+    _requireNonEmpty(fileName, 'fileName');
+    return 'organizations/$organizationId/productRecognitionQueries/$userId/$fileName';
+  }
+
   /// Throws [ArgumentError] instead of returning a malformed path: an empty
   /// tenant/entity id here is always a caller bug (e.g. building a path
   /// before the current organization is known), never an expected runtime

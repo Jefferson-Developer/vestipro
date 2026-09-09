@@ -324,6 +324,63 @@ describe('organizations/{organizationId}/users/{userId}/avatar', () => {
   });
 });
 
+describe('organizations/{organizationId}/productRecognitionQueries/{userId}/{fileName} (TASK-191)', () => {
+  const PATH_REP_A = `organizations/${ORG_A}/productRecognitionQueries/rep-a/query-1.jpg`;
+  const validImage = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
+  const oversizedImage = new Uint8Array(PRODUCT_IMAGE_MAX_BYTES + 1);
+
+  test('usuário consegue enviar a própria foto de consulta', async () => {
+    await assertSucceeds(upload('rep-a', PATH_REP_A, validImage, 'image/jpeg'));
+  });
+
+  test('usuário não consegue enviar foto de consulta em nome de outro usuário', async () => {
+    await assertFails(upload('assistant-a', PATH_REP_A, validImage, 'image/jpeg'));
+  });
+
+  test('upload de foto de consulta com tipo de arquivo não permitido é rejeitado', async () => {
+    await assertFails(upload('rep-a', PATH_REP_A, validImage, 'application/pdf'));
+  });
+
+  test('upload de foto de consulta acima do limite de tamanho é rejeitado', async () => {
+    await assertFails(upload('rep-a', PATH_REP_A, oversizedImage, 'image/jpeg'));
+  });
+
+  test('membro inativo não consegue enviar foto de consulta', async () => {
+    const path = `organizations/${ORG_A}/productRecognitionQueries/inactive-a/query-1.jpg`;
+    await assertFails(upload('inactive-a', path, validImage, 'image/jpeg'));
+  });
+
+  test('usuário consegue ler a própria foto de consulta', async () => {
+    await seedFile(PATH_REP_A, validImage, 'image/jpeg');
+    const storage = testEnv.authenticatedContext('rep-a').storage();
+    await assertSucceeds(getBytes(ref(storage, PATH_REP_A)));
+  });
+
+  test('outro membro da mesma organização não consegue ler a foto de consulta de rep-a', async () => {
+    await seedFile(PATH_REP_A, validImage, 'image/jpeg');
+    const storage = testEnv.authenticatedContext('owner-a').storage();
+    await assertFails(getBytes(ref(storage, PATH_REP_A)));
+  });
+
+  test('membro de outra organização não consegue ler foto de consulta (cross-tenant)', async () => {
+    await seedFile(PATH_REP_A, validImage, 'image/jpeg');
+    const storage = testEnv.authenticatedContext('owner-b').storage();
+    await assertFails(getBytes(ref(storage, PATH_REP_A)));
+  });
+
+  test('usuário consegue excluir a própria foto de consulta', async () => {
+    await seedFile(PATH_REP_A, validImage, 'image/jpeg');
+    const storage = testEnv.authenticatedContext('rep-a').storage();
+    await assertSucceeds(deleteObject(ref(storage, PATH_REP_A)));
+  });
+
+  test('usuário não consegue excluir foto de consulta de outro usuário', async () => {
+    await seedFile(PATH_REP_A, validImage, 'image/jpeg');
+    const storage = testEnv.authenticatedContext('assistant-a').storage();
+    await assertFails(deleteObject(ref(storage, PATH_REP_A)));
+  });
+});
+
 describe('organizations/{organizationId}/exports/{userId}/{fileName} (TASK-146)', () => {
   const csvBytes = new Uint8Array([0xef, 0xbb, 0xbf, 0x61, 0x3b, 0x62]);
 

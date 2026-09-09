@@ -1292,6 +1292,43 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/productImageEmbeddings/{embeddingId}
+      // organizations/{organizationId}/productRecognitionAttempts/{attemptId}
+      // (TASK-191, EPIC-28 — IA generativa: reconhecimento de produto por
+      // imagem)
+      // -------------------------------------------------------------------
+      //
+      // Same "server owns every write, deny-all is not just the implicit
+      // default" shape as `walletSummaries`/`approachSuggestions`/
+      // `dailyRepSummaries`/`reportExplanations` above.
+      //
+      // `productImageEmbeddings` is exclusively written by the
+      // `indexProductImageEmbedding`/`removeProductImageEmbeddingOnDelete`
+      // Storage triggers (Admin SDK, bypass these Rules) and exclusively read
+      // by `recognizeProductImage` (also Admin SDK) — a client never reads or
+      // writes an embedding vector directly, so it can never be used to probe
+      // another organization's catalog even indirectly: `recognizeProductImage`
+      // itself only ever loads the caller's own `organizationId` index
+      // (`loadOrganizationIndex`, re-derived server-side, never trusting the
+      // client's claimed scope beyond the caller's real active Membership).
+      //
+      // `productRecognitionAttempts` is exclusively written by
+      // `recognizeProductImage` (create) and `submitProductRecognitionFeedback`
+      // (feedback update) — a client never reads this collection directly;
+      // the only way to obtain a recognition result is `recognizeProductImage`'s
+      // own response, which already re-checks the caller's active Membership
+      // before returning anything.
+      // -------------------------------------------------------------------
+
+      match /productImageEmbeddings/{embeddingId} {
+        allow read, write: if false;
+      }
+
+      match /productRecognitionAttempts/{attemptId} {
+        allow read, write: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/webhooks/{webhookId}
       // organizations/{organizationId}/webhookSecrets/{webhookId}
       // organizations/{organizationId}/webhookDeliveries/{deliveryId}

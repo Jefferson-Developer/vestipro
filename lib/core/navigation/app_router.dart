@@ -45,6 +45,7 @@ class AppRouter {
     this.customerPortfolioPageBuilder,
     this.customerDetailPageBuilder,
     this.visitRoutePageBuilder,
+    this.productRecognitionPageBuilder,
     this.catalogBrowsePageBuilder,
     this.orderListPageBuilder,
     this.orderApprovalQueuePageBuilder,
@@ -156,6 +157,11 @@ class AppRouter {
   /// `orgId`/`companyId` from [VisitRouteRoute].
   final Widget Function(BuildContext context, String orgId, String companyId)?
   visitRoutePageBuilder;
+
+  /// Builds the "identificar produto por foto" screen (TASK-191, EPIC-28),
+  /// given `orgId`/`companyId` from [ProductRecognitionRoute].
+  final Widget Function(BuildContext context, String orgId, String companyId)?
+  productRecognitionPageBuilder;
 
   /// Builds the pedidos listing/tracking screen (TASK-102), given
   /// `orgId`/`companyId` and the raw `queryParameters` of [OrderListRoute] —
@@ -939,6 +945,19 @@ class AppRouter {
         ),
         builder: (context, state) {
           final builder = visitRoutePageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: ProductRecognitionRoute.pathPattern,
+        name: ProductRecognitionRoute.name,
+        builder: (context, state) {
+          final builder = productRecognitionPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,

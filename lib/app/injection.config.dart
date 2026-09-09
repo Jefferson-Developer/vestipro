@@ -1167,6 +1167,16 @@ import '../features/product_import/domain/usecases/watch_product_import_job_use_
     as _i374;
 import '../features/product_import/presentation/bloc/product_import_bloc.dart'
     as _i752;
+import '../features/product_recognition/data/repositories/cloud_functions_product_recognition_repository.dart'
+    as _i656;
+import '../features/product_recognition/domain/repositories/product_recognition_repository.dart'
+    as _i98;
+import '../features/product_recognition/domain/usecases/recognize_product_image_use_case.dart'
+    as _i709;
+import '../features/product_recognition/domain/usecases/submit_product_recognition_feedback_use_case.dart'
+    as _i257;
+import '../features/product_recognition/presentation/cubit/product_recognition_cubit.dart'
+    as _i1064;
 import '../features/product_recommendations/data/datasources/firestore_product_recommendation_data_source.dart'
     as _i933;
 import '../features/product_recommendations/data/datasources/product_recommendation_data_source.dart'
@@ -3361,6 +3371,15 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1072.CatalogHomeConfigRepository>(),
       ),
     );
+    gh.lazySingleton<_i98.ProductRecognitionRepository>(
+      () => _i656.CloudFunctionsProductRecognitionRepository(
+        gh<_i340.CloudFunctionsService>(),
+        gh<_i209.StorageDataSource>(),
+        gh<_i59.FirebaseAuth>(),
+        gh<_i209.ImageUploadCompressor>(),
+        uuid: gh<_i706.Uuid>(),
+      ),
+    );
     gh.lazySingleton<_i160.BranchRepository>(
       () => _i375.BranchRepositoryImpl(
         dataSource: gh<_i526.BranchDataSource>(),
@@ -3377,6 +3396,18 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i15.OrderProductAdditionCubit>(
       () => _i15.OrderProductAdditionCubit(
         gh<_i720.AddItemsToOrderDraftUseCase>(),
+      ),
+    );
+    gh.factory<_i709.RecognizeProductImageUseCase>(
+      () => _i709.RecognizeProductImageUseCase(
+        gh<_i98.ProductRecognitionRepository>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i257.SubmitProductRecognitionFeedbackUseCase>(
+      () => _i257.SubmitProductRecognitionFeedbackUseCase(
+        gh<_i98.ProductRecognitionRepository>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.lazySingleton<_i737.ApproachSuggestionRepository>(
@@ -3633,6 +3664,12 @@ extension GetItInjectableX on _i174.GetIt {
         dataSource: gh<_i902.InsightDataSource>(),
         mapper: gh<_i963.InsightMapper>(),
         validator: gh<_i864.InsightStructuralValidator>(),
+      ),
+    );
+    gh.factory<_i1064.ProductRecognitionCubit>(
+      () => _i1064.ProductRecognitionCubit(
+        gh<_i709.RecognizeProductImageUseCase>(),
+        gh<_i257.SubmitProductRecognitionFeedbackUseCase>(),
       ),
     );
     gh.lazySingleton<_i183.OrderPricingRepository>(

@@ -303,6 +303,28 @@ final class AnalyticsEvents {
   static const String productRecommendationsViewed =
       'product_recommendations_viewed';
 
+  /// Logged by `RecognizeProductImageUseCase` (TASK-191, EPIC-28) whenever a
+  /// `recognizeProductImage` call succeeds (including when
+  /// `belowThreshold` is `true`, i.e. no candidate reached the confidence
+  /// bar) — `candidate_count`/`below_threshold` are carried as parameters,
+  /// never the recognized product ids/names themselves. Never logged for a
+  /// failed call (see `productRecognitionFailed`).
+  static const String productRecognitionCompleted =
+      'product_recognition_completed';
+
+  /// Logged by `RecognizeProductImageUseCase` (TASK-191, EPIC-28) whenever a
+  /// `recognizeProductImage` call fails (provider unavailable, upload
+  /// error, validation rejected) — `failure_code` is carried as a
+  /// parameter.
+  static const String productRecognitionFailed = 'product_recognition_failed';
+
+  /// Logged by `SubmitProductRecognitionFeedbackUseCase` (TASK-191,
+  /// EPIC-28) whenever a seller answers "era este"/"não era nenhum" for a
+  /// recognition attempt — `outcome` is carried as a parameter, never the
+  /// matched product id.
+  static const String productRecognitionFeedbackSubmitted =
+      'product_recognition_feedback_submitted';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -402,5 +424,8 @@ final class AnalyticsEvents {
     reportExplanationGenerated,
     reportExplanationGenerationFailed,
     productRecommendationsViewed,
+    productRecognitionCompleted,
+    productRecognitionFailed,
+    productRecognitionFeedbackSubmitted,
   ];
 }

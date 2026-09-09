@@ -310,6 +310,45 @@ void main() {
       expect(find.text('product-form:acme:company-1'), findsNothing);
     });
 
+    testWidgets(
+      'passes ProductRecognitionRoute path parameters to the injected page '
+      'with no Capability gate (TASK-191)',
+      (tester) async {
+        String? capturedOrgId;
+        String? capturedCompanyId;
+        final appRouter = _buildRouter(
+          // Never protected by any Capability — an active member always
+          // needs to reach this route (`AppRouter.productRecognitionPageBuilder`'s
+          // own doc comment); a hostile "deny everything" guard here proves
+          // the route itself carries no `redirect:`, unlike
+          // `ProductFormRoute`/`CustomerDetailRoute` above.
+          authorizationGuard: const _DenyEverythingAuthorizationGuard(),
+          productRecognitionPageBuilder: (context, orgId, companyId) {
+            capturedOrgId = orgId;
+            capturedCompanyId = companyId;
+            return Scaffold(
+              body: Text('product-recognition:$orgId:$companyId'),
+            );
+          },
+        );
+
+        await tester.pumpWidget(
+          MaterialApp.router(routerConfig: appRouter.router),
+        );
+        appRouter.router.go(
+          const ProductRecognitionRoute(
+            orgId: 'acme',
+            companyId: 'company-1',
+          ).location,
+        );
+        await tester.pumpAndSettle();
+
+        expect(capturedOrgId, 'acme');
+        expect(capturedCompanyId, 'company-1');
+        expect(find.text('product-recognition:acme:company-1'), findsOneWidget);
+      },
+    );
+
     testWidgets('passes CustomerPortfolioRoute query parameters to the '
         'injected page', (tester) async {
       Map<String, String>? capturedQuery;
@@ -490,6 +529,8 @@ AppRouter _buildRouter({
   customerFormPageBuilder,
   Widget Function(BuildContext context, String orgId, String companyId)?
   productFormPageBuilder,
+  Widget Function(BuildContext context, String orgId, String companyId)?
+  productRecognitionPageBuilder,
   Widget Function(
     BuildContext context,
     String orgId,
@@ -533,6 +574,7 @@ AppRouter _buildRouter({
         (context, orgId) => Scaffold(body: Text('user-management:$orgId')),
     customerFormPageBuilder: customerFormPageBuilder,
     productFormPageBuilder: productFormPageBuilder,
+    productRecognitionPageBuilder: productRecognitionPageBuilder,
     customerPortfolioPageBuilder: customerPortfolioPageBuilder,
     customerDetailPageBuilder: customerDetailPageBuilder,
     catalogBrowsePageBuilder: catalogBrowsePageBuilder,
@@ -622,6 +664,24 @@ final class _DenyCustomerCreateGuard implements AuthorizationGuard {
       return const ForbiddenRoute().location;
     }
     return null;
+  }
+}
+
+/// Denies every possible [Capability] — used to prove a route (e.g.
+/// [ProductRecognitionRoute]) is reachable regardless of what any
+/// [AuthorizationGuard] would decide, because that `GoRoute` carries no
+/// `redirect:` clause at all (unlike [ProductFormRoute]/[CustomerDetailRoute],
+/// whose own tests use a narrower single-capability deny guard instead).
+final class _DenyEverythingAuthorizationGuard implements AuthorizationGuard {
+  const _DenyEverythingAuthorizationGuard();
+
+  @override
+  String? redirect(
+    BuildContext context,
+    GoRouterState state, {
+    required Capability requiredCapability,
+  }) {
+    return const ForbiddenRoute().location;
   }
 }
 
