@@ -48,6 +48,7 @@ import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import '../features/orders/orders.dart';
 import '../features/returns/returns.dart';
 import '../features/exchanges/exchanges.dart';
+import '../features/after_sales/after_sales.dart';
 import '../features/organizations/organizations.dart';
 import '../features/products/products.dart';
 import '../features/privacy/privacy.dart';
@@ -1157,6 +1158,10 @@ class VestiProApp extends StatelessWidget {
                       getIt<ExchangeRequestHistoryCubit>(),
                   createExchangeRequestFormCubit: () =>
                       getIt<ExchangeRequestFormCubit>(),
+                  createPostSaleTimelineCubit: () =>
+                      getIt<PostSaleTimelineCubit>(),
+                  createRegisterPostSaleEventCubit: () =>
+                      getIt<RegisterPostSaleEventCubit>(),
                   onDuplicated: (order) => context.go(
                     OrderDraftRoute(
                       orgId: orgId,

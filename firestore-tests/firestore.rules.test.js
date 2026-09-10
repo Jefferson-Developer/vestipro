@@ -557,6 +557,32 @@ function returnRequestDoc({
   };
 }
 
+function postSaleEventDoc({
+  organizationId,
+  companyId = 'company-a',
+  orderId = 'order-rep-a',
+  sellerId,
+  customerId = 'customer-a',
+  type = 'delivered',
+}) {
+  return {
+    organizationId,
+    companyId,
+    orderId,
+    orderNumber: '000001',
+    customerId,
+    sellerId,
+    type,
+    description: null,
+    source: 'manual',
+    sourceRequestId: null,
+    createdBy: sellerId,
+    createdByName: 'Vendedor Teste',
+    createdAt: now(),
+    notifiedSeller: true,
+  };
+}
+
 function exchangeRequestDoc({
   organizationId,
   companyId = 'company-a',
@@ -1648,6 +1674,83 @@ describe('organizations/{organizationId}/exchangeRequests/{exchangeRequestId}  (
       db.doc(`organizations/${ORG_A}/exchangeRequests/exchange-rep-a`).update({ status: 'approved' }),
     );
     await assertFails(db.doc(`organizations/${ORG_A}/exchangeRequests/exchange-rep-a`).delete());
+  });
+});
+
+describe('organizations/{organizationId}/postSaleEvents/{postSaleEventId}  (TASK-201, EPIC-30 — pós-venda)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/orders/order-rep-a`)
+        .set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/orders/order-rep-b`)
+        .set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-b' }));
+      await db
+        .doc(`organizations/${ORG_A}/postSaleEvents/event-rep-a`)
+        .set(postSaleEventDoc({ organizationId: ORG_A, orderId: 'order-rep-a', sellerId: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/postSaleEvents/event-rep-b`)
+        .set(postSaleEventDoc({ organizationId: ORG_A, orderId: 'order-rep-b', sellerId: 'rep-b' }));
+      await db
+        .doc(`organizations/${ORG_B}/postSaleEvents/event-other-tenant`)
+        .set(
+          postSaleEventDoc({
+            organizationId: ORG_B,
+            companyId: 'company-b',
+            orderId: 'order-other-tenant',
+            sellerId: 'owner-b',
+          }),
+        );
+    });
+  });
+
+  test('SALES_REP lê o próprio evento de pós-venda (do próprio pedido)', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/postSaleEvents/event-rep-a`).get());
+  });
+
+  test('SALES_REP não lê evento de pós-venda de pedido de outro vendedor', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/postSaleEvents/event-rep-b`).get());
+  });
+
+  test('SALES_MANAGER lê evento do vendedor da própria equipe, mas não de outra equipe', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/postSaleEvents/event-rep-a`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/postSaleEvents/event-rep-b`).get());
+  });
+
+  test('ADMIN e OWNER leem todos os eventos de pós-venda da própria organization', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+
+    await assertSucceeds(ownerDb.collection(`organizations/${ORG_A}/postSaleEvents`).get());
+    await assertSucceeds(adminDb.collection(`organizations/${ORG_A}/postSaleEvents`).get());
+  });
+
+  test('FINANCE não lê eventos de pós-venda (sem escopo de pedido)', async () => {
+    const db = testEnv.authenticatedContext('finance-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/postSaleEvents/event-rep-a`).get());
+  });
+
+  test('membro da Org A não lê evento de pós-venda da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/postSaleEvents/event-other-tenant`).get());
+  });
+
+  test('ninguém escreve evento de pós-venda pelo cliente, nem OWNER — registerPostSaleEvent/createReturnRequest/resolveReturnRequest/createExchangeRequest/resolveExchangeRequest (Admin SDK) são o único caminho', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/postSaleEvents/event-new`)
+        .set(postSaleEventDoc({ organizationId: ORG_A, orderId: 'order-rep-a', sellerId: 'rep-a' })),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/postSaleEvents/event-rep-a`).update({ description: 'editado' }),
+    );
+    await assertFails(db.doc(`organizations/${ORG_A}/postSaleEvents/event-rep-a`).delete());
   });
 });
 

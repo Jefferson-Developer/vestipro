@@ -15,6 +15,7 @@ import '../../domain/services/order_receipt_pdf_encoder.dart';
 import '../../domain/usecases/capture_order_signature_use_case.dart'
     show kSignableOrderStatuses;
 import '../../domain/value_objects/order_status.dart';
+import '../../../after_sales/after_sales.dart';
 import '../../../exchanges/exchanges.dart';
 import '../../../returns/returns.dart';
 import '../bloc/order_duplication_cubit.dart';
@@ -47,6 +48,8 @@ class OrderHistoryPage extends StatelessWidget {
     required this.createReturnRequestFormCubit,
     required this.createExchangeRequestHistoryCubit,
     required this.createExchangeRequestFormCubit,
+    required this.createPostSaleTimelineCubit,
+    required this.createRegisterPostSaleEventCubit,
     this.onDuplicated,
     super.key,
   });
@@ -85,6 +88,16 @@ class OrderHistoryPage extends StatelessWidget {
   /// each time, same one-cubit-per-push convention [createDuplicationCubit]
   /// already sets.
   final ExchangeRequestFormCubit Function() createExchangeRequestFormCubit;
+
+  /// Feeds the "Pós-venda" timeline section (TASK-201, EPIC-30) embedded in
+  /// this same screen.
+  final PostSaleTimelineCubit Function() createPostSaleTimelineCubit;
+
+  /// Builds a fresh `RegisterPostSaleEventCubit` every time "Registrar
+  /// evento" is pushed (TASK-201) — a brand new registro intent (and
+  /// idempotency key) each time, same one-cubit-per-push convention
+  /// [createReturnRequestFormCubit] already sets.
+  final RegisterPostSaleEventCubit Function() createRegisterPostSaleEventCubit;
 
   /// Called once "Repetir pedido" successfully creates a new draft — always
   /// navigates into the existing order draft flow (`OrderDraftRoute`,
@@ -140,6 +153,8 @@ class OrderHistoryPage extends StatelessWidget {
             createExchangeRequestHistoryCubit:
                 createExchangeRequestHistoryCubit,
             createExchangeRequestFormCubit: createExchangeRequestFormCubit,
+            createPostSaleTimelineCubit: createPostSaleTimelineCubit,
+            createRegisterPostSaleEventCubit: createRegisterPostSaleEventCubit,
             onDuplicated: onDuplicated,
           ),
         );
@@ -158,6 +173,8 @@ class _OrderHistoryPermissionsGate extends StatefulWidget {
     required this.createReturnRequestFormCubit,
     required this.createExchangeRequestHistoryCubit,
     required this.createExchangeRequestFormCubit,
+    required this.createPostSaleTimelineCubit,
+    required this.createRegisterPostSaleEventCubit,
     this.onDuplicated,
   });
 
@@ -170,6 +187,8 @@ class _OrderHistoryPermissionsGate extends StatefulWidget {
   final ExchangeRequestHistoryCubit Function()
   createExchangeRequestHistoryCubit;
   final ExchangeRequestFormCubit Function() createExchangeRequestFormCubit;
+  final PostSaleTimelineCubit Function() createPostSaleTimelineCubit;
+  final RegisterPostSaleEventCubit Function() createRegisterPostSaleEventCubit;
   final ValueChanged<Order>? onDuplicated;
 
   @override
@@ -182,6 +201,7 @@ class _OrderHistoryPermissionsGateState
   late final Future<bool> _canDuplicate;
   late final Future<bool> _canRequestReturn;
   late final Future<bool> _canRequestExchange;
+  late final Future<bool> _canRegisterPostSaleEvent;
 
   @override
   void initState() {
@@ -233,6 +253,22 @@ class _OrderHistoryPermissionsGateState
             onFailure: (_) => false,
           ),
         );
+    // "Registrar evento" (TASK-201, EPIC-30) — gated by
+    // `Capability.postSaleEventRegister`; `registerPostSaleEvent` (Cloud
+    // Function) remains the real, independent source of truth for both this
+    // capability and the seller/pedido-ownership scope.
+    _canRegisterPostSaleEvent = widget.permissionService
+        .hasPermission(
+          organizationId: widget.organizationId,
+          userId: widget.sellerId,
+          capability: Capability.postSaleEventRegister,
+        )
+        .then(
+          (result) => result.fold(
+            onSuccess: (granted) => granted,
+            onFailure: (_) => false,
+          ),
+        );
   }
 
   @override
@@ -246,22 +282,33 @@ class _OrderHistoryPermissionsGateState
             return FutureBuilder<bool>(
               future: _canRequestExchange,
               builder: (context, exchangeSnapshot) {
-                return _OrderHistoryScaffold(
-                  canDuplicate: duplicateSnapshot.data ?? false,
-                  canRequestReturn: returnSnapshot.data ?? false,
-                  canRequestExchange: exchangeSnapshot.data ?? false,
-                  organizationId: widget.organizationId,
-                  companyId: widget.companyId,
-                  sellerId: widget.sellerId,
-                  createReturnRequestHistoryCubit:
-                      widget.createReturnRequestHistoryCubit,
-                  createReturnRequestFormCubit:
-                      widget.createReturnRequestFormCubit,
-                  createExchangeRequestHistoryCubit:
-                      widget.createExchangeRequestHistoryCubit,
-                  createExchangeRequestFormCubit:
-                      widget.createExchangeRequestFormCubit,
-                  onDuplicated: widget.onDuplicated,
+                return FutureBuilder<bool>(
+                  future: _canRegisterPostSaleEvent,
+                  builder: (context, postSaleEventSnapshot) {
+                    return _OrderHistoryScaffold(
+                      canDuplicate: duplicateSnapshot.data ?? false,
+                      canRequestReturn: returnSnapshot.data ?? false,
+                      canRequestExchange: exchangeSnapshot.data ?? false,
+                      canRegisterPostSaleEvent:
+                          postSaleEventSnapshot.data ?? false,
+                      organizationId: widget.organizationId,
+                      companyId: widget.companyId,
+                      sellerId: widget.sellerId,
+                      createReturnRequestHistoryCubit:
+                          widget.createReturnRequestHistoryCubit,
+                      createReturnRequestFormCubit:
+                          widget.createReturnRequestFormCubit,
+                      createExchangeRequestHistoryCubit:
+                          widget.createExchangeRequestHistoryCubit,
+                      createExchangeRequestFormCubit:
+                          widget.createExchangeRequestFormCubit,
+                      createPostSaleTimelineCubit:
+                          widget.createPostSaleTimelineCubit,
+                      createRegisterPostSaleEventCubit:
+                          widget.createRegisterPostSaleEventCubit,
+                      onDuplicated: widget.onDuplicated,
+                    );
+                  },
                 );
               },
             );
@@ -277,6 +324,7 @@ class _OrderHistoryScaffold extends StatelessWidget {
     required this.canDuplicate,
     required this.canRequestReturn,
     required this.canRequestExchange,
+    required this.canRegisterPostSaleEvent,
     required this.organizationId,
     required this.companyId,
     required this.sellerId,
@@ -284,12 +332,15 @@ class _OrderHistoryScaffold extends StatelessWidget {
     required this.createReturnRequestFormCubit,
     required this.createExchangeRequestHistoryCubit,
     required this.createExchangeRequestFormCubit,
+    required this.createPostSaleTimelineCubit,
+    required this.createRegisterPostSaleEventCubit,
     this.onDuplicated,
   });
 
   final bool canDuplicate;
   final bool canRequestReturn;
   final bool canRequestExchange;
+  final bool canRegisterPostSaleEvent;
   final String organizationId;
   final String companyId;
   final String sellerId;
@@ -298,6 +349,8 @@ class _OrderHistoryScaffold extends StatelessWidget {
   final ExchangeRequestHistoryCubit Function()
   createExchangeRequestHistoryCubit;
   final ExchangeRequestFormCubit Function() createExchangeRequestFormCubit;
+  final PostSaleTimelineCubit Function() createPostSaleTimelineCubit;
+  final RegisterPostSaleEventCubit Function() createRegisterPostSaleEventCubit;
   final ValueChanged<Order>? onDuplicated;
 
   /// Pedido statuses a devolução — ou uma troca (TASK-200, EPIC-30) — may be
@@ -314,6 +367,23 @@ class _OrderHistoryScaffold extends StatelessWidget {
     OrderStatus.shipped,
     OrderStatus.delivered,
     OrderStatus.partiallyReturned,
+  };
+
+  /// Pedido statuses a pós-venda event (TASK-201, EPIC-30) may ever be
+  /// registered against — mirrors exactly
+  /// `POST_SALE_EVENT_ELIGIBLE_ORDER_STATUSES`
+  /// (`functions/src/after_sales/after-sales-shared.ts`): a bit wider than
+  /// [_returnEligibleStatuses], since tracking "despachado"/"em trânsito"
+  /// may start as soon as separação/expedição begins ([OrderStatus.processing]),
+  /// before the pedido is even faturado.
+  static const _postSaleEventEligibleStatuses = <OrderStatus>{
+    OrderStatus.processing,
+    OrderStatus.invoiced,
+    OrderStatus.partiallyInvoiced,
+    OrderStatus.shipped,
+    OrderStatus.delivered,
+    OrderStatus.partiallyReturned,
+    OrderStatus.returned,
   };
 
   @override
@@ -354,6 +424,10 @@ class _OrderHistoryScaffold extends StatelessWidget {
                     canRequestExchange &&
                     order != null &&
                     _returnEligibleStatuses.contains(order.status);
+                final canSubmitPostSaleEvent =
+                    canRegisterPostSaleEvent &&
+                    order != null &&
+                    _postSaleEventEligibleStatuses.contains(order.status);
 
                 return Scaffold(
                   body: AppAdminPageLayout(
@@ -380,6 +454,19 @@ class _OrderHistoryScaffold extends StatelessWidget {
                           leadingIcon: Icons.swap_horiz_outlined,
                           variant: AppButtonVariant.secondary,
                           onPressed: () => _requestExchange(
+                            context,
+                            organizationId: organizationId,
+                            companyId: companyId,
+                            userId: sellerId,
+                            order: order,
+                          ),
+                        ),
+                      if (canSubmitPostSaleEvent)
+                        AppButton(
+                          label: 'Registrar evento',
+                          leadingIcon: Icons.event_note_outlined,
+                          variant: AppButtonVariant.secondary,
+                          onPressed: () => _registerPostSaleEvent(
                             context,
                             organizationId: organizationId,
                             companyId: companyId,
@@ -434,6 +521,7 @@ class _OrderHistoryScaffold extends StatelessWidget {
                           createReturnRequestHistoryCubit,
                       createExchangeRequestHistoryCubit:
                           createExchangeRequestHistoryCubit,
+                      createPostSaleTimelineCubit: createPostSaleTimelineCubit,
                     ),
                   ),
                 );
@@ -480,6 +568,27 @@ class _OrderHistoryScaffold extends StatelessWidget {
           userId: userId,
           order: order,
           createCubit: createExchangeRequestFormCubit,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _registerPostSaleEvent(
+    BuildContext context, {
+    required String organizationId,
+    required String companyId,
+    required String userId,
+    required Order order,
+  }) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => RegisterPostSaleEventPage(
+          organizationId: organizationId,
+          companyId: companyId,
+          userId: userId,
+          orderId: order.id,
+          orderLabel: order.orderNumber ?? order.id,
+          createCubit: createRegisterPostSaleEventCubit,
         ),
       ),
     );
@@ -583,6 +692,7 @@ class _OrderHistoryContent extends StatelessWidget {
     required this.organizationId,
     required this.createReturnRequestHistoryCubit,
     required this.createExchangeRequestHistoryCubit,
+    required this.createPostSaleTimelineCubit,
   });
 
   final OrderHistoryState state;
@@ -590,6 +700,7 @@ class _OrderHistoryContent extends StatelessWidget {
   final ReturnRequestHistoryCubit Function() createReturnRequestHistoryCubit;
   final ExchangeRequestHistoryCubit Function()
   createExchangeRequestHistoryCubit;
+  final PostSaleTimelineCubit Function() createPostSaleTimelineCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -621,6 +732,12 @@ class _OrderHistoryContent extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.spacing12),
           OrderStatusHistoryTimeline(entries: order.statusHistory),
+          const SizedBox(height: AppSpacing.spacing24),
+          PostSaleTimelineSection(
+            organizationId: organizationId,
+            orderId: order.id,
+            createCubit: createPostSaleTimelineCubit,
+          ),
           const SizedBox(height: AppSpacing.spacing24),
           ReturnRequestHistorySection(
             organizationId: organizationId,

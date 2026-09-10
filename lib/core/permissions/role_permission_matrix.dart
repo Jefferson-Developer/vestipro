@@ -83,6 +83,11 @@ abstract final class RolePermissionMatrix {
     // via o conjunto completo/quase completo acima.
     Capability.exchangeRequestCreate,
     Capability.exchangeRequestApprove,
+    // TASK-201: SALES_MANAGER registra manualmente um marco de pós-venda
+    // para pedidos da própria equipe — mesma amplitude de
+    // Capability.returnRequestCreate; OWNER/ADMIN já a recebem via o
+    // conjunto completo/quase completo acima.
+    Capability.postSaleEventRegister,
   };
 
   static const Set<Capability> _salesRepCapabilities = <Capability>{
@@ -114,6 +119,9 @@ abstract final class RolePermissionMatrix {
     // decide (aprova/recusa) uma troca — mesma amplitude/assimetria já
     // aplicada a Capability.returnRequestCreate vs. Capability.returnRequestApprove.
     Capability.exchangeRequestCreate,
+    // TASK-201: SALES_REP registra manualmente um marco de pós-venda para os
+    // próprios pedidos, mesma amplitude de Capability.returnRequestCreate.
+    Capability.postSaleEventRegister,
   };
 
   static const Set<Capability> _salesAssistantCapabilities = <Capability>{

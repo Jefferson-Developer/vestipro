@@ -371,6 +371,13 @@ final class AnalyticsEvents {
   /// motivo's free text.
   static const String exchangeRejected = 'exchange_rejected';
 
+  /// Logged by `RegisterPostSaleEventCubit` (TASK-201, EPIC-30) whenever a
+  /// manual pós-venda milestone (despachado, em trânsito, entregue, problema
+  /// reportado, em resolução ou resolvido) is successfully registered onto a
+  /// pedido's own timeline — `order_id`/`event_type` are carried as
+  /// parameters, never the free-text description.
+  static const String postSaleEventRegistered = 'post_sale_event_registered';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -481,5 +488,6 @@ final class AnalyticsEvents {
     exchangeRequested,
     exchangeApproved,
     exchangeRejected,
+    postSaleEventRegistered,
   ];
 }

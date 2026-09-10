@@ -22,6 +22,7 @@ import {
   resolveRestockPlans,
   type RestockableItem,
 } from './return-shared';
+import { appendPostSaleEvent } from '../after_sales/after-sales-shared';
 
 /**
  * Only these roles may ever decide (aprovar/recusar) a `ReturnRequest`
@@ -203,6 +204,27 @@ export const resolveReturnRequest = onCall<
         newValue: { returnRequestId, status: 'rejected', reason },
         timestamp: now,
       });
+      // Links this decisão onto the pedido's own pós-venda timeline
+      // (TASK-201, EPIC-30) — see `create-return-request.ts`'s own
+      // `appendPostSaleEvent` call for `return_requested`.
+      appendPostSaleEvent(transaction, organizationRef, {
+        eventRef: organizationRef.collection('postSaleEvents').doc(),
+        organizationId,
+        companyId,
+        orderId,
+        orderNumber: order.orderNumber,
+        customerId: order.customerId,
+        sellerId: order.sellerId,
+        type: 'return_resolved',
+        description: reason
+          ? `Devolução recusada (motivo: ${reason}).`
+          : 'Devolução recusada.',
+        source: 'system',
+        sourceRequestId: returnRequestId,
+        createdBy: uid,
+        createdByName: actorName,
+        now,
+      });
       return {
         correlationId,
         returnRequestId,
@@ -318,6 +340,26 @@ export const resolveReturnRequest = onCall<
         reason: reason ?? null,
       },
       timestamp: now,
+    });
+
+    // Links this decisão onto the pedido's own pós-venda timeline
+    // (TASK-201, EPIC-30) — see `create-return-request.ts`'s own
+    // `appendPostSaleEvent` call for `return_requested`.
+    appendPostSaleEvent(transaction, organizationRef, {
+      eventRef: organizationRef.collection('postSaleEvents').doc(),
+      organizationId,
+      companyId,
+      orderId,
+      orderNumber: order.orderNumber,
+      customerId: order.customerId,
+      sellerId: order.sellerId,
+      type: 'return_resolved',
+      description: 'Devolução aprovada.',
+      source: 'system',
+      sourceRequestId: returnRequestId,
+      createdBy: uid,
+      createdByName: actorName,
+      now,
     });
 
     return {

@@ -177,6 +177,26 @@ import '../core/sync/presentation/cubit/conflict_resolution_cubit.dart'
     as _i717;
 import '../core/sync/presentation/cubit/outbox_watcher_cubit.dart' as _i866;
 import '../core/sync/presentation/cubit/sync_center_cubit.dart' as _i542;
+import '../features/after_sales/data/datasources/cloud_functions_post_sale_event_data_source.dart'
+    as _i755;
+import '../features/after_sales/data/datasources/firestore_post_sale_event_data_source.dart'
+    as _i11;
+import '../features/after_sales/data/datasources/post_sale_event_read_data_source.dart'
+    as _i860;
+import '../features/after_sales/data/datasources/post_sale_event_write_data_source.dart'
+    as _i1043;
+import '../features/after_sales/data/repositories/post_sale_event_repository_impl.dart'
+    as _i862;
+import '../features/after_sales/domain/repositories/post_sale_event_repository.dart'
+    as _i27;
+import '../features/after_sales/domain/usecases/register_post_sale_event_use_case.dart'
+    as _i560;
+import '../features/after_sales/domain/usecases/watch_post_sale_timeline_for_order_use_case.dart'
+    as _i490;
+import '../features/after_sales/presentation/cubit/post_sale_timeline_cubit.dart'
+    as _i110;
+import '../features/after_sales/presentation/cubit/register_post_sale_event_cubit.dart'
+    as _i547;
 import '../features/approach_suggestion/data/repositories/cloud_functions_approach_suggestion_repository.dart'
     as _i73;
 import '../features/approach_suggestion/domain/repositories/approach_suggestion_repository.dart'
@@ -3195,6 +3215,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
+    gh.lazySingleton<_i1043.PostSaleEventWriteDataSource>(
+      () => _i755.CloudFunctionsPostSaleEventDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i164.SsoRepository>(
       () => _i970.SsoRepositoryImpl(
         dataSource: gh<_i513.SsoDataSource>(),
@@ -3229,6 +3254,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i455.PriceListRepository>(),
         gh<_i661.PriceListLocalStoreRepository>(),
       ),
+    );
+    gh.lazySingleton<_i860.PostSaleEventReadDataSource>(
+      () =>
+          _i11.FirestorePostSaleEventDataSource(gh<_i974.FirebaseFirestore>()),
     );
     gh.lazySingleton<_i603.SavedReportRemoteDataSource>(
       () => _i925.FirestoreSavedReportRemoteDataSource(
@@ -3557,6 +3586,12 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i708.PortfolioAssignmentMapper>(),
       ),
     );
+    gh.lazySingleton<_i27.PostSaleEventRepository>(
+      () => _i862.PostSaleEventRepositoryImpl(
+        gh<_i860.PostSaleEventReadDataSource>(),
+        gh<_i1043.PostSaleEventWriteDataSource>(),
+      ),
+    );
     gh.lazySingleton<_i78.DailyRepSummaryRepository>(
       () => _i692.CloudFunctionsDailyRepSummaryRepository(
         gh<_i340.CloudFunctionsService>(),
@@ -3648,6 +3683,11 @@ extension GetItInjectableX on _i174.GetIt {
         deviceIdProvider: gh<_i10.DeviceInstallationIdProvider>(),
         clientMetadataProvider: gh<_i340.AppClientMetadataProvider>(),
         registrationStore: gh<_i343.PushRegistrationLocalStore>(),
+      ),
+    );
+    gh.factory<_i490.WatchPostSaleTimelineForOrderUseCase>(
+      () => _i490.WatchPostSaleTimelineForOrderUseCase(
+        gh<_i27.PostSaleEventRepository>(),
       ),
     );
     gh.factory<_i604.UpdateTargetUseCase>(
@@ -3851,6 +3891,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i684.ListStockAlertsUseCase>(
       () => _i684.ListStockAlertsUseCase(
         gh<_i896.StockAlertRepository>(),
+        gh<_i47.PermissionService>(),
+      ),
+    );
+    gh.factory<_i560.RegisterPostSaleEventUseCase>(
+      () => _i560.RegisterPostSaleEventUseCase(
+        gh<_i27.PostSaleEventRepository>(),
         gh<_i47.PermissionService>(),
       ),
     );
@@ -4226,6 +4272,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i47.PermissionService>(),
       ),
     );
+    gh.factory<_i547.RegisterPostSaleEventCubit>(
+      () => _i547.RegisterPostSaleEventCubit(
+        gh<_i560.RegisterPostSaleEventUseCase>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i906.CreateBranchUseCase>(
       () => _i906.CreateBranchUseCase(gh<_i160.BranchRepository>()),
     );
@@ -4369,6 +4421,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i764.WatchCommunicationPreferencesUseCase>(),
         gh<_i304.SaveCommunicationPreferencesUseCase>(),
         gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i110.PostSaleTimelineCubit>(
+      () => _i110.PostSaleTimelineCubit(
+        gh<_i490.WatchPostSaleTimelineForOrderUseCase>(),
       ),
     );
     gh.factory<_i579.GenerateCampaignCreationDraftUseCase>(

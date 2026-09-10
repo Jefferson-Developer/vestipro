@@ -113,6 +113,7 @@ void main() {
           'exchange_requested',
           'exchange_approved',
           'exchange_rejected',
+          'post_sale_event_registered',
         ]),
       );
 

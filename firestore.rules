@@ -385,6 +385,54 @@ service cloud.firestore {
           );
     }
 
+    // -----------------------------------------------------------------------
+    // organizations/{organizationId}/postSaleEvents/{postSaleEventId}
+    // (TASK-201, EPIC-30 — acompanhamento de pós-venda). Exclusively written
+    // by `registerPostSaleEvent` (registro manual) and by
+    // `createReturnRequest`/`resolveReturnRequest`/`createExchangeRequest`/
+    // `resolveExchangeRequest` (Admin SDK, bypass these Rules) — same
+    // "read-only via Rules, write only via Cloud Function" shape
+    // `returnRequests`/`exchangeRequests` themselves already use. Visibility
+    // deliberately mirrors `canReadReturnRequest`'s own scope: a pós-venda
+    // event is never visible to anyone who could not already read the
+    // pedido it is attached to.
+    // -----------------------------------------------------------------------
+
+    function validPostSaleEventVisibilityPayload(organizationId) {
+      return resource.data.keys().hasAll([
+          'organizationId',
+          'companyId',
+          'sellerId',
+          'customerId'
+        ])
+        && resource.data.organizationId == organizationId
+        && resource.data.companyId is string
+        && resource.data.companyId.size() > 0
+        && resource.data.sellerId is string
+        && resource.data.sellerId.size() > 0
+        && resource.data.customerId is string
+        && resource.data.customerId.size() > 0;
+    }
+
+    function managerCanReadPostSaleEvent(organizationId) {
+      return isSalesManager(organizationId)
+        && exists(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId))
+        && requesterTeamIds(organizationId).hasAny(
+            get(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId)).data.teamIds
+          );
+    }
+
+    function canReadPostSaleEvent(organizationId) {
+      return validPostSaleEventVisibilityPayload(organizationId)
+        && (
+          isOwnerOrAdmin(organizationId)
+          || (isCustomerPortal(organizationId)
+            && resource.data.customerId == portalCustomerId(organizationId))
+          || (isSalesRep(organizationId) && resource.data.sellerId == request.auth.uid)
+          || managerCanReadPostSaleEvent(organizationId)
+        );
+    }
+
     function canReadExchangeRequest(organizationId) {
       return validExchangeRequestVisibilityPayload(organizationId)
         && (
@@ -1136,6 +1184,22 @@ service cloud.firestore {
 
       match /exchangeRequests/{exchangeRequestId} {
         allow get, list: if canReadExchangeRequest(organizationId);
+
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/postSaleEvents/{postSaleEventId}
+      // (TASK-201, EPIC-30 — acompanhamento de pós-venda: writes exclusively
+      // via `registerPostSaleEvent`/`createReturnRequest`/
+      // `resolveReturnRequest`/`createExchangeRequest`/
+      // `resolveExchangeRequest`, Admin SDK, bypass these Rules entirely.
+      // Every event is immutable once written — `update`/`delete` are always
+      // denied, same as `create` from the client.)
+      // -------------------------------------------------------------------
+
+      match /postSaleEvents/{postSaleEventId} {
+        allow get, list: if canReadPostSaleEvent(organizationId);
 
         allow create, update, delete: if false;
       }

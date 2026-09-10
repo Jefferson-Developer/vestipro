@@ -141,6 +141,7 @@ export {
 } from './commissions';
 export { createReturnRequest, resolveReturnRequest } from './returns';
 export { createExchangeRequest, resolveExchangeRequest } from './exchanges';
+export { registerPostSaleEvent } from './after_sales';
 
 // Domínios reservados pelo backlog (EPIC-01 a EPIC-32) — cada um populado pela
 // task correspondente. Mantidos vazios de propósito por enquanto; nenhum é

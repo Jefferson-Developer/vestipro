@@ -8,6 +8,7 @@ import {
   requireNonEmptyString,
   resolveActorName,
 } from '../invites/invite-shared';
+import { appendPostSaleEvent } from '../after_sales/after-sales-shared';
 import {
   ensureRequesterMayActOnOrder,
   isReturnEligibleOrderStatus,
@@ -254,6 +255,27 @@ export const createReturnRequest = onCall<
         refundAmount,
       },
       timestamp: now,
+    });
+
+    // Links this devolução onto the pedido's own pós-venda timeline
+    // (TASK-201, EPIC-30): "Vincular devoluções/trocas... como eventos na
+    // mesma timeline, para visão única de pós-venda do pedido". Also
+    // notifies the vendedor responsável (`SELLER_NOTIFIABLE_TYPES`).
+    appendPostSaleEvent(transaction, organizationRef, {
+      eventRef: organizationRef.collection('postSaleEvents').doc(),
+      organizationId,
+      companyId,
+      orderId,
+      orderNumber: order.orderNumber,
+      customerId: order.customerId,
+      sellerId: order.sellerId,
+      type: 'return_requested',
+      description: `Devolução solicitada (motivo: ${reasonCategory}).`,
+      source: 'system',
+      sourceRequestId: returnRequestId,
+      createdBy: uid,
+      createdByName: actorName,
+      now,
     });
 
     return serializeReturnRequest(returnRequestId, returnRequestData, correlationId);

@@ -671,6 +671,39 @@ void main() {
       }
     });
 
+    test('OWNER/ADMIN/SALES_MANAGER/SALES_REP can register a manual '
+        'pós-venda milestone (TASK-201); SALES_ASSISTANT/FINANCE/READ_ONLY '
+        'never can', () {
+      for (final role in <SystemRoleName>[
+        SystemRoleName.owner,
+        SystemRoleName.admin,
+        SystemRoleName.salesManager,
+        SystemRoleName.salesRep,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.postSaleEventRegister),
+          isTrue,
+          reason: '$role must be able to register a pós-venda milestone.',
+        );
+      }
+
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesAssistant,
+        SystemRoleName.finance,
+        SystemRoleName.readOnly,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.postSaleEventRegister),
+          isFalse,
+          reason: '$role must never be able to register a pós-venda milestone.',
+        );
+      }
+    });
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,

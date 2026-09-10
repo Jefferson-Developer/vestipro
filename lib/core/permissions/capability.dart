@@ -230,6 +230,17 @@ enum Capability {
   /// troca mas nunca decidir uma, mesma assimetria já aplicada às
   /// devoluções.
   exchangeRequestApprove,
+
+  /// Registrar manualmente um marco de pós-venda (despachado, em trânsito,
+  /// entregue, problema reportado, em resolução ou resolvido) na timeline de
+  /// um pedido (TASK-201, EPIC-30) — granted to whoever may already act on
+  /// that same order: `SALES_REP` for their own pedidos, `SALES_MANAGER` for
+  /// their team's, `OWNER`/`ADMIN` for any — mirrors [returnRequestCreate]'s
+  /// own scope, never wider. Never grants editing/removing an already
+  /// registered event (`tasks.md`: "histórico não é editado, apenas
+  /// complementado") — there is no separate capability for that because no
+  /// such action exists anywhere in this codebase.
+  postSaleEventRegister,
 }
 
 extension CapabilityCode on Capability {
@@ -287,6 +298,7 @@ extension CapabilityCode on Capability {
       Capability.returnRequestApprove => 'return.approve',
       Capability.exchangeRequestCreate => 'exchange.create',
       Capability.exchangeRequestApprove => 'exchange.approve',
+      Capability.postSaleEventRegister => 'postSaleEvent.register',
     };
   }
 }

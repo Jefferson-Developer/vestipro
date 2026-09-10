@@ -41,6 +41,7 @@ import {
   findFulfillableBalance,
   mapExchangeDestinationVariant,
 } from './exchange-shared';
+import { appendPostSaleEvent } from '../after_sales/after-sales-shared';
 
 /**
  * Only these roles may ever decide (aprovar/recusar) an `ExchangeRequest`
@@ -249,6 +250,28 @@ export const resolveExchangeRequest = onCall<
         newValue: { exchangeRequestId, status: 'rejected', reason },
         timestamp: now,
       });
+      // Links this decisão onto the pedido's own pós-venda timeline
+      // (TASK-201, EPIC-30) — see `create-return-request.ts`'s own
+      // `appendPostSaleEvent` call for the exact same convention applied to
+      // devoluções.
+      appendPostSaleEvent(transaction, organizationRef, {
+        eventRef: organizationRef.collection('postSaleEvents').doc(),
+        organizationId,
+        companyId,
+        orderId,
+        orderNumber: order.orderNumber,
+        customerId: order.customerId,
+        sellerId: order.sellerId,
+        type: 'exchange_resolved',
+        description: reason
+          ? `Troca recusada (motivo: ${reason}).`
+          : 'Troca recusada.',
+        source: 'system',
+        sourceRequestId: exchangeRequestId,
+        createdBy: uid,
+        createdByName: actorName,
+        now,
+      });
       return {
         correlationId,
         exchangeRequestId,
@@ -409,6 +432,27 @@ export const resolveExchangeRequest = onCall<
         reason: reason ?? null,
       },
       timestamp: now,
+    });
+
+    // Links this decisão onto the pedido's own pós-venda timeline
+    // (TASK-201, EPIC-30) — see `create-return-request.ts`'s own
+    // `appendPostSaleEvent` call for the exact same convention applied to
+    // devoluções.
+    appendPostSaleEvent(transaction, organizationRef, {
+      eventRef: organizationRef.collection('postSaleEvents').doc(),
+      organizationId,
+      companyId,
+      orderId,
+      orderNumber: order.orderNumber,
+      customerId: order.customerId,
+      sellerId: order.sellerId,
+      type: 'exchange_resolved',
+      description: 'Troca aprovada.',
+      source: 'system',
+      sourceRequestId: exchangeRequestId,
+      createdBy: uid,
+      createdByName: actorName,
+      now,
     });
 
     return {
