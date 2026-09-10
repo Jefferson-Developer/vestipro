@@ -344,7 +344,7 @@ Não autorizado nesta rodada (push não solicitado pelo usuário).
 
 ## Hash do commit
 
-Preenchido após o commit — ver seção final desta task (hash real do `git log -1`, nunca inventado).
+`4de01dc200a8aea93f244bedae6395d149e7a58c`
 
 ## Branch
 
