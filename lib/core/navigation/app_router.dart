@@ -50,6 +50,7 @@ class AppRouter {
     this.orderListPageBuilder,
     this.orderApprovalQueuePageBuilder,
     this.returnRequestAnalysisPageBuilder,
+    this.exchangeRequestAnalysisPageBuilder,
     this.orderHistoryPageBuilder,
     this.orderDraftPageBuilder,
     this.orderProductCatalogPageBuilder,
@@ -185,6 +186,11 @@ class AppRouter {
   /// given `orgId`/`companyId` from [ReturnRequestAnalysisRoute].
   final Widget Function(BuildContext context, String orgId, String companyId)?
   returnRequestAnalysisPageBuilder;
+
+  /// Builds the fila de análise de trocas screen (TASK-200, EPIC-30), given
+  /// `orgId`/`companyId` from [ExchangeRequestAnalysisRoute].
+  final Widget Function(BuildContext context, String orgId, String companyId)?
+  exchangeRequestAnalysisPageBuilder;
 
   /// Builds the pedido history/detail screen (TASK-104), given
   /// `orgId`/`companyId`/`orderId` from [OrderHistoryRoute].
@@ -913,6 +919,24 @@ class AppRouter {
         ),
         builder: (context, state) {
           final builder = returnRequestAnalysisPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: ExchangeRequestAnalysisRoute.pathPattern,
+        name: ExchangeRequestAnalysisRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.exchangeRequestApprove,
+        ),
+        builder: (context, state) {
+          final builder = exchangeRequestAnalysisPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,

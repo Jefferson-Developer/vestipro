@@ -5,7 +5,6 @@ import {
   Timestamp,
   getFirestore,
   type DocumentData,
-  type Transaction,
 } from 'firebase-admin/firestore';
 
 import { resolveCorrelationId, type RequestWithMeta } from '../shared/callable-meta';
@@ -15,11 +14,13 @@ import {
   resolveActorName,
 } from '../invites/invite-shared';
 import {
-  inventoryBalanceRef,
+  applyRestockMovements,
   isReturnEligibleOrderStatus,
   mapReturnRequestOrder,
   optionalString,
   resolveOrderStatusAfterApproval,
+  resolveRestockPlans,
+  type RestockableItem,
 } from './return-shared';
 
 /**
@@ -251,10 +252,18 @@ export const resolveReturnRequest = onCall<
     }
 
     // ---- reads for stock reintegration (staged before any write) --------
-    const restockPlans = await resolveRestockPlans(transaction, organizationRef, items);
+    const restockPlans = await resolveRestockPlans(
+      transaction,
+      organizationRef,
+      toRestockableItems(items),
+    );
 
     // ---- writes -----------------------------------------------------------
-    applyRestockMovements(transaction, restockPlans, { uid, now });
+    applyRestockMovements(transaction, restockPlans, {
+      uid,
+      now,
+      source: 'return_request_approval',
+    });
 
     const resultingOrderStatus = resolveOrderStatusAfterApproval(
       order.items,
@@ -343,11 +352,6 @@ interface NormalizedReturnItem {
   warehouseId: string | null;
 }
 
-interface RestockPlan {
-  balanceRef: FirebaseFirestore.DocumentReference;
-  quantity: number;
-}
-
 function normalizeReturnRequestItems(value: unknown): NormalizedReturnItem[] {
   if (!Array.isArray(value)) return [];
   return value.map((item) => ({
@@ -358,60 +362,12 @@ function normalizeReturnRequestItems(value: unknown): NormalizedReturnItem[] {
   }));
 }
 
-/**
- * Reads (never writes) the exact inventory balance each returned item
- * should be reintegrated into: the warehouse denormalized on the order item
- * at submission time (TASK-101) whenever present, or — only for orders
- * predating that denormalization — the first (lexicographically smallest)
- * balance already tracking that variant, same fallback
- * `resolveItemAvailability` (`submitOrder`) already uses for the opposite
- * (decrement) direction. An item whose variant has no tracked balance at
- * all is skipped: there is nothing to reintegrate into, never a blocking
- * error (mirrors `submitOrder`'s own "stock not tracked" tolerance).
- */
-async function resolveRestockPlans(
-  transaction: Transaction,
-  organizationRef: FirebaseFirestore.DocumentReference,
-  items: NormalizedReturnItem[],
-): Promise<RestockPlan[]> {
-  const plans: RestockPlan[] = [];
-  for (const item of items) {
-    if (item.quantity <= 0) continue;
-    if (item.warehouseId) {
-      plans.push({
-        balanceRef: inventoryBalanceRef(organizationRef, item.variantId, item.warehouseId),
-        quantity: item.quantity,
-      });
-      continue;
-    }
-    const balanceSnapshots = await transaction.get(
-      organizationRef.collection('inventory').where('variantId', '==', item.variantId),
-    );
-    if (balanceSnapshots.empty) continue;
-    const fallback = balanceSnapshots.docs.sort((left, right) => left.id.localeCompare(right.id))[0];
-    plans.push({ balanceRef: fallback.ref, quantity: item.quantity });
-  }
-  return plans;
-}
-
-function applyRestockMovements(
-  transaction: Transaction,
-  plans: RestockPlan[],
-  context: { uid: string; now: Timestamp },
-): void {
-  for (const plan of plans) {
-    transaction.set(
-      plan.balanceRef,
-      {
-        physicalQuantity: FieldValue.increment(plan.quantity),
-        updatedAt: context.now,
-        updatedBy: context.uid,
-        lastSource: 'return_request_approval',
-        version: FieldValue.increment(1),
-      },
-      { merge: true },
-    );
-  }
+function toRestockableItems(items: NormalizedReturnItem[]): RestockableItem[] {
+  return items.map((item) => ({
+    variantId: item.variantId,
+    quantity: item.quantity,
+    warehouseId: item.warehouseId,
+  }));
 }
 
 function sumApprovedQuantities(approvedReturnRequests: DocumentData[]): Map<string, number> {

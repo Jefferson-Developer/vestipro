@@ -1,5 +1,6 @@
+import { FieldValue } from 'firebase-admin/firestore';
 import { HttpsError } from 'firebase-functions/v2/https';
-import type { DocumentData, DocumentReference, Timestamp } from 'firebase-admin/firestore';
+import type { DocumentData, DocumentReference, Timestamp, Transaction } from 'firebase-admin/firestore';
 
 /**
  * Categorized reason a `ReturnRequest` was opened for (TASK-199, EPIC-30) —
@@ -168,4 +169,154 @@ export function roundMoney(value: number): number {
 export function timestampToDate(value: unknown): Date | undefined {
   const timestamp = value as Timestamp | undefined;
   return typeof timestamp?.toDate === 'function' ? timestamp.toDate() : undefined;
+}
+
+// -----------------------------------------------------------------------
+// Restock reintegration (originally `resolveReturnRequest`-only, TASK-199;
+// exported here so `resolveExchangeRequest` (TASK-200, EPIC-30) can reuse the
+// exact same "read every plan before any write, tolerate an untracked
+// variant" logic for reintegrating the exchanged-away variant, instead of a
+// second, independently-drifting reimplementation of the same Firestore
+// transaction-ordering rules).
+// -----------------------------------------------------------------------
+
+export interface RestockableItem {
+  variantId: string;
+  quantity: number;
+  warehouseId: string | null;
+}
+
+export interface RestockPlan {
+  balanceRef: DocumentReference;
+  quantity: number;
+}
+
+/**
+ * Reads (never writes — Firestore transactions require every read staged
+ * before any write) every item's exact inventory balance to reintegrate
+ * quantity into: the warehouse denormalized on the order item at submission
+ * time (TASK-101) whenever present, or — only for orders predating that
+ * denormalization — the first (lexicographically smallest) balance already
+ * tracking that variant, same fallback `resolveItemAvailability`
+ * (`submitOrder`) already uses for the opposite (decrement) direction. An
+ * item whose variant has no tracked balance at all is skipped: there is
+ * nothing to reintegrate into, never a blocking error (mirrors
+ * `submitOrder`'s own "stock not tracked" tolerance).
+ */
+export async function resolveRestockPlans(
+  transaction: Transaction,
+  organizationRef: DocumentReference,
+  items: RestockableItem[],
+): Promise<RestockPlan[]> {
+  const plans: RestockPlan[] = [];
+  for (const item of items) {
+    if (item.quantity <= 0) continue;
+    if (item.warehouseId) {
+      plans.push({
+        balanceRef: inventoryBalanceRef(organizationRef, item.variantId, item.warehouseId),
+        quantity: item.quantity,
+      });
+      continue;
+    }
+    const balanceSnapshots = await transaction.get(
+      organizationRef.collection('inventory').where('variantId', '==', item.variantId),
+    );
+    if (balanceSnapshots.empty) continue;
+    const fallback = balanceSnapshots.docs.sort((left, right) => left.id.localeCompare(right.id))[0];
+    plans.push({ balanceRef: fallback.ref, quantity: item.quantity });
+  }
+  return plans;
+}
+
+export function normalizeTeamIds(value: unknown): string[] {
+  if (!Array.isArray(value)) return [];
+  return value.filter((entry): entry is string => typeof entry === 'string');
+}
+
+/**
+ * Guards who may act (solicitar uma devolução *or* uma troca, TASK-199/
+ * TASK-200) on behalf of a given [ReturnRequestOrder] — exported so both
+ * `createReturnRequest` and `createExchangeRequest` share one single
+ * definition of "quem pode agir neste pedido" instead of two independently-
+ * drifting copies: OWNER/ADMIN always may; the portal only for its own
+ * pedido; a SALES_REP only for their own pedido; a SALES_MANAGER only for a
+ * pedido whose vendedor shares at least one team with them. Every other role
+ * is denied — the caller is expected to have already checked its own
+ * `ROLES_ALLOWED_TO_REQUEST_*` set before reaching here.
+ */
+export async function ensureRequesterMayActOnOrder(
+  transaction: Transaction,
+  organizationRef: DocumentReference,
+  input: {
+    roleName: string;
+    uid: string;
+    order: ReturnRequestOrder;
+    portalCustomerId?: string;
+    requesterTeamIds: string[];
+  },
+): Promise<void> {
+  if (input.roleName === 'OWNER' || input.roleName === 'ADMIN') return;
+
+  if (input.roleName === 'CUSTOMER_PORTAL') {
+    if (input.portalCustomerId !== input.order.customerId) {
+      throw new HttpsError(
+        'permission-denied',
+        'O portal só pode agir sobre os próprios pedidos.',
+      );
+    }
+    return;
+  }
+
+  if (input.roleName === 'SALES_REP') {
+    if (input.order.sellerId !== input.uid) {
+      throw new HttpsError(
+        'permission-denied',
+        'O pedido só pode ter uma solicitação aberta pelo próprio vendedor responsável.',
+      );
+    }
+    return;
+  }
+
+  if (input.roleName === 'SALES_MANAGER') {
+    const sellerSnapshot = await transaction.get(
+      organizationRef.collection('members').doc(input.order.sellerId),
+    );
+    const sellerTeamIds = normalizeTeamIds(sellerSnapshot.data()?.teamIds);
+    const sharesTeam = sellerTeamIds.some((teamId) => input.requesterTeamIds.includes(teamId));
+    if (!sharesTeam) {
+      throw new HttpsError(
+        'permission-denied',
+        'Você só pode agir sobre pedidos da sua própria equipe.',
+      );
+    }
+    return;
+  }
+
+  throw new HttpsError('permission-denied', 'Seu perfil não pode realizar esta ação.');
+}
+
+/** Writes every reintegration [plans] staged by [resolveRestockPlans] —
+ * always additive (`FieldValue.increment`), so two concurrent
+ * reintegrations of different quantities for the same balance never clobber
+ * one another. [source] tags `inventory.lastSource` so a balance's own
+ * movement history can tell a devolução's reintegration apart from a
+ * troca's. */
+export function applyRestockMovements(
+  transaction: Transaction,
+  plans: RestockPlan[],
+  context: { uid: string; now: Timestamp; source: string },
+): void {
+  for (const plan of plans) {
+    transaction.set(
+      plan.balanceRef,
+      {
+        physicalQuantity: FieldValue.increment(plan.quantity),
+        updatedAt: context.now,
+        updatedBy: context.uid,
+        lastSource: context.source,
+        version: FieldValue.increment(1),
+      },
+      { merge: true },
+    );
+  }
 }

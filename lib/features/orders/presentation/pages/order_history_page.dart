@@ -15,6 +15,7 @@ import '../../domain/services/order_receipt_pdf_encoder.dart';
 import '../../domain/usecases/capture_order_signature_use_case.dart'
     show kSignableOrderStatuses;
 import '../../domain/value_objects/order_status.dart';
+import '../../../exchanges/exchanges.dart';
 import '../../../returns/returns.dart';
 import '../bloc/order_duplication_cubit.dart';
 import '../bloc/order_duplication_state.dart';
@@ -44,6 +45,8 @@ class OrderHistoryPage extends StatelessWidget {
     required this.createSignatureCubit,
     required this.createReturnRequestHistoryCubit,
     required this.createReturnRequestFormCubit,
+    required this.createExchangeRequestHistoryCubit,
+    required this.createExchangeRequestFormCubit,
     this.onDuplicated,
     super.key,
   });
@@ -71,6 +74,17 @@ class OrderHistoryPage extends StatelessWidget {
   /// idempotency key) each time, same one-cubit-per-push convention
   /// [createDuplicationCubit] already sets.
   final ReturnRequestFormCubit Function() createReturnRequestFormCubit;
+
+  /// Feeds the "Trocas" history section (TASK-200, EPIC-30) embedded in
+  /// this same screen.
+  final ExchangeRequestHistoryCubit Function()
+  createExchangeRequestHistoryCubit;
+
+  /// Builds a fresh `ExchangeRequestFormCubit` every time "Solicitar troca"
+  /// is pushed (TASK-200) — a brand new troca intent (and idempotency key)
+  /// each time, same one-cubit-per-push convention [createDuplicationCubit]
+  /// already sets.
+  final ExchangeRequestFormCubit Function() createExchangeRequestFormCubit;
 
   /// Called once "Repetir pedido" successfully creates a new draft — always
   /// navigates into the existing order draft flow (`OrderDraftRoute`,
@@ -123,6 +137,9 @@ class OrderHistoryPage extends StatelessWidget {
             permissionService: permissionService,
             createReturnRequestHistoryCubit: createReturnRequestHistoryCubit,
             createReturnRequestFormCubit: createReturnRequestFormCubit,
+            createExchangeRequestHistoryCubit:
+                createExchangeRequestHistoryCubit,
+            createExchangeRequestFormCubit: createExchangeRequestFormCubit,
             onDuplicated: onDuplicated,
           ),
         );
@@ -139,6 +156,8 @@ class _OrderHistoryPermissionsGate extends StatefulWidget {
     required this.permissionService,
     required this.createReturnRequestHistoryCubit,
     required this.createReturnRequestFormCubit,
+    required this.createExchangeRequestHistoryCubit,
+    required this.createExchangeRequestFormCubit,
     this.onDuplicated,
   });
 
@@ -148,6 +167,9 @@ class _OrderHistoryPermissionsGate extends StatefulWidget {
   final PermissionService permissionService;
   final ReturnRequestHistoryCubit Function() createReturnRequestHistoryCubit;
   final ReturnRequestFormCubit Function() createReturnRequestFormCubit;
+  final ExchangeRequestHistoryCubit Function()
+  createExchangeRequestHistoryCubit;
+  final ExchangeRequestFormCubit Function() createExchangeRequestFormCubit;
   final ValueChanged<Order>? onDuplicated;
 
   @override
@@ -159,6 +181,7 @@ class _OrderHistoryPermissionsGateState
     extends State<_OrderHistoryPermissionsGate> {
   late final Future<bool> _canDuplicate;
   late final Future<bool> _canRequestReturn;
+  late final Future<bool> _canRequestExchange;
 
   @override
   void initState() {
@@ -194,6 +217,22 @@ class _OrderHistoryPermissionsGateState
             onFailure: (_) => false,
           ),
         );
+    // "Solicitar troca" (TASK-200, EPIC-30) — gated by
+    // `Capability.exchangeRequestCreate`; `createExchangeRequest` (Cloud
+    // Function) remains the real, independent source of truth for both this
+    // capability and the seller/pedido-ownership scope.
+    _canRequestExchange = widget.permissionService
+        .hasPermission(
+          organizationId: widget.organizationId,
+          userId: widget.sellerId,
+          capability: Capability.exchangeRequestCreate,
+        )
+        .then(
+          (result) => result.fold(
+            onSuccess: (granted) => granted,
+            onFailure: (_) => false,
+          ),
+        );
   }
 
   @override
@@ -204,16 +243,27 @@ class _OrderHistoryPermissionsGateState
         return FutureBuilder<bool>(
           future: _canRequestReturn,
           builder: (context, returnSnapshot) {
-            return _OrderHistoryScaffold(
-              canDuplicate: duplicateSnapshot.data ?? false,
-              canRequestReturn: returnSnapshot.data ?? false,
-              organizationId: widget.organizationId,
-              companyId: widget.companyId,
-              sellerId: widget.sellerId,
-              createReturnRequestHistoryCubit:
-                  widget.createReturnRequestHistoryCubit,
-              createReturnRequestFormCubit: widget.createReturnRequestFormCubit,
-              onDuplicated: widget.onDuplicated,
+            return FutureBuilder<bool>(
+              future: _canRequestExchange,
+              builder: (context, exchangeSnapshot) {
+                return _OrderHistoryScaffold(
+                  canDuplicate: duplicateSnapshot.data ?? false,
+                  canRequestReturn: returnSnapshot.data ?? false,
+                  canRequestExchange: exchangeSnapshot.data ?? false,
+                  organizationId: widget.organizationId,
+                  companyId: widget.companyId,
+                  sellerId: widget.sellerId,
+                  createReturnRequestHistoryCubit:
+                      widget.createReturnRequestHistoryCubit,
+                  createReturnRequestFormCubit:
+                      widget.createReturnRequestFormCubit,
+                  createExchangeRequestHistoryCubit:
+                      widget.createExchangeRequestHistoryCubit,
+                  createExchangeRequestFormCubit:
+                      widget.createExchangeRequestFormCubit,
+                  onDuplicated: widget.onDuplicated,
+                );
+              },
             );
           },
         );
@@ -226,27 +276,38 @@ class _OrderHistoryScaffold extends StatelessWidget {
   const _OrderHistoryScaffold({
     required this.canDuplicate,
     required this.canRequestReturn,
+    required this.canRequestExchange,
     required this.organizationId,
     required this.companyId,
     required this.sellerId,
     required this.createReturnRequestHistoryCubit,
     required this.createReturnRequestFormCubit,
+    required this.createExchangeRequestHistoryCubit,
+    required this.createExchangeRequestFormCubit,
     this.onDuplicated,
   });
 
   final bool canDuplicate;
   final bool canRequestReturn;
+  final bool canRequestExchange;
   final String organizationId;
   final String companyId;
   final String sellerId;
   final ReturnRequestHistoryCubit Function() createReturnRequestHistoryCubit;
   final ReturnRequestFormCubit Function() createReturnRequestFormCubit;
+  final ExchangeRequestHistoryCubit Function()
+  createExchangeRequestHistoryCubit;
+  final ExchangeRequestFormCubit Function() createExchangeRequestFormCubit;
   final ValueChanged<Order>? onDuplicated;
 
-  /// Pedido statuses a devolução may be requested against (TASK-199) —
-  /// mirrors exactly which `OrderStatus` values
+  /// Pedido statuses a devolução — ou uma troca (TASK-200, EPIC-30) — may be
+  /// requested against: mirrors exactly which `OrderStatus` values
   /// `OrderStatusTransitionValidator` accepts a transition into
-  /// `returned`/`partiallyReturned` from.
+  /// `returned`/`partiallyReturned` from. A troca reaproveita a mesma janela
+  /// de elegibilidade da devolução (`tasks.md`: "reaproveitando a base de
+  /// devoluções") — nunca altera o `status` do pedido em si, apenas o
+  /// mesmo pedido já faturado/expedido/entregue precisa existir para que
+  /// uma variante já entregue possa ser trocada.
   static const _returnEligibleStatuses = <OrderStatus>{
     OrderStatus.invoiced,
     OrderStatus.partiallyInvoiced,
@@ -289,6 +350,10 @@ class _OrderHistoryScaffold extends StatelessWidget {
                     canRequestReturn &&
                     order != null &&
                     _returnEligibleStatuses.contains(order.status);
+                final canSubmitExchangeRequest =
+                    canRequestExchange &&
+                    order != null &&
+                    _returnEligibleStatuses.contains(order.status);
 
                 return Scaffold(
                   body: AppAdminPageLayout(
@@ -302,6 +367,19 @@ class _OrderHistoryScaffold extends StatelessWidget {
                           leadingIcon: Icons.keyboard_return_outlined,
                           variant: AppButtonVariant.secondary,
                           onPressed: () => _requestReturn(
+                            context,
+                            organizationId: organizationId,
+                            companyId: companyId,
+                            userId: sellerId,
+                            order: order,
+                          ),
+                        ),
+                      if (canSubmitExchangeRequest)
+                        AppButton(
+                          label: 'Solicitar troca',
+                          leadingIcon: Icons.swap_horiz_outlined,
+                          variant: AppButtonVariant.secondary,
+                          onPressed: () => _requestExchange(
                             context,
                             organizationId: organizationId,
                             companyId: companyId,
@@ -354,6 +432,8 @@ class _OrderHistoryScaffold extends StatelessWidget {
                       organizationId: organizationId,
                       createReturnRequestHistoryCubit:
                           createReturnRequestHistoryCubit,
+                      createExchangeRequestHistoryCubit:
+                          createExchangeRequestHistoryCubit,
                     ),
                   ),
                 );
@@ -380,6 +460,26 @@ class _OrderHistoryScaffold extends StatelessWidget {
           userId: userId,
           order: order,
           createCubit: createReturnRequestFormCubit,
+        ),
+      ),
+    );
+  }
+
+  Future<void> _requestExchange(
+    BuildContext context, {
+    required String organizationId,
+    required String companyId,
+    required String userId,
+    required Order order,
+  }) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ExchangeRequestFormPage(
+          organizationId: organizationId,
+          companyId: companyId,
+          userId: userId,
+          order: order,
+          createCubit: createExchangeRequestFormCubit,
         ),
       ),
     );
@@ -482,11 +582,14 @@ class _OrderHistoryContent extends StatelessWidget {
     required this.state,
     required this.organizationId,
     required this.createReturnRequestHistoryCubit,
+    required this.createExchangeRequestHistoryCubit,
   });
 
   final OrderHistoryState state;
   final String organizationId;
   final ReturnRequestHistoryCubit Function() createReturnRequestHistoryCubit;
+  final ExchangeRequestHistoryCubit Function()
+  createExchangeRequestHistoryCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -523,6 +626,12 @@ class _OrderHistoryContent extends StatelessWidget {
             organizationId: organizationId,
             orderId: order.id,
             createCubit: createReturnRequestHistoryCubit,
+          ),
+          const SizedBox(height: AppSpacing.spacing24),
+          ExchangeRequestHistorySection(
+            organizationId: organizationId,
+            orderId: order.id,
+            createCubit: createExchangeRequestHistoryCubit,
           ),
         ],
       ),

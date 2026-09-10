@@ -590,6 +590,32 @@ import '../features/demand_forecast/domain/usecases/get_demand_forecast_use_case
     as _i187;
 import '../features/demand_forecast/presentation/bloc/demand_forecast_bloc.dart'
     as _i571;
+import '../features/exchanges/data/datasources/cloud_functions_exchange_request_data_source.dart'
+    as _i726;
+import '../features/exchanges/data/datasources/exchange_request_read_data_source.dart'
+    as _i777;
+import '../features/exchanges/data/datasources/exchange_request_write_data_source.dart'
+    as _i377;
+import '../features/exchanges/data/datasources/firestore_exchange_request_data_source.dart'
+    as _i1023;
+import '../features/exchanges/data/repositories/exchange_request_repository_impl.dart'
+    as _i153;
+import '../features/exchanges/domain/repositories/exchange_request_repository.dart'
+    as _i269;
+import '../features/exchanges/domain/usecases/create_exchange_request_use_case.dart'
+    as _i284;
+import '../features/exchanges/domain/usecases/resolve_exchange_request_use_case.dart'
+    as _i211;
+import '../features/exchanges/domain/usecases/watch_exchange_request_queue_use_case.dart'
+    as _i991;
+import '../features/exchanges/domain/usecases/watch_exchange_requests_for_order_use_case.dart'
+    as _i543;
+import '../features/exchanges/presentation/cubit/exchange_request_form_cubit.dart'
+    as _i254;
+import '../features/exchanges/presentation/cubit/exchange_request_history_cubit.dart'
+    as _i432;
+import '../features/exchanges/presentation/cubit/exchange_request_queue_cubit.dart'
+    as _i622;
 import '../features/favorites/data/datasources/favorite_remote_data_source.dart'
     as _i1002;
 import '../features/favorites/data/datasources/firestore_favorite_remote_data_source.dart'
@@ -3076,6 +3102,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
+    gh.lazySingleton<_i377.ExchangeRequestWriteDataSource>(
+      () => _i726.CloudFunctionsExchangeRequestDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i601.LocalePreferenceRepository>(
       () => _i909.LocalePreferenceRepositoryImpl(
         localStore: gh<_i142.LocalePreferenceLocalStore>(),
@@ -3157,6 +3188,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i548.ProductRecommendationRepositoryImpl(
         dataSource: gh<_i619.ProductRecommendationDataSource>(),
         mapper: gh<_i609.ProductRecommendationMapper>(),
+      ),
+    );
+    gh.lazySingleton<_i777.ExchangeRequestReadDataSource>(
+      () => _i1023.FirestoreExchangeRequestDataSource(
+        gh<_i974.FirebaseFirestore>(),
       ),
     );
     gh.lazySingleton<_i164.SsoRepository>(
@@ -3474,6 +3510,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i720.AddItemsToOrderDraftUseCase>(),
       ),
     );
+    gh.lazySingleton<_i269.ExchangeRequestRepository>(
+      () => _i153.ExchangeRequestRepositoryImpl(
+        gh<_i777.ExchangeRequestReadDataSource>(),
+        gh<_i377.ExchangeRequestWriteDataSource>(),
+      ),
+    );
     gh.factory<_i709.RecognizeProductImageUseCase>(
       () => _i709.RecognizeProductImageUseCase(
         gh<_i98.ProductRecognitionRepository>(),
@@ -3675,6 +3717,18 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i54.CatalogShareRepositoryImpl(
         dataSource: gh<_i993.CatalogShareDataSource>(),
         mapper: gh<_i1010.CatalogShareMapper>(),
+      ),
+    );
+    gh.factory<_i284.CreateExchangeRequestUseCase>(
+      () => _i284.CreateExchangeRequestUseCase(
+        gh<_i269.ExchangeRequestRepository>(),
+        gh<_i47.PermissionService>(),
+      ),
+    );
+    gh.factory<_i211.ResolveExchangeRequestUseCase>(
+      () => _i211.ResolveExchangeRequestUseCase(
+        gh<_i269.ExchangeRequestRepository>(),
+        gh<_i47.PermissionService>(),
       ),
     );
     gh.factory<_i411.ListSavedReports>(
@@ -4053,6 +4107,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i941.ProductSearchRepositoryImpl(
         remoteDataSource: gh<_i671.ProductRemoteSearchDataSource>(),
         localDataSource: gh<_i42.ProductLocalSearchIndexDataSource>(),
+      ),
+    );
+    gh.factory<_i543.WatchExchangeRequestsForOrderUseCase>(
+      () => _i543.WatchExchangeRequestsForOrderUseCase(
+        gh<_i269.ExchangeRequestRepository>(),
       ),
     );
     gh.lazySingleton<_i221.VariantStockBalanceRepository>(
@@ -4544,6 +4603,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i361.CustomerLocalStoreRepository>(),
       ),
     );
+    gh.factory<_i432.ExchangeRequestHistoryCubit>(
+      () => _i432.ExchangeRequestHistoryCubit(
+        gh<_i543.WatchExchangeRequestsForOrderUseCase>(),
+      ),
+    );
     gh.factory<_i93.ListOrganizationUsersUseCase>(
       () => _i93.ListOrganizationUsersUseCase(
         gh<_i957.MembershipRepository>(),
@@ -4802,6 +4866,14 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i254.ExchangeRequestFormCubit>(
+      () => _i254.ExchangeRequestFormCubit(
+        gh<_i284.CreateExchangeRequestUseCase>(),
+        gh<_i530.ListProductVariantsByProductUseCase>(),
+        gh<_i1069.GetVariantInventoryAvailabilityUseCase>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i581.LeadListBloc>(
       () => _i581.LeadListBloc(
         listLeads: gh<_i778.ListLeadsUseCase>(),
@@ -4924,6 +4996,12 @@ extension GetItInjectableX on _i174.GetIt {
             gh<_i438.PreviewCustomerSegmentCountUseCase>(),
       ),
     );
+    gh.factory<_i991.WatchExchangeRequestQueueUseCase>(
+      () => _i991.WatchExchangeRequestQueueUseCase(
+        gh<_i269.ExchangeRequestRepository>(),
+        gh<_i63.OrderVisibilityService>(),
+      ),
+    );
     gh.factory<_i986.ListCommercialTeamsUseCase>(
       () => _i986.ListCommercialTeamsUseCase(
         gh<_i265.TeamRepository>(),
@@ -4992,6 +5070,13 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i565.ExecuteReportQuery(
         gh<_i22.ReportRepository>(),
         gh<_i908.ValidateReportDefinition>(),
+      ),
+    );
+    gh.factory<_i622.ExchangeRequestQueueCubit>(
+      () => _i622.ExchangeRequestQueueCubit(
+        gh<_i991.WatchExchangeRequestQueueUseCase>(),
+        gh<_i211.ResolveExchangeRequestUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i680.OrderSignatureCubit>(

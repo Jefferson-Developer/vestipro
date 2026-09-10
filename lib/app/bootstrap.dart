@@ -47,6 +47,7 @@ import '../features/onboarding/onboarding.dart';
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import '../features/orders/orders.dart';
 import '../features/returns/returns.dart';
+import '../features/exchanges/exchanges.dart';
 import '../features/organizations/organizations.dart';
 import '../features/products/products.dart';
 import '../features/privacy/privacy.dart';
@@ -1123,6 +1124,18 @@ class VestiProApp extends StatelessWidget {
                   createCubit: () => getIt<ReturnRequestQueueCubit>(),
                 ),
               ),
+          exchangeRequestAnalysisPageBuilder: (context, orgId, companyId) =>
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId: companyId,
+                child: ExchangeRequestAnalysisPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  permissionService: getIt<PermissionService>(),
+                  createCubit: () => getIt<ExchangeRequestQueueCubit>(),
+                ),
+              ),
           orderHistoryPageBuilder: (context, orgId, companyId, orderId) =>
               _withConnectivityIndicator(
                 orgId: orgId,
@@ -1140,6 +1153,10 @@ class VestiProApp extends StatelessWidget {
                       getIt<ReturnRequestHistoryCubit>(),
                   createReturnRequestFormCubit: () =>
                       getIt<ReturnRequestFormCubit>(),
+                  createExchangeRequestHistoryCubit: () =>
+                      getIt<ExchangeRequestHistoryCubit>(),
+                  createExchangeRequestFormCubit: () =>
+                      getIt<ExchangeRequestFormCubit>(),
                   onDuplicated: (order) => context.go(
                     OrderDraftRoute(
                       orgId: orgId,

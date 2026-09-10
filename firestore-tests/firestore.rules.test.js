@@ -557,6 +557,54 @@ function returnRequestDoc({
   };
 }
 
+function exchangeRequestDoc({
+  organizationId,
+  companyId = 'company-a',
+  orderId = 'order-rep-a',
+  sellerId,
+  customerId = 'customer-a',
+  status = 'requested',
+}) {
+  return {
+    organizationId,
+    companyId,
+    orderId,
+    orderNumber: '000001',
+    customerId,
+    sellerId,
+    currency: 'BRL',
+    priceListId: 'price-list-a',
+    paymentTermId: 'payment-term-a',
+    items: [
+      {
+        orderItemId: 'item-1',
+        originProductId: 'product-a',
+        originVariantId: 'variant-a',
+        originUnitPrice: 100,
+        destinationVariantId: 'variant-b',
+        destinationProductId: 'product-a',
+        quantity: 1,
+      },
+    ],
+    reasonCategory: 'size_issue',
+    reasonDetails: null,
+    status,
+    priceDifferenceAmount: null,
+    requestedBy: sellerId,
+    requestedByName: 'Vendedor Teste',
+    requestedAt: now(),
+    decisions: [],
+    decidedBy: null,
+    decidedAt: null,
+    decisionReason: null,
+    createdAt: now(),
+    createdBy: sellerId,
+    updatedAt: now(),
+    updatedBy: sellerId,
+    version: 1,
+  };
+}
+
 function orderSignatureDoc({ organizationId, companyId = 'company-a', orderId, signedByUserId }) {
   return {
     organizationId,
@@ -1523,6 +1571,83 @@ describe('organizations/{organizationId}/returnRequests/{returnRequestId}  (TASK
       db.doc(`organizations/${ORG_A}/returnRequests/return-rep-a`).update({ status: 'approved' }),
     );
     await assertFails(db.doc(`organizations/${ORG_A}/returnRequests/return-rep-a`).delete());
+  });
+});
+
+describe('organizations/{organizationId}/exchangeRequests/{exchangeRequestId}  (TASK-200, EPIC-30 — trocas)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/orders/order-rep-a`)
+        .set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/orders/order-rep-b`)
+        .set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-b' }));
+      await db
+        .doc(`organizations/${ORG_A}/exchangeRequests/exchange-rep-a`)
+        .set(exchangeRequestDoc({ organizationId: ORG_A, orderId: 'order-rep-a', sellerId: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/exchangeRequests/exchange-rep-b`)
+        .set(exchangeRequestDoc({ organizationId: ORG_A, orderId: 'order-rep-b', sellerId: 'rep-b' }));
+      await db
+        .doc(`organizations/${ORG_B}/exchangeRequests/exchange-other-tenant`)
+        .set(
+          exchangeRequestDoc({
+            organizationId: ORG_B,
+            companyId: 'company-b',
+            orderId: 'order-other-tenant',
+            sellerId: 'owner-b',
+          }),
+        );
+    });
+  });
+
+  test('SALES_REP lê a própria troca (do próprio pedido)', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/exchangeRequests/exchange-rep-a`).get());
+  });
+
+  test('SALES_REP não lê troca de pedido de outro vendedor', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/exchangeRequests/exchange-rep-b`).get());
+  });
+
+  test('SALES_MANAGER lê troca do vendedor da própria equipe, mas não de outra equipe', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/exchangeRequests/exchange-rep-a`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/exchangeRequests/exchange-rep-b`).get());
+  });
+
+  test('ADMIN e OWNER leem todas as trocas da própria organization', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+
+    await assertSucceeds(ownerDb.collection(`organizations/${ORG_A}/exchangeRequests`).get());
+    await assertSucceeds(adminDb.collection(`organizations/${ORG_A}/exchangeRequests`).get());
+  });
+
+  test('FINANCE não lê trocas (sem escopo de pedido)', async () => {
+    const db = testEnv.authenticatedContext('finance-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/exchangeRequests/exchange-rep-a`).get());
+  });
+
+  test('membro da Org A não lê troca da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/exchangeRequests/exchange-other-tenant`).get());
+  });
+
+  test('ninguém escreve troca pelo cliente, nem OWNER — createExchangeRequest/resolveExchangeRequest (Admin SDK) são o único caminho', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/exchangeRequests/exchange-new`)
+        .set(exchangeRequestDoc({ organizationId: ORG_A, orderId: 'order-rep-a', sellerId: 'rep-a' })),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/exchangeRequests/exchange-rep-a`).update({ status: 'approved' }),
+    );
+    await assertFails(db.doc(`organizations/${ORG_A}/exchangeRequests/exchange-rep-a`).delete());
   });
 });
 

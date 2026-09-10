@@ -110,6 +110,9 @@ void main() {
           'return_requested',
           'return_approved',
           'return_rejected',
+          'exchange_requested',
+          'exchange_approved',
+          'exchange_rejected',
         ]),
       );
 

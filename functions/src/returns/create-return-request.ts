@@ -9,8 +9,10 @@ import {
   resolveActorName,
 } from '../invites/invite-shared';
 import {
+  ensureRequesterMayActOnOrder,
   isReturnEligibleOrderStatus,
   mapReturnRequestOrder,
+  normalizeTeamIds,
   optionalString,
   requireReasonCategory,
   requireString,
@@ -270,57 +272,6 @@ export const createReturnRequest = onCall<
   return result;
 });
 
-async function ensureRequesterMayActOnOrder(
-  transaction: FirebaseFirestore.Transaction,
-  organizationRef: FirebaseFirestore.DocumentReference,
-  input: {
-    roleName: string;
-    uid: string;
-    order: ReturnRequestOrder;
-    portalCustomerId?: string;
-    requesterTeamIds: string[];
-  },
-): Promise<void> {
-  if (input.roleName === 'OWNER' || input.roleName === 'ADMIN') return;
-
-  if (input.roleName === 'CUSTOMER_PORTAL') {
-    if (input.portalCustomerId !== input.order.customerId) {
-      throw new HttpsError(
-        'permission-denied',
-        'O portal só pode solicitar devolução dos próprios pedidos.',
-      );
-    }
-    return;
-  }
-
-  if (input.roleName === 'SALES_REP') {
-    if (input.order.sellerId !== input.uid) {
-      throw new HttpsError(
-        'permission-denied',
-        'O pedido só pode ter devolução solicitada pelo próprio vendedor responsável.',
-      );
-    }
-    return;
-  }
-
-  if (input.roleName === 'SALES_MANAGER') {
-    const sellerSnapshot = await transaction.get(
-      organizationRef.collection('members').doc(input.order.sellerId),
-    );
-    const sellerTeamIds = normalizeTeamIds(sellerSnapshot.data()?.teamIds);
-    const sharesTeam = sellerTeamIds.some((teamId) => input.requesterTeamIds.includes(teamId));
-    if (!sharesTeam) {
-      throw new HttpsError(
-        'permission-denied',
-        'Você só pode solicitar devolução de pedidos da sua própria equipe.',
-      );
-    }
-    return;
-  }
-
-  throw new HttpsError('permission-denied', 'Seu perfil não pode solicitar devoluções.');
-}
-
 /** Sums, per `orderItemId`, every quantity already committed to a devolução
  * that has not been rejected (`requested` or `approved`) — never letting a
  * new request push the total above what the pedido's own item actually
@@ -424,11 +375,6 @@ function requireOptionalBoundedString(
     throw new HttpsError('invalid-argument', `${field} must stay under ${maxLength} characters.`);
   }
   return normalized;
-}
-
-function normalizeTeamIds(value: unknown): string[] {
-  if (!Array.isArray(value)) return [];
-  return value.filter((entry): entry is string => typeof entry === 'string');
 }
 
 function roundCurrency(value: number): number {

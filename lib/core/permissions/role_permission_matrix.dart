@@ -77,6 +77,12 @@ abstract final class RolePermissionMatrix {
     // conjunto completo/quase completo acima.
     Capability.returnRequestCreate,
     Capability.returnRequestApprove,
+    // TASK-200: SALES_MANAGER solicita troca para pedidos da própria equipe
+    // e decide (aprova/recusa) qualquer troca solicitada — mesma amplitude
+    // de Capability.returnRequestCreate/Approve; OWNER/ADMIN já a recebem
+    // via o conjunto completo/quase completo acima.
+    Capability.exchangeRequestCreate,
+    Capability.exchangeRequestApprove,
   };
 
   static const Set<Capability> _salesRepCapabilities = <Capability>{
@@ -104,6 +110,10 @@ abstract final class RolePermissionMatrix {
     // nunca decide (aprova/recusa) uma devolução — mesma amplitude/assimetria
     // já aplicada a Capability.orderCreate vs. Capability.orderApprove.
     Capability.returnRequestCreate,
+    // TASK-200: SALES_REP solicita troca para os próprios pedidos, mas nunca
+    // decide (aprova/recusa) uma troca — mesma amplitude/assimetria já
+    // aplicada a Capability.returnRequestCreate vs. Capability.returnRequestApprove.
+    Capability.exchangeRequestCreate,
   };
 
   static const Set<Capability> _salesAssistantCapabilities = <Capability>{

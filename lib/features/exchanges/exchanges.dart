@@ -1,0 +1,33 @@
+/// Public surface of `lib/features/exchanges/` (TASK-200, EPIC-30).
+library;
+
+export 'data/datasources/cloud_functions_exchange_request_data_source.dart';
+export 'data/datasources/firestore_exchange_request_data_source.dart';
+export 'data/datasources/exchange_request_read_data_source.dart';
+export 'data/datasources/exchange_request_write_data_source.dart';
+export 'data/dtos/exchange_request_decision_result_dto.dart';
+export 'data/dtos/exchange_request_dto.dart';
+export 'data/dtos/exchange_request_submission_result_dto.dart';
+export 'data/mappers/exchange_request_mapper.dart';
+export 'data/repositories/exchange_request_repository_impl.dart';
+export 'domain/entities/exchange_request.dart';
+export 'domain/entities/exchange_request_decision.dart';
+export 'domain/entities/exchange_request_decision_result.dart';
+export 'domain/entities/exchange_request_item.dart';
+export 'domain/entities/exchange_request_submission_result.dart';
+export 'domain/repositories/exchange_request_repository.dart';
+export 'domain/usecases/create_exchange_request_use_case.dart';
+export 'domain/usecases/resolve_exchange_request_use_case.dart';
+export 'domain/usecases/watch_exchange_request_queue_use_case.dart';
+export 'domain/usecases/watch_exchange_requests_for_order_use_case.dart';
+export 'domain/value_objects/exchange_reason_category.dart';
+export 'domain/value_objects/exchange_request_status.dart';
+export 'presentation/cubit/exchange_request_form_cubit.dart';
+export 'presentation/cubit/exchange_request_form_state.dart';
+export 'presentation/cubit/exchange_request_history_cubit.dart';
+export 'presentation/cubit/exchange_request_history_state.dart';
+export 'presentation/cubit/exchange_request_queue_cubit.dart';
+export 'presentation/cubit/exchange_request_queue_state.dart';
+export 'presentation/pages/exchange_request_analysis_page.dart';
+export 'presentation/pages/exchange_request_form_page.dart';
+export 'presentation/widgets/exchange_request_history_section.dart';

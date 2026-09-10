@@ -306,6 +306,26 @@ final class ReturnRequestAnalysisRoute extends AppRoute {
   String get location => '/org/$orgId/companies/$companyId/returns/approvals';
 }
 
+/// Fila de análise de trocas (TASK-200, EPIC-30) — toda `ExchangeRequest`
+/// ainda solicitada visível ao caller, mesmo escopo de visibilidade de
+/// [ReturnRequestAnalysisRoute] (`OrderVisibilityService`, TASK-102).
+final class ExchangeRequestAnalysisRoute extends AppRoute {
+  const ExchangeRequestAnalysisRoute({
+    required this.orgId,
+    required this.companyId,
+  });
+
+  final String orgId;
+  final String companyId;
+
+  static const name = 'exchangeRequestAnalysis';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/exchanges/approvals';
+
+  @override
+  String get location => '/org/$orgId/companies/$companyId/exchanges/approvals';
+}
+
 final class TargetDashboardRoute extends AppRoute {
   const TargetDashboardRoute({
     required this.orgId,

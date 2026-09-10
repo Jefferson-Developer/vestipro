@@ -210,6 +210,26 @@ enum Capability {
   /// devolução but never decide one, same asymmetry `orderApprove` already
   /// enforces for pedidos themselves.
   returnRequestApprove,
+
+  /// Solicitar a troca de variante (cor/tamanho) de um item já entregue/
+  /// faturado/expedido de um pedido (TASK-200, EPIC-30) — mesma amplitude de
+  /// [returnRequestCreate], reaproveitando o mesmo ciclo de análise/RBAC das
+  /// devoluções (TASK-199): a solicitação em si nunca aplica efeito de
+  /// estoque/preço por conta própria, apenas abre um `ExchangeRequest` que
+  /// `createExchangeRequest` revalida de forma independente (item original
+  /// pertence ao pedido, variante de destino do mesmo produto e disponível
+  /// em tempo real, motivo categorizado obrigatório).
+  exchangeRequestCreate,
+
+  /// Aprovar ou recusar um `ExchangeRequest` já solicitado (TASK-200,
+  /// EPIC-30) — a única capability que permite `resolveExchangeRequest`
+  /// reintegrar a variante original ao estoque, debitar a variante de
+  /// destino e calcular a diferença de preço pelo motor de precificação
+  /// vigente. Mesma amplitude de [returnRequestApprove]
+  /// (`OWNER`/`ADMIN`/`SALES_MANAGER`) — um `SALES_REP` pode solicitar uma
+  /// troca mas nunca decidir uma, mesma assimetria já aplicada às
+  /// devoluções.
+  exchangeRequestApprove,
 }
 
 extension CapabilityCode on Capability {
@@ -265,6 +285,8 @@ extension CapabilityCode on Capability {
       Capability.ssoManage => 'sso.manage',
       Capability.returnRequestCreate => 'return.create',
       Capability.returnRequestApprove => 'return.approve',
+      Capability.exchangeRequestCreate => 'exchange.create',
+      Capability.exchangeRequestApprove => 'exchange.approve',
     };
   }
 }

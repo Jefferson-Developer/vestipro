@@ -356,6 +356,21 @@ final class AnalyticsEvents {
   /// the motivo's free text.
   static const String returnRejected = 'return_rejected';
 
+  /// Logged by `CreateExchangeRequestUseCase` (TASK-200, EPIC-30) whenever a
+  /// troca is successfully opened — `order_id`/`reason_category`/
+  /// `item_count` are carried as parameters, never customer PII.
+  static const String exchangeRequested = 'exchange_requested';
+
+  /// Logged by `ResolveExchangeRequestUseCase` (TASK-200, EPIC-30) whenever a
+  /// troca is approved — `order_id`/`price_difference_amount` are carried as
+  /// parameters.
+  static const String exchangeApproved = 'exchange_approved';
+
+  /// Logged by `ResolveExchangeRequestUseCase` (TASK-200, EPIC-30) whenever a
+  /// troca is recusada — `order_id` is carried as a parameter, never the
+  /// motivo's free text.
+  static const String exchangeRejected = 'exchange_rejected';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -463,5 +478,8 @@ final class AnalyticsEvents {
     returnRequested,
     returnApproved,
     returnRejected,
+    exchangeRequested,
+    exchangeApproved,
+    exchangeRejected,
   ];
 }

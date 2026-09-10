@@ -350,6 +350,52 @@ service cloud.firestore {
         );
     }
 
+    // -----------------------------------------------------------------------
+    // organizations/{organizationId}/exchangeRequests/{exchangeRequestId}
+    // (TASK-200, EPIC-30 — trocas). Exclusively written by
+    // `createExchangeRequest`/`resolveExchangeRequest` (Admin SDK, bypass
+    // these Rules) — same "read-only via Rules, write only via Cloud
+    // Function" shape `returnRequests/{returnRequestId}` itself already
+    // uses. Visibility deliberately mirrors `canReadReturnRequest`'s own
+    // scope: a troca is never visible to anyone who could not already read
+    // the devolução (and, by extension, the order) it is attached to.
+    // -----------------------------------------------------------------------
+
+    function validExchangeRequestVisibilityPayload(organizationId) {
+      return resource.data.keys().hasAll([
+          'organizationId',
+          'companyId',
+          'sellerId',
+          'customerId'
+        ])
+        && resource.data.organizationId == organizationId
+        && resource.data.companyId is string
+        && resource.data.companyId.size() > 0
+        && resource.data.sellerId is string
+        && resource.data.sellerId.size() > 0
+        && resource.data.customerId is string
+        && resource.data.customerId.size() > 0;
+    }
+
+    function managerCanReadExchangeRequest(organizationId) {
+      return isSalesManager(organizationId)
+        && exists(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId))
+        && requesterTeamIds(organizationId).hasAny(
+            get(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId)).data.teamIds
+          );
+    }
+
+    function canReadExchangeRequest(organizationId) {
+      return validExchangeRequestVisibilityPayload(organizationId)
+        && (
+          isOwnerOrAdmin(organizationId)
+          || (isCustomerPortal(organizationId)
+            && resource.data.customerId == portalCustomerId(organizationId))
+          || (isSalesRep(organizationId) && resource.data.sellerId == request.auth.uid)
+          || managerCanReadExchangeRequest(organizationId)
+        );
+    }
+
     function validProductReadPayload(organizationId) {
       return resource.data.keys().hasAll([
           'organizationId',
@@ -1077,6 +1123,19 @@ service cloud.firestore {
 
       match /returnRequests/{returnRequestId} {
         allow get, list: if canReadReturnRequest(organizationId);
+
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/exchangeRequests/{exchangeRequestId}
+      // (TASK-200, EPIC-30 — trocas: writes exclusively via
+      // `createExchangeRequest`/`resolveExchangeRequest`, Admin SDK, bypass
+      // these Rules entirely.)
+      // -------------------------------------------------------------------
+
+      match /exchangeRequests/{exchangeRequestId} {
+        allow get, list: if canReadExchangeRequest(organizationId);
 
         allow create, update, delete: if false;
       }

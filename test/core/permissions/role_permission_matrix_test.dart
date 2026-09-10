@@ -606,6 +606,71 @@ void main() {
       }
     });
 
+    test('OWNER/ADMIN/SALES_MANAGER/SALES_REP can request a troca '
+        '(TASK-200); SALES_ASSISTANT/FINANCE/READ_ONLY never can', () {
+      for (final role in <SystemRoleName>[
+        SystemRoleName.owner,
+        SystemRoleName.admin,
+        SystemRoleName.salesManager,
+        SystemRoleName.salesRep,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.exchangeRequestCreate),
+          isTrue,
+          reason: '$role must be able to request a troca.',
+        );
+      }
+
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesAssistant,
+        SystemRoleName.finance,
+        SystemRoleName.readOnly,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.exchangeRequestCreate),
+          isFalse,
+          reason: '$role must never be able to request a troca.',
+        );
+      }
+    });
+
+    test('only OWNER/ADMIN/SALES_MANAGER can decide (aprovar/recusar) a '
+        'troca (TASK-200); SALES_REP/SALES_ASSISTANT/FINANCE/READ_ONLY '
+        'never can', () {
+      for (final role in <SystemRoleName>[
+        SystemRoleName.owner,
+        SystemRoleName.admin,
+        SystemRoleName.salesManager,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.exchangeRequestApprove),
+          isTrue,
+          reason: '$role must be able to decide a troca.',
+        );
+      }
+
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesRep,
+        SystemRoleName.salesAssistant,
+        SystemRoleName.finance,
+        SystemRoleName.readOnly,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.exchangeRequestApprove),
+          isFalse,
+          reason: '$role must never decide a troca.',
+        );
+      }
+    });
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,
