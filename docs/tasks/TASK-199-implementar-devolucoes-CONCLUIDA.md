@@ -262,7 +262,7 @@ TASK-199; 0 erros.
 Não autorizado nesta rodada (push não solicitado pelo usuário).
 
 ## Hash do commit
-Hash final informado no resumo da rodada e consultável via `git log`.
+`72d8fcf6c0aa1554d85fb91ae75b095c20076009`
 
 ## Branch
 `main`
