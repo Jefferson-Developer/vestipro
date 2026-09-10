@@ -333,7 +333,7 @@ TASK-200; 0 erros.
 Não autorizado nesta rodada (push não solicitado pelo usuário).
 
 ## Hash do commit
-(preenchido no commit seguinte, após o commit real ser criado — mesmo padrão já usado por TASK-190/191/192)
+`392970634ede3cf0d5e8a9010ae3f6a1b047d454`
 
 ## Branch
 `main`
