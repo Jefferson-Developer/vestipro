@@ -286,6 +286,26 @@ final class OrderApprovalQueueRoute extends AppRoute {
   String get location => '/org/$orgId/companies/$companyId/orders/approvals';
 }
 
+/// Fila de análise de devoluções (TASK-199, EPIC-30) — toda `ReturnRequest`
+/// ainda solicitada visível ao caller, mesmo escopo de visibilidade de
+/// [OrderApprovalQueueRoute] (`OrderVisibilityService`, TASK-102).
+final class ReturnRequestAnalysisRoute extends AppRoute {
+  const ReturnRequestAnalysisRoute({
+    required this.orgId,
+    required this.companyId,
+  });
+
+  final String orgId;
+  final String companyId;
+
+  static const name = 'returnRequestAnalysis';
+  static const pathPattern =
+      '/org/:orgId/companies/:companyId/returns/approvals';
+
+  @override
+  String get location => '/org/$orgId/companies/$companyId/returns/approvals';
+}
+
 final class TargetDashboardRoute extends AppRoute {
   const TargetDashboardRoute({
     required this.orgId,

@@ -14,6 +14,8 @@ import '../../domain/entities/order_signature.dart';
 import '../../domain/services/order_receipt_pdf_encoder.dart';
 import '../../domain/usecases/capture_order_signature_use_case.dart'
     show kSignableOrderStatuses;
+import '../../domain/value_objects/order_status.dart';
+import '../../../returns/returns.dart';
 import '../bloc/order_duplication_cubit.dart';
 import '../bloc/order_duplication_state.dart';
 import '../bloc/order_history_bloc.dart';
@@ -40,6 +42,8 @@ class OrderHistoryPage extends StatelessWidget {
     required this.createBloc,
     required this.createDuplicationCubit,
     required this.createSignatureCubit,
+    required this.createReturnRequestHistoryCubit,
+    required this.createReturnRequestFormCubit,
     this.onDuplicated,
     super.key,
   });
@@ -57,6 +61,16 @@ class OrderHistoryPage extends StatelessWidget {
   /// `OrderSignatureCapturePage` (`BlocProvider.value`), same factory-per-use
   /// convention as [createDuplicationCubit].
   final OrderSignatureCubit Function() createSignatureCubit;
+
+  /// Feeds the "Devoluções" history section (TASK-199, EPIC-30) embedded in
+  /// this same screen.
+  final ReturnRequestHistoryCubit Function() createReturnRequestHistoryCubit;
+
+  /// Builds a fresh `ReturnRequestFormCubit` every time "Solicitar
+  /// devolução" is pushed (TASK-199) — a brand new devolução intent (and
+  /// idempotency key) each time, same one-cubit-per-push convention
+  /// [createDuplicationCubit] already sets.
+  final ReturnRequestFormCubit Function() createReturnRequestFormCubit;
 
   /// Called once "Repetir pedido" successfully creates a new draft — always
   /// navigates into the existing order draft flow (`OrderDraftRoute`,
@@ -107,6 +121,8 @@ class OrderHistoryPage extends StatelessWidget {
             companyId: companyId,
             sellerId: userId,
             permissionService: permissionService,
+            createReturnRequestHistoryCubit: createReturnRequestHistoryCubit,
+            createReturnRequestFormCubit: createReturnRequestFormCubit,
             onDuplicated: onDuplicated,
           ),
         );
@@ -121,6 +137,8 @@ class _OrderHistoryPermissionsGate extends StatefulWidget {
     required this.companyId,
     required this.sellerId,
     required this.permissionService,
+    required this.createReturnRequestHistoryCubit,
+    required this.createReturnRequestFormCubit,
     this.onDuplicated,
   });
 
@@ -128,6 +146,8 @@ class _OrderHistoryPermissionsGate extends StatefulWidget {
   final String companyId;
   final String sellerId;
   final PermissionService permissionService;
+  final ReturnRequestHistoryCubit Function() createReturnRequestHistoryCubit;
+  final ReturnRequestFormCubit Function() createReturnRequestFormCubit;
   final ValueChanged<Order>? onDuplicated;
 
   @override
@@ -138,6 +158,7 @@ class _OrderHistoryPermissionsGate extends StatefulWidget {
 class _OrderHistoryPermissionsGateState
     extends State<_OrderHistoryPermissionsGate> {
   late final Future<bool> _canDuplicate;
+  late final Future<bool> _canRequestReturn;
 
   @override
   void initState() {
@@ -157,19 +178,44 @@ class _OrderHistoryPermissionsGateState
             onFailure: (_) => false,
           ),
         );
+    // "Solicitar devolução" (TASK-199, EPIC-30) — gated by
+    // `Capability.returnRequestCreate`; `createReturnRequest` (Cloud
+    // Function) remains the real, independent source of truth for both this
+    // capability and the seller/pedido-ownership scope.
+    _canRequestReturn = widget.permissionService
+        .hasPermission(
+          organizationId: widget.organizationId,
+          userId: widget.sellerId,
+          capability: Capability.returnRequestCreate,
+        )
+        .then(
+          (result) => result.fold(
+            onSuccess: (granted) => granted,
+            onFailure: (_) => false,
+          ),
+        );
   }
 
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<bool>(
       future: _canDuplicate,
-      builder: (context, snapshot) {
-        return _OrderHistoryScaffold(
-          canDuplicate: snapshot.data ?? false,
-          organizationId: widget.organizationId,
-          companyId: widget.companyId,
-          sellerId: widget.sellerId,
-          onDuplicated: widget.onDuplicated,
+      builder: (context, duplicateSnapshot) {
+        return FutureBuilder<bool>(
+          future: _canRequestReturn,
+          builder: (context, returnSnapshot) {
+            return _OrderHistoryScaffold(
+              canDuplicate: duplicateSnapshot.data ?? false,
+              canRequestReturn: returnSnapshot.data ?? false,
+              organizationId: widget.organizationId,
+              companyId: widget.companyId,
+              sellerId: widget.sellerId,
+              createReturnRequestHistoryCubit:
+                  widget.createReturnRequestHistoryCubit,
+              createReturnRequestFormCubit: widget.createReturnRequestFormCubit,
+              onDuplicated: widget.onDuplicated,
+            );
+          },
         );
       },
     );
@@ -179,17 +225,35 @@ class _OrderHistoryPermissionsGateState
 class _OrderHistoryScaffold extends StatelessWidget {
   const _OrderHistoryScaffold({
     required this.canDuplicate,
+    required this.canRequestReturn,
     required this.organizationId,
     required this.companyId,
     required this.sellerId,
+    required this.createReturnRequestHistoryCubit,
+    required this.createReturnRequestFormCubit,
     this.onDuplicated,
   });
 
   final bool canDuplicate;
+  final bool canRequestReturn;
   final String organizationId;
   final String companyId;
   final String sellerId;
+  final ReturnRequestHistoryCubit Function() createReturnRequestHistoryCubit;
+  final ReturnRequestFormCubit Function() createReturnRequestFormCubit;
   final ValueChanged<Order>? onDuplicated;
+
+  /// Pedido statuses a devolução may be requested against (TASK-199) —
+  /// mirrors exactly which `OrderStatus` values
+  /// `OrderStatusTransitionValidator` accepts a transition into
+  /// `returned`/`partiallyReturned` from.
+  static const _returnEligibleStatuses = <OrderStatus>{
+    OrderStatus.invoiced,
+    OrderStatus.partiallyInvoiced,
+    OrderStatus.shipped,
+    OrderStatus.delivered,
+    OrderStatus.partiallyReturned,
+  };
 
   @override
   Widget build(BuildContext context) {
@@ -221,6 +285,10 @@ class _OrderHistoryScaffold extends StatelessWidget {
                         OrderSignatureFlowStatus.capturing &&
                     signatureState.status != OrderSignatureFlowStatus.syncing;
                 final canViewReceipt = order?.orderNumber != null;
+                final canSubmitReturnRequest =
+                    canRequestReturn &&
+                    order != null &&
+                    _returnEligibleStatuses.contains(order.status);
 
                 return Scaffold(
                   body: AppAdminPageLayout(
@@ -228,6 +296,19 @@ class _OrderHistoryScaffold extends StatelessWidget {
                         ? 'Histórico do pedido'
                         : 'Histórico do pedido ${order.orderNumber}',
                     actions: <Widget>[
+                      if (canSubmitReturnRequest)
+                        AppButton(
+                          label: 'Solicitar devolução',
+                          leadingIcon: Icons.keyboard_return_outlined,
+                          variant: AppButtonVariant.secondary,
+                          onPressed: () => _requestReturn(
+                            context,
+                            organizationId: organizationId,
+                            companyId: companyId,
+                            userId: sellerId,
+                            order: order,
+                          ),
+                        ),
                       if (canViewReceipt)
                         AppButton(
                           label: 'Ver comprovante',
@@ -268,7 +349,12 @@ class _OrderHistoryScaffold extends StatelessWidget {
                                   ),
                       ),
                     ],
-                    content: _OrderHistoryContent(state: historyState),
+                    content: _OrderHistoryContent(
+                      state: historyState,
+                      organizationId: organizationId,
+                      createReturnRequestHistoryCubit:
+                          createReturnRequestHistoryCubit,
+                    ),
                   ),
                 );
               },
@@ -276,6 +362,26 @@ class _OrderHistoryScaffold extends StatelessWidget {
           },
         );
       },
+    );
+  }
+
+  Future<void> _requestReturn(
+    BuildContext context, {
+    required String organizationId,
+    required String companyId,
+    required String userId,
+    required Order order,
+  }) async {
+    await Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => ReturnRequestFormPage(
+          organizationId: organizationId,
+          companyId: companyId,
+          userId: userId,
+          order: order,
+          createCubit: createReturnRequestFormCubit,
+        ),
+      ),
     );
   }
 
@@ -372,9 +478,15 @@ class _OrderHistoryScaffold extends StatelessWidget {
 }
 
 class _OrderHistoryContent extends StatelessWidget {
-  const _OrderHistoryContent({required this.state});
+  const _OrderHistoryContent({
+    required this.state,
+    required this.organizationId,
+    required this.createReturnRequestHistoryCubit,
+  });
 
   final OrderHistoryState state;
+  final String organizationId;
+  final ReturnRequestHistoryCubit Function() createReturnRequestHistoryCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -406,6 +518,12 @@ class _OrderHistoryContent extends StatelessWidget {
           ),
           const SizedBox(height: AppSpacing.spacing12),
           OrderStatusHistoryTimeline(entries: order.statusHistory),
+          const SizedBox(height: AppSpacing.spacing24),
+          ReturnRequestHistorySection(
+            organizationId: organizationId,
+            orderId: order.id,
+            createCubit: createReturnRequestHistoryCubit,
+          ),
         ],
       ),
     );

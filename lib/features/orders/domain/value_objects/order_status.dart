@@ -12,6 +12,15 @@
 ///
 /// Valid transitions between these statuses are enforced by
 /// `OrderStatusTransitionValidator`, never inferred ad hoc from UI code.
+///
+/// [partiallyReturned] and [returned] were added by EPIC-30/TASK-199
+/// (devoluções): reachable from every post-fulfillment status
+/// ([invoiced], [partiallyInvoiced], [shipped], [delivered]) once at least
+/// one `ReturnRequest` for the order is approved by `resolveReturnRequest`
+/// (Cloud Function, Admin SDK — bypasses this client-side validator, same
+/// precedent `decideOrderApproval` already sets for [approved]/[rejected]).
+/// [returned] is terminal; [partiallyReturned] may still transition to
+/// [returned] once every remaining item is eventually returned too.
 enum OrderStatus {
   draft,
   pendingSync,
@@ -25,4 +34,6 @@ enum OrderStatus {
   shipped,
   delivered,
   cancelled,
+  partiallyReturned,
+  returned,
 }

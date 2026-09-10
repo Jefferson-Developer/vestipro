@@ -23,9 +23,14 @@ import '../value_objects/order_status.dart';
 /// - `cancelled` is reachable from every status strictly before [shipped]
 ///   (`draft` through `partiallyInvoiced`, [rejected] included) — once an
 ///   order has [shipped] or reached [delivered] it can no longer be
-///   cancelled outright; undoing it becomes a return/RMA concern, out of
-///   this task's scope.
-/// - [delivered] and [cancelled] are terminal: no further transition is
+///   cancelled outright; undoing it is instead the return/RMA flow below.
+/// - `invoiced | partiallyInvoiced | shipped | delivered -> partiallyReturned
+///   | returned` (EPIC-30, TASK-199): once at least one `ReturnRequest` for
+///   the order is approved, and `partiallyReturned -> returned` once every
+///   remaining item is eventually returned too. Applied server-side only, by
+///   `resolveReturnRequest` (Admin SDK, bypasses this validator) — never a
+///   status a seller/manager picks directly in the UI.
+/// - [cancelled] and [returned] are terminal: no further transition is
 ///   accepted out of them.
 @lazySingleton
 final class OrderStatusTransitionValidator {
@@ -47,15 +52,31 @@ final class OrderStatusTransitionValidator {
       OrderStatus.partiallyInvoiced,
       OrderStatus.cancelled,
     },
-    OrderStatus.invoiced: {OrderStatus.shipped, OrderStatus.cancelled},
+    OrderStatus.invoiced: {
+      OrderStatus.shipped,
+      OrderStatus.cancelled,
+      OrderStatus.partiallyReturned,
+      OrderStatus.returned,
+    },
     OrderStatus.partiallyInvoiced: {
       OrderStatus.invoiced,
       OrderStatus.shipped,
       OrderStatus.cancelled,
+      OrderStatus.partiallyReturned,
+      OrderStatus.returned,
     },
-    OrderStatus.shipped: {OrderStatus.delivered},
-    OrderStatus.delivered: {},
+    OrderStatus.shipped: {
+      OrderStatus.delivered,
+      OrderStatus.partiallyReturned,
+      OrderStatus.returned,
+    },
+    OrderStatus.delivered: {
+      OrderStatus.partiallyReturned,
+      OrderStatus.returned,
+    },
     OrderStatus.cancelled: {},
+    OrderStatus.partiallyReturned: {OrderStatus.returned},
+    OrderStatus.returned: {},
   };
 
   /// Whether moving from [from] to [to] is a valid transition. A status

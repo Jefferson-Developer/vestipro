@@ -25,15 +25,31 @@ void main() {
         OrderStatus.partiallyInvoiced,
         OrderStatus.cancelled,
       },
-      OrderStatus.invoiced: {OrderStatus.shipped, OrderStatus.cancelled},
+      OrderStatus.invoiced: {
+        OrderStatus.shipped,
+        OrderStatus.cancelled,
+        OrderStatus.partiallyReturned,
+        OrderStatus.returned,
+      },
       OrderStatus.partiallyInvoiced: {
         OrderStatus.invoiced,
         OrderStatus.shipped,
         OrderStatus.cancelled,
+        OrderStatus.partiallyReturned,
+        OrderStatus.returned,
       },
-      OrderStatus.shipped: {OrderStatus.delivered},
-      OrderStatus.delivered: {},
+      OrderStatus.shipped: {
+        OrderStatus.delivered,
+        OrderStatus.partiallyReturned,
+        OrderStatus.returned,
+      },
+      OrderStatus.delivered: {
+        OrderStatus.partiallyReturned,
+        OrderStatus.returned,
+      },
       OrderStatus.cancelled: {},
+      OrderStatus.partiallyReturned: {OrderStatus.returned},
+      OrderStatus.returned: {},
     };
 
     test('covers every OrderStatus as a "from" key', () {
@@ -71,10 +87,10 @@ void main() {
       );
     });
 
-    test('delivered and cancelled are terminal', () {
+    test('cancelled and returned are terminal', () {
       for (final to in OrderStatus.values) {
-        expect(validator.canTransition(OrderStatus.delivered, to), isFalse);
         expect(validator.canTransition(OrderStatus.cancelled, to), isFalse);
+        expect(validator.canTransition(OrderStatus.returned, to), isFalse);
       }
     });
 
@@ -83,6 +99,47 @@ void main() {
         validator.canTransition(OrderStatus.shipped, OrderStatus.cancelled),
         isFalse,
       );
+    });
+
+    test('invoiced/partiallyInvoiced/shipped/delivered can transition into '
+        'partiallyReturned/returned (EPIC-30, TASK-199 — devoluções), never '
+        'straight back into an earlier commercial status', () {
+      for (final from in <OrderStatus>[
+        OrderStatus.invoiced,
+        OrderStatus.partiallyInvoiced,
+        OrderStatus.shipped,
+        OrderStatus.delivered,
+      ]) {
+        expect(
+          validator.canTransition(from, OrderStatus.partiallyReturned),
+          isTrue,
+          reason: '${from.name} -> partiallyReturned should be allowed.',
+        );
+        expect(
+          validator.canTransition(from, OrderStatus.returned),
+          isTrue,
+          reason: '${from.name} -> returned should be allowed.',
+        );
+      }
+    });
+
+    test('partiallyReturned only ever transitions into returned, never back '
+        'into an earlier commercial status', () {
+      expect(
+        validator.canTransition(
+          OrderStatus.partiallyReturned,
+          OrderStatus.returned,
+        ),
+        isTrue,
+      );
+      for (final to in OrderStatus.values) {
+        if (to == OrderStatus.returned) continue;
+        expect(
+          validator.canTransition(OrderStatus.partiallyReturned, to),
+          isFalse,
+          reason: 'partiallyReturned -> ${to.name} should be rejected.',
+        );
+      }
     });
 
     test('validateTransition returns normally for a valid transition', () {

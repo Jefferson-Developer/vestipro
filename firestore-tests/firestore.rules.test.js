@@ -510,6 +510,53 @@ function orderDoc({
   };
 }
 
+function returnRequestDoc({
+  organizationId,
+  companyId = 'company-a',
+  orderId = 'order-rep-a',
+  sellerId,
+  customerId = 'customer-a',
+  status = 'requested',
+}) {
+  return {
+    organizationId,
+    companyId,
+    orderId,
+    orderNumber: '000001',
+    customerId,
+    sellerId,
+    currency: 'BRL',
+    items: [
+      {
+        orderItemId: 'item-1',
+        productId: 'product-a',
+        variantId: 'variant-a',
+        quantity: 1,
+        unitPrice: 100,
+        subtotal: 100,
+        warehouseId: 'wh-a',
+      },
+    ],
+    reasonCategory: 'defect',
+    reasonDetails: null,
+    evidenceUrls: [],
+    status,
+    refundAmount: 100,
+    requestedBy: sellerId,
+    requestedByName: 'Vendedor Teste',
+    requestedAt: now(),
+    decisions: [],
+    decidedBy: null,
+    decidedAt: null,
+    decisionReason: null,
+    createdAt: now(),
+    createdBy: sellerId,
+    updatedAt: now(),
+    updatedBy: sellerId,
+    version: 1,
+  };
+}
+
 function orderSignatureDoc({ organizationId, companyId = 'company-a', orderId, signedByUserId }) {
   return {
     organizationId,
@@ -1399,6 +1446,83 @@ describe('organizations/{organizationId}/orders/{orderId}  (TASK-102 visibility 
       db.doc(`organizations/${ORG_A}/orders/order-rep-a`).update({ status: 'approved' }),
     );
     await assertFails(db.doc(`organizations/${ORG_A}/orders/order-rep-a`).delete());
+  });
+});
+
+describe('organizations/{organizationId}/returnRequests/{returnRequestId}  (TASK-199, EPIC-30 — devoluções)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/orders/order-rep-a`)
+        .set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/orders/order-rep-b`)
+        .set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-b' }));
+      await db
+        .doc(`organizations/${ORG_A}/returnRequests/return-rep-a`)
+        .set(returnRequestDoc({ organizationId: ORG_A, orderId: 'order-rep-a', sellerId: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/returnRequests/return-rep-b`)
+        .set(returnRequestDoc({ organizationId: ORG_A, orderId: 'order-rep-b', sellerId: 'rep-b' }));
+      await db
+        .doc(`organizations/${ORG_B}/returnRequests/return-other-tenant`)
+        .set(
+          returnRequestDoc({
+            organizationId: ORG_B,
+            companyId: 'company-b',
+            orderId: 'order-other-tenant',
+            sellerId: 'owner-b',
+          }),
+        );
+    });
+  });
+
+  test('SALES_REP lê a própria devolução (do próprio pedido)', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/returnRequests/return-rep-a`).get());
+  });
+
+  test('SALES_REP não lê devolução de pedido de outro vendedor', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/returnRequests/return-rep-b`).get());
+  });
+
+  test('SALES_MANAGER lê devolução do vendedor da própria equipe, mas não de outra equipe', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/returnRequests/return-rep-a`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/returnRequests/return-rep-b`).get());
+  });
+
+  test('ADMIN e OWNER leem todas as devoluções da própria organization', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+
+    await assertSucceeds(ownerDb.collection(`organizations/${ORG_A}/returnRequests`).get());
+    await assertSucceeds(adminDb.collection(`organizations/${ORG_A}/returnRequests`).get());
+  });
+
+  test('FINANCE não lê devoluções (sem escopo de pedido)', async () => {
+    const db = testEnv.authenticatedContext('finance-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/returnRequests/return-rep-a`).get());
+  });
+
+  test('membro da Org A não lê devolução da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/returnRequests/return-other-tenant`).get());
+  });
+
+  test('ninguém escreve devolução pelo cliente, nem OWNER — createReturnRequest/resolveReturnRequest (Admin SDK) são o único caminho', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/returnRequests/return-new`)
+        .set(returnRequestDoc({ organizationId: ORG_A, orderId: 'order-rep-a', sellerId: 'rep-a' })),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/returnRequests/return-rep-a`).update({ status: 'approved' }),
+    );
+    await assertFails(db.doc(`organizations/${ORG_A}/returnRequests/return-rep-a`).delete());
   });
 });
 

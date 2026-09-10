@@ -87,6 +87,21 @@ final class StoragePaths {
     return 'organizations/$organizationId/productRecognitionQueries/$userId/$fileName';
   }
 
+  /// Evidência opcional (foto) de uma solicitação de devolução (TASK-199,
+  /// EPIC-30) — uploaded by the requester just before calling the
+  /// `createReturnRequest` callable, same "upload first, then reference the
+  /// URL in the callable payload" sequence [orderAttachment] already uses.
+  static String returnRequestEvidence({
+    required String organizationId,
+    required String returnRequestId,
+    required String fileName,
+  }) {
+    _requireNonEmpty(organizationId, 'organizationId');
+    _requireNonEmpty(returnRequestId, 'returnRequestId');
+    _requireNonEmpty(fileName, 'fileName');
+    return 'organizations/$organizationId/returnRequests/$returnRequestId/evidence/$fileName';
+  }
+
   /// Throws [ArgumentError] instead of returning a malformed path: an empty
   /// tenant/entity id here is always a caller bug (e.g. building a path
   /// before the current organization is known), never an expected runtime

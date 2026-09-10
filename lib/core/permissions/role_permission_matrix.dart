@@ -71,6 +71,12 @@ abstract final class RolePermissionMatrix {
     // acima. SALES_REP/SALES_ASSISTANT/FINANCE nunca a recebem — importação
     // em massa é restrita ao "gestor" (tasks.md).
     Capability.customerImport,
+    // TASK-199: SALES_MANAGER solicita devolução para pedidos da própria
+    // equipe e decide (aprova/recusa) qualquer devolução solicitada — mesma
+    // amplitude de Capability.orderApprove; OWNER/ADMIN já a recebem via o
+    // conjunto completo/quase completo acima.
+    Capability.returnRequestCreate,
+    Capability.returnRequestApprove,
   };
 
   static const Set<Capability> _salesRepCapabilities = <Capability>{
@@ -94,6 +100,10 @@ abstract final class RolePermissionMatrix {
     // própria equipe — nunca com toda a organização
     // (Capability.reportShareOrganization, deliberadamente ausente aqui).
     Capability.reportShareTeam,
+    // TASK-199: SALES_REP solicita devolução para os próprios pedidos, mas
+    // nunca decide (aprova/recusa) uma devolução — mesma amplitude/assimetria
+    // já aplicada a Capability.orderCreate vs. Capability.orderApprove.
+    Capability.returnRequestCreate,
   };
 
   static const Set<Capability> _salesAssistantCapabilities = <Capability>{

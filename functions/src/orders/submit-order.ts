@@ -468,6 +468,13 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
           discountAmount: item.discountAmount,
           surchargeAmount: 0,
           subtotal: item.subtotal,
+          // TASK-199, EPIC-30: which exact warehouse this line's stock was
+          // decremented from at submission — `null` only when stock for this
+          // variant was not tracked at all (never blocks submission, see
+          // `resolveItemAvailability`). A future devolução (`resolveReturnRequest`)
+          // reintegrates the returned quantity into precisely this warehouse,
+          // never an arbitrary one for the same variant.
+          warehouseId: availability.get(item.id)?.warehouseId ?? null,
         })),
         discountAmount: roundCurrency(
           pricing.campaignDiscountTotal +
@@ -653,6 +660,14 @@ interface ItemAvailabilityPlan {
    * `physicalQuantity` and `reservedQuantity` decremented together. */
   reservationBalanceRef?: DocumentReference;
   reservationQuantity?: number;
+  /** The exact warehouse this line's stock was actually decremented from
+   * (either the reservation's own `warehouseId` or the fulfillable balance's
+   * own `warehouseId` field) — denormalized onto the persisted order item
+   * (TASK-199, EPIC-30) so a later devolução knows precisely which
+   * warehouse's saldo to reintegrate, instead of guessing among every
+   * balance for the same variant. `undefined` only when stock for this item
+   * is not tracked at all (mirrors the rest of this plan). */
+  warehouseId?: string;
 }
 
 /**
@@ -705,6 +720,7 @@ async function resolveItemAvailability(
           .collection('inventory')
           .doc(`${item.variantId}_${reservationWarehouseId}`),
         reservationQuantity: asInt(reservation.quantity),
+        warehouseId: reservationWarehouseId,
       });
       continue;
     }
@@ -729,7 +745,13 @@ async function resolveItemAvailability(
         'A quantidade solicitada não está disponível em estoque para um dos itens.',
       );
     }
-    plans.set(item.id, { balanceRef: fulfillable.ref });
+    plans.set(item.id, {
+      balanceRef: fulfillable.ref,
+      warehouseId:
+        typeof fulfillable.data.warehouseId === 'string'
+          ? fulfillable.data.warehouseId
+          : undefined,
+    });
   }
 
   return plans;

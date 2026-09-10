@@ -323,6 +323,18 @@ import '../features/catalog_share/presentation/bloc/catalog_share_public_bloc.da
     as _i447;
 import '../features/catalog_share/presentation/bloc/catalog_share_sheet_bloc.dart'
     as _i511;
+import '../features/commissions/data/datasources/commission_entry_data_source.dart'
+    as _i446;
+import '../features/commissions/data/datasources/firestore_commission_entry_data_source.dart'
+    as _i1036;
+import '../features/commissions/data/repositories/commission_repository_impl.dart'
+    as _i301;
+import '../features/commissions/domain/repositories/commission_repository.dart'
+    as _i525;
+import '../features/commissions/domain/usecases/watch_commission_entries_use_case.dart'
+    as _i818;
+import '../features/commissions/presentation/cubit/commission_statement_cubit.dart'
+    as _i487;
 import '../features/crm/crm.dart' as _i205;
 import '../features/crm/data/mappers/crm_activity_mapper.dart' as _i203;
 import '../features/crm/data/mappers/crm_task_mapper.dart' as _i519;
@@ -884,6 +896,8 @@ import '../features/orders/domain/repositories/order_signature_submission_reposi
     as _i463;
 import '../features/orders/domain/repositories/order_submission_repository.dart'
     as _i202;
+import '../features/orders/domain/repositories/recurring_order_plan_repository.dart'
+    as _i366;
 import '../features/orders/domain/services/order_content_hasher.dart' as _i483;
 import '../features/orders/domain/services/order_status_transition_validator.dart'
     as _i753;
@@ -895,6 +909,8 @@ import '../features/orders/domain/usecases/add_items_to_order_draft_use_case.dar
     as _i720;
 import '../features/orders/domain/usecases/capture_order_signature_use_case.dart'
     as _i328;
+import '../features/orders/domain/usecases/create_recurring_order_plan_use_case.dart'
+    as _i535;
 import '../features/orders/domain/usecases/decide_order_approval_use_case.dart'
     as _i828;
 import '../features/orders/domain/usecases/duplicate_order_use_case.dart'
@@ -929,6 +945,8 @@ import '../features/orders/domain/usecases/start_order_draft_for_customer_use_ca
 import '../features/orders/domain/usecases/submit_order_signature_use_case.dart'
     as _i315;
 import '../features/orders/domain/usecases/submit_order_use_case.dart' as _i856;
+import '../features/orders/domain/usecases/update_recurring_order_plan_use_case.dart'
+    as _i111;
 import '../features/orders/presentation/bloc/order_approval_queue_bloc.dart'
     as _i339;
 import '../features/orders/presentation/bloc/order_draft_bloc.dart' as _i287;
@@ -1458,6 +1476,32 @@ import '../features/reports/presentation/bloc/report_builder_bloc.dart'
 import '../features/reports/presentation/bloc/report_schedules_bloc.dart'
     as _i879;
 import '../features/reports/presentation/bloc/saved_reports_bloc.dart' as _i855;
+import '../features/returns/data/datasources/cloud_functions_return_request_data_source.dart'
+    as _i716;
+import '../features/returns/data/datasources/firestore_return_request_data_source.dart'
+    as _i383;
+import '../features/returns/data/datasources/return_request_read_data_source.dart'
+    as _i126;
+import '../features/returns/data/datasources/return_request_write_data_source.dart'
+    as _i476;
+import '../features/returns/data/repositories/return_request_repository_impl.dart'
+    as _i98;
+import '../features/returns/domain/repositories/return_request_repository.dart'
+    as _i295;
+import '../features/returns/domain/usecases/create_return_request_use_case.dart'
+    as _i423;
+import '../features/returns/domain/usecases/resolve_return_request_use_case.dart'
+    as _i124;
+import '../features/returns/domain/usecases/watch_return_request_queue_use_case.dart'
+    as _i8;
+import '../features/returns/domain/usecases/watch_return_requests_for_order_use_case.dart'
+    as _i1040;
+import '../features/returns/presentation/cubit/return_request_form_cubit.dart'
+    as _i1024;
+import '../features/returns/presentation/cubit/return_request_history_cubit.dart'
+    as _i814;
+import '../features/returns/presentation/cubit/return_request_queue_cubit.dart'
+    as _i548;
 import '../features/settings/data/datasources/about_app_data_source.dart'
     as _i364;
 import '../features/settings/data/datasources/in_memory_about_app_datasource.dart'
@@ -2066,6 +2110,16 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i101.PriceListItemRepository>(
       () => const _i808.SharedPreferencesPriceListItemRepository(),
+    );
+    gh.factory<_i535.CreateRecurringOrderPlanUseCase>(
+      () => _i535.CreateRecurringOrderPlanUseCase(
+        gh<_i366.RecurringOrderPlanRepository>(),
+      ),
+    );
+    gh.factory<_i111.UpdateRecurringOrderPlanUseCase>(
+      () => _i111.UpdateRecurringOrderPlanUseCase(
+        gh<_i366.RecurringOrderPlanRepository>(),
+      ),
     );
     gh.lazySingleton<_i809.VisitCheckInLocationService>(
       () => const _i85.GeolocatorVisitCheckInLocationService(),
@@ -2917,6 +2971,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i361.MembershipDataSource>(
       () => _i201.FirestoreMembershipDataSource(gh<_i974.FirebaseFirestore>()),
     );
+    gh.lazySingleton<_i476.ReturnRequestWriteDataSource>(
+      () => _i716.CloudFunctionsReturnRequestDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i814.InviteDataSource>(
       () => _i3.FirestoreInviteDataSource(
         gh<_i340.CloudFunctionsService>(),
@@ -3090,6 +3149,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i809.VisitCheckInLocationService>(),
       ),
     );
+    gh.lazySingleton<_i126.ReturnRequestReadDataSource>(
+      () =>
+          _i383.FirestoreReturnRequestDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i1022.ProductRecommendationRepository>(
       () => _i548.ProductRecommendationRepositoryImpl(
         dataSource: gh<_i619.ProductRecommendationDataSource>(),
@@ -3252,6 +3315,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i598.ReplenishmentSuggestionDataSource>(
       () => _i923.FirestoreReplenishmentSuggestionDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
+    gh.lazySingleton<_i446.CommissionEntryDataSource>(
+      () => _i1036.FirestoreCommissionEntryDataSource(
         gh<_i974.FirebaseFirestore>(),
       ),
     );
@@ -3463,6 +3531,10 @@ extension GetItInjectableX on _i174.GetIt {
         retryPolicy: gh<_i158.SyncRetryPolicy>(),
       ),
     );
+    gh.lazySingleton<_i525.CommissionRepository>(
+      () =>
+          _i301.CommissionRepositoryImpl(gh<_i446.CommissionEntryDataSource>()),
+    );
     gh.factory<_i986.SeasonListBloc>(
       () => _i986.SeasonListBloc(
         listSeasons: gh<_i722.ListSeasonsUseCase>(),
@@ -3584,6 +3656,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i818.WatchCommissionEntriesUseCase>(
+      () =>
+          _i818.WatchCommissionEntriesUseCase(gh<_i525.CommissionRepository>()),
+    );
     gh.lazySingleton<_i922.ReportRemoteDataSource>(
       () => _i712.CloudFunctionsReportRemoteDataSource(
         gh<_i340.CloudFunctionsService>(),
@@ -3627,6 +3703,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i957.MembershipRepository>(),
         gh<_i47.PermissionService>(),
         gh<_i706.Uuid>(),
+      ),
+    );
+    gh.factory<_i487.CommissionStatementCubit>(
+      () => _i487.CommissionStatementCubit(
+        gh<_i818.WatchCommissionEntriesUseCase>(),
       ),
     );
     gh.lazySingleton<_i440.RoleRepository>(
@@ -3707,6 +3788,12 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.lazySingleton<_i295.ReturnRequestRepository>(
+      () => _i98.ReturnRequestRepositoryImpl(
+        gh<_i126.ReturnRequestReadDataSource>(),
+        gh<_i476.ReturnRequestWriteDataSource>(),
+      ),
+    );
     gh.factory<_i684.ListStockAlertsUseCase>(
       () => _i684.ListStockAlertsUseCase(
         gh<_i896.StockAlertRepository>(),
@@ -3771,6 +3858,11 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i412.SignInWithCorporateSsoUseCase(
         gh<_i164.SsoRepository>(),
         gh<_i217.AuthRepository>(),
+      ),
+    );
+    gh.factory<_i1040.WatchReturnRequestsForOrderUseCase>(
+      () => _i1040.WatchReturnRequestsForOrderUseCase(
+        gh<_i295.ReturnRequestRepository>(),
       ),
     );
     gh.factory<_i848.LoadWhatsAppContextUseCase>(
@@ -3927,6 +4019,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i402.WatchCustomerImportJobUseCase>(
       () => _i402.WatchCustomerImportJobUseCase(
         gh<_i253.CustomerImportJobRepository>(),
+      ),
+    );
+    gh.factory<_i814.ReturnRequestHistoryCubit>(
+      () => _i814.ReturnRequestHistoryCubit(
+        gh<_i1040.WatchReturnRequestsForOrderUseCase>(),
       ),
     );
     gh.lazySingleton<_i126.CustomerImportTemplateRepository>(
@@ -4164,6 +4261,18 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i592.OrderApprovalRepository>(),
         gh<_i47.PermissionService>(),
         gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i423.CreateReturnRequestUseCase>(
+      () => _i423.CreateReturnRequestUseCase(
+        gh<_i295.ReturnRequestRepository>(),
+        gh<_i47.PermissionService>(),
+      ),
+    );
+    gh.factory<_i124.ResolveReturnRequestUseCase>(
+      () => _i124.ResolveReturnRequestUseCase(
+        gh<_i295.ReturnRequestRepository>(),
+        gh<_i47.PermissionService>(),
       ),
     );
     gh.factory<_i84.NotificationCenterBloc>(
@@ -4640,6 +4749,14 @@ extension GetItInjectableX on _i174.GetIt {
             gh<_i113.GenerateInsightCommercialAlertsUseCase>(),
       ),
     );
+    gh.factory<_i1024.ReturnRequestFormCubit>(
+      () => _i1024.ReturnRequestFormCubit(
+        gh<_i423.CreateReturnRequestUseCase>(),
+        gh<_i202.AnalyticsService>(),
+        gh<_i209.StorageDataSource>(),
+        gh<_i209.ImageUploadCompressor>(),
+      ),
+    );
     gh.factory<_i532.ProcessCrmTaskReminderUseCase>(
       () => _i532.ProcessCrmTaskReminderUseCase(
         gh<_i516.CrmReminderDispatchRepository>(),
@@ -4952,6 +5069,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i639.FutureStockRepository>(),
       ),
     );
+    gh.factory<_i8.WatchReturnRequestQueueUseCase>(
+      () => _i8.WatchReturnRequestQueueUseCase(
+        gh<_i295.ReturnRequestRepository>(),
+        gh<_i63.OrderVisibilityService>(),
+      ),
+    );
     gh.factory<_i583.EnsureCustomerInSellerPortfolioUseCase>(
       () => _i583.EnsureCustomerInSellerPortfolioUseCase(
         gh<_i220.PortfolioVisibilityService>(),
@@ -4963,6 +5086,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i325.CustomerOfflinePackageEntityLoader>(),
         gh<_i1044.PriceListOfflinePackageEntityLoader>(),
         gh<_i898.PaymentTermOfflinePackageEntityLoader>(),
+      ),
+    );
+    gh.factory<_i548.ReturnRequestQueueCubit>(
+      () => _i548.ReturnRequestQueueCubit(
+        gh<_i8.WatchReturnRequestQueueUseCase>(),
+        gh<_i124.ResolveReturnRequestUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i144.InventoryDashboardBloc>(

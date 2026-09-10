@@ -1,0 +1,33 @@
+/// Public surface of `lib/features/returns/` (TASK-199, EPIC-30).
+library;
+
+export 'data/datasources/cloud_functions_return_request_data_source.dart';
+export 'data/datasources/firestore_return_request_data_source.dart';
+export 'data/datasources/return_request_read_data_source.dart';
+export 'data/datasources/return_request_write_data_source.dart';
+export 'data/dtos/return_request_decision_result_dto.dart';
+export 'data/dtos/return_request_dto.dart';
+export 'data/dtos/return_request_submission_result_dto.dart';
+export 'data/mappers/return_request_mapper.dart';
+export 'data/repositories/return_request_repository_impl.dart';
+export 'domain/entities/return_request.dart';
+export 'domain/entities/return_request_decision.dart';
+export 'domain/entities/return_request_decision_result.dart';
+export 'domain/entities/return_request_item.dart';
+export 'domain/entities/return_request_submission_result.dart';
+export 'domain/repositories/return_request_repository.dart';
+export 'domain/usecases/create_return_request_use_case.dart';
+export 'domain/usecases/resolve_return_request_use_case.dart';
+export 'domain/usecases/watch_return_request_queue_use_case.dart';
+export 'domain/usecases/watch_return_requests_for_order_use_case.dart';
+export 'domain/value_objects/return_reason_category.dart';
+export 'domain/value_objects/return_request_status.dart';
+export 'presentation/cubit/return_request_form_cubit.dart';
+export 'presentation/cubit/return_request_form_state.dart';
+export 'presentation/cubit/return_request_history_cubit.dart';
+export 'presentation/cubit/return_request_history_state.dart';
+export 'presentation/cubit/return_request_queue_cubit.dart';
+export 'presentation/cubit/return_request_queue_state.dart';
+export 'presentation/pages/return_request_analysis_page.dart';
+export 'presentation/pages/return_request_form_page.dart';
+export 'presentation/widgets/return_request_history_section.dart';

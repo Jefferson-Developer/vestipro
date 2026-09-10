@@ -74,11 +74,11 @@ service cloud.firestore {
               'order.create', 'order.view', 'order.approve', 'discount.approveAboveLimit',
               'team.manage', 'report.export', 'report.viewSensitive',
               'report.share.team', 'report.share.organization', 'report.schedule',
-              'customer.import'
+              'customer.import', 'return.create', 'return.approve'
             ])
         || (roleName == 'SALES_REP' && capabilityCode in [
               'customer.create', 'customer.update', 'order.create', 'order.view',
-              'report.share.team'
+              'report.share.team', 'return.create'
             ])
         || (roleName == 'SALES_ASSISTANT' && capabilityCode in [
               'customer.create', 'customer.update'
@@ -300,6 +300,53 @@ service cloud.firestore {
             && resource.data.customerId == portalCustomerId(organizationId))
           || (isSalesRep(organizationId) && resource.data.sellerId == request.auth.uid)
           || managerCanReadOrder(organizationId)
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // organizations/{organizationId}/returnRequests/{returnRequestId}
+    // (TASK-199, EPIC-30 — devoluções). Exclusively written by
+    // `createReturnRequest`/`resolveReturnRequest` (Admin SDK, bypass these
+    // Rules) — same "read-only via Rules, write only via Cloud Function"
+    // shape `orders/{orderId}` itself already uses. Visibility deliberately
+    // mirrors `canReadOrder`'s own scope (the devolução is never visible to
+    // anyone who could not already read the order it is attached to):
+    // requester's own SALES_REP orders, a SALES_MANAGER sharing a team with
+    // that order's seller, the customer's own portal, or OWNER/ADMIN.
+    // -----------------------------------------------------------------------
+
+    function validReturnRequestVisibilityPayload(organizationId) {
+      return resource.data.keys().hasAll([
+          'organizationId',
+          'companyId',
+          'sellerId',
+          'customerId'
+        ])
+        && resource.data.organizationId == organizationId
+        && resource.data.companyId is string
+        && resource.data.companyId.size() > 0
+        && resource.data.sellerId is string
+        && resource.data.sellerId.size() > 0
+        && resource.data.customerId is string
+        && resource.data.customerId.size() > 0;
+    }
+
+    function managerCanReadReturnRequest(organizationId) {
+      return isSalesManager(organizationId)
+        && exists(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId))
+        && requesterTeamIds(organizationId).hasAny(
+            get(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId)).data.teamIds
+          );
+    }
+
+    function canReadReturnRequest(organizationId) {
+      return validReturnRequestVisibilityPayload(organizationId)
+        && (
+          isOwnerOrAdmin(organizationId)
+          || (isCustomerPortal(organizationId)
+            && resource.data.customerId == portalCustomerId(organizationId))
+          || (isSalesRep(organizationId) && resource.data.sellerId == request.auth.uid)
+          || managerCanReadReturnRequest(organizationId)
         );
     }
 
@@ -1019,6 +1066,19 @@ service cloud.firestore {
 
           allow create, update, delete: if false;
         }
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/returnRequests/{returnRequestId}
+      // (TASK-199, EPIC-30 — devoluções: writes exclusively via
+      // `createReturnRequest`/`resolveReturnRequest`, Admin SDK, bypass
+      // these Rules entirely.)
+      // -------------------------------------------------------------------
+
+      match /returnRequests/{returnRequestId} {
+        allow get, list: if canReadReturnRequest(organizationId);
+
+        allow create, update, delete: if false;
       }
 
       // -------------------------------------------------------------------

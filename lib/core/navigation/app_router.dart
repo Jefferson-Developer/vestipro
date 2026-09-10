@@ -49,6 +49,7 @@ class AppRouter {
     this.catalogBrowsePageBuilder,
     this.orderListPageBuilder,
     this.orderApprovalQueuePageBuilder,
+    this.returnRequestAnalysisPageBuilder,
     this.orderHistoryPageBuilder,
     this.orderDraftPageBuilder,
     this.orderProductCatalogPageBuilder,
@@ -179,6 +180,11 @@ class AppRouter {
   /// `orgId`/`companyId` from [OrderApprovalQueueRoute].
   final Widget Function(BuildContext context, String orgId, String companyId)?
   orderApprovalQueuePageBuilder;
+
+  /// Builds the fila de análise de devoluções screen (TASK-199, EPIC-30),
+  /// given `orgId`/`companyId` from [ReturnRequestAnalysisRoute].
+  final Widget Function(BuildContext context, String orgId, String companyId)?
+  returnRequestAnalysisPageBuilder;
 
   /// Builds the pedido history/detail screen (TASK-104), given
   /// `orgId`/`companyId`/`orderId` from [OrderHistoryRoute].
@@ -889,6 +895,24 @@ class AppRouter {
         ),
         builder: (context, state) {
           final builder = orderApprovalQueuePageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['companyId']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: ReturnRequestAnalysisRoute.pathPattern,
+        name: ReturnRequestAnalysisRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.returnRequestApprove,
+        ),
+        builder: (context, state) {
+          final builder = returnRequestAnalysisPageBuilder;
           if (builder == null) return const NotFoundPage();
           return builder(
             context,

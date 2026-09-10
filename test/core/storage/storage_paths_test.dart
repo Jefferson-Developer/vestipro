@@ -109,5 +109,33 @@ void main() {
         throwsA(isA<ArgumentError>()),
       );
     });
+
+    test('returnRequestEvidence builds '
+        'organizations/{org}/returnRequests/{id}/evidence/{file}', () {
+      final path = StoragePaths.returnRequestEvidence(
+        organizationId: 'org-1',
+        returnRequestId: 'return-1',
+        fileName: 'defeito.jpg',
+      );
+
+      expect(
+        path,
+        'organizations/org-1/returnRequests/return-1/evidence/defeito.jpg',
+      );
+    });
+
+    test(
+      'returnRequestEvidence throws ArgumentError for empty returnRequestId',
+      () {
+        expect(
+          () => StoragePaths.returnRequestEvidence(
+            organizationId: 'org-1',
+            returnRequestId: '',
+            fileName: 'defeito.jpg',
+          ),
+          throwsA(isA<ArgumentError>()),
+        );
+      },
+    );
   });
 }

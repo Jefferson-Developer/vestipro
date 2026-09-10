@@ -193,6 +193,8 @@ final class OrderMapper {
       'shipped' => OrderStatus.shipped,
       'delivered' => OrderStatus.delivered,
       'cancelled' => OrderStatus.cancelled,
+      'partially_returned' => OrderStatus.partiallyReturned,
+      'returned' => OrderStatus.returned,
       _ => throw ValidationException(
         'Invalid order status "$raw".',
         code: 'invalid_order_status',
@@ -214,6 +216,8 @@ final class OrderMapper {
       OrderStatus.shipped => 'shipped',
       OrderStatus.delivered => 'delivered',
       OrderStatus.cancelled => 'cancelled',
+      OrderStatus.partiallyReturned => 'partially_returned',
+      OrderStatus.returned => 'returned',
     };
   }
 

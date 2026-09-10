@@ -190,6 +190,26 @@ enum Capability {
   /// *any* user signing in, including one with no capability at all yet
   /// (their very first login).
   ssoManage,
+
+  /// Solicitar a devolução de um item já entregue/faturado/expedido de um
+  /// pedido (TASK-199, EPIC-30) — the request itself never applies any
+  /// stock/financial effect by itself; it only opens a `ReturnRequest` the
+  /// `createReturnRequest` Cloud Function independently re-validates
+  /// (quantidade nunca excede a do pedido original, motivo categorizado
+  /// obrigatório). Granted to whoever may already act on that same order:
+  /// `SALES_REP` for their own pedidos, `SALES_MANAGER` for their team's,
+  /// `OWNER`/`ADMIN` for any — mirrors [orderView]'s own scope, never wider.
+  returnRequestCreate,
+
+  /// Aprovar ou recusar um `ReturnRequest` já solicitado (TASK-199, EPIC-30)
+  /// — the only capability that ever lets `resolveReturnRequest` reintegrate
+  /// stock into the warehouse of origin and drive the pedido's own status
+  /// into `partiallyReturned`/`returned` (which in turn triggers commission
+  /// reversal, EPIC-29). Deliberately mirrors [orderApprove]'s exact grant
+  /// set (`OWNER`/`ADMIN`/`SALES_MANAGER`) — a `SALES_REP` may request a
+  /// devolução but never decide one, same asymmetry `orderApprove` already
+  /// enforces for pedidos themselves.
+  returnRequestApprove,
 }
 
 extension CapabilityCode on Capability {
@@ -243,6 +263,8 @@ extension CapabilityCode on Capability {
       Capability.webhookManage => 'webhook.manage',
       Capability.apiKeyManage => 'apiKey.manage',
       Capability.ssoManage => 'sso.manage',
+      Capability.returnRequestCreate => 'return.create',
+      Capability.returnRequestApprove => 'return.approve',
     };
   }
 }

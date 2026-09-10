@@ -37,6 +37,7 @@ const ORG_B = 'org-b';
 const PRODUCT_IMAGE_MAX_BYTES = 10 * 1024 * 1024;
 const PRODUCT_VIDEO_MAX_BYTES = 100 * 1024 * 1024;
 const ORDER_ATTACHMENT_MAX_BYTES = 20 * 1024 * 1024;
+const RETURN_REQUEST_EVIDENCE_MAX_BYTES = 10 * 1024 * 1024;
 
 const now = () => new Date();
 
@@ -244,6 +245,57 @@ describe('organizations/{organizationId}/orders/{orderId}/attachments/{fileName}
         .set(membershipDoc({ organizationId: ORG_A, userId: 'manager-a', roleName: 'SALES_MANAGER' }));
     });
     await seedFile(PATH_A, validPdf, 'application/pdf');
+    const storage = testEnv.authenticatedContext('manager-a').storage();
+    await assertSucceeds(deleteObject(ref(storage, PATH_A)));
+  });
+});
+
+describe('organizations/{organizationId}/returnRequests/{returnRequestId}/evidence/{fileName} (TASK-199, EPIC-30)', () => {
+  const PATH_A = `organizations/${ORG_A}/returnRequests/return-1/evidence/foto.jpg`;
+  const PATH_B = `organizations/${ORG_B}/returnRequests/return-1/evidence/foto.jpg`;
+  const validImage = new Uint8Array([0xff, 0xd8, 0xff, 0xe0]);
+
+  test('SALES_REP (return.create) consegue enviar evidência de devolução dentro da própria organização', async () => {
+    await assertSucceeds(upload('rep-a', PATH_A, validImage, 'image/jpeg'));
+  });
+
+  test('SALES_ASSISTANT (sem return.create) não consegue enviar evidência de devolução', async () => {
+    await assertFails(upload('assistant-a', PATH_A, validImage, 'image/jpeg'));
+  });
+
+  test('membro da Org A não consegue enviar evidência sob o path da Org B (cross-tenant)', async () => {
+    await assertFails(upload('rep-a', PATH_B, validImage, 'image/jpeg'));
+  });
+
+  test('usuário não autenticado não consegue ler evidência de devolução', async () => {
+    await seedFile(PATH_A, validImage, 'image/jpeg');
+    const storage = testEnv.unauthenticatedContext().storage();
+    await assertFails(getBytes(ref(storage, PATH_A)));
+  });
+
+  test('membro ativo da própria organização consegue ler evidência já existente', async () => {
+    await seedFile(PATH_A, validImage, 'image/jpeg');
+    const storage = testEnv.authenticatedContext('assistant-a').storage();
+    await assertSucceeds(getBytes(ref(storage, PATH_A)));
+  });
+
+  test('upload de evidência com tipo de arquivo não permitido (não-imagem) é rejeitado', async () => {
+    await assertFails(upload('rep-a', PATH_A, validImage, 'application/pdf'));
+  });
+
+  test('upload de evidência acima do tamanho máximo permitido é rejeitado', async () => {
+    const oversized = new Uint8Array(RETURN_REQUEST_EVIDENCE_MAX_BYTES + 1);
+    await assertFails(upload('rep-a', PATH_A, oversized, 'image/jpeg'));
+  });
+
+  test('SALES_MANAGER (return.create) consegue excluir evidência enviada por outro usuário', async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      await context
+        .firestore()
+        .doc(`organizations/${ORG_A}/members/manager-a`)
+        .set(membershipDoc({ organizationId: ORG_A, userId: 'manager-a', roleName: 'SALES_MANAGER' }));
+    });
+    await seedFile(PATH_A, validImage, 'image/jpeg');
     const storage = testEnv.authenticatedContext('manager-a').storage();
     await assertSucceeds(deleteObject(ref(storage, PATH_A)));
   });

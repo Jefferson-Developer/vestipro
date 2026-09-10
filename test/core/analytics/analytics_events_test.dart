@@ -107,6 +107,9 @@ void main() {
           'product_recognition_feedback_submitted',
           'campaign_assist_draft_generated',
           'campaign_assist_draft_generation_failed',
+          'return_requested',
+          'return_approved',
+          'return_rejected',
         ]),
       );
 

@@ -763,6 +763,8 @@ String orderStatusLabel(OrderStatus status) {
     OrderStatus.shipped => 'Expedido',
     OrderStatus.delivered => 'Entregue',
     OrderStatus.cancelled => 'Cancelado',
+    OrderStatus.partiallyReturned => 'Devolvido parcialmente',
+    OrderStatus.returned => 'Devolvido',
   };
 }
 
@@ -780,6 +782,8 @@ AppStatusBadgeVariant orderStatusVariant(OrderStatus status) {
     OrderStatus.delivered => AppStatusBadgeVariant.success,
     OrderStatus.rejected ||
     OrderStatus.cancelled => AppStatusBadgeVariant.error,
+    OrderStatus.partiallyReturned ||
+    OrderStatus.returned => AppStatusBadgeVariant.warning,
   };
 }
 
@@ -797,6 +801,8 @@ IconData orderStatusIcon(OrderStatus status) {
     OrderStatus.shipped => Icons.local_shipping_outlined,
     OrderStatus.delivered => Icons.inventory_2_outlined,
     OrderStatus.cancelled => Icons.block_outlined,
+    OrderStatus.partiallyReturned ||
+    OrderStatus.returned => Icons.keyboard_return_outlined,
   };
 }
 

@@ -46,6 +46,7 @@ import '../features/invites/invites.dart';
 import '../features/onboarding/onboarding.dart';
 import '../features/onboarding/presentation/bloc/onboarding_bloc.dart';
 import '../features/orders/orders.dart';
+import '../features/returns/returns.dart';
 import '../features/organizations/organizations.dart';
 import '../features/products/products.dart';
 import '../features/privacy/privacy.dart';
@@ -1110,6 +1111,18 @@ class VestiProApp extends StatelessWidget {
                   createBloc: () => getIt<OrderApprovalQueueBloc>(),
                 ),
               ),
+          returnRequestAnalysisPageBuilder: (context, orgId, companyId) =>
+              _withConnectivityIndicator(
+                orgId: orgId,
+                companyId: companyId,
+                child: ReturnRequestAnalysisPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  permissionService: getIt<PermissionService>(),
+                  createCubit: () => getIt<ReturnRequestQueueCubit>(),
+                ),
+              ),
           orderHistoryPageBuilder: (context, orgId, companyId, orderId) =>
               _withConnectivityIndicator(
                 orgId: orgId,
@@ -1123,6 +1136,10 @@ class VestiProApp extends StatelessWidget {
                   createBloc: () => getIt<OrderHistoryBloc>(),
                   createDuplicationCubit: () => getIt<OrderDuplicationCubit>(),
                   createSignatureCubit: () => getIt<OrderSignatureCubit>(),
+                  createReturnRequestHistoryCubit: () =>
+                      getIt<ReturnRequestHistoryCubit>(),
+                  createReturnRequestFormCubit: () =>
+                      getIt<ReturnRequestFormCubit>(),
                   onDuplicated: (order) => context.go(
                     OrderDraftRoute(
                       orgId: orgId,

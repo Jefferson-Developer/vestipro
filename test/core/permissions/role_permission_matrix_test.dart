@@ -541,6 +541,71 @@ void main() {
       },
     );
 
+    test('OWNER/ADMIN/SALES_MANAGER/SALES_REP can request a devolução '
+        '(TASK-199); SALES_ASSISTANT/FINANCE/READ_ONLY never can', () {
+      for (final role in <SystemRoleName>[
+        SystemRoleName.owner,
+        SystemRoleName.admin,
+        SystemRoleName.salesManager,
+        SystemRoleName.salesRep,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.returnRequestCreate),
+          isTrue,
+          reason: '$role must be able to request a devolução.',
+        );
+      }
+
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesAssistant,
+        SystemRoleName.finance,
+        SystemRoleName.readOnly,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.returnRequestCreate),
+          isFalse,
+          reason: '$role must never be able to request a devolução.',
+        );
+      }
+    });
+
+    test('only OWNER/ADMIN/SALES_MANAGER can decide (aprovar/recusar) a '
+        'devolução (TASK-199); SALES_REP/SALES_ASSISTANT/FINANCE/READ_ONLY '
+        'never can', () {
+      for (final role in <SystemRoleName>[
+        SystemRoleName.owner,
+        SystemRoleName.admin,
+        SystemRoleName.salesManager,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.returnRequestApprove),
+          isTrue,
+          reason: '$role must be able to decide a devolução.',
+        );
+      }
+
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesRep,
+        SystemRoleName.salesAssistant,
+        SystemRoleName.finance,
+        SystemRoleName.readOnly,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.returnRequestApprove),
+          isFalse,
+          reason: '$role must never decide a devolução.',
+        );
+      }
+    });
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,

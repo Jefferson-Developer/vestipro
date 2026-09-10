@@ -73,10 +73,10 @@ service firebase.storage {
               'customer.create', 'customer.update', 'customer.delete',
               'order.create', 'order.approve', 'discount.approveAboveLimit',
               'team.manage', 'report.export', 'report.viewSensitive',
-              'customer.import'
+              'customer.import', 'return.create', 'return.approve'
             ])
         || (roleName == 'SALES_REP' && capabilityCode in [
-              'customer.create', 'customer.update', 'order.create'
+              'customer.create', 'customer.update', 'order.create', 'return.create'
             ])
         || (roleName == 'SALES_ASSISTANT' && capabilityCode in [
               'customer.create', 'customer.update'
@@ -129,6 +129,14 @@ service firebase.storage {
              'application/vnd.ms-excel',
              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet'
            ];
+    }
+
+    // TASK-199, EPIC-30: evidência opcional (foto) anexada a uma solicitação
+    // de devolução — sempre uma imagem, mesmo cap de tamanho de
+    // `isValidProductImage`.
+    function isValidReturnRequestEvidence() {
+      return request.resource.size <= 10 * 1024 * 1024
+        && request.resource.contentType.matches('image/.*');
     }
 
     function isValidAvatarImage() {
@@ -196,6 +204,23 @@ service firebase.storage {
         && isValidOrderAttachment();
 
       allow delete: if hasCapability(organizationId, 'order.create');
+    }
+
+    // -------------------------------------------------------------------
+    // organizations/{organizationId}/returnRequests/{returnRequestId}/evidence/{fileName}
+    // (`StoragePaths.returnRequestEvidence`, TASK-199, EPIC-30 — evidência
+    // opcional de uma solicitação de devolução, upload feito antes de
+    // chamar `createReturnRequest`, mesma sequência "upload primeiro, depois
+    // callable" de `orderAttachment`.)
+    // -------------------------------------------------------------------
+
+    match /organizations/{organizationId}/returnRequests/{returnRequestId}/evidence/{fileName} {
+      allow read: if isActiveMember(organizationId);
+
+      allow create, update: if hasCapability(organizationId, 'return.create')
+        && isValidReturnRequestEvidence();
+
+      allow delete: if hasCapability(organizationId, 'return.create');
     }
 
     // -------------------------------------------------------------------
