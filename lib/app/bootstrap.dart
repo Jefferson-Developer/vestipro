@@ -49,6 +49,7 @@ import '../features/orders/orders.dart';
 import '../features/returns/returns.dart';
 import '../features/exchanges/exchanges.dart';
 import '../features/after_sales/after_sales.dart';
+import '../features/nps/nps.dart';
 import '../features/organizations/organizations.dart';
 import '../features/products/products.dart';
 import '../features/privacy/privacy.dart';
@@ -743,6 +744,7 @@ class VestiProApp extends StatelessWidget {
                           getIt<WalletSummaryCubit>(),
                       createDailyRepSummaryCubit: () =>
                           getIt<DailyRepSummaryCubit>(),
+                      createNpsScoreCardCubit: () => getIt<NpsScoreCardCubit>(),
                       onOpenCrmActivity: (task) {
                         final customerId = task.customerId;
                         if (customerId != null) {
@@ -1359,6 +1361,10 @@ class VestiProApp extends StatelessWidget {
           cartSharePublicPageBuilder: (context, token) => CartSharePublicPage(
             token: token,
             createCubit: () => getIt<CartShareCubit>(),
+          ),
+          npsResponsePageBuilder: (context, token) => NpsResponsePage(
+            token: token,
+            createBloc: () => getIt<NpsResponseBloc>(),
           ),
           customerPortalPageBuilder: (context, orgId) {
             final repository = getIt<CustomerPortalRepository>();

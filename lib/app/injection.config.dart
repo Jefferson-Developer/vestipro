@@ -809,6 +809,35 @@ import '../features/leads/domain/usecases/list_leads_use_case.dart' as _i778;
 import '../features/leads/domain/usecases/qualify_lead_use_case.dart' as _i924;
 import '../features/leads/presentation/bloc/lead_form_bloc.dart' as _i480;
 import '../features/leads/presentation/bloc/lead_list_bloc.dart' as _i581;
+import '../features/nps/data/datasources/cloud_functions_nps_public_survey_data_source.dart'
+    as _i551;
+import '../features/nps/data/datasources/firestore_nps_aggregate_data_source.dart'
+    as _i127;
+import '../features/nps/data/datasources/nps_aggregate_data_source.dart'
+    as _i495;
+import '../features/nps/data/datasources/nps_public_survey_data_source.dart'
+    as _i673;
+import '../features/nps/data/mappers/nps_aggregate_snapshot_mapper.dart'
+    as _i51;
+import '../features/nps/data/mappers/nps_response_submission_result_mapper.dart'
+    as _i546;
+import '../features/nps/data/mappers/nps_survey_preview_mapper.dart' as _i165;
+import '../features/nps/data/repositories/nps_aggregate_repository_impl.dart'
+    as _i840;
+import '../features/nps/data/repositories/nps_public_survey_repository_impl.dart'
+    as _i51;
+import '../features/nps/domain/repositories/nps_aggregate_repository.dart'
+    as _i921;
+import '../features/nps/domain/repositories/nps_public_survey_repository.dart'
+    as _i418;
+import '../features/nps/domain/usecases/load_nps_aggregate_trend_use_case.dart'
+    as _i126;
+import '../features/nps/domain/usecases/preview_nps_survey_use_case.dart'
+    as _i850;
+import '../features/nps/domain/usecases/submit_nps_response_use_case.dart'
+    as _i620;
+import '../features/nps/presentation/bloc/nps_response_bloc.dart' as _i794;
+import '../features/nps/presentation/cubit/nps_score_card_cubit.dart' as _i268;
 import '../features/onboarding/data/datasources/onboarding_progress_data_source.dart'
     as _i924;
 import '../features/onboarding/data/datasources/shared_preferences_onboarding_progress_data_source.dart'
@@ -1755,6 +1784,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.factory<_i619.FavoriteLocalMapper>(
       () => const _i619.FavoriteLocalMapper(),
+    );
+    gh.factory<_i51.NpsAggregateSnapshotMapper>(
+      () => const _i51.NpsAggregateSnapshotMapper(),
+    );
+    gh.factory<_i546.NpsResponseSubmissionResultMapper>(
+      () => const _i546.NpsResponseSubmissionResultMapper(),
+    );
+    gh.factory<_i165.NpsSurveyPreviewMapper>(
+      () => const _i165.NpsSurveyPreviewMapper(),
     );
     gh.factory<_i730.OrderPricingMapper>(
       () => const _i730.OrderPricingMapper(),
@@ -3321,6 +3359,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
+    gh.lazySingleton<_i495.NpsAggregateDataSource>(
+      () =>
+          _i127.FirestoreNpsAggregateDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i240.StockAlertDataSource>(
       () => _i8.FirestoreStockAlertDataSource(gh<_i974.FirebaseFirestore>()),
     );
@@ -3420,9 +3462,20 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i974.FirebaseFirestore>(),
       ),
     );
+    gh.lazySingleton<_i673.NpsPublicSurveyDataSource>(
+      () => _i551.CloudFunctionsNpsPublicSurveyDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i226.ReportScheduleRemoteDataSource>(
       () => _i272.FirestoreReportScheduleRemoteDataSource(
         gh<_i974.FirebaseFirestore>(),
+      ),
+    );
+    gh.lazySingleton<_i921.NpsAggregateRepository>(
+      () => _i840.NpsAggregateRepositoryImpl(
+        gh<_i495.NpsAggregateDataSource>(),
+        gh<_i51.NpsAggregateSnapshotMapper>(),
       ),
     );
     gh.lazySingleton<_i671.ProductRemoteSearchDataSource>(
@@ -3816,12 +3869,24 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i802.TeamMapper>(),
       ),
     );
+    gh.lazySingleton<_i418.NpsPublicSurveyRepository>(
+      () => _i51.NpsPublicSurveyRepositoryImpl(
+        dataSource: gh<_i673.NpsPublicSurveyDataSource>(),
+        previewMapper: gh<_i165.NpsSurveyPreviewMapper>(),
+        submissionResultMapper: gh<_i546.NpsResponseSubmissionResultMapper>(),
+      ),
+    );
     gh.factory<_i1064.LoadExecutiveDashboardSnapshotUseCase>(
       () => _i1064.LoadExecutiveDashboardSnapshotUseCase(
         gh<_i649.AggregationRepository>(),
         gh<_i1031.PositivacaoRepository>(),
         gh<_i876.TargetRepository>(),
         gh<_i154.TargetAchievementRepository>(),
+      ),
+    );
+    gh.factory<_i126.LoadNpsAggregateTrendUseCase>(
+      () => _i126.LoadNpsAggregateTrendUseCase(
+        gh<_i921.NpsAggregateRepository>(),
       ),
     );
     gh.factory<_i938.CreatePromotionalCampaignUseCase>(
@@ -4482,6 +4547,20 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i601.RevokeCatalogShareUseCase>(
       () => _i601.RevokeCatalogShareUseCase(gh<_i558.CatalogShareRepository>()),
     );
+    gh.factory<_i268.NpsScoreCardCubit>(
+      () => _i268.NpsScoreCardCubit(
+        gh<_i126.LoadNpsAggregateTrendUseCase>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i850.PreviewNpsSurveyUseCase>(
+      () =>
+          _i850.PreviewNpsSurveyUseCase(gh<_i418.NpsPublicSurveyRepository>()),
+    );
+    gh.factory<_i620.SubmitNpsResponseUseCase>(
+      () =>
+          _i620.SubmitNpsResponseUseCase(gh<_i418.NpsPublicSurveyRepository>()),
+    );
     gh.factory<_i835.AddUserToTeamUseCase>(
       () => _i835.AddUserToTeamUseCase(gh<_i320.TeamRepository>()),
     );
@@ -4581,6 +4660,13 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i966.GetOrganizationUseCase>(),
         gh<_i270.UpdateOrganizationSettingsUseCase>(),
         gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i794.NpsResponseBloc>(
+      () => _i794.NpsResponseBloc(
+        previewNpsSurvey: gh<_i850.PreviewNpsSurveyUseCase>(),
+        submitNpsResponse: gh<_i620.SubmitNpsResponseUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i957.CartShareCubit>(

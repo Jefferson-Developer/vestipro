@@ -114,6 +114,8 @@ void main() {
           'exchange_approved',
           'exchange_rejected',
           'post_sale_event_registered',
+          'nps_response_submitted',
+          'nps_score_card_viewed',
         ]),
       );
 

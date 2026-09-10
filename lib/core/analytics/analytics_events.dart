@@ -378,6 +378,18 @@ final class AnalyticsEvents {
   /// parameters, never the free-text description.
   static const String postSaleEventRegistered = 'post_sale_event_registered';
 
+  /// Logged by `NpsResponseBloc` (TASK-202, EPIC-30) whenever a customer
+  /// successfully submits an NPS response through their survey link —
+  /// `score` is carried as a parameter, never the free-text comment or any
+  /// customer identifier.
+  static const String npsResponseSubmitted = 'nps_response_submitted';
+
+  /// Logged by `NpsScoreCardCubit` (TASK-202, EPIC-30) whenever the NPS
+  /// indicator on a dashboard finishes loading with an aggregate available
+  /// — `scope`/`has_score` are carried as parameters, never the raw score
+  /// itself (that is already visible on-screen, not an analytics concern).
+  static const String npsScoreCardViewed = 'nps_score_card_viewed';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -489,5 +501,7 @@ final class AnalyticsEvents {
     exchangeApproved,
     exchangeRejected,
     postSaleEventRegistered,
+    npsResponseSubmitted,
+    npsScoreCardViewed,
   ];
 }

@@ -37,6 +37,7 @@ class AppRouter {
     required this.acceptInvitePageBuilder,
     required this.catalogSharePublicPageBuilder,
     this.cartSharePublicPageBuilder,
+    this.npsResponsePageBuilder,
     this.customerPortalPageBuilder,
     this.customerFormPageBuilder,
     this.customerImportPageBuilder,
@@ -98,6 +99,14 @@ class AppRouter {
   userManagementPageBuilder;
   final Widget Function(BuildContext context, String token)?
   cartSharePublicPageBuilder;
+
+  /// Builds the public, unauthenticated NPS survey response screen
+  /// (TASK-202), given the `token` path parameter extracted from
+  /// [NpsResponseRoute]. Optional (like most feature builders here) so
+  /// tests/examples that build their own [AppRouter] without wiring
+  /// TASK-202 keep compiling unchanged.
+  final Widget Function(BuildContext context, String token)?
+  npsResponsePageBuilder;
   final Widget Function(BuildContext context, String orgId)?
   customerPortalPageBuilder;
 
@@ -1255,6 +1264,16 @@ class AppRouter {
         name: CartSharePublicRoute.name,
         builder: (context, state) =>
             cartSharePublicPageBuilder?.call(
+              context,
+              state.pathParameters['token']!,
+            ) ??
+            const NotFoundPage(),
+      ),
+      GoRoute(
+        path: NpsResponseRoute.pathPattern,
+        name: NpsResponseRoute.name,
+        builder: (context, state) =>
+            npsResponsePageBuilder?.call(
               context,
               state.pathParameters['token']!,
             ) ??

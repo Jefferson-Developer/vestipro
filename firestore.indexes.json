@@ -311,6 +311,16 @@
         { "fieldPath": "orderId", "order": "ASCENDING" },
         { "fieldPath": "createdAt", "order": "DESCENDING" }
       ]
+    },
+    {
+      "collectionGroup": "npsMonthlyAggregates",
+      "queryScope": "COLLECTION",
+      "fields": [
+        { "fieldPath": "companyId", "order": "ASCENDING" },
+        { "fieldPath": "scope", "order": "ASCENDING" },
+        { "fieldPath": "scopeId", "order": "ASCENDING" },
+        { "fieldPath": "periodKey", "order": "ASCENDING" }
+      ]
     }
   ],
   "fieldOverrides": [
@@ -330,6 +340,13 @@
     },
     {
       "collectionGroup": "catalogShares",
+      "fieldPath": "tokenHash",
+      "indexes": [
+        { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }
+      ]
+    },
+    {
+      "collectionGroup": "npsSurveyRequests",
       "fieldPath": "tokenHash",
       "indexes": [
         { "order": "ASCENDING", "queryScope": "COLLECTION_GROUP" }

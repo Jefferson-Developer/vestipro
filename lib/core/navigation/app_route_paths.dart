@@ -1235,6 +1235,30 @@ final class CartSharePublicRoute extends AppRoute {
   String get location => '/cart-share/$token';
 }
 
+/// Route reached via the link sent to a customer to answer an NPS survey
+/// (TASK-202, EPIC-30 — consuming the `NpsSurveyRequest` created by
+/// `triggerNpsSurvey`).
+///
+/// Deliberately outside the `/org/:orgId/...` convention every other
+/// authenticated route follows, same rationale as [CatalogSharePublicRoute]:
+/// the organization is not known ahead of time here — it is resolved from
+/// [token] itself, by `getNpsSurveyByToken`, once `NpsResponsePage` loads.
+/// Must never require [AuthGuard]/[ActiveOrganizationGuard] the way
+/// protected routes do: a pesquisa link has to work for a customer who is
+/// not signed in at all (`tasks.md`: "sem exigir login complexo do
+/// cliente").
+final class NpsResponseRoute extends AppRoute {
+  const NpsResponseRoute({required this.token});
+
+  final String token;
+
+  static const name = 'npsResponse';
+  static const pathPattern = '/nps/:token';
+
+  @override
+  String get location => '/nps/$token';
+}
+
 /// Authenticated self-service area for a customer linked to one tenant.
 final class CustomerPortalRoute extends AppRoute {
   const CustomerPortalRoute({required this.orgId});

@@ -353,7 +353,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-199 — Implementar devoluções](TASK-199-implementar-devolucoes.md) — Flutter Senior + Front-end
 - [x] [TASK-200 — Implementar trocas](TASK-200-implementar-trocas.md) — Flutter Senior + Front-end
 - [x] [TASK-201 — Implementar acompanhamento de pós-venda](TASK-201-implementar-acompanhamento-de-pos-venda.md) — Flutter Senior + Front-end
-- [ ] [TASK-202 — Implementar NPS e pesquisa de satisfação](TASK-202-implementar-nps.md) — Flutter Senior + Front-end
+- [x] [TASK-202 — Implementar NPS e pesquisa de satisfação](TASK-202-implementar-nps.md) — Flutter Senior + Front-end
 
 ### EPIC-31 — Administração Avançada e Data Platform
 - [ ] [TASK-203 — Implementar portal administrativo avançado](TASK-203-implementar-portal-administrativo-avancado.md) — Flutter Senior + Front-end
@@ -379,6 +379,6 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 200 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
+**Progresso:** 201 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
 [`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md)
 — e não conta mais no total).

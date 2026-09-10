@@ -1,0 +1,33 @@
+/// Public surface of `lib/features/nps/` (TASK-202, EPIC-30).
+library;
+
+export 'data/datasources/cloud_functions_nps_public_survey_data_source.dart';
+export 'data/datasources/firestore_nps_aggregate_data_source.dart';
+export 'data/datasources/nps_aggregate_data_source.dart';
+export 'data/datasources/nps_public_survey_data_source.dart';
+export 'data/dtos/nps_aggregate_snapshot_dto.dart';
+export 'data/dtos/nps_response_submission_result_dto.dart';
+export 'data/dtos/nps_survey_preview_dto.dart';
+export 'data/mappers/nps_aggregate_snapshot_mapper.dart';
+export 'data/mappers/nps_response_submission_result_mapper.dart';
+export 'data/mappers/nps_survey_preview_mapper.dart';
+export 'data/repositories/nps_aggregate_repository_impl.dart';
+export 'data/repositories/nps_public_survey_repository_impl.dart';
+export 'domain/entities/nps_aggregate_snapshot.dart';
+export 'domain/entities/nps_response_submission_result.dart';
+export 'domain/entities/nps_survey_preview.dart';
+export 'domain/repositories/nps_aggregate_repository.dart';
+export 'domain/repositories/nps_public_survey_repository.dart';
+export 'domain/usecases/load_nps_aggregate_trend_use_case.dart';
+export 'domain/usecases/preview_nps_survey_use_case.dart';
+export 'domain/usecases/submit_nps_response_use_case.dart';
+export 'domain/value_objects/nps_aggregate_scope.dart';
+export 'domain/value_objects/nps_score_category.dart';
+export 'domain/value_objects/nps_survey_outcome.dart';
+export 'presentation/bloc/nps_response_bloc.dart';
+export 'presentation/bloc/nps_response_event.dart';
+export 'presentation/bloc/nps_response_state.dart';
+export 'presentation/cubit/nps_score_card_cubit.dart';
+export 'presentation/cubit/nps_score_card_state.dart';
+export 'presentation/pages/nps_response_page.dart';
+export 'presentation/widgets/nps_score_card.dart';

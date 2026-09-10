@@ -9,6 +9,9 @@ import '../../../crm/domain/entities/crm_task.dart';
 import '../../../daily_rep_summary/presentation/cubit/daily_rep_summary_cubit.dart';
 import '../../../daily_rep_summary/presentation/widgets/daily_rep_summary_card.dart';
 import '../../../insights/domain/entities/insight.dart';
+import '../../../nps/domain/value_objects/nps_aggregate_scope.dart';
+import '../../../nps/presentation/cubit/nps_score_card_cubit.dart';
+import '../../../nps/presentation/widgets/nps_score_card.dart';
 import '../../../wallet_summary/presentation/cubit/wallet_summary_cubit.dart';
 import '../../../wallet_summary/presentation/widgets/wallet_summary_card.dart';
 import '../../domain/entities/executive_dashboard_metric.dart';
@@ -28,6 +31,7 @@ class RepresentativeDashboardPage extends StatelessWidget {
     required this.createBloc,
     required this.createWalletSummaryCubit,
     required this.createDailyRepSummaryCubit,
+    required this.createNpsScoreCardCubit,
     required this.onOpenCrmActivity,
     required this.onOpenCustomer,
     required this.onOpenInsight,
@@ -39,6 +43,7 @@ class RepresentativeDashboardPage extends StatelessWidget {
   final RepresentativeDashboardBloc Function() createBloc;
   final WalletSummaryCubit Function() createWalletSummaryCubit;
   final DailyRepSummaryCubit Function() createDailyRepSummaryCubit;
+  final NpsScoreCardCubit Function() createNpsScoreCardCubit;
   final ValueChanged<CrmTask> onOpenCrmActivity;
   final ValueChanged<String> onOpenCustomer;
   final ValueChanged<Insight> onOpenInsight;
@@ -68,6 +73,20 @@ class RepresentativeDashboardPage extends StatelessWidget {
                 organizationId: organizationId,
                 requesterUserId: requesterUserId,
                 sellerId: requesterUserId,
+              ),
+            );
+            return cubit;
+          },
+        ),
+        BlocProvider<NpsScoreCardCubit>(
+          create: (_) {
+            final cubit = createNpsScoreCardCubit();
+            unawaited(
+              cubit.load(
+                organizationId: organizationId,
+                companyId: initialFilters.companyId,
+                scope: NpsAggregateScope.seller,
+                scopeId: initialFilters.sellerId,
               ),
             );
             return cubit;
@@ -207,6 +226,13 @@ class _DashboardBody extends StatelessWidget {
                   ],
                 );
               },
+            ),
+            const SizedBox(height: AppSpacing.spacing16),
+            NpsScoreCard(
+              organizationId: organizationId,
+              companyId: companyId,
+              scope: NpsAggregateScope.seller,
+              scopeId: sellerId,
             ),
             const SizedBox(height: AppSpacing.spacing24),
             WalletSummaryCard(

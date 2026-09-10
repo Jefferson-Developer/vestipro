@@ -433,6 +433,74 @@ service cloud.firestore {
         );
     }
 
+    // -----------------------------------------------------------------------
+    // organizations/{organizationId}/npsSurveyRequests/{npsSurveyRequestId}
+    // and organizations/{organizationId}/npsResponses/{npsResponseId}
+    // (TASK-202, EPIC-30 — NPS e pesquisa de satisfação). Exclusively written
+    // by `triggerNpsSurvey`/`submitNpsResponse` (Admin SDK, bypass these
+    // Rules entirely) — same "read-only via Rules, write only via Cloud
+    // Function" shape `returnRequests`/`exchangeRequests`/`postSaleEvents`
+    // themselves already use. Visibility deliberately mirrors
+    // `canReadPostSaleEvent`'s own scope: a pesquisa (or its resposta) is
+    // never visible to anyone who could not already read the pedido it is
+    // attached to. The anonymous customer answering their own pesquisa never
+    // reads either collection directly — only via `getNpsSurveyByToken`/
+    // `submitNpsResponse`, which use the Admin SDK and so never present the
+    // token to these Rules at all (same guarantee TASK-081's own
+    // `catalogShares` already established for its own public token).
+    // -----------------------------------------------------------------------
+
+    function validNpsVisibilityPayload(organizationId) {
+      return resource.data.keys().hasAll([
+          'organizationId',
+          'companyId',
+          'sellerId',
+          'customerId'
+        ])
+        && resource.data.organizationId == organizationId
+        && resource.data.companyId is string
+        && resource.data.companyId.size() > 0
+        && resource.data.sellerId is string
+        && resource.data.sellerId.size() > 0
+        && resource.data.customerId is string
+        && resource.data.customerId.size() > 0;
+    }
+
+    function managerCanReadNps(organizationId) {
+      return isSalesManager(organizationId)
+        && exists(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId))
+        && requesterTeamIds(organizationId).hasAny(
+            get(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId)).data.teamIds
+          );
+    }
+
+    function canReadNps(organizationId) {
+      return validNpsVisibilityPayload(organizationId)
+        && (
+          isOwnerOrAdmin(organizationId)
+          || (isCustomerPortal(organizationId)
+            && resource.data.customerId == portalCustomerId(organizationId))
+          || (isSalesRep(organizationId) && resource.data.sellerId == request.auth.uid)
+          || managerCanReadNps(organizationId)
+        );
+    }
+
+    // TASK-202: `npsMonthlyAggregates` — pre-computed promoters/passives/
+    // detractors/NPS score, one document per `{companyId, scope, scopeId,
+    // periodKey}`. `scope: 'organization'|'team'` is gated by the same
+    // `report.viewSensitive` capability every other TASK-133 aggregate uses;
+    // `scope: 'seller'` additionally follows `canReadSellerAggregate`'s own
+    // "the seller sees themself, a manager sharing a team sees them too"
+    // rule (TASK-140), since a seller's own NPS is not a tenant-wide
+    // reporting concern the way team/organization NPS is.
+    function canReadNpsAggregate(organizationId) {
+      return isActiveMember(organizationId)
+        && (
+          hasCapability(organizationId, 'report.viewSensitive')
+          || (resource.data.scope == 'seller' && canReadSellerAggregate(organizationId))
+        );
+    }
+
     function canReadExchangeRequest(organizationId) {
       return validExchangeRequestVisibilityPayload(organizationId)
         && (
@@ -1205,6 +1273,26 @@ service cloud.firestore {
       }
 
       // -------------------------------------------------------------------
+      // organizations/{organizationId}/npsSurveyRequests/{npsSurveyRequestId}
+      // organizations/{organizationId}/npsResponses/{npsResponseId}
+      // (TASK-202, EPIC-30 — NPS e pesquisa de satisfação: writes exclusively
+      // via `triggerNpsSurvey`/`submitNpsResponse`, Admin SDK, bypass these
+      // Rules entirely.)
+      // -------------------------------------------------------------------
+
+      match /npsSurveyRequests/{npsSurveyRequestId} {
+        allow get, list: if canReadNps(organizationId);
+
+        allow create, update, delete: if false;
+      }
+
+      match /npsResponses/{npsResponseId} {
+        allow get, list: if canReadNps(organizationId);
+
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
       // organizations/{organizationId}/products/{productId}
       // (TASK-069 global product search)
       // -------------------------------------------------------------------
@@ -1951,6 +2039,17 @@ service cloud.firestore {
 
       match /regionMonthlyAggregates/{aggregateId} {
         allow get, list: if hasCapability(organizationId, 'report.viewSensitive');
+        allow create, update, delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/npsMonthlyAggregates/{aggregateId}
+      // (TASK-202 — NPS agregado por vendedor/equipe/organização, mesmo
+      // padrão "só a Admin SDK escreve" das cinco agregações de TASK-133.)
+      // -------------------------------------------------------------------
+
+      match /npsMonthlyAggregates/{aggregateId} {
+        allow get, list: if canReadNpsAggregate(organizationId);
         allow create, update, delete: if false;
       }
 

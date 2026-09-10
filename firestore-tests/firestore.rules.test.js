@@ -583,6 +583,74 @@ function postSaleEventDoc({
   };
 }
 
+function npsSurveyRequestDoc({
+  organizationId,
+  companyId = 'company-a',
+  orderId = 'order-rep-a',
+  sellerId,
+  customerId = 'customer-a',
+  status = 'pending',
+}) {
+  return {
+    organizationId,
+    companyId,
+    orderId,
+    orderNumber: '000001',
+    customerId,
+    sellerId,
+    milestoneType: 'delivered',
+    tokenHash: 'hash-does-not-matter-for-rules-tests',
+    status,
+    createdAt: now(),
+    expiresAt: now(),
+    respondedAt: null,
+  };
+}
+
+function npsResponseDoc({
+  organizationId,
+  companyId = 'company-a',
+  orderId = 'order-rep-a',
+  sellerId,
+  customerId = 'customer-a',
+}) {
+  return {
+    organizationId,
+    companyId,
+    orderId,
+    customerId,
+    sellerId,
+    surveyRequestId: 'survey-1',
+    score: 9,
+    comment: null,
+    category: 'promoter',
+    periodKey: '2026-08',
+    respondedAt: now(),
+  };
+}
+
+function npsAggregateDoc({
+  organizationId,
+  companyId = 'company-a',
+  scope = 'organization',
+  scopeId = 'company-a',
+}) {
+  return {
+    organizationId,
+    companyId,
+    scope,
+    scopeId,
+    periodKey: '2026-08',
+    promoters: 3,
+    passives: 1,
+    detractors: 1,
+    totalResponses: 5,
+    npsScore: 40,
+    generatedAt: now(),
+    version: 1,
+  };
+}
+
 function exchangeRequestDoc({
   organizationId,
   companyId = 'company-a',
@@ -1751,6 +1819,161 @@ describe('organizations/{organizationId}/postSaleEvents/{postSaleEventId}  (TASK
       db.doc(`organizations/${ORG_A}/postSaleEvents/event-rep-a`).update({ description: 'editado' }),
     );
     await assertFails(db.doc(`organizations/${ORG_A}/postSaleEvents/event-rep-a`).delete());
+  });
+});
+
+describe('organizations/{organizationId}/npsSurveyRequests/{npsSurveyRequestId} e npsResponses/{npsResponseId}  (TASK-202, EPIC-30 — NPS)', () => {
+  // Visibility mirrors `postSaleEvents` exactly (`canReadNps`), so both
+  // collections are exercised together here instead of duplicating the same
+  // set of RBAC assertions twice.
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/npsSurveyRequests/survey-rep-a`)
+        .set(npsSurveyRequestDoc({ organizationId: ORG_A, orderId: 'order-rep-a', sellerId: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/npsSurveyRequests/survey-rep-b`)
+        .set(npsSurveyRequestDoc({ organizationId: ORG_A, orderId: 'order-rep-b', sellerId: 'rep-b' }));
+      await db
+        .doc(`organizations/${ORG_B}/npsSurveyRequests/survey-other-tenant`)
+        .set(
+          npsSurveyRequestDoc({
+            organizationId: ORG_B,
+            companyId: 'company-b',
+            orderId: 'order-other-tenant',
+            sellerId: 'owner-b',
+          }),
+        );
+      await db
+        .doc(`organizations/${ORG_A}/npsResponses/survey-rep-a`)
+        .set(npsResponseDoc({ organizationId: ORG_A, orderId: 'order-rep-a', sellerId: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/npsResponses/survey-rep-b`)
+        .set(npsResponseDoc({ organizationId: ORG_A, orderId: 'order-rep-b', sellerId: 'rep-b' }));
+    });
+  });
+
+  test('SALES_REP lê a própria pesquisa e resposta de NPS (do próprio pedido)', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/npsSurveyRequests/survey-rep-a`).get());
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/npsResponses/survey-rep-a`).get());
+  });
+
+  test('SALES_REP não lê pesquisa/resposta de NPS de pedido de outro vendedor', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/npsSurveyRequests/survey-rep-b`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/npsResponses/survey-rep-b`).get());
+  });
+
+  test('SALES_MANAGER lê a pesquisa/resposta do vendedor da própria equipe, mas não de outra equipe', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/npsSurveyRequests/survey-rep-a`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/npsSurveyRequests/survey-rep-b`).get());
+  });
+
+  test('ADMIN e OWNER leem todas as pesquisas de NPS da própria organization', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+    await assertSucceeds(ownerDb.collection(`organizations/${ORG_A}/npsSurveyRequests`).get());
+    await assertSucceeds(adminDb.collection(`organizations/${ORG_A}/npsSurveyRequests`).get());
+  });
+
+  test('FINANCE não lê pesquisas/respostas de NPS (sem escopo de pedido)', async () => {
+    const db = testEnv.authenticatedContext('finance-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/npsSurveyRequests/survey-rep-a`).get());
+  });
+
+  test('membro da Org A não lê pesquisa de NPS da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/npsSurveyRequests/survey-other-tenant`).get());
+  });
+
+  test('ninguém escreve pesquisa/resposta de NPS pelo client, nem OWNER — triggerNpsSurvey/submitNpsResponse (Admin SDK) são o único caminho', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/npsSurveyRequests/survey-new`)
+        .set(npsSurveyRequestDoc({ organizationId: ORG_A, orderId: 'order-rep-a', sellerId: 'rep-a' })),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/npsSurveyRequests/survey-rep-a`).update({ status: 'answered' }),
+    );
+    await assertFails(db.doc(`organizations/${ORG_A}/npsSurveyRequests/survey-rep-a`).delete());
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/npsResponses/response-new`)
+        .set(npsResponseDoc({ organizationId: ORG_A, orderId: 'order-rep-a', sellerId: 'rep-a' })),
+    );
+  });
+});
+
+describe('organizations/{organizationId}/npsMonthlyAggregates/{aggregateId}  (TASK-202 — NPS agregado)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/npsMonthlyAggregates/company-a_organization_company-a_2026-08`)
+        .set(npsAggregateDoc({ organizationId: ORG_A }));
+      await db
+        .doc(`organizations/${ORG_A}/npsMonthlyAggregates/company-a_seller_rep-a_2026-08`)
+        .set(npsAggregateDoc({ organizationId: ORG_A, scope: 'seller', scopeId: 'rep-a' }));
+      await db
+        .doc(`organizations/${ORG_B}/npsMonthlyAggregates/company-b_organization_company-b_2026-08`)
+        .set(npsAggregateDoc({ organizationId: ORG_B, companyId: 'company-b', scopeId: 'company-b' }));
+    });
+  });
+
+  test('OWNER (report.viewSensitive) lê o NPS agregado da organização', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/npsMonthlyAggregates/company-a_organization_company-a_2026-08`).get(),
+    );
+  });
+
+  test('SALES_REP (sem report.viewSensitive) não lê o NPS agregado da organização, mas lê o próprio NPS agregado de vendedor', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/npsMonthlyAggregates/company-a_organization_company-a_2026-08`).get(),
+    );
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/npsMonthlyAggregates/company-a_seller_rep-a_2026-08`).get(),
+    );
+  });
+
+  test('SALES_REP não lê o NPS agregado de outro vendedor', async () => {
+    const db = testEnv.authenticatedContext('rep-b').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/npsMonthlyAggregates/company-a_seller_rep-a_2026-08`).get(),
+    );
+  });
+
+  test('SALES_MANAGER lê o NPS agregado de vendedor da própria equipe', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/npsMonthlyAggregates/company-a_seller_rep-a_2026-08`).get(),
+    );
+  });
+
+  test('OWNER da Org A não lê o NPS agregado da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_B}/npsMonthlyAggregates/company-b_organization_company-b_2026-08`).get(),
+    );
+  });
+
+  test('nenhum papel, nem OWNER, consegue escrever um NPS agregado pelo client (só a Admin SDK escreve)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/npsMonthlyAggregates/company-a_organization_company-a_2026-09`)
+        .set(npsAggregateDoc({ organizationId: ORG_A })),
+    );
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/npsMonthlyAggregates/company-a_organization_company-a_2026-08`)
+        .update({ npsScore: 100 }),
+    );
   });
 });
 

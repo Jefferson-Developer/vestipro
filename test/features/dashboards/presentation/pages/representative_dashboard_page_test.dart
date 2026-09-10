@@ -8,6 +8,7 @@ import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/crm/crm.dart';
 import 'package:vestipro/features/daily_rep_summary/daily_rep_summary.dart';
 import 'package:vestipro/features/dashboards/dashboards.dart';
+import 'package:vestipro/features/nps/nps.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
 import 'package:vestipro/features/wallet_summary/wallet_summary.dart';
 
@@ -19,6 +20,22 @@ class _LoadDashboard extends Mock
 class _MockMembershipRepository extends Mock implements MembershipRepository {}
 
 class _MockTeamRepository extends Mock implements TeamRepository {}
+
+/// Like `DailyRepSummaryCard`, `NpsScoreCard` also auto-loads on creation
+/// (TASK-202 — the aggregate is already pre-computed server-side, no
+/// "Gerar" gate exists), so this fake really is called by every test in
+/// this file; it always resolves to "no snapshot yet", which none of these
+/// tests assert on.
+class _FakeNpsAggregateRepository implements NpsAggregateRepository {
+  @override
+  Future<AppResult<NpsAggregateSnapshot?>> getSnapshot({
+    required String organizationId,
+    required String companyId,
+    required NpsAggregateScope scope,
+    required String scopeId,
+    required String periodKey,
+  }) async => const AppSuccess<NpsAggregateSnapshot?>(null);
+}
 
 /// Never actually invoked by any test in this file (none of them tap the
 /// "Gerar resumo" button) — only exists so `RepresentativeDashboardPage`'s
@@ -165,6 +182,10 @@ void main() {
           ),
           FakeAnalyticsService(),
         ),
+      ),
+      createNpsScoreCardCubit: () => NpsScoreCardCubit(
+        LoadNpsAggregateTrendUseCase(_FakeNpsAggregateRepository()),
+        FakeAnalyticsService(),
       ),
       onOpenCrmActivity: onOpenCrmActivity,
       onOpenCustomer: (_) {},
