@@ -31,6 +31,7 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart';
 import '../features/authentication/presentation/bloc/login_bloc.dart';
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart';
 import '../features/audit_log/audit_log.dart';
+import '../features/admin_portal/admin_portal.dart';
 import '../features/catalog/catalog.dart';
 import '../features/customer_import/customer_import.dart';
 import '../features/product_import/product_import.dart';
@@ -329,6 +330,7 @@ class VestiProApp extends StatelessWidget {
           authGuard: SessionAuthGuard(getIt<SessionService>()),
           organizationGuard: const _LazyActiveOrganizationGuard(),
           authorizationGuard: const _LazyPermissionAuthorizationGuard(),
+          vestiProOperatorGuard: const _LazyVestiProOperatorGuard(),
           policyAcceptanceGuard: CurrentPolicyAcceptanceGuard(
             getIt<AuthRepository>(),
             EvaluatePolicyAcceptanceUseCase(
@@ -372,6 +374,27 @@ class VestiProApp extends StatelessWidget {
               listAuditLogEntries: getIt<ListAuditLogEntriesUseCase>(),
             ),
           ),
+          vestiProAdminPortalPageBuilder: (context) {
+            final repository = CloudFunctionsAdminPortalRepository(
+              getIt<CloudFunctionsService>(),
+            );
+            return AdminPortalPage(
+              createCubit: () => AdminPortalCubit(
+                resolveSession: ResolveVestiProOperatorSessionUseCase(
+                  repository,
+                ),
+                searchOrganizations: SearchAdminOrganizationsUseCase(
+                  repository,
+                ),
+                loadDiagnosticReport: LoadAdminDiagnosticReportUseCase(
+                  repository,
+                ),
+                reprocessOutboxItem: ReprocessAdminOutboxItemUseCase(
+                  repository,
+                ),
+              ),
+            );
+          },
           userManagementPageBuilder: (context, orgId) => UserListPage(
             organizationId: orgId,
             userId: getIt<AuthRepository>().currentUser?.uid ?? '',
@@ -1607,5 +1630,16 @@ final class _LazyPermissionAuthorizationGuard implements AuthorizationGuard {
       getIt<PermissionService>(),
       getIt<AuthRepository>(),
     ).redirect(context, state, requiredCapability: requiredCapability);
+  }
+}
+
+final class _LazyVestiProOperatorGuard implements VestiProOperatorGuard {
+  const _LazyVestiProOperatorGuard();
+
+  @override
+  Future<String?> redirect(BuildContext context, GoRouterState state) {
+    return RepositoryVestiProOperatorGuard(
+      CloudFunctionsAdminPortalRepository(getIt<CloudFunctionsService>()),
+    ).redirect(context, state);
   }
 }

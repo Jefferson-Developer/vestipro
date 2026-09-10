@@ -7,6 +7,7 @@ import 'app_route_paths.dart';
 import 'auth_guard.dart';
 import 'authorization_guard.dart';
 import 'policy_acceptance_guard.dart';
+import 'vestipro_operator_guard.dart';
 import 'widgets/forbidden_page.dart';
 import 'widgets/not_found_page.dart';
 
@@ -22,6 +23,7 @@ class AppRouter {
     required this.aboutAppPageBuilder,
     required this.catalogHomePageBuilder,
     required this.auditLogPageBuilder,
+    this.vestiProAdminPortalPageBuilder,
     required this.userManagementPageBuilder,
     this.notificationCenterPageBuilder,
     this.communicationPreferencesPageBuilder,
@@ -78,23 +80,28 @@ class AppRouter {
     AuthGuard? authGuard,
     ActiveOrganizationGuard? organizationGuard,
     AuthorizationGuard? authorizationGuard,
+    VestiProOperatorGuard? vestiProOperatorGuard,
     PolicyAcceptanceGuard? policyAcceptanceGuard,
   }) : authGuard = authGuard ?? const AlwaysAllowAuthGuard(),
        organizationGuard =
            organizationGuard ?? const AlwaysAllowActiveOrganizationGuard(),
        authorizationGuard =
            authorizationGuard ?? const AlwaysAllowAuthorizationGuard(),
+       vestiProOperatorGuard =
+           vestiProOperatorGuard ?? const AlwaysAllowVestiProOperatorGuard(),
        policyAcceptanceGuard =
            policyAcceptanceGuard ?? const AlwaysAllowPolicyAcceptanceGuard();
 
   final AuthGuard authGuard;
   final ActiveOrganizationGuard organizationGuard;
   final AuthorizationGuard authorizationGuard;
+  final VestiProOperatorGuard vestiProOperatorGuard;
   final PolicyAcceptanceGuard policyAcceptanceGuard;
   final Widget Function(BuildContext context, String orgId) aboutAppPageBuilder;
   final Widget Function(BuildContext context, String orgId, String? companyId)
   catalogHomePageBuilder;
   final Widget Function(BuildContext context, String orgId) auditLogPageBuilder;
+  final WidgetBuilder? vestiProAdminPortalPageBuilder;
   final Widget Function(BuildContext context, String orgId)
   userManagementPageBuilder;
   final Widget Function(BuildContext context, String token)?
@@ -516,6 +523,16 @@ class AppRouter {
         ),
         builder: (context, state) =>
             auditLogPageBuilder(context, state.pathParameters['orgId']!),
+      ),
+      GoRoute(
+        path: VestiProAdminPortalRoute.pathPattern,
+        name: VestiProAdminPortalRoute.name,
+        redirect: vestiProOperatorGuard.redirect,
+        builder: (context, state) {
+          final builder = vestiProAdminPortalPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(context);
+        },
       ),
       GoRoute(
         path: UserManagementRoute.pathPattern,

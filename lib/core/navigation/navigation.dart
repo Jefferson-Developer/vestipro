@@ -6,5 +6,6 @@ export 'authorization_guard.dart';
 export 'permission_authorization_guard.dart';
 export 'policy_acceptance_guard.dart';
 export 'session_auth_guard.dart';
+export 'vestipro_operator_guard.dart';
 export 'widgets/forbidden_page.dart';
 export 'widgets/not_found_page.dart';

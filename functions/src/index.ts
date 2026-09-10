@@ -14,6 +14,12 @@ export { acceptInvite } from './invites/accept-invite';
 export { updateUserRole } from './admin/update-user-role';
 export { deactivateUser, reactivateUser } from './admin/update-user-access';
 export {
+  resolveVestiProOperatorSession,
+  searchAdminOrganizations,
+  loadAdminDiagnosticReport,
+  reprocessAdminOutboxItem,
+} from './admin/admin-portal';
+export {
   recalculateCustomerScores,
   startCustomerImportJob,
   processCustomerImportJob,

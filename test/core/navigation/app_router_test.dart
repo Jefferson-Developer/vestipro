@@ -196,6 +196,43 @@ void main() {
       expect(find.text('audit-log:acme'), findsNothing);
     });
 
+    testWidgets('protects VestiProAdminPortalRoute with internal guard', (
+      tester,
+    ) async {
+      final appRouter = _buildRouter(
+        vestiProOperatorGuard: const _DenyVestiProOperatorGuard(),
+        vestiProAdminPortalPageBuilder: (context) =>
+            const Scaffold(body: Text('vestipro-admin')),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(const VestiProAdminPortalRoute().location);
+      await tester.pumpAndSettle();
+
+      expect(find.byType(ForbiddenPage), findsOneWidget);
+      expect(find.text('vestipro-admin'), findsNothing);
+    });
+
+    testWidgets('resolves VestiProAdminPortalRoute outside org scope', (
+      tester,
+    ) async {
+      final appRouter = _buildRouter(
+        organizationGuard: const _DenyEveryOrganizationGuard(),
+        vestiProAdminPortalPageBuilder: (context) =>
+            const Scaffold(body: Text('vestipro-admin')),
+      );
+
+      await tester.pumpWidget(
+        MaterialApp.router(routerConfig: appRouter.router),
+      );
+      appRouter.router.go(const VestiProAdminPortalRoute().location);
+      await tester.pumpAndSettle();
+
+      expect(find.text('vestipro-admin'), findsOneWidget);
+    });
+
     testWidgets('resolves UserManagementRoute for role management', (
       tester,
     ) async {
@@ -518,11 +555,13 @@ AppRouter _buildRouter({
   AuthGuard? authGuard,
   ActiveOrganizationGuard? organizationGuard,
   AuthorizationGuard? authorizationGuard,
+  VestiProOperatorGuard? vestiProOperatorGuard,
   PolicyAcceptanceGuard? policyAcceptanceGuard,
   Widget Function(BuildContext context, String orgId)? aboutAppPageBuilder,
   Widget Function(BuildContext context, String orgId, String? companyId)?
   catalogHomePageBuilder,
   Widget Function(BuildContext context, String orgId)? auditLogPageBuilder,
+  WidgetBuilder? vestiProAdminPortalPageBuilder,
   Widget Function(BuildContext context, String orgId)?
   userManagementPageBuilder,
   Widget Function(BuildContext context, String orgId, String companyId)?
@@ -557,6 +596,7 @@ AppRouter _buildRouter({
     authGuard: authGuard,
     organizationGuard: organizationGuard,
     authorizationGuard: authorizationGuard,
+    vestiProOperatorGuard: vestiProOperatorGuard,
     policyAcceptanceGuard: policyAcceptanceGuard,
     policyAcceptancePageBuilder: policyAcceptancePageBuilder,
     aboutAppPageBuilder:
@@ -569,6 +609,7 @@ AppRouter _buildRouter({
     auditLogPageBuilder:
         auditLogPageBuilder ??
         (context, orgId) => Scaffold(body: Text('audit-log:$orgId')),
+    vestiProAdminPortalPageBuilder: vestiProAdminPortalPageBuilder,
     userManagementPageBuilder:
         userManagementPageBuilder ??
         (context, orgId) => Scaffold(body: Text('user-management:$orgId')),
@@ -629,6 +670,27 @@ final class _DenyAuditLogGuard implements AuthorizationGuard {
     required Capability requiredCapability,
   }) {
     if (requiredCapability == Capability.auditLogView) {
+      return const ForbiddenRoute().location;
+    }
+    return null;
+  }
+}
+
+final class _DenyVestiProOperatorGuard implements VestiProOperatorGuard {
+  const _DenyVestiProOperatorGuard();
+
+  @override
+  String? redirect(BuildContext context, GoRouterState state) {
+    return const ForbiddenRoute().location;
+  }
+}
+
+final class _DenyEveryOrganizationGuard implements ActiveOrganizationGuard {
+  const _DenyEveryOrganizationGuard();
+
+  @override
+  String? redirect(BuildContext context, GoRouterState state) {
+    if (state.pathParameters.containsKey('orgId')) {
       return const ForbiddenRoute().location;
     }
     return null;

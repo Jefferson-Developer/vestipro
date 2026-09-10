@@ -114,6 +114,21 @@ final class AuditLogRoute extends AppRoute {
   String get location => '/org/$orgId/settings/audit-log';
 }
 
+/// Internal VestiPro operations portal (TASK-203).
+///
+/// Deliberately outside `/org/:orgId`: this is not the customer's
+/// organization admin area, and it is protected by a separate internal
+/// operator guard backed by Cloud Functions/custom claims.
+final class VestiProAdminPortalRoute extends AppRoute {
+  const VestiProAdminPortalRoute();
+
+  static const name = 'vestiproAdminPortal';
+  static const pathPattern = '/vestipro-admin';
+
+  @override
+  String get location => pathPattern;
+}
+
 /// Central de notificações internas (TASK-151), scoped by Organization only
 /// — `AppNotification` maps to `organizations/{organizationId}/notifications`,
 /// never to a specific company. Every authenticated member may open it (no
