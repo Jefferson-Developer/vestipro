@@ -11,6 +11,7 @@ import 'package:vestipro/features/credit/credit.dart';
 import 'package:vestipro/features/crm/crm.dart';
 import 'package:vestipro/features/customers/customers.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
+import 'package:vestipro/features/receivables/receivables.dart';
 import 'package:vestipro/features/users/users.dart';
 
 class _MockMembershipRepository extends Mock implements MembershipRepository {}
@@ -80,6 +81,46 @@ final class _FakeCreditRepository implements CreditRepository {
     required String customerId,
   }) => throw UnimplementedError(
     'CreditRepository.revokeOverride should never be called in these tests.',
+  );
+}
+
+/// TASK-213: same "must actually answer" reasoning as [_FakeCreditRepository]
+/// — `CustomerBillingPanel`'s masked path (`SALES_MANAGER`, granted
+/// `report.viewSensitive` but not `finance.view`) genuinely calls
+/// `checkBillingStatus` in most of this file's scenarios.
+final class _FakeReceivablesRepository implements ReceivablesRepository {
+  @override
+  Future<AppResult<BillingStatusCheck>> checkBillingStatus({
+    required String organizationId,
+    required String customerId,
+    String? orderId,
+  }) async => const AppSuccess<BillingStatusCheck>(
+    BillingStatusCheck(
+      status: BillingStatus.upToDate,
+      message: 'Nenhuma fatura em aberto para este cliente.',
+    ),
+  );
+
+  @override
+  Stream<AppResult<List<Receivable>>> watchReceivables({
+    required String organizationId,
+    required String customerId,
+    String? orderId,
+  }) => Stream<AppResult<List<Receivable>>>.value(
+    const AppSuccess<List<Receivable>>(<Receivable>[]),
+  );
+
+  @override
+  Future<AppResult<void>> registerPaymentAllocation({
+    required String organizationId,
+    required String receivableId,
+    required double amount,
+    required String externalReference,
+    String source = 'manual',
+    String? note,
+  }) => throw UnimplementedError(
+    'ReceivablesRepository.registerPaymentAllocation should never be called '
+    'in these tests.',
   );
 }
 
@@ -419,6 +460,17 @@ Future<void> _pumpPage(
           ),
           revokeOverrideUseCase: RevokeCreditOverrideUseCase(
             _FakeCreditRepository(),
+          ),
+        ),
+        createBillingPanelCubit: () => CustomerBillingCubit(
+          watchReceivablesUseCase: WatchReceivablesUseCase(
+            _FakeReceivablesRepository(),
+          ),
+          checkBillingStatusUseCase: CheckBillingStatusUseCase(
+            _FakeReceivablesRepository(),
+          ),
+          registerPaymentAllocationUseCase: RegisterPaymentAllocationUseCase(
+            _FakeReceivablesRepository(),
           ),
         ),
       ),

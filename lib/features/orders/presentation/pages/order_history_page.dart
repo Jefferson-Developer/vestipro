@@ -17,6 +17,7 @@ import '../../domain/usecases/capture_order_signature_use_case.dart'
 import '../../domain/value_objects/order_status.dart';
 import '../../../after_sales/after_sales.dart';
 import '../../../exchanges/exchanges.dart';
+import '../../../receivables/receivables.dart';
 import '../../../returns/returns.dart';
 import '../bloc/order_duplication_cubit.dart';
 import '../bloc/order_duplication_state.dart';
@@ -50,6 +51,7 @@ class OrderHistoryPage extends StatelessWidget {
     required this.createExchangeRequestFormCubit,
     required this.createPostSaleTimelineCubit,
     required this.createRegisterPostSaleEventCubit,
+    required this.createBillingPanelCubit,
     this.onDuplicated,
     super.key,
   });
@@ -98,6 +100,11 @@ class OrderHistoryPage extends StatelessWidget {
   /// idempotency key) each time, same one-cubit-per-push convention
   /// [createReturnRequestFormCubit] already sets.
   final RegisterPostSaleEventCubit Function() createRegisterPostSaleEventCubit;
+
+  /// Feeds the "Situação financeira" section (TASK-213, EPIC-32) embedded in
+  /// this same screen — same "fresh instance per screen" shape as
+  /// [createPostSaleTimelineCubit].
+  final CustomerBillingCubit Function() createBillingPanelCubit;
 
   /// Called once "Repetir pedido" successfully creates a new draft — always
   /// navigates into the existing order draft flow (`OrderDraftRoute`,
@@ -155,6 +162,7 @@ class OrderHistoryPage extends StatelessWidget {
             createExchangeRequestFormCubit: createExchangeRequestFormCubit,
             createPostSaleTimelineCubit: createPostSaleTimelineCubit,
             createRegisterPostSaleEventCubit: createRegisterPostSaleEventCubit,
+            createBillingPanelCubit: createBillingPanelCubit,
             onDuplicated: onDuplicated,
           ),
         );
@@ -175,6 +183,7 @@ class _OrderHistoryPermissionsGate extends StatefulWidget {
     required this.createExchangeRequestFormCubit,
     required this.createPostSaleTimelineCubit,
     required this.createRegisterPostSaleEventCubit,
+    required this.createBillingPanelCubit,
     this.onDuplicated,
   });
 
@@ -189,6 +198,7 @@ class _OrderHistoryPermissionsGate extends StatefulWidget {
   final ExchangeRequestFormCubit Function() createExchangeRequestFormCubit;
   final PostSaleTimelineCubit Function() createPostSaleTimelineCubit;
   final RegisterPostSaleEventCubit Function() createRegisterPostSaleEventCubit;
+  final CustomerBillingCubit Function() createBillingPanelCubit;
   final ValueChanged<Order>? onDuplicated;
 
   @override
@@ -306,6 +316,8 @@ class _OrderHistoryPermissionsGateState
                           widget.createPostSaleTimelineCubit,
                       createRegisterPostSaleEventCubit:
                           widget.createRegisterPostSaleEventCubit,
+                      createBillingPanelCubit: widget.createBillingPanelCubit,
+                      permissionService: widget.permissionService,
                       onDuplicated: widget.onDuplicated,
                     );
                   },
@@ -334,6 +346,8 @@ class _OrderHistoryScaffold extends StatelessWidget {
     required this.createExchangeRequestFormCubit,
     required this.createPostSaleTimelineCubit,
     required this.createRegisterPostSaleEventCubit,
+    required this.createBillingPanelCubit,
+    required this.permissionService,
     this.onDuplicated,
   });
 
@@ -344,6 +358,7 @@ class _OrderHistoryScaffold extends StatelessWidget {
   final String organizationId;
   final String companyId;
   final String sellerId;
+  final PermissionService permissionService;
   final ReturnRequestHistoryCubit Function() createReturnRequestHistoryCubit;
   final ReturnRequestFormCubit Function() createReturnRequestFormCubit;
   final ExchangeRequestHistoryCubit Function()
@@ -351,6 +366,7 @@ class _OrderHistoryScaffold extends StatelessWidget {
   final ExchangeRequestFormCubit Function() createExchangeRequestFormCubit;
   final PostSaleTimelineCubit Function() createPostSaleTimelineCubit;
   final RegisterPostSaleEventCubit Function() createRegisterPostSaleEventCubit;
+  final CustomerBillingCubit Function() createBillingPanelCubit;
   final ValueChanged<Order>? onDuplicated;
 
   /// Pedido statuses a devolução — ou uma troca (TASK-200, EPIC-30) — may be
@@ -517,11 +533,14 @@ class _OrderHistoryScaffold extends StatelessWidget {
                     content: _OrderHistoryContent(
                       state: historyState,
                       organizationId: organizationId,
+                      userId: sellerId,
+                      permissionService: permissionService,
                       createReturnRequestHistoryCubit:
                           createReturnRequestHistoryCubit,
                       createExchangeRequestHistoryCubit:
                           createExchangeRequestHistoryCubit,
                       createPostSaleTimelineCubit: createPostSaleTimelineCubit,
+                      createBillingPanelCubit: createBillingPanelCubit,
                     ),
                   ),
                 );
@@ -690,17 +709,23 @@ class _OrderHistoryContent extends StatelessWidget {
   const _OrderHistoryContent({
     required this.state,
     required this.organizationId,
+    required this.userId,
+    required this.permissionService,
     required this.createReturnRequestHistoryCubit,
     required this.createExchangeRequestHistoryCubit,
     required this.createPostSaleTimelineCubit,
+    required this.createBillingPanelCubit,
   });
 
   final OrderHistoryState state;
   final String organizationId;
+  final String userId;
+  final PermissionService permissionService;
   final ReturnRequestHistoryCubit Function() createReturnRequestHistoryCubit;
   final ExchangeRequestHistoryCubit Function()
   createExchangeRequestHistoryCubit;
   final PostSaleTimelineCubit Function() createPostSaleTimelineCubit;
+  final CustomerBillingCubit Function() createBillingPanelCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -737,6 +762,22 @@ class _OrderHistoryContent extends StatelessWidget {
             organizationId: organizationId,
             orderId: order.id,
             createCubit: createPostSaleTimelineCubit,
+          ),
+          const SizedBox(height: AppSpacing.spacing24),
+          Text(
+            'Situação financeira',
+            style: AppTypography.titleMedium.copyWith(
+              color: context.colors.onSurface,
+            ),
+          ),
+          const SizedBox(height: AppSpacing.spacing12),
+          CustomerBillingPanel(
+            organizationId: organizationId,
+            customerId: order.customerId,
+            orderId: order.id,
+            userId: userId,
+            permissionService: permissionService,
+            createCubit: createBillingPanelCubit,
           ),
           const SizedBox(height: AppSpacing.spacing24),
           ReturnRequestHistorySection(

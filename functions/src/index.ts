@@ -70,6 +70,13 @@ export {
   updateCreditProfile,
   grantCreditOverride,
 } from './credit';
+export {
+  importReceivableInvoice,
+  registerPaymentAllocation,
+  checkBillingStatus,
+  reconcileReceivablesToCreditProfile,
+  generateBillingReminders,
+} from './receivables';
 export { generateInsightsScheduled } from './insights';
 export {
   calculateReplenishmentSuggestions,

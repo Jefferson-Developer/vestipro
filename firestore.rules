@@ -1628,6 +1628,48 @@ service cloud.firestore {
         allow create, update, delete: if false;
       }
 
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/invoices/{invoiceId}
+      // organizations/{organizationId}/receivables/{receivableId}
+      // organizations/{organizationId}/paymentAllocations/{allocationId}
+      // organizations/{organizationId}/paymentAllocationEvents/{eventId}
+      // organizations/{organizationId}/billingReminderDispatches/{dispatchId}
+      // (TASK-213 — contas a receber, faturas e lembretes de cobrança)
+      // -------------------------------------------------------------------
+      //
+      // Mesma sensibilidade de `creditProfiles`: valores de fatura/título e
+      // histórico de pagamento só são lidos diretamente por `finance.view`
+      // (OWNER/ADMIN/FINANCE); vendedor/gestor sem essa capability só
+      // enxergam o status mascarado (aberto/vencido/em dia), servido pela
+      // Cloud Function callable `checkBillingStatus` (Admin SDK, não passa
+      // por estas regras). Toda escrita é exclusiva das Cloud Functions
+      // `importReceivableInvoice`, `registerPaymentAllocation` e do trigger
+      // `reconcileReceivablesToCreditProfile` — nenhum cliente jamais marca
+      // uma fatura como paga ou importa um título por conta própria.
+
+      match /invoices/{invoiceId} {
+        allow get, list: if hasCapability(organizationId, 'finance.view');
+        allow create, update, delete: if false;
+      }
+
+      match /receivables/{receivableId} {
+        allow get, list: if hasCapability(organizationId, 'finance.view');
+        allow create, update, delete: if false;
+      }
+
+      match /paymentAllocations/{allocationId} {
+        allow get, list: if hasCapability(organizationId, 'finance.view');
+        allow create, update, delete: if false;
+      }
+
+      match /paymentAllocationEvents/{eventId} {
+        allow read, write: if false;
+      }
+
+      match /billingReminderDispatches/{dispatchId} {
+        allow read, write: if false;
+      }
+
       // TASK-183: consent, approved templates and delivery history are
       // mediated exclusively by Cloud Functions. This prevents a client
       // from forging opt-in, approving its own template or changing a

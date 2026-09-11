@@ -1530,6 +1530,22 @@ import '../features/products/presentation/bloc/season_form_bloc.dart' as _i98;
 import '../features/products/presentation/bloc/season_list_bloc.dart' as _i986;
 import '../features/products/presentation/bloc/size_grid_template_bloc.dart'
     as _i415;
+import '../features/receivables/data/datasources/cloud_functions_receivables_write_data_source.dart'
+    as _i927;
+import '../features/receivables/data/datasources/firestore_receivables_read_data_source.dart'
+    as _i418;
+import '../features/receivables/data/datasources/receivables_read_data_source.dart'
+    as _i630;
+import '../features/receivables/data/datasources/receivables_write_data_source.dart'
+    as _i979;
+import '../features/receivables/data/repositories/receivables_repository_impl.dart'
+    as _i747;
+import '../features/receivables/domain/repositories/receivables_repository.dart'
+    as _i804;
+import '../features/receivables/domain/usecases/receivables_use_cases.dart'
+    as _i507;
+import '../features/receivables/presentation/bloc/customer_billing_cubit.dart'
+    as _i234;
 import '../features/replenishment/data/datasources/firestore_replenishment_suggestion_data_source.dart'
     as _i923;
 import '../features/replenishment/data/datasources/replenishment_suggestion_data_source.dart'
@@ -3136,6 +3152,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i384.CompanyDataSource>(
       () => _i512.FirestoreCompanyDataSource(gh<_i974.FirebaseFirestore>()),
     );
+    gh.lazySingleton<_i630.ReceivablesReadDataSource>(
+      () => _i418.FirestoreReceivablesReadDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.lazySingleton<_i799.CompanyRepository>(
       () => _i960.CompanyRepositoryImpl(
         dataSource: gh<_i384.CompanyDataSource>(),
@@ -3980,6 +4001,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i211.NotificationMapper>(),
       ),
     );
+    gh.lazySingleton<_i979.ReceivablesWriteDataSource>(
+      () => _i927.CloudFunctionsReceivablesWriteDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.factory<_i856.SubmitOrderUseCase>(
       () => _i856.SubmitOrderUseCase(
         gh<_i202.OrderSubmissionRepository>(),
@@ -4102,6 +4128,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i98.ReturnRequestRepositoryImpl(
         gh<_i126.ReturnRequestReadDataSource>(),
         gh<_i476.ReturnRequestWriteDataSource>(),
+      ),
+    );
+    gh.lazySingleton<_i804.ReceivablesRepository>(
+      () => _i747.ReceivablesRepositoryImpl(
+        gh<_i630.ReceivablesReadDataSource>(),
+        gh<_i979.ReceivablesWriteDataSource>(),
       ),
     );
     gh.factory<_i684.ListStockAlertsUseCase>(
@@ -4416,6 +4448,17 @@ extension GetItInjectableX on _i174.GetIt {
         localDataSource: gh<_i42.ProductLocalSearchIndexDataSource>(),
       ),
     );
+    gh.factory<_i507.CheckBillingStatusUseCase>(
+      () => _i507.CheckBillingStatusUseCase(gh<_i804.ReceivablesRepository>()),
+    );
+    gh.factory<_i507.WatchReceivablesUseCase>(
+      () => _i507.WatchReceivablesUseCase(gh<_i804.ReceivablesRepository>()),
+    );
+    gh.factory<_i507.RegisterPaymentAllocationUseCase>(
+      () => _i507.RegisterPaymentAllocationUseCase(
+        gh<_i804.ReceivablesRepository>(),
+      ),
+    );
     gh.factory<_i543.WatchExchangeRequestsForOrderUseCase>(
       () => _i543.WatchExchangeRequestsForOrderUseCase(
         gh<_i269.ExchangeRequestRepository>(),
@@ -4588,6 +4631,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i209.StorageDataSource>(),
         gh<_i897.ProductImportJobMapper>(),
         gh<_i962.ProductImportReportMapper>(),
+      ),
+    );
+    gh.factory<_i234.CustomerBillingCubit>(
+      () => _i234.CustomerBillingCubit(
+        watchReceivablesUseCase: gh<_i507.WatchReceivablesUseCase>(),
+        checkBillingStatusUseCase: gh<_i507.CheckBillingStatusUseCase>(),
+        registerPaymentAllocationUseCase:
+            gh<_i507.RegisterPaymentAllocationUseCase>(),
       ),
     );
     gh.lazySingleton<_i935.CreditRepository>(

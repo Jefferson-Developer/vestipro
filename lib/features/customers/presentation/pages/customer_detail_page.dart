@@ -10,6 +10,7 @@ import '../../../approach_suggestion/approach_suggestion.dart';
 import '../../../credit/credit.dart';
 import '../../../crm/crm.dart';
 import '../../../product_recommendations/product_recommendations.dart';
+import '../../../receivables/receivables.dart';
 import '../../domain/entities/customer.dart';
 import '../../domain/entities/customer_address.dart';
 import '../../domain/entities/customer_contact.dart';
@@ -30,6 +31,7 @@ class CustomerDetailPage extends StatelessWidget {
     required this.createBloc,
     required this.createApproachSuggestionCubit,
     required this.createCreditPanelCubit,
+    required this.createBillingPanelCubit,
     this.createProductRecommendationsBloc,
     super.key,
   });
@@ -48,6 +50,10 @@ class CustomerDetailPage extends StatelessWidget {
   /// Factory for TASK-212's credit section cubit (`CustomerCreditPanel`) —
   /// same "fresh instance per screen" shape as [createApproachSuggestionCubit].
   final CustomerCreditCubit Function() createCreditPanelCubit;
+
+  /// Factory for TASK-213's billing section cubit (`CustomerBillingPanel`) —
+  /// same "fresh instance per screen" shape as [createCreditPanelCubit].
+  final CustomerBillingCubit Function() createBillingPanelCubit;
 
   /// Factory for TASK-190's "Recomendações" sheet bloc — same
   /// "fresh instance per sheet open" shape as
@@ -80,6 +86,7 @@ class CustomerDetailPage extends StatelessWidget {
             permissionService: permissionService,
             createApproachSuggestionCubit: createApproachSuggestionCubit,
             createCreditPanelCubit: createCreditPanelCubit,
+            createBillingPanelCubit: createBillingPanelCubit,
             createProductRecommendationsBloc: createProductRecommendationsBloc,
           ),
         );
@@ -96,6 +103,7 @@ class CustomerDetailView extends StatelessWidget {
     required this.permissionService,
     required this.createApproachSuggestionCubit,
     required this.createCreditPanelCubit,
+    required this.createBillingPanelCubit,
     this.createProductRecommendationsBloc,
     super.key,
   });
@@ -105,6 +113,7 @@ class CustomerDetailView extends StatelessWidget {
   final PermissionService permissionService;
   final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
   final CustomerCreditCubit Function() createCreditPanelCubit;
+  final CustomerBillingCubit Function() createBillingPanelCubit;
   final ProductRecommendationsBloc Function()? createProductRecommendationsBloc;
 
   @override
@@ -151,6 +160,7 @@ class CustomerDetailView extends StatelessWidget {
                 permissionService: permissionService,
                 createApproachSuggestionCubit: createApproachSuggestionCubit,
                 createCreditPanelCubit: createCreditPanelCubit,
+                createBillingPanelCubit: createBillingPanelCubit,
                 createProductRecommendationsBloc:
                     createProductRecommendationsBloc,
               ),
@@ -170,6 +180,7 @@ class _CustomerDetailBody extends StatelessWidget {
     required this.permissionService,
     required this.createApproachSuggestionCubit,
     required this.createCreditPanelCubit,
+    required this.createBillingPanelCubit,
     this.createProductRecommendationsBloc,
   });
 
@@ -179,6 +190,7 @@ class _CustomerDetailBody extends StatelessWidget {
   final PermissionService permissionService;
   final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
   final CustomerCreditCubit Function() createCreditPanelCubit;
+  final CustomerBillingCubit Function() createBillingPanelCubit;
   final ProductRecommendationsBloc Function()? createProductRecommendationsBloc;
 
   @override
@@ -205,6 +217,7 @@ class _CustomerDetailBody extends StatelessWidget {
       permissionService: permissionService,
       createApproachSuggestionCubit: createApproachSuggestionCubit,
       createCreditPanelCubit: createCreditPanelCubit,
+      createBillingPanelCubit: createBillingPanelCubit,
       createProductRecommendationsBloc: createProductRecommendationsBloc,
     );
   }
@@ -218,6 +231,7 @@ class _CustomerDetailContent extends StatelessWidget {
     required this.userId,
     required this.createApproachSuggestionCubit,
     required this.createCreditPanelCubit,
+    required this.createBillingPanelCubit,
     required this.permissionService,
     this.createProductRecommendationsBloc,
   });
@@ -229,6 +243,7 @@ class _CustomerDetailContent extends StatelessWidget {
   final PermissionService permissionService;
   final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
   final CustomerCreditCubit Function() createCreditPanelCubit;
+  final CustomerBillingCubit Function() createBillingPanelCubit;
   final ProductRecommendationsBloc Function()? createProductRecommendationsBloc;
 
   @override
@@ -252,6 +267,7 @@ class _CustomerDetailContent extends StatelessWidget {
                 permissionService: permissionService,
                 createApproachSuggestionCubit: createApproachSuggestionCubit,
                 createCreditPanelCubit: createCreditPanelCubit,
+                createBillingPanelCubit: createBillingPanelCubit,
                 createProductRecommendationsBloc:
                     createProductRecommendationsBloc,
               )
@@ -263,6 +279,7 @@ class _CustomerDetailContent extends StatelessWidget {
                 permissionService: permissionService,
                 createApproachSuggestionCubit: createApproachSuggestionCubit,
                 createCreditPanelCubit: createCreditPanelCubit,
+                createBillingPanelCubit: createBillingPanelCubit,
                 createProductRecommendationsBloc:
                     createProductRecommendationsBloc,
               );
@@ -282,6 +299,7 @@ class _StackedCustomerDetail extends StatelessWidget {
     required this.permissionService,
     required this.createApproachSuggestionCubit,
     required this.createCreditPanelCubit,
+    required this.createBillingPanelCubit,
     this.createProductRecommendationsBloc,
   });
 
@@ -292,6 +310,7 @@ class _StackedCustomerDetail extends StatelessWidget {
   final PermissionService permissionService;
   final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
   final CustomerCreditCubit Function() createCreditPanelCubit;
+  final CustomerBillingCubit Function() createBillingPanelCubit;
   final ProductRecommendationsBloc Function()? createProductRecommendationsBloc;
 
   @override
@@ -330,6 +349,7 @@ class _StackedCustomerDetail extends StatelessWidget {
           userId: userId,
           permissionService: permissionService,
           createCreditPanelCubit: createCreditPanelCubit,
+          createBillingPanelCubit: createBillingPanelCubit,
         ),
         const SizedBox(height: AppSpacing.spacing16),
         const _TimelineSection(),
@@ -353,6 +373,7 @@ class _DesktopCustomerDetail extends StatelessWidget {
     required this.permissionService,
     required this.createApproachSuggestionCubit,
     required this.createCreditPanelCubit,
+    required this.createBillingPanelCubit,
     this.createProductRecommendationsBloc,
   });
 
@@ -363,6 +384,7 @@ class _DesktopCustomerDetail extends StatelessWidget {
   final PermissionService permissionService;
   final ApproachSuggestionCubit Function() createApproachSuggestionCubit;
   final CustomerCreditCubit Function() createCreditPanelCubit;
+  final CustomerBillingCubit Function() createBillingPanelCubit;
   final ProductRecommendationsBloc Function()? createProductRecommendationsBloc;
 
   @override
@@ -419,6 +441,7 @@ class _DesktopCustomerDetail extends StatelessWidget {
                     userId: userId,
                     permissionService: permissionService,
                     createCreditPanelCubit: createCreditPanelCubit,
+                    createBillingPanelCubit: createBillingPanelCubit,
                   ),
                   const SizedBox(height: AppSpacing.spacing16),
                   const _OpportunitiesSection(),
@@ -957,6 +980,7 @@ class _SensitiveCommercialSection extends StatelessWidget {
     required this.userId,
     required this.permissionService,
     required this.createCreditPanelCubit,
+    required this.createBillingPanelCubit,
   });
 
   final String organizationId;
@@ -965,6 +989,7 @@ class _SensitiveCommercialSection extends StatelessWidget {
   final String userId;
   final PermissionService permissionService;
   final CustomerCreditCubit Function() createCreditPanelCubit;
+  final CustomerBillingCubit Function() createBillingPanelCubit;
 
   @override
   Widget build(BuildContext context) {
@@ -1010,6 +1035,21 @@ class _SensitiveCommercialSection extends StatelessWidget {
               userId: userId,
               permissionService: permissionService,
               createCubit: createCreditPanelCubit,
+            ),
+            const SizedBox(height: AppSpacing.spacing16),
+            Text(
+              'Situacao financeira',
+              style: AppTypography.titleMedium.copyWith(
+                color: context.colors.onSurface,
+              ),
+            ),
+            const SizedBox(height: AppSpacing.spacing8),
+            CustomerBillingPanel(
+              organizationId: organizationId,
+              customerId: customerId,
+              userId: userId,
+              permissionService: permissionService,
+              createCubit: createBillingPanelCubit,
             ),
           ],
         );
