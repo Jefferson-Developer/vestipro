@@ -75,6 +75,8 @@ final class AnalyticsEvents {
   static const String lineSheetFiltered = 'line_sheet_filtered';
   static const String lineSheetProductViewed = 'line_sheet_product_viewed';
   static const String lineSheetItemAdded = 'line_sheet_item_added';
+  static const String preBookProgramOpened = 'pre_book_program_opened';
+  static const String preBookOrderCreated = 'pre_book_order_created';
   static const String cartShareCreated = 'cart_share_created';
   static const String cartShareReviewed = 'cart_share_reviewed';
   static const String whatsAppOptInRequested = 'whatsapp_opt_in_requested';
@@ -456,6 +458,8 @@ final class AnalyticsEvents {
     lineSheetFiltered,
     lineSheetProductViewed,
     lineSheetItemAdded,
+    preBookProgramOpened,
+    preBookOrderCreated,
     cartShareCreated,
     cartShareReviewed,
     whatsAppOptInRequested,

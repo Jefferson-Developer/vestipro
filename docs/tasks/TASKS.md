@@ -373,7 +373,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-207 — Modelar kits, pacotes e sortimentos](TASK-207-modelar-kits-pacotes-e-sortimentos.md) — Flutter Senior
 - [x] [TASK-208 — Implementar venda por kit, pacote e sortimento no pedido](TASK-208-implementar-venda-por-kit-pacote-e-sortimento.md) — Flutter Senior + Front-end
 - [x] [TASK-209 — Implementar line sheet atacadista e order form por coleção](TASK-209-implementar-line-sheet-atacadista-e-order-form.md) — Flutter Senior + Front-end
-- [ ] [TASK-210 — Implementar pré-venda e pre-book por coleção](TASK-210-implementar-pre-venda-e-pre-book-por-colecao.md) — Flutter Senior + Front-end
+- [x] [TASK-210 — Implementar pré-venda e pre-book por coleção](TASK-210-implementar-pre-venda-e-pre-book-por-colecao.md) — Flutter Senior + Front-end
 - [ ] [TASK-211 — Implementar colaboração com comprador em seleções e pedidos](TASK-211-implementar-colaboracao-com-comprador.md) — Flutter Senior + Front-end
 - [ ] [TASK-212 — Implementar crédito, inadimplência e bloqueios financeiros](TASK-212-implementar-credito-inadimplencia-e-bloqueios.md) — Flutter Senior + Front-end
 - [ ] [TASK-213 — Implementar contas a receber, faturas e lembretes de cobrança](TASK-213-implementar-contas-a-receber-faturas-e-cobranca.md) — Flutter Senior + Front-end
@@ -387,7 +387,7 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 205 / 216 tasks concluídas (TASK-166, TASK-204, TASK-205 e TASK-206 foram movidas
+**Progresso:** 206 / 216 tasks concluídas (TASK-166, TASK-204, TASK-205 e TASK-206 foram movidas
 para o backlog — ver
 [`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md),
 [`docs/backlog/BACKLOG-006-implementar-logs-de-auditoria-exportaveis.md`](../backlog/BACKLOG-006-implementar-logs-de-auditoria-exportaveis.md),
