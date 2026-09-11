@@ -6,6 +6,13 @@
          fora do momento do check-in. -->
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION"/>
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION"/>
+    <!-- Leitura de código de barras/QR (TASK-216): usada só quando o
+         vendedor abre a tela de escaneamento — negar a permissão nunca
+         bloqueia o app, o fluxo cai automaticamente para digitação manual
+         do código (ver `BarcodeScannerCameraSurface`). -->
+    <uses-permission android:name="android.permission.CAMERA"/>
+    <uses-feature android:name="android.hardware.camera" android:required="false"/>
+    <uses-feature android:name="android.hardware.camera.autofocus" android:required="false"/>
     <application
         android:label="${appName}"
         android:name="${applicationName}"

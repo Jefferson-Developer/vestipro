@@ -1861,6 +1861,21 @@ import 'offline_package_loaders_module.dart' as _i418;
 import 'product_import_parsers_module.dart' as _i490;
 import 'sync_module.dart' as _i350;
 
+import '../features/barcode_scanner/data/datasources/alternate_product_code_local_data_source.dart'
+    as _ibs0;
+import '../features/barcode_scanner/data/datasources/shared_preferences_alternate_product_code_data_source.dart'
+    as _ibs1;
+import '../features/barcode_scanner/domain/repositories/product_code_lookup_repository.dart'
+    as _ibs2;
+import '../features/barcode_scanner/data/repositories/product_code_lookup_repository_impl.dart'
+    as _ibs3;
+import '../features/barcode_scanner/domain/usecases/resolve_product_code_use_case.dart'
+    as _ibs4;
+import '../features/barcode_scanner/domain/usecases/register_unknown_product_code_use_case.dart'
+    as _ibs5;
+import '../features/barcode_scanner/presentation/cubit/barcode_scan_cubit.dart'
+    as _ibs6;
+
 const String _dev = 'dev';
 const String _staging = 'staging';
 const String _prod = 'prod';
@@ -6028,6 +6043,37 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i21.OrderDuplicationCubit(
         gh<_i315.DuplicateOrderUseCase>(),
         gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.lazySingleton<_ibs0.AlternateProductCodeLocalDataSource>(
+      () => _ibs1.SharedPreferencesAlternateProductCodeDataSource(),
+    );
+    gh.lazySingleton<_ibs2.ProductCodeLookupRepository>(
+      () => _ibs3.ProductCodeLookupRepositoryImpl(
+        variantRepository: gh<_i795.ProductVariantRepository>(),
+        productRepository: gh<_i321.ProductRepository>(),
+        searchProducts: gh<_i268.SearchProductsUseCase>(),
+        alternateCodeDataSource: gh<_ibs0.AlternateProductCodeLocalDataSource>(),
+      ),
+    );
+    gh.factory<_ibs4.ResolveProductCodeUseCase>(
+      () => _ibs4.ResolveProductCodeUseCase(
+        gh<_ibs2.ProductCodeLookupRepository>(),
+        gh<_i932.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_ibs5.RegisterUnknownProductCodeUseCase>(
+      () => _ibs5.RegisterUnknownProductCodeUseCase(
+        gh<_ibs2.ProductCodeLookupRepository>(),
+        gh<_i315.PermissionService>(),
+        gh<_i753.AuditLogRepository>(),
+        gh<_i932.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_ibs6.BarcodeScanCubit>(
+      () => _ibs6.BarcodeScanCubit(
+        gh<_ibs4.ResolveProductCodeUseCase>(),
+        gh<_i932.AnalyticsService>(),
       ),
     );
     return this;

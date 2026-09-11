@@ -33,6 +33,8 @@ String auditActionLabel(AuditAction action) {
     AuditAction.targetUpdated => 'Meta alterada',
     AuditAction.customerImportCompleted => 'Importação de clientes concluída',
     AuditAction.productImportCompleted => 'Importação de produtos concluída',
+    AuditAction.productAlternateCodeRegistered =>
+      'Código alternativo de produto cadastrado',
   };
 }
 

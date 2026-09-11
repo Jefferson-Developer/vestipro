@@ -458,6 +458,30 @@ final class AnalyticsEvents {
   /// carried as a parameter.
   static const String backorderConverted = 'backorder_converted';
 
+  /// Logged by `ResolveProductCodeUseCase` (TASK-216, EPIC-32) whenever a
+  /// scanned/typed code resolution completes — `resolution_status`
+  /// (`singleMatch`/`multipleMatches`/`notFound`) and `match_count` are
+  /// carried as parameters, never the scanned code value itself.
+  static const String barcodeScanResolved = 'barcode_scan_resolved';
+
+  /// Logged by `BarcodeScanCubit` (TASK-216, EPIC-32) whenever the camera
+  /// reports it has no permission to use — `source` (`camera`) is carried as
+  /// a parameter.
+  static const String barcodeScanPermissionDenied =
+      'barcode_scan_permission_denied';
+
+  /// Logged by `BarcodeScanCubit` (TASK-216, EPIC-32) whenever the seller
+  /// falls back to the manual code entry field instead of the camera.
+  static const String barcodeScanManualFallbackUsed =
+      'barcode_scan_manual_fallback_used';
+
+  /// Logged by `RegisterUnknownProductCodeUseCase` (TASK-216, EPIC-32)
+  /// whenever an authorized profile links an unrecognized scanned code to a
+  /// product/variant — `has_variant` is carried as a parameter, never the
+  /// code value itself.
+  static const String barcodeAlternateCodeRegistered =
+      'barcode_alternate_code_registered';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -589,5 +613,9 @@ final class AnalyticsEvents {
     backorderRejected,
     backorderCancelled,
     backorderConverted,
+    barcodeScanResolved,
+    barcodeScanPermissionDenied,
+    barcodeScanManualFallbackUsed,
+    barcodeAlternateCodeRegistered,
   ];
 }

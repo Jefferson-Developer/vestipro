@@ -32,6 +32,7 @@ import '../features/authentication/presentation/bloc/login_bloc.dart';
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart';
 import '../features/audit_log/audit_log.dart';
 import '../features/admin_portal/admin_portal.dart';
+import '../features/barcode_scanner/barcode_scanner.dart';
 import '../features/catalog/catalog.dart';
 import '../features/customer_import/customer_import.dart';
 import '../features/product_import/product_import.dart';
@@ -1332,6 +1333,7 @@ class VestiProApp extends StatelessWidget {
                       createCatalogFilterBloc: () => getIt<CatalogFilterBloc>(),
                       createItemsCounterCubit: () =>
                           getIt<OrderItemsCounterCubit>(),
+                      createBarcodeScanCubit: () => getIt<BarcodeScanCubit>(),
                     ),
                   ),
           orderProductDetailPageBuilder:

@@ -31,6 +31,11 @@
 	     — só "When In Use" é declarado (ver `GeolocatorVisitCheckInLocationService`). -->
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>O VestiPro usa sua localização apenas quando você registra um check-in de visita a um cliente, para anexar a localização como evidência complementar da visita.</string>
+	<!-- Leitura de código de barras/QR (TASK-216): só é solicitada quando o
+	     vendedor abre a tela de escaneamento — se negada, o app cai
+	     automaticamente para digitação manual do código. -->
+	<key>NSCameraUsageDescription</key>
+	<string>O VestiPro usa a câmera apenas para ler o código de barras ou QR de um produto e localizá-lo mais rápido no catálogo.</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

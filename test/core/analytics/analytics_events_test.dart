@@ -134,6 +134,10 @@ void main() {
           'backorder_rejected',
           'backorder_cancelled',
           'backorder_converted',
+          'barcode_scan_resolved',
+          'barcode_scan_permission_denied',
+          'barcode_scan_manual_fallback_used',
+          'barcode_alternate_code_registered',
         ]),
       );
 

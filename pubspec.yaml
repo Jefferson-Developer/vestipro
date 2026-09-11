@@ -135,6 +135,18 @@ dependencies:
   # "Riscos conhecidos" no relatório desta task para o que ainda precisa de
   # validação em dispositivo real.
   geolocator: ^14.0.3
+  # Leitura de código de barras/QR (TASK-216): universal, actively maintained
+  # Flutter plugin — CameraX/ML Kit on Android, AVFoundation/Apple Vision on
+  # iOS, ZXing on Web — covering exactly this project's three target
+  # platforms (android/ios/web; there is no windows/linux/macos folder in
+  # this repo). No extra native permission-request package needed: camera
+  # permission prompting/denial is handled by the plugin itself and surfaced
+  # to Dart as a typed `MobileScannerException`
+  # (`BarcodeScannerCameraSurface`). Declaring
+  # `NSCameraUsageDescription`/`android.permission.CAMERA` is still required
+  # per-platform (done in `ios/Runner/Info.plist`/
+  # `android/app/src/main/AndroidManifest.xml`).
+  mobile_scanner: ^7.4.1
 
 dev_dependencies:
   flutter_test:

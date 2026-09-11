@@ -84,6 +84,13 @@ enum AuditAction {
   /// (TASK-168, `functions/src/products/process-product-import-job.ts`)
   /// once a `ProductImportJob` finishes.
   productImportCompleted,
+
+  /// An `AlternateProductCode` (TASK-216, "código desconhecido pode gerar
+  /// sugestão de cadastro/correção") was registered via
+  /// `RegisterUnknownProductCodeUseCase`, always after that use case
+  /// re-checked `Capability.catalogManage` — never recorded for the read-only
+  /// `resolveCode` path.
+  productAlternateCodeRegistered,
 }
 
 extension AuditActionCode on AuditAction {
@@ -125,6 +132,8 @@ extension AuditActionCode on AuditAction {
       AuditAction.targetUpdated => 'target.updated',
       AuditAction.customerImportCompleted => 'customerImport.completed',
       AuditAction.productImportCompleted => 'productImport.completed',
+      AuditAction.productAlternateCodeRegistered =>
+        'product.alternateCodeRegistered',
     };
   }
 }
