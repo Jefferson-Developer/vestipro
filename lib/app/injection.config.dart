@@ -240,6 +240,22 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart'
 import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
+import '../features/buyer_collaboration/data/datasources/buyer_collaboration_read_data_source.dart'
+    as _i214;
+import '../features/buyer_collaboration/data/datasources/buyer_collaboration_write_data_source.dart'
+    as _i372;
+import '../features/buyer_collaboration/data/datasources/cloud_functions_buyer_collaboration_write_data_source.dart'
+    as _i544;
+import '../features/buyer_collaboration/data/datasources/firestore_buyer_collaboration_read_data_source.dart'
+    as _i507;
+import '../features/buyer_collaboration/data/repositories/buyer_collaboration_repository_impl.dart'
+    as _i67;
+import '../features/buyer_collaboration/domain/repositories/buyer_collaboration_repository.dart'
+    as _i39;
+import '../features/buyer_collaboration/domain/usecases/buyer_collaboration_use_cases.dart'
+    as _i72;
+import '../features/buyer_collaboration/presentation/bloc/buyer_collaboration_cubit.dart'
+    as _i456;
 import '../features/campaign_assist/data/repositories/cloud_functions_campaign_assist_repository.dart'
     as _i800;
 import '../features/campaign_assist/domain/repositories/campaign_assist_repository.dart'
@@ -3419,6 +3435,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i340.CloudFunctionsService>(),
       ),
     );
+    gh.lazySingleton<_i214.BuyerCollaborationReadDataSource>(
+      () => _i507.FirestoreBuyerCollaborationReadDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.lazySingleton<_i117.SavedReportRepository>(
       () => _i462.SavedReportRepositoryImpl(
         gh<_i603.SavedReportRemoteDataSource>(),
@@ -3591,6 +3612,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i801.OrderSignatureCodec>(),
       ),
     );
+    gh.lazySingleton<_i372.BuyerCollaborationWriteDataSource>(
+      () => _i544.CloudFunctionsBuyerCollaborationWriteDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i503.StockTurnoverRepository>(
       () => _i80.StockTurnoverRepositoryImpl(
         dataSource: gh<_i135.StockTurnoverDataSource>(),
@@ -3737,6 +3763,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i78.DailyRepSummaryRepository>(
       () => _i692.CloudFunctionsDailyRepSummaryRepository(
         gh<_i340.CloudFunctionsService>(),
+      ),
+    );
+    gh.lazySingleton<_i39.BuyerCollaborationRepository>(
+      () => _i67.BuyerCollaborationRepositoryImpl(
+        gh<_i214.BuyerCollaborationReadDataSource>(),
+        gh<_i372.BuyerCollaborationWriteDataSource>(),
       ),
     );
     gh.lazySingleton<_i292.SyncEngine>(
@@ -4101,6 +4133,51 @@ extension GetItInjectableX on _i174.GetIt {
         getRecommendations: gh<_i78.GetProductRecommendationsUseCase>(),
       ),
     );
+    gh.factory<_i72.CreateBuyerCollaborationSessionUseCase>(
+      () => _i72.CreateBuyerCollaborationSessionUseCase(
+        gh<_i39.BuyerCollaborationRepository>(),
+      ),
+    );
+    gh.factory<_i72.ShareBuyerCollaborationSessionUseCase>(
+      () => _i72.ShareBuyerCollaborationSessionUseCase(
+        gh<_i39.BuyerCollaborationRepository>(),
+      ),
+    );
+    gh.factory<_i72.AddBuyerCollaborationCommentUseCase>(
+      () => _i72.AddBuyerCollaborationCommentUseCase(
+        gh<_i39.BuyerCollaborationRepository>(),
+      ),
+    );
+    gh.factory<_i72.RequestBuyerCollaborationChangesUseCase>(
+      () => _i72.RequestBuyerCollaborationChangesUseCase(
+        gh<_i39.BuyerCollaborationRepository>(),
+      ),
+    );
+    gh.factory<_i72.ApproveBuyerCollaborationSessionUseCase>(
+      () => _i72.ApproveBuyerCollaborationSessionUseCase(
+        gh<_i39.BuyerCollaborationRepository>(),
+      ),
+    );
+    gh.factory<_i72.ConvertBuyerCollaborationSessionUseCase>(
+      () => _i72.ConvertBuyerCollaborationSessionUseCase(
+        gh<_i39.BuyerCollaborationRepository>(),
+      ),
+    );
+    gh.factory<_i72.ReopenBuyerCollaborationSessionUseCase>(
+      () => _i72.ReopenBuyerCollaborationSessionUseCase(
+        gh<_i39.BuyerCollaborationRepository>(),
+      ),
+    );
+    gh.factory<_i72.WatchBuyerCollaborationSessionUseCase>(
+      () => _i72.WatchBuyerCollaborationSessionUseCase(
+        gh<_i39.BuyerCollaborationRepository>(),
+      ),
+    );
+    gh.factory<_i72.WatchBuyerCollaborationCommentsUseCase>(
+      () => _i72.WatchBuyerCollaborationCommentsUseCase(
+        gh<_i39.BuyerCollaborationRepository>(),
+      ),
+    );
     gh.factory<_i899.LoadCustomerDashboardRankingUseCase>(
       () => _i899.LoadCustomerDashboardRankingUseCase(
         gh<_i649.AggregationRepository>(),
@@ -4338,6 +4415,21 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i298.RegisterCatalogShareOpenUseCase>(
       () => _i298.RegisterCatalogShareOpenUseCase(
         gh<_i344.CatalogShareLookupRepository>(),
+      ),
+    );
+    gh.factory<_i456.BuyerCollaborationCubit>(
+      () => _i456.BuyerCollaborationCubit(
+        createSession: gh<_i72.CreateBuyerCollaborationSessionUseCase>(),
+        shareSession: gh<_i72.ShareBuyerCollaborationSessionUseCase>(),
+        addCommentUseCase: gh<_i72.AddBuyerCollaborationCommentUseCase>(),
+        requestChangesUseCase:
+            gh<_i72.RequestBuyerCollaborationChangesUseCase>(),
+        approveUseCase: gh<_i72.ApproveBuyerCollaborationSessionUseCase>(),
+        convertUseCase: gh<_i72.ConvertBuyerCollaborationSessionUseCase>(),
+        reopenUseCase: gh<_i72.ReopenBuyerCollaborationSessionUseCase>(),
+        watchSessionUseCase: gh<_i72.WatchBuyerCollaborationSessionUseCase>(),
+        watchCommentsUseCase: gh<_i72.WatchBuyerCollaborationCommentsUseCase>(),
+        analytics: gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i1019.ListNotificationsForUserUseCase>(

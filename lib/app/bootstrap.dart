@@ -40,6 +40,7 @@ import '../features/customer_portal/customer_portal.dart';
 import '../features/demand_forecast/demand_forecast.dart';
 import '../features/visit_routes/visit_routes.dart';
 import '../features/catalog_share/catalog_share.dart';
+import '../features/buyer_collaboration/buyer_collaboration.dart';
 import '../features/cart_share/cart_share.dart';
 import '../features/dashboards/dashboards.dart';
 import '../features/insights/insights.dart';
@@ -1250,6 +1251,61 @@ class VestiProApp extends StatelessWidget {
                           createCubit: () => getIt<CartShareCubit>(),
                         ),
                       ),
+                  onCollaborate: (order, productNames) =>
+                      showModalBottomSheet<void>(
+                        context: context,
+                        isScrollControlled: true,
+                        builder: (_) => BuyerCollaborationEntrySheet(
+                          organizationId: order.organizationId,
+                          companyId: order.companyId,
+                          customerId: order.customerId,
+                          priceListId: order.priceListId,
+                          sourceType: BuyerCollaborationSourceType.orderDraft,
+                          sourceId: order.id,
+                          items: order.items
+                              .map(
+                                (item) => BuyerCollaborationItem(
+                                  itemId: item.id,
+                                  productId: item.productId,
+                                  productName:
+                                      productNames[item.productId] ??
+                                      item.productId,
+                                  variantId: item.variantId,
+                                  quantity: item.quantity,
+                                  unitPrice: item.unitPrice,
+                                  subtotal: item.subtotal,
+                                ),
+                              )
+                              .toList(growable: false),
+                          createCubit: () => getIt<BuyerCollaborationCubit>(),
+                          onConvertRequested: () async {
+                            final confirmed = await showDialog<bool>(
+                              context: context,
+                              builder: (dialogContext) => AlertDialog(
+                                title: const Text('Converter em pedido'),
+                                content: const Text(
+                                  'Confirme que este pedido já foi enviado '
+                                  '("Enviar pedido") com os itens combinados '
+                                  'antes de converter a colaboração.',
+                                ),
+                                actions: <Widget>[
+                                  TextButton(
+                                    onPressed: () =>
+                                        Navigator.of(dialogContext).pop(false),
+                                    child: const Text('Cancelar'),
+                                  ),
+                                  FilledButton(
+                                    onPressed: () =>
+                                        Navigator.of(dialogContext).pop(true),
+                                    child: const Text('Já enviei o pedido'),
+                                  ),
+                                ],
+                              ),
+                            );
+                            return confirmed == true ? order.id : null;
+                          },
+                        ),
+                      ),
                   onSendWhatsApp: (order) => WhatsAppSendSheet.show(
                     context: context,
                     createCubit: () => getIt<WhatsAppSendCubit>(),
@@ -1399,6 +1455,20 @@ class VestiProApp extends StatelessWidget {
               ),
             );
           },
+          buyerCollaborationBuyerPageBuilder: (context, orgId, sessionId) =>
+              BuyerCollaborationPage(
+                organizationId: orgId,
+                sessionId: sessionId,
+                role: BuyerCollaborationViewerRole.buyer,
+                createCubit: () => getIt<BuyerCollaborationCubit>(),
+              ),
+          buyerCollaborationSellerPageBuilder: (context, orgId, sessionId) =>
+              BuyerCollaborationPage(
+                organizationId: orgId,
+                sessionId: sessionId,
+                role: BuyerCollaborationViewerRole.seller,
+                createCubit: () => getIt<BuyerCollaborationCubit>(),
+              ),
         );
 
     // TASK-174: `appRouter` above is built exactly once per `build()` call —

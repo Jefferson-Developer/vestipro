@@ -41,6 +41,8 @@ class AppRouter {
     this.cartSharePublicPageBuilder,
     this.npsResponsePageBuilder,
     this.customerPortalPageBuilder,
+    this.buyerCollaborationBuyerPageBuilder,
+    this.buyerCollaborationSellerPageBuilder,
     this.customerFormPageBuilder,
     this.customerImportPageBuilder,
     this.productFormPageBuilder,
@@ -116,6 +118,22 @@ class AppRouter {
   npsResponsePageBuilder;
   final Widget Function(BuildContext context, String orgId)?
   customerPortalPageBuilder;
+
+  /// Builds the buyer's own side of a `BuyerCollaborationSession` screen
+  /// (TASK-211), given `orgId`/`sessionId` from
+  /// [BuyerCollaborationBuyerRoute]. Optional (like [customerPortalPageBuilder]
+  /// itself) so tests/examples that build their own [AppRouter] without
+  /// wiring TASK-211 keep compiling unchanged.
+  final Widget Function(BuildContext context, String orgId, String sessionId)?
+  buyerCollaborationBuyerPageBuilder;
+
+  /// Builds the seller's own side of a `BuyerCollaborationSession` screen
+  /// (TASK-211), given `orgId`/`sessionId` from
+  /// [BuyerCollaborationSellerRoute] — reached from a notification's deep
+  /// link, not from day-to-day navigation (that stays the bottom sheet on
+  /// [OrderDraftRoute]).
+  final Widget Function(BuildContext context, String orgId, String sessionId)?
+  buyerCollaborationSellerPageBuilder;
 
   /// Builds the central de notificações internas screen (TASK-151), given
   /// `orgId` from [NotificationCenterRoute]. Optional (like most feature
@@ -1303,6 +1321,35 @@ class AppRouter {
             customerPortalPageBuilder?.call(
               context,
               state.pathParameters['orgId']!,
+            ) ??
+            const NotFoundPage(),
+      ),
+      GoRoute(
+        path: BuyerCollaborationSellerRoute.pathPattern,
+        name: BuyerCollaborationSellerRoute.name,
+        redirect: (context, state) => authorizationGuard.redirect(
+          context,
+          state,
+          requiredCapability: Capability.orderCreate,
+        ),
+        builder: (context, state) {
+          final builder = buyerCollaborationSellerPageBuilder;
+          if (builder == null) return const NotFoundPage();
+          return builder(
+            context,
+            state.pathParameters['orgId']!,
+            state.pathParameters['sessionId']!,
+          );
+        },
+      ),
+      GoRoute(
+        path: BuyerCollaborationBuyerRoute.pathPattern,
+        name: BuyerCollaborationBuyerRoute.name,
+        builder: (context, state) =>
+            buyerCollaborationBuyerPageBuilder?.call(
+              context,
+              state.pathParameters['orgId']!,
+              state.pathParameters['sessionId']!,
             ) ??
             const NotFoundPage(),
       ),

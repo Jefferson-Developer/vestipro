@@ -53,6 +53,7 @@ class OrderDraftPage extends StatelessWidget {
     this.onSubmitOrder,
     this.onGenerateQuote,
     this.onShareCart,
+    this.onCollaborate,
     this.onSendWhatsApp,
     super.key,
   });
@@ -120,6 +121,16 @@ class OrderDraftPage extends StatelessWidget {
   final Future<void> Function(Order order)? onGenerateQuote;
   final Future<void> Function(Order order, Map<String, String> productNames)?
   onShareCart;
+
+  /// Called when the seller taps "Colaborar com o comprador" (TASK-211,
+  /// EPIC-32) — expected to open `BuyerCollaborationEntrySheet` with this
+  /// `Order`'s items, letting seller and buyer negotiate the selection
+  /// (comments, solicitação de ajuste, aprovação) before it becomes a
+  /// pedido. `null` (e.g. before composition-root wiring exists) simply
+  /// hides the entry point, same `null`-means-"not wired yet" precedent
+  /// [onShareCart] itself already sets.
+  final Future<void> Function(Order order, Map<String, String> productNames)?
+  onCollaborate;
   final Future<void> Function(Order order)? onSendWhatsApp;
 
   @override
@@ -156,6 +167,7 @@ class OrderDraftPage extends StatelessWidget {
             onSubmitOrder: onSubmitOrder,
             onGenerateQuote: onGenerateQuote,
             onShareCart: onShareCart,
+            onCollaborate: onCollaborate,
             onSendWhatsApp: onSendWhatsApp,
           ),
         );
@@ -179,6 +191,7 @@ class _OrderDraftView extends StatelessWidget {
     this.onSubmitOrder,
     this.onGenerateQuote,
     this.onShareCart,
+    this.onCollaborate,
     this.onSendWhatsApp,
   });
 
@@ -197,6 +210,8 @@ class _OrderDraftView extends StatelessWidget {
   final Future<void> Function(Order order)? onGenerateQuote;
   final Future<void> Function(Order order, Map<String, String> productNames)?
   onShareCart;
+  final Future<void> Function(Order order, Map<String, String> productNames)?
+  onCollaborate;
   final Future<void> Function(Order order)? onSendWhatsApp;
 
   @override
@@ -274,6 +289,7 @@ class _OrderDraftView extends StatelessWidget {
           onSubmitOrder: onSubmitOrder,
           onGenerateQuote: onGenerateQuote,
           onShareCart: onShareCart,
+          onCollaborate: onCollaborate,
           onSendWhatsApp: onSendWhatsApp,
         );
       case OrderDraftLoadStatus.awaitingCustomer:
@@ -295,6 +311,7 @@ class _OrderDraftSummary extends StatefulWidget {
     this.onSubmitOrder,
     this.onGenerateQuote,
     this.onShareCart,
+    this.onCollaborate,
     this.onSendWhatsApp,
   });
 
@@ -310,6 +327,8 @@ class _OrderDraftSummary extends StatefulWidget {
   final Future<void> Function(Order order)? onGenerateQuote;
   final Future<void> Function(Order order, Map<String, String> productNames)?
   onShareCart;
+  final Future<void> Function(Order order, Map<String, String> productNames)?
+  onCollaborate;
   final Future<void> Function(Order order)? onSendWhatsApp;
 
   @override
@@ -543,6 +562,19 @@ class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
                           entry.key: entry.value.name,
                       }),
               ),
+              if (widget.onCollaborate != null) ...<Widget>[
+                const SizedBox(height: AppSpacing.spacing8),
+                AppButton(
+                  label: 'Colaborar com o comprador',
+                  leadingIcon: Icons.forum_outlined,
+                  variant: AppButtonVariant.secondary,
+                  onPressed: () =>
+                      widget.onCollaborate!(order, <String, String>{
+                        for (final entry in widget.state.productsById.entries)
+                          entry.key: entry.value.name,
+                      }),
+                ),
+              ],
               if (widget.onSendWhatsApp != null) ...<Widget>[
                 const SizedBox(height: AppSpacing.spacing8),
                 AppButton(

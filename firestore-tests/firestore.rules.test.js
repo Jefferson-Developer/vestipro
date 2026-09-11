@@ -618,6 +618,74 @@ function returnRequestDoc({
   };
 }
 
+function buyerCollaborationSessionDoc({
+  organizationId,
+  companyId = 'company-a',
+  sellerId,
+  customerId = 'customer-a',
+  status = 'buyer_review',
+}) {
+  return {
+    organizationId,
+    companyId,
+    sellerId,
+    customerId,
+    sourceType: 'orderDraft',
+    sourceId: 'draft-1',
+    priceListId: 'price-list-a',
+    status,
+    items: [
+      {
+        itemId: 'line-1',
+        productId: 'product-a',
+        productName: 'Vestido Floral',
+        variantId: 'variant-a',
+        quantity: 10,
+        unitPrice: 100,
+        subtotal: 1000,
+      },
+    ],
+    showPrices: true,
+    currentTotal: 1000,
+    convertedOrderId: null,
+    createdBy: sellerId,
+    createdAt: now(),
+    updatedAt: now(),
+    lastActivityAt: now(),
+    expiresAt: new Date(Date.now() + 14 * 24 * 60 * 60 * 1000),
+    deletedAt: null,
+  };
+}
+
+function buyerCollaborationCommentDoc({
+  organizationId,
+  companyId = 'company-a',
+  sellerId,
+  customerId = 'customer-a',
+  authorId,
+  authorType = 'seller',
+  visibility = 'shared',
+  body = 'Comentário de teste.',
+}) {
+  return {
+    organizationId,
+    companyId,
+    sellerId,
+    customerId,
+    authorId,
+    authorType,
+    authorName: 'Autor Teste',
+    visibility,
+    itemId: null,
+    kind: 'comment',
+    body,
+    attachments: [],
+    mentionedMemberIds: [],
+    proposedChanges: null,
+    createdAt: now(),
+  };
+}
+
 function postSaleEventDoc({
   organizationId,
   companyId = 'company-a',
@@ -3703,5 +3771,124 @@ describe('customer portal isolation (TASK-182)', () => {
     const db = testEnv.authenticatedContext('portal-a').firestore();
     await assertFails(db.doc(`organizations/${ORG_A}/orders/order-forged`).set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-a' })));
     await assertFails(db.doc(`organizations/${ORG_B}/customers/customer-a`).get());
+  });
+});
+
+describe('organizations/{organizationId}/buyerCollaborationSessions/{sessionId}  (TASK-211, EPIC-32 — colaboração com comprador)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db.doc(`organizations/${ORG_A}/members/portal-a`).set({
+        ...membershipDoc({ organizationId: ORG_A, userId: 'portal-a', roleId: 'CUSTOMER_PORTAL', roleName: 'CUSTOMER_PORTAL' }),
+        customerId: 'customer-a',
+      });
+      await db.doc(`organizations/${ORG_A}/members/portal-other`).set({
+        ...membershipDoc({ organizationId: ORG_A, userId: 'portal-other', roleId: 'CUSTOMER_PORTAL', roleName: 'CUSTOMER_PORTAL' }),
+        customerId: 'customer-other',
+      });
+      await db
+        .doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared`)
+        .set(buyerCollaborationSessionDoc({ organizationId: ORG_A, sellerId: 'rep-a', customerId: 'customer-a', status: 'buyer_review' }));
+      await db
+        .doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-draft`)
+        .set(buyerCollaborationSessionDoc({ organizationId: ORG_A, sellerId: 'rep-a', customerId: 'customer-a', status: 'seller_draft' }));
+      await db
+        .doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-b-shared`)
+        .set(buyerCollaborationSessionDoc({ organizationId: ORG_A, sellerId: 'rep-b', customerId: 'customer-other', status: 'buyer_review' }));
+      await db
+        .doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared/comments/comment-shared`)
+        .set(buyerCollaborationCommentDoc({ organizationId: ORG_A, sellerId: 'rep-a', customerId: 'customer-a', authorId: 'rep-a', visibility: 'shared' }));
+      await db
+        .doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared/comments/comment-internal`)
+        .set(buyerCollaborationCommentDoc({ organizationId: ORG_A, sellerId: 'rep-a', customerId: 'customer-a', authorId: 'manager-a', visibility: 'internal' }));
+    });
+  });
+
+  test('SALES_REP lê a própria sessão de colaboração já compartilhada', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared`).get());
+  });
+
+  test('SALES_REP não lê sessão de colaboração de outro vendedor de outra equipe', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-b-shared`).get());
+  });
+
+  test('SALES_MANAGER lê sessão do vendedor da própria equipe, mas não de outra equipe', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-b-shared`).get());
+  });
+
+  test('ADMIN e OWNER leem qualquer sessão de colaboração da própria organization', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+    await assertSucceeds(ownerDb.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-b-shared`).get());
+    await assertSucceeds(adminDb.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-b-shared`).get());
+  });
+
+  test('comprador externo lê a própria sessão apenas depois de compartilhada, nunca o seller_draft', async () => {
+    const db = testEnv.authenticatedContext('portal-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-draft`).get());
+  });
+
+  test('comprador externo não lê sessão de colaboração de outro cliente', async () => {
+    const db = testEnv.authenticatedContext('portal-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-b-shared`).get());
+    const otherDb = testEnv.authenticatedContext('portal-other').firestore();
+    await assertFails(otherDb.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared`).get());
+  });
+
+  test('ninguém escreve sessão de colaboração pelo cliente, nem OWNER — as Cloud Functions (Admin SDK) são o único caminho', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-new`)
+        .set(buyerCollaborationSessionDoc({ organizationId: ORG_A, sellerId: 'rep-a' })),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared`).update({ status: 'buyer_approved' }),
+    );
+    await assertFails(db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared`).delete());
+  });
+
+  test('comprador externo lê comentários compartilhados mas não os internos da própria sessão', async () => {
+    const db = testEnv.authenticatedContext('portal-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared/comments/comment-shared`).get(),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared/comments/comment-internal`).get(),
+    );
+  });
+
+  test('SALES_REP dono da sessão lê tanto comentários compartilhados quanto internos', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared/comments/comment-shared`).get(),
+    );
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared/comments/comment-internal`).get(),
+    );
+  });
+
+  test('comprador de outro cliente não lê nenhum comentário da sessão alheia', async () => {
+    const db = testEnv.authenticatedContext('portal-other').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared/comments/comment-shared`).get(),
+    );
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared/comments/comment-internal`).get(),
+    );
+  });
+
+  test('ninguém escreve comentário pelo cliente, nem OWNER', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/buyerCollaborationSessions/session-rep-a-shared/comments/comment-new`)
+        .set(buyerCollaborationCommentDoc({ organizationId: ORG_A, sellerId: 'rep-a', customerId: 'customer-a', authorId: 'owner-a' })),
+    );
   });
 });

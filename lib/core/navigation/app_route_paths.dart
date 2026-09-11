@@ -1284,6 +1284,48 @@ final class CustomerPortalRoute extends AppRoute {
   String get location => '/customer-portal/$orgId';
 }
 
+/// Seller-side destination for a `BuyerCollaborationSession` notification's
+/// own deep link (TASK-211, EPIC-32) — the day-to-day entry point stays the
+/// "Colaborar com o comprador" button on [OrderDraftRoute] (a bottom sheet,
+/// same precedent the cart-share flow already sets), but a notification
+/// about a comment/aprovação needs a real location to `context.go` to, since
+/// it may arrive while the seller is nowhere near that draft. Protected in
+/// [AppRouter] by `order.create` — same capability [OrderDraftRoute] itself
+/// requires, since managing a collaboration session is just an extension of
+/// being allowed to build/send that order.
+final class BuyerCollaborationSellerRoute extends AppRoute {
+  const BuyerCollaborationSellerRoute({
+    required this.orgId,
+    required this.sessionId,
+  });
+  final String orgId;
+  final String sessionId;
+  static const name = 'buyerCollaborationSeller';
+  static const pathPattern = '/org/:orgId/buyer-collaboration/:sessionId';
+  @override
+  String get location => '/org/$orgId/buyer-collaboration/$sessionId';
+}
+
+/// The buyer's own side of a `BuyerCollaborationSession` (TASK-211,
+/// EPIC-32) — reached from the customer portal, no [Capability] gate: same
+/// "an authenticated CUSTOMER_PORTAL membership is all the authorization
+/// this area ever needs" contract [CustomerPortalRoute] itself already sets.
+/// A buyer trying to open a session belonging to another `customerId` is
+/// stopped by `firestore.rules`/the Cloud Functions themselves
+/// (`portalCustomerId`), never by this route.
+final class BuyerCollaborationBuyerRoute extends AppRoute {
+  const BuyerCollaborationBuyerRoute({
+    required this.orgId,
+    required this.sessionId,
+  });
+  final String orgId;
+  final String sessionId;
+  static const name = 'buyerCollaborationBuyer';
+  static const pathPattern = '/customer-portal/:orgId/collaboration/:sessionId';
+  @override
+  String get location => '/customer-portal/$orgId/collaboration/$sessionId';
+}
+
 /// Route shown when a guard denies access to the requested location.
 final class ForbiddenRoute extends AppRoute {
   const ForbiddenRoute();

@@ -33,6 +33,16 @@ export { registerCatalogShareOpen } from './catalog/register-catalog-share-open'
 export { revokeCatalogShareLink } from './catalog/revoke-catalog-share-link';
 export { createCartShareLink, getCartShareLink, reviewCartShare } from './cart_shares';
 export {
+  createBuyerCollaborationSession,
+  shareBuyerCollaborationSession,
+  addBuyerCollaborationComment,
+  requestBuyerCollaborationChanges,
+  approveBuyerCollaborationSession,
+  convertBuyerCollaborationSession,
+  reopenBuyerCollaborationSession,
+  expireBuyerCollaborationSessions,
+} from './buyer_collaboration';
+export {
   createCustomerPortalInvite,
   acceptCustomerPortalInvite,
   loadCustomerPortal,

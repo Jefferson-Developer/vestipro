@@ -1496,6 +1496,116 @@ service cloud.firestore {
         allow create, update, delete: if false;
       }
 
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/buyerCollaborationSessions/{sessionId}
+      // (TASK-211, EPIC-32 — colaboração com comprador em seleções/pedidos).
+      // Exclusively written by the `buyer_collaboration` Cloud Functions
+      // (Admin SDK, bypass these Rules) — same "read-only via Rules, write
+      // only via Cloud Function" shape `orders`/`returnRequests`/
+      // `exchangeRequests` already use. Visibility mirrors `canReadOrder`:
+      // the seller who owns it, a SALES_MANAGER sharing a team with that
+      // seller, OWNER/ADMIN, and — the whole point of this task — the
+      // customer's own CUSTOMER_PORTAL membership, but only once the seller
+      // has actually shared it (`status != 'seller_draft'`): a comprador
+      // never sees a session still being drafted internally, and never a
+      // session belonging to any other `customerId` (`portalCustomerId`,
+      // never a client-supplied field, decides that).
+      // -------------------------------------------------------------------
+
+      function validBuyerCollaborationSessionVisibilityPayload(organizationId) {
+        return resource.data.keys().hasAll([
+            'organizationId',
+            'companyId',
+            'sellerId',
+            'customerId',
+            'status'
+          ])
+          && resource.data.organizationId == organizationId
+          && resource.data.companyId is string
+          && resource.data.companyId.size() > 0
+          && resource.data.sellerId is string
+          && resource.data.sellerId.size() > 0
+          && resource.data.customerId is string
+          && resource.data.customerId.size() > 0;
+      }
+
+      function managerCanReadBuyerCollaborationSession(organizationId) {
+        return isSalesManager(organizationId)
+          && exists(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId))
+          && requesterTeamIds(organizationId).hasAny(
+              get(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId)).data.teamIds
+            );
+      }
+
+      function canReadBuyerCollaborationSession(organizationId) {
+        return validBuyerCollaborationSessionVisibilityPayload(organizationId)
+          && (
+            isOwnerOrAdmin(organizationId)
+            || (isSalesRep(organizationId) && resource.data.sellerId == request.auth.uid)
+            || managerCanReadBuyerCollaborationSession(organizationId)
+            || (isCustomerPortal(organizationId)
+              && resource.data.customerId == portalCustomerId(organizationId)
+              && resource.data.status != 'seller_draft')
+          );
+      }
+
+      // `comments` denormalizes `organizationId`/`companyId`/`sellerId`/
+      // `customerId` from its parent session onto every subdocument (see
+      // `commentVisibilityFields` in `buyer-collaboration-shared.ts`) so
+      // this Rule can decide visibility straight from `resource.data` —
+      // Rules evaluate the exact document being read, never its parent, so
+      // re-deriving the session's own fields here would require re-reading
+      // it with `get()` on every single comment instead. A CUSTOMER_PORTAL
+      // reader additionally needs `visibility == 'shared'`: an `internal`
+      // note between seller/manager must never reach the buyer, even though
+      // both kinds live in the same subcollection for one ordered history.
+      function validBuyerCollaborationCommentPayload(organizationId) {
+        return resource.data.keys().hasAll([
+            'organizationId',
+            'companyId',
+            'sellerId',
+            'customerId',
+            'visibility'
+          ])
+          && resource.data.organizationId == organizationId
+          && resource.data.companyId is string
+          && resource.data.companyId.size() > 0
+          && resource.data.sellerId is string
+          && resource.data.sellerId.size() > 0
+          && resource.data.customerId is string
+          && resource.data.customerId.size() > 0;
+      }
+
+      function managerCanReadBuyerCollaborationComment(organizationId) {
+        return isSalesManager(organizationId)
+          && exists(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId))
+          && requesterTeamIds(organizationId).hasAny(
+              get(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId)).data.teamIds
+            );
+      }
+
+      function canReadBuyerCollaborationComment(organizationId) {
+        return validBuyerCollaborationCommentPayload(organizationId)
+          && (
+            isOwnerOrAdmin(organizationId)
+            || (isSalesRep(organizationId) && resource.data.sellerId == request.auth.uid)
+            || managerCanReadBuyerCollaborationComment(organizationId)
+            || (isCustomerPortal(organizationId)
+              && resource.data.customerId == portalCustomerId(organizationId)
+              && resource.data.visibility == 'shared')
+          );
+      }
+
+      match /buyerCollaborationSessions/{sessionId} {
+        allow get, list: if canReadBuyerCollaborationSession(organizationId);
+        allow create, update, delete: if false;
+
+        match /comments/{commentId} {
+          allow get, list: if canReadBuyerCollaborationComment(organizationId);
+          allow create, update, delete: if false;
+        }
+      }
+
       // TASK-183: consent, approved templates and delivery history are
       // mediated exclusively by Cloud Functions. This prevents a client
       // from forging opt-in, approving its own template or changing a

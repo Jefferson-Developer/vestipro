@@ -396,6 +396,33 @@ final class AnalyticsEvents {
   /// itself (that is already visible on-screen, not an analytics concern).
   static const String npsScoreCardViewed = 'nps_score_card_viewed';
 
+  /// Logged by `BuyerCollaborationCubit` (TASK-211, EPIC-32) whenever a
+  /// seller opens a new collaboration session for a customer to review —
+  /// `source_type`/`items_count` are carried as parameters, never customer
+  /// PII or item prices.
+  static const String buyerCollaborationSessionOpened =
+      'buyer_collaboration_session_opened';
+
+  /// Logged whenever a seller or buyer successfully adds a comment to a
+  /// collaboration session — `has_item`/`visibility` are carried as
+  /// parameters, never the comment's free text.
+  static const String buyerCollaborationCommentAdded =
+      'buyer_collaboration_comment_added';
+
+  /// Logged whenever the buyer requests changes to a shared selection —
+  /// `proposed_changes_count` is carried as a parameter.
+  static const String buyerCollaborationChangesRequested =
+      'buyer_collaboration_changes_requested';
+
+  /// Logged whenever the buyer approves a collaboration session.
+  static const String buyerCollaborationApproved =
+      'buyer_collaboration_approved';
+
+  /// Logged whenever a collaboration session is successfully converted into
+  /// a pedido — `order_id` is carried as a parameter.
+  static const String buyerCollaborationConvertedToOrder =
+      'buyer_collaboration_converted_to_order';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -515,5 +542,10 @@ final class AnalyticsEvents {
     postSaleEventRegistered,
     npsResponseSubmitted,
     npsScoreCardViewed,
+    buyerCollaborationSessionOpened,
+    buyerCollaborationCommentAdded,
+    buyerCollaborationChangesRequested,
+    buyerCollaborationApproved,
+    buyerCollaborationConvertedToOrder,
   ];
 }
