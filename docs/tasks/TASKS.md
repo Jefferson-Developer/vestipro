@@ -357,9 +357,17 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ### EPIC-31 — Administração Avançada e Data Platform
 - [x] [TASK-203 — Implementar portal administrativo avançado](TASK-203-implementar-portal-administrativo-avancado.md) — Flutter Senior + Front-end
-- [ ] [TASK-204 — Implementar logs de auditoria exportáveis](TASK-204-implementar-logs-de-auditoria-exportaveis.md) — Flutter Senior + Front-end
-- [ ] [TASK-205 — Criar pipeline de Data Warehouse / BigQuery](TASK-205-criar-pipeline-data-warehouse.md) — Flutter Senior
-- [ ] [TASK-206 — Criar camada semântica de BI](TASK-206-criar-camada-semantica-de-bi.md) — Flutter Senior
+- 🔴 TASK-204 — Implementar logs de auditoria exportáveis — **adiada para o backlog a pedido do
+  usuário**: ver
+  [`docs/backlog/BACKLOG-006-implementar-logs-de-auditoria-exportaveis.md`](../backlog/BACKLOG-006-implementar-logs-de-auditoria-exportaveis.md).
+  Não conta mais na fila obrigatória nem no total de tasks abaixo.
+- 🔴 TASK-205 — Criar pipeline de Data Warehouse / BigQuery — **adiada para o backlog a pedido do
+  usuário**: ver
+  [`docs/backlog/BACKLOG-007-criar-pipeline-data-warehouse.md`](../backlog/BACKLOG-007-criar-pipeline-data-warehouse.md).
+  Não conta mais na fila obrigatória nem no total de tasks abaixo.
+- 🔴 TASK-206 — Criar camada semântica de BI — **adiada para o backlog a pedido do usuário**: ver
+  [`docs/backlog/BACKLOG-008-criar-camada-semantica-de-bi.md`](../backlog/BACKLOG-008-criar-camada-semantica-de-bi.md).
+  Não conta mais na fila obrigatória nem no total de tasks abaixo.
 
 ### EPIC-32 — Operações Comerciais Avançadas de Moda B2B
 - [ ] [TASK-207 — Modelar kits, pacotes e sortimentos](TASK-207-modelar-kits-pacotes-e-sortimentos.md) — Flutter Senior
@@ -379,6 +387,10 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 
 ---
 
-**Progresso:** 202 / 219 tasks concluídas (TASK-166 foi movida para o backlog — ver
-[`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md)
-— e não conta mais no total).
+**Progresso:** 202 / 216 tasks concluídas (TASK-166, TASK-204, TASK-205 e TASK-206 foram movidas
+para o backlog — ver
+[`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md),
+[`docs/backlog/BACKLOG-006-implementar-logs-de-auditoria-exportaveis.md`](../backlog/BACKLOG-006-implementar-logs-de-auditoria-exportaveis.md),
+[`docs/backlog/BACKLOG-007-criar-pipeline-data-warehouse.md`](../backlog/BACKLOG-007-criar-pipeline-data-warehouse.md) e
+[`docs/backlog/BACKLOG-008-criar-camada-semantica-de-bi.md`](../backlog/BACKLOG-008-criar-camada-semantica-de-bi.md)
+— e não contam mais no total).

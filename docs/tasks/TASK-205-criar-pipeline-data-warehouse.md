@@ -1,3 +1,7 @@
+> ⏸️ **Adiada para o backlog em 2026-09-10, a pedido do usuário** (não é bloqueio técnico — a spec
+> abaixo continua válida). Ver
+> [`docs/backlog/BACKLOG-007-criar-pipeline-data-warehouse.md`](../backlog/BACKLOG-007-criar-pipeline-data-warehouse.md).
+
 # TASK-205 — Criar pipeline de Data Warehouse / BigQuery
 
 **Epic:** EPIC-31 — Administração Avançada e Data Platform

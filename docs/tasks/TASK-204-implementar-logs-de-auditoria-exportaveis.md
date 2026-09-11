@@ -1,3 +1,7 @@
+> ⏸️ **Adiada para o backlog em 2026-09-10, a pedido do usuário** (não é bloqueio técnico — a spec
+> abaixo continua válida). Ver
+> [`docs/backlog/BACKLOG-006-implementar-logs-de-auditoria-exportaveis.md`](../backlog/BACKLOG-006-implementar-logs-de-auditoria-exportaveis.md).
+
 # TASK-204 — Implementar logs de auditoria exportáveis
 
 **Epic:** EPIC-31 — Administração Avançada e Data Platform

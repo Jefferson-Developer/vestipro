@@ -1,3 +1,7 @@
+> ⏸️ **Adiada para o backlog em 2026-09-10, a pedido do usuário** (não é bloqueio técnico — a spec
+> abaixo continua válida). Ver
+> [`docs/backlog/BACKLOG-008-criar-camada-semantica-de-bi.md`](../backlog/BACKLOG-008-criar-camada-semantica-de-bi.md).
+
 # TASK-206 — Criar camada semântica de BI
 
 **Epic:** EPIC-31 — Administração Avançada e Data Platform

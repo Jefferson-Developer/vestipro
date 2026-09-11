@@ -14,3 +14,6 @@ Cada item é um arquivo `BACKLOG-XXX-titulo.md` nesta pasta.
 - [BACKLOG-003 — Reverter Firestore Rules do "modo teste" para o `firestore.rules` real (🔴 urgente)](BACKLOG-003-reverter-firestore-rules-modo-teste.md)
 - [BACKLOG-004 — Vulnerabilidade alta (`undici`) nas dependências de teste do Firebase JS SDK](BACKLOG-004-vulnerabilidade-alta-undici-testes-firebase-js.md)
 - [BACKLOG-005 — Realizar release MVP controlado (🔴 bloqueada por acesso a produção; ex-TASK-166)](BACKLOG-005-realizar-release-mvp-controlado.md)
+- [BACKLOG-006 — Implementar logs de auditoria exportáveis (⏸️ adiada a pedido do usuário; ex-TASK-204)](BACKLOG-006-implementar-logs-de-auditoria-exportaveis.md)
+- [BACKLOG-007 — Criar pipeline de Data Warehouse / BigQuery (⏸️ adiada a pedido do usuário; ex-TASK-205)](BACKLOG-007-criar-pipeline-data-warehouse.md)
+- [BACKLOG-008 — Criar camada semântica de BI (⏸️ adiada a pedido do usuário; ex-TASK-206)](BACKLOG-008-criar-camada-semantica-de-bi.md)
