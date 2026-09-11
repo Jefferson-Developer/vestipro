@@ -71,6 +71,10 @@ final class AnalyticsEvents {
   static const String campaignProductClicked = 'campaign_product_clicked';
   static const String catalogShareCreated = 'catalog_share_created';
   static const String catalogShareOpened = 'catalog_share_opened';
+  static const String lineSheetOpened = 'line_sheet_opened';
+  static const String lineSheetFiltered = 'line_sheet_filtered';
+  static const String lineSheetProductViewed = 'line_sheet_product_viewed';
+  static const String lineSheetItemAdded = 'line_sheet_item_added';
   static const String cartShareCreated = 'cart_share_created';
   static const String cartShareReviewed = 'cart_share_reviewed';
   static const String whatsAppOptInRequested = 'whatsapp_opt_in_requested';
@@ -448,6 +452,10 @@ final class AnalyticsEvents {
     campaignProductClicked,
     catalogShareCreated,
     catalogShareOpened,
+    lineSheetOpened,
+    lineSheetFiltered,
+    lineSheetProductViewed,
+    lineSheetItemAdded,
     cartShareCreated,
     cartShareReviewed,
     whatsAppOptInRequested,
