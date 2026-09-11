@@ -441,6 +441,67 @@ function priceListDoc({
   };
 }
 
+function commercialPackDoc({
+  organizationId,
+  companyId = 'company-a',
+  packCode = 'PACK-1',
+  version = 1,
+  name = 'Kit Verão',
+  packType = 'kit',
+  status = 'active',
+  pricingPolicyType = 'componentSum',
+  stockPolicyType = 'consumeComponentBalances',
+  validFrom = now(),
+  validTo = null,
+  components = [
+    {
+      id: 'component-1',
+      scopeType: 'variant',
+      scopeReferenceId: 'variant-1',
+      compositionType: 'fixed',
+      quantity: 2,
+      minQuantity: null,
+      maxQuantity: null,
+      proportion: null,
+      isBonusItem: false,
+    },
+  ],
+  assortmentRules = [],
+  createdBy = 'owner-a',
+}) {
+  return {
+    organizationId,
+    companyId,
+    packCode,
+    version,
+    name,
+    description: null,
+    packType,
+    status,
+    pricingPolicyType,
+    fixedPrice: null,
+    discountPercentage: null,
+    bonusComponentId: null,
+    stockPolicyType,
+    dedicatedWarehouseId: null,
+    collectionId: null,
+    campaignId: null,
+    customerSegment: null,
+    channel: null,
+    validFrom,
+    validTo,
+    components,
+    assortmentRules,
+    createdAt: now(),
+    createdBy,
+    updatedAt: now(),
+    updatedBy: createdBy,
+    deletedAt: null,
+    supersededByPackId: null,
+    syncStatus: 'synced',
+  };
+}
+
 function warehouseDoc({
   organizationId,
   companyId = 'company-a',
@@ -2350,6 +2411,121 @@ describe('organizations/{organizationId}/priceLists/{priceListId}  (TASK-083)', 
   test('cliente não exclui Price List (soft delete apenas, sem delete físico)', async () => {
     const db = testEnv.authenticatedContext('owner-a').firestore();
     await assertFails(db.doc(`organizations/${ORG_A}/priceLists/price-list-a`).delete());
+  });
+});
+
+describe('organizations/{organizationId}/commercialPacks/{commercialPackId}  (TASK-207)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db
+        .doc(`organizations/${ORG_A}/commercialPacks/pack-a`)
+        .set(commercialPackDoc({ organizationId: ORG_A }));
+      await db
+        .doc(`organizations/${ORG_B}/commercialPacks/pack-b`)
+        .set(commercialPackDoc({ organizationId: ORG_B, companyId: 'company-b', createdBy: 'owner-b' }));
+    });
+  });
+
+  test('membro ativo da Org A le o commercial pack da própria organization', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/commercialPacks/pack-a`).get());
+  });
+
+  test('membro da Org A não le o commercial pack da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/commercialPacks/pack-b`).get());
+  });
+
+  test('usuário não autenticado não le nenhum commercial pack', async () => {
+    const db = testEnv.unauthenticatedContext().firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/commercialPacks/pack-a`).get());
+  });
+
+  test('OWNER/ADMIN/SALES_MANAGER (commercialPack.manage) criam commercial pack na própria organization', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    await assertSucceeds(
+      ownerDb
+        .doc(`organizations/${ORG_A}/commercialPacks/pack-owner`)
+        .set(commercialPackDoc({ organizationId: ORG_A, packCode: 'PACK-OWNER', createdBy: 'owner-a' })),
+    );
+
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+    await assertSucceeds(
+      adminDb
+        .doc(`organizations/${ORG_A}/commercialPacks/pack-admin`)
+        .set(commercialPackDoc({ organizationId: ORG_A, packCode: 'PACK-ADMIN', createdBy: 'admin-a' })),
+    );
+
+    const managerDb = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      managerDb
+        .doc(`organizations/${ORG_A}/commercialPacks/pack-manager`)
+        .set(commercialPackDoc({ organizationId: ORG_A, packCode: 'PACK-MANAGER', createdBy: 'manager-a' })),
+    );
+  });
+
+  test('SALES_REP e FINANCE não criam commercial pack (sem commercialPack.manage)', async () => {
+    const repDb = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(
+      repDb
+        .doc(`organizations/${ORG_A}/commercialPacks/pack-rep`)
+        .set(commercialPackDoc({ organizationId: ORG_A, packCode: 'PACK-REP', createdBy: 'rep-a' })),
+    );
+
+    const financeDb = testEnv.authenticatedContext('finance-a').firestore();
+    await assertFails(
+      financeDb
+        .doc(`organizations/${ORG_A}/commercialPacks/pack-finance`)
+        .set(commercialPackDoc({ organizationId: ORG_A, packCode: 'PACK-FINANCE', createdBy: 'finance-a' })),
+    );
+  });
+
+  test('não é possível criar commercial pack sem nenhum componente', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/commercialPacks/pack-empty`)
+        .set(commercialPackDoc({ organizationId: ORG_A, packCode: 'PACK-EMPTY', components: [] })),
+    );
+  });
+
+  test('não é possível criar commercial pack com validTo anterior a validFrom', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    const start = new Date();
+    const before = new Date(start.getTime() - 86400000);
+    await assertFails(
+      db
+        .doc(`organizations/${ORG_A}/commercialPacks/pack-invalid-dates`)
+        .set(commercialPackDoc({ organizationId: ORG_A, packCode: 'PACK-INVALID-DATES', validFrom: start, validTo: before })),
+    );
+  });
+
+  test('SALES_MANAGER atualiza um commercial pack existente sem alterar o packCode', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(
+      db.doc(`organizations/${ORG_A}/commercialPacks/pack-a`).update({
+        name: 'Kit Verão Renomeado',
+        updatedAt: now(),
+        updatedBy: 'manager-a',
+      }),
+    );
+  });
+
+  test('não é possível alterar o packCode de um commercial pack existente (imutável)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(
+      db.doc(`organizations/${ORG_A}/commercialPacks/pack-a`).update({
+        packCode: 'PACK-OUTRO',
+        updatedAt: now(),
+        updatedBy: 'owner-a',
+      }),
+    );
+  });
+
+  test('cliente não exclui commercial pack (soft delete apenas, sem delete físico)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/commercialPacks/pack-a`).delete());
   });
 });
 

@@ -704,6 +704,39 @@ void main() {
       }
     });
 
+    test('only OWNER/ADMIN/SALES_MANAGER can create/edit/publish/revise '
+        'commercial packs (TASK-207); SALES_REP/SALES_ASSISTANT/FINANCE/'
+        'READ_ONLY never can', () {
+      for (final role in <SystemRoleName>[
+        SystemRoleName.owner,
+        SystemRoleName.admin,
+        SystemRoleName.salesManager,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.commercialPackManage),
+          isTrue,
+          reason: '$role must be able to manage commercial packs.',
+        );
+      }
+
+      for (final role in <SystemRoleName>[
+        SystemRoleName.salesRep,
+        SystemRoleName.salesAssistant,
+        SystemRoleName.finance,
+        SystemRoleName.readOnly,
+      ]) {
+        expect(
+          RolePermissionMatrix.capabilitiesFor(
+            role,
+          ).contains(Capability.commercialPackManage),
+          isFalse,
+          reason: '$role must never manage commercial packs.',
+        );
+      }
+    });
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,

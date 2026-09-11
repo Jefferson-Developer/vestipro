@@ -5,6 +5,7 @@ export 'firestore_converter.dart';
 export 'firestore_exception_mapper.dart';
 export 'firestore_page_slice.dart';
 export 'firestore_query_page.dart';
+export 'tables/commercial_packs_table.dart';
 export 'tables/conflict_audit_log_table.dart';
 export 'tables/conflict_records_table.dart';
 export 'tables/customer_addresses_table.dart';

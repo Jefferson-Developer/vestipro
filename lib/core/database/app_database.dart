@@ -2,6 +2,7 @@ import 'package:drift/drift.dart';
 
 import 'tables/campaigns_table.dart';
 import 'tables/colors_table.dart';
+import 'tables/commercial_packs_table.dart';
 import 'tables/conflict_audit_log_table.dart';
 import 'tables/conflict_records_table.dart';
 import 'tables/customer_addresses_table.dart';
@@ -97,6 +98,8 @@ class OrderWithItemsRow {
 /// columns to [CustomerAddressesTable] (customer map pins).
 /// TASK-177 adds [VisitRoutesTable], the seller's local daily visit route
 /// (roteirização de visitas).
+/// TASK-207 adds [CommercialPacksTable], the offline cache for kits/pacotes/
+/// sortimentos (`CommercialPack`), mirroring [PriceListsTable]'s own role.
 @DriftDatabase(
   tables: [
     CustomersTable,
@@ -125,13 +128,14 @@ class OrderWithItemsRow {
     PositivacaoSnapshotsTable,
     VisitRoutesTable,
     OrderSignaturesTable,
+    CommercialPacksTable,
   ],
 )
 class AppDatabase extends _$AppDatabase {
   AppDatabase(super.executor);
 
   @override
-  int get schemaVersion => 23;
+  int get schemaVersion => 24;
 
   /// Removes every offline row after an account deletion. Child tables are
   /// cleared first so foreign-key integrity remains enabled throughout.
@@ -384,6 +388,13 @@ class AppDatabase extends _$AppDatabase {
           // electronic signature — a brand-new table, same "safe to create
           // unconditionally" precedent as the `from < 22` branch above.
           await migrator.createTable(orderSignaturesTable);
+        }
+        if (from < 24) {
+          // TASK-207: offline cache for kits/pacotes/sortimentos
+          // (`CommercialPack`) — a brand-new table, same "safe to create
+          // unconditionally" precedent as the `from < 22`/`from < 23`
+          // branches above.
+          await migrator.createTable(commercialPacksTable);
         }
       },
       beforeOpen: (details) async {
@@ -1945,6 +1956,86 @@ class AppDatabase extends _$AppDatabase {
               row.date.equals(date),
         ))
         .getSingleOrNull();
+  }
+
+  // ---------------------------------------------------------------------
+  // Commercial Packs — kits/pacotes/sortimentos (TASK-207)
+  // ---------------------------------------------------------------------
+
+  /// Replaces the full local `CommercialPack` set for [organizationId]
+  /// (optionally narrowed to [companyId]) with exactly [packRows] in a
+  /// single transaction, mirroring [replacePriceLists]/[replaceProducts]'s
+  /// own optional-[companyId] narrowing.
+  Future<void> replaceCommercialPacks({
+    required String organizationId,
+    String? companyId,
+    required List<CommercialPacksTableCompanion> packRows,
+  }) {
+    return transaction(() async {
+      await (delete(commercialPacksTable)..where((row) {
+            final base = row.organizationId.equals(organizationId);
+            if (companyId == null) return base;
+            return base & row.companyId.equals(companyId);
+          }))
+          .go();
+
+      await batch((batch) {
+        batch.insertAll(commercialPacksTable, packRows);
+      });
+    });
+  }
+
+  /// Inserts or updates exactly one `CommercialPack` row — the
+  /// incremental-update primitive the future sync engine (EPIC-14) uses to
+  /// keep the local cache fresh after the initial load, mirroring
+  /// [upsertPriceList].
+  Future<void> upsertCommercialPack(CommercialPacksTableCompanion row) {
+    return into(commercialPacksTable).insertOnConflictUpdate(row);
+  }
+
+  /// Every non-soft-deleted `CommercialPack` currently stored locally for
+  /// [organizationId], optionally narrowed to packs scoped to [companyId]
+  /// plus every organization-wide pack (whose `companyId` column is
+  /// `null`), mirroring `CommercialPackRepository.listByOrganization`'s own
+  /// narrowing semantics.
+  Future<List<CommercialPacksTableData>> getCommercialPacksForOrganization({
+    required String organizationId,
+    String? companyId,
+  }) {
+    return (select(commercialPacksTable)..where((row) {
+          final base =
+              row.organizationId.equals(organizationId) &
+              row.deletedAt.isNull();
+          if (companyId == null) return base;
+          return base &
+              (row.companyId.equals(companyId) | row.companyId.isNull());
+        }))
+        .get();
+  }
+
+  /// Number of non-soft-deleted `CommercialPack`s currently stored locally
+  /// for [organizationId] (optionally narrowed to [companyId]), without
+  /// materializing every row.
+  Future<int> countCommercialPacksForOrganization({
+    required String organizationId,
+    String? companyId,
+  }) async {
+    final countExpression = commercialPacksTable.id.count();
+    final query = selectOnly(commercialPacksTable)
+      ..addColumns([countExpression])
+      ..where(
+        (() {
+          final base =
+              commercialPacksTable.organizationId.equals(organizationId) &
+              commercialPacksTable.deletedAt.isNull();
+          if (companyId == null) return base;
+          return base &
+              (commercialPacksTable.companyId.equals(companyId) |
+                  commercialPacksTable.companyId.isNull());
+        })(),
+      );
+    final row = await query.getSingle();
+    return row.read(countExpression) ?? 0;
   }
 }
 

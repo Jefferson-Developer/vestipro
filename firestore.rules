@@ -74,7 +74,8 @@ service cloud.firestore {
               'order.create', 'order.view', 'order.approve', 'discount.approveAboveLimit',
               'team.manage', 'report.export', 'report.viewSensitive',
               'report.share.team', 'report.share.organization', 'report.schedule',
-              'customer.import', 'return.create', 'return.approve'
+              'customer.import', 'return.create', 'return.approve',
+              'commercialPack.manage'
             ])
         || (roleName == 'SALES_REP' && capabilityCode in [
               'customer.create', 'customer.update', 'order.create', 'order.view',
@@ -716,6 +717,104 @@ service cloud.firestore {
         && resource.data.organizationId == organizationId;
     }
 
+    // -----------------------------------------------------------------
+    // organizations/{organizationId}/commercialPacks/{commercialPackId}
+    // (TASK-207)
+    // -----------------------------------------------------------------
+    //
+    // Deep validation of `components`/`assortmentRules` (individual scope
+    // type, quantity/proportion shape, circular composition) is the
+    // exclusive job of `ValidateCommercialPackCompositionUseCase` (domain
+    // layer) before any write is even attempted — same precedent every
+    // other embedded-array field in this ruleset already follows (no
+    // Security Rule in this file validates deep into an embedded list of
+    // maps); Rules only ever check top-level payload shape, tenant scope
+    // and RBAC.
+
+    function validCommercialPackPayload(organizationId, data) {
+      return data.keys().hasOnly([
+          'organizationId',
+          'companyId',
+          'packCode',
+          'version',
+          'name',
+          'description',
+          'packType',
+          'status',
+          'pricingPolicyType',
+          'fixedPrice',
+          'discountPercentage',
+          'bonusComponentId',
+          'stockPolicyType',
+          'dedicatedWarehouseId',
+          'collectionId',
+          'campaignId',
+          'customerSegment',
+          'channel',
+          'validFrom',
+          'validTo',
+          'components',
+          'assortmentRules',
+          'createdAt',
+          'createdBy',
+          'updatedAt',
+          'updatedBy',
+          'deletedAt',
+          'supersededByPackId',
+          'syncStatus'
+        ])
+        && data.keys().hasAll([
+          'organizationId',
+          'packCode',
+          'version',
+          'name',
+          'packType',
+          'status',
+          'pricingPolicyType',
+          'stockPolicyType',
+          'validFrom',
+          'components',
+          'createdAt',
+          'createdBy',
+          'updatedAt',
+          'updatedBy',
+          'syncStatus'
+        ])
+        && data.organizationId == organizationId
+        && (!data.keys().hasAny(['companyId']) || data.companyId == null || (data.companyId is string && data.companyId.size() > 0))
+        && data.packCode is string
+        && data.packCode.size() > 0
+        && data.version is int
+        && data.version >= 1
+        && data.name is string
+        && data.name.size() > 0
+        && data.packType in ['kit', 'pack', 'assortment']
+        && data.status in ['draft', 'active', 'expired', 'archived', 'superseded']
+        && data.pricingPolicyType in ['componentSum', 'fixedPrice', 'packDiscount', 'bonusItem']
+        && data.stockPolicyType in ['consumeComponentBalances', 'dedicatedStock']
+        && data.validFrom is timestamp
+        && (
+          !data.keys().hasAny(['validTo'])
+          || data.validTo == null
+          || (data.validTo is timestamp && data.validTo > data.validFrom)
+        )
+        && data.components is list
+        && data.components.size() > 0
+        && (!data.keys().hasAny(['assortmentRules']) || data.assortmentRules is list)
+        && data.createdAt is timestamp
+        && data.createdBy is string
+        && data.createdBy.size() > 0
+        && data.updatedAt is timestamp
+        && data.updatedBy is string
+        && data.updatedBy.size() > 0
+        && data.syncStatus in ['pending', 'syncing', 'synced', 'failed', 'conflict'];
+    }
+
+    function canReadCommercialPack(organizationId) {
+      return isActiveMember(organizationId)
+        && resource.data.organizationId == organizationId;
+    }
+
     function validWarehousePayload(organizationId, data) {
       return data.keys().hasOnly([
           'organizationId',
@@ -820,6 +919,25 @@ service cloud.firestore {
         && unchanged('organizationId')
         && unchanged('companyId')
         && unchanged('currency')
+        && unchanged('createdAt')
+        && unchanged('createdBy');
+    }
+
+    function canCreateCommercialPack(organizationId) {
+      return hasCapability(organizationId, 'commercialPack.manage')
+        && validCommercialPackPayload(organizationId, request.resource.data);
+    }
+
+    // `packCode` is immutable once a `CommercialPack` document exists — the
+    // stable identifier that groups every version of "the same" pack
+    // together (TASK-207 business rule). A version change always means
+    // creating a brand-new document (`ReviseCommercialPackUseCase`), never
+    // mutating an existing one's `packCode`.
+    function canUpdateCommercialPack(organizationId) {
+      return hasCapability(organizationId, 'commercialPack.manage')
+        && validCommercialPackPayload(organizationId, request.resource.data)
+        && unchanged('organizationId')
+        && unchanged('packCode')
         && unchanged('createdAt')
         && unchanged('createdBy');
     }
@@ -1843,6 +1961,28 @@ service cloud.firestore {
         allow get, list: if canReadPriceList(organizationId);
         allow create: if canCreatePriceList(organizationId);
         allow update: if canUpdatePriceList(organizationId);
+        allow delete: if false;
+      }
+
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/commercialPacks/{commercialPackId}
+      // (TASK-207)
+      // -------------------------------------------------------------------
+      //
+      // Read escopado por organização: qualquer membro ativo pode ler os
+      // kits/pacotes/sortimentos da própria organização (um representante
+      // precisa deles para vender por pacote), nunca de outra organização.
+      // Escrita restrita a quem tem `commercialPack.manage` — hoje, apenas
+      // OWNER/ADMIN/SALES_MANAGER (RolePermissionMatrix) — nunca SALES_REP.
+      // Nenhum documento é fisicamente excluído (soft delete via
+      // `deletedAt`, mesmo padrão de `priceLists`/`products`/`customers`);
+      // versionar um pacote ativo (`ReviseCommercialPackUseCase`) sempre
+      // cria um novo documento em vez de reescrever este.
+
+      match /commercialPacks/{commercialPackId} {
+        allow get, list: if canReadCommercialPack(organizationId);
+        allow create: if canCreateCommercialPack(organizationId);
+        allow update: if canUpdateCommercialPack(organizationId);
         allow delete: if false;
       }
 

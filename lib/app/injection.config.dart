@@ -343,6 +343,26 @@ import '../features/catalog_share/presentation/bloc/catalog_share_public_bloc.da
     as _i447;
 import '../features/catalog_share/presentation/bloc/catalog_share_sheet_bloc.dart'
     as _i511;
+import '../features/commercial_packs/data/mappers/commercial_pack_local_mapper.dart'
+    as _i652;
+import '../features/commercial_packs/data/mappers/commercial_pack_mapper.dart'
+    as _i804;
+import '../features/commercial_packs/data/repositories/drift_commercial_pack_local_store_repository.dart'
+    as _i729;
+import '../features/commercial_packs/data/repositories/shared_preferences_commercial_pack_repository.dart'
+    as _i352;
+import '../features/commercial_packs/domain/repositories/commercial_pack_local_store_repository.dart'
+    as _i765;
+import '../features/commercial_packs/domain/repositories/commercial_pack_repository.dart'
+    as _i950;
+import '../features/commercial_packs/domain/usecases/create_commercial_pack_use_case.dart'
+    as _i862;
+import '../features/commercial_packs/domain/usecases/revise_commercial_pack_use_case.dart'
+    as _i265;
+import '../features/commercial_packs/domain/usecases/update_commercial_pack_use_case.dart'
+    as _i173;
+import '../features/commercial_packs/domain/usecases/validate_commercial_pack_composition_use_case.dart'
+    as _i24;
 import '../features/commissions/data/datasources/commission_entry_data_source.dart'
     as _i446;
 import '../features/commissions/data/datasources/firestore_commission_entry_data_source.dart'
@@ -1764,6 +1784,9 @@ extension GetItInjectableX on _i174.GetIt {
     final customerImportParsersModule = _$CustomerImportParsersModule();
     final insightModule = _$InsightModule();
     final offlinePackageLoadersModule = _$OfflinePackageLoadersModule();
+    gh.factory<_i24.ValidateCommercialPackCompositionUseCase>(
+      () => const _i24.ValidateCommercialPackCompositionUseCase(),
+    );
     gh.factory<_i925.CustomerImportJobMapper>(
       () => const _i925.CustomerImportJobMapper(),
     );
@@ -1856,6 +1879,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i1010.CatalogShareMapper>(
       () => const _i1010.CatalogShareMapper(),
+    );
+    gh.lazySingleton<_i804.CommercialPackMapper>(
+      () => const _i804.CommercialPackMapper(),
     );
     gh.lazySingleton<_i203.CrmActivityMapper>(
       () => const _i203.CrmActivityMapper(),
@@ -2057,6 +2083,9 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i99.SecureSessionStore>(
       () => _i772.SecureFlutterSessionStore(gh<_i558.FlutterSecureStorage>()),
     );
+    gh.lazySingleton<_i652.CommercialPackLocalMapper>(
+      () => _i652.CommercialPackLocalMapper(gh<_i804.CommercialPackMapper>()),
+    );
     gh.lazySingleton<_i648.CategoryRepository>(
       () => const _i597.SharedPreferencesCategoryRepository(),
     );
@@ -2088,6 +2117,11 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i142.LocalePreferenceLocalStore>(
       () => _i142.SharedPreferencesLocalePreferenceLocalStore(),
+    );
+    gh.lazySingleton<_i950.CommercialPackRepository>(
+      () => _i352.SharedPreferencesCommercialPackRepository(
+        gh<_i804.CommercialPackMapper>(),
+      ),
     );
     gh.lazySingleton<_i211.PromotionalCampaignRepository>(
       () => const _i430.SharedPreferencesPromotionalCampaignRepository(),
@@ -2283,6 +2317,12 @@ extension GetItInjectableX on _i174.GetIt {
         mapper: gh<_i477.OnboardingProgressMapper>(),
       ),
     );
+    gh.lazySingleton<_i765.CommercialPackLocalStoreRepository>(
+      () => _i729.DriftCommercialPackLocalStoreRepository(
+        gh<_i658.AppDatabase>(),
+        gh<_i652.CommercialPackLocalMapper>(),
+      ),
+    );
     gh.lazySingleton<_i960.ProductFormDraftDataSource>(
       () => const _i1033.SharedPreferencesProductFormDraftDataSource(),
     );
@@ -2383,6 +2423,24 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i657.MarkOpportunityWonUseCase(
         gh<_i43.OpportunityRepository>(),
         gh<_i527.OpportunityOutcomeReasonRepository>(),
+      ),
+    );
+    gh.factory<_i862.CreateCommercialPackUseCase>(
+      () => _i862.CreateCommercialPackUseCase(
+        gh<_i950.CommercialPackRepository>(),
+        gh<_i24.ValidateCommercialPackCompositionUseCase>(),
+      ),
+    );
+    gh.factory<_i265.ReviseCommercialPackUseCase>(
+      () => _i265.ReviseCommercialPackUseCase(
+        gh<_i950.CommercialPackRepository>(),
+        gh<_i24.ValidateCommercialPackCompositionUseCase>(),
+      ),
+    );
+    gh.factory<_i173.UpdateCommercialPackUseCase>(
+      () => _i173.UpdateCommercialPackUseCase(
+        gh<_i950.CommercialPackRepository>(),
+        gh<_i24.ValidateCommercialPackCompositionUseCase>(),
       ),
     );
     gh.lazySingleton<_i833.OrderSignatureLocalMapper>(

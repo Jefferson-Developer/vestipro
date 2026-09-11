@@ -88,6 +88,11 @@ abstract final class RolePermissionMatrix {
     // Capability.returnRequestCreate; OWNER/ADMIN já a recebem via o
     // conjunto completo/quase completo acima.
     Capability.postSaleEventRegister,
+    // TASK-207: SALES_MANAGER cria/edita/publica/revisa kits, pacotes e
+    // sortimentos vendáveis; OWNER/ADMIN já a recebem via o conjunto
+    // completo/quase completo acima. SALES_REP nunca a recebe — só
+    // consome (lê) um pacote já publicado.
+    Capability.commercialPackManage,
   };
 
   static const Set<Capability> _salesRepCapabilities = <Capability>{

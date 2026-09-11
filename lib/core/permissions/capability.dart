@@ -241,6 +241,20 @@ enum Capability {
   /// complementado") — there is no separate capability for that because no
   /// such action exists anywhere in this codebase.
   postSaleEventRegister,
+
+  /// Create/edit/publish/revise a `CommercialPack` (kit, pacote ou
+  /// sortimento vendável, TASK-207, EPIC-32) — the only gate
+  /// `CreateCommercialPackUseCase`/`UpdateCommercialPackUseCase`/
+  /// `ReviseCommercialPackUseCase` all check. Restricted to
+  /// `OWNER`/`ADMIN`/`SALES_MANAGER` (`RolePermissionMatrix`) — a
+  /// `SALES_REP` never creates/publishes/revises a pack, only ever reads
+  /// (resolves/sells) one already published by someone who holds this
+  /// capability, same "gestor comercial configura, vendedor consome"
+  /// scope `tasks.md` describes for this feature. Gates both this
+  /// client-side check and the independent `commercialPack.manage`
+  /// Firestore Security Rule (`firestore.rules`) that re-validates the
+  /// same boundary server-side from the caller's real Membership/role.
+  commercialPackManage,
 }
 
 extension CapabilityCode on Capability {
@@ -299,6 +313,7 @@ extension CapabilityCode on Capability {
       Capability.exchangeRequestCreate => 'exchange.create',
       Capability.exchangeRequestApprove => 'exchange.approve',
       Capability.postSaleEventRegister => 'postSaleEvent.register',
+      Capability.commercialPackManage => 'commercialPack.manage',
     };
   }
 }

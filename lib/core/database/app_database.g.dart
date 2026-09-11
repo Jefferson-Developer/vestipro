@@ -26343,6 +26343,1678 @@ class OrderSignaturesTableCompanion
   }
 }
 
+class $CommercialPacksTableTable extends CommercialPacksTable
+    with TableInfo<$CommercialPacksTableTable, CommercialPacksTableData> {
+  @override
+  final GeneratedDatabase attachedDatabase;
+  final String? _alias;
+  $CommercialPacksTableTable(this.attachedDatabase, [this._alias]);
+  static const VerificationMeta _idMeta = const VerificationMeta('id');
+  @override
+  late final GeneratedColumn<String> id = GeneratedColumn<String>(
+    'id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _organizationIdMeta = const VerificationMeta(
+    'organizationId',
+  );
+  @override
+  late final GeneratedColumn<String> organizationId = GeneratedColumn<String>(
+    'organization_id',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _companyIdMeta = const VerificationMeta(
+    'companyId',
+  );
+  @override
+  late final GeneratedColumn<String> companyId = GeneratedColumn<String>(
+    'company_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _packCodeMeta = const VerificationMeta(
+    'packCode',
+  );
+  @override
+  late final GeneratedColumn<String> packCode = GeneratedColumn<String>(
+    'pack_code',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _versionMeta = const VerificationMeta(
+    'version',
+  );
+  @override
+  late final GeneratedColumn<int> version = GeneratedColumn<int>(
+    'version',
+    aliasedName,
+    false,
+    type: DriftSqlType.int,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _nameMeta = const VerificationMeta('name');
+  @override
+  late final GeneratedColumn<String> name = GeneratedColumn<String>(
+    'name',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _descriptionMeta = const VerificationMeta(
+    'description',
+  );
+  @override
+  late final GeneratedColumn<String> description = GeneratedColumn<String>(
+    'description',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _packTypeMeta = const VerificationMeta(
+    'packType',
+  );
+  @override
+  late final GeneratedColumn<String> packType = GeneratedColumn<String>(
+    'pack_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _statusMeta = const VerificationMeta('status');
+  @override
+  late final GeneratedColumn<String> status = GeneratedColumn<String>(
+    'status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _pricingPolicyTypeMeta = const VerificationMeta(
+    'pricingPolicyType',
+  );
+  @override
+  late final GeneratedColumn<String> pricingPolicyType =
+      GeneratedColumn<String>(
+        'pricing_policy_type',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: true,
+      );
+  static const VerificationMeta _fixedPriceMeta = const VerificationMeta(
+    'fixedPrice',
+  );
+  @override
+  late final GeneratedColumn<double> fixedPrice = GeneratedColumn<double>(
+    'fixed_price',
+    aliasedName,
+    true,
+    type: DriftSqlType.double,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _discountPercentageMeta =
+      const VerificationMeta('discountPercentage');
+  @override
+  late final GeneratedColumn<double> discountPercentage =
+      GeneratedColumn<double>(
+        'discount_percentage',
+        aliasedName,
+        true,
+        type: DriftSqlType.double,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _bonusComponentIdMeta = const VerificationMeta(
+    'bonusComponentId',
+  );
+  @override
+  late final GeneratedColumn<String> bonusComponentId = GeneratedColumn<String>(
+    'bonus_component_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _stockPolicyTypeMeta = const VerificationMeta(
+    'stockPolicyType',
+  );
+  @override
+  late final GeneratedColumn<String> stockPolicyType = GeneratedColumn<String>(
+    'stock_policy_type',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _dedicatedWarehouseIdMeta =
+      const VerificationMeta('dedicatedWarehouseId');
+  @override
+  late final GeneratedColumn<String> dedicatedWarehouseId =
+      GeneratedColumn<String>(
+        'dedicated_warehouse_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _collectionIdMeta = const VerificationMeta(
+    'collectionId',
+  );
+  @override
+  late final GeneratedColumn<String> collectionId = GeneratedColumn<String>(
+    'collection_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _campaignIdMeta = const VerificationMeta(
+    'campaignId',
+  );
+  @override
+  late final GeneratedColumn<String> campaignId = GeneratedColumn<String>(
+    'campaign_id',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _customerSegmentMeta = const VerificationMeta(
+    'customerSegment',
+  );
+  @override
+  late final GeneratedColumn<String> customerSegment = GeneratedColumn<String>(
+    'customer_segment',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _channelMeta = const VerificationMeta(
+    'channel',
+  );
+  @override
+  late final GeneratedColumn<String> channel = GeneratedColumn<String>(
+    'channel',
+    aliasedName,
+    true,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _validFromMeta = const VerificationMeta(
+    'validFrom',
+  );
+  @override
+  late final GeneratedColumn<DateTime> validFrom = GeneratedColumn<DateTime>(
+    'valid_from',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _validToMeta = const VerificationMeta(
+    'validTo',
+  );
+  @override
+  late final GeneratedColumn<DateTime> validTo = GeneratedColumn<DateTime>(
+    'valid_to',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _componentsJsonMeta = const VerificationMeta(
+    'componentsJson',
+  );
+  @override
+  late final GeneratedColumn<String> componentsJson = GeneratedColumn<String>(
+    'components_json',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: false,
+    defaultValue: const Constant('[]'),
+  );
+  static const VerificationMeta _assortmentRulesJsonMeta =
+      const VerificationMeta('assortmentRulesJson');
+  @override
+  late final GeneratedColumn<String> assortmentRulesJson =
+      GeneratedColumn<String>(
+        'assortment_rules_json',
+        aliasedName,
+        false,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+        defaultValue: const Constant('[]'),
+      );
+  static const VerificationMeta _createdAtMeta = const VerificationMeta(
+    'createdAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> createdAt = GeneratedColumn<DateTime>(
+    'created_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _createdByMeta = const VerificationMeta(
+    'createdBy',
+  );
+  @override
+  late final GeneratedColumn<String> createdBy = GeneratedColumn<String>(
+    'created_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedAtMeta = const VerificationMeta(
+    'updatedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> updatedAt = GeneratedColumn<DateTime>(
+    'updated_at',
+    aliasedName,
+    false,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _updatedByMeta = const VerificationMeta(
+    'updatedBy',
+  );
+  @override
+  late final GeneratedColumn<String> updatedBy = GeneratedColumn<String>(
+    'updated_by',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  static const VerificationMeta _deletedAtMeta = const VerificationMeta(
+    'deletedAt',
+  );
+  @override
+  late final GeneratedColumn<DateTime> deletedAt = GeneratedColumn<DateTime>(
+    'deleted_at',
+    aliasedName,
+    true,
+    type: DriftSqlType.dateTime,
+    requiredDuringInsert: false,
+  );
+  static const VerificationMeta _supersededByPackIdMeta =
+      const VerificationMeta('supersededByPackId');
+  @override
+  late final GeneratedColumn<String> supersededByPackId =
+      GeneratedColumn<String>(
+        'superseded_by_pack_id',
+        aliasedName,
+        true,
+        type: DriftSqlType.string,
+        requiredDuringInsert: false,
+      );
+  static const VerificationMeta _syncStatusMeta = const VerificationMeta(
+    'syncStatus',
+  );
+  @override
+  late final GeneratedColumn<String> syncStatus = GeneratedColumn<String>(
+    'sync_status',
+    aliasedName,
+    false,
+    type: DriftSqlType.string,
+    requiredDuringInsert: true,
+  );
+  @override
+  List<GeneratedColumn> get $columns => [
+    id,
+    organizationId,
+    companyId,
+    packCode,
+    version,
+    name,
+    description,
+    packType,
+    status,
+    pricingPolicyType,
+    fixedPrice,
+    discountPercentage,
+    bonusComponentId,
+    stockPolicyType,
+    dedicatedWarehouseId,
+    collectionId,
+    campaignId,
+    customerSegment,
+    channel,
+    validFrom,
+    validTo,
+    componentsJson,
+    assortmentRulesJson,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    supersededByPackId,
+    syncStatus,
+  ];
+  @override
+  String get aliasedName => _alias ?? actualTableName;
+  @override
+  String get actualTableName => $name;
+  static const String $name = 'commercial_packs';
+  @override
+  VerificationContext validateIntegrity(
+    Insertable<CommercialPacksTableData> instance, {
+    bool isInserting = false,
+  }) {
+    final context = VerificationContext();
+    final data = instance.toColumns(true);
+    if (data.containsKey('id')) {
+      context.handle(_idMeta, id.isAcceptableOrUnknown(data['id']!, _idMeta));
+    } else if (isInserting) {
+      context.missing(_idMeta);
+    }
+    if (data.containsKey('organization_id')) {
+      context.handle(
+        _organizationIdMeta,
+        organizationId.isAcceptableOrUnknown(
+          data['organization_id']!,
+          _organizationIdMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_organizationIdMeta);
+    }
+    if (data.containsKey('company_id')) {
+      context.handle(
+        _companyIdMeta,
+        companyId.isAcceptableOrUnknown(data['company_id']!, _companyIdMeta),
+      );
+    }
+    if (data.containsKey('pack_code')) {
+      context.handle(
+        _packCodeMeta,
+        packCode.isAcceptableOrUnknown(data['pack_code']!, _packCodeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_packCodeMeta);
+    }
+    if (data.containsKey('version')) {
+      context.handle(
+        _versionMeta,
+        version.isAcceptableOrUnknown(data['version']!, _versionMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_versionMeta);
+    }
+    if (data.containsKey('name')) {
+      context.handle(
+        _nameMeta,
+        name.isAcceptableOrUnknown(data['name']!, _nameMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_nameMeta);
+    }
+    if (data.containsKey('description')) {
+      context.handle(
+        _descriptionMeta,
+        description.isAcceptableOrUnknown(
+          data['description']!,
+          _descriptionMeta,
+        ),
+      );
+    }
+    if (data.containsKey('pack_type')) {
+      context.handle(
+        _packTypeMeta,
+        packType.isAcceptableOrUnknown(data['pack_type']!, _packTypeMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_packTypeMeta);
+    }
+    if (data.containsKey('status')) {
+      context.handle(
+        _statusMeta,
+        status.isAcceptableOrUnknown(data['status']!, _statusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_statusMeta);
+    }
+    if (data.containsKey('pricing_policy_type')) {
+      context.handle(
+        _pricingPolicyTypeMeta,
+        pricingPolicyType.isAcceptableOrUnknown(
+          data['pricing_policy_type']!,
+          _pricingPolicyTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_pricingPolicyTypeMeta);
+    }
+    if (data.containsKey('fixed_price')) {
+      context.handle(
+        _fixedPriceMeta,
+        fixedPrice.isAcceptableOrUnknown(data['fixed_price']!, _fixedPriceMeta),
+      );
+    }
+    if (data.containsKey('discount_percentage')) {
+      context.handle(
+        _discountPercentageMeta,
+        discountPercentage.isAcceptableOrUnknown(
+          data['discount_percentage']!,
+          _discountPercentageMeta,
+        ),
+      );
+    }
+    if (data.containsKey('bonus_component_id')) {
+      context.handle(
+        _bonusComponentIdMeta,
+        bonusComponentId.isAcceptableOrUnknown(
+          data['bonus_component_id']!,
+          _bonusComponentIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('stock_policy_type')) {
+      context.handle(
+        _stockPolicyTypeMeta,
+        stockPolicyType.isAcceptableOrUnknown(
+          data['stock_policy_type']!,
+          _stockPolicyTypeMeta,
+        ),
+      );
+    } else if (isInserting) {
+      context.missing(_stockPolicyTypeMeta);
+    }
+    if (data.containsKey('dedicated_warehouse_id')) {
+      context.handle(
+        _dedicatedWarehouseIdMeta,
+        dedicatedWarehouseId.isAcceptableOrUnknown(
+          data['dedicated_warehouse_id']!,
+          _dedicatedWarehouseIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('collection_id')) {
+      context.handle(
+        _collectionIdMeta,
+        collectionId.isAcceptableOrUnknown(
+          data['collection_id']!,
+          _collectionIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('campaign_id')) {
+      context.handle(
+        _campaignIdMeta,
+        campaignId.isAcceptableOrUnknown(data['campaign_id']!, _campaignIdMeta),
+      );
+    }
+    if (data.containsKey('customer_segment')) {
+      context.handle(
+        _customerSegmentMeta,
+        customerSegment.isAcceptableOrUnknown(
+          data['customer_segment']!,
+          _customerSegmentMeta,
+        ),
+      );
+    }
+    if (data.containsKey('channel')) {
+      context.handle(
+        _channelMeta,
+        channel.isAcceptableOrUnknown(data['channel']!, _channelMeta),
+      );
+    }
+    if (data.containsKey('valid_from')) {
+      context.handle(
+        _validFromMeta,
+        validFrom.isAcceptableOrUnknown(data['valid_from']!, _validFromMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_validFromMeta);
+    }
+    if (data.containsKey('valid_to')) {
+      context.handle(
+        _validToMeta,
+        validTo.isAcceptableOrUnknown(data['valid_to']!, _validToMeta),
+      );
+    }
+    if (data.containsKey('components_json')) {
+      context.handle(
+        _componentsJsonMeta,
+        componentsJson.isAcceptableOrUnknown(
+          data['components_json']!,
+          _componentsJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('assortment_rules_json')) {
+      context.handle(
+        _assortmentRulesJsonMeta,
+        assortmentRulesJson.isAcceptableOrUnknown(
+          data['assortment_rules_json']!,
+          _assortmentRulesJsonMeta,
+        ),
+      );
+    }
+    if (data.containsKey('created_at')) {
+      context.handle(
+        _createdAtMeta,
+        createdAt.isAcceptableOrUnknown(data['created_at']!, _createdAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdAtMeta);
+    }
+    if (data.containsKey('created_by')) {
+      context.handle(
+        _createdByMeta,
+        createdBy.isAcceptableOrUnknown(data['created_by']!, _createdByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_createdByMeta);
+    }
+    if (data.containsKey('updated_at')) {
+      context.handle(
+        _updatedAtMeta,
+        updatedAt.isAcceptableOrUnknown(data['updated_at']!, _updatedAtMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedAtMeta);
+    }
+    if (data.containsKey('updated_by')) {
+      context.handle(
+        _updatedByMeta,
+        updatedBy.isAcceptableOrUnknown(data['updated_by']!, _updatedByMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_updatedByMeta);
+    }
+    if (data.containsKey('deleted_at')) {
+      context.handle(
+        _deletedAtMeta,
+        deletedAt.isAcceptableOrUnknown(data['deleted_at']!, _deletedAtMeta),
+      );
+    }
+    if (data.containsKey('superseded_by_pack_id')) {
+      context.handle(
+        _supersededByPackIdMeta,
+        supersededByPackId.isAcceptableOrUnknown(
+          data['superseded_by_pack_id']!,
+          _supersededByPackIdMeta,
+        ),
+      );
+    }
+    if (data.containsKey('sync_status')) {
+      context.handle(
+        _syncStatusMeta,
+        syncStatus.isAcceptableOrUnknown(data['sync_status']!, _syncStatusMeta),
+      );
+    } else if (isInserting) {
+      context.missing(_syncStatusMeta);
+    }
+    return context;
+  }
+
+  @override
+  Set<GeneratedColumn> get $primaryKey => {id};
+  @override
+  CommercialPacksTableData map(
+    Map<String, dynamic> data, {
+    String? tablePrefix,
+  }) {
+    final effectivePrefix = tablePrefix != null ? '$tablePrefix.' : '';
+    return CommercialPacksTableData(
+      id: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}id'],
+      )!,
+      organizationId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}organization_id'],
+      )!,
+      companyId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}company_id'],
+      ),
+      packCode: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pack_code'],
+      )!,
+      version: attachedDatabase.typeMapping.read(
+        DriftSqlType.int,
+        data['${effectivePrefix}version'],
+      )!,
+      name: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}name'],
+      )!,
+      description: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}description'],
+      ),
+      packType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pack_type'],
+      )!,
+      status: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}status'],
+      )!,
+      pricingPolicyType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}pricing_policy_type'],
+      )!,
+      fixedPrice: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}fixed_price'],
+      ),
+      discountPercentage: attachedDatabase.typeMapping.read(
+        DriftSqlType.double,
+        data['${effectivePrefix}discount_percentage'],
+      ),
+      bonusComponentId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}bonus_component_id'],
+      ),
+      stockPolicyType: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}stock_policy_type'],
+      )!,
+      dedicatedWarehouseId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}dedicated_warehouse_id'],
+      ),
+      collectionId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}collection_id'],
+      ),
+      campaignId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}campaign_id'],
+      ),
+      customerSegment: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}customer_segment'],
+      ),
+      channel: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}channel'],
+      ),
+      validFrom: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}valid_from'],
+      )!,
+      validTo: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}valid_to'],
+      ),
+      componentsJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}components_json'],
+      )!,
+      assortmentRulesJson: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}assortment_rules_json'],
+      )!,
+      createdAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}created_at'],
+      )!,
+      createdBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}created_by'],
+      )!,
+      updatedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}updated_at'],
+      )!,
+      updatedBy: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}updated_by'],
+      )!,
+      deletedAt: attachedDatabase.typeMapping.read(
+        DriftSqlType.dateTime,
+        data['${effectivePrefix}deleted_at'],
+      ),
+      supersededByPackId: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}superseded_by_pack_id'],
+      ),
+      syncStatus: attachedDatabase.typeMapping.read(
+        DriftSqlType.string,
+        data['${effectivePrefix}sync_status'],
+      )!,
+    );
+  }
+
+  @override
+  $CommercialPacksTableTable createAlias(String alias) {
+    return $CommercialPacksTableTable(attachedDatabase, alias);
+  }
+}
+
+class CommercialPacksTableData extends DataClass
+    implements Insertable<CommercialPacksTableData> {
+  final String id;
+  final String organizationId;
+  final String? companyId;
+  final String packCode;
+  final int version;
+  final String name;
+  final String? description;
+  final String packType;
+  final String status;
+  final String pricingPolicyType;
+  final double? fixedPrice;
+  final double? discountPercentage;
+  final String? bonusComponentId;
+  final String stockPolicyType;
+  final String? dedicatedWarehouseId;
+  final String? collectionId;
+  final String? campaignId;
+  final String? customerSegment;
+  final String? channel;
+  final DateTime validFrom;
+  final DateTime? validTo;
+  final String componentsJson;
+  final String assortmentRulesJson;
+  final DateTime createdAt;
+  final String createdBy;
+  final DateTime updatedAt;
+  final String updatedBy;
+  final DateTime? deletedAt;
+  final String? supersededByPackId;
+  final String syncStatus;
+  const CommercialPacksTableData({
+    required this.id,
+    required this.organizationId,
+    this.companyId,
+    required this.packCode,
+    required this.version,
+    required this.name,
+    this.description,
+    required this.packType,
+    required this.status,
+    required this.pricingPolicyType,
+    this.fixedPrice,
+    this.discountPercentage,
+    this.bonusComponentId,
+    required this.stockPolicyType,
+    this.dedicatedWarehouseId,
+    this.collectionId,
+    this.campaignId,
+    this.customerSegment,
+    this.channel,
+    required this.validFrom,
+    this.validTo,
+    required this.componentsJson,
+    required this.assortmentRulesJson,
+    required this.createdAt,
+    required this.createdBy,
+    required this.updatedAt,
+    required this.updatedBy,
+    this.deletedAt,
+    this.supersededByPackId,
+    required this.syncStatus,
+  });
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    map['id'] = Variable<String>(id);
+    map['organization_id'] = Variable<String>(organizationId);
+    if (!nullToAbsent || companyId != null) {
+      map['company_id'] = Variable<String>(companyId);
+    }
+    map['pack_code'] = Variable<String>(packCode);
+    map['version'] = Variable<int>(version);
+    map['name'] = Variable<String>(name);
+    if (!nullToAbsent || description != null) {
+      map['description'] = Variable<String>(description);
+    }
+    map['pack_type'] = Variable<String>(packType);
+    map['status'] = Variable<String>(status);
+    map['pricing_policy_type'] = Variable<String>(pricingPolicyType);
+    if (!nullToAbsent || fixedPrice != null) {
+      map['fixed_price'] = Variable<double>(fixedPrice);
+    }
+    if (!nullToAbsent || discountPercentage != null) {
+      map['discount_percentage'] = Variable<double>(discountPercentage);
+    }
+    if (!nullToAbsent || bonusComponentId != null) {
+      map['bonus_component_id'] = Variable<String>(bonusComponentId);
+    }
+    map['stock_policy_type'] = Variable<String>(stockPolicyType);
+    if (!nullToAbsent || dedicatedWarehouseId != null) {
+      map['dedicated_warehouse_id'] = Variable<String>(dedicatedWarehouseId);
+    }
+    if (!nullToAbsent || collectionId != null) {
+      map['collection_id'] = Variable<String>(collectionId);
+    }
+    if (!nullToAbsent || campaignId != null) {
+      map['campaign_id'] = Variable<String>(campaignId);
+    }
+    if (!nullToAbsent || customerSegment != null) {
+      map['customer_segment'] = Variable<String>(customerSegment);
+    }
+    if (!nullToAbsent || channel != null) {
+      map['channel'] = Variable<String>(channel);
+    }
+    map['valid_from'] = Variable<DateTime>(validFrom);
+    if (!nullToAbsent || validTo != null) {
+      map['valid_to'] = Variable<DateTime>(validTo);
+    }
+    map['components_json'] = Variable<String>(componentsJson);
+    map['assortment_rules_json'] = Variable<String>(assortmentRulesJson);
+    map['created_at'] = Variable<DateTime>(createdAt);
+    map['created_by'] = Variable<String>(createdBy);
+    map['updated_at'] = Variable<DateTime>(updatedAt);
+    map['updated_by'] = Variable<String>(updatedBy);
+    if (!nullToAbsent || deletedAt != null) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt);
+    }
+    if (!nullToAbsent || supersededByPackId != null) {
+      map['superseded_by_pack_id'] = Variable<String>(supersededByPackId);
+    }
+    map['sync_status'] = Variable<String>(syncStatus);
+    return map;
+  }
+
+  CommercialPacksTableCompanion toCompanion(bool nullToAbsent) {
+    return CommercialPacksTableCompanion(
+      id: Value(id),
+      organizationId: Value(organizationId),
+      companyId: companyId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(companyId),
+      packCode: Value(packCode),
+      version: Value(version),
+      name: Value(name),
+      description: description == null && nullToAbsent
+          ? const Value.absent()
+          : Value(description),
+      packType: Value(packType),
+      status: Value(status),
+      pricingPolicyType: Value(pricingPolicyType),
+      fixedPrice: fixedPrice == null && nullToAbsent
+          ? const Value.absent()
+          : Value(fixedPrice),
+      discountPercentage: discountPercentage == null && nullToAbsent
+          ? const Value.absent()
+          : Value(discountPercentage),
+      bonusComponentId: bonusComponentId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(bonusComponentId),
+      stockPolicyType: Value(stockPolicyType),
+      dedicatedWarehouseId: dedicatedWarehouseId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(dedicatedWarehouseId),
+      collectionId: collectionId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(collectionId),
+      campaignId: campaignId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(campaignId),
+      customerSegment: customerSegment == null && nullToAbsent
+          ? const Value.absent()
+          : Value(customerSegment),
+      channel: channel == null && nullToAbsent
+          ? const Value.absent()
+          : Value(channel),
+      validFrom: Value(validFrom),
+      validTo: validTo == null && nullToAbsent
+          ? const Value.absent()
+          : Value(validTo),
+      componentsJson: Value(componentsJson),
+      assortmentRulesJson: Value(assortmentRulesJson),
+      createdAt: Value(createdAt),
+      createdBy: Value(createdBy),
+      updatedAt: Value(updatedAt),
+      updatedBy: Value(updatedBy),
+      deletedAt: deletedAt == null && nullToAbsent
+          ? const Value.absent()
+          : Value(deletedAt),
+      supersededByPackId: supersededByPackId == null && nullToAbsent
+          ? const Value.absent()
+          : Value(supersededByPackId),
+      syncStatus: Value(syncStatus),
+    );
+  }
+
+  factory CommercialPacksTableData.fromJson(
+    Map<String, dynamic> json, {
+    ValueSerializer? serializer,
+  }) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return CommercialPacksTableData(
+      id: serializer.fromJson<String>(json['id']),
+      organizationId: serializer.fromJson<String>(json['organizationId']),
+      companyId: serializer.fromJson<String?>(json['companyId']),
+      packCode: serializer.fromJson<String>(json['packCode']),
+      version: serializer.fromJson<int>(json['version']),
+      name: serializer.fromJson<String>(json['name']),
+      description: serializer.fromJson<String?>(json['description']),
+      packType: serializer.fromJson<String>(json['packType']),
+      status: serializer.fromJson<String>(json['status']),
+      pricingPolicyType: serializer.fromJson<String>(json['pricingPolicyType']),
+      fixedPrice: serializer.fromJson<double?>(json['fixedPrice']),
+      discountPercentage: serializer.fromJson<double?>(
+        json['discountPercentage'],
+      ),
+      bonusComponentId: serializer.fromJson<String?>(json['bonusComponentId']),
+      stockPolicyType: serializer.fromJson<String>(json['stockPolicyType']),
+      dedicatedWarehouseId: serializer.fromJson<String?>(
+        json['dedicatedWarehouseId'],
+      ),
+      collectionId: serializer.fromJson<String?>(json['collectionId']),
+      campaignId: serializer.fromJson<String?>(json['campaignId']),
+      customerSegment: serializer.fromJson<String?>(json['customerSegment']),
+      channel: serializer.fromJson<String?>(json['channel']),
+      validFrom: serializer.fromJson<DateTime>(json['validFrom']),
+      validTo: serializer.fromJson<DateTime?>(json['validTo']),
+      componentsJson: serializer.fromJson<String>(json['componentsJson']),
+      assortmentRulesJson: serializer.fromJson<String>(
+        json['assortmentRulesJson'],
+      ),
+      createdAt: serializer.fromJson<DateTime>(json['createdAt']),
+      createdBy: serializer.fromJson<String>(json['createdBy']),
+      updatedAt: serializer.fromJson<DateTime>(json['updatedAt']),
+      updatedBy: serializer.fromJson<String>(json['updatedBy']),
+      deletedAt: serializer.fromJson<DateTime?>(json['deletedAt']),
+      supersededByPackId: serializer.fromJson<String?>(
+        json['supersededByPackId'],
+      ),
+      syncStatus: serializer.fromJson<String>(json['syncStatus']),
+    );
+  }
+  @override
+  Map<String, dynamic> toJson({ValueSerializer? serializer}) {
+    serializer ??= driftRuntimeOptions.defaultSerializer;
+    return <String, dynamic>{
+      'id': serializer.toJson<String>(id),
+      'organizationId': serializer.toJson<String>(organizationId),
+      'companyId': serializer.toJson<String?>(companyId),
+      'packCode': serializer.toJson<String>(packCode),
+      'version': serializer.toJson<int>(version),
+      'name': serializer.toJson<String>(name),
+      'description': serializer.toJson<String?>(description),
+      'packType': serializer.toJson<String>(packType),
+      'status': serializer.toJson<String>(status),
+      'pricingPolicyType': serializer.toJson<String>(pricingPolicyType),
+      'fixedPrice': serializer.toJson<double?>(fixedPrice),
+      'discountPercentage': serializer.toJson<double?>(discountPercentage),
+      'bonusComponentId': serializer.toJson<String?>(bonusComponentId),
+      'stockPolicyType': serializer.toJson<String>(stockPolicyType),
+      'dedicatedWarehouseId': serializer.toJson<String?>(dedicatedWarehouseId),
+      'collectionId': serializer.toJson<String?>(collectionId),
+      'campaignId': serializer.toJson<String?>(campaignId),
+      'customerSegment': serializer.toJson<String?>(customerSegment),
+      'channel': serializer.toJson<String?>(channel),
+      'validFrom': serializer.toJson<DateTime>(validFrom),
+      'validTo': serializer.toJson<DateTime?>(validTo),
+      'componentsJson': serializer.toJson<String>(componentsJson),
+      'assortmentRulesJson': serializer.toJson<String>(assortmentRulesJson),
+      'createdAt': serializer.toJson<DateTime>(createdAt),
+      'createdBy': serializer.toJson<String>(createdBy),
+      'updatedAt': serializer.toJson<DateTime>(updatedAt),
+      'updatedBy': serializer.toJson<String>(updatedBy),
+      'deletedAt': serializer.toJson<DateTime?>(deletedAt),
+      'supersededByPackId': serializer.toJson<String?>(supersededByPackId),
+      'syncStatus': serializer.toJson<String>(syncStatus),
+    };
+  }
+
+  CommercialPacksTableData copyWith({
+    String? id,
+    String? organizationId,
+    Value<String?> companyId = const Value.absent(),
+    String? packCode,
+    int? version,
+    String? name,
+    Value<String?> description = const Value.absent(),
+    String? packType,
+    String? status,
+    String? pricingPolicyType,
+    Value<double?> fixedPrice = const Value.absent(),
+    Value<double?> discountPercentage = const Value.absent(),
+    Value<String?> bonusComponentId = const Value.absent(),
+    String? stockPolicyType,
+    Value<String?> dedicatedWarehouseId = const Value.absent(),
+    Value<String?> collectionId = const Value.absent(),
+    Value<String?> campaignId = const Value.absent(),
+    Value<String?> customerSegment = const Value.absent(),
+    Value<String?> channel = const Value.absent(),
+    DateTime? validFrom,
+    Value<DateTime?> validTo = const Value.absent(),
+    String? componentsJson,
+    String? assortmentRulesJson,
+    DateTime? createdAt,
+    String? createdBy,
+    DateTime? updatedAt,
+    String? updatedBy,
+    Value<DateTime?> deletedAt = const Value.absent(),
+    Value<String?> supersededByPackId = const Value.absent(),
+    String? syncStatus,
+  }) => CommercialPacksTableData(
+    id: id ?? this.id,
+    organizationId: organizationId ?? this.organizationId,
+    companyId: companyId.present ? companyId.value : this.companyId,
+    packCode: packCode ?? this.packCode,
+    version: version ?? this.version,
+    name: name ?? this.name,
+    description: description.present ? description.value : this.description,
+    packType: packType ?? this.packType,
+    status: status ?? this.status,
+    pricingPolicyType: pricingPolicyType ?? this.pricingPolicyType,
+    fixedPrice: fixedPrice.present ? fixedPrice.value : this.fixedPrice,
+    discountPercentage: discountPercentage.present
+        ? discountPercentage.value
+        : this.discountPercentage,
+    bonusComponentId: bonusComponentId.present
+        ? bonusComponentId.value
+        : this.bonusComponentId,
+    stockPolicyType: stockPolicyType ?? this.stockPolicyType,
+    dedicatedWarehouseId: dedicatedWarehouseId.present
+        ? dedicatedWarehouseId.value
+        : this.dedicatedWarehouseId,
+    collectionId: collectionId.present ? collectionId.value : this.collectionId,
+    campaignId: campaignId.present ? campaignId.value : this.campaignId,
+    customerSegment: customerSegment.present
+        ? customerSegment.value
+        : this.customerSegment,
+    channel: channel.present ? channel.value : this.channel,
+    validFrom: validFrom ?? this.validFrom,
+    validTo: validTo.present ? validTo.value : this.validTo,
+    componentsJson: componentsJson ?? this.componentsJson,
+    assortmentRulesJson: assortmentRulesJson ?? this.assortmentRulesJson,
+    createdAt: createdAt ?? this.createdAt,
+    createdBy: createdBy ?? this.createdBy,
+    updatedAt: updatedAt ?? this.updatedAt,
+    updatedBy: updatedBy ?? this.updatedBy,
+    deletedAt: deletedAt.present ? deletedAt.value : this.deletedAt,
+    supersededByPackId: supersededByPackId.present
+        ? supersededByPackId.value
+        : this.supersededByPackId,
+    syncStatus: syncStatus ?? this.syncStatus,
+  );
+  CommercialPacksTableData copyWithCompanion(
+    CommercialPacksTableCompanion data,
+  ) {
+    return CommercialPacksTableData(
+      id: data.id.present ? data.id.value : this.id,
+      organizationId: data.organizationId.present
+          ? data.organizationId.value
+          : this.organizationId,
+      companyId: data.companyId.present ? data.companyId.value : this.companyId,
+      packCode: data.packCode.present ? data.packCode.value : this.packCode,
+      version: data.version.present ? data.version.value : this.version,
+      name: data.name.present ? data.name.value : this.name,
+      description: data.description.present
+          ? data.description.value
+          : this.description,
+      packType: data.packType.present ? data.packType.value : this.packType,
+      status: data.status.present ? data.status.value : this.status,
+      pricingPolicyType: data.pricingPolicyType.present
+          ? data.pricingPolicyType.value
+          : this.pricingPolicyType,
+      fixedPrice: data.fixedPrice.present
+          ? data.fixedPrice.value
+          : this.fixedPrice,
+      discountPercentage: data.discountPercentage.present
+          ? data.discountPercentage.value
+          : this.discountPercentage,
+      bonusComponentId: data.bonusComponentId.present
+          ? data.bonusComponentId.value
+          : this.bonusComponentId,
+      stockPolicyType: data.stockPolicyType.present
+          ? data.stockPolicyType.value
+          : this.stockPolicyType,
+      dedicatedWarehouseId: data.dedicatedWarehouseId.present
+          ? data.dedicatedWarehouseId.value
+          : this.dedicatedWarehouseId,
+      collectionId: data.collectionId.present
+          ? data.collectionId.value
+          : this.collectionId,
+      campaignId: data.campaignId.present
+          ? data.campaignId.value
+          : this.campaignId,
+      customerSegment: data.customerSegment.present
+          ? data.customerSegment.value
+          : this.customerSegment,
+      channel: data.channel.present ? data.channel.value : this.channel,
+      validFrom: data.validFrom.present ? data.validFrom.value : this.validFrom,
+      validTo: data.validTo.present ? data.validTo.value : this.validTo,
+      componentsJson: data.componentsJson.present
+          ? data.componentsJson.value
+          : this.componentsJson,
+      assortmentRulesJson: data.assortmentRulesJson.present
+          ? data.assortmentRulesJson.value
+          : this.assortmentRulesJson,
+      createdAt: data.createdAt.present ? data.createdAt.value : this.createdAt,
+      createdBy: data.createdBy.present ? data.createdBy.value : this.createdBy,
+      updatedAt: data.updatedAt.present ? data.updatedAt.value : this.updatedAt,
+      updatedBy: data.updatedBy.present ? data.updatedBy.value : this.updatedBy,
+      deletedAt: data.deletedAt.present ? data.deletedAt.value : this.deletedAt,
+      supersededByPackId: data.supersededByPackId.present
+          ? data.supersededByPackId.value
+          : this.supersededByPackId,
+      syncStatus: data.syncStatus.present
+          ? data.syncStatus.value
+          : this.syncStatus,
+    );
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CommercialPacksTableData(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('packCode: $packCode, ')
+          ..write('version: $version, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('packType: $packType, ')
+          ..write('status: $status, ')
+          ..write('pricingPolicyType: $pricingPolicyType, ')
+          ..write('fixedPrice: $fixedPrice, ')
+          ..write('discountPercentage: $discountPercentage, ')
+          ..write('bonusComponentId: $bonusComponentId, ')
+          ..write('stockPolicyType: $stockPolicyType, ')
+          ..write('dedicatedWarehouseId: $dedicatedWarehouseId, ')
+          ..write('collectionId: $collectionId, ')
+          ..write('campaignId: $campaignId, ')
+          ..write('customerSegment: $customerSegment, ')
+          ..write('channel: $channel, ')
+          ..write('validFrom: $validFrom, ')
+          ..write('validTo: $validTo, ')
+          ..write('componentsJson: $componentsJson, ')
+          ..write('assortmentRulesJson: $assortmentRulesJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('supersededByPackId: $supersededByPackId, ')
+          ..write('syncStatus: $syncStatus')
+          ..write(')'))
+        .toString();
+  }
+
+  @override
+  int get hashCode => Object.hashAll([
+    id,
+    organizationId,
+    companyId,
+    packCode,
+    version,
+    name,
+    description,
+    packType,
+    status,
+    pricingPolicyType,
+    fixedPrice,
+    discountPercentage,
+    bonusComponentId,
+    stockPolicyType,
+    dedicatedWarehouseId,
+    collectionId,
+    campaignId,
+    customerSegment,
+    channel,
+    validFrom,
+    validTo,
+    componentsJson,
+    assortmentRulesJson,
+    createdAt,
+    createdBy,
+    updatedAt,
+    updatedBy,
+    deletedAt,
+    supersededByPackId,
+    syncStatus,
+  ]);
+  @override
+  bool operator ==(Object other) =>
+      identical(this, other) ||
+      (other is CommercialPacksTableData &&
+          other.id == this.id &&
+          other.organizationId == this.organizationId &&
+          other.companyId == this.companyId &&
+          other.packCode == this.packCode &&
+          other.version == this.version &&
+          other.name == this.name &&
+          other.description == this.description &&
+          other.packType == this.packType &&
+          other.status == this.status &&
+          other.pricingPolicyType == this.pricingPolicyType &&
+          other.fixedPrice == this.fixedPrice &&
+          other.discountPercentage == this.discountPercentage &&
+          other.bonusComponentId == this.bonusComponentId &&
+          other.stockPolicyType == this.stockPolicyType &&
+          other.dedicatedWarehouseId == this.dedicatedWarehouseId &&
+          other.collectionId == this.collectionId &&
+          other.campaignId == this.campaignId &&
+          other.customerSegment == this.customerSegment &&
+          other.channel == this.channel &&
+          other.validFrom == this.validFrom &&
+          other.validTo == this.validTo &&
+          other.componentsJson == this.componentsJson &&
+          other.assortmentRulesJson == this.assortmentRulesJson &&
+          other.createdAt == this.createdAt &&
+          other.createdBy == this.createdBy &&
+          other.updatedAt == this.updatedAt &&
+          other.updatedBy == this.updatedBy &&
+          other.deletedAt == this.deletedAt &&
+          other.supersededByPackId == this.supersededByPackId &&
+          other.syncStatus == this.syncStatus);
+}
+
+class CommercialPacksTableCompanion
+    extends UpdateCompanion<CommercialPacksTableData> {
+  final Value<String> id;
+  final Value<String> organizationId;
+  final Value<String?> companyId;
+  final Value<String> packCode;
+  final Value<int> version;
+  final Value<String> name;
+  final Value<String?> description;
+  final Value<String> packType;
+  final Value<String> status;
+  final Value<String> pricingPolicyType;
+  final Value<double?> fixedPrice;
+  final Value<double?> discountPercentage;
+  final Value<String?> bonusComponentId;
+  final Value<String> stockPolicyType;
+  final Value<String?> dedicatedWarehouseId;
+  final Value<String?> collectionId;
+  final Value<String?> campaignId;
+  final Value<String?> customerSegment;
+  final Value<String?> channel;
+  final Value<DateTime> validFrom;
+  final Value<DateTime?> validTo;
+  final Value<String> componentsJson;
+  final Value<String> assortmentRulesJson;
+  final Value<DateTime> createdAt;
+  final Value<String> createdBy;
+  final Value<DateTime> updatedAt;
+  final Value<String> updatedBy;
+  final Value<DateTime?> deletedAt;
+  final Value<String?> supersededByPackId;
+  final Value<String> syncStatus;
+  final Value<int> rowid;
+  const CommercialPacksTableCompanion({
+    this.id = const Value.absent(),
+    this.organizationId = const Value.absent(),
+    this.companyId = const Value.absent(),
+    this.packCode = const Value.absent(),
+    this.version = const Value.absent(),
+    this.name = const Value.absent(),
+    this.description = const Value.absent(),
+    this.packType = const Value.absent(),
+    this.status = const Value.absent(),
+    this.pricingPolicyType = const Value.absent(),
+    this.fixedPrice = const Value.absent(),
+    this.discountPercentage = const Value.absent(),
+    this.bonusComponentId = const Value.absent(),
+    this.stockPolicyType = const Value.absent(),
+    this.dedicatedWarehouseId = const Value.absent(),
+    this.collectionId = const Value.absent(),
+    this.campaignId = const Value.absent(),
+    this.customerSegment = const Value.absent(),
+    this.channel = const Value.absent(),
+    this.validFrom = const Value.absent(),
+    this.validTo = const Value.absent(),
+    this.componentsJson = const Value.absent(),
+    this.assortmentRulesJson = const Value.absent(),
+    this.createdAt = const Value.absent(),
+    this.createdBy = const Value.absent(),
+    this.updatedAt = const Value.absent(),
+    this.updatedBy = const Value.absent(),
+    this.deletedAt = const Value.absent(),
+    this.supersededByPackId = const Value.absent(),
+    this.syncStatus = const Value.absent(),
+    this.rowid = const Value.absent(),
+  });
+  CommercialPacksTableCompanion.insert({
+    required String id,
+    required String organizationId,
+    this.companyId = const Value.absent(),
+    required String packCode,
+    required int version,
+    required String name,
+    this.description = const Value.absent(),
+    required String packType,
+    required String status,
+    required String pricingPolicyType,
+    this.fixedPrice = const Value.absent(),
+    this.discountPercentage = const Value.absent(),
+    this.bonusComponentId = const Value.absent(),
+    required String stockPolicyType,
+    this.dedicatedWarehouseId = const Value.absent(),
+    this.collectionId = const Value.absent(),
+    this.campaignId = const Value.absent(),
+    this.customerSegment = const Value.absent(),
+    this.channel = const Value.absent(),
+    required DateTime validFrom,
+    this.validTo = const Value.absent(),
+    this.componentsJson = const Value.absent(),
+    this.assortmentRulesJson = const Value.absent(),
+    required DateTime createdAt,
+    required String createdBy,
+    required DateTime updatedAt,
+    required String updatedBy,
+    this.deletedAt = const Value.absent(),
+    this.supersededByPackId = const Value.absent(),
+    required String syncStatus,
+    this.rowid = const Value.absent(),
+  }) : id = Value(id),
+       organizationId = Value(organizationId),
+       packCode = Value(packCode),
+       version = Value(version),
+       name = Value(name),
+       packType = Value(packType),
+       status = Value(status),
+       pricingPolicyType = Value(pricingPolicyType),
+       stockPolicyType = Value(stockPolicyType),
+       validFrom = Value(validFrom),
+       createdAt = Value(createdAt),
+       createdBy = Value(createdBy),
+       updatedAt = Value(updatedAt),
+       updatedBy = Value(updatedBy),
+       syncStatus = Value(syncStatus);
+  static Insertable<CommercialPacksTableData> custom({
+    Expression<String>? id,
+    Expression<String>? organizationId,
+    Expression<String>? companyId,
+    Expression<String>? packCode,
+    Expression<int>? version,
+    Expression<String>? name,
+    Expression<String>? description,
+    Expression<String>? packType,
+    Expression<String>? status,
+    Expression<String>? pricingPolicyType,
+    Expression<double>? fixedPrice,
+    Expression<double>? discountPercentage,
+    Expression<String>? bonusComponentId,
+    Expression<String>? stockPolicyType,
+    Expression<String>? dedicatedWarehouseId,
+    Expression<String>? collectionId,
+    Expression<String>? campaignId,
+    Expression<String>? customerSegment,
+    Expression<String>? channel,
+    Expression<DateTime>? validFrom,
+    Expression<DateTime>? validTo,
+    Expression<String>? componentsJson,
+    Expression<String>? assortmentRulesJson,
+    Expression<DateTime>? createdAt,
+    Expression<String>? createdBy,
+    Expression<DateTime>? updatedAt,
+    Expression<String>? updatedBy,
+    Expression<DateTime>? deletedAt,
+    Expression<String>? supersededByPackId,
+    Expression<String>? syncStatus,
+    Expression<int>? rowid,
+  }) {
+    return RawValuesInsertable({
+      if (id != null) 'id': id,
+      if (organizationId != null) 'organization_id': organizationId,
+      if (companyId != null) 'company_id': companyId,
+      if (packCode != null) 'pack_code': packCode,
+      if (version != null) 'version': version,
+      if (name != null) 'name': name,
+      if (description != null) 'description': description,
+      if (packType != null) 'pack_type': packType,
+      if (status != null) 'status': status,
+      if (pricingPolicyType != null) 'pricing_policy_type': pricingPolicyType,
+      if (fixedPrice != null) 'fixed_price': fixedPrice,
+      if (discountPercentage != null) 'discount_percentage': discountPercentage,
+      if (bonusComponentId != null) 'bonus_component_id': bonusComponentId,
+      if (stockPolicyType != null) 'stock_policy_type': stockPolicyType,
+      if (dedicatedWarehouseId != null)
+        'dedicated_warehouse_id': dedicatedWarehouseId,
+      if (collectionId != null) 'collection_id': collectionId,
+      if (campaignId != null) 'campaign_id': campaignId,
+      if (customerSegment != null) 'customer_segment': customerSegment,
+      if (channel != null) 'channel': channel,
+      if (validFrom != null) 'valid_from': validFrom,
+      if (validTo != null) 'valid_to': validTo,
+      if (componentsJson != null) 'components_json': componentsJson,
+      if (assortmentRulesJson != null)
+        'assortment_rules_json': assortmentRulesJson,
+      if (createdAt != null) 'created_at': createdAt,
+      if (createdBy != null) 'created_by': createdBy,
+      if (updatedAt != null) 'updated_at': updatedAt,
+      if (updatedBy != null) 'updated_by': updatedBy,
+      if (deletedAt != null) 'deleted_at': deletedAt,
+      if (supersededByPackId != null)
+        'superseded_by_pack_id': supersededByPackId,
+      if (syncStatus != null) 'sync_status': syncStatus,
+      if (rowid != null) 'rowid': rowid,
+    });
+  }
+
+  CommercialPacksTableCompanion copyWith({
+    Value<String>? id,
+    Value<String>? organizationId,
+    Value<String?>? companyId,
+    Value<String>? packCode,
+    Value<int>? version,
+    Value<String>? name,
+    Value<String?>? description,
+    Value<String>? packType,
+    Value<String>? status,
+    Value<String>? pricingPolicyType,
+    Value<double?>? fixedPrice,
+    Value<double?>? discountPercentage,
+    Value<String?>? bonusComponentId,
+    Value<String>? stockPolicyType,
+    Value<String?>? dedicatedWarehouseId,
+    Value<String?>? collectionId,
+    Value<String?>? campaignId,
+    Value<String?>? customerSegment,
+    Value<String?>? channel,
+    Value<DateTime>? validFrom,
+    Value<DateTime?>? validTo,
+    Value<String>? componentsJson,
+    Value<String>? assortmentRulesJson,
+    Value<DateTime>? createdAt,
+    Value<String>? createdBy,
+    Value<DateTime>? updatedAt,
+    Value<String>? updatedBy,
+    Value<DateTime?>? deletedAt,
+    Value<String?>? supersededByPackId,
+    Value<String>? syncStatus,
+    Value<int>? rowid,
+  }) {
+    return CommercialPacksTableCompanion(
+      id: id ?? this.id,
+      organizationId: organizationId ?? this.organizationId,
+      companyId: companyId ?? this.companyId,
+      packCode: packCode ?? this.packCode,
+      version: version ?? this.version,
+      name: name ?? this.name,
+      description: description ?? this.description,
+      packType: packType ?? this.packType,
+      status: status ?? this.status,
+      pricingPolicyType: pricingPolicyType ?? this.pricingPolicyType,
+      fixedPrice: fixedPrice ?? this.fixedPrice,
+      discountPercentage: discountPercentage ?? this.discountPercentage,
+      bonusComponentId: bonusComponentId ?? this.bonusComponentId,
+      stockPolicyType: stockPolicyType ?? this.stockPolicyType,
+      dedicatedWarehouseId: dedicatedWarehouseId ?? this.dedicatedWarehouseId,
+      collectionId: collectionId ?? this.collectionId,
+      campaignId: campaignId ?? this.campaignId,
+      customerSegment: customerSegment ?? this.customerSegment,
+      channel: channel ?? this.channel,
+      validFrom: validFrom ?? this.validFrom,
+      validTo: validTo ?? this.validTo,
+      componentsJson: componentsJson ?? this.componentsJson,
+      assortmentRulesJson: assortmentRulesJson ?? this.assortmentRulesJson,
+      createdAt: createdAt ?? this.createdAt,
+      createdBy: createdBy ?? this.createdBy,
+      updatedAt: updatedAt ?? this.updatedAt,
+      updatedBy: updatedBy ?? this.updatedBy,
+      deletedAt: deletedAt ?? this.deletedAt,
+      supersededByPackId: supersededByPackId ?? this.supersededByPackId,
+      syncStatus: syncStatus ?? this.syncStatus,
+      rowid: rowid ?? this.rowid,
+    );
+  }
+
+  @override
+  Map<String, Expression> toColumns(bool nullToAbsent) {
+    final map = <String, Expression>{};
+    if (id.present) {
+      map['id'] = Variable<String>(id.value);
+    }
+    if (organizationId.present) {
+      map['organization_id'] = Variable<String>(organizationId.value);
+    }
+    if (companyId.present) {
+      map['company_id'] = Variable<String>(companyId.value);
+    }
+    if (packCode.present) {
+      map['pack_code'] = Variable<String>(packCode.value);
+    }
+    if (version.present) {
+      map['version'] = Variable<int>(version.value);
+    }
+    if (name.present) {
+      map['name'] = Variable<String>(name.value);
+    }
+    if (description.present) {
+      map['description'] = Variable<String>(description.value);
+    }
+    if (packType.present) {
+      map['pack_type'] = Variable<String>(packType.value);
+    }
+    if (status.present) {
+      map['status'] = Variable<String>(status.value);
+    }
+    if (pricingPolicyType.present) {
+      map['pricing_policy_type'] = Variable<String>(pricingPolicyType.value);
+    }
+    if (fixedPrice.present) {
+      map['fixed_price'] = Variable<double>(fixedPrice.value);
+    }
+    if (discountPercentage.present) {
+      map['discount_percentage'] = Variable<double>(discountPercentage.value);
+    }
+    if (bonusComponentId.present) {
+      map['bonus_component_id'] = Variable<String>(bonusComponentId.value);
+    }
+    if (stockPolicyType.present) {
+      map['stock_policy_type'] = Variable<String>(stockPolicyType.value);
+    }
+    if (dedicatedWarehouseId.present) {
+      map['dedicated_warehouse_id'] = Variable<String>(
+        dedicatedWarehouseId.value,
+      );
+    }
+    if (collectionId.present) {
+      map['collection_id'] = Variable<String>(collectionId.value);
+    }
+    if (campaignId.present) {
+      map['campaign_id'] = Variable<String>(campaignId.value);
+    }
+    if (customerSegment.present) {
+      map['customer_segment'] = Variable<String>(customerSegment.value);
+    }
+    if (channel.present) {
+      map['channel'] = Variable<String>(channel.value);
+    }
+    if (validFrom.present) {
+      map['valid_from'] = Variable<DateTime>(validFrom.value);
+    }
+    if (validTo.present) {
+      map['valid_to'] = Variable<DateTime>(validTo.value);
+    }
+    if (componentsJson.present) {
+      map['components_json'] = Variable<String>(componentsJson.value);
+    }
+    if (assortmentRulesJson.present) {
+      map['assortment_rules_json'] = Variable<String>(
+        assortmentRulesJson.value,
+      );
+    }
+    if (createdAt.present) {
+      map['created_at'] = Variable<DateTime>(createdAt.value);
+    }
+    if (createdBy.present) {
+      map['created_by'] = Variable<String>(createdBy.value);
+    }
+    if (updatedAt.present) {
+      map['updated_at'] = Variable<DateTime>(updatedAt.value);
+    }
+    if (updatedBy.present) {
+      map['updated_by'] = Variable<String>(updatedBy.value);
+    }
+    if (deletedAt.present) {
+      map['deleted_at'] = Variable<DateTime>(deletedAt.value);
+    }
+    if (supersededByPackId.present) {
+      map['superseded_by_pack_id'] = Variable<String>(supersededByPackId.value);
+    }
+    if (syncStatus.present) {
+      map['sync_status'] = Variable<String>(syncStatus.value);
+    }
+    if (rowid.present) {
+      map['rowid'] = Variable<int>(rowid.value);
+    }
+    return map;
+  }
+
+  @override
+  String toString() {
+    return (StringBuffer('CommercialPacksTableCompanion(')
+          ..write('id: $id, ')
+          ..write('organizationId: $organizationId, ')
+          ..write('companyId: $companyId, ')
+          ..write('packCode: $packCode, ')
+          ..write('version: $version, ')
+          ..write('name: $name, ')
+          ..write('description: $description, ')
+          ..write('packType: $packType, ')
+          ..write('status: $status, ')
+          ..write('pricingPolicyType: $pricingPolicyType, ')
+          ..write('fixedPrice: $fixedPrice, ')
+          ..write('discountPercentage: $discountPercentage, ')
+          ..write('bonusComponentId: $bonusComponentId, ')
+          ..write('stockPolicyType: $stockPolicyType, ')
+          ..write('dedicatedWarehouseId: $dedicatedWarehouseId, ')
+          ..write('collectionId: $collectionId, ')
+          ..write('campaignId: $campaignId, ')
+          ..write('customerSegment: $customerSegment, ')
+          ..write('channel: $channel, ')
+          ..write('validFrom: $validFrom, ')
+          ..write('validTo: $validTo, ')
+          ..write('componentsJson: $componentsJson, ')
+          ..write('assortmentRulesJson: $assortmentRulesJson, ')
+          ..write('createdAt: $createdAt, ')
+          ..write('createdBy: $createdBy, ')
+          ..write('updatedAt: $updatedAt, ')
+          ..write('updatedBy: $updatedBy, ')
+          ..write('deletedAt: $deletedAt, ')
+          ..write('supersededByPackId: $supersededByPackId, ')
+          ..write('syncStatus: $syncStatus, ')
+          ..write('rowid: $rowid')
+          ..write(')'))
+        .toString();
+  }
+}
+
 abstract class _$AppDatabase extends GeneratedDatabase {
   _$AppDatabase(QueryExecutor e) : super(e);
   $AppDatabaseManager get managers => $AppDatabaseManager(this);
@@ -26394,6 +28066,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
   );
   late final $OrderSignaturesTableTable orderSignaturesTable =
       $OrderSignaturesTableTable(this);
+  late final $CommercialPacksTableTable commercialPacksTable =
+      $CommercialPacksTableTable(this);
   late final Index idxCustomersOrgCompany = Index(
     'idx_customers_org_company',
     'CREATE INDEX idx_customers_org_company ON customers (organization_id, company_id)',
@@ -26534,6 +28208,14 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     'idx_order_signatures_org_company',
     'CREATE INDEX idx_order_signatures_org_company ON order_signatures (organization_id, company_id)',
   );
+  late final Index idxCommercialPacksOrgCompany = Index(
+    'idx_commercial_packs_org_company',
+    'CREATE INDEX idx_commercial_packs_org_company ON commercial_packs (organization_id, company_id)',
+  );
+  late final Index idxCommercialPacksOrgPackCode = Index(
+    'idx_commercial_packs_org_pack_code',
+    'CREATE INDEX idx_commercial_packs_org_pack_code ON commercial_packs (organization_id, pack_code)',
+  );
   @override
   Iterable<TableInfo<Table, Object?>> get allTables =>
       allSchemaEntities.whereType<TableInfo<Table, Object?>>();
@@ -26565,6 +28247,7 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     positivacaoSnapshotsTable,
     visitRoutesTable,
     orderSignaturesTable,
+    commercialPacksTable,
     idxCustomersOrgCompany,
     idxCustomerAddressesCustomer,
     idxCustomerContactsCustomer,
@@ -26600,6 +28283,8 @@ abstract class _$AppDatabase extends GeneratedDatabase {
     idxVisitRoutesOrgRepDate,
     idxOrderSignaturesOrder,
     idxOrderSignaturesOrgCompany,
+    idxCommercialPacksOrgCompany,
+    idxCommercialPacksOrgPackCode,
   ];
   @override
   StreamQueryUpdateRules get streamUpdateRules => const StreamQueryUpdateRules([
@@ -39583,6 +41268,727 @@ typedef $$OrderSignaturesTableTableProcessedTableManager =
       OrderSignaturesTableData,
       PrefetchHooks Function()
     >;
+typedef $$CommercialPacksTableTableCreateCompanionBuilder =
+    CommercialPacksTableCompanion Function({
+      required String id,
+      required String organizationId,
+      Value<String?> companyId,
+      required String packCode,
+      required int version,
+      required String name,
+      Value<String?> description,
+      required String packType,
+      required String status,
+      required String pricingPolicyType,
+      Value<double?> fixedPrice,
+      Value<double?> discountPercentage,
+      Value<String?> bonusComponentId,
+      required String stockPolicyType,
+      Value<String?> dedicatedWarehouseId,
+      Value<String?> collectionId,
+      Value<String?> campaignId,
+      Value<String?> customerSegment,
+      Value<String?> channel,
+      required DateTime validFrom,
+      Value<DateTime?> validTo,
+      Value<String> componentsJson,
+      Value<String> assortmentRulesJson,
+      required DateTime createdAt,
+      required String createdBy,
+      required DateTime updatedAt,
+      required String updatedBy,
+      Value<DateTime?> deletedAt,
+      Value<String?> supersededByPackId,
+      required String syncStatus,
+      Value<int> rowid,
+    });
+typedef $$CommercialPacksTableTableUpdateCompanionBuilder =
+    CommercialPacksTableCompanion Function({
+      Value<String> id,
+      Value<String> organizationId,
+      Value<String?> companyId,
+      Value<String> packCode,
+      Value<int> version,
+      Value<String> name,
+      Value<String?> description,
+      Value<String> packType,
+      Value<String> status,
+      Value<String> pricingPolicyType,
+      Value<double?> fixedPrice,
+      Value<double?> discountPercentage,
+      Value<String?> bonusComponentId,
+      Value<String> stockPolicyType,
+      Value<String?> dedicatedWarehouseId,
+      Value<String?> collectionId,
+      Value<String?> campaignId,
+      Value<String?> customerSegment,
+      Value<String?> channel,
+      Value<DateTime> validFrom,
+      Value<DateTime?> validTo,
+      Value<String> componentsJson,
+      Value<String> assortmentRulesJson,
+      Value<DateTime> createdAt,
+      Value<String> createdBy,
+      Value<DateTime> updatedAt,
+      Value<String> updatedBy,
+      Value<DateTime?> deletedAt,
+      Value<String?> supersededByPackId,
+      Value<String> syncStatus,
+      Value<int> rowid,
+    });
+
+class $$CommercialPacksTableTableFilterComposer
+    extends Composer<_$AppDatabase, $CommercialPacksTableTable> {
+  $$CommercialPacksTableTableFilterComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnFilters<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get packCode => $composableBuilder(
+    column: $table.packCode,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get packType => $composableBuilder(
+    column: $table.packType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get pricingPolicyType => $composableBuilder(
+    column: $table.pricingPolicyType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get fixedPrice => $composableBuilder(
+    column: $table.fixedPrice,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<double> get discountPercentage => $composableBuilder(
+    column: $table.discountPercentage,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get bonusComponentId => $composableBuilder(
+    column: $table.bonusComponentId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get stockPolicyType => $composableBuilder(
+    column: $table.stockPolicyType,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get dedicatedWarehouseId => $composableBuilder(
+    column: $table.dedicatedWarehouseId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get collectionId => $composableBuilder(
+    column: $table.collectionId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get campaignId => $composableBuilder(
+    column: $table.campaignId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get customerSegment => $composableBuilder(
+    column: $table.customerSegment,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get channel => $composableBuilder(
+    column: $table.channel,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get validFrom => $composableBuilder(
+    column: $table.validFrom,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get validTo => $composableBuilder(
+    column: $table.validTo,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get componentsJson => $composableBuilder(
+    column: $table.componentsJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get assortmentRulesJson => $composableBuilder(
+    column: $table.assortmentRulesJson,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get supersededByPackId => $composableBuilder(
+    column: $table.supersededByPackId,
+    builder: (column) => ColumnFilters(column),
+  );
+
+  ColumnFilters<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnFilters(column),
+  );
+}
+
+class $$CommercialPacksTableTableOrderingComposer
+    extends Composer<_$AppDatabase, $CommercialPacksTableTable> {
+  $$CommercialPacksTableTableOrderingComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  ColumnOrderings<String> get id => $composableBuilder(
+    column: $table.id,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get companyId => $composableBuilder(
+    column: $table.companyId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get packCode => $composableBuilder(
+    column: $table.packCode,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<int> get version => $composableBuilder(
+    column: $table.version,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get name => $composableBuilder(
+    column: $table.name,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get packType => $composableBuilder(
+    column: $table.packType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get status => $composableBuilder(
+    column: $table.status,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get pricingPolicyType => $composableBuilder(
+    column: $table.pricingPolicyType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get fixedPrice => $composableBuilder(
+    column: $table.fixedPrice,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<double> get discountPercentage => $composableBuilder(
+    column: $table.discountPercentage,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get bonusComponentId => $composableBuilder(
+    column: $table.bonusComponentId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get stockPolicyType => $composableBuilder(
+    column: $table.stockPolicyType,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get dedicatedWarehouseId => $composableBuilder(
+    column: $table.dedicatedWarehouseId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get collectionId => $composableBuilder(
+    column: $table.collectionId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get campaignId => $composableBuilder(
+    column: $table.campaignId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get customerSegment => $composableBuilder(
+    column: $table.customerSegment,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get channel => $composableBuilder(
+    column: $table.channel,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get validFrom => $composableBuilder(
+    column: $table.validFrom,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get validTo => $composableBuilder(
+    column: $table.validTo,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get componentsJson => $composableBuilder(
+    column: $table.componentsJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get assortmentRulesJson => $composableBuilder(
+    column: $table.assortmentRulesJson,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get createdAt => $composableBuilder(
+    column: $table.createdAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get createdBy => $composableBuilder(
+    column: $table.createdBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get updatedAt => $composableBuilder(
+    column: $table.updatedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get updatedBy => $composableBuilder(
+    column: $table.updatedBy,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<DateTime> get deletedAt => $composableBuilder(
+    column: $table.deletedAt,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get supersededByPackId => $composableBuilder(
+    column: $table.supersededByPackId,
+    builder: (column) => ColumnOrderings(column),
+  );
+
+  ColumnOrderings<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => ColumnOrderings(column),
+  );
+}
+
+class $$CommercialPacksTableTableAnnotationComposer
+    extends Composer<_$AppDatabase, $CommercialPacksTableTable> {
+  $$CommercialPacksTableTableAnnotationComposer({
+    required super.$db,
+    required super.$table,
+    super.joinBuilder,
+    super.$addJoinBuilderToRootComposer,
+    super.$removeJoinBuilderFromRootComposer,
+  });
+  GeneratedColumn<String> get id =>
+      $composableBuilder(column: $table.id, builder: (column) => column);
+
+  GeneratedColumn<String> get organizationId => $composableBuilder(
+    column: $table.organizationId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get companyId =>
+      $composableBuilder(column: $table.companyId, builder: (column) => column);
+
+  GeneratedColumn<String> get packCode =>
+      $composableBuilder(column: $table.packCode, builder: (column) => column);
+
+  GeneratedColumn<int> get version =>
+      $composableBuilder(column: $table.version, builder: (column) => column);
+
+  GeneratedColumn<String> get name =>
+      $composableBuilder(column: $table.name, builder: (column) => column);
+
+  GeneratedColumn<String> get description => $composableBuilder(
+    column: $table.description,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get packType =>
+      $composableBuilder(column: $table.packType, builder: (column) => column);
+
+  GeneratedColumn<String> get status =>
+      $composableBuilder(column: $table.status, builder: (column) => column);
+
+  GeneratedColumn<String> get pricingPolicyType => $composableBuilder(
+    column: $table.pricingPolicyType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get fixedPrice => $composableBuilder(
+    column: $table.fixedPrice,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<double> get discountPercentage => $composableBuilder(
+    column: $table.discountPercentage,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get bonusComponentId => $composableBuilder(
+    column: $table.bonusComponentId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get stockPolicyType => $composableBuilder(
+    column: $table.stockPolicyType,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get dedicatedWarehouseId => $composableBuilder(
+    column: $table.dedicatedWarehouseId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get collectionId => $composableBuilder(
+    column: $table.collectionId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get campaignId => $composableBuilder(
+    column: $table.campaignId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get customerSegment => $composableBuilder(
+    column: $table.customerSegment,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get channel =>
+      $composableBuilder(column: $table.channel, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get validFrom =>
+      $composableBuilder(column: $table.validFrom, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get validTo =>
+      $composableBuilder(column: $table.validTo, builder: (column) => column);
+
+  GeneratedColumn<String> get componentsJson => $composableBuilder(
+    column: $table.componentsJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get assortmentRulesJson => $composableBuilder(
+    column: $table.assortmentRulesJson,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<DateTime> get createdAt =>
+      $composableBuilder(column: $table.createdAt, builder: (column) => column);
+
+  GeneratedColumn<String> get createdBy =>
+      $composableBuilder(column: $table.createdBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get updatedAt =>
+      $composableBuilder(column: $table.updatedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get updatedBy =>
+      $composableBuilder(column: $table.updatedBy, builder: (column) => column);
+
+  GeneratedColumn<DateTime> get deletedAt =>
+      $composableBuilder(column: $table.deletedAt, builder: (column) => column);
+
+  GeneratedColumn<String> get supersededByPackId => $composableBuilder(
+    column: $table.supersededByPackId,
+    builder: (column) => column,
+  );
+
+  GeneratedColumn<String> get syncStatus => $composableBuilder(
+    column: $table.syncStatus,
+    builder: (column) => column,
+  );
+}
+
+class $$CommercialPacksTableTableTableManager
+    extends
+        RootTableManager<
+          _$AppDatabase,
+          $CommercialPacksTableTable,
+          CommercialPacksTableData,
+          $$CommercialPacksTableTableFilterComposer,
+          $$CommercialPacksTableTableOrderingComposer,
+          $$CommercialPacksTableTableAnnotationComposer,
+          $$CommercialPacksTableTableCreateCompanionBuilder,
+          $$CommercialPacksTableTableUpdateCompanionBuilder,
+          (
+            CommercialPacksTableData,
+            BaseReferences<
+              _$AppDatabase,
+              $CommercialPacksTableTable,
+              CommercialPacksTableData
+            >,
+          ),
+          CommercialPacksTableData,
+          PrefetchHooks Function()
+        > {
+  $$CommercialPacksTableTableTableManager(
+    _$AppDatabase db,
+    $CommercialPacksTableTable table,
+  ) : super(
+        TableManagerState(
+          db: db,
+          table: table,
+          createFilteringComposer: () =>
+              $$CommercialPacksTableTableFilterComposer($db: db, $table: table),
+          createOrderingComposer: () =>
+              $$CommercialPacksTableTableOrderingComposer(
+                $db: db,
+                $table: table,
+              ),
+          createComputedFieldComposer: () =>
+              $$CommercialPacksTableTableAnnotationComposer(
+                $db: db,
+                $table: table,
+              ),
+          updateCompanionCallback:
+              ({
+                Value<String> id = const Value.absent(),
+                Value<String> organizationId = const Value.absent(),
+                Value<String?> companyId = const Value.absent(),
+                Value<String> packCode = const Value.absent(),
+                Value<int> version = const Value.absent(),
+                Value<String> name = const Value.absent(),
+                Value<String?> description = const Value.absent(),
+                Value<String> packType = const Value.absent(),
+                Value<String> status = const Value.absent(),
+                Value<String> pricingPolicyType = const Value.absent(),
+                Value<double?> fixedPrice = const Value.absent(),
+                Value<double?> discountPercentage = const Value.absent(),
+                Value<String?> bonusComponentId = const Value.absent(),
+                Value<String> stockPolicyType = const Value.absent(),
+                Value<String?> dedicatedWarehouseId = const Value.absent(),
+                Value<String?> collectionId = const Value.absent(),
+                Value<String?> campaignId = const Value.absent(),
+                Value<String?> customerSegment = const Value.absent(),
+                Value<String?> channel = const Value.absent(),
+                Value<DateTime> validFrom = const Value.absent(),
+                Value<DateTime?> validTo = const Value.absent(),
+                Value<String> componentsJson = const Value.absent(),
+                Value<String> assortmentRulesJson = const Value.absent(),
+                Value<DateTime> createdAt = const Value.absent(),
+                Value<String> createdBy = const Value.absent(),
+                Value<DateTime> updatedAt = const Value.absent(),
+                Value<String> updatedBy = const Value.absent(),
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> supersededByPackId = const Value.absent(),
+                Value<String> syncStatus = const Value.absent(),
+                Value<int> rowid = const Value.absent(),
+              }) => CommercialPacksTableCompanion(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                packCode: packCode,
+                version: version,
+                name: name,
+                description: description,
+                packType: packType,
+                status: status,
+                pricingPolicyType: pricingPolicyType,
+                fixedPrice: fixedPrice,
+                discountPercentage: discountPercentage,
+                bonusComponentId: bonusComponentId,
+                stockPolicyType: stockPolicyType,
+                dedicatedWarehouseId: dedicatedWarehouseId,
+                collectionId: collectionId,
+                campaignId: campaignId,
+                customerSegment: customerSegment,
+                channel: channel,
+                validFrom: validFrom,
+                validTo: validTo,
+                componentsJson: componentsJson,
+                assortmentRulesJson: assortmentRulesJson,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                supersededByPackId: supersededByPackId,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          createCompanionCallback:
+              ({
+                required String id,
+                required String organizationId,
+                Value<String?> companyId = const Value.absent(),
+                required String packCode,
+                required int version,
+                required String name,
+                Value<String?> description = const Value.absent(),
+                required String packType,
+                required String status,
+                required String pricingPolicyType,
+                Value<double?> fixedPrice = const Value.absent(),
+                Value<double?> discountPercentage = const Value.absent(),
+                Value<String?> bonusComponentId = const Value.absent(),
+                required String stockPolicyType,
+                Value<String?> dedicatedWarehouseId = const Value.absent(),
+                Value<String?> collectionId = const Value.absent(),
+                Value<String?> campaignId = const Value.absent(),
+                Value<String?> customerSegment = const Value.absent(),
+                Value<String?> channel = const Value.absent(),
+                required DateTime validFrom,
+                Value<DateTime?> validTo = const Value.absent(),
+                Value<String> componentsJson = const Value.absent(),
+                Value<String> assortmentRulesJson = const Value.absent(),
+                required DateTime createdAt,
+                required String createdBy,
+                required DateTime updatedAt,
+                required String updatedBy,
+                Value<DateTime?> deletedAt = const Value.absent(),
+                Value<String?> supersededByPackId = const Value.absent(),
+                required String syncStatus,
+                Value<int> rowid = const Value.absent(),
+              }) => CommercialPacksTableCompanion.insert(
+                id: id,
+                organizationId: organizationId,
+                companyId: companyId,
+                packCode: packCode,
+                version: version,
+                name: name,
+                description: description,
+                packType: packType,
+                status: status,
+                pricingPolicyType: pricingPolicyType,
+                fixedPrice: fixedPrice,
+                discountPercentage: discountPercentage,
+                bonusComponentId: bonusComponentId,
+                stockPolicyType: stockPolicyType,
+                dedicatedWarehouseId: dedicatedWarehouseId,
+                collectionId: collectionId,
+                campaignId: campaignId,
+                customerSegment: customerSegment,
+                channel: channel,
+                validFrom: validFrom,
+                validTo: validTo,
+                componentsJson: componentsJson,
+                assortmentRulesJson: assortmentRulesJson,
+                createdAt: createdAt,
+                createdBy: createdBy,
+                updatedAt: updatedAt,
+                updatedBy: updatedBy,
+                deletedAt: deletedAt,
+                supersededByPackId: supersededByPackId,
+                syncStatus: syncStatus,
+                rowid: rowid,
+              ),
+          withReferenceMapper: (p0) => p0
+              .map((e) => (e.readTable(table), BaseReferences(db, table, e)))
+              .toList(),
+          prefetchHooksCallback: null,
+        ),
+      );
+}
+
+typedef $$CommercialPacksTableTableProcessedTableManager =
+    ProcessedTableManager<
+      _$AppDatabase,
+      $CommercialPacksTableTable,
+      CommercialPacksTableData,
+      $$CommercialPacksTableTableFilterComposer,
+      $$CommercialPacksTableTableOrderingComposer,
+      $$CommercialPacksTableTableAnnotationComposer,
+      $$CommercialPacksTableTableCreateCompanionBuilder,
+      $$CommercialPacksTableTableUpdateCompanionBuilder,
+      (
+        CommercialPacksTableData,
+        BaseReferences<
+          _$AppDatabase,
+          $CommercialPacksTableTable,
+          CommercialPacksTableData
+        >,
+      ),
+      CommercialPacksTableData,
+      PrefetchHooks Function()
+    >;
 
 class $AppDatabaseManager {
   final _$AppDatabase _db;
@@ -39655,4 +42061,6 @@ class $AppDatabaseManager {
       $$VisitRoutesTableTableTableManager(_db, _db.visitRoutesTable);
   $$OrderSignaturesTableTableTableManager get orderSignaturesTable =>
       $$OrderSignaturesTableTableTableManager(_db, _db.orderSignaturesTable);
+  $$CommercialPacksTableTableTableManager get commercialPacksTable =>
+      $$CommercialPacksTableTableTableManager(_db, _db.commercialPacksTable);
 }
