@@ -1747,6 +1747,61 @@ service cloud.firestore {
         allow read, write: if false;
       }
 
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/backorders/{backorderId}
+      // (TASK-215, EPIC-32 — backorder e solicitação de estoque futuro)
+      // -------------------------------------------------------------------
+      //
+      // Toda escrita é exclusiva das Cloud Functions `createBackorderRequest`,
+      // `decideBackorderApproval`, `cancelBackorderRequest`,
+      // `convertBackorderToOrder` e `notifyBackordersOnStockAvailable`
+      // (trigger de estoque, roda com o Admin SDK e por isso não passa por
+      // estas regras) — nenhum cliente jamais cria/edita um backorder,
+      // decide sua aprovação ou o converte em pedido por conta própria.
+      // Visibilidade deliberadamente espelha `canReadShipment`: nunca
+      // visível a quem não poderia já agir sobre o cliente/vendedor a que o
+      // backorder pertence, inclusive o portal do próprio cliente.
+
+      function validBackorderVisibilityPayload(organizationId) {
+        return resource.data.keys().hasAll([
+            'organizationId',
+            'companyId',
+            'sellerId',
+            'customerId'
+          ])
+          && resource.data.organizationId == organizationId
+          && resource.data.companyId is string
+          && resource.data.companyId.size() > 0
+          && resource.data.sellerId is string
+          && resource.data.sellerId.size() > 0
+          && resource.data.customerId is string
+          && resource.data.customerId.size() > 0;
+      }
+
+      function managerCanReadBackorder(organizationId) {
+        return isSalesManager(organizationId)
+          && exists(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId))
+          && requesterTeamIds(organizationId).hasAny(
+              get(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId)).data.teamIds
+            );
+      }
+
+      function canReadBackorder(organizationId) {
+        return validBackorderVisibilityPayload(organizationId)
+          && (
+            isOwnerOrAdmin(organizationId)
+            || (isCustomerPortal(organizationId)
+              && resource.data.customerId == portalCustomerId(organizationId))
+            || (isSalesRep(organizationId) && resource.data.sellerId == request.auth.uid)
+            || managerCanReadBackorder(organizationId)
+          );
+      }
+
+      match /backorders/{backorderId} {
+        allow get, list: if canReadBackorder(organizationId);
+        allow create, update, delete: if false;
+      }
+
       // TASK-183: consent, approved templates and delivery history are
       // mediated exclusively by Cloud Functions. This prevents a client
       // from forging opt-in, approving its own template or changing a

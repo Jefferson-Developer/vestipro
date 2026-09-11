@@ -269,6 +269,29 @@ enum Capability {
   /// (webhook de transportadora) e a detecção automática de atraso rodam
   /// pelo Admin SDK e nunca passam por este capability.
   shipmentManage,
+
+  /// Solicitar, cancelar ou converter (em um pedido já submetido) um
+  /// `BackorderRequest`/solicitação de estoque futuro (TASK-215, EPIC-32) —
+  /// a solicitação em si nunca move/reserva estoque por conta própria; ela
+  /// só abre um registro de demanda que `createBackorderRequest`/
+  /// `cancelBackorderRequest`/`convertBackorderToOrder` revalidam de forma
+  /// independente (cliente/variante existem, quem solicita pode agir sobre
+  /// aquele cliente/pedido, o pedido de conversão realmente cobre a
+  /// quantidade pendente). Mirrors [returnRequestCreate]'s own scope:
+  /// granted to whoever já pode agir sobre aquele cliente/pedido —
+  /// `SALES_REP` para os próprios, `SALES_MANAGER` para os da própria
+  /// equipe, `OWNER`/`ADMIN` para qualquer um.
+  backorderRequest,
+
+  /// Aprovar/recusar um `BackorderRequest` acima do limite de auto-aprovação
+  /// da organização (TASK-215, EPIC-32) — a única capability que permite
+  /// `decideBackorderApproval` avançar um backorder `awaiting_approval` para
+  /// `queued`/`rejected`. Mirrors [returnRequestApprove]'s exact grant set
+  /// (`OWNER`/`ADMIN`/`SALES_MANAGER`) — um `SALES_REP` pode solicitar um
+  /// backorder (e converter um já liberado, via [backorderRequest]) mas
+  /// nunca decide um que exige aprovação, mesma assimetria já aplicada às
+  /// devoluções/trocas.
+  backorderApprove,
 }
 
 extension CapabilityCode on Capability {
@@ -329,6 +352,8 @@ extension CapabilityCode on Capability {
       Capability.postSaleEventRegister => 'postSaleEvent.register',
       Capability.commercialPackManage => 'commercialPack.manage',
       Capability.shipmentManage => 'shipment.manage',
+      Capability.backorderRequest => 'backorder.request',
+      Capability.backorderApprove => 'backorder.approve',
     };
   }
 }

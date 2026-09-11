@@ -435,6 +435,29 @@ final class AnalyticsEvents {
   /// `issue_type` are carried as parameters, never the resolution note.
   static const String logisticsIssueResolved = 'logistics_issue_resolved';
 
+  /// Logged by `RequestBackorderCubit` (TASK-215, EPIC-32) whenever a
+  /// vendedor/cliente successfully opens a `BackorderRequest`/solicitação de
+  /// estoque futuro — `origin`/`priority`/`quantity` are carried as
+  /// parameters, never customer PII.
+  static const String backorderRequested = 'backorder_requested';
+
+  /// Logged by `BackorderQueueCubit` (TASK-215, EPIC-32) whenever a gestor
+  /// approves a backorder that was `awaiting_approval`.
+  static const String backorderApproved = 'backorder_approved';
+
+  /// Logged by `BackorderQueueCubit` (TASK-215, EPIC-32) whenever a gestor
+  /// rejects a backorder that was `awaiting_approval`.
+  static const String backorderRejected = 'backorder_rejected';
+
+  /// Logged by `BackorderQueueCubit` (TASK-215, EPIC-32) whenever a backorder
+  /// is cancelled before ever being converted/rejected.
+  static const String backorderCancelled = 'backorder_cancelled';
+
+  /// Logged by `BackorderQueueCubit` (TASK-215, EPIC-32) whenever a backorder
+  /// is successfully linked to an already-submitted pedido — `order_id` is
+  /// carried as a parameter.
+  static const String backorderConverted = 'backorder_converted';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -561,5 +584,10 @@ final class AnalyticsEvents {
     buyerCollaborationConvertedToOrder,
     logisticsIssueRegistered,
     logisticsIssueResolved,
+    backorderRequested,
+    backorderApproved,
+    backorderRejected,
+    backorderCancelled,
+    backorderConverted,
   ];
 }

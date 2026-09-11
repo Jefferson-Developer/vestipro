@@ -773,6 +773,76 @@ void main() {
       },
     );
 
+    test(
+      'OWNER/ADMIN/SALES_MANAGER/SALES_REP can request/cancel/convert a '
+      'backorder (TASK-215); SALES_ASSISTANT/FINANCE/READ_ONLY never can',
+      () {
+        for (final role in <SystemRoleName>[
+          SystemRoleName.owner,
+          SystemRoleName.admin,
+          SystemRoleName.salesManager,
+          SystemRoleName.salesRep,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.backorderRequest),
+            isTrue,
+            reason: '$role must be able to request/cancel/convert a backorder.',
+          );
+        }
+
+        for (final role in <SystemRoleName>[
+          SystemRoleName.salesAssistant,
+          SystemRoleName.finance,
+          SystemRoleName.readOnly,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.backorderRequest),
+            isFalse,
+            reason: '$role must never request/cancel/convert a backorder.',
+          );
+        }
+      },
+    );
+
+    test(
+      'only OWNER/ADMIN/SALES_MANAGER can decide (approve/reject) a backorder '
+      '(TASK-215); SALES_REP/SALES_ASSISTANT/FINANCE/READ_ONLY never can',
+      () {
+        for (final role in <SystemRoleName>[
+          SystemRoleName.owner,
+          SystemRoleName.admin,
+          SystemRoleName.salesManager,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.backorderApprove),
+            isTrue,
+            reason: '$role must be able to decide a backorder.',
+          );
+        }
+
+        for (final role in <SystemRoleName>[
+          SystemRoleName.salesRep,
+          SystemRoleName.salesAssistant,
+          SystemRoleName.finance,
+          SystemRoleName.readOnly,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.backorderApprove),
+            isFalse,
+            reason: '$role must never decide a backorder.',
+          );
+        }
+      },
+    );
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,

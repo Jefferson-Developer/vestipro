@@ -177,6 +177,13 @@ export {
   calculateOrderCommissionOnWrite,
 } from './commissions';
 export { createReturnRequest, resolveReturnRequest } from './returns';
+export {
+  createBackorderRequest,
+  decideBackorderApproval,
+  cancelBackorderRequest,
+  convertBackorderToOrder,
+  notifyBackordersOnStockAvailable,
+} from './backorder';
 export { createExchangeRequest, resolveExchangeRequest } from './exchanges';
 export { registerPostSaleEvent } from './after_sales';
 export {

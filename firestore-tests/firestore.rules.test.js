@@ -815,6 +815,49 @@ function logisticsIssueDoc({
   };
 }
 
+function backorderDoc({
+  organizationId,
+  companyId = 'company-a',
+  customerId = 'customer-a',
+  sellerId,
+  status = 'queued',
+}) {
+  return {
+    organizationId,
+    companyId,
+    customerId,
+    productId: 'product-a',
+    variantId: 'variant-a',
+    sku: 'SKU-A',
+    quantity: 10,
+    fulfilledQuantity: 0,
+    quantityAtRequest: 2,
+    origin: 'catalog',
+    priority: 'normal',
+    priorityWeight: 1,
+    sellerId,
+    relatedOrderId: null,
+    relatedOrderItemId: null,
+    requestedDeliveryDate: null,
+    estimatedUnitPrice: null,
+    notes: null,
+    status,
+    resolutionNote: null,
+    convertedOrderId: null,
+    convertedAt: null,
+    convertedBy: null,
+    expectedAvailabilityDate: null,
+    readyToFulfillAt: null,
+    requestedBy: sellerId,
+    requestedByName: 'Vendedor Teste',
+    createdAt: now(),
+    createdBy: sellerId,
+    updatedAt: now(),
+    updatedBy: sellerId,
+    version: 1,
+  };
+}
+
 function npsSurveyRequestDoc({
   organizationId,
   companyId = 'company-a',
@@ -2182,6 +2225,80 @@ describe(
     });
   },
 );
+
+describe('organizations/{organizationId}/backorders/{backorderId}  (TASK-215, EPIC-32 — backorder e solicitação de estoque futuro)', () => {
+  beforeEach(async () => {
+    await testEnv.withSecurityRulesDisabled(async (context) => {
+      const db = context.firestore();
+      await db.doc(`organizations/${ORG_A}/members/portal-a`).set({
+        ...membershipDoc({ organizationId: ORG_A, userId: 'portal-a', roleId: 'CUSTOMER_PORTAL', roleName: 'CUSTOMER_PORTAL' }),
+        customerId: 'customer-a',
+      });
+      await db
+        .doc(`organizations/${ORG_A}/backorders/backorder-rep-a`)
+        .set(backorderDoc({ organizationId: ORG_A, sellerId: 'rep-a', customerId: 'customer-a' }));
+      await db
+        .doc(`organizations/${ORG_A}/backorders/backorder-rep-b`)
+        .set(backorderDoc({ organizationId: ORG_A, sellerId: 'rep-b', customerId: 'customer-other' }));
+      await db
+        .doc(`organizations/${ORG_B}/backorders/backorder-other-tenant`)
+        .set(backorderDoc({ organizationId: ORG_B, companyId: 'company-b', sellerId: 'owner-b' }));
+    });
+  });
+
+  test('SALES_REP lê o próprio backorder', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/backorders/backorder-rep-a`).get());
+  });
+
+  test('SALES_REP não lê backorder de outro vendedor', async () => {
+    const db = testEnv.authenticatedContext('rep-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/backorders/backorder-rep-b`).get());
+  });
+
+  test('SALES_MANAGER lê o backorder do vendedor da própria equipe, mas não de outra equipe', async () => {
+    const db = testEnv.authenticatedContext('manager-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/backorders/backorder-rep-a`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/backorders/backorder-rep-b`).get());
+  });
+
+  test('ADMIN e OWNER leem todos os backorders da própria organization', async () => {
+    const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+    const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+
+    await assertSucceeds(ownerDb.collection(`organizations/${ORG_A}/backorders`).get());
+    await assertSucceeds(adminDb.collection(`organizations/${ORG_A}/backorders`).get());
+  });
+
+  test('FINANCE não lê backorder (sem escopo de cliente/vendedor)', async () => {
+    const db = testEnv.authenticatedContext('finance-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_A}/backorders/backorder-rep-a`).get());
+  });
+
+  test('membro da Org A não lê backorder da Org B (cross-tenant)', async () => {
+    const db = testEnv.authenticatedContext('owner-a').firestore();
+    await assertFails(db.doc(`organizations/${ORG_B}/backorders/backorder-other-tenant`).get());
+  });
+
+  test('cliente externo (portal) só vê os próprios backorders', async () => {
+    const db = testEnv.authenticatedContext('portal-a').firestore();
+    await assertSucceeds(db.doc(`organizations/${ORG_A}/backorders/backorder-rep-a`).get());
+    await assertFails(db.doc(`organizations/${ORG_A}/backorders/backorder-rep-b`).get());
+  });
+
+  test(
+    'ninguém escreve backorder pelo cliente, nem OWNER — createBackorderRequest/decideBackorderApproval/'
+      + 'cancelBackorderRequest/convertBackorderToOrder (Admin SDK) são o único caminho',
+    async () => {
+      const db = testEnv.authenticatedContext('owner-a').firestore();
+      await assertFails(
+        db.doc(`organizations/${ORG_A}/backorders/backorder-forged`).set(backorderDoc({ organizationId: ORG_A, sellerId: 'rep-a' })),
+      );
+      await assertFails(db.doc(`organizations/${ORG_A}/backorders/backorder-rep-a`).update({ status: 'converted' }));
+      await assertFails(db.doc(`organizations/${ORG_A}/backorders/backorder-rep-a`).delete());
+    },
+  );
+});
 
 describe('organizations/{organizationId}/npsSurveyRequests/{npsSurveyRequestId} e npsResponses/{npsResponseId}  (TASK-202, EPIC-30 — NPS)', () => {
   // Visibility mirrors `postSaleEvents` exactly (`canReadNps`), so both

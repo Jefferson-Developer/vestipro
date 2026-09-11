@@ -240,6 +240,24 @@ import '../features/authentication/presentation/bloc/forgot_password_bloc.dart'
 import '../features/authentication/presentation/bloc/login_bloc.dart' as _i776;
 import '../features/authentication/presentation/bloc/sign_up_bloc.dart'
     as _i481;
+import '../features/backorder/data/datasources/backorder_read_data_source.dart'
+    as _i605;
+import '../features/backorder/data/datasources/backorder_write_data_source.dart'
+    as _i868;
+import '../features/backorder/data/datasources/cloud_functions_backorder_write_data_source.dart'
+    as _i1031;
+import '../features/backorder/data/datasources/firestore_backorder_read_data_source.dart'
+    as _i207;
+import '../features/backorder/data/repositories/backorder_repository_impl.dart'
+    as _i701;
+import '../features/backorder/domain/repositories/backorder_repository.dart'
+    as _i448;
+import '../features/backorder/domain/usecases/backorder_use_cases.dart'
+    as _i127;
+import '../features/backorder/presentation/cubit/backorder_queue_cubit.dart'
+    as _i654;
+import '../features/backorder/presentation/cubit/request_backorder_cubit.dart'
+    as _i18;
 import '../features/buyer_collaboration/data/datasources/buyer_collaboration_read_data_source.dart'
     as _i214;
 import '../features/buyer_collaboration/data/datasources/buyer_collaboration_write_data_source.dart'
@@ -3504,6 +3522,10 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i603.SavedReportRemoteDataSource>(),
       ),
     );
+    gh.lazySingleton<_i605.BackorderReadDataSource>(
+      () =>
+          _i207.FirestoreBackorderReadDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.lazySingleton<_i902.InsightDataSource>(
       () => _i837.FirestoreInsightDataSource(gh<_i974.FirebaseFirestore>()),
     );
@@ -3639,6 +3661,11 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i226.ReportScheduleRemoteDataSource>(
       () => _i272.FirestoreReportScheduleRemoteDataSource(
         gh<_i974.FirebaseFirestore>(),
+      ),
+    );
+    gh.lazySingleton<_i868.BackorderWriteDataSource>(
+      () => _i1031.CloudFunctionsBackorderWriteDataSource(
+        gh<_i340.CloudFunctionsService>(),
       ),
     );
     gh.lazySingleton<_i921.NpsAggregateRepository>(
@@ -4576,6 +4603,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i47.PermissionService>(),
       ),
     );
+    gh.lazySingleton<_i448.BackorderRepository>(
+      () => _i701.BackorderRepositoryImpl(
+        gh<_i605.BackorderReadDataSource>(),
+        gh<_i868.BackorderWriteDataSource>(),
+      ),
+    );
     gh.factory<_i6.LoadCustomerDashboardSnapshotUseCase>(
       () => _i6.LoadCustomerDashboardSnapshotUseCase(
         gh<_i649.AggregationRepository>(),
@@ -5315,6 +5348,35 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i127.WatchBackorderQueueUseCase>(
+      () => _i127.WatchBackorderQueueUseCase(gh<_i448.BackorderRepository>()),
+    );
+    gh.factory<_i127.WatchBackordersAwaitingApprovalUseCase>(
+      () => _i127.WatchBackordersAwaitingApprovalUseCase(
+        gh<_i448.BackorderRepository>(),
+      ),
+    );
+    gh.factory<_i127.WatchBackordersForCustomerUseCase>(
+      () => _i127.WatchBackordersForCustomerUseCase(
+        gh<_i448.BackorderRepository>(),
+      ),
+    );
+    gh.factory<_i127.CreateBackorderRequestUseCase>(
+      () =>
+          _i127.CreateBackorderRequestUseCase(gh<_i448.BackorderRepository>()),
+    );
+    gh.factory<_i127.DecideBackorderApprovalUseCase>(
+      () =>
+          _i127.DecideBackorderApprovalUseCase(gh<_i448.BackorderRepository>()),
+    );
+    gh.factory<_i127.CancelBackorderRequestUseCase>(
+      () =>
+          _i127.CancelBackorderRequestUseCase(gh<_i448.BackorderRepository>()),
+    );
+    gh.factory<_i127.ConvertBackorderToOrderUseCase>(
+      () =>
+          _i127.ConvertBackorderToOrderUseCase(gh<_i448.BackorderRepository>()),
+    );
     gh.factory<_i904.OpportunityCenterBloc>(
       () => _i904.OpportunityCenterBloc(
         gh<_i1006.ListOpportunityCenterInsightsUseCase>(),
@@ -5493,6 +5555,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i576.ListCustomerPortfolioUseCase>(),
       ),
     );
+    gh.factory<_i654.BackorderQueueCubit>(
+      () => _i654.BackorderQueueCubit(
+        gh<_i127.WatchBackorderQueueUseCase>(),
+        gh<_i127.WatchBackordersAwaitingApprovalUseCase>(),
+        gh<_i127.DecideBackorderApprovalUseCase>(),
+        gh<_i127.CancelBackorderRequestUseCase>(),
+        gh<_i127.ConvertBackorderToOrderUseCase>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
     gh.factory<_i522.CustomerPortfolioBloc>(
       () => _i522.CustomerPortfolioBloc(
         listCustomerPortfolio: gh<_i576.ListCustomerPortfolioUseCase>(),
@@ -5657,6 +5729,12 @@ extension GetItInjectableX on _i174.GetIt {
         deactivateUser: gh<_i126.DeactivateUserUseCase>(),
         reactivateUser: gh<_i603.ReactivateUserUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i18.RequestBackorderCubit>(
+      () => _i18.RequestBackorderCubit(
+        gh<_i127.CreateBackorderRequestUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i349.GetVariantFutureStockSummaryUseCase>(

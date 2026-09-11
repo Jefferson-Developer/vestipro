@@ -98,6 +98,16 @@ abstract final class RolePermissionMatrix {
     // mesma amplitude de Capability.postSaleEventRegister; OWNER/ADMIN já a
     // recebem via o conjunto completo/quase completo acima.
     Capability.shipmentManage,
+    // TASK-215: SALES_MANAGER solicita/cancela/converte um backorder para
+    // clientes/pedidos da própria equipe, mesma amplitude de
+    // Capability.postSaleEventRegister; OWNER/ADMIN já a recebem via o
+    // conjunto completo/quase completo acima.
+    Capability.backorderRequest,
+    // TASK-215: SALES_MANAGER decide (aprova/recusa) um backorder acima do
+    // limite de auto-aprovação — mesma amplitude de
+    // Capability.returnRequestApprove; OWNER/ADMIN já a recebem via o
+    // conjunto completo/quase completo acima.
+    Capability.backorderApprove,
   };
 
   static const Set<Capability> _salesRepCapabilities = <Capability>{
@@ -136,6 +146,12 @@ abstract final class RolePermissionMatrix {
     // abre/resolve ocorrência logística para os próprios pedidos, mesma
     // amplitude de Capability.postSaleEventRegister.
     Capability.shipmentManage,
+    // TASK-215: SALES_REP solicita/cancela/converte um backorder para os
+    // próprios clientes/pedidos, mesma amplitude de
+    // Capability.postSaleEventRegister — mas nunca decide (aprova/recusa)
+    // um que exige aprovação (Capability.backorderApprove, deliberadamente
+    // ausente aqui).
+    Capability.backorderRequest,
   };
 
   static const Set<Capability> _salesAssistantCapabilities = <Capability>{
