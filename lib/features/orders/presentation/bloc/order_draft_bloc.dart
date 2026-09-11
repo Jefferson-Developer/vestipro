@@ -58,6 +58,10 @@ final class OrderDraftBloc extends Bloc<OrderDraftEvent, OrderDraftState> {
       transformer: sequential(),
     );
     on<OrderDraftItemRemoved>(_onItemRemoved, transformer: sequential());
+    on<OrderDraftPackGroupRemoved>(
+      _onPackGroupRemoved,
+      transformer: sequential(),
+    );
     on<OrderDraftItemVariantQuantityChanged>(
       _onItemVariantQuantityChanged,
       transformer: sequential(),
@@ -264,6 +268,29 @@ final class OrderDraftBloc extends Bloc<OrderDraftEvent, OrderDraftState> {
     final updatedItems = OrderItemEditor.withRemovedItem(
       order.items,
       itemId: event.itemId,
+    );
+    emit(
+      state.copyWith(
+        order: order.copyWith(items: updatedItems),
+        saveStatus: OrderDraftSaveStatus.idle,
+        clearFailure: true,
+      ),
+    );
+    _scheduleAutoSave();
+  }
+
+  /// Removes every item of one kit/pacote/sortimento instance at once
+  /// (TASK-208), identified by [OrderDraftPackGroupRemoved.packGroupId].
+  void _onPackGroupRemoved(
+    OrderDraftPackGroupRemoved event,
+    Emitter<OrderDraftState> emit,
+  ) {
+    final order = state.order;
+    if (order == null) return;
+
+    final updatedItems = OrderItemEditor.withRemovedPackGroup(
+      order.items,
+      packGroupId: event.packGroupId,
     );
     emit(
       state.copyWith(

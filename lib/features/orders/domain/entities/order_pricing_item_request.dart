@@ -10,11 +10,24 @@ final class OrderPricingItemRequest {
     this.collectionId,
     this.categoryId,
     this.manualDiscountPercent = 0,
+    this.packId,
+    this.packGroupId,
   });
 
   final String productId;
   final String? variantId;
   final int quantity;
+
+  /// `OrderItem.packId`/`OrderItem.packGroupId` (TASK-208), when this item
+  /// came from expanding a `CommercialPack` — both `null` for a plain
+  /// catalog item. The server (`calculatePricing`) is the only place that
+  /// ever resolves [packId] into a real `CommercialPack.pricingPolicyType`
+  /// (fetched fresh from Firestore, never trusted from this request) and
+  /// applies it to every item sharing the same [packGroupId] — this client
+  /// never sends the policy/discount itself, only which pack/group an item
+  /// belongs to.
+  final String? packId;
+  final String? packGroupId;
 
   /// The order's own `collectionId` (`Order.collectionId`), when the seller
   /// narrowed the catalog to one collection — every item on the same order

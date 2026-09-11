@@ -2,6 +2,7 @@ import {
   calculatePricingEngine,
   exceedsPricingTolerance,
   type PricingEngineCampaign,
+  type PricingEngineCommercialPack,
   type PricingEngineCommercialRule,
   type PricingEngineDiscountPolicy,
   type PricingEngineInput,
@@ -367,6 +368,126 @@ describe('calculatePricingEngine', () => {
     expect(result.items[0].priceAfterCampaigns).toBe(90);
     expect(result.items[0].finalUnitPrice).toBe(79.2);
     expect(result.approvalRequired).toBe(true);
+  });
+});
+
+function buildPackPricingInput(
+  pack: PricingEngineCommercialPack,
+  overrides: Partial<PricingEngineInput> = {},
+): PricingEngineInput {
+  return buildInput({
+    priceListItems: [
+      { productId: 'product-1', companyId: 'company-1', price: 100 },
+      { productId: 'product-2', companyId: 'company-1', price: 100 },
+    ],
+    packs: [pack],
+    items: [
+      { productId: 'product-1', quantity: 2, packId: 'pack-1', packGroupId: 'group-1' },
+      { productId: 'product-2', quantity: 1, packId: 'pack-1', packGroupId: 'group-1' },
+    ],
+    shippingAmount: 0,
+    ...overrides,
+  });
+}
+
+describe('calculatePricingEngine — commercial pack adjustments (TASK-208)', () => {
+  it('never adjusts anything for the componentSum policy', () => {
+    const result = calculatePricingEngine(
+      buildPackPricingInput({
+        id: 'pack-1',
+        companyId: 'company-1',
+        status: 'active',
+        pricingPolicyType: 'componentSum',
+      }),
+    );
+
+    expect(result.total).toBe(300);
+    expect(result.packAdjustmentTotal).toBe(0);
+    expect(result.items.every((item) => item.appliedDiscounts.length === 0)).toBe(
+      true,
+    );
+  });
+
+  it('forces the group total to fixedPrice, distributed proportionally across its items', () => {
+    const result = calculatePricingEngine(
+      buildPackPricingInput({
+        id: 'pack-1',
+        companyId: 'company-1',
+        status: 'active',
+        pricingPolicyType: 'fixedPrice',
+        fixedPrice: 250,
+      }),
+    );
+
+    expect(result.packAdjustmentTotal).toBe(50);
+    expect(result.total).toBe(250);
+    // product-1 (200 of the 300 baseline, 2/3) absorbs 2/3 of the 50
+    // adjustment; product-2 (the last item) absorbs the exact remainder so
+    // both lines always sum back to fixedPrice, never an off-by-a-cent
+    // drift.
+    expect(result.items[0].lineTotal).toBeCloseTo(200 - 50 * (200 / 300), 2);
+    expect(result.items[1].lineTotal).toBeCloseTo(
+      250 - result.items[0].lineTotal,
+      2,
+    );
+    expect(
+      result.items.flatMap((item) => item.appliedDiscounts),
+    ).toEqual([
+      expect.objectContaining({ origin: 'commercial_pack' }),
+      expect.objectContaining({ origin: 'commercial_pack' }),
+    ]);
+  });
+
+  it('applies a packDiscount percentage across the whole group', () => {
+    const result = calculatePricingEngine(
+      buildPackPricingInput({
+        id: 'pack-1',
+        companyId: 'company-1',
+        status: 'active',
+        pricingPolicyType: 'packDiscount',
+        discountPercentage: 0.1,
+      }),
+    );
+
+    expect(result.packAdjustmentTotal).toBe(30);
+    expect(result.total).toBe(270);
+  });
+
+  it('zeroes the bonus component under the bonusItem policy', () => {
+    const result = calculatePricingEngine(
+      buildPackPricingInput({
+        id: 'pack-1',
+        companyId: 'company-1',
+        status: 'active',
+        pricingPolicyType: 'bonusItem',
+        bonusComponentId: 'product-2',
+      }),
+    );
+
+    const bonusItem = result.items.find((item) => item.productId === 'product-2')!;
+    expect(bonusItem.finalUnitPrice).toBe(0);
+    expect(bonusItem.lineTotal).toBe(0);
+    expect(result.packAdjustmentTotal).toBe(100);
+    expect(result.total).toBe(200);
+  });
+
+  it('prices a group as componentSum when its referenced pack was not supplied', () => {
+    const result = calculatePricingEngine(
+      buildPackPricingInput(
+        {
+          id: 'pack-other',
+          companyId: 'company-1',
+          status: 'active',
+          pricingPolicyType: 'fixedPrice',
+          fixedPrice: 1,
+        },
+        // `pack-1` (the id every item references) is never in `packs` here.
+        {},
+      ),
+    );
+
+    expect(result.packAdjustmentTotal).toBe(0);
+    expect(result.total).toBe(300);
   });
 });
 

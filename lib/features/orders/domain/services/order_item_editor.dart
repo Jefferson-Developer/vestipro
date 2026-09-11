@@ -13,11 +13,20 @@ final class OrderItemEditor {
   const OrderItemEditor._();
 
   /// Merges [additions] into [items]: a variant already present on the order
-  /// (matched by [OrderItem.variantId]) has its quantity summed and its
-  /// [OrderItem.unitPrice] refreshed to the addition's own — the price the
-  /// seller was just shown for that fresh "add" action — never a previously
-  /// captured, possibly stale price for the same session. A variant not yet
-  /// present is appended as-is.
+  /// (matched by [OrderItem.variantId] **and** [OrderItem.packGroupId], see
+  /// below) has its quantity summed and its [OrderItem.unitPrice] refreshed
+  /// to the addition's own — the price the seller was just shown for that
+  /// fresh "add" action — never a previously captured, possibly stale price
+  /// for the same session. A variant not yet present is appended as-is.
+  ///
+  /// [OrderItem.packGroupId] is part of the match key (TASK-208) so that:
+  /// a bare catalog item never silently merges into (and loses the
+  /// traceability of) an existing pack item for the same variant, and two
+  /// separate "adicionar pacote" actions for the very same
+  /// `CommercialPack` never merge into a single line either — each
+  /// [OrderItem.packGroupId] is its own distinct pack instance, always kept
+  /// separately removable/explainable, even when it happens to resolve to a
+  /// variant already elsewhere on the order.
   static List<OrderItem> withAddedItems(
     List<OrderItem> items,
     List<OrderItem> additions,
@@ -25,7 +34,9 @@ final class OrderItemEditor {
     final result = List<OrderItem>.of(items);
     for (final addition in additions) {
       final existingIndex = result.indexWhere(
-        (item) => item.variantId == addition.variantId,
+        (item) =>
+            item.variantId == addition.variantId &&
+            item.packGroupId == addition.packGroupId,
       );
       if (existingIndex == -1) {
         result.add(addition);
@@ -83,6 +94,20 @@ final class OrderItemEditor {
   }) {
     return List<OrderItem>.unmodifiable(
       items.where((item) => item.id != itemId),
+    );
+  }
+
+  /// Removes every item sharing [packGroupId] (TASK-208) — "desfazer
+  /// pacote" always removes the whole instance at once, never one component
+  /// at a time, per this task's own business rule ("a remoção de um pacote
+  /// remove todos os itens vinculados"). A no-op when no item currently
+  /// carries this [packGroupId].
+  static List<OrderItem> withRemovedPackGroup(
+    List<OrderItem> items, {
+    required String packGroupId,
+  }) {
+    return List<OrderItem>.unmodifiable(
+      items.where((item) => item.packGroupId != packGroupId),
     );
   }
 

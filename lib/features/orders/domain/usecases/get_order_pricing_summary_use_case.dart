@@ -58,6 +58,8 @@ final class GetOrderPricingSummaryUseCase {
             variantId: item.variantId,
             quantity: item.quantity,
             collectionId: order.collectionId,
+            packId: item.packId,
+            packGroupId: item.packGroupId,
           ),
         )
         .toList(growable: false);
@@ -94,6 +96,7 @@ final class GetOrderPricingSummaryUseCase {
         item.productId,
         item.variantId,
         item.quantity,
+        item.packGroupId,
       ],
     ]);
     return 'order-pricing-${order.id}-${fingerprint.toRadixString(16)}';

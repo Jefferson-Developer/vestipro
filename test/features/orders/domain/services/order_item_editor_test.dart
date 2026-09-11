@@ -63,6 +63,114 @@ void main() {
           4,
         );
       });
+
+      test(
+        'never merges a bare catalog addition into an existing pack item for '
+        'the same variant (TASK-208)',
+        () {
+          final existing = <OrderItem>[
+            _item(
+              id: 'item-1',
+              variantId: 'variant-1',
+              quantity: 2,
+            ).copyWith(packGroupId: 'group-1', packId: 'pack-1'),
+          ];
+
+          final result = OrderItemEditor.withAddedItems(existing, <OrderItem>[
+            _item(id: 'item-2', variantId: 'variant-1', quantity: 1),
+          ]);
+
+          expect(result, hasLength(2));
+          expect(result.firstWhere((item) => item.id == 'item-1').quantity, 2);
+          expect(result.firstWhere((item) => item.id == 'item-2').quantity, 1);
+        },
+      );
+
+      test('never merges two separate instances of the same pack for the same '
+          'variant (TASK-208) — each packGroupId stays its own line', () {
+        final existing = <OrderItem>[
+          _item(
+            id: 'item-1',
+            variantId: 'variant-1',
+            quantity: 2,
+          ).copyWith(packGroupId: 'group-1', packId: 'pack-1'),
+        ];
+
+        final result = OrderItemEditor.withAddedItems(existing, <OrderItem>[
+          _item(
+            id: 'item-2',
+            variantId: 'variant-1',
+            quantity: 2,
+          ).copyWith(packGroupId: 'group-2', packId: 'pack-1'),
+        ]);
+
+        expect(result, hasLength(2));
+        expect(result.map((item) => item.packGroupId), <String>[
+          'group-1',
+          'group-2',
+        ]);
+      });
+
+      test('merges two additions sharing the same packGroupId and variant '
+          '(retrying the exact same pack addition)', () {
+        final existing = <OrderItem>[
+          _item(
+            id: 'item-1',
+            variantId: 'variant-1',
+            quantity: 2,
+          ).copyWith(packGroupId: 'group-1', packId: 'pack-1'),
+        ];
+
+        final result = OrderItemEditor.withAddedItems(existing, <OrderItem>[
+          _item(
+            id: 'item-2',
+            variantId: 'variant-1',
+            quantity: 2,
+          ).copyWith(packGroupId: 'group-1', packId: 'pack-1'),
+        ]);
+
+        expect(result, hasLength(1));
+        expect(result.single.quantity, 4);
+      });
+    });
+
+    group('withRemovedPackGroup', () {
+      test('removes every item sharing the packGroupId, keeps the rest', () {
+        final items = <OrderItem>[
+          _item(
+            id: 'item-1',
+            variantId: 'variant-1',
+            quantity: 1,
+          ).copyWith(packGroupId: 'group-1'),
+          _item(
+            id: 'item-2',
+            variantId: 'variant-2',
+            quantity: 1,
+          ).copyWith(packGroupId: 'group-1'),
+          _item(id: 'item-3', variantId: 'variant-3', quantity: 1),
+        ];
+
+        final result = OrderItemEditor.withRemovedPackGroup(
+          items,
+          packGroupId: 'group-1',
+        );
+
+        expect(result, hasLength(1));
+        expect(result.single.id, 'item-3');
+      });
+
+      test('is a no-op when the packGroupId is not found', () {
+        final items = <OrderItem>[
+          _item(id: 'item-1', variantId: 'variant-1', quantity: 1),
+        ];
+
+        final result = OrderItemEditor.withRemovedPackGroup(
+          items,
+          packGroupId: 'missing',
+        );
+
+        expect(result, hasLength(1));
+      });
     });
 
     group('withUpdatedQuantity', () {

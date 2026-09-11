@@ -22,6 +22,7 @@ final class OrderPricingMapper {
       total: dto.total,
       blocked: dto.blocked,
       approvalRequired: dto.approvalRequired,
+      packAdjustmentTotal: dto.packAdjustmentTotal,
       items: dto.items.map(_itemToEntity).toList(growable: false),
     );
   }

@@ -15,7 +15,7 @@ T _$identity<T>(T value) => value;
 mixin _$OrderItem {
 
  String get id; String get variantId;// Denormalized from the variant's product for display without a join.
- String get productId; int get quantity; double get unitPrice; double get discountAmount; double get surchargeAmount; double get subtotal;
+ String get productId; int get quantity; double get unitPrice; double get discountAmount; double get surchargeAmount; double get subtotal; String? get packId; String? get packCode; int? get packVersion; String? get packGroupId; String? get packName;
 /// Create a copy of OrderItem
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -26,16 +26,16 @@ $OrderItemCopyWith<OrderItem> get copyWith => _$OrderItemCopyWithImpl<OrderItem>
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrderItem&&(identical(other.id, id) || other.id == id)&&(identical(other.variantId, variantId) || other.variantId == variantId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unitPrice, unitPrice) || other.unitPrice == unitPrice)&&(identical(other.discountAmount, discountAmount) || other.discountAmount == discountAmount)&&(identical(other.surchargeAmount, surchargeAmount) || other.surchargeAmount == surchargeAmount)&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is OrderItem&&(identical(other.id, id) || other.id == id)&&(identical(other.variantId, variantId) || other.variantId == variantId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unitPrice, unitPrice) || other.unitPrice == unitPrice)&&(identical(other.discountAmount, discountAmount) || other.discountAmount == discountAmount)&&(identical(other.surchargeAmount, surchargeAmount) || other.surchargeAmount == surchargeAmount)&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal)&&(identical(other.packId, packId) || other.packId == packId)&&(identical(other.packCode, packCode) || other.packCode == packCode)&&(identical(other.packVersion, packVersion) || other.packVersion == packVersion)&&(identical(other.packGroupId, packGroupId) || other.packGroupId == packGroupId)&&(identical(other.packName, packName) || other.packName == packName));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,variantId,productId,quantity,unitPrice,discountAmount,surchargeAmount,subtotal);
+int get hashCode => Object.hash(runtimeType,id,variantId,productId,quantity,unitPrice,discountAmount,surchargeAmount,subtotal,packId,packCode,packVersion,packGroupId,packName);
 
 @override
 String toString() {
-  return 'OrderItem(id: $id, variantId: $variantId, productId: $productId, quantity: $quantity, unitPrice: $unitPrice, discountAmount: $discountAmount, surchargeAmount: $surchargeAmount, subtotal: $subtotal)';
+  return 'OrderItem(id: $id, variantId: $variantId, productId: $productId, quantity: $quantity, unitPrice: $unitPrice, discountAmount: $discountAmount, surchargeAmount: $surchargeAmount, subtotal: $subtotal, packId: $packId, packCode: $packCode, packVersion: $packVersion, packGroupId: $packGroupId, packName: $packName)';
 }
 
 
@@ -46,7 +46,7 @@ abstract mixin class $OrderItemCopyWith<$Res>  {
   factory $OrderItemCopyWith(OrderItem value, $Res Function(OrderItem) _then) = _$OrderItemCopyWithImpl;
 @useResult
 $Res call({
- String id, String variantId, String productId, int quantity, double unitPrice, double discountAmount, double surchargeAmount, double subtotal
+ String id, String variantId, String productId, int quantity, double unitPrice, double discountAmount, double surchargeAmount, double subtotal, String? packId, String? packCode, int? packVersion, String? packGroupId, String? packName
 });
 
 
@@ -63,7 +63,7 @@ class _$OrderItemCopyWithImpl<$Res>
 
 /// Create a copy of OrderItem
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? variantId = null,Object? productId = null,Object? quantity = null,Object? unitPrice = null,Object? discountAmount = null,Object? surchargeAmount = null,Object? subtotal = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? variantId = null,Object? productId = null,Object? quantity = null,Object? unitPrice = null,Object? discountAmount = null,Object? surchargeAmount = null,Object? subtotal = null,Object? packId = freezed,Object? packCode = freezed,Object? packVersion = freezed,Object? packGroupId = freezed,Object? packName = freezed,}) {
   return _then(_self.copyWith(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,variantId: null == variantId ? _self.variantId : variantId // ignore: cast_nullable_to_non_nullable
@@ -73,7 +73,12 @@ as int,unitPrice: null == unitPrice ? _self.unitPrice : unitPrice // ignore: cas
 as double,discountAmount: null == discountAmount ? _self.discountAmount : discountAmount // ignore: cast_nullable_to_non_nullable
 as double,surchargeAmount: null == surchargeAmount ? _self.surchargeAmount : surchargeAmount // ignore: cast_nullable_to_non_nullable
 as double,subtotal: null == subtotal ? _self.subtotal : subtotal // ignore: cast_nullable_to_non_nullable
-as double,
+as double,packId: freezed == packId ? _self.packId : packId // ignore: cast_nullable_to_non_nullable
+as String?,packCode: freezed == packCode ? _self.packCode : packCode // ignore: cast_nullable_to_non_nullable
+as String?,packVersion: freezed == packVersion ? _self.packVersion : packVersion // ignore: cast_nullable_to_non_nullable
+as int?,packGroupId: freezed == packGroupId ? _self.packGroupId : packGroupId // ignore: cast_nullable_to_non_nullable
+as String?,packName: freezed == packName ? _self.packName : packName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -158,10 +163,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String variantId,  String productId,  int quantity,  double unitPrice,  double discountAmount,  double surchargeAmount,  double subtotal)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String variantId,  String productId,  int quantity,  double unitPrice,  double discountAmount,  double surchargeAmount,  double subtotal,  String? packId,  String? packCode,  int? packVersion,  String? packGroupId,  String? packName)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _OrderItem() when $default != null:
-return $default(_that.id,_that.variantId,_that.productId,_that.quantity,_that.unitPrice,_that.discountAmount,_that.surchargeAmount,_that.subtotal);case _:
+return $default(_that.id,_that.variantId,_that.productId,_that.quantity,_that.unitPrice,_that.discountAmount,_that.surchargeAmount,_that.subtotal,_that.packId,_that.packCode,_that.packVersion,_that.packGroupId,_that.packName);case _:
   return orElse();
 
 }
@@ -179,10 +184,10 @@ return $default(_that.id,_that.variantId,_that.productId,_that.quantity,_that.un
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String variantId,  String productId,  int quantity,  double unitPrice,  double discountAmount,  double surchargeAmount,  double subtotal)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String variantId,  String productId,  int quantity,  double unitPrice,  double discountAmount,  double surchargeAmount,  double subtotal,  String? packId,  String? packCode,  int? packVersion,  String? packGroupId,  String? packName)  $default,) {final _that = this;
 switch (_that) {
 case _OrderItem():
-return $default(_that.id,_that.variantId,_that.productId,_that.quantity,_that.unitPrice,_that.discountAmount,_that.surchargeAmount,_that.subtotal);case _:
+return $default(_that.id,_that.variantId,_that.productId,_that.quantity,_that.unitPrice,_that.discountAmount,_that.surchargeAmount,_that.subtotal,_that.packId,_that.packCode,_that.packVersion,_that.packGroupId,_that.packName);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -199,10 +204,10 @@ return $default(_that.id,_that.variantId,_that.productId,_that.quantity,_that.un
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String variantId,  String productId,  int quantity,  double unitPrice,  double discountAmount,  double surchargeAmount,  double subtotal)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String variantId,  String productId,  int quantity,  double unitPrice,  double discountAmount,  double surchargeAmount,  double subtotal,  String? packId,  String? packCode,  int? packVersion,  String? packGroupId,  String? packName)?  $default,) {final _that = this;
 switch (_that) {
 case _OrderItem() when $default != null:
-return $default(_that.id,_that.variantId,_that.productId,_that.quantity,_that.unitPrice,_that.discountAmount,_that.surchargeAmount,_that.subtotal);case _:
+return $default(_that.id,_that.variantId,_that.productId,_that.quantity,_that.unitPrice,_that.discountAmount,_that.surchargeAmount,_that.subtotal,_that.packId,_that.packCode,_that.packVersion,_that.packGroupId,_that.packName);case _:
   return null;
 
 }
@@ -214,7 +219,7 @@ return $default(_that.id,_that.variantId,_that.productId,_that.quantity,_that.un
 
 
 class _OrderItem extends OrderItem {
-  const _OrderItem({required this.id, required this.variantId, required this.productId, required this.quantity, required this.unitPrice, this.discountAmount = 0, this.surchargeAmount = 0, required this.subtotal}): super._();
+  const _OrderItem({required this.id, required this.variantId, required this.productId, required this.quantity, required this.unitPrice, this.discountAmount = 0, this.surchargeAmount = 0, required this.subtotal, this.packId, this.packCode, this.packVersion, this.packGroupId, this.packName}): super._();
   
 
 @override final  String id;
@@ -226,6 +231,11 @@ class _OrderItem extends OrderItem {
 @override@JsonKey() final  double discountAmount;
 @override@JsonKey() final  double surchargeAmount;
 @override final  double subtotal;
+@override final  String? packId;
+@override final  String? packCode;
+@override final  int? packVersion;
+@override final  String? packGroupId;
+@override final  String? packName;
 
 /// Create a copy of OrderItem
 /// with the given fields replaced by the non-null parameter values.
@@ -237,16 +247,16 @@ _$OrderItemCopyWith<_OrderItem> get copyWith => __$OrderItemCopyWithImpl<_OrderI
 
 @override
 bool operator ==(Object other) {
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrderItem&&(identical(other.id, id) || other.id == id)&&(identical(other.variantId, variantId) || other.variantId == variantId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unitPrice, unitPrice) || other.unitPrice == unitPrice)&&(identical(other.discountAmount, discountAmount) || other.discountAmount == discountAmount)&&(identical(other.surchargeAmount, surchargeAmount) || other.surchargeAmount == surchargeAmount)&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is _OrderItem&&(identical(other.id, id) || other.id == id)&&(identical(other.variantId, variantId) || other.variantId == variantId)&&(identical(other.productId, productId) || other.productId == productId)&&(identical(other.quantity, quantity) || other.quantity == quantity)&&(identical(other.unitPrice, unitPrice) || other.unitPrice == unitPrice)&&(identical(other.discountAmount, discountAmount) || other.discountAmount == discountAmount)&&(identical(other.surchargeAmount, surchargeAmount) || other.surchargeAmount == surchargeAmount)&&(identical(other.subtotal, subtotal) || other.subtotal == subtotal)&&(identical(other.packId, packId) || other.packId == packId)&&(identical(other.packCode, packCode) || other.packCode == packCode)&&(identical(other.packVersion, packVersion) || other.packVersion == packVersion)&&(identical(other.packGroupId, packGroupId) || other.packGroupId == packGroupId)&&(identical(other.packName, packName) || other.packName == packName));
 }
 
 
 @override
-int get hashCode => Object.hash(runtimeType,id,variantId,productId,quantity,unitPrice,discountAmount,surchargeAmount,subtotal);
+int get hashCode => Object.hash(runtimeType,id,variantId,productId,quantity,unitPrice,discountAmount,surchargeAmount,subtotal,packId,packCode,packVersion,packGroupId,packName);
 
 @override
 String toString() {
-  return 'OrderItem(id: $id, variantId: $variantId, productId: $productId, quantity: $quantity, unitPrice: $unitPrice, discountAmount: $discountAmount, surchargeAmount: $surchargeAmount, subtotal: $subtotal)';
+  return 'OrderItem(id: $id, variantId: $variantId, productId: $productId, quantity: $quantity, unitPrice: $unitPrice, discountAmount: $discountAmount, surchargeAmount: $surchargeAmount, subtotal: $subtotal, packId: $packId, packCode: $packCode, packVersion: $packVersion, packGroupId: $packGroupId, packName: $packName)';
 }
 
 
@@ -257,7 +267,7 @@ abstract mixin class _$OrderItemCopyWith<$Res> implements $OrderItemCopyWith<$Re
   factory _$OrderItemCopyWith(_OrderItem value, $Res Function(_OrderItem) _then) = __$OrderItemCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String variantId, String productId, int quantity, double unitPrice, double discountAmount, double surchargeAmount, double subtotal
+ String id, String variantId, String productId, int quantity, double unitPrice, double discountAmount, double surchargeAmount, double subtotal, String? packId, String? packCode, int? packVersion, String? packGroupId, String? packName
 });
 
 
@@ -274,7 +284,7 @@ class __$OrderItemCopyWithImpl<$Res>
 
 /// Create a copy of OrderItem
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? variantId = null,Object? productId = null,Object? quantity = null,Object? unitPrice = null,Object? discountAmount = null,Object? surchargeAmount = null,Object? subtotal = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? variantId = null,Object? productId = null,Object? quantity = null,Object? unitPrice = null,Object? discountAmount = null,Object? surchargeAmount = null,Object? subtotal = null,Object? packId = freezed,Object? packCode = freezed,Object? packVersion = freezed,Object? packGroupId = freezed,Object? packName = freezed,}) {
   return _then(_OrderItem(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,variantId: null == variantId ? _self.variantId : variantId // ignore: cast_nullable_to_non_nullable
@@ -284,7 +294,12 @@ as int,unitPrice: null == unitPrice ? _self.unitPrice : unitPrice // ignore: cas
 as double,discountAmount: null == discountAmount ? _self.discountAmount : discountAmount // ignore: cast_nullable_to_non_nullable
 as double,surchargeAmount: null == surchargeAmount ? _self.surchargeAmount : surchargeAmount // ignore: cast_nullable_to_non_nullable
 as double,subtotal: null == subtotal ? _self.subtotal : subtotal // ignore: cast_nullable_to_non_nullable
-as double,
+as double,packId: freezed == packId ? _self.packId : packId // ignore: cast_nullable_to_non_nullable
+as String?,packCode: freezed == packCode ? _self.packCode : packCode // ignore: cast_nullable_to_non_nullable
+as String?,packVersion: freezed == packVersion ? _self.packVersion : packVersion // ignore: cast_nullable_to_non_nullable
+as int?,packGroupId: freezed == packGroupId ? _self.packGroupId : packGroupId // ignore: cast_nullable_to_non_nullable
+as String?,packName: freezed == packName ? _self.packName : packName // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

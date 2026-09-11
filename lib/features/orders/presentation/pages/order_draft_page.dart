@@ -22,6 +22,7 @@ import '../bloc/order_pricing_summary_state.dart';
 import '../bloc/order_submission_validation_cubit.dart';
 import '../bloc/order_submission_validation_state.dart';
 import '../widgets/order_items_grid.dart';
+import '../widgets/order_pack_groups_section.dart';
 import '../widgets/order_pricing_summary_section.dart';
 import '../widgets/order_submission_pendencies_panel.dart';
 
@@ -48,6 +49,7 @@ class OrderDraftPage extends StatelessWidget {
     required this.createOrderSubmissionValidationCubit,
     this.draftId,
     this.onContinueToProducts,
+    this.onAddCommercialPack,
     this.onSubmitOrder,
     this.onGenerateQuote,
     this.onShareCart,
@@ -94,6 +96,18 @@ class OrderDraftPage extends StatelessWidget {
   /// re-dispatches `OrderDraftStarted` to reload them.
   final Future<void> Function(Order order)? onContinueToProducts;
 
+  /// Called once the seller taps "Adicionar kit ou pacote" with the ready
+  /// `Order` draft (TASK-208, EPIC-32) — expected to navigate to
+  /// `CommercialPackPickerPage` and resolve only once the seller comes back.
+  /// Mirrors [onContinueToProducts]'s own contract exactly: a pack added
+  /// while away is persisted directly to the local draft
+  /// (`CommercialPackAdditionCubit` → `AddItemsToOrderDraftUseCase`), never
+  /// through this bloc's in-memory state, so this page re-dispatches
+  /// `OrderDraftStarted` once the returned future completes. `null` (e.g.
+  /// before composition-root wiring exists) simply hides the entry point,
+  /// same "not wired yet" precedent [onContinueToProducts] already sets.
+  final Future<void> Function(Order order)? onAddCommercialPack;
+
   /// Called once the seller taps "Enviar pedido" with the ready `Order`
   /// draft — only ever enabled once `OrderSubmissionValidationCubit` reports
   /// no blocking pendency left (TASK-100). The actual submission (idempotent
@@ -138,6 +152,7 @@ class OrderDraftPage extends StatelessWidget {
             createOrderSubmissionValidationCubit:
                 createOrderSubmissionValidationCubit,
             onContinueToProducts: onContinueToProducts,
+            onAddCommercialPack: onAddCommercialPack,
             onSubmitOrder: onSubmitOrder,
             onGenerateQuote: onGenerateQuote,
             onShareCart: onShareCart,
@@ -160,6 +175,7 @@ class _OrderDraftView extends StatelessWidget {
     required this.createOrderPricingSummaryCubit,
     required this.createOrderSubmissionValidationCubit,
     this.onContinueToProducts,
+    this.onAddCommercialPack,
     this.onSubmitOrder,
     this.onGenerateQuote,
     this.onShareCart,
@@ -176,6 +192,7 @@ class _OrderDraftView extends StatelessWidget {
   final OrderSubmissionValidationCubit Function()
   createOrderSubmissionValidationCubit;
   final Future<void> Function(Order order)? onContinueToProducts;
+  final Future<void> Function(Order order)? onAddCommercialPack;
   final Future<void> Function(Order order)? onSubmitOrder;
   final Future<void> Function(Order order)? onGenerateQuote;
   final Future<void> Function(Order order, Map<String, String> productNames)?
@@ -253,6 +270,7 @@ class _OrderDraftView extends StatelessWidget {
           createOrderSubmissionValidationCubit:
               createOrderSubmissionValidationCubit,
           onContinueToProducts: onContinueToProducts,
+          onAddCommercialPack: onAddCommercialPack,
           onSubmitOrder: onSubmitOrder,
           onGenerateQuote: onGenerateQuote,
           onShareCart: onShareCart,
@@ -273,6 +291,7 @@ class _OrderDraftSummary extends StatefulWidget {
     required this.createOrderPricingSummaryCubit,
     required this.createOrderSubmissionValidationCubit,
     this.onContinueToProducts,
+    this.onAddCommercialPack,
     this.onSubmitOrder,
     this.onGenerateQuote,
     this.onShareCart,
@@ -286,6 +305,7 @@ class _OrderDraftSummary extends StatefulWidget {
   final OrderSubmissionValidationCubit Function()
   createOrderSubmissionValidationCubit;
   final Future<void> Function(Order order)? onContinueToProducts;
+  final Future<void> Function(Order order)? onAddCommercialPack;
   final Future<void> Function(Order order)? onSubmitOrder;
   final Future<void> Function(Order order)? onGenerateQuote;
   final Future<void> Function(Order order, Map<String, String> productNames)?
@@ -479,7 +499,22 @@ class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
                   ? null
                   : () => _continueToProducts(context, order),
             ),
+            const SizedBox(height: AppSpacing.spacing8),
+            AppButton(
+              label: 'Adicionar kit ou pacote',
+              leadingIcon: Icons.inventory_2_outlined,
+              variant: AppButtonVariant.secondary,
+              onPressed: widget.onAddCommercialPack == null
+                  ? null
+                  : () => _continueToAddCommercialPack(context, order),
+            ),
             const SizedBox(height: AppSpacing.spacing24),
+            OrderPackGroupsSection(
+              items: order.items,
+              currency: order.currency,
+            ),
+            if (order.items.any((item) => item.isFromCommercialPack))
+              const SizedBox(height: AppSpacing.spacing16),
             _OrderItemsSection(
               key: _itemsSectionKey,
               state: widget.state,
@@ -575,6 +610,27 @@ class _OrderDraftSummaryState extends State<_OrderDraftSummary> {
       ),
     );
   }
+
+  /// Awaits the pack-picking flow (TASK-208) and reloads the draft once the
+  /// seller comes back — same "persisted directly, reload on return"
+  /// contract [_continueToProducts] already sets, just for
+  /// `CommercialPackAdditionCubit` instead of `OrderProductAdditionCubit`.
+  Future<void> _continueToAddCommercialPack(
+    BuildContext context,
+    Order order,
+  ) async {
+    final bloc = context.read<OrderDraftBloc>();
+    await widget.onAddCommercialPack!(order);
+    if (!context.mounted) return;
+    bloc.add(
+      OrderDraftStarted(
+        organizationId: widget.state.organizationId,
+        companyId: widget.state.companyId,
+        sellerId: widget.state.sellerId,
+        draftId: order.id,
+      ),
+    );
+  }
 }
 
 /// "Itens do pedido" (TASK-097/TASK-098): every `OrderItem` already on the
@@ -606,7 +662,12 @@ class _OrderItemsSection extends StatelessWidget {
     final order = state.order;
     if (order == null) return const SizedBox.shrink();
     final colors = context.colors;
-    final items = order.items;
+    // Items that came from expanding a `CommercialPack` (TASK-208) are shown
+    // grouped by `packGroupId` in `OrderPackGroupsSection` above instead —
+    // never duplicated here as loose per-product rows.
+    final items = order.items
+        .where((item) => !item.isFromCommercialPack)
+        .toList(growable: false);
     final itemsByProduct = <String, List<OrderItem>>{};
     for (final item in items) {
       itemsByProduct.putIfAbsent(item.productId, () => <OrderItem>[]).add(item);

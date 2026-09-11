@@ -134,6 +134,7 @@ final class OrderPricingSummaryDto {
     required this.total,
     required this.blocked,
     required this.approvalRequired,
+    this.packAdjustmentTotal = 0,
     this.items = const <OrderPricingSummaryItemDto>[],
   });
 
@@ -147,6 +148,11 @@ final class OrderPricingSummaryDto {
     final total = json['total'];
     final blocked = json['blocked'];
     final approvalRequired = json['approvalRequired'];
+    // Absent on any response computed before TASK-208 shipped (no
+    // `commercialPacks` involved) — `calculatePricing` only ever includes it
+    // once at least one item carries a `packGroupId`, so `0` is the correct
+    // default rather than a parsing error.
+    final packAdjustmentTotal = json['packAdjustmentTotal'] ?? 0;
     final rawItems = json['items'];
 
     if (currency is! String ||
@@ -158,6 +164,7 @@ final class OrderPricingSummaryDto {
         total is! num ||
         blocked is! bool ||
         approvalRequired is! bool ||
+        packAdjustmentTotal is! num ||
         rawItems is! List) {
       throw const ServerException(
         'Unexpected calculatePricing callable response shape.',
@@ -175,6 +182,7 @@ final class OrderPricingSummaryDto {
       total: total.toDouble(),
       blocked: blocked,
       approvalRequired: approvalRequired,
+      packAdjustmentTotal: packAdjustmentTotal.toDouble(),
       items: rawItems
           .map(
             (item) => OrderPricingSummaryItemDto.fromJson(
@@ -194,5 +202,6 @@ final class OrderPricingSummaryDto {
   final double total;
   final bool blocked;
   final bool approvalRequired;
+  final double packAdjustmentTotal;
   final List<OrderPricingSummaryItemDto> items;
 }

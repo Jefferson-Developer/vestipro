@@ -49,6 +49,8 @@ final class CloudFunctionsOrderPricingDataSource
                   'collectionId': item.collectionId,
                 if (item.categoryId != null) 'categoryId': item.categoryId,
                 'manualDiscountPercent': item.manualDiscountPercent,
+                if (item.packId != null) 'packId': item.packId,
+                if (item.packGroupId != null) 'packGroupId': item.packGroupId,
               },
             )
             .toList(growable: false),

@@ -23,6 +23,7 @@ import {
   ensureActivePriceList,
   ensureCompanyScope,
   ensureValidPaymentTerm,
+  loadReferencedCommercialPacks,
   mapCampaign,
   mapCommercialRule,
   mapDiscountPolicy,
@@ -96,6 +97,18 @@ export interface SubmitOrderItemInput {
    * `0` (no manual discount) when omitted, same as `calculatePricing`.
    */
   manualDiscountPercent?: number;
+  /**
+   * `OrderItem.packId`/`OrderItem.packGroupId` (TASK-208, EPIC-32) — set
+   * only when this line came from expanding a `CommercialPack`. Both are
+   * revalidated here exactly like every other TASK-100 condition: the pack
+   * itself is re-fetched fresh from Firestore
+   * (`loadReferencedCommercialPacks`) and must still be `active` (not
+   * expired/superseded/archived/draft) or the whole submission is rejected
+   * — "pedido não pode ser submetido se a versão do pacote usada no
+   * rascunho estiver expirada sem revalidação" (`tasks.md`).
+   */
+  packId?: string;
+  packGroupId?: string;
 }
 
 export interface SubmitOrderRequest extends RequestWithMeta {
@@ -180,6 +193,8 @@ interface NormalizedItem {
   categoryId?: string;
   reservationId?: string;
   manualDiscountPercent: number;
+  packId?: string;
+  packGroupId?: string;
 }
 
 /**
@@ -353,6 +368,19 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
       );
       commercialRules.forEach((rule) => ensureCompanyScope(companyId, 'Commercial rule', rule));
 
+      const commercialPacks = await loadReferencedCommercialPacks(
+        db,
+        organizationId,
+        companyId,
+        items.map((item) => ({
+          productId: item.productId,
+          quantity: item.quantity,
+          packId: item.packId,
+        })),
+        transaction,
+      );
+      ensureCommercialPacksStillActive(commercialPacks, items);
+
       const pricingItems: PricingEngineItemInput[] = items.map((item) => ({
         productId: item.productId,
         variantId: item.variantId,
@@ -360,6 +388,8 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
         collectionId: item.collectionId,
         categoryId: item.categoryId,
         manualDiscountPercent: item.manualDiscountPercent,
+        packId: item.packId,
+        packGroupId: item.packGroupId,
       }));
       const pricing: PricingEngineOutput = calculatePricingEngine({
         selectedPriceList,
@@ -368,6 +398,7 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
         discountPolicy,
         campaigns,
         commercialRules,
+        packs: commercialPacks,
         customerId,
         customerSegment,
         channel: portalApprovalRequiredChannel(membership.roleName),
@@ -616,8 +647,40 @@ function requireItems(value: SubmitOrderItemInput[] | undefined): NormalizedItem
         item.manualDiscountPercent,
         `items[${index}].manualDiscountPercent`,
       ),
+      packId: optionalString(item.packId),
+      packGroupId: optionalString(item.packGroupId),
     };
   });
+}
+
+/**
+ * Revalidates every pack referenced by [items] (TASK-208): each one must
+ * still exist and be `active` right now — a pack that was revised
+ * (`ReviseCommercialPackUseCase`, TASK-207) or otherwise superseded/expired/
+ * archived since the draft was built never reaches `submitOrder`
+ * successfully, forcing the seller to refresh the pack (re-add it) rather
+ * than silently submitting a stale composition/price.
+ */
+function ensureCommercialPacksStillActive(
+  packs: Awaited<ReturnType<typeof loadReferencedCommercialPacks>>,
+  items: NormalizedItem[],
+): void {
+  const referencedPackIds = new Set(
+    items.map((item) => item.packId).filter((id): id is string => !!id),
+  );
+  if (referencedPackIds.size === 0) return;
+
+  const packsById = new Map(packs.map((pack) => [pack.id, pack]));
+  for (const packId of referencedPackIds) {
+    const pack = packsById.get(packId);
+    if (!pack || pack.status !== 'active') {
+      throw new HttpsError(
+        'failed-precondition',
+        'Um dos kits/pacotes deste pedido não está mais disponível para ' +
+          'venda — remova-o e adicione a versão atual antes de enviar.',
+      );
+    }
+  }
 }
 
 function requireValidManualDiscountPercent(value: number | undefined, field: string): number {

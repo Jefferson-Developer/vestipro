@@ -355,8 +355,16 @@ import '../features/commercial_packs/domain/repositories/commercial_pack_local_s
     as _i765;
 import '../features/commercial_packs/domain/repositories/commercial_pack_repository.dart'
     as _i950;
+import '../features/commercial_packs/domain/services/catalog_pack_component_variant_resolver.dart'
+    as _i291;
+import '../features/commercial_packs/domain/services/pack_component_variant_resolver.dart'
+    as _i1022;
 import '../features/commercial_packs/domain/usecases/create_commercial_pack_use_case.dart'
     as _i862;
+import '../features/commercial_packs/domain/usecases/get_commercial_pack_availability_use_case.dart'
+    as _i420;
+import '../features/commercial_packs/domain/usecases/list_eligible_commercial_packs_use_case.dart'
+    as _i274;
 import '../features/commercial_packs/domain/usecases/revise_commercial_pack_use_case.dart'
     as _i265;
 import '../features/commercial_packs/domain/usecases/update_commercial_pack_use_case.dart'
@@ -1012,6 +1020,8 @@ import '../features/orders/domain/usecases/duplicate_order_use_case.dart'
     as _i315;
 import '../features/orders/domain/usecases/ensure_customer_in_seller_portfolio_use_case.dart'
     as _i583;
+import '../features/orders/domain/usecases/expand_commercial_pack_to_order_items_use_case.dart'
+    as _i116;
 import '../features/orders/domain/usecases/generate_order_commercial_alerts_use_case.dart'
     as _i787;
 import '../features/orders/domain/usecases/get_order_by_id_use_case.dart'
@@ -1042,6 +1052,10 @@ import '../features/orders/domain/usecases/submit_order_signature_use_case.dart'
 import '../features/orders/domain/usecases/submit_order_use_case.dart' as _i856;
 import '../features/orders/domain/usecases/update_recurring_order_plan_use_case.dart'
     as _i111;
+import '../features/orders/presentation/bloc/commercial_pack_addition_cubit.dart'
+    as _i575;
+import '../features/orders/presentation/bloc/commercial_pack_eligibility_cubit.dart'
+    as _i161;
 import '../features/orders/presentation/bloc/order_approval_queue_bloc.dart'
     as _i339;
 import '../features/orders/presentation/bloc/order_draft_bloc.dart' as _i287;
@@ -2443,6 +2457,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i24.ValidateCommercialPackCompositionUseCase>(),
       ),
     );
+    gh.factory<_i274.ListEligibleCommercialPacksUseCase>(
+      () => _i274.ListEligibleCommercialPacksUseCase(
+        gh<_i950.CommercialPackRepository>(),
+      ),
+    );
     gh.lazySingleton<_i833.OrderSignatureLocalMapper>(
       () => _i833.OrderSignatureLocalMapper(gh<_i801.OrderSignatureCodec>()),
     );
@@ -2777,6 +2796,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i748.CustomerSegmentRepository>(),
       ),
     );
+    gh.factory<_i161.CommercialPackEligibilityCubit>(
+      () => _i161.CommercialPackEligibilityCubit(
+        gh<_i274.ListEligibleCommercialPacksUseCase>(),
+      ),
+    );
     gh.factory<_i959.CreatePipelineStageUseCase>(
       () =>
           _i959.CreatePipelineStageUseCase(gh<_i385.PipelineStageRepository>()),
@@ -3071,6 +3095,13 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i526.BranchDataSource>(
       () => _i878.FirestoreBranchDataSource(gh<_i974.FirebaseFirestore>()),
+    );
+    gh.lazySingleton<_i1022.PackComponentVariantResolver>(
+      () => _i291.CatalogPackComponentVariantResolver(
+        gh<_i321.ProductRepository>(),
+        gh<_i795.ProductVariantRepository>(),
+        gh<_i950.CommercialPackRepository>(),
+      ),
     );
     gh.lazySingleton<_i384.CompanyDataSource>(
       () => _i512.FirestoreCompanyDataSource(gh<_i974.FirebaseFirestore>()),
@@ -3942,6 +3973,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i154.TargetAchievementRepository>(),
       ),
     );
+    gh.factory<_i116.ExpandCommercialPackToOrderItemsUseCase>(
+      () => _i116.ExpandCommercialPackToOrderItemsUseCase(
+        gh<_i1022.PackComponentVariantResolver>(),
+        gh<_i950.CommercialPackRepository>(),
+        gh<_i352.ResolvePriceForVariantUseCase>(),
+        gh<_i706.Uuid>(),
+      ),
+    );
     gh.factory<_i126.LoadNpsAggregateTrendUseCase>(
       () => _i126.LoadNpsAggregateTrendUseCase(
         gh<_i921.NpsAggregateRepository>(),
@@ -4422,6 +4461,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i957.MembershipRepository>(),
       ),
     );
+    gh.factory<_i575.CommercialPackAdditionCubit>(
+      () => _i575.CommercialPackAdditionCubit(
+        gh<_i116.ExpandCommercialPackToOrderItemsUseCase>(),
+        gh<_i720.AddItemsToOrderDraftUseCase>(),
+      ),
+    );
     gh.lazySingleton<_i523.ProductImportJobRepository>(
       () => _i671.ProductImportJobRepositoryImpl(
         gh<_i684.ProductImportJobDataSource>(),
@@ -4827,6 +4872,12 @@ extension GetItInjectableX on _i174.GetIt {
         previewCatalogShare: gh<_i620.PreviewCatalogShareUseCase>(),
         registerCatalogShareOpen: gh<_i298.RegisterCatalogShareOpenUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i420.GetCommercialPackAvailabilityUseCase>(
+      () => _i420.GetCommercialPackAvailabilityUseCase(
+        gh<_i1022.PackComponentVariantResolver>(),
+        gh<_i221.VariantStockBalanceRepository>(),
       ),
     );
     gh.factory<_i44.InsightVisibilityService>(

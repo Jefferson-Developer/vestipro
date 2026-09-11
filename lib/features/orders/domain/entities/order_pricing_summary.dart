@@ -5,12 +5,22 @@
 /// seller/approver needs to know exactly which rule produced it.
 enum OrderPricingDiscountOrigin {
   campaign,
-  manual;
+  manual,
+  commercialRule,
+
+  /// A `CommercialPack.pricingPolicyType` adjustment (`fixedPrice`/
+  /// `packDiscount`/`bonusItem`, TASK-207/TASK-208) applied by the pricing
+  /// engine to every item sharing one `OrderItem.packGroupId` — never
+  /// computed client-side (see `ExpandCommercialPackToOrderItemsUseCase`'s
+  /// own docs).
+  commercialPack;
 
   static OrderPricingDiscountOrigin fromWire(String value) {
     return switch (value) {
       'campaign' => OrderPricingDiscountOrigin.campaign,
       'manual' => OrderPricingDiscountOrigin.manual,
+      'commercial_rule' => OrderPricingDiscountOrigin.commercialRule,
+      'commercial_pack' => OrderPricingDiscountOrigin.commercialPack,
       _ => throw ArgumentError.value(
         value,
         'value',
@@ -117,6 +127,7 @@ final class OrderPricingSummary {
     required this.total,
     required this.blocked,
     required this.approvalRequired,
+    this.packAdjustmentTotal = 0,
     this.items = const <OrderPricingItemSummary>[],
   });
 
@@ -140,9 +151,19 @@ final class OrderPricingSummary {
   /// automatic threshold and requires approval (TASK-103) before submission
   /// — must always be surfaced to the seller, never hidden (`tasks.md`).
   final bool approvalRequired;
+
+  /// Net effect of every `CommercialPack.pricingPolicyType` adjustment
+  /// (`fixedPrice`/`packDiscount`/`bonusItem`, TASK-207/TASK-208) the pricing
+  /// engine applied across every `packGroupId` on this order — positive when
+  /// it reduced the total (the common case), `0` when no item on this order
+  /// came from a pack or every pack used `componentSum` (no adjustment).
+  /// Always the engine's own value, straight from `calculatePricing`, never
+  /// computed here.
+  final double packAdjustmentTotal;
   final List<OrderPricingItemSummary> items;
 
-  double get discountTotal => campaignDiscountTotal + manualDiscountTotal;
+  double get discountTotal =>
+      campaignDiscountTotal + manualDiscountTotal + packAdjustmentTotal;
 
   bool get hasDiscounts => discountTotal > 0;
 

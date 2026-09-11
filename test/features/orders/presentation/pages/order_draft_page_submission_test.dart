@@ -188,8 +188,15 @@ void main() {
         // The single item's `Product` was never resolved (no
         // `getProductById` wired in this suite), so it falls back to the
         // plain quantity-stepper row — its delete icon is the only one on
-        // screen with a single item on the draft.
-        await tester.tap(find.byIcon(Icons.delete_outline));
+        // screen with a single item on the draft. TASK-208's own
+        // "Adicionar kit ou pacote" entry point pushes this below the fixed
+        // test viewport, so it is scrolled into view first, same
+        // `ensureVisible` precedent this file already uses for the submit
+        // button above.
+        final deleteIconFinder = find.byIcon(Icons.delete_outline);
+        await tester.ensureVisible(deleteIconFinder);
+        await tester.pumpAndSettle();
+        await tester.tap(deleteIconFinder);
         await _settleValidation(tester);
 
         expect(

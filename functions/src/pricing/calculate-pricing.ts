@@ -7,6 +7,7 @@ import {
   calculatePricingEngine,
   exceedsPricingTolerance,
   type PricingEngineCampaign,
+  type PricingEngineCommercialPack,
   type PricingEngineCommercialRule,
   type PricingEngineDiscountPolicy,
   type PricingEngineItemInput,
@@ -39,6 +40,7 @@ export interface CalculatePricingResponse {
   manualDiscountTotal: number;
   paymentTermAdjustmentTotal: number;
   appliedPaymentTermRuleId?: string;
+  packAdjustmentTotal: number;
   shippingAmount: number;
   total: number;
   blocked: boolean;
@@ -171,6 +173,13 @@ export const calculatePricing = onCall<
   );
   commercialRules.forEach((rule) => ensureCompanyScope(companyId, 'Commercial rule', rule));
 
+  const packs = await loadReferencedCommercialPacks(
+    db,
+    organizationId,
+    companyId,
+    normalizedItems,
+  );
+
   const pricing = calculatePricingEngine({
     selectedPriceList,
     priceListItems,
@@ -178,6 +187,7 @@ export const calculatePricing = onCall<
     discountPolicy,
     campaigns,
     commercialRules,
+    packs,
     customerId,
     customerSegment,
     channel,
@@ -195,6 +205,7 @@ export const calculatePricing = onCall<
     manualDiscountTotal: pricing.manualDiscountTotal,
     paymentTermAdjustmentTotal: pricing.paymentTermAdjustmentTotal,
     appliedPaymentTermRuleId: pricing.appliedPaymentTermRuleId,
+    packAdjustmentTotal: pricing.packAdjustmentTotal,
     shippingAmount: pricing.shippingAmount,
     total: pricing.total,
     blocked: pricing.blocked,
@@ -338,6 +349,7 @@ export const simulateCommercialRule = onCall<
     manualDiscountTotal: pricing.manualDiscountTotal,
     paymentTermAdjustmentTotal: pricing.paymentTermAdjustmentTotal,
     appliedPaymentTermRuleId: pricing.appliedPaymentTermRuleId,
+    packAdjustmentTotal: pricing.packAdjustmentTotal,
     shippingAmount: pricing.shippingAmount,
     total: pricing.total,
     blocked: pricing.blocked,
@@ -406,6 +418,77 @@ export function normalizeItem(item: PricingEngineItemInput, index: number): Pric
     collectionId: optionalString(item.collectionId),
     categoryId: optionalString(item.categoryId),
     manualDiscountPercent: item.manualDiscountPercent,
+    packId: optionalString(item.packId),
+    packGroupId: optionalString(item.packGroupId),
+  };
+}
+
+/**
+ * Loads every distinct `PricingEngineItemInput.packId` referenced by
+ * [items] straight from `organizations/{organizationId}/commercialPacks`
+ * (TASK-208) — never trusting a pack's own pricing policy/parameters from
+ * the client, mirroring `mapPriceList`/`mapPaymentTerm`'s own "load fresh,
+ * validate scope" contract exactly. A pack that no longer exists is simply
+ * omitted from the returned array (`calculatePricingEngine` then prices
+ * that `packGroupId` as plain `componentSum`, no adjustment) rather than
+ * failing the whole request — the caller (`submitOrder`) is the one place
+ * that additionally *requires* every referenced pack to still be `active`
+ * before allowing submission.
+ */
+export async function loadReferencedCommercialPacks(
+  db: FirebaseFirestore.Firestore,
+  organizationId: string,
+  companyId: string,
+  items: PricingEngineItemInput[],
+  // Passed by `submitOrder`, whose whole body runs inside one
+  // `db.runTransaction` — every read there must go through
+  // `transaction.get`, never a plain `ref.get()` call, same "every read
+  // staged before any write" rule this codebase's own transactions already
+  // document. `calculatePricing`'s own handler is not transactional, so it
+  // omits this and falls back to a plain read.
+  transaction?: FirebaseFirestore.Transaction,
+): Promise<PricingEngineCommercialPack[]> {
+  const packIds = Array.from(
+    new Set(items.map((item) => item.packId).filter((id): id is string => !!id)),
+  );
+  if (packIds.length === 0) return [];
+
+  const orgRef = db.collection('organizations').doc(organizationId);
+  const refs = packIds.map((packId) => orgRef.collection('commercialPacks').doc(packId));
+  const snapshots = transaction
+    ? await Promise.all(refs.map((ref) => transaction.get(ref)))
+    : await Promise.all(refs.map((ref) => ref.get()));
+  const packs: PricingEngineCommercialPack[] = [];
+  for (const snapshot of snapshots) {
+    if (!snapshot.exists) continue;
+    const data = snapshot.data();
+    if (!data) continue;
+    const pack = mapCommercialPack(snapshot.id, data);
+    if (pack.companyId && pack.companyId !== companyId) continue;
+    packs.push(pack);
+  }
+  return packs;
+}
+
+export function mapCommercialPack(
+  id: string,
+  data: FirebaseFirestore.DocumentData,
+): PricingEngineCommercialPack {
+  return {
+    id,
+    companyId: optionalString(data.companyId),
+    status: requireNonEmptyString(
+      data.status,
+      'status',
+    ) as PricingEngineCommercialPack['status'],
+    pricingPolicyType: requireNonEmptyString(
+      data.pricingPolicyType,
+      'pricingPolicyType',
+    ) as PricingEngineCommercialPack['pricingPolicyType'],
+    fixedPrice: data.fixedPrice === undefined ? undefined : Number(data.fixedPrice),
+    discountPercentage:
+      data.discountPercentage === undefined ? undefined : Number(data.discountPercentage),
+    bonusComponentId: optionalString(data.bonusComponentId),
   };
 }
 

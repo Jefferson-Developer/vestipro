@@ -103,3 +103,15 @@ final class OrderDraftItemVariantQuantityChanged extends OrderDraftEvent {
   final String variantId;
   final int quantity;
 }
+
+/// The seller tapped "Remover" on a kit/pacote/sortimento already on the
+/// draft (TASK-208, EPIC-32) — removes every `OrderItem` sharing
+/// [packGroupId] at once (`OrderItemEditor.withRemovedPackGroup`), never one
+/// component at a time, per this pack's own "a remoção de um pacote remove
+/// todos os itens vinculados" business rule. Triggers the same debounced
+/// autosave as [OrderDraftNotesChanged].
+final class OrderDraftPackGroupRemoved extends OrderDraftEvent {
+  const OrderDraftPackGroupRemoved(this.packGroupId);
+
+  final String packGroupId;
+}

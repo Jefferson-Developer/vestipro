@@ -96,10 +96,45 @@ export interface PricingEngineItemInput {
   collectionId?: string;
   categoryId?: string;
   manualDiscountPercent?: number;
+  /**
+   * `OrderItem.packId`/`OrderItem.packGroupId` (TASK-208, EPIC-32) — set
+   * only when this item came from expanding a `CommercialPack`
+   * (`ExpandCommercialPackToOrderItemsUseCase`, client-side). Every item
+   * sharing one [packGroupId] is one single pack instance: once every
+   * item's own campaign/commercial-rule/manual pricing above is resolved,
+   * [PricingEngineCommercialPack.pricingPolicyType] is applied once across
+   * the whole group. [packId] is only ever used to look up the pack's own
+   * policy server-side (`calculatePricing`/`submitOrder` fetch it fresh from
+   * Firestore) — the policy/discount value itself is never trusted from
+   * this input.
+   */
+  packId?: string;
+  packGroupId?: string;
+}
+
+/**
+ * `CommercialPack.pricingPolicyType` and its parameters (TASK-207,
+ * `lib/features/commercial_packs/domain/entities/commercial_pack.dart`),
+ * loaded fresh from Firestore by the caller (never accepted from the
+ * client) — the server-side half of "a UI nunca calcula preço final do
+ * pacote como fonte de verdade" (TASK-208).
+ */
+export interface PricingEngineCommercialPack {
+  id: string;
+  companyId?: string;
+  status: 'draft' | 'active' | 'superseded' | 'expired' | 'archived';
+  pricingPolicyType: 'componentSum' | 'fixedPrice' | 'packDiscount' | 'bonusItem';
+  fixedPrice?: number;
+  /** A fraction between 0 exclusive and 1 inclusive, mirroring
+   * `CommercialPack.discountPercentage`'s own Dart-side contract. */
+  discountPercentage?: number;
+  /** The `variantId` (or, absent one, the `productId`) of the one component
+   * given away for free under the `bonusItem` policy. */
+  bonusComponentId?: string;
 }
 
 export interface PricingEngineAppliedDiscount {
-  origin: 'campaign' | 'commercial_rule' | 'manual';
+  origin: 'campaign' | 'commercial_rule' | 'manual' | 'commercial_pack';
   amount: number;
   description: string;
   campaignId?: string;
@@ -119,6 +154,10 @@ export interface PricingEngineCommercialRuleTrace {
 export interface PricingEngineItemOutput {
   productId: string;
   variantId?: string;
+  /** Mirrors `PricingEngineItemInput.packGroupId` verbatim (TASK-208) — kept
+   * on the output so a caller can regroup pack items after pricing without
+   * re-zipping against the original input array. */
+  packGroupId?: string;
   quantity: number;
   baseUnitPrice: number;
   priceAfterCampaigns: number;
@@ -143,6 +182,16 @@ export interface PricingEngineInput {
   discountPolicy?: PricingEngineDiscountPolicy;
   campaigns: PricingEngineCampaign[];
   commercialRules?: PricingEngineCommercialRule[];
+  /**
+   * Every `CommercialPack` referenced by at least one `items[].packId`
+   * (TASK-208) — loaded and validated by the caller (`calculatePricing`/
+   * `submitOrder`) straight from Firestore. A `packGroupId` whose pack is
+   * missing here is simply priced as `componentSum` (no adjustment), never a
+   * hard failure inside the pure engine itself — the caller decides whether
+   * a missing/inactive pack should instead reject the whole request before
+   * ever reaching this function.
+   */
+  packs?: PricingEngineCommercialPack[];
   customerId?: string;
   customerSegment: string;
   channel?: string;
@@ -159,6 +208,17 @@ export interface PricingEngineOutput {
   manualDiscountTotal: number;
   paymentTermAdjustmentTotal: number;
   appliedPaymentTermRuleId?: string;
+  /**
+   * Net effect of every `CommercialPack.pricingPolicyType` adjustment
+   * applied across every `packGroupId` present in `items` (TASK-208) —
+   * positive when it reduced the group's total, `0` when nothing on this
+   * request carried a `packGroupId` or every referenced pack used
+   * `componentSum`. Already folded into each affected item's own
+   * `finalUnitPrice`/`lineTotal` and into this output's own `total`; kept
+   * here separately only so a caller can display/audit it distinctly from
+   * campaign/commercial-rule/manual discounts.
+   */
+  packAdjustmentTotal: number;
   shippingAmount: number;
   total: number;
   blocked: boolean;
@@ -183,6 +243,14 @@ export function calculatePricingEngine(
   const items = input.items.map((item) =>
     calculatePricingItem(item, input),
   );
+
+  // TASK-208: applied once every item's own campaign/commercial-rule/manual
+  // pricing above is already resolved — mutates `finalUnitPrice`/`lineTotal`
+  // (and appends a `commercial_pack`-origin `appliedDiscounts` entry) on
+  // every item whose `packGroupId` references a pack with an adjustment
+  // policy. `lineSubtotal` (the pre-discount gross) is deliberately never
+  // touched, same precedent every other discount origin already follows.
+  applyCommercialPackAdjustments(items, input.items, input.packs ?? []);
 
   const subtotal = roundCurrency(
     items.reduce((sum, item) => sum + item.lineSubtotal, 0),
@@ -217,6 +285,16 @@ export function calculatePricingEngine(
       0,
     ),
   );
+  const packAdjustmentTotal = roundCurrency(
+    items.reduce(
+      (sum, item) =>
+        sum +
+        item.appliedDiscounts
+          .filter((discount) => discount.origin === 'commercial_pack')
+          .reduce((lineSum, discount) => lineSum + discount.amount, 0),
+      0,
+    ),
+  );
   const commercialRuleTrace = items.flatMap((item) => item.commercialRuleTrace);
   const paymentTermRule = commercialRuleTrace.find((trace) =>
     trace.applied && trace.reason === 'payment_term_effect',
@@ -230,6 +308,7 @@ export function calculatePricingEngine(
     manualDiscountTotal,
     paymentTermAdjustmentTotal: 0,
     appliedPaymentTermRuleId: paymentTermRule?.ruleId,
+    packAdjustmentTotal,
     shippingAmount: roundCurrency(input.shippingAmount),
     total: roundCurrency(
       items.reduce((sum, item) => sum + item.lineTotal, 0) +
@@ -327,6 +406,7 @@ function calculatePricingItem(
   return {
     productId: item.productId,
     variantId: item.variantId,
+    packGroupId: item.packGroupId,
     quantity,
     baseUnitPrice: roundCurrency(baseUnitPrice),
     priceAfterCampaigns: roundCurrency(runningUnitPrice),
@@ -477,6 +557,133 @@ function matchesCommercialRuleConditions(
     (!!item.collectionId && conditions.collectionIds?.includes(item.collectionId) === true) ||
     (!!item.categoryId && conditions.categoryIds?.includes(item.categoryId) === true)
   );
+}
+
+/**
+ * Groups `items`/`inputItems` (same order, 1:1 by index) by
+ * `packGroupId` and applies each referenced pack's own
+ * `pricingPolicyType` once per group (TASK-208) — mutates `items` in place
+ * (`finalUnitPrice`/`lineTotal`/`appliedDiscounts`), never touches an item
+ * outside a `packGroupId`, and is a complete no-op when `packs` is empty
+ * (every existing call site that never sends packs behaves exactly as
+ * before this task).
+ */
+function applyCommercialPackAdjustments(
+  items: PricingEngineItemOutput[],
+  inputItems: PricingEngineItemInput[],
+  packs: PricingEngineCommercialPack[],
+): void {
+  if (packs.length === 0) return;
+  const packsById = new Map(packs.map((pack) => [pack.id, pack]));
+  const indicesByGroup = new Map<string, number[]>();
+  inputItems.forEach((inputItem, index) => {
+    const packGroupId = inputItem.packGroupId;
+    if (!packGroupId) return;
+    const indices = indicesByGroup.get(packGroupId) ?? [];
+    indices.push(index);
+    indicesByGroup.set(packGroupId, indices);
+  });
+
+  for (const indices of indicesByGroup.values()) {
+    const groupItems = indices.map((index) => items[index]!);
+    const packId = inputItems[indices[0]!]!.packId;
+    const pack = packId ? packsById.get(packId) : undefined;
+    if (!pack || pack.pricingPolicyType === 'componentSum') continue;
+
+    const groupBaselineTotal = roundCurrency(
+      groupItems.reduce((sum, item) => sum + item.lineTotal, 0),
+    );
+
+    switch (pack.pricingPolicyType) {
+      case 'fixedPrice': {
+        if (pack.fixedPrice === undefined || groupBaselineTotal <= 0) break;
+        const adjustment = roundCurrency(
+          groupBaselineTotal - roundCurrency(pack.fixedPrice),
+        );
+        distributeGroupAdjustment(
+          groupItems,
+          groupBaselineTotal,
+          adjustment,
+          pack.id,
+        );
+        break;
+      }
+      case 'packDiscount': {
+        if (
+          pack.discountPercentage === undefined ||
+          pack.discountPercentage <= 0 ||
+          groupBaselineTotal <= 0
+        ) {
+          break;
+        }
+        const adjustment = roundCurrency(
+          groupBaselineTotal * pack.discountPercentage,
+        );
+        distributeGroupAdjustment(
+          groupItems,
+          groupBaselineTotal,
+          adjustment,
+          pack.id,
+        );
+        break;
+      }
+      case 'bonusItem': {
+        const bonusComponentId = pack.bonusComponentId;
+        if (!bonusComponentId) break;
+        const bonusItem = groupItems.find(
+          (item) =>
+            item.variantId === bonusComponentId ||
+            item.productId === bonusComponentId,
+        );
+        if (!bonusItem || bonusItem.lineTotal <= 0) break;
+        const amount = roundCurrency(bonusItem.lineTotal);
+        bonusItem.appliedDiscounts.push({
+          origin: 'commercial_pack',
+          amount,
+          description: `Commercial pack ${pack.id} bonus item.`,
+        });
+        bonusItem.finalUnitPrice = 0;
+        bonusItem.lineTotal = 0;
+        break;
+      }
+    }
+  }
+}
+
+/**
+ * Splits [adjustment] (positive = discount, negative = surcharge)
+ * proportionally across [groupItems] by each item's own share of
+ * [groupBaselineTotal] — the last item absorbs whatever rounding remainder
+ * the proportional shares leave behind, so the group's items always sum
+ * back to exactly `groupBaselineTotal - adjustment`, never an
+ * off-by-a-cent drift. A no-op when [groupBaselineTotal] is `0` (nothing to
+ * distribute against).
+ */
+function distributeGroupAdjustment(
+  groupItems: PricingEngineItemOutput[],
+  groupBaselineTotal: number,
+  adjustment: number,
+  packId: string,
+): void {
+  if (groupBaselineTotal <= 0) return;
+  let allocated = 0;
+  groupItems.forEach((item, index) => {
+    const isLast = index === groupItems.length - 1;
+    const share = isLast
+      ? roundCurrency(adjustment - allocated)
+      : roundCurrency(adjustment * (item.lineTotal / groupBaselineTotal));
+    allocated = roundCurrency(allocated + share);
+    if (share === 0) return;
+    item.appliedDiscounts.push({
+      origin: 'commercial_pack',
+      amount: share,
+      description: `Commercial pack ${packId} adjustment.`,
+    });
+    item.lineTotal = roundCurrency(Math.max(0, item.lineTotal - share));
+    item.finalUnitPrice = item.quantity > 0
+      ? roundCurrency(item.lineTotal / item.quantity)
+      : item.finalUnitPrice;
+  });
 }
 
 function buildCommercialRuleTrace(
