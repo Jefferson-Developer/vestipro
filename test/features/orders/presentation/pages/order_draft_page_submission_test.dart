@@ -5,6 +5,7 @@ import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/design_system/design_system.dart';
 import 'package:vestipro/core/permissions/permissions.dart';
 import 'package:vestipro/core/utils/utils.dart';
+import 'package:vestipro/features/credit/credit.dart';
 import 'package:vestipro/features/customers/customers.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
 import 'package:vestipro/features/orders/orders.dart';
@@ -25,6 +26,8 @@ class _MockVariantAvailabilityRepository extends Mock
 
 class _MockOrderPricingRepository extends Mock
     implements OrderPricingRepository {}
+
+class _MockCreditRepository extends Mock implements CreditRepository {}
 
 /// TASK-100's own widget tests for `OrderDraftPage`'s "Enviar pedido" CTA
 /// and "Antes de enviar, resolva:" pendencies panel: the CTA stays disabled
@@ -280,6 +283,31 @@ Future<void> _pumpPage(
     ),
   ).thenAnswer((_) async => pricingResult);
 
+  // TASK-212: never blocks/requires approval by itself in this suite (its
+  // own scenarios are entirely about TASK-100's pre-existing pendencies) —
+  // stubbed to always resolve "released", same "no restriction" default
+  // `evaluateOrderCredit` itself falls back to for a customer with no
+  // `CustomerCreditProfile` at all.
+  final creditRepository = _MockCreditRepository();
+  when(
+    () => creditRepository.validateOrderCredit(
+      organizationId: any(named: 'organizationId'),
+      companyId: any(named: 'companyId'),
+      customerId: any(named: 'customerId'),
+      orderTotal: any(named: 'orderTotal'),
+    ),
+  ).thenAnswer(
+    (_) async => const AppSuccess<CreditCheckResult>(
+      CreditCheckResult(
+        status: CreditStatus.released,
+        blocked: false,
+        approvalRequired: false,
+        message: 'Crédito liberado para este pedido.',
+        dataStale: false,
+      ),
+    ),
+  );
+
   return tester.pumpWidget(
     MaterialApp(
       theme: AppTheme.light,
@@ -319,6 +347,7 @@ Future<void> _pumpPage(
                 GetVariantAvailabilityUseCase(availabilityRepository),
               ),
               const OrderSubmissionValidator(),
+              ValidateOrderCreditUseCase(creditRepository),
             ),
         draftId: 'order-1',
         onSubmitOrder: onSubmitOrder,

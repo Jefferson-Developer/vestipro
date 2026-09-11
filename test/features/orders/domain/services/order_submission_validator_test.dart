@@ -1,4 +1,5 @@
 import 'package:flutter_test/flutter_test.dart';
+import 'package:vestipro/features/credit/credit.dart';
 import 'package:vestipro/features/customers/customers.dart';
 import 'package:vestipro/features/orders/orders.dart';
 import 'package:vestipro/features/pricing/pricing.dart';
@@ -289,6 +290,79 @@ void main() {
       final issues = validator.validate(
         order: _order(),
         context: _validContext(),
+        now: now,
+      );
+
+      expect(issues, isEmpty);
+    });
+
+    test('blocks a customer whose credit check came back blocked', () {
+      final issues = validator.validate(
+        order: _order(),
+        context: _validContext(),
+        pricingSummary: _pricingSummary(),
+        creditCheck: const CreditCheckResult(
+          status: CreditStatus.blocked,
+          blocked: true,
+          approvalRequired: false,
+          message: 'Este cliente está bloqueado por pendência financeira.',
+          dataStale: false,
+        ),
+        now: now,
+      );
+
+      expect(issues.single.type, OrderSubmissionIssueType.creditBlocked);
+      expect(issues.single.isBlocking, isTrue);
+    });
+
+    test('never blocks by itself a credit check that only requires approval '
+        '— it is a warning that routes to the approval flow instead', () {
+      final issues = validator.validate(
+        order: _order(),
+        context: _validContext(),
+        pricingSummary: _pricingSummary(),
+        creditCheck: const CreditCheckResult(
+          status: CreditStatus.approvalRequired,
+          blocked: false,
+          approvalRequired: true,
+          message: 'Este pedido será enviado para aprovação.',
+          dataStale: false,
+        ),
+        now: now,
+      );
+
+      expect(
+        issues.single.type,
+        OrderSubmissionIssueType.creditRequiresApproval,
+      );
+      expect(issues.single.isBlocking, isFalse);
+    });
+
+    test('surfaces a near-limit/stale credit check only as a non-blocking '
+        'alert', () {
+      final issues = validator.validate(
+        order: _order(),
+        context: _validContext(),
+        pricingSummary: _pricingSummary(),
+        creditCheck: const CreditCheckResult(
+          status: CreditStatus.nearLimit,
+          blocked: false,
+          approvalRequired: false,
+          message: 'Cliente próximo do limite de crédito.',
+          dataStale: false,
+        ),
+        now: now,
+      );
+
+      expect(issues.single.type, OrderSubmissionIssueType.creditAlert);
+      expect(issues.single.isBlocking, isFalse);
+    });
+
+    test('ignores credit entirely when no check was resolved yet', () {
+      final issues = validator.validate(
+        order: _order(),
+        context: _validContext(),
+        pricingSummary: _pricingSummary(),
         now: now,
       );
 

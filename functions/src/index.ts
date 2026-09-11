@@ -65,6 +65,11 @@ export {
   expireQuotes,
   processRecurringOrders,
 } from './orders';
+export {
+  validateOrderCredit,
+  updateCreditProfile,
+  grantCreditOverride,
+} from './credit';
 export { generateInsightsScheduled } from './insights';
 export {
   calculateReplenishmentSuggestions,

@@ -399,6 +399,20 @@ import '../features/commissions/domain/usecases/watch_commission_entries_use_cas
     as _i818;
 import '../features/commissions/presentation/cubit/commission_statement_cubit.dart'
     as _i487;
+import '../features/credit/data/datasources/cloud_functions_credit_write_data_source.dart'
+    as _i53;
+import '../features/credit/data/datasources/credit_read_data_source.dart'
+    as _i869;
+import '../features/credit/data/datasources/credit_write_data_source.dart'
+    as _i173;
+import '../features/credit/data/datasources/firestore_credit_read_data_source.dart'
+    as _i224;
+import '../features/credit/data/repositories/credit_repository_impl.dart'
+    as _i891;
+import '../features/credit/domain/repositories/credit_repository.dart' as _i935;
+import '../features/credit/domain/usecases/credit_use_cases.dart' as _i560;
+import '../features/credit/presentation/bloc/customer_credit_cubit.dart'
+    as _i984;
 import '../features/crm/crm.dart' as _i205;
 import '../features/crm/data/mappers/crm_activity_mapper.dart' as _i203;
 import '../features/crm/data/mappers/crm_task_mapper.dart' as _i519;
@@ -3310,6 +3324,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i340.CloudFunctionsService>(),
       ),
     );
+    gh.lazySingleton<_i869.CreditReadDataSource>(
+      () => _i224.FirestoreCreditReadDataSource(gh<_i974.FirebaseFirestore>()),
+    );
     gh.factory<_i720.AddItemsToOrderDraftUseCase>(
       () => _i720.AddItemsToOrderDraftUseCase(
         gh<_i81.OrderDraftRepository>(),
@@ -3700,6 +3717,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1022.ProductRecommendationRepository>(),
         gh<_i47.PermissionService>(),
         gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.lazySingleton<_i173.CreditWriteDataSource>(
+      () => _i53.CloudFunctionsCreditWriteDataSource(
+        gh<_i340.CloudFunctionsService>(),
       ),
     );
     gh.factory<_i15.OrderProductAdditionCubit>(
@@ -4568,6 +4590,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i962.ProductImportReportMapper>(),
       ),
     );
+    gh.lazySingleton<_i935.CreditRepository>(
+      () => _i891.CreditRepositoryImpl(
+        gh<_i869.CreditReadDataSource>(),
+        gh<_i173.CreditWriteDataSource>(),
+      ),
+    );
     gh.factory<_i268.SearchProductsUseCase>(
       () => _i268.SearchProductsUseCase(gh<_i568.ProductSearchRepository>()),
     );
@@ -4747,6 +4775,22 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i126.LoadNpsAggregateTrendUseCase>(),
         gh<_i202.AnalyticsService>(),
       ),
+    );
+    gh.factory<_i560.ValidateOrderCreditUseCase>(
+      () => _i560.ValidateOrderCreditUseCase(gh<_i935.CreditRepository>()),
+    );
+    gh.factory<_i560.WatchCustomerCreditProfileUseCase>(
+      () =>
+          _i560.WatchCustomerCreditProfileUseCase(gh<_i935.CreditRepository>()),
+    );
+    gh.factory<_i560.UpdateCreditProfileUseCase>(
+      () => _i560.UpdateCreditProfileUseCase(gh<_i935.CreditRepository>()),
+    );
+    gh.factory<_i560.GrantCreditOverrideUseCase>(
+      () => _i560.GrantCreditOverrideUseCase(gh<_i935.CreditRepository>()),
+    );
+    gh.factory<_i560.RevokeCreditOverrideUseCase>(
+      () => _i560.RevokeCreditOverrideUseCase(gh<_i935.CreditRepository>()),
     );
     gh.factory<_i850.PreviewNpsSurveyUseCase>(
       () =>
@@ -5029,6 +5073,15 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i750.OrganizationReportBrandingDataSource(
         gh<_i756.OrganizationRepository>(),
         gh<_i361.Dio>(),
+      ),
+    );
+    gh.factory<_i984.CustomerCreditCubit>(
+      () => _i984.CustomerCreditCubit(
+        watchProfileUseCase: gh<_i560.WatchCustomerCreditProfileUseCase>(),
+        validateOrderCreditUseCase: gh<_i560.ValidateOrderCreditUseCase>(),
+        updateProfileUseCase: gh<_i560.UpdateCreditProfileUseCase>(),
+        grantOverrideUseCase: gh<_i560.GrantCreditOverrideUseCase>(),
+        revokeOverrideUseCase: gh<_i560.RevokeCreditOverrideUseCase>(),
       ),
     );
     gh.factory<_i75.PromotionalCampaignCubit>(
@@ -5737,12 +5790,6 @@ extension GetItInjectableX on _i174.GetIt {
         sessionService: gh<_i885.SessionService>(),
       ),
     );
-    gh.factory<_i753.OrderSubmissionValidationCubit>(
-      () => _i753.OrderSubmissionValidationCubit(
-        gh<_i1025.GetOrderSubmissionContextUseCase>(),
-        gh<_i745.OrderSubmissionValidator>(),
-      ),
-    );
     gh.factory<_i287.OrderDraftBloc>(
       () => _i287.OrderDraftBloc(
         getOrderDraft: gh<_i485.GetOrderDraftUseCase>(),
@@ -5752,6 +5799,13 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
         getProductById: gh<_i721.GetProductByIdUseCase>(),
         resolvePriceForVariant: gh<_i352.ResolvePriceForVariantUseCase>(),
+      ),
+    );
+    gh.factory<_i753.OrderSubmissionValidationCubit>(
+      () => _i753.OrderSubmissionValidationCubit(
+        gh<_i1025.GetOrderSubmissionContextUseCase>(),
+        gh<_i745.OrderSubmissionValidator>(),
+        gh<_i560.ValidateOrderCreditUseCase>(),
       ),
     );
     gh.factory<_i315.DuplicateOrderUseCase>(

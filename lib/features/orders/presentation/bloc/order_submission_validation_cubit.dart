@@ -4,6 +4,9 @@ import 'package:bloc/bloc.dart';
 // already follows.
 import 'package:injectable/injectable.dart' hide Order;
 
+import '../../../../core/utils/utils.dart';
+import '../../../credit/domain/entities/credit_check_result.dart';
+import '../../../credit/domain/usecases/credit_use_cases.dart';
 import '../../domain/entities/order.dart';
 import '../../domain/entities/order_pricing_summary.dart';
 import '../../domain/services/order_submission_validator.dart';
@@ -25,11 +28,15 @@ import 'order_submission_validation_state.dart';
 @injectable
 final class OrderSubmissionValidationCubit
     extends Cubit<OrderSubmissionValidationState> {
-  OrderSubmissionValidationCubit(this._getContext, this._validator)
-    : super(const OrderSubmissionValidationState());
+  OrderSubmissionValidationCubit(
+    this._getContext,
+    this._validator,
+    this._validateOrderCredit,
+  ) : super(const OrderSubmissionValidationState());
 
   final GetOrderSubmissionContextUseCase _getContext;
   final OrderSubmissionValidator _validator;
+  final ValidateOrderCreditUseCase _validateOrderCredit;
 
   /// Guards against a stale evaluation overwriting a newer one — the same
   /// token-based staleness guard `OrderPricingSummaryCubit._requestToken`
@@ -45,13 +52,25 @@ final class OrderSubmissionValidationCubit
     final token = ++_requestToken;
     emit(state.copyWith(status: OrderSubmissionValidationStatus.evaluating));
 
-    final context = await _getContext(order: order);
+    // TASK-212: best-effort, exactly like `_getContext` right below —
+    // resolved only once `pricingSummary` (and therefore a real order
+    // total) is known, mirroring `_validatePricing`'s own "nothing to check
+    // yet" precedent. A failed/slow lookup never blocks this screen: this
+    // is explicitly a client-side/UX-only preview, `submitOrder` always
+    // revalidates credit server-side regardless of what this call found.
+    final contextFuture = _getContext(order: order);
+    final creditFuture = pricingSummary == null
+        ? Future<CreditCheckResult?>.value()
+        : _resolveCreditCheck(order: order, orderTotal: pricingSummary.total);
+    final context = await contextFuture;
+    final creditCheck = await creditFuture;
     if (isClosed || token != _requestToken) return;
 
     final issues = _validator.validate(
       order: order,
       context: context,
       pricingSummary: pricingSummary,
+      creditCheck: creditCheck,
       productNamesById: productNamesById,
     );
     if (isClosed || token != _requestToken) return;
@@ -62,5 +81,21 @@ final class OrderSubmissionValidationCubit
         issues: issues,
       ),
     );
+  }
+
+  Future<CreditCheckResult?> _resolveCreditCheck({
+    required Order order,
+    required double orderTotal,
+  }) async {
+    final result = await _validateOrderCredit(
+      organizationId: order.organizationId,
+      companyId: order.companyId,
+      customerId: order.customerId,
+      orderTotal: orderTotal,
+    );
+    return switch (result) {
+      AppSuccess<CreditCheckResult>(value: final check) => check,
+      AppFailure<CreditCheckResult>() => null,
+    };
   }
 }

@@ -7,6 +7,7 @@ import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/navigation/navigation.dart';
 import 'package:vestipro/core/permissions/permissions.dart';
 import 'package:vestipro/core/utils/utils.dart';
+import 'package:vestipro/features/credit/credit.dart';
 import 'package:vestipro/features/customers/customers.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
 import 'package:vestipro/features/orders/orders.dart';
@@ -36,6 +37,8 @@ class _MockPriceListRepository extends Mock implements PriceListRepository {}
 
 class _MockPaymentTermRepository extends Mock
     implements PaymentTermRepository {}
+
+class _MockCreditRepository extends Mock implements CreditRepository {}
 
 void main() {
   group('OrderDraftPage', () {
@@ -270,6 +273,7 @@ Future<void> _pumpPage(
                 ),
               ),
               const OrderSubmissionValidator(),
+              ValidateOrderCreditUseCase(_MockCreditRepository()),
             ),
       ),
     ),

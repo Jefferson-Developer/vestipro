@@ -7,12 +7,81 @@ import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/permissions/permissions.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/approach_suggestion/approach_suggestion.dart';
+import 'package:vestipro/features/credit/credit.dart';
 import 'package:vestipro/features/crm/crm.dart';
 import 'package:vestipro/features/customers/customers.dart';
 import 'package:vestipro/features/organizations/organizations.dart';
 import 'package:vestipro/features/users/users.dart';
 
 class _MockMembershipRepository extends Mock implements MembershipRepository {}
+
+/// TASK-212: a plain, always-released fake — `CustomerCreditPanel`'s masked
+/// path (`SALES_MANAGER`, granted `report.viewSensitive` but not
+/// `finance.view`) genuinely calls `validateOrderCredit` in most of this
+/// file's scenarios, so (unlike [_UncalledApproachSuggestionRepository])
+/// this one must actually answer instead of throwing.
+final class _FakeCreditRepository implements CreditRepository {
+  @override
+  Future<AppResult<CreditCheckResult>> validateOrderCredit({
+    required String organizationId,
+    required String companyId,
+    required String customerId,
+    required double orderTotal,
+  }) async => const AppSuccess<CreditCheckResult>(
+    CreditCheckResult(
+      status: CreditStatus.released,
+      blocked: false,
+      approvalRequired: false,
+      message: 'Crédito liberado para este pedido.',
+      dataStale: false,
+    ),
+  );
+
+  @override
+  Stream<AppResult<CustomerCreditProfile?>> watchProfile({
+    required String organizationId,
+    required String customerId,
+  }) => Stream<AppResult<CustomerCreditProfile?>>.value(
+    const AppSuccess<CustomerCreditProfile?>(null),
+  );
+
+  @override
+  Future<AppResult<void>> updateProfile({
+    required String organizationId,
+    required String companyId,
+    required String customerId,
+    required double creditLimit,
+    required double openBalance,
+    required double overdueBalance,
+    required CreditBlockPolicy blockPolicy,
+    double? financialScore,
+    String dataSource = 'manual',
+    bool manualBlockActive = false,
+    String? manualBlockReason,
+  }) => throw UnimplementedError(
+    'CreditRepository.updateProfile should never be called in these tests.',
+  );
+
+  @override
+  Future<AppResult<void>> grantOverride({
+    required String organizationId,
+    required String companyId,
+    required String customerId,
+    required String reason,
+    required DateTime expiresAt,
+  }) => throw UnimplementedError(
+    'CreditRepository.grantOverride should never be called in these tests.',
+  );
+
+  @override
+  Future<AppResult<void>> revokeOverride({
+    required String organizationId,
+    required String companyId,
+    required String customerId,
+  }) => throw UnimplementedError(
+    'CreditRepository.revokeOverride should never be called in these tests.',
+  );
+}
 
 /// Never actually invoked by any test in this file (none of them tap
 /// "Sugerir abordagem" through to a real generation) — only exists so
@@ -269,7 +338,7 @@ void main() {
           ),
           findsOneWidget,
         );
-        expect(find.text('Margem e credito em breve'), findsNothing);
+        expect(find.text('Margem em breve'), findsNothing);
 
         _grantRole(membershipRepository, 'SALES_MANAGER');
         await tester.pumpWidget(Container());
@@ -283,13 +352,17 @@ void main() {
         );
         await tester.pumpAndSettle();
 
-        expect(find.text('Margem e credito em breve'), findsOneWidget);
+        expect(find.text('Margem em breve'), findsOneWidget);
         expect(
           find.text(
             'Sem permissao para ver margem, credito ou dados financeiros.',
           ),
           findsNothing,
         );
+        // TASK-212: SALES_MANAGER holds `report.viewSensitive` but not
+        // `finance.view` — sees only the masked credit status, never a raw
+        // limite/saldo figure.
+        expect(find.text('Crédito liberado para este pedido.'), findsOneWidget);
       },
     );
   });
@@ -329,6 +402,23 @@ Future<void> _pumpPage(
           GenerateApproachSuggestionUseCase(
             _UncalledApproachSuggestionRepository(),
             analyticsService,
+          ),
+        ),
+        createCreditPanelCubit: () => CustomerCreditCubit(
+          watchProfileUseCase: WatchCustomerCreditProfileUseCase(
+            _FakeCreditRepository(),
+          ),
+          validateOrderCreditUseCase: ValidateOrderCreditUseCase(
+            _FakeCreditRepository(),
+          ),
+          updateProfileUseCase: UpdateCreditProfileUseCase(
+            _FakeCreditRepository(),
+          ),
+          grantOverrideUseCase: GrantCreditOverrideUseCase(
+            _FakeCreditRepository(),
+          ),
+          revokeOverrideUseCase: RevokeCreditOverrideUseCase(
+            _FakeCreditRepository(),
           ),
         ),
       ),

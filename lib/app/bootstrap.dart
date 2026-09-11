@@ -36,6 +36,7 @@ import '../features/catalog/catalog.dart';
 import '../features/customer_import/customer_import.dart';
 import '../features/product_import/product_import.dart';
 import '../features/customers/customers.dart';
+import '../features/credit/credit.dart';
 import '../features/customer_portal/customer_portal.dart';
 import '../features/demand_forecast/demand_forecast.dart';
 import '../features/visit_routes/visit_routes.dart';
@@ -1416,6 +1417,7 @@ class VestiProApp extends StatelessWidget {
                 createBloc: () => getIt<CustomerDetailBloc>(),
                 createApproachSuggestionCubit: () =>
                     getIt<ApproachSuggestionCubit>(),
+                createCreditPanelCubit: () => getIt<CustomerCreditCubit>(),
                 createProductRecommendationsBloc: () =>
                     getIt<ProductRecommendationsBloc>(),
               ),

@@ -43,6 +43,22 @@ enum OrderSubmissionIssueType {
   itemQuantityExceedsAvailability,
   discountBlocked,
   discountRequiresApproval,
+
+  /// Cliente bloqueado/inadimplente sob uma política de crédito `block`
+  /// (TASK-212, EPIC-32) — o pedido não pode ser enviado até o financeiro
+  /// regularizar a situação ou conceder uma exceção temporária.
+  creditBlocked,
+
+  /// Cliente com pendência de crédito sob uma política `require_approval`
+  /// (TASK-212) — o pedido ainda é enviado, mas entra em aprovação em vez de
+  /// ir direto para `submitted` (nunca bloqueia sozinho, mesmo precedente de
+  /// [discountRequiresApproval]).
+  creditRequiresApproval,
+
+  /// Cliente próximo do limite de crédito ou com dado financeiro
+  /// desatualizado (TASK-212) — puramente informativo, nunca bloqueia nem
+  /// exige aprovação por si só.
+  creditAlert,
 }
 
 /// One pendência (or aviso) `OrderSubmissionValidator` (TASK-100) reports

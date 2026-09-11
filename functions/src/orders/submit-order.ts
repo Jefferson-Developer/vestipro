@@ -35,8 +35,14 @@ import {
 } from '../pricing/calculate-pricing';
 import { asInt, requirePositiveInteger } from '../inventory/stock-reservation-shared';
 import {
+  describeCreditEvaluation,
+  evaluateOrderCredit,
+  mapCreditProfile,
+} from '../credit/credit-shared';
+import {
   buildApprovalChainInstance,
   enqueueApprovalNotifications,
+  type ApprovalChainInstance,
 } from './approval-chain';
 
 /**
@@ -312,6 +318,15 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
       const customerSegment =
         typeof customerData.segment === 'string' ? customerData.segment.trim() : '';
 
+      // TASK-212: read once here (transaction reads must all happen before
+      // any write below) — evaluated further down once `pricing.total` is
+      // known, right after the discount-driven `pricing.blocked` check, so
+      // a customer bloqueado/inadimplente/acima do limite never reaches
+      // `submitted` any more than a discount fora da política already does.
+      const creditProfileSnapshot = await transaction.get(
+        organizationRef.collection('creditProfiles').doc(customerId),
+      );
+
       const priceListSnapshot = await transaction.get(
         organizationRef.collection('priceLists').doc(priceListId),
       );
@@ -412,6 +427,24 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
         );
       }
 
+      // TASK-212: crédito/inadimplência é revalidado contra o
+      // `CustomerCreditProfile` atual (nunca o snapshot que o app possa ter
+      // mostrado offline) — a única regra de negócio crítica desta task
+      // nunca depende só do cliente. `blockPolicy: 'block'` (ou bloqueio
+      // manual/limite excedido sem exceção vigente) interrompe a submissão
+      // aqui mesmo; `'require_approval'` só marca `creditApprovalRequired`,
+      // tratado junto da aprovação de desconto mais abaixo.
+      const creditProfile = creditProfileSnapshot.exists
+        ? mapCreditProfile(customerId, creditProfileSnapshot.data())
+        : null;
+      const creditEvaluation = evaluateOrderCredit(creditProfile, pricing.total, Timestamp.now());
+      if (creditEvaluation.blocked) {
+        throw new HttpsError(
+          'failed-precondition',
+          describeCreditEvaluation(creditEvaluation),
+        );
+      }
+
       // ---- availability (reads only — writes staged further below) ------
       const approvalPolicySnapshots = await transaction.get(
         organizationRef.collection('approvalPolicies'),
@@ -437,20 +470,56 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
       // (`buildApprovalReason`), so the approval queue (`decideOrderApproval`)
       // never has to reverse-engineer the reason from raw pricing internals.
       const portalApprovalRequired = membership.roleName === 'CUSTOMER_PORTAL';
-      const initialStatus = pricing.approvalRequired || portalApprovalRequired
-        ? 'under_review'
-        : 'submitted';
-      const approvalReason = portalApprovalRequired
-        ? 'Pedido realizado pelo portal do cliente'
-        : pricing.approvalRequired ? buildApprovalReason(pricing) : null;
-      const approvalChain = approvalReason
-        ? buildApprovalChainInstance(
-            approvalPolicySnapshots.docs.map((doc) => ({ id: doc.id, data: doc.data() })),
-            companyId,
-            pricing,
-            approvalReason,
-          )
-        : null;
+      const creditApprovalRequired = creditEvaluation.approvalRequired;
+      const initialStatus =
+        pricing.approvalRequired || portalApprovalRequired || creditApprovalRequired
+          ? 'under_review'
+          : 'submitted';
+      const approvalReasonParts: string[] = [];
+      if (portalApprovalRequired) {
+        approvalReasonParts.push('Pedido realizado pelo portal do cliente');
+      }
+      if (pricing.approvalRequired) {
+        approvalReasonParts.push(buildApprovalReason(pricing));
+      }
+      if (creditApprovalRequired) {
+        approvalReasonParts.push(describeCreditEvaluation(creditEvaluation));
+      }
+      const approvalReason =
+        approvalReasonParts.length > 0 ? approvalReasonParts.join(' ') : null;
+      let approvalChain: ApprovalChainInstance | null =
+        pricing.approvalRequired && approvalReason
+          ? buildApprovalChainInstance(
+              approvalPolicySnapshots.docs.map((doc) => ({ id: doc.id, data: doc.data() })),
+              companyId,
+              pricing,
+              approvalReason,
+            )
+          : null;
+      // TASK-212: quando só o crédito exige aprovação (desconto dentro da
+      // política do vendedor), nenhuma `ApprovalPolicy` por faixa de
+      // desconto se aplica — um nível único, decidido por `SALES_MANAGER`
+      // (o único perfil não-FINANCE que `decideOrderApproval`, TASK-103, já
+      // permite decidir), garante que a exceção financeira sempre entre no
+      // mesmo fluxo multinível de aprovação em vez de ficar sem cadeia.
+      if (creditApprovalRequired && !approvalChain) {
+        approvalChain = {
+          policyId: 'credit_profile',
+          policyVersion: 1,
+          reason: approvalReason ?? describeCreditEvaluation(creditEvaluation),
+          discountPercent: 0,
+          currentLevelIndex: 0,
+          status: 'pending',
+          levels: [
+            {
+              index: 0,
+              role: creditEvaluation.approverRole ?? 'SALES_MANAGER',
+              label: 'Gestor comercial',
+            },
+          ],
+          decisions: [],
+        };
+      }
       const firstApprovalLevel = approvalChain?.levels[0];
       if (initialStatus === 'under_review' && firstApprovalLevel) {
         await enqueueApprovalNotifications(transaction, organizationRef, {
@@ -534,6 +603,17 @@ export const submitOrder = onCall<SubmitOrderRequest, Promise<SubmitOrderRespons
         approvedAt: null,
         rejectionReason: null,
         pricingApprovalRequired: pricing.approvalRequired || portalApprovalRequired,
+        // TASK-212: apenas o status/motivo não-sensível (nunca limite/saldo/
+        // score) — o mesmo "vendedor entende o motivo operacional sem
+        // acessar dado financeiro além do permitido" que já vale para
+        // `validateOrderCredit`. Auditoria detalhada de crédito fica em
+        // `creditProfiles`/`auditLogs`, não aqui.
+        creditCheck: {
+          status: creditEvaluation.status,
+          reasonCode: creditEvaluation.reasonCode,
+          dataStale: creditEvaluation.dataStale,
+          overrideApplied: creditEvaluation.overrideApplied,
+        },
         approvalChain,
         submittedVia: portalApprovalRequired ? 'customer_portal' : 'internal',
         idempotencyKey: orderId,

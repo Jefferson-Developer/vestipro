@@ -1606,6 +1606,28 @@ service cloud.firestore {
         }
       }
 
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/creditProfiles/{customerId}
+      // (TASK-212)
+      // -------------------------------------------------------------------
+      //
+      // Dado financeiro sensível (limite de crédito, saldo em aberto, saldo
+      // vencido, score) — leitura direta restrita a `finance.view`, hoje só
+      // OWNER/ADMIN/FINANCE (`roleHasCapability` acima), nunca SALES_REP/
+      // SALES_MANAGER/SALES_ASSISTANT/CUSTOMER_PORTAL: esses perfis só
+      // enxergam o status mascarado (liberado/próximo do limite/bloqueado/
+      // aprovação necessária), servido pela Cloud Function callable
+      // `validateOrderCredit` (que usa o Admin SDK e por isso não passa por
+      // estas regras). Toda escrita é mediada exclusivamente pelas Cloud
+      // Functions `updateCreditProfile`/`grantCreditOverride` — nenhum
+      // cliente jamais define o próprio limite, bloqueio ou exceção
+      // (`tasks.md`: "cliente não pode aprovar crédito no próprio app").
+
+      match /creditProfiles/{customerId} {
+        allow get, list: if hasCapability(organizationId, 'finance.view');
+        allow create, update, delete: if false;
+      }
+
       // TASK-183: consent, approved templates and delivery history are
       // mediated exclusively by Cloud Functions. This prevents a client
       // from forging opt-in, approving its own template or changing a

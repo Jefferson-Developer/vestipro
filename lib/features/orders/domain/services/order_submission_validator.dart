@@ -1,5 +1,7 @@
 import 'package:injectable/injectable.dart' hide Order;
 
+import '../../../credit/domain/entities/credit_check_result.dart';
+import '../../../credit/domain/value_objects/credit_status.dart';
 import '../../../customers/domain/entities/customer.dart';
 import '../../../customers/domain/value_objects/customer_status.dart';
 import '../../../pricing/domain/entities/payment_term.dart';
@@ -45,6 +47,7 @@ final class OrderSubmissionValidator {
     required Order order,
     required OrderSubmissionContext context,
     OrderPricingSummary? pricingSummary,
+    CreditCheckResult? creditCheck,
     Map<String, String> productNamesById = const <String, String>{},
     DateTime? now,
   }) {
@@ -56,6 +59,7 @@ final class OrderSubmissionValidator {
       ..._validatePaymentTerm(context.paymentTerm, order.priceListId),
       ..._validateItemsAvailability(order, context, productNamesById),
       ..._validatePricing(pricingSummary),
+      ..._validateCredit(creditCheck),
     ]);
   }
 
@@ -269,6 +273,48 @@ final class OrderSubmissionValidator {
               'Este pedido tem desconto acima do seu limite e será enviado '
               'para aprovação antes de ser confirmado.',
           target: OrderSubmissionIssueTarget.pricingSummary,
+        ),
+      ];
+    }
+    return const <OrderSubmissionIssue>[];
+  }
+
+  /// TASK-212, EPIC-32: crédito/inadimplência do cliente — [creditCheck] é
+  /// `null` até `orderTotal` (o próprio [pricingSummary]) ficar disponível,
+  /// mesmo precedente de [_validatePricing]. `blocked` é a única condição
+  /// que impede o envio aqui; `approvalRequired`/`nearLimit`/`dataStale`
+  /// nunca bloqueiam sozinhos — a revalidação definitiva e o eventual
+  /// roteamento para aprovação continuam sendo decididos por `submitOrder`
+  /// (`functions/src/credit/credit-shared.ts`), nunca por este validador.
+  List<OrderSubmissionIssue> _validateCredit(CreditCheckResult? creditCheck) {
+    if (creditCheck == null) return const <OrderSubmissionIssue>[];
+    if (creditCheck.blocked) {
+      return <OrderSubmissionIssue>[
+        OrderSubmissionIssue(
+          type: OrderSubmissionIssueType.creditBlocked,
+          severity: OrderSubmissionIssueSeverity.blocking,
+          message: creditCheck.message,
+          target: OrderSubmissionIssueTarget.orderSummary,
+        ),
+      ];
+    }
+    if (creditCheck.approvalRequired) {
+      return <OrderSubmissionIssue>[
+        OrderSubmissionIssue(
+          type: OrderSubmissionIssueType.creditRequiresApproval,
+          severity: OrderSubmissionIssueSeverity.warning,
+          message: creditCheck.message,
+          target: OrderSubmissionIssueTarget.orderSummary,
+        ),
+      ];
+    }
+    if (creditCheck.status == CreditStatus.nearLimit || creditCheck.dataStale) {
+      return <OrderSubmissionIssue>[
+        OrderSubmissionIssue(
+          type: OrderSubmissionIssueType.creditAlert,
+          severity: OrderSubmissionIssueSeverity.warning,
+          message: creditCheck.message,
+          target: OrderSubmissionIssueTarget.orderSummary,
         ),
       ];
     }
