@@ -77,6 +77,15 @@ export {
   reconcileReceivablesToCreditProfile,
   generateBillingReminders,
 } from './receivables';
+export {
+  createShipment,
+  registerTrackingEvent,
+  handleShipmentTrackingWebhook,
+  provisionShipmentWebhookSecret,
+  registerLogisticsIssue,
+  resolveLogisticsIssue,
+  detectShipmentDelays,
+} from './fulfillment';
 export { generateInsightsScheduled } from './insights';
 export {
   calculateReplenishmentSuggestions,

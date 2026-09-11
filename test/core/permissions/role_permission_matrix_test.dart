@@ -737,6 +737,42 @@ void main() {
       }
     });
 
+    test(
+      'OWNER/ADMIN/SALES_MANAGER/SALES_REP can manage expedição/tracking/'
+      'ocorrências (TASK-214); SALES_ASSISTANT/FINANCE/READ_ONLY never can',
+      () {
+        for (final role in <SystemRoleName>[
+          SystemRoleName.owner,
+          SystemRoleName.admin,
+          SystemRoleName.salesManager,
+          SystemRoleName.salesRep,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.shipmentManage),
+            isTrue,
+            reason:
+                '$role must be able to manage expedição/tracking/ocorrências.',
+          );
+        }
+
+        for (final role in <SystemRoleName>[
+          SystemRoleName.salesAssistant,
+          SystemRoleName.finance,
+          SystemRoleName.readOnly,
+        ]) {
+          expect(
+            RolePermissionMatrix.capabilitiesFor(
+              role,
+            ).contains(Capability.shipmentManage),
+            isFalse,
+            reason: '$role must never manage expedição/tracking/ocorrências.',
+          );
+        }
+      },
+    );
+
     test('READ_ONLY never has any capability', () {
       final capabilities = RolePermissionMatrix.capabilitiesFor(
         SystemRoleName.readOnly,

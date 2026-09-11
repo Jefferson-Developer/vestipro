@@ -255,6 +255,20 @@ enum Capability {
   /// Firestore Security Rule (`firestore.rules`) that re-validates the
   /// same boundary server-side from the caller's real Membership/role.
   commercialPackManage,
+
+  /// Criar uma `Shipment`/romaneio, registrar manualmente um evento de
+  /// tracking (marco de expedição) e abrir/resolver uma `LogisticsIssue`/
+  /// ocorrência de entrega (TASK-214, EPIC-32) — mirrors exactly
+  /// [postSaleEventRegister]'s own grant list/scope: `OWNER`/`ADMIN` always;
+  /// `SALES_MANAGER`/`SALES_REP` only for a pedido they may already act on.
+  /// A ocorrência sempre carrega responsável e próxima ação
+  /// (`createShipment`/`registerTrackingEvent`/`registerLogisticsIssue`/
+  /// `resolveLogisticsIssue`, Cloud Functions, revalidam essa mesma
+  /// amplitude server-side a partir da Membership real do chamador — nunca
+  /// confiam neste capability resolvido no cliente). A integração externa
+  /// (webhook de transportadora) e a detecção automática de atraso rodam
+  /// pelo Admin SDK e nunca passam por este capability.
+  shipmentManage,
 }
 
 extension CapabilityCode on Capability {
@@ -314,6 +328,7 @@ extension CapabilityCode on Capability {
       Capability.exchangeRequestApprove => 'exchange.approve',
       Capability.postSaleEventRegister => 'postSaleEvent.register',
       Capability.commercialPackManage => 'commercialPack.manage',
+      Capability.shipmentManage => 'shipment.manage',
     };
   }
 }

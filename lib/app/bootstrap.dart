@@ -38,6 +38,7 @@ import '../features/product_import/product_import.dart';
 import '../features/customers/customers.dart';
 import '../features/credit/credit.dart';
 import '../features/receivables/receivables.dart';
+import '../features/fulfillment/fulfillment.dart';
 import '../features/customer_portal/customer_portal.dart';
 import '../features/demand_forecast/demand_forecast.dart';
 import '../features/visit_routes/visit_routes.dart';
@@ -1191,6 +1192,8 @@ class VestiProApp extends StatelessWidget {
                   createRegisterPostSaleEventCubit: () =>
                       getIt<RegisterPostSaleEventCubit>(),
                   createBillingPanelCubit: () => getIt<CustomerBillingCubit>(),
+                  createFulfillmentPanelCubit: () =>
+                      getIt<OrderFulfillmentCubit>(),
                   onDuplicated: (order) => context.go(
                     OrderDraftRoute(
                       orgId: orgId,

@@ -92,8 +92,11 @@ class _CustomerPortalPageState extends State<CustomerPortalPage> {
                       child: ListTile(
                         title: Text('Pedido ${order.orderNumber}'),
                         subtitle: Text(
-                          '${order.status} • R\$ ${order.total.toStringAsFixed(2)}',
+                          '${order.status} • R\$ ${order.total.toStringAsFixed(2)}'
+                          '${order.shipmentStatus == null ? '' : '\nRastreio: ${order.shipmentStatus}'}'
+                          '${order.hasOpenLogisticsIssue ? ' (ocorrência em aberto)' : ''}',
                         ),
+                        isThreeLine: order.shipmentStatus != null,
                         trailing: FilledButton.tonal(
                           onPressed: () => context
                               .read<CustomerPortalCubit>()

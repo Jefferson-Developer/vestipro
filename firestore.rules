@@ -1670,6 +1670,83 @@ service cloud.firestore {
         allow read, write: if false;
       }
 
+      // -------------------------------------------------------------------
+      // organizations/{organizationId}/shipments/{shipmentId}
+      // organizations/{organizationId}/trackingEvents/{trackingEventId}
+      // organizations/{organizationId}/logisticsIssues/{logisticsIssueId}
+      // organizations/{organizationId}/shipmentWebhookSecrets/{carrierId}
+      // (TASK-214, EPIC-32 — expedição, romaneio, tracking e ocorrências)
+      // -------------------------------------------------------------------
+      //
+      // Toda escrita é exclusiva das Cloud Functions `createShipment`,
+      // `registerTrackingEvent`, `handleShipmentTrackingWebhook` (integração
+      // externa, roda com o Admin SDK e por isso não passa por estas regras),
+      // `registerLogisticsIssue`, `resolveLogisticsIssue` e
+      // `detectShipmentDelays` — nenhum cliente jamais cria/edita um
+      // romaneio, avança um evento de tracking ou marca uma ocorrência como
+      // resolvida por conta própria. Visibilidade deliberadamente espelha
+      // `canReadOrder`/`canReadPostSaleEvent`: nunca visível a quem não
+      // poderia já ler o pedido a que a expedição pertence — inclusive o
+      // portal do próprio cliente (TASK-214: "Cliente externo só vê tracking
+      // dos próprios pedidos").
+
+      function validShipmentVisibilityPayload(organizationId) {
+        return resource.data.keys().hasAll([
+            'organizationId',
+            'companyId',
+            'sellerId',
+            'customerId'
+          ])
+          && resource.data.organizationId == organizationId
+          && resource.data.companyId is string
+          && resource.data.companyId.size() > 0
+          && resource.data.sellerId is string
+          && resource.data.sellerId.size() > 0
+          && resource.data.customerId is string
+          && resource.data.customerId.size() > 0;
+      }
+
+      function managerCanReadShipment(organizationId) {
+        return isSalesManager(organizationId)
+          && exists(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId))
+          && requesterTeamIds(organizationId).hasAny(
+              get(/databases/$(database)/documents/organizations/$(organizationId)/members/$(resource.data.sellerId)).data.teamIds
+            );
+      }
+
+      function canReadShipment(organizationId) {
+        return validShipmentVisibilityPayload(organizationId)
+          && (
+            isOwnerOrAdmin(organizationId)
+            || (isCustomerPortal(organizationId)
+              && resource.data.customerId == portalCustomerId(organizationId))
+            || (isSalesRep(organizationId) && resource.data.sellerId == request.auth.uid)
+            || managerCanReadShipment(organizationId)
+          );
+      }
+
+      match /shipments/{shipmentId} {
+        allow get, list: if canReadShipment(organizationId);
+        allow create, update, delete: if false;
+      }
+
+      match /trackingEvents/{trackingEventId} {
+        allow get, list: if canReadShipment(organizationId);
+        allow create, update, delete: if false;
+      }
+
+      match /logisticsIssues/{logisticsIssueId} {
+        allow get, list: if canReadShipment(organizationId);
+        allow create, update, delete: if false;
+      }
+
+      // Segredo HMAC por transportadora usado por
+      // `handleShipmentTrackingWebhook` — nunca lido/gravado pelo cliente,
+      // mesmo padrão de `paymentWebhookSecrets` (TASK-193).
+      match /shipmentWebhookSecrets/{carrierId} {
+        allow read, write: if false;
+      }
+
       // TASK-183: consent, approved templates and delivery history are
       // mediated exclusively by Cloud Functions. This prevents a client
       // from forging opt-in, approving its own template or changing a

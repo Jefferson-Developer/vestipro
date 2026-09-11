@@ -423,6 +423,18 @@ final class AnalyticsEvents {
   static const String buyerCollaborationConvertedToOrder =
       'buyer_collaboration_converted_to_order';
 
+  /// Logged by `OrderFulfillmentCubit` (TASK-214, EPIC-32) whenever a
+  /// vendedor/gestor successfully opens a `LogisticsIssue`/ocorrência de
+  /// entrega (atraso, avaria, divergência de volume, endereço inválido,
+  /// devolução de transporte) — `order_id`/`issue_type` are carried as
+  /// parameters, never the free-text description.
+  static const String logisticsIssueRegistered = 'logistics_issue_registered';
+
+  /// Logged by `OrderFulfillmentCubit` (TASK-214, EPIC-32) whenever a
+  /// vendedor/gestor marks a `LogisticsIssue` as resolvida — `order_id`/
+  /// `issue_type` are carried as parameters, never the resolution note.
+  static const String logisticsIssueResolved = 'logistics_issue_resolved';
+
   /// Every event name currently defined in the taxonomy. Used by tests to
   /// assert there are no duplicates and by tooling that needs to enumerate
   /// the full catalog (e.g. a future QA/analytics debug screen).
@@ -547,5 +559,7 @@ final class AnalyticsEvents {
     buyerCollaborationChangesRequested,
     buyerCollaborationApproved,
     buyerCollaborationConvertedToOrder,
+    logisticsIssueRegistered,
+    logisticsIssueResolved,
   ];
 }

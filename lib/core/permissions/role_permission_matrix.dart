@@ -93,6 +93,11 @@ abstract final class RolePermissionMatrix {
     // completo/quase completo acima. SALES_REP nunca a recebe — só
     // consome (lê) um pacote já publicado.
     Capability.commercialPackManage,
+    // TASK-214: SALES_MANAGER cria expedição, registra evento de tracking e
+    // abre/resolve ocorrência logística para pedidos da própria equipe —
+    // mesma amplitude de Capability.postSaleEventRegister; OWNER/ADMIN já a
+    // recebem via o conjunto completo/quase completo acima.
+    Capability.shipmentManage,
   };
 
   static const Set<Capability> _salesRepCapabilities = <Capability>{
@@ -127,6 +132,10 @@ abstract final class RolePermissionMatrix {
     // TASK-201: SALES_REP registra manualmente um marco de pós-venda para os
     // próprios pedidos, mesma amplitude de Capability.returnRequestCreate.
     Capability.postSaleEventRegister,
+    // TASK-214: SALES_REP cria expedição, registra evento de tracking e
+    // abre/resolve ocorrência logística para os próprios pedidos, mesma
+    // amplitude de Capability.postSaleEventRegister.
+    Capability.shipmentManage,
   };
 
   static const Set<Capability> _salesAssistantCapabilities = <Capability>{

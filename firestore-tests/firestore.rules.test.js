@@ -712,6 +712,109 @@ function postSaleEventDoc({
   };
 }
 
+function shipmentDoc({
+  organizationId,
+  companyId = 'company-a',
+  orderId = 'order-rep-a',
+  sellerId,
+  customerId = 'customer-a',
+  status = 'shipped',
+}) {
+  return {
+    organizationId,
+    companyId,
+    orderId,
+    orderNumber: '000001',
+    customerId,
+    sellerId,
+    carrierName: 'Transportadora Teste',
+    carrierTrackingCode: 'TRACK123',
+    status,
+    hasOpenIssue: false,
+    packages: [
+      {
+        packageNumber: 1,
+        weightKg: 1.5,
+        items: [{ orderItemId: 'item-1', productId: 'product-a', variantId: 'variant-a', quantity: 1 }],
+      },
+    ],
+    deliveredQuantities: {},
+    estimatedDeliveryDate: null,
+    shippedAt: now(),
+    deliveredAt: null,
+    lastEventAt: now(),
+    lastEventType: 'shipped',
+    createdAt: now(),
+    createdBy: sellerId,
+    updatedAt: now(),
+    updatedBy: sellerId,
+    version: 1,
+  };
+}
+
+function trackingEventDoc({
+  organizationId,
+  companyId = 'company-a',
+  shipmentId = 'shipment-rep-a',
+  orderId = 'order-rep-a',
+  sellerId,
+  customerId = 'customer-a',
+  type = 'shipped',
+}) {
+  return {
+    organizationId,
+    companyId,
+    shipmentId,
+    orderId,
+    orderNumber: '000001',
+    customerId,
+    sellerId,
+    type,
+    source: 'manual',
+    externalEventId: null,
+    carrierId: null,
+    description: null,
+    deliveredItems: null,
+    correctionOfEventId: null,
+    occurredAt: now(),
+    createdAt: now(),
+    createdBy: sellerId,
+    createdByName: 'Vendedor Teste',
+  };
+}
+
+function logisticsIssueDoc({
+  organizationId,
+  companyId = 'company-a',
+  shipmentId = 'shipment-rep-a',
+  orderId = 'order-rep-a',
+  sellerId,
+  customerId = 'customer-a',
+  status = 'open',
+}) {
+  return {
+    organizationId,
+    companyId,
+    shipmentId,
+    orderId,
+    orderNumber: '000001',
+    customerId,
+    sellerId,
+    type: 'delay',
+    description: 'Atraso na entrega.',
+    responsibleUserId: sellerId,
+    nextAction: 'Contatar a transportadora.',
+    status,
+    source: 'manual',
+    createdAt: now(),
+    createdBy: sellerId,
+    createdByName: 'Vendedor Teste',
+    resolvedAt: null,
+    resolvedBy: null,
+    resolutionNote: null,
+  };
+}
+
 function npsSurveyRequestDoc({
   organizationId,
   companyId = 'company-a',
@@ -1950,6 +2053,135 @@ describe('organizations/{organizationId}/postSaleEvents/{postSaleEventId}  (TASK
     await assertFails(db.doc(`organizations/${ORG_A}/postSaleEvents/event-rep-a`).delete());
   });
 });
+
+describe(
+  'organizations/{organizationId}/shipments/{shipmentId}, trackingEvents/{trackingEventId} e '
+    + 'logisticsIssues/{logisticsIssueId}  (TASK-214, EPIC-32 — expedição, romaneio, tracking e ocorrências)',
+  () => {
+    beforeEach(async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        const db = context.firestore();
+        await db.doc(`organizations/${ORG_A}/members/portal-a`).set({
+          ...membershipDoc({ organizationId: ORG_A, userId: 'portal-a', roleId: 'CUSTOMER_PORTAL', roleName: 'CUSTOMER_PORTAL' }),
+          customerId: 'customer-a',
+        });
+        await db
+          .doc(`organizations/${ORG_A}/orders/order-rep-a`)
+          .set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-a', customerId: 'customer-a' }));
+        await db
+          .doc(`organizations/${ORG_A}/orders/order-rep-b`)
+          .set(orderDoc({ organizationId: ORG_A, sellerId: 'rep-b', customerId: 'customer-other' }));
+        await db
+          .doc(`organizations/${ORG_A}/shipments/shipment-rep-a`)
+          .set(shipmentDoc({ organizationId: ORG_A, orderId: 'order-rep-a', sellerId: 'rep-a', customerId: 'customer-a' }));
+        await db
+          .doc(`organizations/${ORG_A}/shipments/shipment-rep-b`)
+          .set(shipmentDoc({ organizationId: ORG_A, orderId: 'order-rep-b', sellerId: 'rep-b', customerId: 'customer-other' }));
+        await db
+          .doc(`organizations/${ORG_B}/shipments/shipment-other-tenant`)
+          .set(shipmentDoc({ organizationId: ORG_B, companyId: 'company-b', orderId: 'order-other-tenant', sellerId: 'owner-b' }));
+        await db
+          .doc(`organizations/${ORG_A}/trackingEvents/event-rep-a`)
+          .set(trackingEventDoc({ organizationId: ORG_A, shipmentId: 'shipment-rep-a', orderId: 'order-rep-a', sellerId: 'rep-a', customerId: 'customer-a' }));
+        await db
+          .doc(`organizations/${ORG_A}/trackingEvents/event-rep-b`)
+          .set(trackingEventDoc({ organizationId: ORG_A, shipmentId: 'shipment-rep-b', orderId: 'order-rep-b', sellerId: 'rep-b', customerId: 'customer-other' }));
+        await db
+          .doc(`organizations/${ORG_A}/logisticsIssues/issue-rep-a`)
+          .set(logisticsIssueDoc({ organizationId: ORG_A, shipmentId: 'shipment-rep-a', orderId: 'order-rep-a', sellerId: 'rep-a', customerId: 'customer-a' }));
+        await db
+          .doc(`organizations/${ORG_A}/logisticsIssues/issue-rep-b`)
+          .set(logisticsIssueDoc({ organizationId: ORG_A, shipmentId: 'shipment-rep-b', orderId: 'order-rep-b', sellerId: 'rep-b', customerId: 'customer-other' }));
+      });
+    });
+
+    test('SALES_REP lê a própria expedição/tracking/ocorrência (do próprio pedido)', async () => {
+      const db = testEnv.authenticatedContext('rep-a').firestore();
+      await assertSucceeds(db.doc(`organizations/${ORG_A}/shipments/shipment-rep-a`).get());
+      await assertSucceeds(db.doc(`organizations/${ORG_A}/trackingEvents/event-rep-a`).get());
+      await assertSucceeds(db.doc(`organizations/${ORG_A}/logisticsIssues/issue-rep-a`).get());
+    });
+
+    test('SALES_REP não lê expedição/tracking/ocorrência de pedido de outro vendedor', async () => {
+      const db = testEnv.authenticatedContext('rep-a').firestore();
+      await assertFails(db.doc(`organizations/${ORG_A}/shipments/shipment-rep-b`).get());
+      await assertFails(db.doc(`organizations/${ORG_A}/trackingEvents/event-rep-b`).get());
+      await assertFails(db.doc(`organizations/${ORG_A}/logisticsIssues/issue-rep-b`).get());
+    });
+
+    test('SALES_MANAGER lê a expedição do vendedor da própria equipe, mas não de outra equipe', async () => {
+      const db = testEnv.authenticatedContext('manager-a').firestore();
+      await assertSucceeds(db.doc(`organizations/${ORG_A}/shipments/shipment-rep-a`).get());
+      await assertFails(db.doc(`organizations/${ORG_A}/shipments/shipment-rep-b`).get());
+    });
+
+    test('ADMIN e OWNER leem todas as expedições da própria organization', async () => {
+      const ownerDb = testEnv.authenticatedContext('owner-a').firestore();
+      const adminDb = testEnv.authenticatedContext('admin-a').firestore();
+
+      await assertSucceeds(ownerDb.collection(`organizations/${ORG_A}/shipments`).get());
+      await assertSucceeds(adminDb.collection(`organizations/${ORG_A}/shipments`).get());
+    });
+
+    test('FINANCE não lê expedição (sem escopo de pedido)', async () => {
+      const db = testEnv.authenticatedContext('finance-a').firestore();
+      await assertFails(db.doc(`organizations/${ORG_A}/shipments/shipment-rep-a`).get());
+    });
+
+    test('membro da Org A não lê expedição da Org B (cross-tenant)', async () => {
+      const db = testEnv.authenticatedContext('owner-a').firestore();
+      await assertFails(db.doc(`organizations/${ORG_B}/shipments/shipment-other-tenant`).get());
+    });
+
+    test('cliente externo (portal) só vê tracking dos próprios pedidos', async () => {
+      const db = testEnv.authenticatedContext('portal-a').firestore();
+      await assertSucceeds(db.doc(`organizations/${ORG_A}/shipments/shipment-rep-a`).get());
+      await assertSucceeds(db.doc(`organizations/${ORG_A}/trackingEvents/event-rep-a`).get());
+      await assertSucceeds(db.doc(`organizations/${ORG_A}/logisticsIssues/issue-rep-a`).get());
+      await assertFails(db.doc(`organizations/${ORG_A}/shipments/shipment-rep-b`).get());
+      await assertFails(db.doc(`organizations/${ORG_A}/trackingEvents/event-rep-b`).get());
+      await assertFails(db.doc(`organizations/${ORG_A}/logisticsIssues/issue-rep-b`).get());
+    });
+
+    test(
+      'ninguém escreve expedição/tracking/ocorrência pelo cliente, nem OWNER — createShipment/registerTrackingEvent/'
+        + 'handleShipmentTrackingWebhook/registerLogisticsIssue/resolveLogisticsIssue (Admin SDK) são o único caminho',
+      async () => {
+        const db = testEnv.authenticatedContext('owner-a').firestore();
+        await assertFails(
+          db.doc(`organizations/${ORG_A}/shipments/shipment-forged`).set(shipmentDoc({ organizationId: ORG_A, sellerId: 'rep-a' })),
+        );
+        await assertFails(db.doc(`organizations/${ORG_A}/shipments/shipment-rep-a`).update({ status: 'delivered' }));
+        await assertFails(db.doc(`organizations/${ORG_A}/shipments/shipment-rep-a`).delete());
+        await assertFails(
+          db
+            .doc(`organizations/${ORG_A}/trackingEvents/event-forged`)
+            .set(trackingEventDoc({ organizationId: ORG_A, sellerId: 'rep-a' })),
+        );
+        await assertFails(
+          db
+            .doc(`organizations/${ORG_A}/logisticsIssues/issue-forged`)
+            .set(logisticsIssueDoc({ organizationId: ORG_A, sellerId: 'rep-a' })),
+        );
+        await assertFails(db.doc(`organizations/${ORG_A}/logisticsIssues/issue-rep-a`).update({ status: 'resolved' }));
+      },
+    );
+
+    test('ninguém lê/escreve o segredo do webhook de expedição diretamente', async () => {
+      await testEnv.withSecurityRulesDisabled(async (context) => {
+        await context
+          .firestore()
+          .doc(`organizations/${ORG_A}/shipmentWebhookSecrets/correios`)
+          .set({ organizationId: ORG_A, carrierId: 'correios', secret: 'super-secret' });
+      });
+      const db = testEnv.authenticatedContext('owner-a').firestore();
+      await assertFails(db.doc(`organizations/${ORG_A}/shipmentWebhookSecrets/correios`).get());
+      await assertFails(
+        db.doc(`organizations/${ORG_A}/shipmentWebhookSecrets/correios`).set({ secret: 'forged' }),
+      );
+    });
+  },
+);
 
 describe('organizations/{organizationId}/npsSurveyRequests/{npsSurveyRequestId} e npsResponses/{npsResponseId}  (TASK-202, EPIC-30 — NPS)', () => {
   // Visibility mirrors `postSaleEvents` exactly (`canReadNps`), so both

@@ -714,6 +714,22 @@ import '../features/favorites/domain/usecases/watch_favorite_product_ids_use_cas
 import '../features/favorites/presentation/bloc/favorites_bloc.dart' as _i318;
 import '../features/favorites/presentation/cubit/favorite_status_cubit.dart'
     as _i249;
+import '../features/fulfillment/data/datasources/cloud_functions_fulfillment_write_data_source.dart'
+    as _i147;
+import '../features/fulfillment/data/datasources/firestore_fulfillment_read_data_source.dart'
+    as _i407;
+import '../features/fulfillment/data/datasources/fulfillment_read_data_source.dart'
+    as _i491;
+import '../features/fulfillment/data/datasources/fulfillment_write_data_source.dart'
+    as _i564;
+import '../features/fulfillment/data/repositories/fulfillment_repository_impl.dart'
+    as _i378;
+import '../features/fulfillment/domain/repositories/fulfillment_repository.dart'
+    as _i631;
+import '../features/fulfillment/domain/usecases/fulfillment_use_cases.dart'
+    as _i799;
+import '../features/fulfillment/presentation/cubit/order_fulfillment_cubit.dart'
+    as _i43;
 import '../features/insights/data/datasources/firestore_insight_data_source.dart'
     as _i837;
 import '../features/insights/data/datasources/insight_data_source.dart'
@@ -3272,6 +3288,11 @@ extension GetItInjectableX on _i174.GetIt {
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.lazySingleton<_i491.FulfillmentReadDataSource>(
+      () => _i407.FirestoreFulfillmentReadDataSource(
+        gh<_i974.FirebaseFirestore>(),
+      ),
+    );
     gh.lazySingleton<_i1039.OrderApprovalDataSource>(
       () => _i725.CloudFunctionsOrderApprovalDataSource(
         gh<_i340.CloudFunctionsService>(),
@@ -3915,6 +3936,11 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.lazySingleton<_i564.FulfillmentWriteDataSource>(
+      () => _i147.CloudFunctionsFulfillmentWriteDataSource(
+        gh<_i340.CloudFunctionsService>(),
+      ),
+    );
     gh.lazySingleton<_i327.ProductImportFunctionsDataSource>(
       () => _i508.CloudFunctionsProductImportDataSource(
         gh<_i340.CloudFunctionsService>(),
@@ -4059,6 +4085,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i950.CommercialPackRepository>(),
         gh<_i352.ResolvePriceForVariantUseCase>(),
         gh<_i706.Uuid>(),
+      ),
+    );
+    gh.lazySingleton<_i631.FulfillmentRepository>(
+      () => _i378.FulfillmentRepositoryImpl(
+        gh<_i491.FulfillmentReadDataSource>(),
+        gh<_i564.FulfillmentWriteDataSource>(),
       ),
     );
     gh.factory<_i126.LoadNpsAggregateTrendUseCase>(
@@ -4497,6 +4529,27 @@ extension GetItInjectableX on _i174.GetIt {
         analytics: gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i799.WatchShipmentsForOrderUseCase>(
+      () => _i799.WatchShipmentsForOrderUseCase(
+        gh<_i631.FulfillmentRepository>(),
+      ),
+    );
+    gh.factory<_i799.WatchTrackingEventsUseCase>(
+      () => _i799.WatchTrackingEventsUseCase(gh<_i631.FulfillmentRepository>()),
+    );
+    gh.factory<_i799.WatchLogisticsIssuesUseCase>(
+      () =>
+          _i799.WatchLogisticsIssuesUseCase(gh<_i631.FulfillmentRepository>()),
+    );
+    gh.factory<_i799.RegisterLogisticsIssueUseCase>(
+      () => _i799.RegisterLogisticsIssueUseCase(
+        gh<_i631.FulfillmentRepository>(),
+      ),
+    );
+    gh.factory<_i799.ResolveLogisticsIssueUseCase>(
+      () =>
+          _i799.ResolveLogisticsIssueUseCase(gh<_i631.FulfillmentRepository>()),
+    );
     gh.factory<_i1019.ListNotificationsForUserUseCase>(
       () => _i1019.ListNotificationsForUserUseCase(
         gh<_i73.NotificationInboxRepository>(),
@@ -4631,6 +4684,16 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i209.StorageDataSource>(),
         gh<_i897.ProductImportJobMapper>(),
         gh<_i962.ProductImportReportMapper>(),
+      ),
+    );
+    gh.factory<_i43.OrderFulfillmentCubit>(
+      () => _i43.OrderFulfillmentCubit(
+        gh<_i799.WatchShipmentsForOrderUseCase>(),
+        gh<_i799.WatchTrackingEventsUseCase>(),
+        gh<_i799.WatchLogisticsIssuesUseCase>(),
+        gh<_i799.RegisterLogisticsIssueUseCase>(),
+        gh<_i799.ResolveLogisticsIssueUseCase>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i234.CustomerBillingCubit>(

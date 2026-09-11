@@ -1,6 +1,7 @@
 import 'package:cloud_functions/cloud_functions.dart';
 import 'package:injectable/injectable.dart';
 
+import '../../fulfillment/domain/value_objects/shipment_status.dart';
 import '../domain/entities/customer_portal_models.dart';
 import '../domain/repositories/customer_portal_repository.dart';
 
@@ -34,11 +35,21 @@ final class CloudFunctionsCustomerPortalRepository
       }).toList(),
       orders: (data['orders'] as List).map((raw) {
         final item = Map<String, dynamic>.from(raw as Map);
+        final shipmentStatusCode = item['shipmentStatus'] as String?;
+        final estimatedDeliveryDate = item['estimatedDeliveryDate'] as String?;
         return CustomerPortalOrder(
           id: item['id'] as String,
           orderNumber: item['orderNumber'] as String,
           status: item['status'] as String,
           total: (item['total'] as num).toDouble(),
+          shipmentStatus: shipmentStatusCode == null
+              ? null
+              : ShipmentStatus.fromCode(shipmentStatusCode).label,
+          hasOpenLogisticsIssue:
+              item['hasOpenLogisticsIssue'] as bool? ?? false,
+          estimatedDeliveryDate: estimatedDeliveryDate == null
+              ? null
+              : DateTime.tryParse(estimatedDeliveryDate),
         );
       }).toList(),
     );
