@@ -383,11 +383,11 @@ Fase 5 — Evolução      : EPIC-22 a EPIC-32 (integrações, IA, portal B2B, p
 - [x] [TASK-217 — Implementar gestão de mostruário, amostras e consignação](TASK-217-implementar-gestao-de-mostruario-amostras-e-consignacao.md) — Flutter Senior + Front-end
 - [x] [TASK-218 — Implementar territórios, cobertura e potencial de carteira](TASK-218-implementar-territorios-cobertura-e-potencial-de-carteira.md) — Flutter Senior + Front-end
 - [x] [TASK-219 — Implementar ingestão de sell-out/POS do varejo](TASK-219-implementar-ingestao-de-sell-out-pos.md) — Flutter Senior
-- [ ] [TASK-220 — Implementar governança de dados mestre e qualidade cadastral](TASK-220-implementar-governanca-de-dados-mestre-e-qualidade-cadastral.md) — Flutter Senior + Front-end
+- [x] [TASK-220 — Implementar governança de dados mestre e qualidade cadastral](TASK-220-implementar-governanca-de-dados-mestre-e-qualidade-cadastral.md) — Flutter Senior + Front-end
 
 ---
 
-**Progresso:** 215 / 216 tasks concluídas (TASK-166, TASK-204, TASK-205 e TASK-206 foram movidas
+**Progresso:** 216 / 216 tasks concluídas (TASK-166, TASK-204, TASK-205 e TASK-206 foram movidas
 para o backlog — ver
 [`docs/backlog/BACKLOG-005-realizar-release-mvp-controlado.md`](../backlog/BACKLOG-005-realizar-release-mvp-controlado.md),
 [`docs/backlog/BACKLOG-006-implementar-logs-de-auditoria-exportaveis.md`](../backlog/BACKLOG-006-implementar-logs-de-auditoria-exportaveis.md),
