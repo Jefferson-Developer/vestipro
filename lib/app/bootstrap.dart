@@ -26,6 +26,7 @@ import '../core/navigation/navigation.dart';
 import '../core/notifications/notifications.dart';
 import '../core/permissions/permissions.dart';
 import '../core/services/services.dart';
+import '../core/utils/utils.dart';
 import '../features/authentication/authentication.dart';
 import '../features/authentication/presentation/bloc/forgot_password_bloc.dart';
 import '../features/authentication/presentation/bloc/login_bloc.dart';
@@ -78,6 +79,36 @@ import '../l10n/generated/app_localizations.dart';
 import 'firebase_bootstrap_error_app.dart';
 import 'injection.dart';
 import 'vestipro_bloc_observer.dart';
+
+enum _MainMenuSection {
+  catalog,
+  customers,
+  orders,
+  opportunities,
+  dashboards,
+  reports,
+  notifications,
+  settings,
+}
+
+final class _MainMenuDestination {
+  const _MainMenuDestination({
+    required this.section,
+    required this.destination,
+    required this.location,
+    this.requiredCapabilities = const <Capability>[],
+  });
+
+  final _MainMenuSection? section;
+  final AppNavDestination destination;
+  final String location;
+  final List<Capability> requiredCapabilities;
+
+  bool isAllowed(Set<Capability> capabilities) {
+    return requiredCapabilities.isEmpty ||
+        requiredCapabilities.any(capabilities.contains);
+  }
+}
 
 /// Central bootstrap for every entrypoint (`main_dev.dart`, `main_staging.dart`,
 /// `main_prod.dart`). Firebase must be initialized here, and only here: no
@@ -342,41 +373,62 @@ class VestiProApp extends StatelessWidget {
               FirestorePolicyRepository(getIt<FirebaseFirestore>()),
             ),
           ),
-          aboutAppPageBuilder: (context, orgId) => AboutAppPage(
-            createBloc: () => getIt<AboutAppBloc>(),
-            showInsightsShortcut: _resolveShowInsightsShortcut(),
-            onPrivacyTap: () =>
-                context.go(PrivacySettingsRoute(orgId: orgId).location),
-            onLanguageTap: () =>
-                context.go(LocaleSettingsRoute(orgId: orgId).location),
+          aboutAppPageBuilder: (context, orgId) => _withAuthenticatedMenu(
+            context: context,
+            orgId: orgId,
+            selectedSection: _MainMenuSection.settings,
+            child: AboutAppPage(
+              createBloc: () => getIt<AboutAppBloc>(),
+              showInsightsShortcut: _resolveShowInsightsShortcut(),
+              onPrivacyTap: () =>
+                  context.go(PrivacySettingsRoute(orgId: orgId).location),
+              onLanguageTap: () =>
+                  context.go(LocaleSettingsRoute(orgId: orgId).location),
+            ),
           ),
-          localeSettingsPageBuilder: (context, orgId) => LocaleSettingsPage(
-            organizationId: orgId,
-            userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+          localeSettingsPageBuilder: (context, orgId) => _withAuthenticatedMenu(
+            context: context,
+            orgId: orgId,
+            selectedSection: _MainMenuSection.settings,
+            child: LocaleSettingsPage(
+              organizationId: orgId,
+              userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+            ),
           ),
           catalogHomePageBuilder: (context, orgId, companyId) =>
-              _withConnectivityIndicator(
+              _withAuthenticatedMenu(
+                context: context,
                 orgId: orgId,
-                companyId: companyId ?? kPlaceholderCompanyId,
-                child: CatalogHomePage(
-                  organizationId: orgId,
-                  companyId: companyId,
-                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                  createBloc: () => getIt<CatalogHomeBloc>(),
-                  onCreateProductTap: () => context.go(
-                    ProductFormRoute(
-                      orgId: orgId,
-                      companyId: companyId ?? kPlaceholderCompanyId,
-                    ).location,
+                companyId: companyId,
+                selectedSection: _MainMenuSection.catalog,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
+                  companyId: companyId ?? kPlaceholderCompanyId,
+                  child: CatalogHomePage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    createBloc: () => getIt<CatalogHomeBloc>(),
+                    onCreateProductTap: () => context.go(
+                      ProductFormRoute(
+                        orgId: orgId,
+                        companyId: companyId ?? kPlaceholderCompanyId,
+                      ).location,
+                    ),
                   ),
                 ),
               ),
-          auditLogPageBuilder: (context, orgId) => AuditLogPage(
-            organizationId: orgId,
-            userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-            permissionService: getIt<PermissionService>(),
-            createBloc: () => AuditLogBloc(
-              listAuditLogEntries: getIt<ListAuditLogEntriesUseCase>(),
+          auditLogPageBuilder: (context, orgId) => _withAuthenticatedMenu(
+            context: context,
+            orgId: orgId,
+            selectedSection: _MainMenuSection.settings,
+            child: AuditLogPage(
+              organizationId: orgId,
+              userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+              permissionService: getIt<PermissionService>(),
+              createBloc: () => AuditLogBloc(
+                listAuditLogEntries: getIt<ListAuditLogEntriesUseCase>(),
+              ),
             ),
           ),
           vestiProAdminPortalPageBuilder: (context) {
@@ -400,35 +452,50 @@ class VestiProApp extends StatelessWidget {
               ),
             );
           },
-          userManagementPageBuilder: (context, orgId) => UserListPage(
-            organizationId: orgId,
-            userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-            permissionService: getIt<PermissionService>(),
-            createBloc: () => getIt<UserListBloc>(),
-            createRoleEditBloc: () => getIt<UserRoleEditBloc>(),
+          userManagementPageBuilder: (context, orgId) => _withAuthenticatedMenu(
+            context: context,
+            orgId: orgId,
+            selectedSection: _MainMenuSection.settings,
+            child: UserListPage(
+              organizationId: orgId,
+              userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+              permissionService: getIt<PermissionService>(),
+              createBloc: () => getIt<UserListBloc>(),
+              createRoleEditBloc: () => getIt<UserRoleEditBloc>(),
+            ),
           ),
           notificationCenterPageBuilder: (context, orgId) =>
-              NotificationCenterPage(
-                organizationId: orgId,
-                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                createBloc: () => getIt<NotificationCenterBloc>(),
-                onOpenDeepLink: (location) => context.go(location),
-                onOpenPreferences: () => context.go(
-                  CommunicationPreferencesRoute(orgId: orgId).location,
-                ),
-                onSendWhatsApp: (notification) => WhatsAppSendSheet.show(
-                  context: context,
-                  createCubit: () => getIt<WhatsAppSendCubit>(),
+              _withAuthenticatedMenu(
+                context: context,
+                orgId: orgId,
+                selectedSection: _MainMenuSection.notifications,
+                child: NotificationCenterPage(
                   organizationId: orgId,
-                  customerId: notification.customerId!,
-                  notificationId: notification.id,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  createBloc: () => getIt<NotificationCenterBloc>(),
+                  onOpenDeepLink: (location) => context.go(location),
+                  onOpenPreferences: () => context.go(
+                    CommunicationPreferencesRoute(orgId: orgId).location,
+                  ),
+                  onSendWhatsApp: (notification) => WhatsAppSendSheet.show(
+                    context: context,
+                    createCubit: () => getIt<WhatsAppSendCubit>(),
+                    organizationId: orgId,
+                    customerId: notification.customerId!,
+                    notificationId: notification.id,
+                  ),
                 ),
               ),
           communicationPreferencesPageBuilder: (context, orgId) =>
-              CommunicationPreferencesPage(
-                organizationId: orgId,
-                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                createCubit: () => getIt<CommunicationPreferencesCubit>(),
+              _withAuthenticatedMenu(
+                context: context,
+                orgId: orgId,
+                selectedSection: _MainMenuSection.settings,
+                child: CommunicationPreferencesPage(
+                  organizationId: orgId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  createCubit: () => getIt<CommunicationPreferencesCubit>(),
+                ),
               ),
           privacyConsentsPageBuilder: (context, orgId) {
             final repository = FirestoreConsentRepository(
@@ -441,34 +508,39 @@ class VestiProApp extends StatelessWidget {
             final deletionRepository = FirebaseAccountDeletionRepository(
               getIt<CloudFunctionsService>(),
             );
-            return PrivacyAndConsentsPage(
-              createCubit: () => ConsentManagementCubit(
-                repository: repository,
-                grantConsent: GrantConsent(repository),
-                revokeConsent: RevokeConsent(repository),
-                organizationId: orgId,
-                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-              ),
-              createExportCubit: () => PersonalDataExportCubit(
-                repository: exportRepository,
-                requestExport: RequestPersonalDataExport(exportRepository),
-                getDownload: GetPersonalDataExportDownload(exportRepository),
-                organizationId: orgId,
-                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-              ),
-              createDeletionCubit: () => AccountDeletionCubit(
-                requestAccountDeletion: RequestAccountDeletion(
-                  deletionRepository,
-                  DeviceAccountDeletionLocalCleaner(
-                    database: getIt<AppDatabase>(),
-                    pushTokenService: getIt<PushTokenService>(),
-                    sessionService: getIt<SessionService>(),
-                  ),
+            return _withAuthenticatedMenu(
+              context: context,
+              orgId: orgId,
+              selectedSection: _MainMenuSection.settings,
+              child: PrivacyAndConsentsPage(
+                createCubit: () => ConsentManagementCubit(
+                  repository: repository,
+                  grantConsent: GrantConsent(repository),
+                  revokeConsent: RevokeConsent(repository),
+                  organizationId: orgId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
                 ),
-                organizationId: orgId,
-              ),
-              onPolicyDocumentsTap: () => context.push(
-                PolicyDocumentsSettingsRoute(orgId: orgId).location,
+                createExportCubit: () => PersonalDataExportCubit(
+                  repository: exportRepository,
+                  requestExport: RequestPersonalDataExport(exportRepository),
+                  getDownload: GetPersonalDataExportDownload(exportRepository),
+                  organizationId: orgId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                ),
+                createDeletionCubit: () => AccountDeletionCubit(
+                  requestAccountDeletion: RequestAccountDeletion(
+                    deletionRepository,
+                    DeviceAccountDeletionLocalCleaner(
+                      database: getIt<AppDatabase>(),
+                      pushTokenService: getIt<PushTokenService>(),
+                      sessionService: getIt<SessionService>(),
+                    ),
+                  ),
+                  organizationId: orgId,
+                ),
+                onPolicyDocumentsTap: () => context.push(
+                  PolicyDocumentsSettingsRoute(orgId: orgId).location,
+                ),
               ),
             );
           },
@@ -494,848 +566,1043 @@ class VestiProApp extends StatelessWidget {
               ),
           targetDashboardPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: TargetDashboardPage(
-                      organizationId: orgId,
+                    selectedSection: _MainMenuSection.dashboards,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
                       companyId: companyId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      permissionService: getIt<PermissionService>(),
-                      initialTargetId: queryParameters['targetId'],
-                      createCubit: () => getIt<TargetDashboardCubit>(),
+                      child: TargetDashboardPage(
+                        organizationId: orgId,
+                        companyId: companyId,
+                        userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                        permissionService: getIt<PermissionService>(),
+                        initialTargetId: queryParameters['targetId'],
+                        createCubit: () => getIt<TargetDashboardCubit>(),
+                      ),
                     ),
                   ),
           opportunityCenterPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: OpportunityCenterPage(
-                      organizationId: orgId,
+                    selectedSection: _MainMenuSection.opportunities,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
                       companyId: companyId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      permissionService: getIt<PermissionService>(),
-                      createBloc: () => getIt<OpportunityCenterBloc>(),
-                      createApproachSuggestionCubit: () =>
-                          getIt<ApproachSuggestionCubit>(),
-                      initialFilters:
-                          OpportunityCenterFilters.fromQueryParameters(
-                            queryParameters,
-                          ),
-                      onUrlStateChanged: (filters) => context.go(
-                        OpportunityCenterRoute(
-                          orgId: orgId,
-                          companyId: companyId,
-                          queryParameters: filters.toQueryParameters(),
-                        ).location,
-                      ),
-                      onActionExecuted: (insight, action) =>
-                          _navigateForInsightAction(
-                            context: context,
+                      child: OpportunityCenterPage(
+                        organizationId: orgId,
+                        companyId: companyId,
+                        userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                        permissionService: getIt<PermissionService>(),
+                        createBloc: () => getIt<OpportunityCenterBloc>(),
+                        createApproachSuggestionCubit: () =>
+                            getIt<ApproachSuggestionCubit>(),
+                        initialFilters:
+                            OpportunityCenterFilters.fromQueryParameters(
+                              queryParameters,
+                            ),
+                        onUrlStateChanged: (filters) => context.go(
+                          OpportunityCenterRoute(
                             orgId: orgId,
                             companyId: companyId,
-                            action: action,
-                          ),
+                            queryParameters: filters.toQueryParameters(),
+                          ).location,
+                        ),
+                        onActionExecuted: (insight, action) =>
+                            _navigateForInsightAction(
+                              context: context,
+                              orgId: orgId,
+                              companyId: companyId,
+                              action: action,
+                            ),
+                      ),
                     ),
                   ),
           executiveDashboardPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: ExecutiveDashboardPage(
-                      organizationId: orgId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      permissionService: getIt<PermissionService>(),
-                      createBloc: () => getIt<ExecutiveDashboardBloc>(),
-                      initialFilters:
-                          ExecutiveDashboardFilters.fromQueryParameters(
-                            queryParameters,
-                            defaultCompanyId: companyId,
-                          ),
-                      onUrlStateChanged: (filters) => context.go(
-                        ExecutiveDashboardRoute(
-                          orgId: orgId,
-                          companyId: filters.companyId,
-                          queryParameters: filters.toQueryParameters(),
-                        ).location,
-                      ),
-                      onOpenOpportunityCenter: () => context.go(
-                        OpportunityCenterRoute(
-                          orgId: orgId,
-                          companyId: companyId,
-                        ).location,
+                    selectedSection: _MainMenuSection.dashboards,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
+                      companyId: companyId,
+                      child: ExecutiveDashboardPage(
+                        organizationId: orgId,
+                        userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                        permissionService: getIt<PermissionService>(),
+                        createBloc: () => getIt<ExecutiveDashboardBloc>(),
+                        initialFilters:
+                            ExecutiveDashboardFilters.fromQueryParameters(
+                              queryParameters,
+                              defaultCompanyId: companyId,
+                            ),
+                        onUrlStateChanged: (filters) => context.go(
+                          ExecutiveDashboardRoute(
+                            orgId: orgId,
+                            companyId: filters.companyId,
+                            queryParameters: filters.toQueryParameters(),
+                          ).location,
+                        ),
+                        onOpenOpportunityCenter: () => context.go(
+                          OpportunityCenterRoute(
+                            orgId: orgId,
+                            companyId: companyId,
+                          ).location,
+                        ),
                       ),
                     ),
                   ),
           salesDashboardPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: SalesDashboardPage(
-                      organizationId: orgId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      permissionService: getIt<PermissionService>(),
-                      createBloc: () => getIt<SalesDashboardBloc>(),
-                      initialFilters: SalesDashboardFilters.fromQueryParameters(
-                        queryParameters,
-                        defaultCompanyId: companyId,
-                      ),
-                      onUrlStateChanged: (filters) => context.go(
-                        SalesDashboardRoute(
-                          orgId: orgId,
-                          companyId: filters.companyId,
-                          queryParameters: filters.toQueryParameters(),
-                        ).location,
-                      ),
-                      onDrillDownToOrders: (orderFilters) => context.go(
-                        OrderListRoute(
-                          orgId: orgId,
-                          companyId: companyId,
-                          queryParameters: orderFilters.toQueryParameters(),
-                        ).location,
+                    selectedSection: _MainMenuSection.dashboards,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
+                      companyId: companyId,
+                      child: SalesDashboardPage(
+                        organizationId: orgId,
+                        userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                        permissionService: getIt<PermissionService>(),
+                        createBloc: () => getIt<SalesDashboardBloc>(),
+                        initialFilters:
+                            SalesDashboardFilters.fromQueryParameters(
+                              queryParameters,
+                              defaultCompanyId: companyId,
+                            ),
+                        onUrlStateChanged: (filters) => context.go(
+                          SalesDashboardRoute(
+                            orgId: orgId,
+                            companyId: filters.companyId,
+                            queryParameters: filters.toQueryParameters(),
+                          ).location,
+                        ),
+                        onDrillDownToOrders: (orderFilters) => context.go(
+                          OrderListRoute(
+                            orgId: orgId,
+                            companyId: companyId,
+                            queryParameters: orderFilters.toQueryParameters(),
+                          ).location,
+                        ),
                       ),
                     ),
                   ),
           customerDashboardPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: CustomerDashboardPage(
-                      organizationId: orgId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      permissionService: getIt<PermissionService>(),
-                      createBloc: () => getIt<CustomerDashboardBloc>(),
-                      initialFilters:
-                          CustomerDashboardFilters.fromQueryParameters(
-                            queryParameters,
-                            defaultCompanyId: companyId,
-                          ),
-                      onUrlStateChanged: (filters) => context.go(
-                        CustomerDashboardRoute(
-                          orgId: orgId,
-                          companyId: filters.companyId,
-                          queryParameters: filters.toQueryParameters(),
-                        ).location,
-                      ),
-                      onDrillDownToCustomer: (customerId) => context.go(
-                        CustomerDetailRoute(
-                          orgId: orgId,
-                          customerId: customerId,
-                        ).location,
+                    selectedSection: _MainMenuSection.dashboards,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
+                      companyId: companyId,
+                      child: CustomerDashboardPage(
+                        organizationId: orgId,
+                        userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                        permissionService: getIt<PermissionService>(),
+                        createBloc: () => getIt<CustomerDashboardBloc>(),
+                        initialFilters:
+                            CustomerDashboardFilters.fromQueryParameters(
+                              queryParameters,
+                              defaultCompanyId: companyId,
+                            ),
+                        onUrlStateChanged: (filters) => context.go(
+                          CustomerDashboardRoute(
+                            orgId: orgId,
+                            companyId: filters.companyId,
+                            queryParameters: filters.toQueryParameters(),
+                          ).location,
+                        ),
+                        onDrillDownToCustomer: (customerId) => context.go(
+                          CustomerDetailRoute(
+                            orgId: orgId,
+                            customerId: customerId,
+                          ).location,
+                        ),
                       ),
                     ),
                   ),
           productDashboardPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: ProductDashboardPage(
-                      organizationId: orgId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      permissionService: getIt<PermissionService>(),
-                      createBloc: () => getIt<ProductDashboardBloc>(),
-                      initialFilters:
-                          ProductDashboardFilters.fromQueryParameters(
-                            queryParameters,
-                            defaultCompanyId: companyId,
-                          ),
-                      onUrlStateChanged: (filters) => context.go(
-                        ProductDashboardRoute(
-                          orgId: orgId,
-                          companyId: filters.companyId,
-                          queryParameters: filters.toQueryParameters(),
-                        ).location,
-                      ),
-                      onDrillDownToProduct: (productId) => context.go(
-                        ProductDetailRoute(
-                          orgId: orgId,
-                          productId: productId,
-                        ).location,
+                    selectedSection: _MainMenuSection.dashboards,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
+                      companyId: companyId,
+                      child: ProductDashboardPage(
+                        organizationId: orgId,
+                        userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                        permissionService: getIt<PermissionService>(),
+                        createBloc: () => getIt<ProductDashboardBloc>(),
+                        initialFilters:
+                            ProductDashboardFilters.fromQueryParameters(
+                              queryParameters,
+                              defaultCompanyId: companyId,
+                            ),
+                        onUrlStateChanged: (filters) => context.go(
+                          ProductDashboardRoute(
+                            orgId: orgId,
+                            companyId: filters.companyId,
+                            queryParameters: filters.toQueryParameters(),
+                          ).location,
+                        ),
+                        onDrillDownToProduct: (productId) => context.go(
+                          ProductDetailRoute(
+                            orgId: orgId,
+                            productId: productId,
+                          ).location,
+                        ),
                       ),
                     ),
                   ),
           collectionDashboardPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: CollectionDashboardPage(
-                      organizationId: orgId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      permissionService: getIt<PermissionService>(),
-                      createBloc: () => getIt<CollectionDashboardBloc>(),
-                      initialFilters:
-                          CollectionDashboardFilters.fromQueryParameters(
-                            queryParameters,
-                            defaultCompanyId: companyId,
-                          ),
-                      onUrlStateChanged: (filters) => context.go(
-                        CollectionDashboardRoute(
-                          orgId: orgId,
-                          companyId: filters.companyId,
-                          queryParameters: filters.toQueryParameters(),
-                        ).location,
-                      ),
-                      onDrillDownToCollection: (collectionId) => context.go(
-                        ProductDashboardRoute(
-                          orgId: orgId,
-                          companyId: companyId,
-                          queryParameters: <String, String>{
-                            'collectionId': collectionId,
-                          },
-                        ).location,
+                    selectedSection: _MainMenuSection.dashboards,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
+                      companyId: companyId,
+                      child: CollectionDashboardPage(
+                        organizationId: orgId,
+                        userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                        permissionService: getIt<PermissionService>(),
+                        createBloc: () => getIt<CollectionDashboardBloc>(),
+                        initialFilters:
+                            CollectionDashboardFilters.fromQueryParameters(
+                              queryParameters,
+                              defaultCompanyId: companyId,
+                            ),
+                        onUrlStateChanged: (filters) => context.go(
+                          CollectionDashboardRoute(
+                            orgId: orgId,
+                            companyId: filters.companyId,
+                            queryParameters: filters.toQueryParameters(),
+                          ).location,
+                        ),
+                        onDrillDownToCollection: (collectionId) => context.go(
+                          ProductDashboardRoute(
+                            orgId: orgId,
+                            companyId: companyId,
+                            queryParameters: <String, String>{
+                              'collectionId': collectionId,
+                            },
+                          ).location,
+                        ),
                       ),
                     ),
                   ),
           inventoryDashboardPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: InventoryDashboardPage(
-                      organizationId: orgId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      permissionService: getIt<PermissionService>(),
-                      createBloc: () => getIt<InventoryDashboardBloc>(),
-                      initialFilters:
-                          InventoryDashboardFilters.fromQueryParameters(
-                            queryParameters,
-                            defaultCompanyId: companyId,
-                          ),
-                      onUrlStateChanged: (filters) => context.go(
-                        InventoryDashboardRoute(
-                          orgId: orgId,
-                          companyId: filters.companyId,
-                          queryParameters: filters.toQueryParameters(),
-                        ).location,
-                      ),
-                      onDrillDownToProduct: (productId) => context.go(
-                        ProductDetailRoute(
-                          orgId: orgId,
-                          productId: productId,
-                        ).location,
+                    selectedSection: _MainMenuSection.dashboards,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
+                      companyId: companyId,
+                      child: InventoryDashboardPage(
+                        organizationId: orgId,
+                        userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                        permissionService: getIt<PermissionService>(),
+                        createBloc: () => getIt<InventoryDashboardBloc>(),
+                        initialFilters:
+                            InventoryDashboardFilters.fromQueryParameters(
+                              queryParameters,
+                              defaultCompanyId: companyId,
+                            ),
+                        onUrlStateChanged: (filters) => context.go(
+                          InventoryDashboardRoute(
+                            orgId: orgId,
+                            companyId: filters.companyId,
+                            queryParameters: filters.toQueryParameters(),
+                          ).location,
+                        ),
+                        onDrillDownToProduct: (productId) => context.go(
+                          ProductDetailRoute(
+                            orgId: orgId,
+                            productId: productId,
+                          ).location,
+                        ),
                       ),
                     ),
                   ),
           replenishmentSuggestionsPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: ReplenishmentSuggestionsPage(
-                      organizationId: orgId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      permissionService: getIt<PermissionService>(),
-                      createBloc: () => getIt<ReplenishmentSuggestionsBloc>(),
-                      initialWarehouseId: queryParameters['warehouseId'],
+                    selectedSection: _MainMenuSection.dashboards,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
+                      companyId: companyId,
+                      child: ReplenishmentSuggestionsPage(
+                        organizationId: orgId,
+                        userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                        permissionService: getIt<PermissionService>(),
+                        createBloc: () => getIt<ReplenishmentSuggestionsBloc>(),
+                        initialWarehouseId: queryParameters['warehouseId'],
+                      ),
                     ),
                   ),
           demandForecastPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: DemandForecastPage(
-                      organizationId: orgId,
+                    selectedSection: _MainMenuSection.dashboards,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
                       companyId: companyId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      permissionService: getIt<PermissionService>(),
-                      createBloc: () => getIt<DemandForecastBloc>(),
-                      initialScopeType: _parseDemandForecastScopeType(
-                        queryParameters['scopeType'],
+                      child: DemandForecastPage(
+                        organizationId: orgId,
+                        companyId: companyId,
+                        userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                        permissionService: getIt<PermissionService>(),
+                        createBloc: () => getIt<DemandForecastBloc>(),
+                        initialScopeType: _parseDemandForecastScopeType(
+                          queryParameters['scopeType'],
+                        ),
+                        initialScopeId: queryParameters['scopeId'],
                       ),
-                      initialScopeId: queryParameters['scopeId'],
                     ),
                   ),
           representativeDashboardPageBuilder:
               (context, orgId, companyId, sellerId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: RepresentativeDashboardPage(
-                      organizationId: orgId,
-                      requesterUserId:
-                          getIt<AuthRepository>().currentUser?.uid ?? '',
-                      initialFilters:
-                          RepresentativeDashboardFilters.fromQueryParameters(
-                            queryParameters,
-                            defaultCompanyId: companyId,
-                            defaultSellerId: sellerId,
-                          ),
-                      createBloc: () => getIt<RepresentativeDashboardBloc>(),
-                      createWalletSummaryCubit: () =>
-                          getIt<WalletSummaryCubit>(),
-                      createDailyRepSummaryCubit: () =>
-                          getIt<DailyRepSummaryCubit>(),
-                      createNpsScoreCardCubit: () => getIt<NpsScoreCardCubit>(),
-                      onOpenCrmActivity: (task) {
-                        final customerId = task.customerId;
-                        if (customerId != null) {
-                          context.go(
-                            CustomerDetailRoute(
-                              orgId: orgId,
-                              customerId: customerId,
-                            ).location,
-                          );
-                        } else {
-                          context.go(
-                            OpportunityCenterRoute(
-                              orgId: orgId,
-                              companyId: companyId,
-                            ).location,
-                          );
-                        }
-                      },
-                      onOpenCustomer: (customerId) => context.go(
-                        CustomerDetailRoute(
-                          orgId: orgId,
-                          customerId: customerId,
-                        ).location,
+                    selectedSection: _MainMenuSection.dashboards,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
+                      companyId: companyId,
+                      child: RepresentativeDashboardPage(
+                        organizationId: orgId,
+                        requesterUserId:
+                            getIt<AuthRepository>().currentUser?.uid ?? '',
+                        initialFilters:
+                            RepresentativeDashboardFilters.fromQueryParameters(
+                              queryParameters,
+                              defaultCompanyId: companyId,
+                              defaultSellerId: sellerId,
+                            ),
+                        createBloc: () => getIt<RepresentativeDashboardBloc>(),
+                        createWalletSummaryCubit: () =>
+                            getIt<WalletSummaryCubit>(),
+                        createDailyRepSummaryCubit: () =>
+                            getIt<DailyRepSummaryCubit>(),
+                        createNpsScoreCardCubit: () =>
+                            getIt<NpsScoreCardCubit>(),
+                        onOpenCrmActivity: (task) {
+                          final customerId = task.customerId;
+                          if (customerId != null) {
+                            context.go(
+                              CustomerDetailRoute(
+                                orgId: orgId,
+                                customerId: customerId,
+                              ).location,
+                            );
+                          } else {
+                            context.go(
+                              OpportunityCenterRoute(
+                                orgId: orgId,
+                                companyId: companyId,
+                              ).location,
+                            );
+                          }
+                        },
+                        onOpenCustomer: (customerId) => context.go(
+                          CustomerDetailRoute(
+                            orgId: orgId,
+                            customerId: customerId,
+                          ).location,
+                        ),
+                        onOpenInsight: (insight) {
+                          final customerId = insight.customerId;
+                          if (customerId != null) {
+                            context.go(
+                              CustomerDetailRoute(
+                                orgId: orgId,
+                                customerId: customerId,
+                              ).location,
+                            );
+                          } else {
+                            context.go(
+                              OpportunityCenterRoute(
+                                orgId: orgId,
+                                companyId: companyId,
+                              ).location,
+                            );
+                          }
+                        },
                       ),
-                      onOpenInsight: (insight) {
-                        final customerId = insight.customerId;
-                        if (customerId != null) {
-                          context.go(
-                            CustomerDetailRoute(
-                              orgId: orgId,
-                              customerId: customerId,
-                            ).location,
-                          );
-                        } else {
-                          context.go(
-                            OpportunityCenterRoute(
-                              orgId: orgId,
-                              companyId: companyId,
-                            ).location,
-                          );
-                        }
-                      },
                     ),
                   ),
           funnelDashboardPageBuilder:
-              (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
-                    orgId: orgId,
-                    companyId: companyId,
-                    child: FunnelDashboardPage(
-                      organizationId: orgId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      initialFilters:
-                          FunnelDashboardFilters.fromQueryParameters(
-                            queryParameters,
-                            fallbackMonthKey: DateFormat(
-                              'yyyy-MM',
-                            ).format(DateTime.now().toUtc()),
-                            fallbackCompanyId: companyId,
-                          ),
-                      createBloc: () => getIt<FunnelDashboardBloc>(),
-                      onOpenStageOpportunities: (stageId) => context.go(
-                        OpportunityCenterRoute(
-                          orgId: orgId,
-                          companyId: companyId,
-                          queryParameters: <String, String>{'stageId': stageId},
-                        ).location,
-                      ),
-                      onFiltersChanged: (filters) => context.go(
-                        FunnelDashboardRoute(
-                          orgId: orgId,
-                          companyId: companyId,
-                          queryParameters: filters.toQueryParameters(),
-                        ).location,
-                      ),
+              (
+                context,
+                orgId,
+                companyId,
+                queryParameters,
+              ) => _withAuthenticatedMenu(
+                context: context,
+                orgId: orgId,
+                companyId: companyId,
+                selectedSection: _MainMenuSection.dashboards,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
+                  companyId: companyId,
+                  child: FunnelDashboardPage(
+                    organizationId: orgId,
+                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    initialFilters: FunnelDashboardFilters.fromQueryParameters(
+                      queryParameters,
+                      fallbackMonthKey: DateFormat(
+                        'yyyy-MM',
+                      ).format(DateTime.now().toUtc()),
+                      fallbackCompanyId: companyId,
+                    ),
+                    createBloc: () => getIt<FunnelDashboardBloc>(),
+                    onOpenStageOpportunities: (stageId) => context.go(
+                      OpportunityCenterRoute(
+                        orgId: orgId,
+                        companyId: companyId,
+                        queryParameters: <String, String>{'stageId': stageId},
+                      ).location,
+                    ),
+                    onFiltersChanged: (filters) => context.go(
+                      FunnelDashboardRoute(
+                        orgId: orgId,
+                        companyId: companyId,
+                        queryParameters: filters.toQueryParameters(),
+                      ).location,
                     ),
                   ),
+                ),
+              ),
           targetsDashboardPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: TargetsDashboardPage(
-                      organizationId: orgId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      initialFilters:
-                          TargetsDashboardFilters.fromQueryParameters(
-                            queryParameters,
-                            fallbackCompanyId: companyId,
-                          ),
-                      createBloc: () => getIt<TargetsDashboardBloc>(),
-                      onOpenOpportunities: (sellerId) => context.go(
-                        OpportunityCenterRoute(
-                          orgId: orgId,
-                          companyId: companyId,
-                          queryParameters: <String, String>{
-                            'sellerId': sellerId,
-                            'types': 'sellerBelowTarget',
-                          },
-                        ).location,
+                    selectedSection: _MainMenuSection.dashboards,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
+                      companyId: companyId,
+                      child: TargetsDashboardPage(
+                        organizationId: orgId,
+                        userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                        initialFilters:
+                            TargetsDashboardFilters.fromQueryParameters(
+                              queryParameters,
+                              fallbackCompanyId: companyId,
+                            ),
+                        createBloc: () => getIt<TargetsDashboardBloc>(),
+                        onOpenOpportunities: (sellerId) => context.go(
+                          OpportunityCenterRoute(
+                            orgId: orgId,
+                            companyId: companyId,
+                            queryParameters: <String, String>{
+                              'sellerId': sellerId,
+                              'types': 'sellerBelowTarget',
+                            },
+                          ).location,
+                        ),
                       ),
                     ),
                   ),
           geographicDashboardPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: GeographicDashboardPage(
-                      organizationId: orgId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      initialFilters:
-                          GeographicDashboardFilters.fromQueryParameters(
-                            queryParameters,
-                            fallbackCompanyId: companyId,
-                          ),
-                      createBloc: () => getIt<GeographicDashboardBloc>(),
-                      onOpenCustomers: (customerIds) => context.go(
-                        CustomerPortfolioRoute(
-                          orgId: orgId,
-                          companyId: companyId,
-                          queryParameters: <String, String>{
-                            'customerIds': customerIds.join(','),
-                          },
-                        ).location,
-                      ),
-                      onOpenOrders: (orderIds) => context.go(
-                        OrderListRoute(
-                          orgId: orgId,
-                          companyId: companyId,
-                          queryParameters: <String, String>{
-                            'orderIds': orderIds.join(','),
-                          },
-                        ).location,
+                    selectedSection: _MainMenuSection.dashboards,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
+                      companyId: companyId,
+                      child: GeographicDashboardPage(
+                        organizationId: orgId,
+                        userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                        initialFilters:
+                            GeographicDashboardFilters.fromQueryParameters(
+                              queryParameters,
+                              fallbackCompanyId: companyId,
+                            ),
+                        createBloc: () => getIt<GeographicDashboardBloc>(),
+                        onOpenCustomers: (customerIds) => context.go(
+                          CustomerPortfolioRoute(
+                            orgId: orgId,
+                            companyId: companyId,
+                            queryParameters: <String, String>{
+                              'customerIds': customerIds.join(','),
+                            },
+                          ).location,
+                        ),
+                        onOpenOrders: (orderIds) => context.go(
+                          OrderListRoute(
+                            orgId: orgId,
+                            companyId: companyId,
+                            queryParameters: <String, String>{
+                              'orderIds': orderIds.join(','),
+                            },
+                          ).location,
+                        ),
                       ),
                     ),
                   ),
           reportBuilderPageBuilder: (context, orgId, companyId) =>
-              _withConnectivityIndicator(
+              _withAuthenticatedMenu(
+                context: context,
                 orgId: orgId,
                 companyId: companyId,
-                child: ReportBuilderPage(
-                  organizationId: orgId,
+                selectedSection: _MainMenuSection.reports,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
                   companyId: companyId,
-                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                  createBloc: () => getIt<ReportBuilderBloc>(),
-                  createSavedReportsBloc: () => getIt<SavedReportsBloc>(),
-                  createReportExplanationCubit: () =>
-                      getIt<ReportExplanationCubit>(),
-                  permissionService: getIt<PermissionService>(),
-                  onOpenSavedReports: () => context.go(
-                    SavedReportsRoute(
-                      orgId: orgId,
-                      companyId: companyId,
-                    ).location,
+                  child: ReportBuilderPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    createBloc: () => getIt<ReportBuilderBloc>(),
+                    createSavedReportsBloc: () => getIt<SavedReportsBloc>(),
+                    createReportExplanationCubit: () =>
+                        getIt<ReportExplanationCubit>(),
+                    permissionService: getIt<PermissionService>(),
+                    onOpenSavedReports: () => context.go(
+                      SavedReportsRoute(
+                        orgId: orgId,
+                        companyId: companyId,
+                      ).location,
+                    ),
                   ),
                 ),
               ),
           savedReportsPageBuilder: (context, orgId, companyId) =>
-              _withConnectivityIndicator(
+              _withAuthenticatedMenu(
+                context: context,
                 orgId: orgId,
                 companyId: companyId,
-                child: SavedReportsPage(
-                  organizationId: orgId,
+                selectedSection: _MainMenuSection.reports,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
                   companyId: companyId,
-                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                  permissionService: getIt<PermissionService>(),
-                  createBloc: () => getIt<SavedReportsBloc>(),
-                  onOpenReportBuilder: () => context.go(
-                    ReportBuilderRoute(
-                      orgId: orgId,
-                      companyId: companyId,
-                    ).location,
+                  child: SavedReportsPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    permissionService: getIt<PermissionService>(),
+                    createBloc: () => getIt<SavedReportsBloc>(),
+                    onOpenReportBuilder: () => context.go(
+                      ReportBuilderRoute(
+                        orgId: orgId,
+                        companyId: companyId,
+                      ).location,
+                    ),
                   ),
                 ),
               ),
           productDetailPageBuilder: (context, orgId, productId) =>
-              ProductDetailPage(
-                organizationId: orgId,
-                productId: productId,
-                createBloc: () => getIt<ProductDetailBloc>(),
-                userId: getIt<AuthRepository>().currentUser?.uid,
-                createRecommendationsBloc: () =>
-                    getIt<ProductRecommendationsBloc>(),
-                onRecommendationTap: (recommendedProductId) => context.go(
-                  ProductDetailRoute(
-                    orgId: orgId,
-                    productId: recommendedProductId,
-                  ).location,
+              _withAuthenticatedMenu(
+                context: context,
+                orgId: orgId,
+                selectedSection: _MainMenuSection.catalog,
+                child: ProductDetailPage(
+                  organizationId: orgId,
+                  productId: productId,
+                  createBloc: () => getIt<ProductDetailBloc>(),
+                  userId: getIt<AuthRepository>().currentUser?.uid,
+                  createRecommendationsBloc: () =>
+                      getIt<ProductRecommendationsBloc>(),
+                  onRecommendationTap: (recommendedProductId) => context.go(
+                    ProductDetailRoute(
+                      orgId: orgId,
+                      productId: recommendedProductId,
+                    ).location,
+                  ),
                 ),
               ),
           customerFormPageBuilder: (context, orgId, companyId) =>
-              _withConnectivityIndicator(
+              _withAuthenticatedMenu(
+                context: context,
                 orgId: orgId,
                 companyId: companyId,
-                child: CustomerFormPage(
-                  organizationId: orgId,
+                selectedSection: _MainMenuSection.customers,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
                   companyId: companyId,
-                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                  permissionService: getIt<PermissionService>(),
-                  createBloc: () => getIt<CustomerFormBloc>(),
+                  child: CustomerFormPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    permissionService: getIt<PermissionService>(),
+                    createBloc: () => getIt<CustomerFormBloc>(),
+                  ),
                 ),
               ),
           customerImportPageBuilder: (context, orgId, companyId) =>
-              _withConnectivityIndicator(
+              _withAuthenticatedMenu(
+                context: context,
                 orgId: orgId,
                 companyId: companyId,
-                child: CustomerImportPage(
-                  organizationId: orgId,
+                selectedSection: _MainMenuSection.customers,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
                   companyId: companyId,
-                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                  permissionService: getIt<PermissionService>(),
-                  createBloc: () => getIt<CustomerImportBloc>(),
+                  child: CustomerImportPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    permissionService: getIt<PermissionService>(),
+                    createBloc: () => getIt<CustomerImportBloc>(),
+                  ),
                 ),
               ),
           productFormPageBuilder: (context, orgId, companyId) {
             final currentUser = getIt<AuthRepository>().currentUser;
-            return _withConnectivityIndicator(
+            return _withAuthenticatedMenu(
+              context: context,
               orgId: orgId,
               companyId: companyId,
-              child: ProductFormPage(
-                organizationId: orgId,
+              selectedSection: _MainMenuSection.catalog,
+              child: _withConnectivityIndicator(
+                orgId: orgId,
                 companyId: companyId,
-                userId: currentUser?.uid ?? '',
-                actorName:
-                    currentUser?.displayName ?? currentUser?.email ?? 'Usuário',
-                permissionService: getIt<PermissionService>(),
-                createBloc: () => getIt<ProductFormBloc>(),
-                createMediaBloc: () => getIt<ProductMediaBloc>(),
+                child: ProductFormPage(
+                  organizationId: orgId,
+                  companyId: companyId,
+                  userId: currentUser?.uid ?? '',
+                  actorName:
+                      currentUser?.displayName ??
+                      currentUser?.email ??
+                      'Usuário',
+                  permissionService: getIt<PermissionService>(),
+                  createBloc: () => getIt<ProductFormBloc>(),
+                  createMediaBloc: () => getIt<ProductMediaBloc>(),
+                ),
               ),
             );
           },
           productImportPageBuilder: (context, orgId, companyId) =>
-              _withConnectivityIndicator(
+              _withAuthenticatedMenu(
+                context: context,
                 orgId: orgId,
                 companyId: companyId,
-                child: ProductImportPage(
-                  organizationId: orgId,
+                selectedSection: _MainMenuSection.catalog,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
                   companyId: companyId,
-                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                  permissionService: getIt<PermissionService>(),
-                  createBloc: () => getIt<ProductImportBloc>(),
+                  child: ProductImportPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    permissionService: getIt<PermissionService>(),
+                    createBloc: () => getIt<ProductImportBloc>(),
+                  ),
                 ),
               ),
           customerPortfolioPageBuilder:
               (context, orgId, companyId, queryParameters) =>
-                  _withConnectivityIndicator(
+                  _withAuthenticatedMenu(
+                    context: context,
                     orgId: orgId,
                     companyId: companyId,
-                    child: CustomerPortfolioPage(
-                      organizationId: orgId,
+                    selectedSection: _MainMenuSection.customers,
+                    child: _withConnectivityIndicator(
+                      orgId: orgId,
                       companyId: companyId,
-                      userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                      permissionService: getIt<PermissionService>(),
-                      createBloc: () => getIt<CustomerPortfolioBloc>(),
-                      createSegmentBloc: () => getIt<CustomerSegmentBloc>(),
-                      onCustomerSelected: (customer) => context.go(
-                        CustomerDetailRoute(
-                          orgId: orgId,
-                          customerId: customer.id,
-                        ).location,
-                      ),
-                      initialSearchQuery: queryParameters['q'] ?? '',
-                      initialFilters:
-                          CustomerPortfolioFilters.fromQueryParameters(
-                            queryParameters,
-                          ),
-                      onUrlStateChanged: (searchQuery, filters) => context.go(
-                        CustomerPortfolioRoute(
-                          orgId: orgId,
-                          companyId: companyId,
-                          queryParameters: filters.toQueryParameters(
-                            search: searchQuery,
-                          ),
-                        ).location,
-                      ),
-                      onImportRequested: () => context.go(
-                        CustomerImportRoute(
-                          orgId: orgId,
-                          companyId: companyId,
-                        ).location,
-                      ),
-                      onPlanVisitRouteRequested: () => context.go(
-                        VisitRouteRoute(
-                          orgId: orgId,
-                          companyId: companyId,
-                        ).location,
+                      child: CustomerPortfolioPage(
+                        organizationId: orgId,
+                        companyId: companyId,
+                        userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                        permissionService: getIt<PermissionService>(),
+                        createBloc: () => getIt<CustomerPortfolioBloc>(),
+                        createSegmentBloc: () => getIt<CustomerSegmentBloc>(),
+                        onCustomerSelected: (customer) => context.go(
+                          CustomerDetailRoute(
+                            orgId: orgId,
+                            customerId: customer.id,
+                          ).location,
+                        ),
+                        initialSearchQuery: queryParameters['q'] ?? '',
+                        initialFilters:
+                            CustomerPortfolioFilters.fromQueryParameters(
+                              queryParameters,
+                            ),
+                        onUrlStateChanged: (searchQuery, filters) => context.go(
+                          CustomerPortfolioRoute(
+                            orgId: orgId,
+                            companyId: companyId,
+                            queryParameters: filters.toQueryParameters(
+                              search: searchQuery,
+                            ),
+                          ).location,
+                        ),
+                        onImportRequested: () => context.go(
+                          CustomerImportRoute(
+                            orgId: orgId,
+                            companyId: companyId,
+                          ).location,
+                        ),
+                        onPlanVisitRouteRequested: () => context.go(
+                          VisitRouteRoute(
+                            orgId: orgId,
+                            companyId: companyId,
+                          ).location,
+                        ),
                       ),
                     ),
                   ),
           visitRoutePageBuilder: (context, orgId, companyId) =>
-              _withConnectivityIndicator(
+              _withAuthenticatedMenu(
+                context: context,
                 orgId: orgId,
                 companyId: companyId,
-                child: VisitRoutePage(
-                  organizationId: orgId,
+                selectedSection: _MainMenuSection.customers,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
                   companyId: companyId,
-                  salesRepId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                  permissionService: getIt<PermissionService>(),
-                  createBloc: () => getIt<VisitRouteBloc>(),
-                  createPortfolioBloc: () => getIt<CustomerPortfolioBloc>(),
+                  child: VisitRoutePage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    salesRepId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    permissionService: getIt<PermissionService>(),
+                    createBloc: () => getIt<VisitRouteBloc>(),
+                    createPortfolioBloc: () => getIt<CustomerPortfolioBloc>(),
+                  ),
                 ),
               ),
           productRecognitionPageBuilder: (context, orgId, companyId) =>
-              _withConnectivityIndicator(
+              _withAuthenticatedMenu(
+                context: context,
                 orgId: orgId,
                 companyId: companyId,
-                child: ProductRecognitionPage(
-                  organizationId: orgId,
+                selectedSection: _MainMenuSection.catalog,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
                   companyId: companyId,
-                  createCubit: () => getIt<ProductRecognitionCubit>(),
-                  onProductSelected: (productId) => context.go(
-                    ProductDetailRoute(
-                      orgId: orgId,
-                      productId: productId,
-                    ).location,
+                  child: ProductRecognitionPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    createCubit: () => getIt<ProductRecognitionCubit>(),
+                    onProductSelected: (productId) => context.go(
+                      ProductDetailRoute(
+                        orgId: orgId,
+                        productId: productId,
+                      ).location,
+                    ),
                   ),
                 ),
               ),
           orderListPageBuilder: (context, orgId, companyId, queryParameters) =>
-              _withConnectivityIndicator(
+              _withAuthenticatedMenu(
+                context: context,
                 orgId: orgId,
                 companyId: companyId,
-                child: OrderListPage(
-                  organizationId: orgId,
+                selectedSection: _MainMenuSection.orders,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
                   companyId: companyId,
-                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                  permissionService: getIt<PermissionService>(),
-                  createBloc: () => getIt<OrderListBloc>(),
-                  initialSearchQuery: queryParameters['q'] ?? '',
-                  initialFilters: OrderListFilters.fromQueryParameters(
-                    queryParameters,
-                  ),
-                  onOrderDraftSelected: (order) => context.go(
-                    OrderDraftRoute(
-                      orgId: orgId,
-                      companyId: companyId,
-                      draftId: order.id,
-                    ).location,
-                  ),
-                  onOrderHistorySelected: (order) => context.go(
-                    OrderHistoryRoute(
-                      orgId: orgId,
-                      companyId: companyId,
-                      orderId: order.id,
-                    ).location,
-                  ),
-                  onUrlStateChanged: (searchQuery, filters) => context.go(
-                    OrderListRoute(
-                      orgId: orgId,
-                      companyId: companyId,
-                      queryParameters: filters.toQueryParameters(
-                        search: searchQuery,
-                      ),
-                    ).location,
-                  ),
-                ),
-              ),
-          orderApprovalQueuePageBuilder: (context, orgId, companyId) =>
-              _withConnectivityIndicator(
-                orgId: orgId,
-                companyId: companyId,
-                child: OrderApprovalQueuePage(
-                  organizationId: orgId,
-                  companyId: companyId,
-                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                  permissionService: getIt<PermissionService>(),
-                  createBloc: () => getIt<OrderApprovalQueueBloc>(),
-                ),
-              ),
-          returnRequestAnalysisPageBuilder: (context, orgId, companyId) =>
-              _withConnectivityIndicator(
-                orgId: orgId,
-                companyId: companyId,
-                child: ReturnRequestAnalysisPage(
-                  organizationId: orgId,
-                  companyId: companyId,
-                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                  permissionService: getIt<PermissionService>(),
-                  createCubit: () => getIt<ReturnRequestQueueCubit>(),
-                ),
-              ),
-          exchangeRequestAnalysisPageBuilder: (context, orgId, companyId) =>
-              _withConnectivityIndicator(
-                orgId: orgId,
-                companyId: companyId,
-                child: ExchangeRequestAnalysisPage(
-                  organizationId: orgId,
-                  companyId: companyId,
-                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                  permissionService: getIt<PermissionService>(),
-                  createCubit: () => getIt<ExchangeRequestQueueCubit>(),
-                ),
-              ),
-          orderHistoryPageBuilder: (context, orgId, companyId, orderId) =>
-              _withConnectivityIndicator(
-                orgId: orgId,
-                companyId: companyId,
-                child: OrderHistoryPage(
-                  organizationId: orgId,
-                  companyId: companyId,
-                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                  orderId: orderId,
-                  permissionService: getIt<PermissionService>(),
-                  createBloc: () => getIt<OrderHistoryBloc>(),
-                  createDuplicationCubit: () => getIt<OrderDuplicationCubit>(),
-                  createSignatureCubit: () => getIt<OrderSignatureCubit>(),
-                  createReturnRequestHistoryCubit: () =>
-                      getIt<ReturnRequestHistoryCubit>(),
-                  createReturnRequestFormCubit: () =>
-                      getIt<ReturnRequestFormCubit>(),
-                  createExchangeRequestHistoryCubit: () =>
-                      getIt<ExchangeRequestHistoryCubit>(),
-                  createExchangeRequestFormCubit: () =>
-                      getIt<ExchangeRequestFormCubit>(),
-                  createPostSaleTimelineCubit: () =>
-                      getIt<PostSaleTimelineCubit>(),
-                  createRegisterPostSaleEventCubit: () =>
-                      getIt<RegisterPostSaleEventCubit>(),
-                  createBillingPanelCubit: () => getIt<CustomerBillingCubit>(),
-                  createFulfillmentPanelCubit: () =>
-                      getIt<OrderFulfillmentCubit>(),
-                  onDuplicated: (order) => context.go(
-                    OrderDraftRoute(
-                      orgId: orgId,
-                      companyId: companyId,
-                      draftId: order.id,
-                    ).location,
-                  ),
-                ),
-              ),
-          orderDraftPageBuilder: (context, orgId, companyId, queryParameters) =>
-              _withConnectivityIndicator(
-                orgId: orgId,
-                companyId: companyId,
-                child: OrderDraftPage(
-                  organizationId: orgId,
-                  companyId: companyId,
-                  sellerId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                  permissionService: getIt<PermissionService>(),
-                  createBloc: () => getIt<OrderDraftBloc>(),
-                  createCustomerPortfolioBloc: () =>
-                      getIt<CustomerPortfolioBloc>(),
-                  createOrderItemsGridCubit: () => getIt<OrderItemsGridCubit>(),
-                  createOrderPricingSummaryCubit: () =>
-                      getIt<OrderPricingSummaryCubit>(),
-                  createOrderSubmissionValidationCubit: () =>
-                      getIt<OrderSubmissionValidationCubit>(),
-                  draftId: queryParameters['draftId'],
-                  onContinueToProducts: (order) async {
-                    await context.push(
-                      OrderProductCatalogRoute(
+                  child: OrderListPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    permissionService: getIt<PermissionService>(),
+                    createBloc: () => getIt<OrderListBloc>(),
+                    initialSearchQuery: queryParameters['q'] ?? '',
+                    initialFilters: OrderListFilters.fromQueryParameters(
+                      queryParameters,
+                    ),
+                    onOrderDraftSelected: (order) => context.go(
+                      OrderDraftRoute(
                         orgId: orgId,
                         companyId: companyId,
                         draftId: order.id,
                       ).location,
-                    );
-                  },
-                  onSubmitOrder: (order) => _submitOrder(context, order),
-                  onGenerateQuote: (order) => _generateQuote(context, order),
-                  onShareCart: (order, productNames) =>
-                      showModalBottomSheet<void>(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (_) => CartShareSheet(
-                          organizationId: order.organizationId,
-                          sourceCartId: order.id,
-                          sourceCartVersion: order.version,
-                          items: order.items
-                              .map(
-                                (item) => CartShareDraftItem(
-                                  itemId: item.id,
-                                  productId: item.productId,
-                                  productName:
-                                      productNames[item.productId] ??
-                                      item.productId,
-                                  variantId: item.variantId,
-                                  quantity: item.quantity,
-                                  unitPrice: item.unitPrice,
-                                ),
-                              )
-                              .toList(growable: false),
-                          createCubit: () => getIt<CartShareCubit>(),
+                    ),
+                    onOrderHistorySelected: (order) => context.go(
+                      OrderHistoryRoute(
+                        orgId: orgId,
+                        companyId: companyId,
+                        orderId: order.id,
+                      ).location,
+                    ),
+                    onUrlStateChanged: (searchQuery, filters) => context.go(
+                      OrderListRoute(
+                        orgId: orgId,
+                        companyId: companyId,
+                        queryParameters: filters.toQueryParameters(
+                          search: searchQuery,
                         ),
-                      ),
-                  onCollaborate: (order, productNames) =>
-                      showModalBottomSheet<void>(
-                        context: context,
-                        isScrollControlled: true,
-                        builder: (_) => BuyerCollaborationEntrySheet(
-                          organizationId: order.organizationId,
-                          companyId: order.companyId,
-                          customerId: order.customerId,
-                          priceListId: order.priceListId,
-                          sourceType: BuyerCollaborationSourceType.orderDraft,
-                          sourceId: order.id,
-                          items: order.items
-                              .map(
-                                (item) => BuyerCollaborationItem(
-                                  itemId: item.id,
-                                  productId: item.productId,
-                                  productName:
-                                      productNames[item.productId] ??
-                                      item.productId,
-                                  variantId: item.variantId,
-                                  quantity: item.quantity,
-                                  unitPrice: item.unitPrice,
-                                  subtotal: item.subtotal,
-                                ),
-                              )
-                              .toList(growable: false),
-                          createCubit: () => getIt<BuyerCollaborationCubit>(),
-                          onConvertRequested: () async {
-                            final confirmed = await showDialog<bool>(
-                              context: context,
-                              builder: (dialogContext) => AlertDialog(
-                                title: const Text('Converter em pedido'),
-                                content: const Text(
-                                  'Confirme que este pedido já foi enviado '
-                                  '("Enviar pedido") com os itens combinados '
-                                  'antes de converter a colaboração.',
-                                ),
-                                actions: <Widget>[
-                                  TextButton(
-                                    onPressed: () =>
-                                        Navigator.of(dialogContext).pop(false),
-                                    child: const Text('Cancelar'),
+                      ).location,
+                    ),
+                  ),
+                ),
+              ),
+          orderApprovalQueuePageBuilder: (context, orgId, companyId) =>
+              _withAuthenticatedMenu(
+                context: context,
+                orgId: orgId,
+                companyId: companyId,
+                selectedSection: _MainMenuSection.orders,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
+                  companyId: companyId,
+                  child: OrderApprovalQueuePage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    permissionService: getIt<PermissionService>(),
+                    createBloc: () => getIt<OrderApprovalQueueBloc>(),
+                  ),
+                ),
+              ),
+          returnRequestAnalysisPageBuilder: (context, orgId, companyId) =>
+              _withAuthenticatedMenu(
+                context: context,
+                orgId: orgId,
+                companyId: companyId,
+                selectedSection: _MainMenuSection.orders,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
+                  companyId: companyId,
+                  child: ReturnRequestAnalysisPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    permissionService: getIt<PermissionService>(),
+                    createCubit: () => getIt<ReturnRequestQueueCubit>(),
+                  ),
+                ),
+              ),
+          exchangeRequestAnalysisPageBuilder: (context, orgId, companyId) =>
+              _withAuthenticatedMenu(
+                context: context,
+                orgId: orgId,
+                companyId: companyId,
+                selectedSection: _MainMenuSection.orders,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
+                  companyId: companyId,
+                  child: ExchangeRequestAnalysisPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    permissionService: getIt<PermissionService>(),
+                    createCubit: () => getIt<ExchangeRequestQueueCubit>(),
+                  ),
+                ),
+              ),
+          orderHistoryPageBuilder: (context, orgId, companyId, orderId) =>
+              _withAuthenticatedMenu(
+                context: context,
+                orgId: orgId,
+                companyId: companyId,
+                selectedSection: _MainMenuSection.orders,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
+                  companyId: companyId,
+                  child: OrderHistoryPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    orderId: orderId,
+                    permissionService: getIt<PermissionService>(),
+                    createBloc: () => getIt<OrderHistoryBloc>(),
+                    createDuplicationCubit: () =>
+                        getIt<OrderDuplicationCubit>(),
+                    createSignatureCubit: () => getIt<OrderSignatureCubit>(),
+                    createReturnRequestHistoryCubit: () =>
+                        getIt<ReturnRequestHistoryCubit>(),
+                    createReturnRequestFormCubit: () =>
+                        getIt<ReturnRequestFormCubit>(),
+                    createExchangeRequestHistoryCubit: () =>
+                        getIt<ExchangeRequestHistoryCubit>(),
+                    createExchangeRequestFormCubit: () =>
+                        getIt<ExchangeRequestFormCubit>(),
+                    createPostSaleTimelineCubit: () =>
+                        getIt<PostSaleTimelineCubit>(),
+                    createRegisterPostSaleEventCubit: () =>
+                        getIt<RegisterPostSaleEventCubit>(),
+                    createBillingPanelCubit: () =>
+                        getIt<CustomerBillingCubit>(),
+                    createFulfillmentPanelCubit: () =>
+                        getIt<OrderFulfillmentCubit>(),
+                    onDuplicated: (order) => context.go(
+                      OrderDraftRoute(
+                        orgId: orgId,
+                        companyId: companyId,
+                        draftId: order.id,
+                      ).location,
+                    ),
+                  ),
+                ),
+              ),
+          orderDraftPageBuilder: (context, orgId, companyId, queryParameters) =>
+              _withAuthenticatedMenu(
+                context: context,
+                orgId: orgId,
+                companyId: companyId,
+                selectedSection: _MainMenuSection.orders,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
+                  companyId: companyId,
+                  child: OrderDraftPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    sellerId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                    permissionService: getIt<PermissionService>(),
+                    createBloc: () => getIt<OrderDraftBloc>(),
+                    createCustomerPortfolioBloc: () =>
+                        getIt<CustomerPortfolioBloc>(),
+                    createOrderItemsGridCubit: () =>
+                        getIt<OrderItemsGridCubit>(),
+                    createOrderPricingSummaryCubit: () =>
+                        getIt<OrderPricingSummaryCubit>(),
+                    createOrderSubmissionValidationCubit: () =>
+                        getIt<OrderSubmissionValidationCubit>(),
+                    draftId: queryParameters['draftId'],
+                    onContinueToProducts: (order) async {
+                      await context.push(
+                        OrderProductCatalogRoute(
+                          orgId: orgId,
+                          companyId: companyId,
+                          draftId: order.id,
+                        ).location,
+                      );
+                    },
+                    onSubmitOrder: (order) => _submitOrder(context, order),
+                    onGenerateQuote: (order) => _generateQuote(context, order),
+                    onShareCart: (order, productNames) =>
+                        showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (_) => CartShareSheet(
+                            organizationId: order.organizationId,
+                            sourceCartId: order.id,
+                            sourceCartVersion: order.version,
+                            items: order.items
+                                .map(
+                                  (item) => CartShareDraftItem(
+                                    itemId: item.id,
+                                    productId: item.productId,
+                                    productName:
+                                        productNames[item.productId] ??
+                                        item.productId,
+                                    variantId: item.variantId,
+                                    quantity: item.quantity,
+                                    unitPrice: item.unitPrice,
                                   ),
-                                  FilledButton(
-                                    onPressed: () =>
-                                        Navigator.of(dialogContext).pop(true),
-                                    child: const Text('Já enviei o pedido'),
-                                  ),
-                                ],
-                              ),
-                            );
-                            return confirmed == true ? order.id : null;
-                          },
+                                )
+                                .toList(growable: false),
+                            createCubit: () => getIt<CartShareCubit>(),
+                          ),
                         ),
-                      ),
-                  onSendWhatsApp: (order) => WhatsAppSendSheet.show(
-                    context: context,
-                    createCubit: () => getIt<WhatsAppSendCubit>(),
-                    organizationId: order.organizationId,
-                    customerId: order.customerId,
+                    onCollaborate: (order, productNames) =>
+                        showModalBottomSheet<void>(
+                          context: context,
+                          isScrollControlled: true,
+                          builder: (_) => BuyerCollaborationEntrySheet(
+                            organizationId: order.organizationId,
+                            companyId: order.companyId,
+                            customerId: order.customerId,
+                            priceListId: order.priceListId,
+                            sourceType: BuyerCollaborationSourceType.orderDraft,
+                            sourceId: order.id,
+                            items: order.items
+                                .map(
+                                  (item) => BuyerCollaborationItem(
+                                    itemId: item.id,
+                                    productId: item.productId,
+                                    productName:
+                                        productNames[item.productId] ??
+                                        item.productId,
+                                    variantId: item.variantId,
+                                    quantity: item.quantity,
+                                    unitPrice: item.unitPrice,
+                                    subtotal: item.subtotal,
+                                  ),
+                                )
+                                .toList(growable: false),
+                            createCubit: () => getIt<BuyerCollaborationCubit>(),
+                            onConvertRequested: () async {
+                              final confirmed = await showDialog<bool>(
+                                context: context,
+                                builder: (dialogContext) => AlertDialog(
+                                  title: const Text('Converter em pedido'),
+                                  content: const Text(
+                                    'Confirme que este pedido já foi enviado '
+                                    '("Enviar pedido") com os itens combinados '
+                                    'antes de converter a colaboração.',
+                                  ),
+                                  actions: <Widget>[
+                                    TextButton(
+                                      onPressed: () => Navigator.of(
+                                        dialogContext,
+                                      ).pop(false),
+                                      child: const Text('Cancelar'),
+                                    ),
+                                    FilledButton(
+                                      onPressed: () =>
+                                          Navigator.of(dialogContext).pop(true),
+                                      child: const Text('Já enviei o pedido'),
+                                    ),
+                                  ],
+                                ),
+                              );
+                              return confirmed == true ? order.id : null;
+                            },
+                          ),
+                        ),
+                    onSendWhatsApp: (order) => WhatsAppSendSheet.show(
+                      context: context,
+                      createCubit: () => getIt<WhatsAppSendCubit>(),
+                      organizationId: order.organizationId,
+                      customerId: order.customerId,
+                    ),
                   ),
                 ),
               ),
           orderProductCatalogPageBuilder:
-              (context, orgId, companyId, draftId) =>
-                  _withConnectivityIndicator(
-                    orgId: orgId,
+              (context, orgId, companyId, draftId) => _withAuthenticatedMenu(
+                context: context,
+                orgId: orgId,
+                companyId: companyId,
+                selectedSection: _MainMenuSection.orders,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
+                  companyId: companyId,
+                  child: OrderProductCatalogPage(
+                    organizationId: orgId,
                     companyId: companyId,
-                    child: OrderProductCatalogPage(
-                      organizationId: orgId,
-                      companyId: companyId,
-                      draftId: draftId,
-                      createCatalogFilterBloc: () => getIt<CatalogFilterBloc>(),
-                      createItemsCounterCubit: () =>
-                          getIt<OrderItemsCounterCubit>(),
-                      createBarcodeScanCubit: () => getIt<BarcodeScanCubit>(),
-                    ),
+                    draftId: draftId,
+                    createCatalogFilterBloc: () => getIt<CatalogFilterBloc>(),
+                    createItemsCounterCubit: () =>
+                        getIt<OrderItemsCounterCubit>(),
+                    createBarcodeScanCubit: () => getIt<BarcodeScanCubit>(),
                   ),
+                ),
+              ),
           orderProductDetailPageBuilder:
               (
                 context,
@@ -1344,90 +1611,124 @@ class VestiProApp extends StatelessWidget {
                 draftId,
                 productId,
                 queryParameters,
-              ) => _withConnectivityIndicator(
+              ) => _withAuthenticatedMenu(
+                context: context,
                 orgId: orgId,
                 companyId: companyId,
-                child: OrderProductAdditionPage(
-                  organizationId: orgId,
+                selectedSection: _MainMenuSection.orders,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
                   companyId: companyId,
-                  draftId: draftId,
-                  productId: productId,
-                  origin: queryParameters['origin'] ?? 'grid',
-                  createProductDetailBloc: () => getIt<ProductDetailBloc>(),
-                  createAdditionCubit: () => getIt<OrderProductAdditionCubit>(),
+                  child: OrderProductAdditionPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    draftId: draftId,
+                    productId: productId,
+                    origin: queryParameters['origin'] ?? 'grid',
+                    createProductDetailBloc: () => getIt<ProductDetailBloc>(),
+                    createAdditionCubit: () =>
+                        getIt<OrderProductAdditionCubit>(),
+                  ),
                 ),
               ),
-          conflictListPageBuilder: (context, orgId) => ConflictListPage(
-            organizationId: orgId,
-            createCubit: () => getIt<ConflictListCubit>(),
-            onConflictSelected: (conflict) => context.go(
-              ConflictDetailRoute(
-                orgId: orgId,
-                conflictId: conflict.id,
-              ).location,
+          conflictListPageBuilder: (context, orgId) => _withAuthenticatedMenu(
+            context: context,
+            orgId: orgId,
+            selectedSection: _MainMenuSection.settings,
+            child: ConflictListPage(
+              organizationId: orgId,
+              createCubit: () => getIt<ConflictListCubit>(),
+              onConflictSelected: (conflict) => context.go(
+                ConflictDetailRoute(
+                  orgId: orgId,
+                  conflictId: conflict.id,
+                ).location,
+              ),
             ),
           ),
           conflictDetailPageBuilder: (context, orgId, conflictId) =>
-              ConflictDetailPage(
-                conflictId: conflictId,
-                resolvedBy: getIt<AuthRepository>().currentUser?.uid ?? '',
-                createCubit: () => getIt<ConflictResolutionCubit>(),
-                onResolved: (_) =>
-                    context.go(ConflictListRoute(orgId: orgId).location),
-              ),
-          syncCenterPageBuilder: (context, orgId, companyId) =>
-              _withConnectivityIndicator(
+              _withAuthenticatedMenu(
+                context: context,
                 orgId: orgId,
-                companyId: companyId,
-                child: SyncCenterPage(
-                  organizationId: orgId,
-                  companyId: companyId,
-                  createCubit: () => getIt<SyncCenterCubit>(),
-                  onOpenConflicts: () =>
+                selectedSection: _MainMenuSection.settings,
+                child: ConflictDetailPage(
+                  conflictId: conflictId,
+                  resolvedBy: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  createCubit: () => getIt<ConflictResolutionCubit>(),
+                  onResolved: (_) =>
                       context.go(ConflictListRoute(orgId: orgId).location),
                 ),
               ),
-          catalogBrowsePageBuilder: (context, orgId, queryParameters) =>
-              _withConnectivityIndicator(
+          syncCenterPageBuilder: (context, orgId, companyId) =>
+              _withAuthenticatedMenu(
+                context: context,
                 orgId: orgId,
-                companyId:
-                    queryParameters['companyId'] ?? kPlaceholderCompanyId,
-                child: CatalogFilterPage(
-                  organizationId: orgId,
-                  companyId: queryParameters['companyId'],
-                  createBloc: () => getIt<CatalogFilterBloc>(),
-                  initialViewMode: queryParameters.containsKey('mode')
-                      ? CatalogViewMode.fromCode(queryParameters['mode'])
-                      : null,
-                  initialFilter: CatalogFilter.fromQueryParameters(
-                    queryParameters,
+                companyId: companyId,
+                selectedSection: _MainMenuSection.settings,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
+                  companyId: companyId,
+                  child: SyncCenterPage(
+                    organizationId: orgId,
+                    companyId: companyId,
+                    createCubit: () => getIt<SyncCenterCubit>(),
+                    onOpenConflicts: () =>
+                        context.go(ConflictListRoute(orgId: orgId).location),
                   ),
-                  onProductSelected: (product) =>
-                      context.go(CatalogBrowseRoute(orgId: orgId).location),
-                  onUrlStateChanged: (viewMode, filter) => context.go(
-                    CatalogBrowseRoute(
-                      orgId: orgId,
-                      queryParameters: <String, String>{
-                        'mode': viewMode.code,
-                        ...filter.toQueryParameters(),
-                      },
-                    ).location,
+                ),
+              ),
+          catalogBrowsePageBuilder: (context, orgId, queryParameters) =>
+              _withAuthenticatedMenu(
+                context: context,
+                orgId: orgId,
+                companyId: queryParameters['companyId'],
+                selectedSection: _MainMenuSection.catalog,
+                child: _withConnectivityIndicator(
+                  orgId: orgId,
+                  companyId:
+                      queryParameters['companyId'] ?? kPlaceholderCompanyId,
+                  child: CatalogFilterPage(
+                    organizationId: orgId,
+                    companyId: queryParameters['companyId'],
+                    createBloc: () => getIt<CatalogFilterBloc>(),
+                    initialViewMode: queryParameters.containsKey('mode')
+                        ? CatalogViewMode.fromCode(queryParameters['mode'])
+                        : null,
+                    initialFilter: CatalogFilter.fromQueryParameters(
+                      queryParameters,
+                    ),
+                    onProductSelected: (product) =>
+                        context.go(CatalogBrowseRoute(orgId: orgId).location),
+                    onUrlStateChanged: (viewMode, filter) => context.go(
+                      CatalogBrowseRoute(
+                        orgId: orgId,
+                        queryParameters: <String, String>{
+                          'mode': viewMode.code,
+                          ...filter.toQueryParameters(),
+                        },
+                      ).location,
+                    ),
                   ),
                 ),
               ),
           customerDetailPageBuilder: (context, orgId, customerId) =>
-              CustomerDetailPage(
-                organizationId: orgId,
-                customerId: customerId,
-                userId: getIt<AuthRepository>().currentUser?.uid ?? '',
-                permissionService: getIt<PermissionService>(),
-                createBloc: () => getIt<CustomerDetailBloc>(),
-                createApproachSuggestionCubit: () =>
-                    getIt<ApproachSuggestionCubit>(),
-                createCreditPanelCubit: () => getIt<CustomerCreditCubit>(),
-                createBillingPanelCubit: () => getIt<CustomerBillingCubit>(),
-                createProductRecommendationsBloc: () =>
-                    getIt<ProductRecommendationsBloc>(),
+              _withAuthenticatedMenu(
+                context: context,
+                orgId: orgId,
+                selectedSection: _MainMenuSection.customers,
+                child: CustomerDetailPage(
+                  organizationId: orgId,
+                  customerId: customerId,
+                  userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+                  permissionService: getIt<PermissionService>(),
+                  createBloc: () => getIt<CustomerDetailBloc>(),
+                  createApproachSuggestionCubit: () =>
+                      getIt<ApproachSuggestionCubit>(),
+                  createCreditPanelCubit: () => getIt<CustomerCreditCubit>(),
+                  createBillingPanelCubit: () => getIt<CustomerBillingCubit>(),
+                  createProductRecommendationsBloc: () =>
+                      getIt<ProductRecommendationsBloc>(),
+                ),
               ),
           loginPageBuilder: (context) =>
               LoginPage(createBloc: () => getIt<LoginBloc>()),
@@ -1652,6 +1953,298 @@ Widget _withConnectivityIndicator({
     ),
     child: child,
   );
+}
+
+Widget _withAuthenticatedMenu({
+  required BuildContext context,
+  required String orgId,
+  required _MainMenuSection selectedSection,
+  required Widget child,
+  String? companyId,
+}) {
+  return _AuthenticatedMenuShell(
+    organizationId: orgId,
+    companyId: companyId ?? kPlaceholderCompanyId,
+    userId: getIt<AuthRepository>().currentUser?.uid ?? '',
+    permissionService: getIt<PermissionService>(),
+    selectedSection: selectedSection,
+    child: child,
+  );
+}
+
+final class _AuthenticatedMenuShell extends StatefulWidget {
+  const _AuthenticatedMenuShell({
+    required this.organizationId,
+    required this.companyId,
+    required this.userId,
+    required this.permissionService,
+    required this.selectedSection,
+    required this.child,
+  });
+
+  final String organizationId;
+  final String companyId;
+  final String userId;
+  final PermissionService permissionService;
+  final _MainMenuSection selectedSection;
+  final Widget child;
+
+  @override
+  State<_AuthenticatedMenuShell> createState() =>
+      _AuthenticatedMenuShellState();
+}
+
+final class _AuthenticatedMenuShellState
+    extends State<_AuthenticatedMenuShell> {
+  late Future<AppResult<Set<Capability>>> _capabilitiesFuture;
+
+  @override
+  void initState() {
+    super.initState();
+    _capabilitiesFuture = _resolveCapabilities();
+  }
+
+  @override
+  void didUpdateWidget(_AuthenticatedMenuShell oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (oldWidget.organizationId != widget.organizationId ||
+        oldWidget.userId != widget.userId ||
+        oldWidget.permissionService != widget.permissionService) {
+      _capabilitiesFuture = _resolveCapabilities();
+    }
+  }
+
+  Future<AppResult<Set<Capability>>> _resolveCapabilities() {
+    if (widget.userId.trim().isEmpty) {
+      return Future<AppResult<Set<Capability>>>.value(
+        const AppSuccess<Set<Capability>>(<Capability>{}),
+      );
+    }
+    return widget.permissionService.resolveCapabilities(
+      organizationId: widget.organizationId,
+      userId: widget.userId,
+    );
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return FutureBuilder<AppResult<Set<Capability>>>(
+      future: _capabilitiesFuture,
+      builder: (context, snapshot) {
+        final capabilities =
+            snapshot.data?.fold(
+              onSuccess: (value) => value,
+              onFailure: (_) => const <Capability>{},
+            ) ??
+            const <Capability>{};
+        return _buildShell(context, capabilities);
+      },
+    );
+  }
+
+  Widget _buildShell(BuildContext context, Set<Capability> capabilities) {
+    final primaryItems = _primaryDestinations(capabilities);
+    final selectedIndex = primaryItems.indexWhere(
+      (item) => item.section == widget.selectedSection,
+    );
+    final effectiveSelectedIndex = selectedIndex < 0 ? 0 : selectedIndex;
+    final secondaryItems = _secondaryDestinations(capabilities);
+
+    return AppAdaptiveShell(
+      destinations: [for (final item in primaryItems) item.destination],
+      selectedIndex: effectiveSelectedIndex,
+      onDestinationSelected: (index) =>
+          context.go(primaryItems[index].location),
+      secondaryDestinations: [
+        for (final item in secondaryItems) item.destination,
+      ],
+      onSecondaryDestinationSelected: (index) =>
+          context.go(secondaryItems[index].location),
+      body: widget.child,
+    );
+  }
+
+  List<_MainMenuDestination> _primaryDestinations(
+    Set<Capability> capabilities,
+  ) {
+    final dashboardLocation =
+        capabilities.contains(Capability.reportViewSensitive)
+        ? ExecutiveDashboardRoute(
+            orgId: widget.organizationId,
+            companyId: widget.companyId,
+          ).location
+        : TargetDashboardRoute(
+            orgId: widget.organizationId,
+            companyId: widget.companyId,
+          ).location;
+
+    final items = <_MainMenuDestination>[
+      _MainMenuDestination(
+        section: _MainMenuSection.catalog,
+        destination: const AppNavDestination(
+          icon: Icons.storefront_outlined,
+          selectedIcon: Icons.storefront,
+          label: 'Catalogo',
+        ),
+        location: CatalogHomeRoute(
+          orgId: widget.organizationId,
+          companyId: widget.companyId,
+        ).location,
+      ),
+      _MainMenuDestination(
+        section: _MainMenuSection.customers,
+        destination: const AppNavDestination(
+          icon: Icons.people_outline,
+          selectedIcon: Icons.people,
+          label: 'Clientes',
+        ),
+        location: CustomerPortfolioRoute(
+          orgId: widget.organizationId,
+          companyId: widget.companyId,
+        ).location,
+        requiredCapabilities: const <Capability>[Capability.customerView],
+      ),
+      _MainMenuDestination(
+        section: _MainMenuSection.orders,
+        destination: const AppNavDestination(
+          icon: Icons.receipt_long_outlined,
+          selectedIcon: Icons.receipt_long,
+          label: 'Pedidos',
+        ),
+        location: OrderListRoute(
+          orgId: widget.organizationId,
+          companyId: widget.companyId,
+        ).location,
+        requiredCapabilities: const <Capability>[
+          Capability.orderView,
+          Capability.orderCreate,
+        ],
+      ),
+      _MainMenuDestination(
+        section: _MainMenuSection.opportunities,
+        destination: const AppNavDestination(
+          icon: Icons.lightbulb_outline,
+          selectedIcon: Icons.lightbulb,
+          label: 'Oportunidades',
+        ),
+        location: OpportunityCenterRoute(
+          orgId: widget.organizationId,
+          companyId: widget.companyId,
+        ).location,
+        requiredCapabilities: const <Capability>[Capability.insightView],
+      ),
+      _MainMenuDestination(
+        section: _MainMenuSection.dashboards,
+        destination: const AppNavDestination(
+          icon: Icons.dashboard_outlined,
+          selectedIcon: Icons.dashboard,
+          label: 'Dashboards',
+        ),
+        location: dashboardLocation,
+        requiredCapabilities: const <Capability>[
+          Capability.reportViewSensitive,
+          Capability.targetView,
+        ],
+      ),
+      _MainMenuDestination(
+        section: _MainMenuSection.reports,
+        destination: const AppNavDestination(
+          icon: Icons.query_stats_outlined,
+          selectedIcon: Icons.query_stats,
+          label: 'Relatorios',
+        ),
+        location: ReportBuilderRoute(
+          orgId: widget.organizationId,
+          companyId: widget.companyId,
+        ).location,
+        requiredCapabilities: const <Capability>[
+          Capability.reportExport,
+          Capability.reportViewSensitive,
+        ],
+      ),
+      _MainMenuDestination(
+        section: _MainMenuSection.notifications,
+        destination: const AppNavDestination(
+          icon: Icons.notifications_outlined,
+          selectedIcon: Icons.notifications,
+          label: 'Notificacoes',
+        ),
+        location: NotificationCenterRoute(
+          orgId: widget.organizationId,
+        ).location,
+      ),
+      _MainMenuDestination(
+        section: _MainMenuSection.settings,
+        destination: const AppNavDestination(
+          icon: Icons.settings_outlined,
+          selectedIcon: Icons.settings,
+          label: 'Ajustes',
+        ),
+        location: AboutAppRoute(orgId: widget.organizationId).location,
+      ),
+    ];
+
+    return items.where((item) => item.isAllowed(capabilities)).toList();
+  }
+
+  List<_MainMenuDestination> _secondaryDestinations(
+    Set<Capability> capabilities,
+  ) {
+    final items = <_MainMenuDestination>[
+      _MainMenuDestination(
+        section: null,
+        destination: const AppNavDestination(
+          icon: Icons.sync_outlined,
+          selectedIcon: Icons.sync,
+          label: 'Sincronizacao',
+        ),
+        location: SyncCenterRoute(
+          orgId: widget.organizationId,
+          companyId: widget.companyId,
+        ).location,
+      ),
+      _MainMenuDestination(
+        section: null,
+        destination: const AppNavDestination(
+          icon: Icons.admin_panel_settings_outlined,
+          selectedIcon: Icons.admin_panel_settings,
+          label: 'Usuarios',
+        ),
+        location: UserManagementRoute(orgId: widget.organizationId).location,
+        requiredCapabilities: const <Capability>[Capability.userChangeRole],
+      ),
+      _MainMenuDestination(
+        section: null,
+        destination: const AppNavDestination(
+          icon: Icons.policy_outlined,
+          selectedIcon: Icons.policy,
+          label: 'Auditoria',
+        ),
+        location: AuditLogRoute(orgId: widget.organizationId).location,
+        requiredCapabilities: const <Capability>[Capability.auditLogView],
+      ),
+      _MainMenuDestination(
+        section: null,
+        destination: const AppNavDestination(
+          icon: Icons.privacy_tip_outlined,
+          selectedIcon: Icons.privacy_tip,
+          label: 'Privacidade',
+        ),
+        location: PrivacySettingsRoute(orgId: widget.organizationId).location,
+      ),
+      _MainMenuDestination(
+        section: null,
+        destination: const AppNavDestination(
+          icon: Icons.language_outlined,
+          selectedIcon: Icons.language,
+          label: 'Idioma',
+        ),
+        location: LocaleSettingsRoute(orgId: widget.organizationId).location,
+      ),
+    ];
+
+    return items.where((item) => item.isAllowed(capabilities)).toList();
+  }
 }
 
 /// Resolves whether the `feature_insights_enabled` shortcut (TASK-018)

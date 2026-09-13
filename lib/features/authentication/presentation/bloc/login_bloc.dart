@@ -5,6 +5,7 @@ import 'package:injectable/injectable.dart';
 
 import '../../../../core/analytics/analytics.dart';
 import '../../../../core/auth/auth.dart';
+import '../../../../core/services/services.dart';
 import '../../../../core/utils/utils.dart';
 import '../../../organizations/domain/usecases/resolve_active_organization_id_use_case.dart';
 import '../../../sso/domain/entities/corporate_sso_login_result.dart';
@@ -39,6 +40,7 @@ final class LoginBloc extends Bloc<LoginEvent, LoginState> {
     required this.signInWithCorporateSso,
     required this.resolveActiveOrganizationId,
     required this.analyticsService,
+    required this.loginErrorLogger,
   }) : super(const LoginState()) {
     on<LoginEmailChanged>(_onEmailChanged);
     on<LoginPasswordChanged>(_onPasswordChanged);
@@ -58,6 +60,7 @@ final class LoginBloc extends Bloc<LoginEvent, LoginState> {
   final SignInWithCorporateSsoUseCase signInWithCorporateSso;
   final ResolveActiveOrganizationIdUseCase resolveActiveOrganizationId;
   final AnalyticsService analyticsService;
+  final LoginErrorLogger loginErrorLogger;
 
   void _onEmailChanged(LoginEmailChanged event, Emitter<LoginState> emit) {
     emit(
@@ -168,6 +171,14 @@ final class LoginBloc extends Bloc<LoginEvent, LoginState> {
               emit(state.copyWith(status: LoginSubmissionStatus.success)),
         );
       case AppFailure<SessionUser>(failure: final failure):
+        await loginErrorLogger.logFailure(
+          method: 'email',
+          email: email,
+          failure: failure,
+        );
+        if (emit.isDone) {
+          return;
+        }
         emit(
           state.copyWith(
             status: LoginSubmissionStatus.failure,
@@ -251,6 +262,14 @@ final class LoginBloc extends Bloc<LoginEvent, LoginState> {
           ),
         );
       case AppFailure<CorporateSsoLoginResult>(failure: final failure):
+        await loginErrorLogger.logFailure(
+          method: 'sso',
+          email: email,
+          failure: failure,
+        );
+        if (emit.isDone) {
+          return;
+        }
         emit(
           state.copyWith(
             status: LoginSubmissionStatus.failure,

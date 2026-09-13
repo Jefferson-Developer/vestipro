@@ -24,6 +24,9 @@ void main() {
         () => crashlytics.setCustomKey(any(), any()),
       ).thenAnswer((_) async {});
       when(
+        () => crashlytics.setCrashlyticsCollectionEnabled(any()),
+      ).thenAnswer((_) async {});
+      when(
         () => crashlytics.recordError(
           any<dynamic>(),
           any<StackTrace?>(),
@@ -40,10 +43,10 @@ void main() {
         ),
       );
 
-      reporter = FirebaseCrashReporter(
-        crashlytics,
+      reporter = FirebaseCrashReporter.test(
         AppEnvironment.development,
         metadataProvider,
+        crashlytics,
       );
     });
 

@@ -43,7 +43,10 @@ class LoginView extends StatelessWidget {
         listener: (context, state) {
           switch (state.status) {
             case LoginSubmissionStatus.success:
-              context.go(_resolvePostLoginDestination(context, state));
+              _goAfterCurrentOverlaySettles(
+                context,
+                _resolvePostLoginDestination(context, state),
+              );
             case LoginSubmissionStatus.failure:
               final failure = state.failure;
               if (failure != null) {
@@ -73,6 +76,13 @@ class LoginView extends StatelessWidget {
       ),
     );
   }
+}
+
+void _goAfterCurrentOverlaySettles(BuildContext context, String location) {
+  WidgetsBinding.instance.addPostFrameCallback((_) {
+    if (!context.mounted) return;
+    context.go(location);
+  });
 }
 
 /// Where to navigate right after a successful [LoginSubmissionStatus.success]

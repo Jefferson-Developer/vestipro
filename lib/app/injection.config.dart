@@ -16,7 +16,6 @@ import 'package:dio/dio.dart' as _i361;
 import 'package:firebase_analytics/firebase_analytics.dart' as _i398;
 import 'package:firebase_app_check/firebase_app_check.dart' as _i56;
 import 'package:firebase_auth/firebase_auth.dart' as _i59;
-import 'package:firebase_crashlytics/firebase_crashlytics.dart' as _i141;
 import 'package:firebase_messaging/firebase_messaging.dart' as _i892;
 import 'package:firebase_performance/firebase_performance.dart' as _i346;
 import 'package:firebase_remote_config/firebase_remote_config.dart' as _i627;
@@ -147,6 +146,7 @@ import '../core/permissions/permission_service.dart' as _i315;
 import '../core/permissions/permissions.dart' as _i47;
 import '../core/services/crash_reporter.dart' as _i349;
 import '../core/services/firebase_crash_reporter.dart' as _i559;
+import '../core/services/login_error_logger.dart' as _i966;
 import '../core/services/services.dart' as _i113;
 import '../core/storage/firebase_storage_data_source.dart' as _i833;
 import '../core/storage/image_compressor.dart' as _i611;
@@ -258,6 +258,20 @@ import '../features/backorder/presentation/cubit/backorder_queue_cubit.dart'
     as _i654;
 import '../features/backorder/presentation/cubit/request_backorder_cubit.dart'
     as _i18;
+import '../features/barcode_scanner/data/datasources/alternate_product_code_local_data_source.dart'
+    as _i800;
+import '../features/barcode_scanner/data/datasources/shared_preferences_alternate_product_code_data_source.dart'
+    as _i943;
+import '../features/barcode_scanner/data/repositories/product_code_lookup_repository_impl.dart'
+    as _i761;
+import '../features/barcode_scanner/domain/repositories/product_code_lookup_repository.dart'
+    as _i605;
+import '../features/barcode_scanner/domain/usecases/register_unknown_product_code_use_case.dart'
+    as _i794;
+import '../features/barcode_scanner/domain/usecases/resolve_product_code_use_case.dart'
+    as _i579;
+import '../features/barcode_scanner/presentation/cubit/barcode_scan_cubit.dart'
+    as _i632;
 import '../features/buyer_collaboration/data/datasources/buyer_collaboration_read_data_source.dart'
     as _i214;
 import '../features/buyer_collaboration/data/datasources/buyer_collaboration_write_data_source.dart'
@@ -1861,21 +1875,6 @@ import 'offline_package_loaders_module.dart' as _i418;
 import 'product_import_parsers_module.dart' as _i490;
 import 'sync_module.dart' as _i350;
 
-import '../features/barcode_scanner/data/datasources/alternate_product_code_local_data_source.dart'
-    as _ibs0;
-import '../features/barcode_scanner/data/datasources/shared_preferences_alternate_product_code_data_source.dart'
-    as _ibs1;
-import '../features/barcode_scanner/domain/repositories/product_code_lookup_repository.dart'
-    as _ibs2;
-import '../features/barcode_scanner/data/repositories/product_code_lookup_repository_impl.dart'
-    as _ibs3;
-import '../features/barcode_scanner/domain/usecases/resolve_product_code_use_case.dart'
-    as _ibs4;
-import '../features/barcode_scanner/domain/usecases/register_unknown_product_code_use_case.dart'
-    as _ibs5;
-import '../features/barcode_scanner/presentation/cubit/barcode_scan_cubit.dart'
-    as _ibs6;
-
 const String _dev = 'dev';
 const String _staging = 'staging';
 const String _prod = 'prod';
@@ -1979,6 +1978,9 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i211.NotificationMapper>(
       () => const _i211.NotificationMapper(),
+    );
+    gh.lazySingleton<_i827.PushDeviceMapper>(
+      () => const _i827.PushDeviceMapper(),
     );
     gh.lazySingleton<_i246.AuditLogEntryMapper>(
       () => const _i246.AuditLogEntryMapper(),
@@ -2232,6 +2234,9 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i804.CommercialPackMapper>(),
       ),
     );
+    gh.lazySingleton<_i966.LoginErrorLogger>(
+      () => _i966.FileLoginErrorLogger(),
+    );
     gh.lazySingleton<_i211.PromotionalCampaignRepository>(
       () => const _i430.SharedPreferencesPromotionalCampaignRepository(),
     );
@@ -2353,6 +2358,15 @@ extension GetItInjectableX on _i174.GetIt {
     );
     gh.lazySingleton<_i431.OrderLocalMapper>(
       () => _i431.OrderLocalMapper(gh<_i169.OrderMapper>()),
+    );
+    gh.lazySingleton<_i349.CrashReporter>(
+      () => _i559.FirebaseCrashReporter(
+        gh<_i461.AppEnvironment>(),
+        gh<_i465.AppClientMetadataProvider>(),
+      ),
+    );
+    gh.lazySingleton<_i800.AlternateProductCodeLocalDataSource>(
+      () => const _i943.SharedPreferencesAlternateProductCodeDataSource(),
     );
     gh.lazySingleton<_i795.ProductVariantRepository>(
       () => const _i912.SharedPreferencesProductVariantRepository(),
@@ -2738,9 +2752,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i56.FirebaseAppCheck>(
       () => appInjectionModule.firebaseAppCheck(gh<_i461.AppEnvironment>()),
     );
-    gh.lazySingleton<_i141.FirebaseCrashlytics>(
-      () => appInjectionModule.firebaseCrashlytics(gh<_i461.AppEnvironment>()),
-    );
     gh.lazySingleton<_i398.FirebaseAnalytics>(
       () => appInjectionModule.firebaseAnalytics(gh<_i461.AppEnvironment>()),
     );
@@ -3008,6 +3019,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i886.OnboardingProgressRepository>(),
       ),
     );
+    gh.lazySingleton<_i292.SyncEngine>(
+      () => _i292.SyncEngine(
+        gh<_i234.OutboxRepository>(),
+        gh<_i405.SyncCursorRepository>(),
+        gh<List<_i17.SyncPushHandler>>(),
+        gh<List<_i417.SyncPullSource>>(),
+        gh<_i202.AnalyticsService>(),
+        gh<_i113.CrashReporter>(),
+        retryPolicy: gh<_i158.SyncRetryPolicy>(),
+      ),
+    );
     gh.lazySingleton<_i100.OrderSignatureDraftRepository>(
       () => _i13.DriftOrderSignatureDraftRepository(
         gh<_i658.AppDatabase>(),
@@ -3037,13 +3059,6 @@ extension GetItInjectableX on _i174.GetIt {
     gh.factory<_i807.UpdateSizeGridTemplateUseCase>(
       () => _i807.UpdateSizeGridTemplateUseCase(
         gh<_i174.SizeGridTemplateRepository>(),
-      ),
-    );
-    gh.lazySingleton<_i349.CrashReporter>(
-      () => _i559.FirebaseCrashReporter(
-        gh<_i141.FirebaseCrashlytics>(),
-        gh<_i461.AppEnvironment>(),
-        gh<_i465.AppClientMetadataProvider>(),
       ),
     );
     gh.factory<_i866.OutboxWatcherCubit>(
@@ -3224,6 +3239,17 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
       ),
     );
+    gh.factory<_i542.SyncCenterCubit>(
+      () => _i542.SyncCenterCubit(
+        gh<_i234.OutboxRepository>(),
+        gh<_i814.ConflictRecordRepository>(),
+        gh<_i799.OfflinePackageStatusRepository>(),
+        gh<_i610.ConnectivityService>(),
+        gh<_i292.SyncEngine>(),
+        gh<_i202.AnalyticsService>(),
+        gh<_i113.CrashReporter>(),
+      ),
+    );
     gh.factory<_i339.SalesPipelineBloc>(
       () => _i339.SalesPipelineBloc(
         listStages: gh<_i879.ListPipelineStagesUseCase>(),
@@ -3347,6 +3373,12 @@ extension GetItInjectableX on _i174.GetIt {
     gh.lazySingleton<_i589.CustomerImportJobDataSource>(
       () => _i372.FirestoreCustomerImportJobDataSource(
         gh<_i974.FirebaseFirestore>(),
+      ),
+    );
+    gh.lazySingleton<_i970.SyncScheduler>(
+      () => _i970.SyncScheduler(
+        gh<_i292.SyncEngine>(),
+        gh<_i610.ConnectivityService>(),
       ),
     );
     gh.lazySingleton<_i847.PortfolioAssignmentDataSource>(
@@ -3877,17 +3909,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i372.BuyerCollaborationWriteDataSource>(),
       ),
     );
-    gh.lazySingleton<_i292.SyncEngine>(
-      () => _i292.SyncEngine(
-        gh<_i234.OutboxRepository>(),
-        gh<_i405.SyncCursorRepository>(),
-        gh<List<_i17.SyncPushHandler>>(),
-        gh<List<_i417.SyncPullSource>>(),
-        gh<_i202.AnalyticsService>(),
-        gh<_i113.CrashReporter>(),
-        retryPolicy: gh<_i158.SyncRetryPolicy>(),
-      ),
-    );
     gh.lazySingleton<_i525.CommissionRepository>(
       () =>
           _i301.CommissionRepositoryImpl(gh<_i446.CommissionEntryDataSource>()),
@@ -4152,17 +4173,6 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i753.AuditLogRepository>(),
       ),
     );
-    gh.factory<_i542.SyncCenterCubit>(
-      () => _i542.SyncCenterCubit(
-        gh<_i234.OutboxRepository>(),
-        gh<_i814.ConflictRecordRepository>(),
-        gh<_i799.OfflinePackageStatusRepository>(),
-        gh<_i610.ConnectivityService>(),
-        gh<_i292.SyncEngine>(),
-        gh<_i202.AnalyticsService>(),
-        gh<_i113.CrashReporter>(),
-      ),
-    );
     gh.lazySingleton<_i644.InsightRepository>(
       () => _i666.InsightRepositoryImpl(
         dataSource: gh<_i902.InsightDataSource>(),
@@ -4363,12 +4373,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i801.UserProfileRepositoryImpl(
         dataSource: gh<_i668.UserProfileDataSource>(),
         mapper: gh<_i756.UserProfileMapper>(),
-      ),
-    );
-    gh.lazySingleton<_i970.SyncScheduler>(
-      () => _i970.SyncScheduler(
-        gh<_i292.SyncEngine>(),
-        gh<_i610.ConnectivityService>(),
       ),
     );
     gh.factory<_i411.SaveReportView>(
@@ -5048,6 +5052,15 @@ extension GetItInjectableX on _i174.GetIt {
         submitDiagnostics: gh<_i226.SubmitAboutAppDiagnosticsUseCase>(),
       ),
     );
+    gh.lazySingleton<_i605.ProductCodeLookupRepository>(
+      () => _i761.ProductCodeLookupRepositoryImpl(
+        variantRepository: gh<_i795.ProductVariantRepository>(),
+        productRepository: gh<_i321.ProductRepository>(),
+        searchProducts: gh<_i268.SearchProductsUseCase>(),
+        alternateCodeDataSource:
+            gh<_i800.AlternateProductCodeLocalDataSource>(),
+      ),
+    );
     gh.factory<_i1015.ResolveNotificationDeliveryTimeUseCase>(
       () => _i1015.ResolveNotificationDeliveryTimeUseCase(
         gh<_i693.CommunicationPreferencesRepository>(),
@@ -5213,14 +5226,6 @@ extension GetItInjectableX on _i174.GetIt {
             gh<_i59.ResolveCustomerImportDuplicateUseCase>(),
       ),
     );
-    gh.factory<_i516.TeamFormBloc>(
-      () => _i516.TeamFormBloc(
-        listOrganizationUsers: gh<_i93.ListOrganizationUsersUseCase>(),
-        createTeam: gh<_i265.CreateTeamUseCase>(),
-        updateTeam: gh<_i265.UpdateTeamUseCase>(),
-        analyticsService: gh<_i202.AnalyticsService>(),
-      ),
-    );
     gh.factory<_i776.LoginBloc>(
       () => _i776.LoginBloc(
         signInWithEmailAndPassword:
@@ -5228,6 +5233,15 @@ extension GetItInjectableX on _i174.GetIt {
         signInWithCorporateSso: gh<_i412.SignInWithCorporateSsoUseCase>(),
         resolveActiveOrganizationId:
             gh<_i267.ResolveActiveOrganizationIdUseCase>(),
+        analyticsService: gh<_i202.AnalyticsService>(),
+        loginErrorLogger: gh<_i113.LoginErrorLogger>(),
+      ),
+    );
+    gh.factory<_i516.TeamFormBloc>(
+      () => _i516.TeamFormBloc(
+        listOrganizationUsers: gh<_i93.ListOrganizationUsersUseCase>(),
+        createTeam: gh<_i265.CreateTeamUseCase>(),
+        updateTeam: gh<_i265.UpdateTeamUseCase>(),
         analyticsService: gh<_i202.AnalyticsService>(),
       ),
     );
@@ -5302,6 +5316,12 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i1051.OrderListRepository>(),
         gh<_i63.OrderVisibilityService>(),
         gh<_i47.PermissionService>(),
+      ),
+    );
+    gh.factory<_i579.ResolveProductCodeUseCase>(
+      () => _i579.ResolveProductCodeUseCase(
+        gh<_i605.ProductCodeLookupRepository>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i315.SubmitOrderSignatureUseCase>(
@@ -5399,6 +5419,14 @@ extension GetItInjectableX on _i174.GetIt {
         gh<_i202.AnalyticsService>(),
         generateInsightCommercialAlerts:
             gh<_i113.GenerateInsightCommercialAlertsUseCase>(),
+      ),
+    );
+    gh.factory<_i794.RegisterUnknownProductCodeUseCase>(
+      () => _i794.RegisterUnknownProductCodeUseCase(
+        gh<_i605.ProductCodeLookupRepository>(),
+        gh<_i47.PermissionService>(),
+        gh<_i753.AuditLogRepository>(),
+        gh<_i202.AnalyticsService>(),
       ),
     );
     gh.factory<_i1024.ReturnRequestFormCubit>(
@@ -5674,6 +5702,12 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i622.ExchangeRequestQueueCubit(
         gh<_i991.WatchExchangeRequestQueueUseCase>(),
         gh<_i211.ResolveExchangeRequestUseCase>(),
+        gh<_i202.AnalyticsService>(),
+      ),
+    );
+    gh.factory<_i632.BarcodeScanCubit>(
+      () => _i632.BarcodeScanCubit(
+        gh<_i579.ResolveProductCodeUseCase>(),
         gh<_i202.AnalyticsService>(),
       ),
     );
@@ -6043,37 +6077,6 @@ extension GetItInjectableX on _i174.GetIt {
       () => _i21.OrderDuplicationCubit(
         gh<_i315.DuplicateOrderUseCase>(),
         gh<_i202.AnalyticsService>(),
-      ),
-    );
-    gh.lazySingleton<_ibs0.AlternateProductCodeLocalDataSource>(
-      () => _ibs1.SharedPreferencesAlternateProductCodeDataSource(),
-    );
-    gh.lazySingleton<_ibs2.ProductCodeLookupRepository>(
-      () => _ibs3.ProductCodeLookupRepositoryImpl(
-        variantRepository: gh<_i795.ProductVariantRepository>(),
-        productRepository: gh<_i321.ProductRepository>(),
-        searchProducts: gh<_i268.SearchProductsUseCase>(),
-        alternateCodeDataSource: gh<_ibs0.AlternateProductCodeLocalDataSource>(),
-      ),
-    );
-    gh.factory<_ibs4.ResolveProductCodeUseCase>(
-      () => _ibs4.ResolveProductCodeUseCase(
-        gh<_ibs2.ProductCodeLookupRepository>(),
-        gh<_i932.AnalyticsService>(),
-      ),
-    );
-    gh.factory<_ibs5.RegisterUnknownProductCodeUseCase>(
-      () => _ibs5.RegisterUnknownProductCodeUseCase(
-        gh<_ibs2.ProductCodeLookupRepository>(),
-        gh<_i315.PermissionService>(),
-        gh<_i753.AuditLogRepository>(),
-        gh<_i932.AnalyticsService>(),
-      ),
-    );
-    gh.factory<_ibs6.BarcodeScanCubit>(
-      () => _ibs6.BarcodeScanCubit(
-        gh<_ibs4.ResolveProductCodeUseCase>(),
-        gh<_i932.AnalyticsService>(),
       ),
     );
     return this;

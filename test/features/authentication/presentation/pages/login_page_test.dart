@@ -9,6 +9,7 @@ import 'package:vestipro/core/auth/auth.dart';
 import 'package:vestipro/core/design_system/design_system.dart';
 import 'package:vestipro/core/errors/errors.dart';
 import 'package:vestipro/core/navigation/navigation.dart';
+import 'package:vestipro/core/services/services.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/authentication/domain/usecases/sign_in_with_email_and_password_use_case.dart';
 import 'package:vestipro/features/authentication/presentation/bloc/login_bloc.dart';
@@ -18,6 +19,7 @@ import 'package:vestipro/features/sso/domain/entities/completed_sso_login.dart';
 import 'package:vestipro/features/sso/domain/entities/sso_login_route.dart';
 import 'package:vestipro/features/sso/domain/repositories/sso_repository.dart';
 import 'package:vestipro/features/sso/domain/usecases/sign_in_with_corporate_sso_use_case.dart';
+import 'package:vestipro/features/sso/domain/value_objects/sso_protocol.dart';
 import 'package:vestipro/l10n/generated/app_localizations.dart';
 
 const _validEmail = 'vendedor@vestipro.com.br';
@@ -345,6 +347,54 @@ void main() {
         );
       },
     );
+
+    testWidgets(
+      'navigates after a successful corporate SSO login without keeping the '
+      'modal overlay alive',
+      (tester) async {
+        final authRepository = _AuthRepositoryStub(
+          result: const AppSuccess<SessionUser>(_signedInUser),
+        );
+        await tester.pumpWidget(
+          _buildApp(
+            authRepository,
+            ssoRepository: const _SsoRepositoryStub(
+              route: SsoLoginRoute(
+                organizationId: 'org-sso',
+                organizationName: 'Org SSO',
+                protocol: SsoProtocol.oidc,
+                providerId: 'oidc.org-sso',
+              ),
+              completedLogin: CompletedSsoLogin(
+                organizationId: 'org-sso',
+                organizationName: 'Org SSO',
+                roleName: 'SELLER',
+                provisioned: false,
+              ),
+            ),
+          ),
+        );
+        await tester.pumpAndSettle();
+
+        await tester.ensureVisible(find.text('Entrar com SSO corporativo'));
+        await tester.tap(find.text('Entrar com SSO corporativo'));
+        await tester.pumpAndSettle();
+        await tester.enterText(
+          find.bySemanticsLabel('Campo de e-mail corporativo'),
+          'sso@vestipro.com.br',
+        );
+
+        await tester.tap(find.text('Entrar').last);
+        await tester.pumpAndSettle();
+
+        expect(find.text('catalog-home-page:org-sso'), findsOneWidget);
+        expect(
+          find.bySemanticsLabel('Campo de e-mail corporativo'),
+          findsNothing,
+        );
+        expect(tester.takeException(), isNull);
+      },
+    );
   });
 }
 
@@ -352,6 +402,7 @@ Widget _buildApp(
   AuthRepositoryStub authRepository, {
   String? initialLocation,
   List<Membership>? activeMemberships,
+  SsoRepository ssoRepository = const _SsoRepositoryStub(),
 }) {
   final router = GoRouter(
     initialLocation: initialLocation ?? const LoginRoute().location,
@@ -365,7 +416,7 @@ Widget _buildApp(
               authRepository,
             ),
             signInWithCorporateSso: SignInWithCorporateSsoUseCase(
-              const _SsoRepositoryStub(),
+              ssoRepository,
               authRepository,
             ),
             resolveActiveOrganizationId: ResolveActiveOrganizationIdUseCase(
@@ -374,6 +425,7 @@ Widget _buildApp(
               ),
             ),
             analyticsService: FakeAnalyticsService(),
+            loginErrorLogger: const _NoopLoginErrorLogger(),
           ),
         ),
       ),
@@ -426,19 +478,37 @@ Widget _buildApp(
 /// A [SsoRepository] that never resolves a connection — the widget tests in
 /// this file only exercise the e-mail/senha flow; wiring `LoginBloc` still
 /// requires a [SignInWithCorporateSsoUseCase] since TASK-173.
+final class _NoopLoginErrorLogger implements LoginErrorLogger {
+  const _NoopLoginErrorLogger();
+
+  @override
+  Future<void> logFailure({
+    required String method,
+    required String email,
+    required Failure failure,
+  }) async {}
+}
+
 final class _SsoRepositoryStub implements SsoRepository {
-  const _SsoRepositoryStub();
+  const _SsoRepositoryStub({this.route, this.completedLogin});
+
+  final SsoLoginRoute? route;
+  final CompletedSsoLogin? completedLogin;
 
   @override
   Future<AppResult<SsoLoginRoute?>> resolveConnectionForEmail({
     required String email,
   }) async {
-    return const AppSuccess<SsoLoginRoute?>(null);
+    return AppSuccess<SsoLoginRoute?>(route);
   }
 
   @override
-  Future<AppResult<CompletedSsoLogin>> completeSsoLogin() {
-    throw UnimplementedError();
+  Future<AppResult<CompletedSsoLogin>> completeSsoLogin() async {
+    final completed = completedLogin;
+    if (completed == null) {
+      throw UnimplementedError();
+    }
+    return AppSuccess<CompletedSsoLogin>(completed);
   }
 }
 
@@ -544,7 +614,10 @@ final class _AuthRepositoryStub implements AuthRepository {
     required String providerId,
     required bool isSaml,
   }) {
-    throw UnimplementedError();
+    return signInWithEmailAndPassword(
+      email: _validEmail,
+      password: _validPassword,
+    );
   }
 
   @override

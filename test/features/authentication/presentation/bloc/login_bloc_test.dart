@@ -3,6 +3,7 @@ import 'package:flutter_test/flutter_test.dart';
 import 'package:vestipro/core/analytics/analytics.dart';
 import 'package:vestipro/core/auth/auth.dart';
 import 'package:vestipro/core/errors/errors.dart';
+import 'package:vestipro/core/services/services.dart';
 import 'package:vestipro/core/utils/utils.dart';
 import 'package:vestipro/features/authentication/domain/usecases/sign_in_with_email_and_password_use_case.dart';
 import 'package:vestipro/features/authentication/presentation/bloc/login_bloc.dart';
@@ -22,9 +23,11 @@ void main() {
     const signedInUser = SessionUser(uid: 'user-1', emailVerified: true);
 
     late FakeAnalyticsService analyticsService;
+    late _RecordingLoginErrorLogger loginErrorLogger;
 
     setUp(() {
       analyticsService = FakeAnalyticsService();
+      loginErrorLogger = _RecordingLoginErrorLogger();
     });
 
     blocTest<LoginBloc, LoginState>(
@@ -207,6 +210,7 @@ void main() {
           ),
         ),
         analyticsService: analyticsService,
+        loginErrorLogger: loginErrorLogger,
       ),
       seed: () =>
           const LoginState(email: validEmail, password: 'wrong-password'),
@@ -224,6 +228,15 @@ void main() {
           failure: AuthenticationFailure('E-mail ou senha inválidos.'),
         ),
       ],
+      verify: (_) {
+        expect(loginErrorLogger.entries, hasLength(1));
+        expect(loginErrorLogger.entries.single.method, 'email');
+        expect(loginErrorLogger.entries.single.email, validEmail);
+        expect(
+          loginErrorLogger.entries.single.failure,
+          isA<AuthenticationFailure>(),
+        );
+      },
     );
 
     blocTest<LoginBloc, LoginState>(
@@ -412,6 +425,7 @@ void main() {
         ),
         ssoRepository: const _SsoRepositoryStub(route: null),
         analyticsService: analyticsService,
+        loginErrorLogger: loginErrorLogger,
       ),
       seed: () =>
           const LoginState(corporateSsoEmail: 'ana@dominio-pessoal.com'),
@@ -432,6 +446,13 @@ void main() {
       ],
       verify: (_) {
         expect(analyticsService.loggedEvents, isEmpty);
+        expect(loginErrorLogger.entries, hasLength(1));
+        expect(loginErrorLogger.entries.single.method, 'sso');
+        expect(
+          loginErrorLogger.entries.single.email,
+          'ana@dominio-pessoal.com',
+        );
+        expect(loginErrorLogger.entries.single.failure, isA<NotFoundFailure>());
       },
     );
   });
@@ -443,6 +464,7 @@ LoginBloc _buildBloc({
   List<Membership>? activeMemberships,
   MembershipRepository? membershipRepository,
   SsoRepository? ssoRepository,
+  LoginErrorLogger? loginErrorLogger,
 }) {
   return LoginBloc(
     signInWithEmailAndPassword: SignInWithEmailAndPasswordUseCase(
@@ -459,7 +481,35 @@ LoginBloc _buildBloc({
           ),
     ),
     analyticsService: analyticsService,
+    loginErrorLogger: loginErrorLogger ?? _RecordingLoginErrorLogger(),
   );
+}
+
+final class _RecordedLoginFailure {
+  const _RecordedLoginFailure({
+    required this.method,
+    required this.email,
+    required this.failure,
+  });
+
+  final String method;
+  final String email;
+  final Failure failure;
+}
+
+final class _RecordingLoginErrorLogger implements LoginErrorLogger {
+  final entries = <_RecordedLoginFailure>[];
+
+  @override
+  Future<void> logFailure({
+    required String method,
+    required String email,
+    required Failure failure,
+  }) async {
+    entries.add(
+      _RecordedLoginFailure(method: method, email: email, failure: failure),
+    );
+  }
 }
 
 /// Never calls [AuthRepository.signInWithFederatedProvider] itself — it is

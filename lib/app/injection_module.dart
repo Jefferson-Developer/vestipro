@@ -7,7 +7,6 @@ import 'package:dio/dio.dart';
 import 'package:firebase_analytics/firebase_analytics.dart';
 import 'package:firebase_app_check/firebase_app_check.dart';
 import 'package:firebase_auth/firebase_auth.dart';
-import 'package:firebase_crashlytics/firebase_crashlytics.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:firebase_performance/firebase_performance.dart';
 import 'package:firebase_remote_config/firebase_remote_config.dart';
@@ -26,7 +25,6 @@ import '../core/functions/configure_functions.dart';
 import '../core/notifications/push/configure_messaging.dart';
 import '../core/performance/configure_performance.dart';
 import '../core/security/configure_app_check.dart';
-import '../core/services/configure_crashlytics.dart';
 import '../core/storage/configure_storage.dart';
 import '../core/sync/domain/sync_retry_policy.dart';
 import '../features/settings/data/models/about_app_seed_model.dart';
@@ -113,21 +111,9 @@ abstract class AppInjectionModule {
     return functions;
   }
 
-  /// Toggles Crashlytics collection (TASK-016) the first time something
-  /// resolves [FirebaseCrashlytics] — same lazy-DI-triggered wiring
-  /// rationale as [firebaseFirestore]/[firebaseStorage]/[firebaseFunctions]
-  /// above. In practice, that first resolution only happens when an error is
-  /// actually reported (see `FirebaseCrashReporter`).
-  @lazySingleton
-  FirebaseCrashlytics firebaseCrashlytics(AppEnvironment environment) {
-    final crashlytics = FirebaseCrashlytics.instance;
-    configureCrashlytics(crashlytics, environment: environment);
-    return crashlytics;
-  }
-
   /// Toggles Analytics collection and tags test/QA traffic (TASK-017) the
   /// first time something resolves [FirebaseAnalytics] — same lazy-DI-
-  /// triggered wiring rationale as [firebaseCrashlytics] above.
+  /// triggered wiring rationale as the other Firebase product providers above.
   @lazySingleton
   FirebaseAnalytics firebaseAnalytics(AppEnvironment environment) {
     final analytics = FirebaseAnalytics.instance;
@@ -137,7 +123,7 @@ abstract class AppInjectionModule {
 
   /// Toggles Performance Monitoring collection (TASK-019) the first time
   /// something resolves [FirebasePerformance] — same lazy-DI-triggered
-  /// wiring rationale as [firebaseCrashlytics]/[firebaseAnalytics] above.
+  /// wiring rationale as [firebaseAnalytics] above.
   /// `unawaited` here is safe for the same reason it is for
   /// [firebaseRemoteConfig]: [configurePerformance] never completes with an
   /// error.
@@ -151,8 +137,8 @@ abstract class AppInjectionModule {
   /// Applies the per-environment fetch policy and safe local defaults
   /// (TASK-018) the first time something resolves [FirebaseRemoteConfig] —
   /// same lazy-DI-triggered wiring rationale as [firebaseFirestore]/
-  /// [firebaseStorage]/[firebaseFunctions]/[firebaseCrashlytics]/
-  /// [firebaseAnalytics] above. `unawaited` here is safe:
+  /// [firebaseStorage]/[firebaseFunctions]/[firebaseAnalytics] above.
+  /// `unawaited` here is safe:
   /// [configureRemoteConfig] never completes with an error (see its own
   /// docs), so this never blocks app bootstrap nor leaks an unhandled
   /// Future rejection.
@@ -187,16 +173,21 @@ abstract class AppInjectionModule {
   /// pays for it unless a feature actually reads/writes offline data.
   ///
   /// Native platforms (Android/iOS/Windows/macOS/Linux) work out of the box
-  /// through `drift_flutter`. Web is not wired yet: `driftDatabase` requires
-  /// bundled `sqlite3.wasm`/`drift_worker.js` assets that do not exist in
-  /// this repository yet, so resolving [AppDatabase] on Web throws a clear
-  /// `ArgumentError` until a later task (EPIC-14) adds those assets. Nothing
-  /// resolves [AppDatabase] yet outside tests that provide their own
-  /// in-memory instance, so this is a documented, currently-unreachable gap
-  /// rather than a regression.
+  /// through `drift_flutter`. Web uses Drift's bundled worker and sqlite wasm
+  /// files copied into `web/`, so offline tables are persisted in the browser
+  /// storage backend selected by Drift (OPFS when available, IndexedDB
+  /// fallback otherwise).
   @lazySingleton
   AppDatabase appDatabase() {
-    return AppDatabase(driftDatabase(name: 'vestipro_offline'));
+    return AppDatabase(
+      driftDatabase(
+        name: 'vestipro_offline',
+        web: DriftWebOptions(
+          sqlite3Wasm: Uri.parse('sqlite3.wasm'),
+          driftWorker: Uri.parse('drift_worker.js'),
+        ),
+      ),
+    );
   }
 
   /// Backs `ConnectivityPlusService` (TASK-109) — same lazy-DI-triggered

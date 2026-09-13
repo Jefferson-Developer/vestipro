@@ -1,9 +1,12 @@
+import 'package:injectable/injectable.dart';
+
 import '../../domain/entities/push_device.dart';
 import '../dtos/push_device_dto.dart';
 
 /// Converts between [PushDevice] (domain) and [PushDeviceDto] (Firestore
 /// document shape) — same thin, stateless mapper convention as every other
 /// feature's `*Mapper` in this codebase.
+@lazySingleton
 final class PushDeviceMapper {
   const PushDeviceMapper();
 
